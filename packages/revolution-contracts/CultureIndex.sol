@@ -167,21 +167,16 @@ contract CultureIndex {
      * Emits a VoteCast event upon successful execution.
      */
     function vote(uint256 pieceId) public {
+      // Most likely to fail should go first
+        uint256 weight = votingToken.balanceOf(msg.sender);
+        require(weight > 0, "Weight must be greater than zero");
+        
         require(pieceId > 0 && pieceId <= pieceCount, "Invalid piece ID");
         require(!hasVoted[pieceId][msg.sender], "Already voted");
 
-        // Fetch the weight from the ERC20 token balance
-        uint256 weight = votingToken.balanceOf(msg.sender);
-        require(weight > 0, "Weight must be greater than zero");
-
-        Voter[] storage pieceVotes = votes[pieceId];
-
-        // Record the vote
-        Voter memory newVoter = Voter(msg.sender, weight);
-        //Set has voted
+        // Directly update state variables without reading them into local variables
         hasVoted[pieceId][msg.sender] = true;
-        // Add the vote to the list of votes
-        pieceVotes.push(newVoter);
+        votes[pieceId].push(Voter(msg.sender, weight));
         totalVoteWeights[pieceId] += weight;
 
         emit VoteCast(pieceId, msg.sender, weight);
