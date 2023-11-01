@@ -19,6 +19,7 @@ contract MaxHeap {
     /// @param pos The position for which to find the parent
     /// @return The index of the parent node
     function parent(uint256 pos) private pure returns (uint256) {
+        require(pos != 0, "Position should not be zero");
         return (pos - 1) / 2;
     }
 
@@ -35,23 +36,24 @@ contract MaxHeap {
     /// @dev This ensures that the heap property is maintained
     /// @param pos The starting position for the heapify operation
     function maxHeapify(uint256 pos) public {
-        //isLeaf
-        if (pos < size && pos > (size / 2)) return;
-
         uint256 left = 2 * pos + 1;
         uint256 right = 2 * pos + 2;
+        
+        // Check if the position is a leaf node
+        if (pos >= (size / 2) && pos <= size) return;
 
-
-        uint256 currentValue = heap[pos];
-        uint256 leftValue = heap[left];
-        uint256 rightValue = heap[right];
-
-        if (currentValue < leftValue || currentValue < rightValue) {
-            uint256 largest = (leftValue > rightValue) ? left : right;
-            swap(pos, largest);
-            maxHeapify(largest);
+        // Check if the current node is smaller than either of its children
+        if (heap[pos] < heap[left] || heap[pos] < heap[right]) {
+            
+            // Swap with the largest child and recurse
+            if (heap[left] > heap[right]) {
+                swap(pos, left);
+                maxHeapify(left);
+            } else {
+                swap(pos, right);
+                maxHeapify(right);
+            }
         }
-
     }
 
     /// @notice Insert an element into the heap
@@ -62,7 +64,7 @@ contract MaxHeap {
         heap[size] = element;
 
         uint256 current = size;
-        while (heap[current] > heap[parent(current)]) {
+        while (current != 0 && heap[current] > heap[parent(current)]) {
             swap(current, parent(current));
             current = parent(current);
         }
@@ -78,5 +80,24 @@ contract MaxHeap {
         heap[0] = heap[--size];
         maxHeapify(0);
         return popped;
+    }
+
+    /// @notice Get the maximum element from the heap
+    /// @dev The function will revert if the heap is empty
+    /// @return The maximum element from the heap
+    function getMax() public view returns (uint256) {
+        require(size > 0, "Heap is empty");
+        return heap[0];
+    }
+}
+
+contract MaxHeapTest is MaxHeap {
+    constructor(uint256 _maxsize) MaxHeap(_maxsize) {}
+
+    /// @notice Function to set a value in the heap (ONLY FOR TESTING)
+    /// @param pos The position to set
+    /// @param value The value to set at the given position
+    function _set(uint256 pos, uint256 value) public {
+        heap[pos] = value;
     }
 }
