@@ -1,0 +1,45 @@
+name: Build Contract CI
+
+on:
+  workflow_dispatch:
+  pull_request:
+    branches:
+      - main
+  push:
+    branches:
+      - "*"
+
+jobs:
+  forge_test:
+    strategy:
+      fail-fast: true
+
+    name: revolution
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+        with:
+          submodules: recursive
+
+      - name: Install Foundry
+        uses: foundry-rs/foundry-toolchain@v1
+        with:
+          version: nightly
+
+      - name: Install pnpm
+        run: |
+          npm install -g pnpm
+
+      - name: Update Dependencies
+        run: |
+          git submodule foreach --recursive 'if [ -f pnpm-lock.yaml ]; then pnpm install; fi'
+
+      - name: Run Forge test
+        run: |
+          forge test -v --fail-fast
+        id: test
+
+      - name: Run Geiger Check
+        run: |
+          forge geiger --check packages/revolution-contracts*
+        id: geiger
