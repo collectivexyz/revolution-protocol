@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.19;
 
-import "./IERC20.sol";
+import { IERC20 } from "./IERC20.sol";
 
 contract CulturalIndex {
     /// @notice The ERC20 token used for voting
