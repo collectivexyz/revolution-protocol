@@ -3,7 +3,7 @@ pragma solidity ^0.8.19;
 
 import { IERC20 } from "./IERC20.sol";
 
-contract CulturalIndex {
+contract CultureIndex {
     /// @notice The ERC20 token used for voting
     IERC20 public votingToken;
 
@@ -192,5 +192,9 @@ contract CulturalIndex {
         totalVoteWeights[pieceId] += weight;
 
         emit VoteCast(pieceId, msg.sender, weight);
+    }
+
+    function getPieceById(uint256 id) public view returns (ArtPiece memory) {
+    return pieces[id];
     }
 }

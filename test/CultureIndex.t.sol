@@ -2,8 +2,8 @@
 pragma solidity ^0.8.19;
 
 import { Test } from "forge-std/Test.sol";
-import { CultureIndex } from "../CultureIndex.sol";
-import { IERC20 } from "../IERC20.sol";
+import { CultureIndex } from "../packages/revolution-contracts/CultureIndex.sol";
+import { IERC20 } from "../packages/revolution-contracts/IERC20.sol";
 
 contract CultureIndexTest is Test {
     CultureIndex public cultureIndex;
@@ -29,10 +29,12 @@ contract CultureIndexTest is Test {
         CultureIndex.CreatorBps[] memory creators = new CultureIndex.CreatorBps[](1);
         creators[0] = CultureIndex.CreatorBps({ creator: address(0x1), bps: 10000 });
 
-        uint256 newPieceId = CultureIndex.createPiece(metadata, creators);
+        uint256 newPieceId = cultureIndex.createPiece(metadata, creators);
 
         // Validate that the piece was created with correct data
-        CultureIndex.ArtPiece memory createdPiece = CultureIndex.pieces(newPieceId);
+        CultureIndex.ArtPiece memory createdPiece = cultureIndex.getPieceById(newPieceId);
+
+
         assertEq(createdPiece.id, newPieceId);
         assertEq(createdPiece.metadata.name, "Mona Lisa");
         assertEq(createdPiece.creators[0].creator, address(0x1));
