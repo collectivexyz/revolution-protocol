@@ -222,9 +222,4 @@ contract CultureIndexArtPieceTest is Test {
         assertEq(topPieceId, firstPieceId, "Top voted piece should be the first piece");
     }
 
-
-
-
-
-
 }
