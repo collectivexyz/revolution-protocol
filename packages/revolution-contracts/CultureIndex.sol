@@ -179,7 +179,7 @@ contract CulturalIndex {
      * @dev Requires that the provided pieceId is valid, i.e., it should be less than the total number of pieces.
      */
     function getPiece(uint256 pieceId) public view returns (ArtPiece memory) {
-        require(pieceId < pieceCount, "Invalid piece ID");
+        require(pieceId > 0 && pieceId <= pieceCount, "Invalid piece ID");
 
         return pieces[pieceId];
     }
@@ -192,7 +192,7 @@ contract CulturalIndex {
      * Emits a VoteCast event upon successful execution.
      */
     function vote(uint256 pieceId, uint256 weight) public {
-        require(pieceId < pieceCount, "Invalid piece ID");
+        require(pieceId > 0 && pieceId <= pieceCount, "Invalid piece ID");
         require(!hasVoted[pieceId][msg.sender], "Already voted");
         require(weight > 0, "Weight must be greater than zero");
 
@@ -216,7 +216,7 @@ contract CulturalIndex {
      * @dev Requires that the provided pieceId is valid, i.e., it should be less than the total number of pieces.
      */
     function getVotingWeight(uint256 pieceId) public view returns (uint256) {
-        require(pieceId <= pieceCount, "Invalid piece ID");
+        require(pieceId > 0 && pieceId <= pieceCount, "Invalid piece ID");
         return totalVoteWeights[pieceId];
     }
 }
