@@ -1,0 +1,24 @@
+{
+  "name": "@collectivexyz/revolution",
+  "version": "0.0.0",
+  "scripts": {
+    "prettier:check": "prettier --check \"packages/revolution-contracts/**/*.sol\"",
+    "prettier:fix": "prettier --write \"packages/revolution-contracts/**/*.sol\"",
+    "hint": "solhint packages/**/*.sol test/**/*.sol ",
+    "build": "forge build",
+    "test": "forge test -vvv",
+    "clean": "forge cache clean && if [ -d out ]; then forge clean; fi"
+  },
+  "devDependencies": {
+    "solhint": "3.4.1",
+    "prettier": "2.8.8",
+    "prettier-plugin-solidity": "1.1.3"
+  },
+  "bugs": {
+    "url": "https://github.com/collectivexyz/revolution-protocol/issues"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/collectivexyz/revolution-protocol.git"
+  }
+}

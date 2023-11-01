@@ -1,5 +1,4 @@
 {
-  "singleQuote": true,
   "trailingComma": "all",
   "arrowParens": "avoid",
   "printWidth": 100,
@@ -11,5 +10,6 @@
         "bracketSpacing": true
       }
     }
-  ]
+  ],
+  "plugins": ["prettier-plugin-solidity"]
 }
