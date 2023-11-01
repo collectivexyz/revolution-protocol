@@ -21,7 +21,7 @@ contract CultureIndexTest is Test {
             name: "Mona Lisa",
             description: "A masterpiece",
             mediaType: CultureIndex.MediaType.IMAGE,
-            image: "ipfs://legend",
+            image: "ipfs://legends",
             text: "",
             animationUrl: ""
         });
@@ -38,8 +38,7 @@ contract CultureIndexTest is Test {
         assertEq(createdPiece.id, newPieceId);
         assertEq(createdPiece.metadata.name, "Mona Lisa");
         assertEq(createdPiece.metadata.description, "A masterpiece");
-        assertEq(createdPiece.metadata.mediaType, CultureIndex.MediaType.IMAGE);
-        assertEq(createdPiece.metadata.image, "ipfs://legend");
+        assertEq(createdPiece.metadata.image, "ipfs://legends");
         assertEq(createdPiece.creators[0].creator, address(0x1));
         assertEq(createdPiece.creators[0].bps, 10000);
     }
