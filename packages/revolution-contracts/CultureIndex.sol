@@ -167,10 +167,14 @@ contract CulturalIndex {
         validateMediaType(metadata);
 
         pieceCount++;
+        ArtPiece storage newPiece = pieces[pieceCount];
 
-        ArtPiece memory newPiece = ArtPiece(pieceCount, metadata, creatorArray);
+        newPiece.id = pieceCount;
+        newPiece.metadata = metadata;
 
-        pieces[pieceCount] = newPiece;
+        for (uint i = 0; i < creatorArray.length; i++) {
+            newPiece.creators.push(creatorArray[i]);
+        }
 
         emit PieceCreated(
             pieceCount,
