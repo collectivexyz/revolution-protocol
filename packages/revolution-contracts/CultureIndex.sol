@@ -29,7 +29,7 @@ contract CulturalIndex {
         MediaType mediaType;
         string image; // optional
         string text; // optional
-        string animation_url; // optional
+        string animationUrl; // optional
     }
 
     // Struct for creator with basis points
@@ -73,7 +73,7 @@ contract CulturalIndex {
         string name,
         string description,
         string image,
-        string animation_url
+        string animationUrl
     );
 
     /// @notice The event emitted when a vote is cast
@@ -96,7 +96,7 @@ contract CulturalIndex {
         if (metadata.mediaType == MediaType.IMAGE) {
             require(bytes(metadata.image).length > 0, "Image URL must be provided");
         } else if (metadata.mediaType == MediaType.ANIMATION) {
-            require(bytes(metadata.animation_url).length > 0, "Video URL must be provided");
+            require(bytes(metadata.animationUrl).length > 0, "Video URL must be provided");
         } else if (metadata.mediaType == MediaType.TEXT) {
             require(bytes(metadata.text).length > 0, "Text must be provided");
         }
@@ -157,7 +157,7 @@ contract CulturalIndex {
             metadata.name,
             metadata.description,
             metadata.image,
-            metadata.animation_url
+            metadata.animationUrl
         );
 
         // Emit an event for each creator
