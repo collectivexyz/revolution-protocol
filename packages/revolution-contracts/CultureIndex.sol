@@ -23,7 +23,7 @@ contract CulturalIndex {
     }
 
     // Struct for creator with basis points
-    struct Creator {
+    struct CreatorBps {
         address creator;
         uint256 bps; // Basis points, must sum up to 10,000 for each ArtPiece
     }
@@ -32,7 +32,7 @@ contract CulturalIndex {
     struct ArtPiece {
         uint256 id;
         ArtPieceMetadata metadata;
-        Creator[] creators;
+        CreatorBps[] creators;
     }
 
     // Struct for voter
@@ -41,16 +41,22 @@ contract CulturalIndex {
         uint256 weight;
     }
 
-    // State variables
+    /// @notice The list of all pieces
     mapping(uint256 => ArtPiece) public pieces;
+
     /// @notice The total number of pieces
     uint256 public pieceCount;
 
+    /// @notice The list of all votes for a piece
     mapping(uint256 => Voter[]) public votes;
+
+    /// @notice The total voting weight for a piece
     mapping(uint256 => uint256) public totalVoteWeights;
+
+    /// @notice A mapping to keep track of whether the voter voted for the piece
     mapping(uint256 => mapping(address => bool)) public hasVoted;
 
-    // Events
+    /// @notice The event emitted when a new piece is created
     event PieceCreated(
         uint256 indexed id,
         address indexed sender,
@@ -59,11 +65,15 @@ contract CulturalIndex {
         string image,
         string animation_url
     );
+
+    /// @notice The event emitted when a vote is cast
     event VoteCast(
         uint256 indexed pieceId,
         address indexed voter,
         uint256 weight
     );
+
+    /// @notice The events emitted for the respective creators of a piece
     event PieceCreatorAdded(
         uint256 indexed id,
         address indexed creatorAddress,
@@ -109,7 +119,7 @@ contract CulturalIndex {
      * - The function will return the total basis points which must be checked to be exactly 10,000.
      */
     function getTotalBpsFromCreators(
-        Creator[] memory creatorArray
+        CreatorBps[] memory creatorArray
     ) internal pure returns (uint256) {
         uint256 totalBps = 0;
         for (uint i = 0; i < creatorArray.length; i++) {
@@ -138,7 +148,7 @@ contract CulturalIndex {
      */
     function createPiece(
         ArtPieceMetadata memory metadata,
-        Creator[] memory creatorArray
+        CreatorBps[] memory creatorArray
     ) public returns (uint256) {
         uint256 totalBps = getTotalBpsFromCreators(creatorArray);
         require(totalBps == 10_000, "Total BPS must sum up to 10,000");
