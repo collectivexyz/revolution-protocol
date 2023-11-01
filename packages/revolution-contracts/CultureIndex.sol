@@ -1,0 +1,222 @@
+// SPDX-License-Identifier: MIT
+pragma solidity ^0.8.19;
+
+contract CulturalIndex {
+    // Add an enum for media types
+    enum MediaType {
+        NONE,
+        IMAGE,
+        ANIMATION,
+        AUDIO,
+        TEXT,
+        OTHER
+    }
+
+    // Struct for art piece metadata
+    struct ArtPieceMetadata {
+        string name;
+        string description;
+        MediaType mediaType;
+        string image; // optional
+        string text; // optional
+        string animation_url; // optional
+    }
+
+    // Struct for creator with basis points
+    struct Creator {
+        address creator;
+        uint256 bps; // Basis points, must sum up to 10,000 for each ArtPiece
+    }
+
+    // Struct for art piece
+    struct ArtPiece {
+        uint256 id;
+        ArtPieceMetadata metadata;
+        Creator[] creators;
+    }
+
+    // Struct for voter
+    struct Voter {
+        address voterAddress;
+        uint256 weight;
+    }
+
+    // State variables
+    mapping(uint256 => ArtPiece) public pieces;
+    /// @notice The total number of pieces
+    uint256 public pieceCount;
+
+    mapping(uint256 => Voter[]) public votes;
+    mapping(uint256 => uint256) public totalVoteWeights;
+    mapping(uint256 => mapping(address => bool)) public hasVoted;
+
+    // Events
+    event PieceCreated(
+        uint256 indexed id,
+        address indexed sender,
+        string name,
+        string description,
+        string image,
+        string animation_url
+    );
+    event VoteCast(
+        uint256 indexed pieceId,
+        address indexed voter,
+        uint256 weight
+    );
+    event PieceCreatorAdded(
+        uint256 indexed id,
+        address indexed creatorAddress,
+        uint256 bps
+    );
+
+    /**
+     * @notice Validates the media type and associated data.
+     * @param metadata The metadata associated with the art piece.
+     *
+     * Requirements:
+     * - The media type must be one of the defined types in the MediaType enum.
+     * - The corresponding media data must not be empty.
+     */
+    function validateMediaType(ArtPieceMetadata memory metadata) internal pure {
+        require(
+            uint8(metadata.mediaType) > 0 && uint8(metadata.mediaType) <= 5,
+            "Invalid media type"
+        );
+
+        if (metadata.mediaType == MediaType.IMAGE) {
+            require(
+                bytes(metadata.image).length > 0,
+                "Image URL must be provided"
+            );
+        } else if (metadata.mediaType == MediaType.ANIMATION) {
+            require(
+                bytes(metadata.animation_url).length > 0,
+                "Video URL must be provided"
+            );
+        } else if (metadata.mediaType == MediaType.TEXT) {
+            require(bytes(metadata.text).length > 0, "Text must be provided");
+        }
+    }
+
+    /**
+     * @notice Gets the total basis points from an array of creators.
+     * @param creatorArray An array of Creator structs containing address and basis points.
+     * @return Returns the total basis points calculated from the array of creators.
+     *
+     * Requirements:
+     * - The `creatorArray` must not contain any zero addresses.
+     * - The function will return the total basis points which must be checked to be exactly 10,000.
+     */
+    function getTotalBpsFromCreators(
+        Creator[] memory creatorArray
+    ) internal pure returns (uint256) {
+        uint256 totalBps = 0;
+        for (uint i = 0; i < creatorArray.length; i++) {
+            require(
+                creatorArray[i].creator != address(0),
+                "Invalid creator address"
+            );
+            totalBps += creatorArray[i].bps;
+        }
+        return totalBps;
+    }
+
+    /**
+     * @notice Creates a new piece of art with associated metadata and creators.
+     * @param metadata The metadata associated with the art piece, including name, description, image, and optional animation URL.
+     * @param creatorArray An array of creators who contributed to the piece, along with their respective basis points that must sum up to 10,000.
+     * @return Returns the unique ID of the newly created art piece.
+     *
+     * Emits a {PieceCreated} event for the newly created piece.
+     * Emits a {PieceCreatorAdded} event for each creator added to the piece.
+     *
+     * Requirements:
+     * - `metadata` must include name, description, and image. Animation URL is optional.
+     * - `creatorArray` must not contain any zero addresses.
+     * - The sum of basis points in `creatorArray` must be exactly 10,000.
+     */
+    function createPiece(
+        ArtPieceMetadata memory metadata,
+        Creator[] memory creatorArray
+    ) public returns (uint256) {
+        uint256 totalBps = getTotalBpsFromCreators(creatorArray);
+        require(totalBps == 10_000, "Total BPS must sum up to 10,000");
+
+        // Validate the media type and associated data
+        validateMediaType(metadata);
+
+        pieceCount++;
+
+        ArtPiece memory newPiece = ArtPiece(pieceCount, metadata, creatorArray);
+
+        pieces[pieceCount] = newPiece;
+
+        emit PieceCreated(
+            pieceCount,
+            msg.sender,
+            metadata.name,
+            metadata.description,
+            metadata.image,
+            metadata.animation_url
+        );
+
+        // Emit an event for each creator
+        for (uint i = 0; i < creatorArray.length; i++) {
+            emit PieceCreatorAdded(
+                pieceCount,
+                creatorArray[i].creator,
+                creatorArray[i].bps
+            );
+        }
+        return newPiece.id;
+    }
+
+    /**
+     * @notice Retrieve the details of a specific ArtPiece by its ID.
+     * @param pieceId The ID of the ArtPiece to be retrieved.
+     * @return ArtPiece The ArtPiece struct containing all details.
+     * @dev Requires that the provided pieceId is valid, i.e., it should be less than the total number of pieces.
+     */
+    function getPiece(uint256 pieceId) public view returns (ArtPiece memory) {
+        require(pieceId < pieceCount, "Invalid piece ID");
+
+        return pieces[pieceId];
+    }
+
+    /**
+     * @notice Cast a vote for a specific ArtPiece.
+     * @param pieceId The ID of the ArtPiece to vote for.
+     * @param weight The weight of the vote.
+     * @dev Requires that the pieceId is valid, the voter has not already voted on this piece, and the weight is greater than zero.
+     * Emits a VoteCast event upon successful execution.
+     */
+    function vote(uint256 pieceId, uint256 weight) public {
+        require(pieceId < pieceCount, "Invalid piece ID");
+        require(!hasVoted[pieceId][msg.sender], "Already voted");
+        require(weight > 0, "Weight must be greater than zero");
+
+        Voter[] storage pieceVotes = votes[pieceId];
+
+        // Record the vote
+        Voter memory newVoter = Voter(msg.sender, weight);
+        //Set has voted
+        hasVoted[pieceId][msg.sender] = true;
+        // Add the vote to the list of votes
+        pieceVotes.push(newVoter);
+        totalVoteWeights[pieceId] += weight;
+
+        emit VoteCast(pieceId, msg.sender, weight);
+    }
+
+    /**
+     * @notice Retrieve the total voting weight for a specific ArtPiece.
+     * @param pieceId The ID of the ArtPiece for which the total voting weight is to be calculated.
+     * @return uint256 The total voting weight for the specified ArtPiece.
+     * @dev Requires that the provided pieceId is valid, i.e., it should be less than the total number of pieces.
+     */
+    function getVotingWeight(uint256 pieceId) public view returns (uint256) {
+        require(pieceId <= pieceCount, "Invalid piece ID");
+        return totalVoteWeights[pieceId];
+    }
+}
