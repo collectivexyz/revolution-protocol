@@ -197,18 +197,6 @@ contract CulturalIndex {
     }
 
     /**
-     * @notice Retrieve the details of a specific ArtPiece by its ID.
-     * @param pieceId The ID of the ArtPiece to be retrieved.
-     * @return ArtPiece The ArtPiece struct containing all details.
-     * @dev Requires that the provided pieceId is valid, i.e., it should be less than the total number of pieces.
-     */
-    function getPiece(uint256 pieceId) public view returns (ArtPiece memory) {
-        require(pieceId > 0 && pieceId <= pieceCount, "Invalid piece ID");
-
-        return pieces[pieceId];
-    }
-
-    /**
      * @notice Cast a vote for a specific ArtPiece.
      * @param pieceId The ID of the ArtPiece to vote for.
      * @dev Requires that the pieceId is valid, the voter has not already voted on this piece, and the weight is greater than zero.
@@ -233,16 +221,5 @@ contract CulturalIndex {
         totalVoteWeights[pieceId] += weight;
 
         emit VoteCast(pieceId, msg.sender, weight);
-    }
-
-    /**
-     * @notice Retrieve the total voting weight for a specific ArtPiece.
-     * @param pieceId The ID of the ArtPiece for which the total voting weight is to be calculated.
-     * @return uint256 The total voting weight for the specified ArtPiece.
-     * @dev Requires that the provided pieceId is valid, i.e., it should be less than the total number of pieces.
-     */
-    function getVotingWeight(uint256 pieceId) public view returns (uint256) {
-        require(pieceId > 0 && pieceId <= pieceCount, "Invalid piece ID");
-        return totalVoteWeights[pieceId];
     }
 }
