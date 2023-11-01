@@ -167,6 +167,109 @@ contract CultureIndexTest is Test {
         }
     }
 
+    /**
+     * @dev Test case to validate that a single address cannot vote twice on multiple pieces
+     *
+     * We create two new art pieces and cast a vote for each.
+     * Then we try to vote again for both and expect both to fail.
+     */
+    function testCannotVoteOnMultiplePiecesTwice() public {
+        setUp();
+        uint256 firstPieceId = createArtPiece(
+            "Mona Lisa",
+            "A masterpiece",
+            CultureIndex.MediaType.IMAGE,
+            "ipfs://legends",
+            "",
+            "",
+            address(0x1),
+            10000
+        );
+
+        uint256 secondPieceId = createArtPiece(
+            "Starry Night",
+            "Another masterpiece",
+            CultureIndex.MediaType.IMAGE,
+            "ipfs://starrynight",
+            "",
+            "",
+            address(0x2),
+            10000
+        );
+
+        // Mint some tokens to the voter
+        mockVotingToken._mint(address(this), 200);
+
+        // Cast a vote for the first piece
+        cultureIndex.vote(firstPieceId);
+
+        // Cast a vote for the second piece
+        cultureIndex.vote(secondPieceId);
+
+        // Try to vote again for the first piece and expect to fail
+        try cultureIndex.vote(firstPieceId) {
+            fail("Should not be able to vote twice on the first piece");
+        } catch Error(string memory reason) {
+            assertEq(reason, "Already voted");
+        }
+
+        // Try to vote again for the second piece and expect to fail
+        try cultureIndex.vote(secondPieceId) {
+            fail("Should not be able to vote twice on the second piece");
+        } catch Error(string memory reason) {
+            assertEq(reason, "Already voted");
+        }
+    }
+
+    /**
+     * @dev Test case to validate that an address with no tokens cannot vote on multiple pieces
+     *
+     * We create two new art pieces and try to cast a vote for each without any tokens.
+     * We expect both votes to fail.
+     */
+    function testCannotVoteWithoutTokensMultiplePieces() public {
+        setUp();
+        uint256 firstPieceId = createArtPiece(
+            "Mona Lisa",
+            "A masterpiece",
+            CultureIndex.MediaType.IMAGE,
+            "ipfs://legends",
+            "",
+            "",
+            address(0x1),
+            10000
+        );
+
+        uint256 secondPieceId = createArtPiece(
+            "Starry Night",
+            "Another masterpiece",
+            CultureIndex.MediaType.IMAGE,
+            "ipfs://starrynight",
+            "",
+            "",
+            address(0x2),
+            10000
+        );
+
+        // Try to vote for the first piece and expect to fail
+        try cultureIndex.vote(firstPieceId) {
+            fail(
+                "Should not be able to vote without tokens on the first piece"
+            );
+        } catch Error(string memory reason) {
+            assertEq(reason, "Weight must be greater than zero");
+        }
+
+        // Try to vote for the second piece and expect to fail
+        try cultureIndex.vote(secondPieceId) {
+            fail(
+                "Should not be able to vote without tokens on the second piece"
+            );
+        } catch Error(string memory reason) {
+            assertEq(reason, "Weight must be greater than zero");
+        }
+    }
+
     // Utility function to create a new art piece and return its ID
     function createArtPiece(
         string memory name,
