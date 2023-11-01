@@ -1,0 +1,71 @@
+// SPDX-License-Identifier: MIT
+pragma solidity ^0.8.19;
+
+contract MockERC20 {
+    string public name = "Mock ERC20 Token";
+    string public symbol = "MOCK";
+    uint8 public decimals = 18;
+    uint256 public totalSupply;
+
+    mapping(address => uint256) public balances;
+    mapping(address => mapping(address => uint256)) public allowances;
+
+    event Transfer(address indexed from, address indexed to, uint256 value);
+    event Approval(
+        address indexed owner,
+        address indexed spender,
+        uint256 value
+    );
+
+    constructor() {
+        // Mint some initial supply for testing purposes
+        _mint(msg.sender, 10000 * 10 ** uint256(decimals));
+    }
+
+    function balanceOf(address _owner) external view returns (uint256) {
+        return balances[_owner];
+    }
+
+    function allowance(
+        address _owner,
+        address _spender
+    ) external view returns (uint256) {
+        return allowances[_owner][_spender];
+    }
+
+    function transfer(address _to, uint256 _value) external returns (bool) {
+        require(balances[msg.sender] >= _value, "Insufficient balance");
+        balances[msg.sender] -= _value;
+        balances[_to] += _value;
+        emit Transfer(msg.sender, _to, _value);
+        return true;
+    }
+
+    function approve(address _spender, uint256 _value) external returns (bool) {
+        allowances[msg.sender][_spender] = _value;
+        emit Approval(msg.sender, _spender, _value);
+        return true;
+    }
+
+    function transferFrom(
+        address _from,
+        address _to,
+        uint256 _value
+    ) external returns (bool) {
+        require(balances[_from] >= _value, "Insufficient balance");
+        require(allowances[_from][msg.sender] >= _value, "Allowance exceeded");
+
+        balances[_from] -= _value;
+        balances[_to] += _value;
+        allowances[_from][msg.sender] -= _value;
+
+        emit Transfer(_from, _to, _value);
+        return true;
+    }
+
+    function _mint(address _to, uint256 _value) internal {
+        totalSupply += _value;
+        balances[_to] += _value;
+        emit Transfer(address(0), _to, _value);
+    }
+}
