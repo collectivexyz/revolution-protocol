@@ -1,7 +1,17 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.19;
 
+import "./IERC20.sol";
+
 contract CulturalIndex {
+    /// @notice The ERC20 token used for voting
+    IERC20 public votingToken;
+
+    // Initialize ERC20 Token in the constructor
+    constructor(address _votingToken) {
+        votingToken = IERC20(_votingToken);
+    }
+
     // Add an enum for media types
     enum MediaType {
         NONE,
@@ -197,13 +207,15 @@ contract CulturalIndex {
     /**
      * @notice Cast a vote for a specific ArtPiece.
      * @param pieceId The ID of the ArtPiece to vote for.
-     * @param weight The weight of the vote.
      * @dev Requires that the pieceId is valid, the voter has not already voted on this piece, and the weight is greater than zero.
      * Emits a VoteCast event upon successful execution.
      */
-    function vote(uint256 pieceId, uint256 weight) public {
+    function vote(uint256 pieceId) public {
         require(pieceId > 0 && pieceId <= pieceCount, "Invalid piece ID");
         require(!hasVoted[pieceId][msg.sender], "Already voted");
+
+        // Fetch the weight from the ERC20 token balance
+        uint256 weight = votingToken.balanceOf(msg.sender);
         require(weight > 0, "Weight must be greater than zero");
 
         Voter[] storage pieceVotes = votes[pieceId];
