@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.19;
 
-import { IERC20 } from "./IERC20.sol";
+import {IERC20} from "./IERC20.sol";
 
 contract CultureIndex {
     /// @notice The ERC20 token used for voting
@@ -77,10 +77,18 @@ contract CultureIndex {
     );
 
     /// @notice The event emitted when a vote is cast
-    event VoteCast(uint256 indexed pieceId, address indexed voter, uint256 weight);
+    event VoteCast(
+        uint256 indexed pieceId,
+        address indexed voter,
+        uint256 weight
+    );
 
     /// @notice The events emitted for the respective creators of a piece
-    event PieceCreatorAdded(uint256 indexed id, address indexed creatorAddress, uint256 bps);
+    event PieceCreatorAdded(
+        uint256 indexed id,
+        address indexed creatorAddress,
+        uint256 bps
+    );
 
     /**
      * @notice Validates the media type and associated data.
@@ -91,12 +99,21 @@ contract CultureIndex {
      * - The corresponding media data must not be empty.
      */
     function validateMediaType(ArtPieceMetadata memory metadata) internal pure {
-        require(uint8(metadata.mediaType) > 0 && uint8(metadata.mediaType) <= 5, "Invalid media type");
+        require(
+            uint8(metadata.mediaType) > 0 && uint8(metadata.mediaType) <= 5,
+            "Invalid media type"
+        );
 
         if (metadata.mediaType == MediaType.IMAGE) {
-            require(bytes(metadata.image).length > 0, "Image URL must be provided");
+            require(
+                bytes(metadata.image).length > 0,
+                "Image URL must be provided"
+            );
         } else if (metadata.mediaType == MediaType.ANIMATION) {
-            require(bytes(metadata.animationUrl).length > 0, "Video URL must be provided");
+            require(
+                bytes(metadata.animationUrl).length > 0,
+                "Video URL must be provided"
+            );
         } else if (metadata.mediaType == MediaType.TEXT) {
             require(bytes(metadata.text).length > 0, "Text must be provided");
         }
@@ -111,10 +128,15 @@ contract CultureIndex {
      * - The `creatorArray` must not contain any zero addresses.
      * - The function will return the total basis points which must be checked to be exactly 10,000.
      */
-    function getTotalBpsFromCreators(CreatorBps[] memory creatorArray) internal pure returns (uint256) {
+    function getTotalBpsFromCreators(
+        CreatorBps[] memory creatorArray
+    ) internal pure returns (uint256) {
         uint256 totalBps = 0;
         for (uint i = 0; i < creatorArray.length; i++) {
-            require(creatorArray[i].creator != address(0), "Invalid creator address");
+            require(
+                creatorArray[i].creator != address(0),
+                "Invalid creator address"
+            );
             totalBps += creatorArray[i].bps;
         }
         return totalBps;
@@ -134,7 +156,10 @@ contract CultureIndex {
      * - `creatorArray` must not contain any zero addresses.
      * - The sum of basis points in `creatorArray` must be exactly 10,000.
      */
-    function createPiece(ArtPieceMetadata memory metadata, CreatorBps[] memory creatorArray) public returns (uint256) {
+    function createPiece(
+        ArtPieceMetadata memory metadata,
+        CreatorBps[] memory creatorArray
+    ) public returns (uint256) {
         uint256 totalBps = getTotalBpsFromCreators(creatorArray);
         require(totalBps == 10_000, "Total BPS must sum up to 10,000");
 
@@ -162,7 +187,11 @@ contract CultureIndex {
 
         // Emit an event for each creator
         for (uint i = 0; i < creatorArray.length; i++) {
-            emit PieceCreatorAdded(pieceCount, creatorArray[i].creator, creatorArray[i].bps);
+            emit PieceCreatorAdded(
+                pieceCount,
+                creatorArray[i].creator,
+                creatorArray[i].bps
+            );
         }
         return newPiece.id;
     }
@@ -194,7 +223,21 @@ contract CultureIndex {
         emit VoteCast(pieceId, msg.sender, weight);
     }
 
+    /**
+     * @notice Fetch an art piece by its ID.
+     * @param id The ID of the art piece.
+     * @return The ArtPiece struct associated with the given ID.
+     */
     function getPieceById(uint256 id) public view returns (ArtPiece memory) {
-    return pieces[id];
+        return pieces[id];
+    }
+
+    /**
+     * @notice Fetch the list of voters for a given art piece.
+     * @param pieceId The ID of the art piece.
+     * @return An array of Voter structs for the given art piece ID.
+     */
+    function getVotes(uint256 pieceId) public view returns (Voter[] memory) {
+        return votes[pieceId];
     }
 }

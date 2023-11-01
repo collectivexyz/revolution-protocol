@@ -17,10 +17,7 @@ contract MockERC20 {
         uint256 value
     );
 
-    constructor() {
-        // Mint some initial supply for testing purposes
-        _mint(msg.sender, 10000 * 10 ** uint256(decimals));
-    }
+    constructor() {}
 
     function balanceOf(address _owner) external view returns (uint256) {
         return balances[_owner];
@@ -63,7 +60,7 @@ contract MockERC20 {
         return true;
     }
 
-    function _mint(address _to, uint256 _value) internal {
+    function _mint(address _to, uint256 _value) public {
         totalSupply += _value;
         balances[_to] += _value;
         emit Transfer(address(0), _to, _value);
