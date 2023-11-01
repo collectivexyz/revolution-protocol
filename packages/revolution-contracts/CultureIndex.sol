@@ -168,7 +168,7 @@ contract CultureIndex {
      */
     function vote(uint256 pieceId) public {
         require(pieceId > 0 && pieceId <= pieceCount, "Invalid piece ID");
-        // require(!hasVoted[pieceId][msg.sender], "Already voted");
+        require(!hasVoted[pieceId][msg.sender], "Already voted");
 
         // Fetch the weight from the ERC20 token balance
         uint256 weight = votingToken.balanceOf(msg.sender);
