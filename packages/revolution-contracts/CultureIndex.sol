@@ -222,30 +222,11 @@ contract CultureIndex {
     }
 
     /**
-    * @notice Calculate the top-voted piece.
-    * @return The ID of the top-voted art piece.
-    * TODO refactor to use a heap for gas efficiency
-    */
-    function calculateTopVotedPiece() public returns (uint256) {
-        uint256 newTopVotedPiece = 0;
-        uint256 topVotedPieceWeight = 0;
-        for (uint256 i = 1; i <= pieceCount; i++) {
-            if (totalVoteWeights[i] > topVotedPieceWeight && !pieces[i].hasDropped) {
-                newTopVotedPiece = i;
-                topVotedPieceWeight = totalVoteWeights[i];
-            }
-        }
-        topVotedPieceId = newTopVotedPiece;
-        return topVotedPieceId;
-    }
-
-    /**
     * @notice Pulls and drops the top-voted piece.
     * @return The top voted piece
     */
     function popTopVotedPiece() public returns (ArtPiece memory) {
-        uint256 pieceId = calculateTopVotedPiece();
-        pieces[pieceId].hasDropped = true;
-        return pieces[pieceId];
+        pieces[topVotedPieceId].hasDropped = true;
+        return pieces[topVotedPieceId];
     }
 }

@@ -161,7 +161,7 @@ contract CultureIndexArtPieceTest is Test {
         assertEq(topVotedPiece.id, firstPieceId, "Top voted piece should match the voted piece");
     }
 
-    function testCalculateTopVotedPiece() public {
+    function testCorrectTopVotedPiece() public {
         setUp();
 
         uint256 firstPieceId = voter1Test.createDefaultArtPiece();
@@ -177,8 +177,8 @@ contract CultureIndexArtPieceTest is Test {
         // Vote for the second piece with voter2
         voter2Test.voteForPiece(secondPieceId);
 
-        uint256 topPieceId = cultureIndex.calculateTopVotedPiece();
-        assertEq(topPieceId, secondPieceId, "Top voted piece should be the second piece");
+        CultureIndex.ArtPiece memory poppedPiece = cultureIndex.getTopVotedPiece();
+        assertEq(poppedPiece.id, secondPieceId, "Top voted piece should be the second piece");
     }
 
     function testPopTopVotedPiece() public {
@@ -193,7 +193,7 @@ contract CultureIndexArtPieceTest is Test {
         assertEq(poppedPiece.id, firstPieceId, "Popped piece should be the first piece");
     }
 
-    function testRemovedPieceCannotBeTopVotedAgain() public {
+    function testRemovedPieceShouldBeReplaced() public {
         setUp();
 
         uint256 firstPieceId = voter1Test.createDefaultArtPiece();
@@ -218,42 +218,12 @@ contract CultureIndexArtPieceTest is Test {
             assertEq(reason, "Dropped piece can not be voted on");
         }
 
-        uint256 topPieceId = cultureIndex.calculateTopVotedPiece();
+        uint256 topPieceId = cultureIndex.topVotedPieceId();
         assertEq(topPieceId, firstPieceId, "Top voted piece should be the first piece");
     }
 
 
-    /**
-    * @notice Tests for large number of art pieces and votes.
-    * @dev This test will create a large number of art pieces and vote for them.
-    * The aim is to see if the contract can handle large numbers without hitting gas limitations.
-    */
-    function testLargeNumbers() public {
-        setUp();
 
-        uint256 maxPieces = 50_000;  // You can adjust this number based on your contract's limitations
-
-        for (uint256 i = 0; i < maxPieces; i++) {
-            voter1Test.createDefaultArtPiece();
-        }
-
-        mockVotingToken._mint(address(voter1Test), maxPieces * 100);
-
-        for (uint256 i = 1; i <= maxPieces; i++) {
-            voter1Test.voteForPiece(i);
-        }
-
-        uint256 gasBefore = gasleft();
-        uint256 topPieceId = cultureIndex.calculateTopVotedPiece();
-        uint256 gasAfter = gasleft();
-
-        uint256 gasUsed = gasBefore - gasAfter;
-
-        //hits about 70% of max block limit gas limit for 50k pieces...
-        emit log_uint(gasUsed);
-
-        assertTrue(topPieceId > 0, "Top-voted piece should exist");
-    }
 
 
 
