@@ -74,26 +74,16 @@ contract CultureIndexTest is Test {
      */
     function testVoting() public {
         setUp();
-
-        // Create a new art piece
-        CultureIndex.ArtPieceMetadata memory metadata = CultureIndex
-            .ArtPieceMetadata({
-                name: "Starry Night",
-                description: "Another masterpiece",
-                mediaType: CultureIndex.MediaType.IMAGE,
-                image: "ipfs://starrynight",
-                text: "",
-                animationUrl: ""
-            });
-
-        CultureIndex.CreatorBps[]
-            memory creators = new CultureIndex.CreatorBps[](1);
-        creators[0] = CultureIndex.CreatorBps({
-            creator: address(0x2),
-            bps: 10000
-        });
-
-        uint256 newPieceId = cultureIndex.createPiece(metadata, creators);
+        uint256 newPieceId = createArtPiece(
+            "Mona Lisa",
+            "A masterpiece",
+            CultureIndex.MediaType.IMAGE,
+            "ipfs://legends",
+            "",
+            "",
+            address(0x1),
+            10000
+        );
 
         // Mint some tokens to the voter
         mockVotingToken._mint(address(this), 100);
@@ -115,5 +105,96 @@ contract CultureIndexTest is Test {
         );
         assertEq(pieceVotes[0].weight, 100, "Voting weight should be 100");
         assertEq(totalVoteWeight, 100, "Total voting weight should be 100");
+    }
+
+    /**
+     * @dev Test case to validate the "one vote per address" rule
+     *
+     * We create a new art piece and cast a vote for it.
+     * Then we try to vote again and expect it to fail.
+     */
+    function testCannotVoteTwice() public {
+        setUp();
+        uint256 newPieceId = createArtPiece(
+            "Mona Lisa",
+            "A masterpiece",
+            CultureIndex.MediaType.IMAGE,
+            "ipfs://legends",
+            "",
+            "",
+            address(0x1),
+            10000
+        );
+
+        // Mint some tokens to the voter
+        mockVotingToken._mint(address(this), 100);
+
+        // Cast a vote
+        cultureIndex.vote(newPieceId);
+
+        // Try to vote again and expect to fail
+        try cultureIndex.vote(newPieceId) {
+            fail("Should not be able to vote twice");
+        } catch Error(string memory reason) {
+            assertEq(reason, "Already voted");
+        }
+    }
+
+    /**
+     * @dev Test case to validate that an address with no tokens cannot vote
+     *
+     * We create a new art piece and try to cast a vote without any tokens.
+     * We expect the vote to fail.
+     */
+    function testCannotVoteWithoutTokens() public {
+        setUp();
+        uint256 newPieceId = createArtPiece(
+            "Starry Night",
+            "A masterpiece",
+            CultureIndex.MediaType.IMAGE,
+            "ipfs://legends",
+            "",
+            "",
+            address(0x1),
+            10000
+        );
+
+        // Try to vote and expect to fail
+        try cultureIndex.vote(newPieceId) {
+            fail("Should not be able to vote without tokens");
+        } catch Error(string memory reason) {
+            assertEq(reason, "Weight must be greater than zero");
+        }
+    }
+
+    // Utility function to create a new art piece and return its ID
+    function createArtPiece(
+        string memory name,
+        string memory description,
+        CultureIndex.MediaType mediaType,
+        string memory image,
+        string memory text,
+        string memory animationUrl,
+        address creatorAddress,
+        uint256 creatorBps
+    ) internal returns (uint256) {
+        CultureIndex.ArtPieceMetadata memory metadata = CultureIndex
+            .ArtPieceMetadata({
+                name: name,
+                description: description,
+                mediaType: mediaType,
+                image: image,
+                text: text,
+                animationUrl: animationUrl
+            });
+
+        CultureIndex.CreatorBps[]
+            memory creators = new CultureIndex.CreatorBps[](1);
+        creators[0] = CultureIndex.CreatorBps({
+            creator: creatorAddress,
+            bps: creatorBps
+        });
+
+        return cultureIndex.createPiece(metadata, creators);
     }
 }
