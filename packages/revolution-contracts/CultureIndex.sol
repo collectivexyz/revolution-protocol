@@ -43,6 +43,7 @@ contract CultureIndex {
         uint256 id;
         ArtPieceMetadata metadata;
         CreatorBps[] creators;
+        bool hasDropped;
     }
 
     // Struct for voter
@@ -78,6 +79,9 @@ contract CultureIndex {
         string image,
         string animationUrl
     );
+
+    /// @notice The event emitted when a top-voted piece is dropped
+    event TopVotedPieceDropped(uint256 indexed pieceId, address indexed remover);
 
     /// @notice The event emitted when a vote is cast
     event VoteCast(uint256 indexed pieceId, address indexed voter, uint256 weight);
@@ -149,6 +153,7 @@ contract CultureIndex {
 
         newPiece.id = pieceCount;
         newPiece.metadata = metadata;
+        newPiece.hasDropped = false;
 
         for (uint i = 0; i < creatorArray.length; i++) {
             newPiece.creators.push(creatorArray[i]);
@@ -170,19 +175,20 @@ contract CultureIndex {
      * Emits a VoteCast event upon successful execution.
      */
     function vote(uint256 pieceId) public {
-      // Most likely to fail should go first
+        // Most likely to fail should go first
         uint256 weight = votingToken.balanceOf(msg.sender);
         require(weight > 0, "Weight must be greater than zero");
         
         require(pieceId > 0 && pieceId <= pieceCount, "Invalid piece ID");
         require(!hasVoted[pieceId][msg.sender], "Already voted");
+        require(!pieces[pieceId].hasDropped, "Dropped piece can not be voted on");
 
         // Directly update state variables without reading them into local variables
         hasVoted[pieceId][msg.sender] = true;
         votes[pieceId].push(Voter(msg.sender, weight));
         totalVoteWeights[pieceId] += weight;
 
-        if (totalVoteWeights[pieceId] > totalVoteWeights[topVotedPieceId]) {
+        if (totalVoteWeights[pieceId] >= totalVoteWeights[topVotedPieceId]) {
             topVotedPieceId = pieceId;
         }
 
@@ -213,5 +219,33 @@ contract CultureIndex {
     */
     function getTopVotedPiece() public view returns (ArtPiece memory) {
         return pieces[topVotedPieceId];
+    }
+
+    /**
+    * @notice Calculate the top-voted piece.
+    * @return The ID of the top-voted art piece.
+    * TODO refactor to use a heap for gas efficiency
+    */
+    function calculateTopVotedPiece() public returns (uint256) {
+        uint256 newTopVotedPiece = 0;
+        uint256 topVotedPieceWeight = 0;
+        for (uint256 i = 1; i <= pieceCount; i++) {
+            if (totalVoteWeights[i] > topVotedPieceWeight && !pieces[i].hasDropped) {
+                newTopVotedPiece = i;
+                topVotedPieceWeight = totalVoteWeights[i];
+            }
+        }
+        topVotedPieceId = newTopVotedPiece;
+        return topVotedPieceId;
+    }
+
+    /**
+    * @notice Pulls and drops the top-voted piece.
+    * @return The top voted piece
+    */
+    function popTopVotedPiece() public returns (ArtPiece memory) {
+        uint256 pieceId = calculateTopVotedPiece();
+        pieces[pieceId].hasDropped = true;
+        return pieces[pieceId];
     }
 }

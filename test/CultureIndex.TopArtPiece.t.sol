@@ -161,7 +161,99 @@ contract CultureIndexArtPieceTest is Test {
         assertEq(topVotedPiece.id, firstPieceId, "Top voted piece should match the voted piece");
     }
 
+    function testCalculateTopVotedPiece() public {
+        setUp();
 
+        uint256 firstPieceId = voter1Test.createDefaultArtPiece();
+        uint256 secondPieceId = voter2Test.createDefaultArtPiece();
+
+        // Mint tokens to the test contracts (acting as voters)
+        mockVotingToken._mint(address(voter1Test), 100);
+        mockVotingToken._mint(address(voter2Test), 200);
+
+        // Vote for the first piece with voter1
+        voter1Test.voteForPiece(firstPieceId);
+
+        // Vote for the second piece with voter2
+        voter2Test.voteForPiece(secondPieceId);
+
+        uint256 topPieceId = cultureIndex.calculateTopVotedPiece();
+        assertEq(topPieceId, secondPieceId, "Top voted piece should be the second piece");
+    }
+
+    function testPopTopVotedPiece() public {
+        setUp();
+
+        uint256 firstPieceId = voter1Test.createDefaultArtPiece();
+        mockVotingToken._mint(address(voter1Test), 100);
+        voter1Test.voteForPiece(firstPieceId);
+
+        CultureIndex.ArtPiece memory poppedPiece = cultureIndex.popTopVotedPiece();
+        assertTrue(poppedPiece.hasDropped, "The popped piece should be marked as removed");
+        assertEq(poppedPiece.id, firstPieceId, "Popped piece should be the first piece");
+    }
+
+    function testRemovedPieceCannotBeTopVotedAgain() public {
+        setUp();
+
+        uint256 firstPieceId = voter1Test.createDefaultArtPiece();
+        uint256 secondPieceId = voter2Test.createDefaultArtPiece();
+
+        mockVotingToken._mint(address(voter1Test), 100);
+        mockVotingToken._mint(address(voter2Test), 200);
+
+        voter1Test.voteForPiece(firstPieceId);
+        voter2Test.voteForPiece(secondPieceId);
+
+        CultureIndex.ArtPiece memory poppedPiece = cultureIndex.popTopVotedPiece();
+        //assert its the second piece
+        assertEq(poppedPiece.id, secondPieceId, "Popped piece should be the second piece");
+       
+        // Trying to vote for a removed piece
+        try
+            voter1Test.voteForPiece(secondPieceId)
+        {
+            fail("Should not be able to vote for a removed piece");
+        } catch Error(string memory reason) {
+            assertEq(reason, "Dropped piece can not be voted on");
+        }
+
+        uint256 topPieceId = cultureIndex.calculateTopVotedPiece();
+        assertEq(topPieceId, firstPieceId, "Top voted piece should be the first piece");
+    }
+
+
+    /**
+    * @notice Tests for large number of art pieces and votes.
+    * @dev This test will create a large number of art pieces and vote for them.
+    * The aim is to see if the contract can handle large numbers without hitting gas limitations.
+    */
+    function testLargeNumbers() public {
+        setUp();
+
+        uint256 maxPieces = 50_000;  // You can adjust this number based on your contract's limitations
+
+        for (uint256 i = 0; i < maxPieces; i++) {
+            voter1Test.createDefaultArtPiece();
+        }
+
+        mockVotingToken._mint(address(voter1Test), maxPieces * 100);
+
+        for (uint256 i = 1; i <= maxPieces; i++) {
+            voter1Test.voteForPiece(i);
+        }
+
+        uint256 gasBefore = gasleft();
+        uint256 topPieceId = cultureIndex.calculateTopVotedPiece();
+        uint256 gasAfter = gasleft();
+
+        uint256 gasUsed = gasBefore - gasAfter;
+
+        //hits about 70% of max block limit gas limit for 50k pieces...
+        emit log_uint(gasUsed);
+
+        assertTrue(topPieceId > 0, "Top-voted piece should exist");
+    }
 
 
 
