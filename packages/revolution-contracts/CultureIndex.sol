@@ -51,6 +51,9 @@ contract CultureIndex {
         uint256 weight;
     }
 
+    /// @notice The ID of the top-voted piece
+    uint256 public topVotedPieceId;
+
     /// @notice The list of all pieces
     mapping(uint256 => ArtPiece) public pieces;
 
@@ -179,6 +182,10 @@ contract CultureIndex {
         votes[pieceId].push(Voter(msg.sender, weight));
         totalVoteWeights[pieceId] += weight;
 
+        if (totalVoteWeights[pieceId] > totalVoteWeights[topVotedPieceId]) {
+            topVotedPieceId = pieceId;
+        }
+
         emit VoteCast(pieceId, msg.sender, weight);
     }
 
@@ -198,5 +205,13 @@ contract CultureIndex {
      */
     function getVotes(uint256 pieceId) public view returns (Voter[] memory) {
         return votes[pieceId];
+    }
+
+    /**
+    * @notice Fetch the top-voted art piece.
+    * @return The ArtPiece struct of the top-voted art piece.
+    */
+    function getTopVotedPiece() public view returns (ArtPiece memory) {
+        return pieces[topVotedPieceId];
     }
 }
