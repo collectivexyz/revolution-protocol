@@ -9,7 +9,7 @@ import {MockERC20} from "./MockERC20.sol";
  * @title CultureIndexTest
  * @dev Test contract for CultureIndex
  */
-contract CultureIndexVotingTest is Test {
+contract CultureIndexVotingBasicTest is Test {
     CultureIndex public cultureIndex;
     MockERC20 public mockVotingToken;
 
@@ -258,4 +258,119 @@ contract CultureIndexVotingTest is Test {
 
         return cultureIndex.createPiece(metadata, creators);
     }
+
+    //Utility function to create default art piece
+    function createDefaultArtPiece() public returns (uint256) {
+        return createArtPiece(
+            "Mona Lisa",
+            "A masterpiece",
+            CultureIndex.MediaType.IMAGE,
+            "ipfs://legends",
+            "",
+            "",
+            address(0x1),
+            10000
+        );
+    }
+
+    function testVoteAfterTransferringTokens() public {
+        setUp();
+        uint256 newPieceId = createDefaultArtPiece();
+
+        // Mint tokens and vote
+        mockVotingToken._mint(address(this), 100);
+        cultureIndex.vote(newPieceId);
+
+        // Transfer all tokens to another account
+        address anotherAccount = address(0x4);
+        mockVotingToken.transfer(anotherAccount, 100);
+ 
+        // Try to vote again and expect to fail
+        try cultureIndex.vote(newPieceId) {
+            fail("Should not be able to vote without tokens");
+        } catch Error(string memory reason) {
+            assertEq(reason, "Already voted");
+        }
+    }
+
+    function testInvalidPieceID() public {
+        setUp();
+
+        // Mint some tokens to the voter
+        mockVotingToken._mint(address(this), 100);
+
+        // Attempt to vote for an invalid piece ID
+        try cultureIndex.vote(9999) {  // Assuming 9999 is an invalid ID
+            fail("Should not be able to vote for an invalid piece ID");
+        } catch Error(string memory reason) {
+            assertEq(reason, "Invalid piece ID");
+        }
+    }
+
+
+    function voteForPiece(uint256 pieceId) public {
+            cultureIndex.vote(pieceId);
+        }
+}
+
+
+
+contract CultureIndexVotingTest is Test {
+    CultureIndex public cultureIndex;
+    MockERC20 public mockVotingToken;
+
+    constructor(address _cultureIndex, address _mockVotingToken) {
+        cultureIndex = CultureIndex(_cultureIndex);
+        mockVotingToken = MockERC20(_mockVotingToken);
+    }
+
+
+    // Utility function to create a new art piece and return its ID
+    function createArtPiece(
+        string memory name,
+        string memory description,
+        CultureIndex.MediaType mediaType,
+        string memory image,
+        string memory text,
+        string memory animationUrl,
+        address creatorAddress,
+        uint256 creatorBps
+    ) internal returns (uint256) {
+        CultureIndex.ArtPieceMetadata memory metadata = CultureIndex
+            .ArtPieceMetadata({
+                name: name,
+                description: description,
+                mediaType: mediaType,
+                image: image,
+                text: text,
+                animationUrl: animationUrl
+            });
+
+        CultureIndex.CreatorBps[]
+            memory creators = new CultureIndex.CreatorBps[](1);
+        creators[0] = CultureIndex.CreatorBps({
+            creator: creatorAddress,
+            bps: creatorBps
+        });
+
+        return cultureIndex.createPiece(metadata, creators);
+    }
+
+    //Utility function to create default art piece
+    function createDefaultArtPiece() public returns (uint256) {
+        return createArtPiece(
+            "Mona Lisa",
+            "A masterpiece",
+            CultureIndex.MediaType.IMAGE,
+            "ipfs://legends",
+            "",
+            "",
+            address(0x1),
+            10000
+        );
+    }
+
+    function voteForPiece(uint256 pieceId) public {
+            cultureIndex.vote(pieceId);
+        }
 }
