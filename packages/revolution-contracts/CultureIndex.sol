@@ -2,14 +2,19 @@
 pragma solidity ^0.8.19;
 
 import { IERC20 } from "./IERC20.sol";
+import { MaxHeap } from "./MaxHeap.sol";
 
 contract CultureIndex {
+    /// @notice The MaxHeap data structure used to keep track of the top-voted piece
+    MaxHeap public maxHeap;
+
     /// @notice The ERC20 token used for voting
     IERC20 public votingToken;
 
     // Initialize ERC20 Token in the constructor
     constructor(address _votingToken) {
         votingToken = IERC20(_votingToken);
+        maxHeap = new MaxHeap(50_000_000_000);
     }
 
     // Add an enum for media types
@@ -43,6 +48,7 @@ contract CultureIndex {
         uint256 id;
         ArtPieceMetadata metadata;
         CreatorBps[] creators;
+        bool hasDropped;
     }
 
     // Struct for voter
@@ -50,9 +56,6 @@ contract CultureIndex {
         address voterAddress;
         uint256 weight;
     }
-
-    /// @notice The ID of the top-voted piece
-    uint256 public topVotedPieceId;
 
     /// @notice The list of all pieces
     mapping(uint256 => ArtPiece) public pieces;
@@ -78,6 +81,9 @@ contract CultureIndex {
         string image,
         string animationUrl
     );
+
+    /// @notice The event emitted when a top-voted piece is dropped
+    event TopVotedPieceDropped(uint256 indexed pieceId, address indexed remover);
 
     /// @notice The event emitted when a vote is cast
     event VoteCast(uint256 indexed pieceId, address indexed voter, uint256 weight);
@@ -149,10 +155,14 @@ contract CultureIndex {
 
         newPiece.id = pieceCount;
         newPiece.metadata = metadata;
+        newPiece.hasDropped = false;
 
         for (uint i = 0; i < creatorArray.length; i++) {
             newPiece.creators.push(creatorArray[i]);
         }
+
+        /// @dev Insert the new piece into the max heap
+        maxHeap.insert(pieceCount, 0);
 
         emit PieceCreated(pieceCount, msg.sender, metadata.name, metadata.description, metadata.image, metadata.animationUrl);
 
@@ -170,21 +180,21 @@ contract CultureIndex {
      * Emits a VoteCast event upon successful execution.
      */
     function vote(uint256 pieceId) public {
-      // Most likely to fail should go first
+        // Most likely to fail should go first
         uint256 weight = votingToken.balanceOf(msg.sender);
         require(weight > 0, "Weight must be greater than zero");
-        
+
         require(pieceId > 0 && pieceId <= pieceCount, "Invalid piece ID");
         require(!hasVoted[pieceId][msg.sender], "Already voted");
+        require(!pieces[pieceId].hasDropped, "Dropped piece can not be voted on");
 
         // Directly update state variables without reading them into local variables
         hasVoted[pieceId][msg.sender] = true;
         votes[pieceId].push(Voter(msg.sender, weight));
         totalVoteWeights[pieceId] += weight;
 
-        if (totalVoteWeights[pieceId] > totalVoteWeights[topVotedPieceId]) {
-            topVotedPieceId = pieceId;
-        }
+        // Insert the new vote weight into the max heap
+        maxHeap.updateVoteCount(pieceId, totalVoteWeights[pieceId]);
 
         emit VoteCast(pieceId, msg.sender, weight);
     }
@@ -208,10 +218,30 @@ contract CultureIndex {
     }
 
     /**
-    * @notice Fetch the top-voted art piece.
-    * @return The ArtPiece struct of the top-voted art piece.
-    */
+     * @notice Fetch the top-voted art piece.
+     * @return The ArtPiece struct of the top-voted art piece.
+     */
     function getTopVotedPiece() public view returns (ArtPiece memory) {
+        (uint256 pieceId, ) = maxHeap.getMax();
+        return pieces[pieceId];
+    }
+
+    /**
+     * @notice Fetch the top-voted pieceId
+     * @return The top-voted pieceId
+     */
+    function topVotedPieceId() public view returns (uint256) {
+        (uint256 pieceId, ) = maxHeap.getMax();
+        return pieceId;
+    }
+
+    /**
+     * @notice Pulls and drops the top-voted piece.
+     * @return The top voted piece
+     */
+    function popTopVotedPiece() public returns (ArtPiece memory) {
+        (uint256 topVotedPieceId, ) = maxHeap.extractMax();
+        pieces[topVotedPieceId].hasDropped = true;
         return pieces[topVotedPieceId];
     }
 }

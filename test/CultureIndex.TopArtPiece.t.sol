@@ -161,8 +161,89 @@ contract CultureIndexArtPieceTest is Test {
         assertEq(topVotedPiece.id, firstPieceId, "Top voted piece should match the voted piece");
     }
 
+    function testCorrectTopVotedPiece() public {
+        setUp();
+
+        uint256 firstPieceId = voter1Test.createDefaultArtPiece();
+        uint256 secondPieceId = voter2Test.createDefaultArtPiece();
+
+        // Mint tokens to the test contracts (acting as voters)
+        mockVotingToken._mint(address(voter1Test), 100);
+        mockVotingToken._mint(address(voter2Test), 200);
+
+        // Vote for the first piece with voter1
+        voter1Test.voteForPiece(firstPieceId);
+
+        // Vote for the second piece with voter2
+        voter2Test.voteForPiece(secondPieceId);
+
+        CultureIndex.ArtPiece memory poppedPiece = cultureIndex.getTopVotedPiece();
+        assertEq(poppedPiece.id, secondPieceId, "Top voted piece should be the second piece");
+    }
+
+    function testPopTopVotedPiece() public {
+        setUp();
+
+        uint256 firstPieceId = voter1Test.createDefaultArtPiece();
+        mockVotingToken._mint(address(voter1Test), 100);
+        voter1Test.voteForPiece(firstPieceId);
+
+        CultureIndex.ArtPiece memory poppedPiece = cultureIndex.popTopVotedPiece();
+        assertTrue(poppedPiece.hasDropped, "The popped piece should be marked as removed");
+        assertEq(poppedPiece.id, firstPieceId, "Popped piece should be the first piece");
+    }
+
+    function testRemovedPieceShouldBeReplaced() public {
+        setUp();
+
+        uint256 firstPieceId = voter1Test.createDefaultArtPiece();
+        uint256 secondPieceId = voter2Test.createDefaultArtPiece();
+
+        mockVotingToken._mint(address(voter1Test), 100);
+        mockVotingToken._mint(address(voter2Test), 200);
+
+        voter1Test.voteForPiece(firstPieceId);
+        voter2Test.voteForPiece(secondPieceId);
+
+        CultureIndex.ArtPiece memory poppedPiece = cultureIndex.popTopVotedPiece();
+        //assert its the second piece
+        assertEq(poppedPiece.id, secondPieceId, "Popped piece should be the second piece");
+       
+        // Trying to vote for a removed piece
+        try
+            voter1Test.voteForPiece(secondPieceId)
+        {
+            fail("Should not be able to vote for a removed piece");
+        } catch Error(string memory reason) {
+            assertEq(reason, "Dropped piece can not be voted on");
+        }
+
+        uint256 topPieceId = cultureIndex.topVotedPieceId();
+        assertEq(topPieceId, firstPieceId, "Top voted piece should be the first piece");
+    }
 
 
+    /// @dev Tests that log gas
+    function testGasForLargeHeapInserts() public {
+        setUp();
 
+        // Insert a large number of items
+        for (uint i = 0; i < 50000; i++) {
+            voter1Test.createDefaultArtPiece();
+        }
 
+        mockVotingToken._mint(address(voter1Test), 100);
+        mockVotingToken._mint(address(voter2Test), 200);
+
+        // Record initial gas
+        uint256 startGas = gasleft();
+        //vote on all pieces
+        for (uint i = 0; i < 50000; i++) {
+            voter1Test.voteForPiece(i+1);
+            voter2Test.voteForPiece(i+1);
+        }
+        // Calculate gas used
+        uint256 gasUsed = startGas - gasleft();
+        emit log_uint(gasUsed);
+    }
 }
