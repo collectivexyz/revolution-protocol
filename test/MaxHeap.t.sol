@@ -4,13 +4,17 @@ pragma solidity ^0.8.19;
 import {Test} from "forge-std/Test.sol";
 import {MaxHeapTest} from "../packages/revolution-contracts/MaxHeap.sol";  // Update this path
 
+/// @title MaxHeapTestSuite
+/// @dev The test suite for the MaxHeap contract
 contract MaxHeapTestSuite is Test {
     MaxHeapTest public maxHeap;
 
+    /// @dev Sets up a new MaxHeap instance before each test
     function setUp() public {
         maxHeap = new MaxHeapTest(50);
     }
 
+    /// @dev Tests the insert and getMax functions
     function testInsert() public {
         setUp();
 
@@ -25,6 +29,7 @@ contract MaxHeapTestSuite is Test {
         assertEq(maxItemId, 2, "Max piece ID should be 2");
     }
 
+    /// @dev Tests the extractMax function and validates the new max value
     function testRemoveMax() public {
         setUp();
 
@@ -40,6 +45,7 @@ contract MaxHeapTestSuite is Test {
         assertEq(maxItemId, 1, "New max piece ID should be 1");
     }
 
+    /// @dev Tests the maxHeapify function to ensure it corrects the heap property
     function testHeapify() public {
         setUp();
 
@@ -60,6 +66,7 @@ contract MaxHeapTestSuite is Test {
         assertEq(maxItemId, 2, "Max piece ID should be 2");
     }
 
+    /// @dev Tests inserting duplicate values into the heap
     function testInsertDuplicateValues() public {
         setUp();
         maxHeap.insert(1,5);
@@ -71,6 +78,7 @@ contract MaxHeapTestSuite is Test {
         assertEq(maxHeap.size(), 3, "Size should be 3");
     }
 
+    /// @dev Tests that the heap is empty after all elements are removed
     function testHeapEmptyAfterAllRemoved() public {
         setUp();
         maxHeap.insert(1,5);
@@ -80,6 +88,7 @@ contract MaxHeapTestSuite is Test {
         assertEq(maxHeap.size(), 0, "Heap should be empty");
     }
 
+    /// @dev Tests that the heap maintains its properties after multiple insertions and removals
     function testHeapProperty() public {
         setUp();
         uint256[] memory values = new uint256[](6);
@@ -101,6 +110,7 @@ contract MaxHeapTestSuite is Test {
         }
     }
 
+    /// @dev Tests the maxHeapify function on a non-root node
     function testHeapifyOnNonRoot() public {
         setUp();
         maxHeap.insert(1,10);
@@ -114,6 +124,7 @@ contract MaxHeapTestSuite is Test {
         assertEq(itemId, 1, "Item ID should be 1 after heapify");
     }
 
+     /// @dev Tests that the heap does not allow insertions when it's already full
     function testCannotInsertWhenFull() public {
         setUp();
 
@@ -130,6 +141,7 @@ contract MaxHeapTestSuite is Test {
         }
     }
 
+    /// @dev Tests that the heap does not allow removal of max element when it's empty
     function testCannotRemoveMaxWhenEmpty() public {
         setUp();
 
