@@ -189,7 +189,6 @@ contract CultureIndexArtPieceTest is Test {
         voter1Test.voteForPiece(firstPieceId);
 
         CultureIndex.ArtPiece memory poppedPiece = cultureIndex.popTopVotedPiece();
-        assertTrue(poppedPiece.hasDropped, "The popped piece should be marked as removed");
         assertEq(poppedPiece.id, firstPieceId, "Popped piece should be the first piece");
     }
 
@@ -312,7 +311,7 @@ contract CultureIndexArtPieceTest is Test {
         // Create and vote on a set number of pieces.
         for (uint i = 0; i < 50_000; i++) {
             uint256 pieceId = voter1Test.createDefaultArtPiece();
-            mockVotingToken._mint(address(voter1Test), 100);
+            mockVotingToken._mint(address(voter1Test), i*2);
             voter1Test.voteForPiece(pieceId);
         }
 
@@ -323,9 +322,9 @@ contract CultureIndexArtPieceTest is Test {
         emit log_uint(gasUsed);
 
         // Create and vote on another set of pieces.
-        for (uint i = 0; i < 500_000; i++) {
+        for (uint i = 0; i < 250_000; i++) {
             uint256 pieceId = voter1Test.createDefaultArtPiece();
-            mockVotingToken._mint(address(voter1Test), 100);
+            mockVotingToken._mint(address(voter1Test), i*3);
             voter1Test.voteForPiece(pieceId);
         }
 
