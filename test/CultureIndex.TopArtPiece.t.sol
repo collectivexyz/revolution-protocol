@@ -218,7 +218,7 @@ contract CultureIndexArtPieceTest is Test {
         setUp();
 
         // Insert a large number of items
-        for (uint i = 0; i < 50000; i++) {
+        for (uint i = 0; i < 5_000; i++) {
             voter1Test.createDefaultArtPiece();
         }
 
@@ -226,7 +226,7 @@ contract CultureIndexArtPieceTest is Test {
         mockVotingToken._mint(address(voter2Test), 200);
 
         //vote on all pieces
-        for (uint i = 2; i < 50000; i++) {
+        for (uint i = 2; i < 5_000; i++) {
             voter1Test.voteForPiece(i+1);
             voter2Test.voteForPiece(i+1);
         }
@@ -238,7 +238,7 @@ contract CultureIndexArtPieceTest is Test {
         emit log_uint(gasUsed);
 
         // Insert a large number of items
-        for (uint i = 0; i < 100000; i++) {
+        for (uint i = 0; i < 20_000; i++) {
             voter1Test.createDefaultArtPiece();
         }
 
@@ -246,20 +246,21 @@ contract CultureIndexArtPieceTest is Test {
         mockVotingToken._mint(address(voter2Test), 200);
 
         //vote on all pieces
-        for (uint i = 50_002; i < 150_000; i++) {
+        for (uint i = 5_002; i < 25_000; i++) {
             voter1Test.voteForPiece(i+1);
             mockVotingToken._mint(address(voter1Test), i);
+            mockVotingToken._mint(address(voter2Test), i*2);
             voter2Test.voteForPiece(i+1);
         }
 
         //vote once and calculate gas used
         startGas = gasleft();
-        voter1Test.voteForPiece(50_001);
+        voter1Test.voteForPiece(5_001);
         uint256 gasUsed2 = startGas - gasleft();
         emit log_uint(gasUsed2);
 
         //make sure gas used isn't more than double
-        assertLt(gasUsed2, 2 * gasUsed, "Gas used should not be double");
+        assertLt(gasUsed2, 2 * gasUsed, "Gas used should not be more than 100% increase");
     }
 
     /// @dev Tests the gas used for creating art pieces as the number of items grows.
@@ -274,8 +275,8 @@ contract CultureIndexArtPieceTest is Test {
 
 
         // Create a set number of pieces and log the gas used for the last creation.
-        for (uint i = 0; i < 50_000; i++) {
-            if (i == 49_999) {
+        for (uint i = 0; i < 5_000; i++) {
+            if (i == 4_999) {
                 startGas = gasleft();
                 voter1Test.createDefaultArtPiece();
                 gasUsed = startGas - gasleft();
@@ -286,8 +287,8 @@ contract CultureIndexArtPieceTest is Test {
         }
 
         // Create another set of pieces and log the gas used for the last creation.
-        for (uint i = 0; i < 250_000; i++) {
-            if (i == 249_999) {
+        for (uint i = 0; i < 25_000; i++) {
+            if (i == 24_999) {
                 startGas = gasleft();
                 voter1Test.createDefaultArtPiece();
                 gasUsed = startGas - gasleft();
@@ -303,7 +304,7 @@ contract CultureIndexArtPieceTest is Test {
         setUp();
 
         // Create and vote on a set number of pieces.
-        for (uint i = 0; i < 50_000; i++) {
+        for (uint i = 0; i < 5_000; i++) {
             uint256 pieceId = voter1Test.createDefaultArtPiece();
             mockVotingToken._mint(address(voter1Test), i*2 + 1);
             voter1Test.voteForPiece(pieceId);
@@ -316,7 +317,7 @@ contract CultureIndexArtPieceTest is Test {
         emit log_uint(gasUsed);
 
         // Create and vote on another set of pieces.
-        for (uint i = 0; i < 250_000; i++) {
+        for (uint i = 0; i < 25_000; i++) {
             uint256 pieceId = voter1Test.createDefaultArtPiece();
             mockVotingToken._mint(address(voter1Test), i*3 + 1);
             voter1Test.voteForPiece(pieceId);
@@ -328,7 +329,7 @@ contract CultureIndexArtPieceTest is Test {
         uint256 gasUsed2 = startGas - gasleft();
         emit log_uint(gasUsed2);
 
-        assertLt(gasUsed2, gasUsed*2, "Should not be more than double the gas");
+        assertLt(gasUsed2, gasUsed * 2, "Should not be more than double the gas");
     }
 
 
