@@ -371,6 +371,6 @@ contract CultureIndexVotingTest is Test {
     }
 
     function voteForPiece(uint256 pieceId) public {
-            cultureIndex.vote(pieceId);
-        }
+        cultureIndex.vote(pieceId);
+    }
 }

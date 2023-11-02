@@ -14,6 +14,9 @@ contract MaxHeap {
     /// @notice Mapping to keep track of the value of an item in the heap
     mapping(uint256 => uint256) public valueMapping;
 
+    /// @notice Mapping to keep track of the position of an item in the heap
+    mapping(uint256 => uint256) public positionMapping;
+
 
     /// @notice Constructor to initialize the MaxHeap
     /// @param _maxsize The maximum size of the heap
@@ -36,6 +39,9 @@ contract MaxHeap {
         uint256 temp = heap[fpos];
         heap[fpos] = heap[spos];
         heap[spos] = temp;
+
+        positionMapping[heap[fpos]] = fpos;
+        positionMapping[heap[spos]] = spos;
     }
 
     /// @notice Reheapify the heap starting at a given position
@@ -71,6 +77,7 @@ contract MaxHeap {
 
         heap[size] = itemId;
         valueMapping[itemId] = value; // Update the value mapping
+        positionMapping[itemId] = size; // Update the position mapping
 
         uint256 current = size;
         while (current != 0 && valueMapping[heap[current]] > valueMapping[heap[parent(current)]]) {
@@ -85,12 +92,25 @@ contract MaxHeap {
     /// @param newValue The new value for the item
     /// @dev This function adjusts the heap to maintain the max-heap property after updating the vote count
     function updateValue(uint256 itemId, uint256 newValue) public {
+        uint256 position = positionMapping[itemId];
+        uint256 oldValue = valueMapping[itemId];
+
         // Update the value in the valueMapping
         valueMapping[itemId] = newValue;
-        
-        //rerun maxHeapify
-        maxHeapify(0);
+
+        // Decide whether to perform upwards or downwards heapify
+        if (newValue > oldValue) {
+            // Upwards heapify
+            while (position != 0 && valueMapping[heap[position]] > valueMapping[heap[parent(position)]]) {
+                swap(position, parent(position));
+                position = parent(position);
+            }
+        } else if (newValue < oldValue) {
+            // Downwards heapify
+            maxHeapify(position);
+        }
     }
+
 
 
     /// @notice Extract the maximum element from the heap
