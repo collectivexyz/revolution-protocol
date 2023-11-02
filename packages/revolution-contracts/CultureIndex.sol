@@ -48,7 +48,6 @@ contract CultureIndex {
         uint256 id;
         ArtPieceMetadata metadata;
         CreatorBps[] creators;
-        bool hasDropped;
     }
 
     // Struct for voter
@@ -155,7 +154,6 @@ contract CultureIndex {
 
         newPiece.id = pieceCount;
         newPiece.metadata = metadata;
-        newPiece.hasDropped = false;
 
         for (uint i = 0; i < creatorArray.length; i++) {
             newPiece.creators.push(creatorArray[i]);
@@ -186,7 +184,6 @@ contract CultureIndex {
 
         require(pieceId > 0 && pieceId <= pieceCount, "Invalid piece ID");
         require(!hasVoted[pieceId][msg.sender], "Already voted");
-        require(!pieces[pieceId].hasDropped, "Dropped piece can not be voted on");
 
         // Directly update state variables without reading them into local variables
         hasVoted[pieceId][msg.sender] = true;
@@ -241,7 +238,6 @@ contract CultureIndex {
      */
     function popTopVotedPiece() public returns (ArtPiece memory) {
         (uint256 pieceId, ) = maxHeap.extractMax();
-        pieces[pieceId].hasDropped = true;
         return pieces[pieceId];
     }
 }
