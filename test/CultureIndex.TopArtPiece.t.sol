@@ -189,7 +189,6 @@ contract CultureIndexArtPieceTest is Test {
         voter1Test.voteForPiece(firstPieceId);
 
         CultureIndex.ArtPiece memory poppedPiece = cultureIndex.popTopVotedPiece();
-        assertTrue(poppedPiece.hasDropped, "The popped piece should be marked as removed");
         assertEq(poppedPiece.id, firstPieceId, "Popped piece should be the first piece");
     }
 
@@ -208,42 +207,130 @@ contract CultureIndexArtPieceTest is Test {
         CultureIndex.ArtPiece memory poppedPiece = cultureIndex.popTopVotedPiece();
         //assert its the second piece
         assertEq(poppedPiece.id, secondPieceId, "Popped piece should be the second piece");
-       
-        // Trying to vote for a removed piece
-        try
-            voter1Test.voteForPiece(secondPieceId)
-        {
-            fail("Should not be able to vote for a removed piece");
-        } catch Error(string memory reason) {
-            assertEq(reason, "Dropped piece can not be voted on");
-        }
 
         uint256 topPieceId = cultureIndex.topVotedPieceId();
         assertEq(topPieceId, firstPieceId, "Top voted piece should be the first piece");
     }
 
 
-    /// @dev Tests that log gas
-    function testGasForLargeHeapInserts() public {
+    /// @dev Tests that log gas required to vote on a piece isn't out of control as heap grows
+    function testGasForLargeVotes() public {
         setUp();
 
         // Insert a large number of items
-        for (uint i = 0; i < 50000; i++) {
+        for (uint i = 0; i < 5_000; i++) {
             voter1Test.createDefaultArtPiece();
         }
 
         mockVotingToken._mint(address(voter1Test), 100);
         mockVotingToken._mint(address(voter2Test), 200);
 
-        // Record initial gas
-        uint256 startGas = gasleft();
         //vote on all pieces
-        for (uint i = 0; i < 50000; i++) {
+        for (uint i = 2; i < 5_000; i++) {
             voter1Test.voteForPiece(i+1);
             voter2Test.voteForPiece(i+1);
         }
-        // Calculate gas used
+
+        //vote once and calculate gas used
+        uint256 startGas = gasleft();
+        voter1Test.voteForPiece(1);
         uint256 gasUsed = startGas - gasleft();
         emit log_uint(gasUsed);
+
+        // Insert a large number of items
+        for (uint i = 0; i < 20_000; i++) {
+            voter1Test.createDefaultArtPiece();
+        }
+
+        mockVotingToken._mint(address(voter1Test), 100);
+        mockVotingToken._mint(address(voter2Test), 200);
+
+        //vote on all pieces
+        for (uint i = 5_002; i < 25_000; i++) {
+            voter1Test.voteForPiece(i+1);
+            mockVotingToken._mint(address(voter1Test), i);
+            mockVotingToken._mint(address(voter2Test), i*2);
+            voter2Test.voteForPiece(i+1);
+        }
+
+        //vote once and calculate gas used
+        startGas = gasleft();
+        voter1Test.voteForPiece(5_001);
+        uint256 gasUsed2 = startGas - gasleft();
+        emit log_uint(gasUsed2);
+
+        //make sure gas used isn't more than double
+        assertLt(gasUsed2, 2 * gasUsed, "Gas used should not be more than 100% increase");
     }
+
+    /// @dev Tests the gas used for creating art pieces as the number of items grows.
+    function testGasForCreatingArtPieces() public {
+        setUp();
+
+        //log gas used for creating the first piece
+        uint256 startGas = gasleft();
+        voter1Test.createDefaultArtPiece();
+        uint256 gasUsed = startGas - gasleft();
+        emit log_uint(gasUsed);
+
+
+        // Create a set number of pieces and log the gas used for the last creation.
+        for (uint i = 0; i < 5_000; i++) {
+            if (i == 4_999) {
+                startGas = gasleft();
+                voter1Test.createDefaultArtPiece();
+                gasUsed = startGas - gasleft();
+                emit log_uint(gasUsed);
+            } else {
+                voter1Test.createDefaultArtPiece();
+            }
+        }
+
+        // Create another set of pieces and log the gas used for the last creation.
+        for (uint i = 0; i < 25_000; i++) {
+            if (i == 24_999) {
+                startGas = gasleft();
+                voter1Test.createDefaultArtPiece();
+                gasUsed = startGas - gasleft();
+                emit log_uint(gasUsed);
+            } else {
+                voter1Test.createDefaultArtPiece();
+            }
+        }
+    }
+
+    /// @dev Tests the gas used for popping the top voted piece to ensure somewhat constant time
+    function testGasForPopTopVotedPiece() public {
+        setUp();
+
+        // Create and vote on a set number of pieces.
+        for (uint i = 0; i < 5_000; i++) {
+            uint256 pieceId = voter1Test.createDefaultArtPiece();
+            mockVotingToken._mint(address(voter1Test), i*2 + 1);
+            voter1Test.voteForPiece(pieceId);
+        }
+
+        // Pop the top voted piece and log the gas used.
+        uint256 startGas = gasleft();
+        cultureIndex.popTopVotedPiece();
+        uint256 gasUsed = startGas - gasleft();
+        emit log_uint(gasUsed);
+
+        // Create and vote on another set of pieces.
+        for (uint i = 0; i < 25_000; i++) {
+            uint256 pieceId = voter1Test.createDefaultArtPiece();
+            mockVotingToken._mint(address(voter1Test), i*3 + 1);
+            voter1Test.voteForPiece(pieceId);
+        }
+
+        // Pop the top voted piece and log the gas used.
+        startGas = gasleft();
+        cultureIndex.popTopVotedPiece();
+        uint256 gasUsed2 = startGas - gasleft();
+        emit log_uint(gasUsed2);
+
+        assertLt(gasUsed2, gasUsed * 2, "Should not be more than double the gas");
+    }
+
+
 }

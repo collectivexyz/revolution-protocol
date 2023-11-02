@@ -5,14 +5,17 @@ pragma solidity ^0.8.19;
 /// @dev This contract implements a Max Heap data structure with basic operations
 /// @author Written by rocketman and gpt4
 contract MaxHeap {
-    struct Item {
-        uint256 itemId;
-        uint256 voteCount;
-    }
-    mapping(uint256 => Item) public heap;
+    /// @notice Struct to represent an item in the heap by it's ID
+    mapping(uint256 => uint256) public heap;
+
     uint256 public size = 0;
     uint256 public maxsize;
-    mapping(uint256 => uint256) public itemIdToIndex;
+
+    /// @notice Mapping to keep track of the value of an item in the heap
+    mapping(uint256 => uint256) public valueMapping;
+
+    /// @notice Mapping to keep track of the position of an item in the heap
+    mapping(uint256 => uint256) public positionMapping;
 
 
     /// @notice Constructor to initialize the MaxHeap
@@ -33,13 +36,12 @@ contract MaxHeap {
     /// @param fpos The position of the first node
     /// @param spos The position of the second node
     function swap(uint256 fpos, uint256 spos) private {
-        Item memory temp = heap[fpos];
+        uint256 temp = heap[fpos];
         heap[fpos] = heap[spos];
         heap[spos] = temp;
 
-        // Update itemId to index mapping
-        itemIdToIndex[heap[fpos].itemId] = fpos;
-        itemIdToIndex[heap[spos].itemId] = spos;
+        positionMapping[heap[fpos]] = fpos;
+        positionMapping[heap[spos]] = spos;
     }
 
     /// @notice Reheapify the heap starting at a given position
@@ -49,10 +51,14 @@ contract MaxHeap {
         uint256 left = 2 * pos + 1;
         uint256 right = 2 * pos + 2;
 
+        uint256 posValue = valueMapping[heap[pos]];
+        uint256 leftValue = valueMapping[heap[left]];
+        uint256 rightValue = valueMapping[heap[right]];
+
         if (pos >= (size / 2) && pos <= size) return;
 
-        if (heap[pos].voteCount < heap[left].voteCount || heap[pos].voteCount < heap[right].voteCount) {
-            if (heap[left].voteCount > heap[right].voteCount) {
+        if (posValue < leftValue || posValue < rightValue) {
+            if (leftValue > rightValue) {
                 swap(pos, left);
                 maxHeapify(left);
             } else {
@@ -65,54 +71,46 @@ contract MaxHeap {
     /// @notice Insert an element into the heap
     /// @dev The function will revert if the heap is full
     /// @param itemId The item ID to insert
-    /// @param voteCount The vote count to insert
-    function insert(uint256 itemId, uint256 voteCount) public {
+    /// @param value The value to insert
+    function insert(uint256 itemId, uint256 value) public {
         require(size < maxsize, "Heap is full");
-        //make sure item hasn't already been inserted
-        require(itemIdToIndex[itemId] == 0, "Item already exists in heap");
 
-        Item memory newItem = Item(itemId, voteCount);
-        heap[size] = newItem;
-        itemIdToIndex[itemId] = size; // Update the mapping
+        heap[size] = itemId;
+        valueMapping[itemId] = value; // Update the value mapping
+        positionMapping[itemId] = size; // Update the position mapping
 
         uint256 current = size;
-        while (current != 0 && heap[current].voteCount > heap[parent(current)].voteCount) {
+        while (current != 0 && valueMapping[heap[current]] > valueMapping[heap[parent(current)]]) {
             swap(current, parent(current));
             current = parent(current);
         }
         size++;
     }
 
-    /// @notice Update the vote count of an existing item in the heap
+    /// @notice Update the value of an existing item in the heap
     /// @param itemId The item ID whose vote count needs to be updated
-    /// @param newVoteCount The new vote count for the item
+    /// @param newValue The new value for the item
     /// @dev This function adjusts the heap to maintain the max-heap property after updating the vote count
-    function updateVoteCount(uint256 itemId, uint256 newVoteCount) public {
-        // Find the index of the item in the heap
-        uint256 index = itemIdToIndex[itemId];
+    function updateValue(uint256 itemId, uint256 newValue) public {
+        uint256 position = positionMapping[itemId];
+        uint256 oldValue = valueMapping[itemId];
 
-        // Ensure the item exists in the heap
-        require(index < size, "Item not found in heap");
+        // Update the value in the valueMapping
+        valueMapping[itemId] = newValue;
 
-        // Retrieve the old vote count
-        uint256 oldVoteCount = heap[index].voteCount;
-
-        // Update the vote count in the heap
-        heap[index].voteCount = newVoteCount;
-
-        // Maintain max-heap property
-        if (newVoteCount > oldVoteCount) {
-            // If the new vote count is greater, bubble up
-            uint256 current = index;
-            while (current != 0 && heap[current].voteCount > heap[parent(current)].voteCount) {
-                swap(current, parent(current));
-                current = parent(current);
+        // Decide whether to perform upwards or downwards heapify
+        if (newValue > oldValue) {
+            // Upwards heapify
+            while (position != 0 && valueMapping[heap[position]] > valueMapping[heap[parent(position)]]) {
+                swap(position, parent(position));
+                position = parent(position);
             }
-        } else if (newVoteCount < oldVoteCount) {
-            // If the new vote count is smaller, bubble down
-            maxHeapify(index);
+        } else if (newValue < oldValue) {
+            // Downwards heapify
+            maxHeapify(position);
         }
     }
+
 
 
     /// @notice Extract the maximum element from the heap
@@ -121,11 +119,11 @@ contract MaxHeap {
     function extractMax() public returns (uint256, uint256) {
         require(size > 0, "Heap is empty");
 
-        Item memory popped = heap[0];
+        uint256 popped = heap[0];
         heap[0] = heap[--size];
         maxHeapify(0);
 
-        return (popped.itemId, popped.voteCount);
+        return (popped, valueMapping[popped]);
     }
 
     /// @notice Get the maximum element from the heap
@@ -133,7 +131,7 @@ contract MaxHeap {
     /// @return The maximum element from the heap
     function getMax() public view returns (uint256, uint256) {
         require(size > 0, "Heap is empty");
-        return (heap[0].itemId, heap[0].voteCount);
+        return (heap[0], valueMapping[heap[0]]);
     }
 }
 
@@ -144,6 +142,7 @@ contract MaxHeapTest is MaxHeap {
     /// @param pos The position to set
     /// @param value The value to set at the given position
     function _set(uint256 pos, uint256 itemId, uint256 value) public {
-        heap[pos] = Item(itemId, value);
+        heap[pos] = itemId;
+        valueMapping[itemId] = value;
     }
 }
