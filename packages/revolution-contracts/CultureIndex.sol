@@ -2,14 +2,19 @@
 pragma solidity ^0.8.19;
 
 import { IERC20 } from "./IERC20.sol";
+import { MaxHeap } from "./MaxHeap.sol";
 
 contract CultureIndex {
+    /// @notice The MaxHeap data structure used to keep track of the top-voted piece
+    MaxHeap public maxHeap;
+
     /// @notice The ERC20 token used for voting
     IERC20 public votingToken;
 
     // Initialize ERC20 Token in the constructor
     constructor(address _votingToken) {
         votingToken = IERC20(_votingToken);
+        maxHeap = new MaxHeap(50_000_000_000);
     }
 
     // Add an enum for media types
@@ -51,9 +56,6 @@ contract CultureIndex {
         address voterAddress;
         uint256 weight;
     }
-
-    /// @notice The ID of the top-voted piece
-    uint256 public topVotedPieceId;
 
     /// @notice The list of all pieces
     mapping(uint256 => ArtPiece) public pieces;
@@ -159,6 +161,9 @@ contract CultureIndex {
             newPiece.creators.push(creatorArray[i]);
         }
 
+        /// @dev Insert the new piece into the max heap
+        maxHeap.insert(pieceCount, 0);
+
         emit PieceCreated(pieceCount, msg.sender, metadata.name, metadata.description, metadata.image, metadata.animationUrl);
 
         // Emit an event for each creator
@@ -188,9 +193,8 @@ contract CultureIndex {
         votes[pieceId].push(Voter(msg.sender, weight));
         totalVoteWeights[pieceId] += weight;
 
-        if (totalVoteWeights[pieceId] >= totalVoteWeights[topVotedPieceId]) {
-            topVotedPieceId = pieceId;
-        }
+        // Insert the new vote weight into the max heap
+        maxHeap.insert(pieceId, totalVoteWeights[pieceId]);
 
         emit VoteCast(pieceId, msg.sender, weight);
     }
@@ -218,7 +222,17 @@ contract CultureIndex {
      * @return The ArtPiece struct of the top-voted art piece.
      */
     function getTopVotedPiece() public view returns (ArtPiece memory) {
-        return pieces[topVotedPieceId];
+        (uint256 pieceId, ) = maxHeap.getMax();
+        return pieces[pieceId];
+    }
+
+    /**
+     * @notice Fetch the top-voted pieceId
+     * @return The top-voted pieceId
+     */
+    function topVotedPieceId() public view returns (uint256) {
+        (uint256 pieceId, ) = maxHeap.getMax();
+        return pieceId;
     }
 
     /**
@@ -226,6 +240,7 @@ contract CultureIndex {
      * @return The top voted piece
      */
     function popTopVotedPiece() public returns (ArtPiece memory) {
+        (uint256 topVotedPieceId, ) = maxHeap.extractMax();
         pieces[topVotedPieceId].hasDropped = true;
         return pieces[topVotedPieceId];
     }
