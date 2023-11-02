@@ -5,7 +5,11 @@ pragma solidity ^0.8.19;
 /// @dev This contract implements a Max Heap data structure with basic operations
 /// @author Written by rocketman and gpt4
 contract MaxHeap {
-    mapping(uint256 => uint) public heap;
+    struct Item {
+        uint256 itemId;
+        uint256 voteCount;
+    }
+    mapping(uint256 => Item) public heap;
     uint256 public size = 0;
     uint256 public maxsize;
 
@@ -27,7 +31,7 @@ contract MaxHeap {
     /// @param fpos The position of the first node
     /// @param spos The position of the second node
     function swap(uint256 fpos, uint256 spos) private {
-        uint256 temp = heap[fpos];
+        Item memory temp = heap[fpos];
         heap[fpos] = heap[spos];
         heap[spos] = temp;
     }
@@ -38,15 +42,11 @@ contract MaxHeap {
     function maxHeapify(uint256 pos) public {
         uint256 left = 2 * pos + 1;
         uint256 right = 2 * pos + 2;
-        
-        // Check if the position is a leaf node
+
         if (pos >= (size / 2) && pos <= size) return;
 
-        // Check if the current node is smaller than either of its children
-        if (heap[pos] < heap[left] || heap[pos] < heap[right]) {
-            
-            // Swap with the largest child and recurse
-            if (heap[left] > heap[right]) {
+        if (heap[pos].voteCount < heap[left].voteCount || heap[pos].voteCount < heap[right].voteCount) {
+            if (heap[left].voteCount > heap[right].voteCount) {
                 swap(pos, left);
                 maxHeapify(left);
             } else {
@@ -58,13 +58,16 @@ contract MaxHeap {
 
     /// @notice Insert an element into the heap
     /// @dev The function will revert if the heap is full
-    /// @param element The element to insert
-    function insert(uint256 element) public {
+    /// @param itemId The item ID to insert
+    /// @param voteCount The vote count to insert
+    function insert(uint256 itemId, uint256 voteCount) public {
         require(size < maxsize, "Heap is full");
-        heap[size] = element;
+
+        Item memory newItem = Item(itemId, voteCount);
+        heap[size] = newItem;
 
         uint256 current = size;
-        while (current != 0 && heap[current] > heap[parent(current)]) {
+        while (current != 0 && heap[current].voteCount > heap[parent(current)].voteCount) {
             swap(current, parent(current));
             current = parent(current);
         }
@@ -74,20 +77,22 @@ contract MaxHeap {
     /// @notice Extract the maximum element from the heap
     /// @dev The function will revert if the heap is empty
     /// @return The maximum element from the heap
-    function extractMax() public returns (uint256) {
+    function extractMax() public returns (uint256, uint256) {
         require(size > 0, "Heap is empty");
-        uint256 popped = heap[0];
+
+        Item memory popped = heap[0];
         heap[0] = heap[--size];
         maxHeapify(0);
-        return popped;
+
+        return (popped.itemId, popped.voteCount);
     }
 
     /// @notice Get the maximum element from the heap
     /// @dev The function will revert if the heap is empty
     /// @return The maximum element from the heap
-    function getMax() public view returns (uint256) {
+    function getMax() public view returns (uint256, uint256) {
         require(size > 0, "Heap is empty");
-        return heap[0];
+        return (heap[0].itemId, heap[0].voteCount);
     }
 }
 
@@ -97,7 +102,7 @@ contract MaxHeapTest is MaxHeap {
     /// @notice Function to set a value in the heap (ONLY FOR TESTING)
     /// @param pos The position to set
     /// @param value The value to set at the given position
-    function _set(uint256 pos, uint256 value) public {
-        heap[pos] = value;
+    function _set(uint256 pos, uint256 itemId, uint256 value) public {
+        heap[pos] = Item(itemId, value);
     }
 }

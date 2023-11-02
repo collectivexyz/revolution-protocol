@@ -178,7 +178,7 @@ contract CultureIndex {
         // Most likely to fail should go first
         uint256 weight = votingToken.balanceOf(msg.sender);
         require(weight > 0, "Weight must be greater than zero");
-        
+
         require(pieceId > 0 && pieceId <= pieceCount, "Invalid piece ID");
         require(!hasVoted[pieceId][msg.sender], "Already voted");
         require(!pieces[pieceId].hasDropped, "Dropped piece can not be voted on");
@@ -214,17 +214,17 @@ contract CultureIndex {
     }
 
     /**
-    * @notice Fetch the top-voted art piece.
-    * @return The ArtPiece struct of the top-voted art piece.
-    */
+     * @notice Fetch the top-voted art piece.
+     * @return The ArtPiece struct of the top-voted art piece.
+     */
     function getTopVotedPiece() public view returns (ArtPiece memory) {
         return pieces[topVotedPieceId];
     }
 
     /**
-    * @notice Pulls and drops the top-voted piece.
-    * @return The top voted piece
-    */
+     * @notice Pulls and drops the top-voted piece.
+     * @return The top voted piece
+     */
     function popTopVotedPiece() public returns (ArtPiece memory) {
         pieces[topVotedPieceId].hasDropped = true;
         return pieces[topVotedPieceId];
