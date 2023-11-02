@@ -222,4 +222,28 @@ contract CultureIndexArtPieceTest is Test {
         assertEq(topPieceId, firstPieceId, "Top voted piece should be the first piece");
     }
 
+
+    /// @dev Tests that log gas
+    function testGasForLargeHeapInserts() public {
+        setUp();
+
+        // Insert a large number of items
+        for (uint i = 0; i < 50000; i++) {
+            voter1Test.createDefaultArtPiece();
+        }
+
+        mockVotingToken._mint(address(voter1Test), 100);
+        mockVotingToken._mint(address(voter2Test), 200);
+
+        // Record initial gas
+        uint256 startGas = gasleft();
+        //vote on all pieces
+        for (uint i = 0; i < 50000; i++) {
+            voter1Test.voteForPiece(i+1);
+            voter2Test.voteForPiece(i+1);
+        }
+        // Calculate gas used
+        uint256 gasUsed = startGas - gasleft();
+        emit log_uint(gasUsed);
+    }
 }
