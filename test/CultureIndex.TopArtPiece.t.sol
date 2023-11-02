@@ -158,7 +158,7 @@ contract CultureIndexArtPieceTest is Test {
         voter1Test.voteForPiece(firstPieceId);
 
         CultureIndex.ArtPiece memory topVotedPiece = cultureIndex.getTopVotedPiece();
-        assertEq(topVotedPiece.id, firstPieceId, "Top voted piece should match the voted piece");
+        assertEq(topVotedPiece.pieceId, firstPieceId, "Top voted piece should match the voted piece");
     }
 
     function testCorrectTopVotedPiece() public {
@@ -178,7 +178,7 @@ contract CultureIndexArtPieceTest is Test {
         voter2Test.voteForPiece(secondPieceId);
 
         CultureIndex.ArtPiece memory poppedPiece = cultureIndex.getTopVotedPiece();
-        assertEq(poppedPiece.id, secondPieceId, "Top voted piece should be the second piece");
+        assertEq(poppedPiece.pieceId, secondPieceId, "Top voted piece should be the second piece");
     }
 
     function testPopTopVotedPiece() public {
@@ -189,7 +189,7 @@ contract CultureIndexArtPieceTest is Test {
         voter1Test.voteForPiece(firstPieceId);
 
         CultureIndex.ArtPiece memory poppedPiece = cultureIndex.popTopVotedPiece();
-        assertEq(poppedPiece.id, firstPieceId, "Popped piece should be the first piece");
+        assertEq(poppedPiece.pieceId, firstPieceId, "Popped piece should be the first piece");
     }
 
     function testRemovedPieceShouldBeReplaced() public {
@@ -206,7 +206,7 @@ contract CultureIndexArtPieceTest is Test {
 
         CultureIndex.ArtPiece memory poppedPiece = cultureIndex.popTopVotedPiece();
         //assert its the second piece
-        assertEq(poppedPiece.id, secondPieceId, "Popped piece should be the second piece");
+        assertEq(poppedPiece.pieceId, secondPieceId, "Popped piece should be the second piece");
 
         uint256 topPieceId = cultureIndex.topVotedPieceId();
         assertEq(topPieceId, firstPieceId, "Top voted piece should be the first piece");

@@ -143,7 +143,7 @@ contract CultureIndexArtPieceTest is Test {
             newPieceId
         );
 
-        assertEq(createdPiece.id, newPieceId);
+        assertEq(createdPiece.pieceId, newPieceId);
         assertEq(createdPiece.metadata.name, "Mona Lisa");
         assertEq(createdPiece.metadata.description, "A masterpiece");
         assertEq(createdPiece.metadata.image, "ipfs://legends");
@@ -185,7 +185,7 @@ contract CultureIndexArtPieceTest is Test {
             newPieceId
         );
 
-        assertEq(createdPiece.id, newPieceId);
+        assertEq(createdPiece.pieceId, newPieceId);
         assertEq(createdPiece.metadata.name, "Collaborative Work");
         assertEq(createdPiece.creators[0].creator, address(0x1));
         assertEq(createdPiece.creators[0].bps, 5000);

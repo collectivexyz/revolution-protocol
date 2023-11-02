@@ -45,9 +45,12 @@ contract CultureIndex {
 
     // Struct for art piece
     struct ArtPiece {
-        uint256 id;
+        uint256 pieceId;
         ArtPieceMetadata metadata;
+        // Array of creators with basis points
         CreatorBps[] creators;
+        // Address that dropped the piece
+        address dropper;
     }
 
     // Struct for voter
@@ -73,22 +76,24 @@ contract CultureIndex {
 
     /// @notice The event emitted when a new piece is created
     event PieceCreated(
-        uint256 indexed id,
-        address indexed sender,
+        uint256 indexed pieceId,
+        address indexed dropper,
         string name,
         string description,
         string image,
-        string animationUrl
+        string animationUrl,
+        string text,
+        uint8 mediaType
     );
 
     /// @notice The event emitted when a top-voted piece is dropped
     event TopVotedPieceDropped(uint256 indexed pieceId, address indexed remover);
 
     /// @notice The event emitted when a vote is cast
-    event VoteCast(uint256 indexed pieceId, address indexed voter, uint256 weight);
+    event VoteCast(uint256 indexed pieceId, address indexed voter, uint256 weight, uint256 totalWeight);
 
     /// @notice The events emitted for the respective creators of a piece
-    event PieceCreatorAdded(uint256 indexed id, address indexed creatorAddress, uint256 bps);
+    event PieceCreatorAdded(uint256 indexed pieceId, address indexed creatorAddress, address indexed dropper, uint256 bps);
 
     /**
      * @notice Validates the media type and associated data.
@@ -152,8 +157,9 @@ contract CultureIndex {
         pieceCount++;
         ArtPiece storage newPiece = pieces[pieceCount];
 
-        newPiece.id = pieceCount;
+        newPiece.pieceId = pieceCount;
         newPiece.metadata = metadata;
+        newPiece.dropper = msg.sender;
 
         for (uint i = 0; i < creatorArray.length; i++) {
             newPiece.creators.push(creatorArray[i]);
@@ -162,13 +168,13 @@ contract CultureIndex {
         /// @dev Insert the new piece into the max heap
         maxHeap.insert(pieceCount, 0);
 
-        emit PieceCreated(pieceCount, msg.sender, metadata.name, metadata.description, metadata.image, metadata.animationUrl);
+        emit PieceCreated(pieceCount, msg.sender, metadata.name, metadata.description, metadata.image, metadata.animationUrl, metadata.text, uint8(metadata.mediaType));
 
         // Emit an event for each creator
         for (uint i = 0; i < creatorArray.length; i++) {
-            emit PieceCreatorAdded(pieceCount, creatorArray[i].creator, creatorArray[i].bps);
+            emit PieceCreatorAdded(pieceCount, creatorArray[i].creator, msg.sender, creatorArray[i].bps);
         }
-        return newPiece.id;
+        return newPiece.pieceId;
     }
 
     /**
@@ -193,16 +199,16 @@ contract CultureIndex {
         // Insert the new vote weight into the max heap
         maxHeap.updateValue(pieceId, totalVoteWeights[pieceId]);
 
-        emit VoteCast(pieceId, msg.sender, weight);
+        emit VoteCast(pieceId, msg.sender, weight, totalVoteWeights[pieceId]);
     }
 
     /**
      * @notice Fetch an art piece by its ID.
-     * @param id The ID of the art piece.
+     * @param pieceId The ID of the art piece.
      * @return The ArtPiece struct associated with the given ID.
      */
-    function getPieceById(uint256 id) public view returns (ArtPiece memory) {
-        return pieces[id];
+    function getPieceById(uint256 pieceId) public view returns (ArtPiece memory) {
+        return pieces[pieceId];
     }
 
     /**
@@ -238,6 +244,9 @@ contract CultureIndex {
      */
     function popTopVotedPiece() public returns (ArtPiece memory) {
         (uint256 pieceId, ) = maxHeap.extractMax();
+
+        emit TopVotedPieceDropped(pieceId, msg.sender);
+
         return pieces[pieceId];
     }
 }
