@@ -151,12 +151,15 @@ contract CultureIndex {
      * - The sum of basis points in `creatorArray` must be exactly 10,000.
      */
     function createPiece(ArtPieceMetadata memory metadata, CreatorBps[] memory creatorArray) public returns (uint256) {
+        //Require that creatorArray is not more than 100 to prevent gas limit issues
+        require(creatorArray.length <= 100, "Creator array must not be > 100");
+
         uint256 totalBps = getTotalBpsFromCreators(creatorArray);
         require(totalBps == 10_000, "Total BPS must sum up to 10,000");
 
         // Validate the media type and associated data
         validateMediaType(metadata);
-
+     
         pieceCount++;
         ArtPiece storage newPiece = pieces[pieceCount];
 

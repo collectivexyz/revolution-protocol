@@ -402,4 +402,36 @@ contract CultureIndexArtPieceTest is Test {
             "Piece IDs should be incremented correctly"
         );
     }
+
+    /**
+    * @dev Test case to validate that creatorArray does not exceed 50 in length
+    */
+    function testCreatorArrayLengthConstraint() public {
+        setUp();
+
+        CultureIndex.ArtPieceMetadata memory metadata = CultureIndex
+            .ArtPieceMetadata({
+                name: "Constraint Test",
+                description: "Test Piece",
+                mediaType: CultureIndex.MediaType.IMAGE,
+                image: "ipfs://constraint",
+                text: "",
+                animationUrl: ""
+            });
+
+        // Create a creatorArray with 51 entries
+        CultureIndex.CreatorBps[] memory creators = new CultureIndex.CreatorBps[](101);
+        for (uint i = 0; i < 101; i++) {
+            creators[i] = CultureIndex.CreatorBps({
+                creator: address(0x1), // Unique address for each creator
+                bps: 100 // This doesn't sum up to 10,000 but the test is for array length
+            });
+        }
+
+        try cultureIndex.createPiece(metadata, creators) {
+            fail("Should not be able to create piece with creatorArray length > 100");
+        } catch Error(string memory reason) {
+            assertEq(reason, "Creator array must not be > 100");
+        }
+    }
 }
