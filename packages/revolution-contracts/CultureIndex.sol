@@ -87,7 +87,7 @@ contract CultureIndex {
     );
 
     /// @notice The event emitted when a top-voted piece is dropped
-    event PiecePopped(uint256 indexed pieceId, address indexed remover);
+    event PieceDropped(uint256 indexed pieceId, address indexed remover);
 
     /// @notice The event emitted for each creator added to a piece when it is dropped
     event PieceDroppedCreator(uint256 indexed pieceId, address indexed creatorAddress, address indexed dropper, uint256 bps);
@@ -245,10 +245,10 @@ contract CultureIndex {
      * @notice Pulls and drops the top-voted piece.
      * @return The top voted piece
      */
-    function popTopVotedPiece() public returns (ArtPiece memory) {
+    function dropTopVotedPiece() public returns (ArtPiece memory) {
         (uint256 pieceId, ) = maxHeap.extractMax();
 
-        emit PiecePopped(pieceId, msg.sender);
+        emit PieceDropped(pieceId, msg.sender);
 
         //for each creator, emit an event
         for (uint i = 0; i < pieces[pieceId].creators.length; i++) {

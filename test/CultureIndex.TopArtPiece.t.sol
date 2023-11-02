@@ -188,7 +188,7 @@ contract CultureIndexArtPieceTest is Test {
         mockVotingToken._mint(address(voter1Test), 100);
         voter1Test.voteForPiece(firstPieceId);
 
-        CultureIndex.ArtPiece memory poppedPiece = cultureIndex.popTopVotedPiece();
+        CultureIndex.ArtPiece memory poppedPiece = cultureIndex.dropTopVotedPiece();
         assertEq(poppedPiece.pieceId, firstPieceId, "Popped piece should be the first piece");
     }
 
@@ -204,7 +204,7 @@ contract CultureIndexArtPieceTest is Test {
         voter1Test.voteForPiece(firstPieceId);
         voter2Test.voteForPiece(secondPieceId);
 
-        CultureIndex.ArtPiece memory poppedPiece = cultureIndex.popTopVotedPiece();
+        CultureIndex.ArtPiece memory poppedPiece = cultureIndex.dropTopVotedPiece();
         //assert its the second piece
         assertEq(poppedPiece.pieceId, secondPieceId, "Popped piece should be the second piece");
 
@@ -312,7 +312,7 @@ contract CultureIndexArtPieceTest is Test {
 
         // Pop the top voted piece and log the gas used.
         uint256 startGas = gasleft();
-        cultureIndex.popTopVotedPiece();
+        cultureIndex.dropTopVotedPiece();
         uint256 gasUsed = startGas - gasleft();
         emit log_uint(gasUsed);
 
@@ -325,7 +325,7 @@ contract CultureIndexArtPieceTest is Test {
 
         // Pop the top voted piece and log the gas used.
         startGas = gasleft();
-        cultureIndex.popTopVotedPiece();
+        cultureIndex.dropTopVotedPiece();
         uint256 gasUsed2 = startGas - gasleft();
         emit log_uint(gasUsed2);
 
