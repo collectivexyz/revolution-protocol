@@ -224,7 +224,7 @@ contract CultureIndexArtPieceTest is Test {
 
 
     /// @dev Tests that log gas
-    function testGasForLargeHeapInserts() public {
+    function testGasForLargeVotes() public {
         setUp();
 
         // Insert a large number of items
@@ -235,15 +235,106 @@ contract CultureIndexArtPieceTest is Test {
         mockVotingToken._mint(address(voter1Test), 100);
         mockVotingToken._mint(address(voter2Test), 200);
 
-        // Record initial gas
-        uint256 startGas = gasleft();
         //vote on all pieces
-        for (uint i = 0; i < 50000; i++) {
+        for (uint i = 2; i < 50000; i++) {
             voter1Test.voteForPiece(i+1);
             voter2Test.voteForPiece(i+1);
         }
-        // Calculate gas used
+
+        //vote once and calculate gas used
+        uint256 startGas = gasleft();
+        voter1Test.voteForPiece(1);
         uint256 gasUsed = startGas - gasleft();
         emit log_uint(gasUsed);
+
+        // Insert a large number of items
+        for (uint i = 0; i < 50000; i++) {
+            voter1Test.createDefaultArtPiece();
+        }
+
+        mockVotingToken._mint(address(voter1Test), 100);
+        mockVotingToken._mint(address(voter2Test), 200);
+
+        //vote on all pieces
+        for (uint i = 50_002; i < 100_000; i++) {
+            voter1Test.voteForPiece(i+1);
+            mockVotingToken._mint(address(voter1Test), i);
+            voter2Test.voteForPiece(i+1);
+        }
+
+        //vote once and calculate gas used
+        startGas = gasleft();
+        voter1Test.voteForPiece(50_001);
+        gasUsed = startGas - gasleft();
+        emit log_uint(gasUsed);
     }
+
+    /// @dev Tests the gas used for creating art pieces as the number of items grows.
+    function testGasForCreatingArtPieces() public {
+        setUp();
+
+        //log gas used for creating the first piece
+        uint256 startGas = gasleft();
+        voter1Test.createDefaultArtPiece();
+        uint256 gasUsed = startGas - gasleft();
+        emit log_uint(gasUsed);
+
+
+        // Create a set number of pieces and log the gas used for the last creation.
+        for (uint i = 0; i < 50_000; i++) {
+            if (i == 49_999) {
+                startGas = gasleft();
+                voter1Test.createDefaultArtPiece();
+                gasUsed = startGas - gasleft();
+                emit log_uint(gasUsed);
+            } else {
+                voter1Test.createDefaultArtPiece();
+            }
+        }
+
+        // Create another set of pieces and log the gas used for the last creation.
+        for (uint i = 0; i < 250_000; i++) {
+            if (i == 249_999) {
+                startGas = gasleft();
+                voter1Test.createDefaultArtPiece();
+                gasUsed = startGas - gasleft();
+                emit log_uint(gasUsed);
+            } else {
+                voter1Test.createDefaultArtPiece();
+            }
+        }
+    }
+
+    /// @dev Tests the gas used for popping the top voted piece to ensure constant time operation.
+    function testGasForPopTopVotedPiece() public {
+        setUp();
+
+        // Create and vote on a set number of pieces.
+        for (uint i = 0; i < 50_000; i++) {
+            uint256 pieceId = voter1Test.createDefaultArtPiece();
+            mockVotingToken._mint(address(voter1Test), 100);
+            voter1Test.voteForPiece(pieceId);
+        }
+
+        // Pop the top voted piece and log the gas used.
+        uint256 startGas = gasleft();
+        cultureIndex.popTopVotedPiece();
+        uint256 gasUsed = startGas - gasleft();
+        emit log_uint(gasUsed);
+
+        // Create and vote on another set of pieces.
+        for (uint i = 0; i < 500_000; i++) {
+            uint256 pieceId = voter1Test.createDefaultArtPiece();
+            mockVotingToken._mint(address(voter1Test), 100);
+            voter1Test.voteForPiece(pieceId);
+        }
+
+        // Pop the top voted piece and log the gas used.
+        startGas = gasleft();
+        cultureIndex.popTopVotedPiece();
+        gasUsed = startGas - gasleft();
+        emit log_uint(gasUsed);
+    }
+
+
 }

@@ -194,7 +194,7 @@ contract CultureIndex {
         totalVoteWeights[pieceId] += weight;
 
         // Insert the new vote weight into the max heap
-        maxHeap.updateVoteCount(pieceId, totalVoteWeights[pieceId]);
+        maxHeap.updateValue(pieceId, totalVoteWeights[pieceId]);
 
         emit VoteCast(pieceId, msg.sender, weight);
     }
@@ -240,8 +240,8 @@ contract CultureIndex {
      * @return The top voted piece
      */
     function popTopVotedPiece() public returns (ArtPiece memory) {
-        (uint256 topVotedPieceId, ) = maxHeap.extractMax();
-        pieces[topVotedPieceId].hasDropped = true;
-        return pieces[topVotedPieceId];
+        (uint256 pieceId, ) = maxHeap.extractMax();
+        pieces[pieceId].hasDropped = true;
+        return pieces[pieceId];
     }
 }

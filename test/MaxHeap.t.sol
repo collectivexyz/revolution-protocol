@@ -119,7 +119,8 @@ contract MaxHeapTestSuite is Test {
         maxHeap.insert(4,12);
         maxHeap._set(1, 200,4);  // Assume a '_set' function for testing
         maxHeap.maxHeapify(1);
-        (uint256 itemId, uint256 val) = maxHeap.heap(1);
+        uint256 itemId = maxHeap.heap(1);
+        uint256 val = maxHeap.valueMapping(itemId);
         assertEq(val, 10, "Value should be 10 after heapify");
         assertEq(itemId, 1, "Item ID should be 1 after heapify");
     }
