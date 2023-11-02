@@ -12,6 +12,8 @@ contract MaxHeap {
     mapping(uint256 => Item) public heap;
     uint256 public size = 0;
     uint256 public maxsize;
+    mapping(uint256 => uint256) public itemIdToIndex;
+
 
     /// @notice Constructor to initialize the MaxHeap
     /// @param _maxsize The maximum size of the heap
@@ -34,6 +36,10 @@ contract MaxHeap {
         Item memory temp = heap[fpos];
         heap[fpos] = heap[spos];
         heap[spos] = temp;
+
+        // Update itemId to index mapping
+        itemIdToIndex[heap[fpos].itemId] = fpos;
+        itemIdToIndex[heap[spos].itemId] = spos;
     }
 
     /// @notice Reheapify the heap starting at a given position
@@ -62,9 +68,12 @@ contract MaxHeap {
     /// @param voteCount The vote count to insert
     function insert(uint256 itemId, uint256 voteCount) public {
         require(size < maxsize, "Heap is full");
+        //make sure item hasn't already been inserted
+        require(itemIdToIndex[itemId] == 0, "Item already exists in heap");
 
         Item memory newItem = Item(itemId, voteCount);
         heap[size] = newItem;
+        itemIdToIndex[itemId] = size; // Update the mapping
 
         uint256 current = size;
         while (current != 0 && heap[current].voteCount > heap[parent(current)].voteCount) {
@@ -73,6 +82,38 @@ contract MaxHeap {
         }
         size++;
     }
+
+    /// @notice Update the vote count of an existing item in the heap
+    /// @param itemId The item ID whose vote count needs to be updated
+    /// @param newVoteCount The new vote count for the item
+    /// @dev This function adjusts the heap to maintain the max-heap property after updating the vote count
+    function updateVoteCount(uint256 itemId, uint256 newVoteCount) public {
+        // Find the index of the item in the heap
+        uint256 index = itemIdToIndex[itemId];
+
+        // Ensure the item exists in the heap
+        require(index < size, "Item not found in heap");
+
+        // Retrieve the old vote count
+        uint256 oldVoteCount = heap[index].voteCount;
+
+        // Update the vote count in the heap
+        heap[index].voteCount = newVoteCount;
+
+        // Maintain max-heap property
+        if (newVoteCount > oldVoteCount) {
+            // If the new vote count is greater, bubble up
+            uint256 current = index;
+            while (current != 0 && heap[current].voteCount > heap[parent(current)].voteCount) {
+                swap(current, parent(current));
+                current = parent(current);
+            }
+        } else if (newVoteCount < oldVoteCount) {
+            // If the new vote count is smaller, bubble down
+            maxHeapify(index);
+        }
+    }
+
 
     /// @notice Extract the maximum element from the heap
     /// @dev The function will revert if the heap is empty

@@ -194,7 +194,7 @@ contract CultureIndex {
         totalVoteWeights[pieceId] += weight;
 
         // Insert the new vote weight into the max heap
-        maxHeap.insert(pieceId, totalVoteWeights[pieceId]);
+        maxHeap.updateVoteCount(pieceId, totalVoteWeights[pieceId]);
 
         emit VoteCast(pieceId, msg.sender, weight);
     }
