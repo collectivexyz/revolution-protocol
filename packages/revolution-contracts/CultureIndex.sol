@@ -5,10 +5,10 @@ import { IERC20 } from "./IERC20.sol";
 import { MaxHeap } from "./MaxHeap.sol";
 
 contract CultureIndex {
-    /// @notice The MaxHeap data structure used to keep track of the top-voted piece
+    // The MaxHeap data structure used to keep track of the top-voted piece
     MaxHeap public maxHeap;
 
-    /// @notice The ERC20 token used for voting
+    // The ERC20 token used for voting
     IERC20 public votingToken;
 
     // Initialize ERC20 Token in the constructor
@@ -59,22 +59,22 @@ contract CultureIndex {
         uint256 weight;
     }
 
-    /// @notice The list of all pieces
+    // The list of all pieces
     mapping(uint256 => ArtPiece) public pieces;
 
-    /// @notice The total number of pieces
+    // The total number of pieces
     uint256 public pieceCount;
 
-    /// @notice The list of all votes for a piece
+    // The list of all votes for a piece
     mapping(uint256 => Voter[]) public votes;
 
-    /// @notice The total voting weight for a piece
+    // The total voting weight for a piece
     mapping(uint256 => uint256) public totalVoteWeights;
 
-    /// @notice A mapping to keep track of whether the voter voted for the piece
+    // A mapping to keep track of whether the voter voted for the piece
     mapping(uint256 => mapping(address => bool)) public hasVoted;
 
-    /// @notice The event emitted when a new piece is created
+    // The event emitted when a new piece is created
     event PieceCreated(
         uint256 indexed pieceId,
         address indexed dropper,
@@ -86,20 +86,20 @@ contract CultureIndex {
         uint8 mediaType
     );
 
-    /// @notice The event emitted when a top-voted piece is dropped
+    // The event emitted when a top-voted piece is dropped
     event PieceDropped(uint256 indexed pieceId, address indexed remover);
 
-    /// @notice The event emitted for each creator added to a piece when it is dropped
+    // The event emitted for each creator added to a piece when it is dropped
     event PieceDroppedCreator(uint256 indexed pieceId, address indexed creatorAddress, address indexed dropper, uint256 bps);
 
-    /// @notice The event emitted when a vote is cast
+    // The event emitted when a vote is cast
     event VoteCast(uint256 indexed pieceId, address indexed voter, uint256 weight, uint256 totalWeight);
 
-    /// @notice The events emitted for the respective creators of a piece
+    // The events emitted for the respective creators of a piece
     event PieceCreatorAdded(uint256 indexed pieceId, address indexed creatorAddress, address indexed dropper, uint256 bps);
 
     /**
-     * @notice Validates the media type and associated data.
+     *  Validates the media type and associated data.
      * @param metadata The metadata associated with the art piece.
      *
      * Requirements:
@@ -159,7 +159,7 @@ contract CultureIndex {
 
         // Validate the media type and associated data
         validateMediaType(metadata);
-     
+
         pieceCount++;
         ArtPiece storage newPiece = pieces[pieceCount];
 
@@ -174,7 +174,16 @@ contract CultureIndex {
         /// @dev Insert the new piece into the max heap
         maxHeap.insert(pieceCount, 0);
 
-        emit PieceCreated(pieceCount, msg.sender, metadata.name, metadata.description, metadata.image, metadata.animationUrl, metadata.text, uint8(metadata.mediaType));
+        emit PieceCreated(
+            pieceCount,
+            msg.sender,
+            metadata.name,
+            metadata.description,
+            metadata.image,
+            metadata.animationUrl,
+            metadata.text,
+            uint8(metadata.mediaType)
+        );
 
         // Emit an event for each creator
         for (uint i = 0; i < creatorArray.length; i++) {
@@ -255,7 +264,12 @@ contract CultureIndex {
 
         //for each creator, emit an event
         for (uint i = 0; i < pieces[pieceId].creators.length; i++) {
-            emit PieceDroppedCreator(pieceId, pieces[pieceId].creators[i].creator, pieces[pieceId].dropper, pieces[pieceId].creators[i].bps);
+            emit PieceDroppedCreator(
+                pieceId,
+                pieces[pieceId].creators[i].creator,
+                pieces[pieceId].dropper,
+                pieces[pieceId].creators[i].bps
+            );
         }
 
         return pieces[pieceId];
