@@ -300,7 +300,21 @@ contract CultureIndex {
      * @return The top voted piece
      */
     function dropTopVotedPiece() public returns (ArtPiece memory) {
-        (uint256 pieceId, ) = maxHeap.extractMax();
+        uint256 pieceId;
+        try maxHeap.extractMax() returns (uint256 _pieceId, uint256 _value) {
+            pieceId = _pieceId;
+        } 
+        // Catch known revert reason
+        catch Error(string memory reason) {
+            if (keccak256(abi.encodePacked(reason)) == keccak256(abi.encodePacked("Heap is empty"))) {
+                revert("No pieces available to drop");
+            }
+            revert(reason);  // Revert with the original error if not matched
+        }
+        // Catch any other low-level failures
+        catch (bytes memory /*lowLevelData*/) {
+            revert("Unknown error extracting top piece");
+        }
 
         droppedPiecesMapping[nextDropIndex] = pieceId;
         nextDropIndex++;
