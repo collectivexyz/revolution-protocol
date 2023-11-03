@@ -14,7 +14,7 @@ contract CultureIndex {
     // Initialize ERC20 Token in the constructor
     constructor(address _votingToken) {
         votingToken = IERC20(_votingToken);
-        maxHeap = new MaxHeap(50_000_000_000);
+        maxHeap = new MaxHeap(21_000_000_000);
     }
 
     // Add an enum for media types
@@ -51,6 +51,8 @@ contract CultureIndex {
         CreatorBps[] creators;
         // Address that dropped the piece
         address dropper;
+        // Whether the piece has been dropped
+        bool isDropped;
     }
 
     // Struct for voter
@@ -211,6 +213,7 @@ contract CultureIndex {
 
         require(pieceId > 0 && pieceId <= pieceCount, "Invalid piece ID");
         require(!hasVoted[pieceId][msg.sender], "Already voted");
+        require(!pieces[pieceId].isDropped, "Piece has already been dropped");
 
         // Directly update state variables without reading them into local variables
         hasVoted[pieceId][msg.sender] = true;
@@ -316,9 +319,10 @@ contract CultureIndex {
             revert("Unknown error extracting top piece");
         }
 
+        pieces[pieceId].isDropped = true;
         droppedPiecesMapping[nextDropIndex] = pieceId;
         nextDropIndex++;
-
+        
         emit PieceDropped(pieceId, msg.sender);
 
         //for each creator, emit an event
