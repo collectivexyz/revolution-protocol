@@ -1,5 +1,5 @@
-// SPDX-License-Identifier: MIT
-pragma solidity ^0.8.20;
+// SPDX-License-Identifier: GPL-3.0
+pragma solidity ^0.8.22;
 
 /// @title MaxHeap implementation in Solidity
 /// @dev This contract implements a Max Heap data structure with basic operations
@@ -16,7 +16,6 @@ contract MaxHeap {
 
     /// @notice Mapping to keep track of the position of an item in the heap
     mapping(uint256 => uint256) public positionMapping;
-
 
     /// @notice Constructor to initialize the MaxHeap
     /// @param _maxsize The maximum size of the heap
@@ -110,8 +109,6 @@ contract MaxHeap {
             maxHeapify(position);
         }
     }
-
-
 
     /// @notice Extract the maximum element from the heap
     /// @dev The function will revert if the heap is empty

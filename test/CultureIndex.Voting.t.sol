@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: MIT
-pragma solidity ^0.8.20;
+pragma solidity ^0.8.22;
 
 import {Test} from "forge-std/Test.sol";
 import {CultureIndex} from "../packages/revolution-contracts/CultureIndex.sol";
@@ -307,6 +307,30 @@ contract CultureIndexVotingBasicTest is Test {
         }
     }
 
+    /**
+    * @dev Test case to validate that voting on a dropped piece fails.
+    *
+    * We create a new art piece, drop it, and then try to cast a vote for it.
+    * We expect the vote to fail since the piece has been dropped.
+    */
+    function testCannotVoteOnDroppedPiece() public {
+        setUp();
+
+        uint256 newPieceId = createDefaultArtPiece();
+        mockVotingToken._mint(address(this), 100);
+
+        // Drop the top-voted piece (which should be the new piece)
+        cultureIndex.dropTopVotedPiece();
+
+        // Try to vote for the dropped piece and expect to fail
+        try cultureIndex.vote(newPieceId) {
+            fail("Should not be able to vote on a dropped piece");
+        } catch Error(string memory reason) {
+            assertEq(reason, "Piece has already been dropped");
+        }
+    }
+
+
 
     function voteForPiece(uint256 pieceId) public {
             cultureIndex.vote(pieceId);
@@ -373,4 +397,5 @@ contract CultureIndexVotingTest is Test {
     function voteForPiece(uint256 pieceId) public {
         cultureIndex.vote(pieceId);
     }
+    
 }

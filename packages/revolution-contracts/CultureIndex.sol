@@ -1,20 +1,20 @@
-// SPDX-License-Identifier: MIT
-pragma solidity ^0.8.20;
+// SPDX-License-Identifier: GPL-3.0
+pragma solidity ^0.8.22;
 
 import { IERC20 } from "./IERC20.sol";
 import { MaxHeap } from "./MaxHeap.sol";
 
 contract CultureIndex {
-    /// @notice The MaxHeap data structure used to keep track of the top-voted piece
+    // The MaxHeap data structure used to keep track of the top-voted piece
     MaxHeap public maxHeap;
 
-    /// @notice The ERC20 token used for voting
+    // The ERC20 token used for voting
     IERC20 public votingToken;
 
     // Initialize ERC20 Token in the constructor
     constructor(address _votingToken) {
         votingToken = IERC20(_votingToken);
-        maxHeap = new MaxHeap(50_000_000_000);
+        maxHeap = new MaxHeap(21_000_000_000);
     }
 
     // Add an enum for media types
@@ -51,6 +51,8 @@ contract CultureIndex {
         CreatorBps[] creators;
         // Address that dropped the piece
         address dropper;
+        // Whether the piece has been dropped
+        bool isDropped;
     }
 
     // Struct for voter
@@ -59,22 +61,28 @@ contract CultureIndex {
         uint256 weight;
     }
 
-    /// @notice The list of all pieces
+    // The list of all pieces
     mapping(uint256 => ArtPiece) public pieces;
 
-    /// @notice The total number of pieces
+    // The total number of pieces
     uint256 public pieceCount;
 
-    /// @notice The list of all votes for a piece
+    // The list of all votes for a piece
     mapping(uint256 => Voter[]) public votes;
 
-    /// @notice The total voting weight for a piece
+    // The total voting weight for a piece
     mapping(uint256 => uint256) public totalVoteWeights;
 
-    /// @notice A mapping to keep track of whether the voter voted for the piece
+    // A mapping to keep track of whether the voter voted for the piece
     mapping(uint256 => mapping(address => bool)) public hasVoted;
 
-    /// @notice The event emitted when a new piece is created
+    // The index of the next piece to be dropped
+    uint256 public nextDropIndex = 0;
+
+    // The mapping of dropped pieces to their pieceIds
+    mapping(uint256 => uint256) public droppedPiecesMapping;
+
+    // The event emitted when a new piece is created
     event PieceCreated(
         uint256 indexed pieceId,
         address indexed dropper,
@@ -86,20 +94,20 @@ contract CultureIndex {
         uint8 mediaType
     );
 
-    /// @notice The event emitted when a top-voted piece is dropped
+    // The event emitted when a top-voted piece is dropped
     event PieceDropped(uint256 indexed pieceId, address indexed remover);
 
-    /// @notice The event emitted for each creator added to a piece when it is dropped
+    // The event emitted for each creator added to a piece when it is dropped
     event PieceDroppedCreator(uint256 indexed pieceId, address indexed creatorAddress, address indexed dropper, uint256 bps);
 
-    /// @notice The event emitted when a vote is cast
+    // The event emitted when a vote is cast
     event VoteCast(uint256 indexed pieceId, address indexed voter, uint256 weight, uint256 totalWeight);
 
-    /// @notice The events emitted for the respective creators of a piece
+    // The events emitted for the respective creators of a piece
     event PieceCreatorAdded(uint256 indexed pieceId, address indexed creatorAddress, address indexed dropper, uint256 bps);
 
     /**
-     * @notice Validates the media type and associated data.
+     *  Validates the media type and associated data.
      * @param metadata The metadata associated with the art piece.
      *
      * Requirements:
@@ -159,7 +167,7 @@ contract CultureIndex {
 
         // Validate the media type and associated data
         validateMediaType(metadata);
-     
+
         pieceCount++;
         ArtPiece storage newPiece = pieces[pieceCount];
 
@@ -174,7 +182,16 @@ contract CultureIndex {
         /// @dev Insert the new piece into the max heap
         maxHeap.insert(pieceCount, 0);
 
-        emit PieceCreated(pieceCount, msg.sender, metadata.name, metadata.description, metadata.image, metadata.animationUrl, metadata.text, uint8(metadata.mediaType));
+        emit PieceCreated(
+            pieceCount,
+            msg.sender,
+            metadata.name,
+            metadata.description,
+            metadata.image,
+            metadata.animationUrl,
+            metadata.text,
+            uint8(metadata.mediaType)
+        );
 
         // Emit an event for each creator
         for (uint i = 0; i < creatorArray.length; i++) {
@@ -196,6 +213,7 @@ contract CultureIndex {
 
         require(pieceId > 0 && pieceId <= pieceCount, "Invalid piece ID");
         require(!hasVoted[pieceId][msg.sender], "Already voted");
+        require(!pieces[pieceId].isDropped, "Piece has already been dropped");
 
         // Directly update state variables without reading them into local variables
         hasVoted[pieceId][msg.sender] = true;
@@ -239,9 +257,45 @@ contract CultureIndex {
      * @notice Fetch the top-voted pieceId
      * @return The top-voted pieceId
      */
-    function topVotedPieceId() public view returns (uint256) {
+    function topVotedPieceId() external view returns (uint256) {
         (uint256 pieceId, ) = maxHeap.getMax();
         return pieceId;
+    }
+
+    /**
+     * @notice Get the number of votes for a piece
+     * @param pieceId The ID of the art piece.
+     * @return The number of votes for a piece
+     */
+    function getVoteCount(uint256 pieceId) external view returns (uint256) {
+        return votes[pieceId].length;
+    }
+
+    /**
+     * @notice Fetch the total number of pieces that have been dropped.
+     * @return The total number of pieces that have been dropped.
+     */
+    function getTotalDroppedPieces() public view returns (uint256) {
+        return nextDropIndex;
+    } 
+
+    /**
+     * @notice Fetch a dropped piece by its index.
+     * @return The dropped piece
+     */ 
+    function getDroppedPieceByIndex(uint256 index) public view returns (ArtPiece memory) {
+        uint256 pieceId = droppedPiecesMapping[index];
+        return pieces[pieceId];
+    }
+
+    /**
+     * @notice Fetch the latest dropped piece.
+     * @return The latest dropped piece
+     */
+    function getLatestDroppedPiece() public view returns (ArtPiece memory) {
+        require(nextDropIndex > 0, "No pieces have been dropped yet.");
+        uint256 latestDroppedPieceId = droppedPiecesMapping[nextDropIndex - 1];
+        return pieces[latestDroppedPieceId];
     }
 
     /**
@@ -249,13 +303,36 @@ contract CultureIndex {
      * @return The top voted piece
      */
     function dropTopVotedPiece() public returns (ArtPiece memory) {
-        (uint256 pieceId, ) = maxHeap.extractMax();
+        uint256 pieceId;
+        try maxHeap.extractMax() returns (uint256 _pieceId, uint256 _value) {
+            pieceId = _pieceId;
+        } 
+        // Catch known revert reason
+        catch Error(string memory reason) {
+            if (keccak256(abi.encodePacked(reason)) == keccak256(abi.encodePacked("Heap is empty"))) {
+                revert("No pieces available to drop");
+            }
+            revert(reason);  // Revert with the original error if not matched
+        }
+        // Catch any other low-level failures
+        catch (bytes memory /*lowLevelData*/) {
+            revert("Unknown error extracting top piece");
+        }
 
+        pieces[pieceId].isDropped = true;
+        droppedPiecesMapping[nextDropIndex] = pieceId;
+        nextDropIndex++;
+        
         emit PieceDropped(pieceId, msg.sender);
 
         //for each creator, emit an event
         for (uint i = 0; i < pieces[pieceId].creators.length; i++) {
-            emit PieceDroppedCreator(pieceId, pieces[pieceId].creators[i].creator, pieces[pieceId].dropper, pieces[pieceId].creators[i].bps);
+            emit PieceDroppedCreator(
+                pieceId,
+                pieces[pieceId].creators[i].creator,
+                pieces[pieceId].dropper,
+                pieces[pieceId].creators[i].bps
+            );
         }
 
         return pieces[pieceId];
