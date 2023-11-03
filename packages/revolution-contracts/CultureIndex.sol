@@ -1,5 +1,5 @@
-// SPDX-License-Identifier: MIT
-pragma solidity ^0.8.20;
+// SPDX-License-Identifier: GPL-3.0
+pragma solidity ^0.8.22;
 
 import { IERC20 } from "./IERC20.sol";
 import { MaxHeap } from "./MaxHeap.sol";
@@ -73,6 +73,12 @@ contract CultureIndex {
 
     // A mapping to keep track of whether the voter voted for the piece
     mapping(uint256 => mapping(address => bool)) public hasVoted;
+
+    // The index of the next piece to be dropped
+    uint256 public nextDropIndex = 0;
+
+    // The mapping of dropped pieces to their pieceIds
+    mapping(uint256 => uint256) public droppedPiecesMapping;
 
     // The event emitted when a new piece is created
     event PieceCreated(
@@ -248,9 +254,45 @@ contract CultureIndex {
      * @notice Fetch the top-voted pieceId
      * @return The top-voted pieceId
      */
-    function topVotedPieceId() public view returns (uint256) {
+    function topVotedPieceId() external view returns (uint256) {
         (uint256 pieceId, ) = maxHeap.getMax();
         return pieceId;
+    }
+
+    /**
+     * @notice Get the number of votes for a piece
+     * @param pieceId The ID of the art piece.
+     * @return The number of votes for a piece
+     */
+    function getVoteCount(uint256 pieceId) external view returns (uint256) {
+        return votes[pieceId].length;
+    }
+
+    /**
+     * @notice Fetch the total number of pieces that have been dropped.
+     * @return The total number of pieces that have been dropped.
+     */
+    function getTotalDroppedPieces() public view returns (uint256) {
+        return nextDropIndex;
+    } 
+
+    /**
+     * @notice Fetch a dropped piece by its index.
+     * @return The dropped piece
+     */ 
+    function getDroppedPieceByIndex(uint256 index) public view returns (ArtPiece memory) {
+        uint256 pieceId = droppedPiecesMapping[index];
+        return pieces[pieceId];
+    }
+
+    /**
+     * @notice Fetch the latest dropped piece.
+     * @return The latest dropped piece
+     */
+    function getLatestDroppedPiece() public view returns (ArtPiece memory) {
+        require(nextDropIndex > 0, "No pieces have been dropped yet.");
+        uint256 latestDroppedPieceId = droppedPiecesMapping[nextDropIndex - 1];
+        return pieces[latestDroppedPieceId];
     }
 
     /**
@@ -259,6 +301,9 @@ contract CultureIndex {
      */
     function dropTopVotedPiece() public returns (ArtPiece memory) {
         (uint256 pieceId, ) = maxHeap.extractMax();
+
+        droppedPiecesMapping[nextDropIndex] = pieceId;
+        nextDropIndex++;
 
         emit PieceDropped(pieceId, msg.sender);
 
