@@ -40,6 +40,15 @@ contract VerbsDescriptor is IVerbsDescriptor, Ownable {
     string public override baseURI;
 
     /**
+     * @notice Constructor for the VerbsDescriptor contract.
+     * @param _cultureIndex Address of the CultureIndex contract.
+     */
+    constructor(address _cultureIndex) {
+        require(_cultureIndex != address(0), "CultureIndex address cannot be 0x");
+        cultureIndex = ICultureIndex(_cultureIndex);
+    }
+
+    /**
      * @notice Toggle a boolean value which determines if `tokenURI` returns a data URI
      * or an HTTP URL.
      * @dev This can only be called by the owner.

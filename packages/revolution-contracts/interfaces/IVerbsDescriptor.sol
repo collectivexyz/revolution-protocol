@@ -26,8 +26,6 @@ interface IVerbsDescriptor is IVerbsDescriptorMinimal {
 
     event BaseURIUpdated(string baseURI);
 
-    function arePartsLocked() external returns (bool);
-
     function isDataURIEnabled() external returns (bool);
 
     function baseURI() external returns (string memory);
