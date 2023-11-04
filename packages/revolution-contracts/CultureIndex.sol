@@ -277,12 +277,12 @@ contract CultureIndex {
      */
     function getTotalDroppedPieces() public view returns (uint256) {
         return nextDropIndex;
-    } 
+    }
 
     /**
      * @notice Fetch a dropped piece by its index.
      * @return The dropped piece
-     */ 
+     */
     function getDroppedPieceByIndex(uint256 index) public view returns (ArtPiece memory) {
         uint256 pieceId = droppedPiecesMapping[index];
         return pieces[pieceId];
@@ -306,23 +306,21 @@ contract CultureIndex {
         uint256 pieceId;
         try maxHeap.extractMax() returns (uint256 _pieceId, uint256 _value) {
             pieceId = _pieceId;
-        } 
-        // Catch known revert reason
-        catch Error(string memory reason) {
+        } catch Error(string memory reason) // Catch known revert reason
+        {
             if (keccak256(abi.encodePacked(reason)) == keccak256(abi.encodePacked("Heap is empty"))) {
                 revert("No pieces available to drop");
             }
-            revert(reason);  // Revert with the original error if not matched
-        }
-        // Catch any other low-level failures
-        catch (bytes memory /*lowLevelData*/) {
+            revert(reason); // Revert with the original error if not matched
+        } catch (bytes memory /*lowLevelData*/) // Catch any other low-level failures
+        {
             revert("Unknown error extracting top piece");
         }
 
         pieces[pieceId].isDropped = true;
         droppedPiecesMapping[nextDropIndex] = pieceId;
         nextDropIndex++;
-        
+
         emit PieceDropped(pieceId, msg.sender);
 
         //for each creator, emit an event
