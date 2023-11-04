@@ -19,6 +19,7 @@ pragma solidity ^0.8.22;
 
 import { IERC721 } from "@openzeppelin/contracts/token/ERC721/IERC721.sol";
 import { IVerbsDescriptorMinimal } from "./IVerbsDescriptorMinimal.sol";
+import { ICultureIndex } from "./ICultureIndex.sol";
 
 interface IVerbsToken is IERC721 {
     event VerbCreated(uint256 indexed tokenId);
@@ -33,6 +34,10 @@ interface IVerbsToken is IERC721 {
 
     event DescriptorLocked();
 
+    event CultureIndexUpdated(ICultureIndex cultureIndex);
+
+    event CultureIndexLocked();
+
     function mint() external returns (uint256);
 
     function burn(uint256 tokenId) external;
@@ -46,4 +51,6 @@ interface IVerbsToken is IERC721 {
     function setDescriptor(IVerbsDescriptorMinimal descriptor) external;
 
     function lockDescriptor() external;
+
+    function lockCultureIndex() external;
 }

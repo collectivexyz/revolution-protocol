@@ -9,7 +9,6 @@ import { IERC20 } from "../IERC20.sol";
  * @dev This interface defines the events for the CultureIndex contract.
  */
 interface ICultureIndexEvents {
-    
     /**
      * @dev Emitted when a new piece is created.
      * @param pieceId Unique identifier for the newly created piece.
@@ -59,9 +58,7 @@ interface ICultureIndexEvents {
 
     // The events emitted for the respective creators of a piece
     event PieceCreatorAdded(uint256 indexed pieceId, address indexed creatorAddress, address indexed dropper, uint256 bps);
-
 }
-
 
 /**
  * @title ICultureIndex

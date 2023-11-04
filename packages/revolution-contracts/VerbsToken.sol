@@ -20,6 +20,7 @@ pragma solidity ^0.8.22;
 import { Ownable } from "@openzeppelin/contracts/access/Ownable.sol";
 import { ERC721Checkpointable } from "./base/ERC721Checkpointable.sol";
 import { IVerbsDescriptorMinimal } from "./interfaces/IVerbsDescriptorMinimal.sol";
+import { ICultureIndex } from "./interfaces/ICultureIndex.sol";
 import { IVerbsToken } from "./interfaces/IVerbsToken.sol";
 import { ERC721 } from "./base/ERC721.sol";
 import { IERC721 } from "@openzeppelin/contracts/token/ERC721/IERC721.sol";
@@ -32,8 +33,14 @@ contract VerbsToken is IVerbsToken, Ownable, ERC721Checkpointable {
     // The Verbs token URI descriptor
     IVerbsDescriptorMinimal public descriptor;
 
+    // The CultureIndex contract
+    ICultureIndex public cultureIndex;
+
     // Whether the minter can be updated
     bool public isMinterLocked;
+
+    // Whether the CultureIndex can be updated
+    bool public isCultureIndexLocked;
 
     // Whether the descriptor can be updated
     bool public isDescriptorLocked;
@@ -56,6 +63,14 @@ contract VerbsToken is IVerbsToken, Ownable, ERC721Checkpointable {
     }
 
     /**
+     * @notice Require that the CultureIndex has not been locked.
+     */
+    modifier whenCultureIndexNotLocked() {
+        require(!isCultureIndexLocked, "CultureIndex is locked");
+        _;
+    }
+
+    /**
      * @notice Require that the descriptor has not been locked.
      */
     modifier whenDescriptorNotLocked() {
@@ -71,9 +86,10 @@ contract VerbsToken is IVerbsToken, Ownable, ERC721Checkpointable {
         _;
     }
 
-    constructor(address _minter, IVerbsDescriptorMinimal _descriptor, IProxyRegistry _proxyRegistry) ERC721("Verbs", "VERB") {
+    constructor(address _minter, IVerbsDescriptorMinimal _descriptor, IProxyRegistry _proxyRegistry, ICultureIndex _cultureIndex) ERC721("Verbs", "VERB") {
         minter = _minter;
         descriptor = _descriptor;
+        cultureIndex = _cultureIndex;
         proxyRegistry = _proxyRegistry;
     }
 
@@ -175,6 +191,26 @@ contract VerbsToken is IVerbsToken, Ownable, ERC721Checkpointable {
         isDescriptorLocked = true;
 
         emit DescriptorLocked();
+    }
+
+    /**
+     * @notice Set the token CultureIndex.
+     * @dev Only callable by the owner when not locked.
+     */
+    function setCultureIndex(ICultureIndex _cultureIndex) external override onlyOwner whenCultureIndexNotLocked {
+        cultureIndex = _cultureIndex;
+
+        emit CultureIndexUpdated(_cultureIndex);
+    }
+
+    /**
+     * @notice Lock the CultureIndex
+     * @dev This cannot be reversed and is only callable by the owner when not locked.
+     */
+    function lockCultureIndex() external override onlyOwner whenCultureIndexNotLocked {
+        isCultureIndexLocked = true;
+
+        emit CultureIndexLocked();
     }
 
     /**

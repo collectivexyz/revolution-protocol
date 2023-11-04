@@ -21,13 +21,9 @@ import { Ownable } from "@openzeppelin/contracts/access/Ownable.sol";
 import { Strings } from "@openzeppelin/contracts/utils/Strings.sol";
 import { IVerbsDescriptor } from "./interfaces/IVerbsDescriptor.sol";
 import { NFTDescriptor } from "./libs/NFTDescriptor.sol";
-import { ICultureIndex } from "./interfaces/ICultureIndex.sol";
 
 contract VerbsDescriptor is IVerbsDescriptor, Ownable {
     using Strings for uint256;
-
-    // The CultureIndex contract
-    ICultureIndex public cultureIndex;
 
     // prettier-ignore
     // https://creativecommons.org/publicdomain/zero/1.0/legalcode.txt
@@ -38,15 +34,6 @@ contract VerbsDescriptor is IVerbsDescriptor, Ownable {
 
     // Base URI
     string public override baseURI;
-
-    /**
-     * @notice Constructor for the VerbsDescriptor contract.
-     * @param _cultureIndex Address of the CultureIndex contract.
-     */
-    constructor(address _cultureIndex) {
-        require(_cultureIndex != address(0), "CultureIndex address cannot be 0x");
-        cultureIndex = ICultureIndex(_cultureIndex);
-    }
 
     /**
      * @notice Toggle a boolean value which determines if `tokenURI` returns a data URI
