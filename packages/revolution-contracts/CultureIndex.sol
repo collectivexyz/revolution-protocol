@@ -39,30 +39,6 @@ contract CultureIndex is ICultureIndex {
     // The mapping of dropped pieces to their pieceIds
     mapping(uint256 => uint256) public droppedPiecesMapping;
 
-    // The event emitted when a new piece is created
-    event PieceCreated(
-        uint256 indexed pieceId,
-        address indexed dropper,
-        string name,
-        string description,
-        string image,
-        string animationUrl,
-        string text,
-        uint8 mediaType
-    );
-
-    // The event emitted when a top-voted piece is dropped
-    event PieceDropped(uint256 indexed pieceId, address indexed remover);
-
-    // The event emitted for each creator added to a piece when it is dropped
-    event PieceDroppedCreator(uint256 indexed pieceId, address indexed creatorAddress, address indexed dropper, uint256 bps);
-
-    // The event emitted when a vote is cast
-    event VoteCast(uint256 indexed pieceId, address indexed voter, uint256 weight, uint256 totalWeight);
-
-    // The events emitted for the respective creators of a piece
-    event PieceCreatorAdded(uint256 indexed pieceId, address indexed creatorAddress, address indexed dropper, uint256 bps);
-
     /**
      *  Validates the media type and associated data.
      * @param metadata The metadata associated with the art piece.
