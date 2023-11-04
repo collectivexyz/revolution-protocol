@@ -54,6 +54,9 @@ contract VerbsToken is IVerbsToken, Ownable, ERC721Checkpointable {
     // OpenSea's Proxy Registry
     IProxyRegistry public immutable proxyRegistry;
 
+    // The Verb art pieces
+    mapping(uint256 => ICultureIndex.ArtPiece) public artPieces;
+
     /**
      * @notice Require that the minter has not been locked.
      */
@@ -217,9 +220,11 @@ contract VerbsToken is IVerbsToken, Ownable, ERC721Checkpointable {
      * @notice Mint a Verb with `verbId` to the provided `to` address.
      */
     function _mintTo(address to, uint256 verbId) internal returns (uint256) {
+        ICultureIndex.ArtPiece memory artPiece = artPieces[verbId] = cultureIndex.droppedPiecesMapping(verbId);
+
         _mint(owner(), to, verbId);
 
-        emit VerbCreated(verbId);
+        emit VerbCreated(verbId, artPiece);
 
         return verbId;
     }

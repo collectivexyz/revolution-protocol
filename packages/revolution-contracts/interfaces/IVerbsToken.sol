@@ -22,7 +22,7 @@ import { IVerbsDescriptorMinimal } from "./IVerbsDescriptorMinimal.sol";
 import { ICultureIndex } from "./ICultureIndex.sol";
 
 interface IVerbsToken is IERC721 {
-    event VerbCreated(uint256 indexed tokenId);
+    event VerbCreated(uint256 indexed tokenId, ICultureIndex.ArtPiece artPiece);
 
     event VerbBurned(uint256 indexed tokenId);
 
