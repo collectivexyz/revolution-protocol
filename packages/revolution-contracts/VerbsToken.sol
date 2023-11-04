@@ -15,7 +15,7 @@
  * ░░░░░░░░░░░░░░░░░░░░░░░░░░░░░ *
  *********************************/
 
-pragma solidity ^0.8.6;
+pragma solidity ^0.8.22;
 
 import { Ownable } from "@openzeppelin/contracts/access/Ownable.sol";
 import { ERC721Checkpointable } from "./base/ERC721Checkpointable.sol";
@@ -55,7 +55,7 @@ contract VerbsToken is IVerbsToken, Ownable, ERC721Checkpointable {
     uint256 private _currentVerbId;
 
     // IPFS content hash of contract-level metadata
-    string private _contractURIHash = "QmZi1n79FqWt2tTLwCqiy6nLM6xLGRsEPQ5JmReJQKNNzX";
+    string private _contractURIHash = "QmQzDwaZ7yQxHHs7sQQenJVB89riTSacSGcJRv9jtHPuz5";
 
     // OpenSea's Proxy Registry
     IProxyRegistry public immutable proxyRegistry;
