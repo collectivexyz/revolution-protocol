@@ -45,9 +45,6 @@ contract VerbsToken is IVerbsToken, Ownable, ERC721Checkpointable {
     // Whether the descriptor can be updated
     bool public isDescriptorLocked;
 
-    // The internal verb ID tracker
-    uint256 private _currentVerbId;
-
     // IPFS content hash of contract-level metadata
     string private _contractURIHash = "QmQzDwaZ7yQxHHs7sQQenJVB89riTSacSGcJRv9jtHPuz5";
 
@@ -127,7 +124,7 @@ contract VerbsToken is IVerbsToken, Ownable, ERC721Checkpointable {
      * @dev Call _mintTo with the to address(es).
      */
     function mint() public override onlyMinter returns (uint256) {
-        return _mintTo(minter, _currentVerbId++);
+        return _mintTo(minter);
     }
 
     /**
@@ -219,8 +216,12 @@ contract VerbsToken is IVerbsToken, Ownable, ERC721Checkpointable {
     /**
      * @notice Mint a Verb with `verbId` to the provided `to` address.
      */
-    function _mintTo(address to, uint256 verbId) internal returns (uint256) {
-        ICultureIndex.ArtPiece memory artPiece = artPieces[verbId] = cultureIndex.droppedPiecesMapping(verbId);
+    function _mintTo(address to) internal returns (uint256) {
+        ICultureIndex.ArtPiece memory artPiece = cultureIndex.dropTopVotedPiece();
+
+        uint256 verbId = artPiece.pieceId;
+
+        artPieces[verbId] = artPiece;
 
         _mint(owner(), to, verbId);
 
