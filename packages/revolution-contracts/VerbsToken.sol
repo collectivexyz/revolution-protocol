@@ -71,11 +71,7 @@ contract VerbsToken is IVerbsToken, Ownable, ERC721Checkpointable {
         _;
     }
 
-    constructor(
-        address _minter,
-        IVerbsDescriptorMinimal _descriptor,
-        IProxyRegistry _proxyRegistry
-    ) ERC721("Verbs", "VERB") {
+    constructor(address _minter, IVerbsDescriptorMinimal _descriptor, IProxyRegistry _proxyRegistry) ERC721("Verbs", "VERB") {
         minter = _minter;
         descriptor = _descriptor;
         proxyRegistry = _proxyRegistry;
@@ -180,7 +176,7 @@ contract VerbsToken is IVerbsToken, Ownable, ERC721Checkpointable {
 
         emit DescriptorLocked();
     }
-    
+
     /**
      * @notice Mint a Verb with `verbId` to the provided `to` address.
      */

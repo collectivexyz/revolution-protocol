@@ -5,6 +5,7 @@ import {Test} from "forge-std/Test.sol";
 import {CultureIndex} from "../packages/revolution-contracts/CultureIndex.sol";
 import {MockERC20} from "./MockERC20.sol";
 import {CultureIndexVotingTest} from "./CultureIndex.Voting.t.sol";
+import {ICultureIndex} from "../packages/revolution-contracts/interfaces/ICultureIndex.sol";
 
 /**
  * @title CultureIndexArtPieceTest
@@ -30,12 +31,12 @@ contract CultureIndexArtPieceTest is Test {
     function createArtPieceMetadata(
         string memory name,
         string memory description,
-        CultureIndex.MediaType mediaType,
+        ICultureIndex.MediaType mediaType,
         string memory image,
         string memory text,
         string memory animationUrl
     ) public pure returns (CultureIndex.ArtPieceMetadata memory) { // <-- Change visibility and mutability as needed
-        CultureIndex.ArtPieceMetadata memory metadata = CultureIndex
+        ICultureIndex.ArtPieceMetadata memory metadata = ICultureIndex
             .ArtPieceMetadata({
                 name: name,
                 description: description,
@@ -53,9 +54,9 @@ contract CultureIndexArtPieceTest is Test {
         address creatorAddress,
         uint256 creatorBps
     ) public pure returns (CultureIndex.CreatorBps[] memory) { // <-- Change visibility and mutability as needed
-        CultureIndex.CreatorBps[]
-            memory creators = new CultureIndex.CreatorBps[](1);
-        creators[0] = CultureIndex.CreatorBps({
+        ICultureIndex.CreatorBps[]
+            memory creators = new ICultureIndex.CreatorBps[](1);
+        creators[0] = ICultureIndex.CreatorBps({
             creator: creatorAddress,
             bps: creatorBps
         });
@@ -67,14 +68,14 @@ contract CultureIndexArtPieceTest is Test {
     function createArtPieceTuple(
         string memory name,
         string memory description,
-        CultureIndex.MediaType mediaType,
+        ICultureIndex.MediaType mediaType,
         string memory image,
         string memory text,
         string memory animationUrl,
         address creatorAddress,
         uint256 creatorBps
-    ) public pure returns (CultureIndex.ArtPieceMetadata memory, CultureIndex.CreatorBps[] memory) { // <-- Change here
-        CultureIndex.ArtPieceMetadata memory metadata = createArtPieceMetadata(
+    ) public pure returns (CultureIndex.ArtPieceMetadata memory, ICultureIndex.CreatorBps[] memory) { // <-- Change here
+        ICultureIndex.ArtPieceMetadata memory metadata = createArtPieceMetadata(
             name,
             description,
             mediaType,
@@ -83,7 +84,7 @@ contract CultureIndexArtPieceTest is Test {
             animationUrl
         );
 
-        CultureIndex.CreatorBps[] memory creators = createArtPieceCreators(
+        ICultureIndex.CreatorBps[] memory creators = createArtPieceCreators(
             creatorAddress,
             creatorBps
         );
@@ -95,7 +96,7 @@ contract CultureIndexArtPieceTest is Test {
     function createArtPiece(
         string memory name,
         string memory description,
-        CultureIndex.MediaType mediaType,
+        ICultureIndex.MediaType mediaType,
         string memory image,
         string memory text,
         string memory animationUrl,
@@ -103,7 +104,7 @@ contract CultureIndexArtPieceTest is Test {
         uint256 creatorBps
     ) public returns (uint256) { // <-- Change here
         //use createArtPieceTuple to create metadata and creators
-        (CultureIndex.ArtPieceMetadata memory metadata, CultureIndex.CreatorBps[] memory creators) = createArtPieceTuple(
+        (CultureIndex.ArtPieceMetadata memory metadata, ICultureIndex.CreatorBps[] memory creators) = createArtPieceTuple(
             name,
             description,
             mediaType,
@@ -157,7 +158,7 @@ contract CultureIndexArtPieceTest is Test {
         // Vote for the first piece
         voter1Test.voteForPiece(firstPieceId);
 
-        CultureIndex.ArtPiece memory topVotedPiece = cultureIndex.getTopVotedPiece();
+        ICultureIndex.ArtPiece memory topVotedPiece = cultureIndex.getTopVotedPiece();
         assertEq(topVotedPiece.pieceId, firstPieceId, "Top voted piece should match the voted piece");
     }
 
@@ -177,7 +178,7 @@ contract CultureIndexArtPieceTest is Test {
         // Vote for the second piece with voter2
         voter2Test.voteForPiece(secondPieceId);
 
-        CultureIndex.ArtPiece memory poppedPiece = cultureIndex.getTopVotedPiece();
+        ICultureIndex.ArtPiece memory poppedPiece = cultureIndex.getTopVotedPiece();
         assertEq(poppedPiece.pieceId, secondPieceId, "Top voted piece should be the second piece");
     }
 
@@ -188,7 +189,7 @@ contract CultureIndexArtPieceTest is Test {
         mockVotingToken._mint(address(voter1Test), 100);
         voter1Test.voteForPiece(firstPieceId);
 
-        CultureIndex.ArtPiece memory poppedPiece = cultureIndex.dropTopVotedPiece();
+        ICultureIndex.ArtPiece memory poppedPiece = cultureIndex.dropTopVotedPiece();
         assertEq(poppedPiece.pieceId, firstPieceId, "Popped piece should be the first piece");
     }
 
@@ -204,7 +205,7 @@ contract CultureIndexArtPieceTest is Test {
         voter1Test.voteForPiece(firstPieceId);
         voter2Test.voteForPiece(secondPieceId);
 
-        CultureIndex.ArtPiece memory poppedPiece = cultureIndex.dropTopVotedPiece();
+        ICultureIndex.ArtPiece memory poppedPiece = cultureIndex.dropTopVotedPiece();
         //assert its the second piece
         assertEq(poppedPiece.pieceId, secondPieceId, "Popped piece should be the second piece");
 
@@ -373,7 +374,7 @@ contract CultureIndexArtPieceTest is Test {
         cultureIndex.dropTopVotedPiece();
 
         // Fetch by index and verify
-        CultureIndex.ArtPiece memory droppedPiece = cultureIndex.getDroppedPieceByIndex(0);
+        ICultureIndex.ArtPiece memory droppedPiece = cultureIndex.getDroppedPieceByIndex(0);
         assertEq(droppedPiece.pieceId, pieceId, "Dropped piece should match the created piece");
     }
 
@@ -394,7 +395,7 @@ contract CultureIndexArtPieceTest is Test {
         cultureIndex.dropTopVotedPiece();
         
         // Verify the latest dropped piece
-        CultureIndex.ArtPiece memory latestDroppedPiece = cultureIndex.getLatestDroppedPiece();
+        ICultureIndex.ArtPiece memory latestDroppedPiece = cultureIndex.getLatestDroppedPiece();
         assertEq(latestDroppedPiece.pieceId, pieceId2, "Latest dropped piece should be pieceId2");
 
         // Drop another piece and verify again

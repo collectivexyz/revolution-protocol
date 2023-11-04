@@ -3,8 +3,9 @@ pragma solidity ^0.8.22;
 
 import { IERC20 } from "./IERC20.sol";
 import { MaxHeap } from "./MaxHeap.sol";
+import { ICultureIndex } from "./interfaces/ICultureIndex.sol";
 
-contract CultureIndex {
+contract CultureIndex is ICultureIndex {
     // The MaxHeap data structure used to keep track of the top-voted piece
     MaxHeap public maxHeap;
 
@@ -15,50 +16,6 @@ contract CultureIndex {
     constructor(address _votingToken) {
         votingToken = IERC20(_votingToken);
         maxHeap = new MaxHeap(21_000_000_000);
-    }
-
-    // Add an enum for media types
-    enum MediaType {
-        NONE,
-        IMAGE,
-        ANIMATION,
-        AUDIO,
-        TEXT,
-        OTHER
-    }
-
-    // Struct for art piece metadata
-    struct ArtPieceMetadata {
-        string name;
-        string description;
-        MediaType mediaType;
-        string image; // optional
-        string text; // optional
-        string animationUrl; // optional
-    }
-
-    // Struct for creator with basis points
-    struct CreatorBps {
-        address creator;
-        uint256 bps; // Basis points, must sum up to 10,000 for each ArtPiece
-    }
-
-    // Struct for art piece
-    struct ArtPiece {
-        uint256 pieceId;
-        ArtPieceMetadata metadata;
-        // Array of creators with basis points
-        CreatorBps[] creators;
-        // Address that dropped the piece
-        address dropper;
-        // Whether the piece has been dropped
-        bool isDropped;
-    }
-
-    // Struct for voter
-    struct Voter {
-        address voterAddress;
-        uint256 weight;
     }
 
     // The list of all pieces
@@ -182,16 +139,7 @@ contract CultureIndex {
         /// @dev Insert the new piece into the max heap
         maxHeap.insert(pieceCount, 0);
 
-        emit PieceCreated(
-            pieceCount,
-            msg.sender,
-            metadata.name,
-            metadata.description,
-            metadata.image,
-            metadata.animationUrl,
-            metadata.text,
-            uint8(metadata.mediaType)
-        );
+        emit PieceCreated(pieceCount, msg.sender, metadata.name, metadata.description, metadata.image, metadata.animationUrl, metadata.text, uint8(metadata.mediaType));
 
         // Emit an event for each creator
         for (uint i = 0; i < creatorArray.length; i++) {
@@ -283,7 +231,7 @@ contract CultureIndex {
      * @notice Fetch a dropped piece by its index.
      * @return The dropped piece
      */
-    function getDroppedPieceByIndex(uint256 index) public view returns (ArtPiece memory) {
+    function getDroppedPieceByIndex(uint256 index) external view returns (ArtPiece memory) {
         uint256 pieceId = droppedPiecesMapping[index];
         return pieces[pieceId];
     }
@@ -306,14 +254,16 @@ contract CultureIndex {
         uint256 pieceId;
         try maxHeap.extractMax() returns (uint256 _pieceId, uint256 _value) {
             pieceId = _pieceId;
-        } catch Error(string memory reason) // Catch known revert reason
-        {
+        } catch Error(
+            string memory reason // Catch known revert reason
+        ) {
             if (keccak256(abi.encodePacked(reason)) == keccak256(abi.encodePacked("Heap is empty"))) {
                 revert("No pieces available to drop");
             }
             revert(reason); // Revert with the original error if not matched
-        } catch (bytes memory /*lowLevelData*/) // Catch any other low-level failures
-        {
+        } catch (
+            bytes memory /*lowLevelData*/ // Catch any other low-level failures
+        ) {
             revert("Unknown error extracting top piece");
         }
 
@@ -325,12 +275,7 @@ contract CultureIndex {
 
         //for each creator, emit an event
         for (uint i = 0; i < pieces[pieceId].creators.length; i++) {
-            emit PieceDroppedCreator(
-                pieceId,
-                pieces[pieceId].creators[i].creator,
-                pieces[pieceId].dropper,
-                pieces[pieceId].creators[i].bps
-            );
+            emit PieceDroppedCreator(pieceId, pieces[pieceId].creators[i].creator, pieces[pieceId].dropper, pieces[pieceId].creators[i].bps);
         }
 
         return pieces[pieceId];

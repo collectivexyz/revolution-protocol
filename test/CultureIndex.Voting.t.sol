@@ -4,6 +4,7 @@ pragma solidity ^0.8.22;
 import {Test} from "forge-std/Test.sol";
 import {CultureIndex} from "../packages/revolution-contracts/CultureIndex.sol";
 import {MockERC20} from "./MockERC20.sol";
+import {ICultureIndex} from "../packages/revolution-contracts/interfaces/ICultureIndex.sol";
 
 /**
  * @title CultureIndexTest
@@ -35,7 +36,7 @@ contract CultureIndexVotingBasicTest is Test {
         uint256 newPieceId = createArtPiece(
             "Mona Lisa",
             "A masterpiece",
-            CultureIndex.MediaType.IMAGE,
+            ICultureIndex.MediaType.IMAGE,
             "ipfs://legends",
             "",
             "",
@@ -50,7 +51,7 @@ contract CultureIndexVotingBasicTest is Test {
         cultureIndex.vote(newPieceId);
 
         // Validate the vote
-        CultureIndex.Voter[] memory pieceVotes = cultureIndex.getVotes(
+        ICultureIndex.Voter[] memory pieceVotes = cultureIndex.getVotes(
             newPieceId
         );
         uint256 totalVoteWeight = cultureIndex.totalVoteWeights(newPieceId);
@@ -76,7 +77,7 @@ contract CultureIndexVotingBasicTest is Test {
         uint256 newPieceId = createArtPiece(
             "Mona Lisa",
             "A masterpiece",
-            CultureIndex.MediaType.IMAGE,
+            ICultureIndex.MediaType.IMAGE,
             "ipfs://legends",
             "",
             "",
@@ -109,7 +110,7 @@ contract CultureIndexVotingBasicTest is Test {
         uint256 newPieceId = createArtPiece(
             "Starry Night",
             "A masterpiece",
-            CultureIndex.MediaType.IMAGE,
+            ICultureIndex.MediaType.IMAGE,
             "ipfs://legends",
             "",
             "",
@@ -136,7 +137,7 @@ contract CultureIndexVotingBasicTest is Test {
         uint256 firstPieceId = createArtPiece(
             "Mona Lisa",
             "A masterpiece",
-            CultureIndex.MediaType.IMAGE,
+            ICultureIndex.MediaType.IMAGE,
             "ipfs://legends",
             "",
             "",
@@ -147,7 +148,7 @@ contract CultureIndexVotingBasicTest is Test {
         uint256 secondPieceId = createArtPiece(
             "Starry Night",
             "Another masterpiece",
-            CultureIndex.MediaType.IMAGE,
+            ICultureIndex.MediaType.IMAGE,
             "ipfs://starrynight",
             "",
             "",
@@ -190,7 +191,7 @@ contract CultureIndexVotingBasicTest is Test {
         uint256 firstPieceId = createArtPiece(
             "Mona Lisa",
             "A masterpiece",
-            CultureIndex.MediaType.IMAGE,
+            ICultureIndex.MediaType.IMAGE,
             "ipfs://legends",
             "",
             "",
@@ -201,7 +202,7 @@ contract CultureIndexVotingBasicTest is Test {
         uint256 secondPieceId = createArtPiece(
             "Starry Night",
             "Another masterpiece",
-            CultureIndex.MediaType.IMAGE,
+            ICultureIndex.MediaType.IMAGE,
             "ipfs://starrynight",
             "",
             "",
@@ -232,14 +233,14 @@ contract CultureIndexVotingBasicTest is Test {
     function createArtPiece(
         string memory name,
         string memory description,
-        CultureIndex.MediaType mediaType,
+        ICultureIndex.MediaType mediaType,
         string memory image,
         string memory text,
         string memory animationUrl,
         address creatorAddress,
         uint256 creatorBps
     ) internal returns (uint256) {
-        CultureIndex.ArtPieceMetadata memory metadata = CultureIndex
+        ICultureIndex.ArtPieceMetadata memory metadata = ICultureIndex
             .ArtPieceMetadata({
                 name: name,
                 description: description,
@@ -249,9 +250,9 @@ contract CultureIndexVotingBasicTest is Test {
                 animationUrl: animationUrl
             });
 
-        CultureIndex.CreatorBps[]
-            memory creators = new CultureIndex.CreatorBps[](1);
-        creators[0] = CultureIndex.CreatorBps({
+        ICultureIndex.CreatorBps[]
+            memory creators = new ICultureIndex.CreatorBps[](1);
+        creators[0] = ICultureIndex.CreatorBps({
             creator: creatorAddress,
             bps: creatorBps
         });
@@ -264,7 +265,7 @@ contract CultureIndexVotingBasicTest is Test {
         return createArtPiece(
             "Mona Lisa",
             "A masterpiece",
-            CultureIndex.MediaType.IMAGE,
+            ICultureIndex.MediaType.IMAGE,
             "ipfs://legends",
             "",
             "",
@@ -353,14 +354,14 @@ contract CultureIndexVotingTest is Test {
     function createArtPiece(
         string memory name,
         string memory description,
-        CultureIndex.MediaType mediaType,
+        ICultureIndex.MediaType mediaType,
         string memory image,
         string memory text,
         string memory animationUrl,
         address creatorAddress,
         uint256 creatorBps
     ) internal returns (uint256) {
-        CultureIndex.ArtPieceMetadata memory metadata = CultureIndex
+        ICultureIndex.ArtPieceMetadata memory metadata = ICultureIndex
             .ArtPieceMetadata({
                 name: name,
                 description: description,
@@ -370,9 +371,9 @@ contract CultureIndexVotingTest is Test {
                 animationUrl: animationUrl
             });
 
-        CultureIndex.CreatorBps[]
-            memory creators = new CultureIndex.CreatorBps[](1);
-        creators[0] = CultureIndex.CreatorBps({
+        ICultureIndex.CreatorBps[]
+            memory creators = new ICultureIndex.CreatorBps[](1);
+        creators[0] = ICultureIndex.CreatorBps({
             creator: creatorAddress,
             bps: creatorBps
         });
@@ -385,7 +386,7 @@ contract CultureIndexVotingTest is Test {
         return createArtPiece(
             "Mona Lisa",
             "A masterpiece",
-            CultureIndex.MediaType.IMAGE,
+            ICultureIndex.MediaType.IMAGE,
             "ipfs://legends",
             "",
             "",

@@ -4,6 +4,7 @@ pragma solidity ^0.8.22;
 import {Test} from "forge-std/Test.sol";
 import {CultureIndex} from "../packages/revolution-contracts/CultureIndex.sol";
 import {MockERC20} from "./MockERC20.sol";
+import {ICultureIndex} from "../packages/revolution-contracts/interfaces/ICultureIndex.sol";
 
 /**
  * @title CultureIndexArtPieceTest
@@ -28,12 +29,12 @@ contract CultureIndexArtPieceTest is Test {
     function createArtPieceMetadata(
         string memory name,
         string memory description,
-        CultureIndex.MediaType mediaType,
+        ICultureIndex.MediaType mediaType,
         string memory image,
         string memory text,
         string memory animationUrl
     ) public pure returns (CultureIndex.ArtPieceMetadata memory) { // <-- Change visibility and mutability as needed
-        CultureIndex.ArtPieceMetadata memory metadata = CultureIndex
+        ICultureIndex.ArtPieceMetadata memory metadata = ICultureIndex
             .ArtPieceMetadata({
                 name: name,
                 description: description,
@@ -51,9 +52,9 @@ contract CultureIndexArtPieceTest is Test {
         address creatorAddress,
         uint256 creatorBps
     ) public pure returns (CultureIndex.CreatorBps[] memory) { // <-- Change visibility and mutability as needed
-        CultureIndex.CreatorBps[]
-            memory creators = new CultureIndex.CreatorBps[](1);
-        creators[0] = CultureIndex.CreatorBps({
+        ICultureIndex.CreatorBps[]
+            memory creators = new ICultureIndex.CreatorBps[](1);
+        creators[0] = ICultureIndex.CreatorBps({
             creator: creatorAddress,
             bps: creatorBps
         });
@@ -65,14 +66,14 @@ contract CultureIndexArtPieceTest is Test {
     function createArtPieceTuple(
         string memory name,
         string memory description,
-        CultureIndex.MediaType mediaType,
+        ICultureIndex.MediaType mediaType,
         string memory image,
         string memory text,
         string memory animationUrl,
         address creatorAddress,
         uint256 creatorBps
-    ) public pure returns (CultureIndex.ArtPieceMetadata memory, CultureIndex.CreatorBps[] memory) { // <-- Change here
-        CultureIndex.ArtPieceMetadata memory metadata = createArtPieceMetadata(
+    ) public pure returns (CultureIndex.ArtPieceMetadata memory, ICultureIndex.CreatorBps[] memory) { // <-- Change here
+        ICultureIndex.ArtPieceMetadata memory metadata = createArtPieceMetadata(
             name,
             description,
             mediaType,
@@ -81,7 +82,7 @@ contract CultureIndexArtPieceTest is Test {
             animationUrl
         );
 
-        CultureIndex.CreatorBps[] memory creators = createArtPieceCreators(
+        ICultureIndex.CreatorBps[] memory creators = createArtPieceCreators(
             creatorAddress,
             creatorBps
         );
@@ -93,7 +94,7 @@ contract CultureIndexArtPieceTest is Test {
     function createArtPiece(
         string memory name,
         string memory description,
-        CultureIndex.MediaType mediaType,
+        ICultureIndex.MediaType mediaType,
         string memory image,
         string memory text,
         string memory animationUrl,
@@ -101,7 +102,7 @@ contract CultureIndexArtPieceTest is Test {
         uint256 creatorBps
     ) public returns (uint256) { // <-- Change here
         //use createArtPieceTuple to create metadata and creators
-        (CultureIndex.ArtPieceMetadata memory metadata, CultureIndex.CreatorBps[] memory creators) = createArtPieceTuple(
+        (CultureIndex.ArtPieceMetadata memory metadata, ICultureIndex.CreatorBps[] memory creators) = createArtPieceTuple(
             name,
             description,
             mediaType,
@@ -130,7 +131,7 @@ contract CultureIndexArtPieceTest is Test {
         uint256 newPieceId = createArtPiece(
             "Mona Lisa",
             "A masterpiece",
-            CultureIndex.MediaType.IMAGE,
+            ICultureIndex.MediaType.IMAGE,
             "ipfs://legends",
             "",
             "",
@@ -139,7 +140,7 @@ contract CultureIndexArtPieceTest is Test {
         );
 
         // Validate that the piece was created with correct data
-        CultureIndex.ArtPiece memory createdPiece = cultureIndex.getPieceById(
+        ICultureIndex.ArtPiece memory createdPiece = cultureIndex.getPieceById(
             newPieceId
         );
 
@@ -157,23 +158,23 @@ contract CultureIndexArtPieceTest is Test {
     function testCreatePieceWithMultipleCreators() public {
         setUp();
 
-        CultureIndex.ArtPieceMetadata memory metadata = CultureIndex
+        ICultureIndex.ArtPieceMetadata memory metadata = ICultureIndex
             .ArtPieceMetadata({
                 name: "Collaborative Work",
                 description: "A joint masterpiece",
-                mediaType: CultureIndex.MediaType.IMAGE,
+                mediaType: ICultureIndex.MediaType.IMAGE,
                 image: "ipfs://collab",
                 text: "",
                 animationUrl: ""
             });
 
-        CultureIndex.CreatorBps[]
-            memory creators = new CultureIndex.CreatorBps[](2);
-        creators[0] = CultureIndex.CreatorBps({
+        ICultureIndex.CreatorBps[]
+            memory creators = new ICultureIndex.CreatorBps[](2);
+        creators[0] = ICultureIndex.CreatorBps({
             creator: address(0x1),
             bps: 5000
         });
-        creators[1] = CultureIndex.CreatorBps({
+        creators[1] = ICultureIndex.CreatorBps({
             creator: address(0x2),
             bps: 5000
         });
@@ -181,7 +182,7 @@ contract CultureIndexArtPieceTest is Test {
         uint256 newPieceId = cultureIndex.createPiece(metadata, creators);
 
         // Validate that the piece was created with correct data
-        CultureIndex.ArtPiece memory createdPiece = cultureIndex.getPieceById(
+        ICultureIndex.ArtPiece memory createdPiece = cultureIndex.getPieceById(
             newPieceId
         );
 
@@ -199,23 +200,23 @@ contract CultureIndexArtPieceTest is Test {
     function testCreatePieceWithMultipleCreatorsInvalidBPS() public {
         setUp();
 
-        CultureIndex.ArtPieceMetadata memory metadata = CultureIndex
+        ICultureIndex.ArtPieceMetadata memory metadata = ICultureIndex
             .ArtPieceMetadata({
                 name: "Collaborative Work",
                 description: "A joint masterpiece",
-                mediaType: CultureIndex.MediaType.IMAGE,
+                mediaType: ICultureIndex.MediaType.IMAGE,
                 image: "ipfs://collab",
                 text: "",
                 animationUrl: ""
             });
 
-        CultureIndex.CreatorBps[]
-            memory creators = new CultureIndex.CreatorBps[](2);
-        creators[0] = CultureIndex.CreatorBps({
+        ICultureIndex.CreatorBps[]
+            memory creators = new ICultureIndex.CreatorBps[](2);
+        creators[0] = ICultureIndex.CreatorBps({
             creator: address(0x1),
             bps: 5000
         });
-        creators[1] = CultureIndex.CreatorBps({
+        creators[1] = ICultureIndex.CreatorBps({
             creator: address(0x2),
             bps: 500
         });
@@ -238,10 +239,10 @@ contract CultureIndexArtPieceTest is Test {
     function testInvalidCreatorAddress() public {
         setUp();
 
-        (CultureIndex.ArtPieceMetadata memory metadata, CultureIndex.CreatorBps[] memory creators) = createArtPieceTuple(
+        (CultureIndex.ArtPieceMetadata memory metadata, ICultureIndex.CreatorBps[] memory creators) = createArtPieceTuple(
                 "Invalid Creator",
                 "Invalid Piece",
-                CultureIndex.MediaType.IMAGE,
+                ICultureIndex.MediaType.IMAGE,
                 "ipfs://invalid",
                 "",
                 "",
@@ -265,10 +266,10 @@ contract CultureIndexArtPieceTest is Test {
     //  */
     function testExcessiveTotalBasisPoints() public {
         setUp();
-        (CultureIndex.ArtPieceMetadata memory metadata, CultureIndex.CreatorBps[] memory creators) = createArtPieceTuple(
+        (CultureIndex.ArtPieceMetadata memory metadata, ICultureIndex.CreatorBps[] memory creators) = createArtPieceTuple(
                 "Invalid Creator",
                 "Invalid Piece",
-                CultureIndex.MediaType.IMAGE,
+                ICultureIndex.MediaType.IMAGE,
                 "ipfs://invalid",
                 "",
                 "",
@@ -292,10 +293,10 @@ contract CultureIndexArtPieceTest is Test {
     //  */
     function testTooFewTotalBasisPoints() public {
         setUp();
-        (CultureIndex.ArtPieceMetadata memory metadata, CultureIndex.CreatorBps[] memory creators) = createArtPieceTuple(
+        (CultureIndex.ArtPieceMetadata memory metadata, ICultureIndex.CreatorBps[] memory creators) = createArtPieceTuple(
                 "Invalid Creator",
                 "Invalid Piece",
-                CultureIndex.MediaType.IMAGE,
+                ICultureIndex.MediaType.IMAGE,
                 "ipfs://invalid",
                 "",
                 "",
@@ -319,19 +320,19 @@ contract CultureIndexArtPieceTest is Test {
      */
     function testInvalidMediaType() public {
         setUp();
-        CultureIndex.ArtPieceMetadata memory metadata = CultureIndex
+        ICultureIndex.ArtPieceMetadata memory metadata = ICultureIndex
             .ArtPieceMetadata({
                 name: "Invalid Media Type",
                 description: "Invalid Piece",
-                mediaType: CultureIndex.MediaType.NONE,
+                mediaType: ICultureIndex.MediaType.NONE,
                 image: "",
                 text: "",
                 animationUrl: ""
             });
 
-        CultureIndex.CreatorBps[]
-            memory creators = new CultureIndex.CreatorBps[](1);
-        creators[0] = CultureIndex.CreatorBps({
+        ICultureIndex.CreatorBps[]
+            memory creators = new ICultureIndex.CreatorBps[](1);
+        creators[0] = ICultureIndex.CreatorBps({
             creator: address(0x1),
             bps: 10000
         });
@@ -349,10 +350,10 @@ contract CultureIndexArtPieceTest is Test {
     function testMissingMediaData() public {
         setUp();
 
-        (CultureIndex.ArtPieceMetadata memory metadata, CultureIndex.CreatorBps[] memory creators) = createArtPieceTuple(
+        (CultureIndex.ArtPieceMetadata memory metadata, ICultureIndex.CreatorBps[] memory creators) = createArtPieceTuple(
                 "Missing Media Data",
                 "Invalid Piece",
-                CultureIndex.MediaType.IMAGE,
+                ICultureIndex.MediaType.IMAGE,
                 "",
                 "",
                 "",
@@ -377,7 +378,7 @@ contract CultureIndexArtPieceTest is Test {
         uint256 firstPieceId = createArtPiece(
             "First Piece",
             "Valid Piece",
-            CultureIndex.MediaType.IMAGE,
+            ICultureIndex.MediaType.IMAGE,
             "ipfs://first",
             "",
             "",
@@ -388,7 +389,7 @@ contract CultureIndexArtPieceTest is Test {
         uint256 secondPieceId = createArtPiece(
             "Second Piece",
             "Valid Piece",
-            CultureIndex.MediaType.IMAGE,
+            ICultureIndex.MediaType.IMAGE,
             "ipfs://second",
             "",
             "",
@@ -409,20 +410,20 @@ contract CultureIndexArtPieceTest is Test {
     function testCreatorArrayLengthConstraint() public {
         setUp();
 
-        CultureIndex.ArtPieceMetadata memory metadata = CultureIndex
+        ICultureIndex.ArtPieceMetadata memory metadata = ICultureIndex
             .ArtPieceMetadata({
                 name: "Constraint Test",
                 description: "Test Piece",
-                mediaType: CultureIndex.MediaType.IMAGE,
+                mediaType: ICultureIndex.MediaType.IMAGE,
                 image: "ipfs://constraint",
                 text: "",
                 animationUrl: ""
             });
 
         // Create a creatorArray with 51 entries
-        CultureIndex.CreatorBps[] memory creators = new CultureIndex.CreatorBps[](101);
+        ICultureIndex.CreatorBps[] memory creators = new ICultureIndex.CreatorBps[](101);
         for (uint i = 0; i < 101; i++) {
-            creators[i] = CultureIndex.CreatorBps({
+            creators[i] = ICultureIndex.CreatorBps({
                 creator: address(0x1), // Unique address for each creator
                 bps: 100 // This doesn't sum up to 10,000 but the test is for array length
             });
