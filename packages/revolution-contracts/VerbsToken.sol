@@ -224,9 +224,7 @@ contract VerbsToken is IVerbsToken, Ownable, ERC721Checkpointable {
      * @notice Mint a Verb with `verbId` to the provided `to` address.
      */
     function _mintTo(address to) internal returns (uint256) {
-        ICultureIndex.ArtPiece memory artPiece = cultureIndex.dropTopVotedPiece();
-
-        uint256 verbId = artPiece.pieceId;
+        (ICultureIndex.ArtPiece memory artPiece, uint256 verbId) = cultureIndex.dropTopVotedPiece();
 
         artPieces[verbId] = artPiece;
 
