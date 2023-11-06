@@ -197,7 +197,7 @@ contract VerbsToken is IVerbsToken, Ownable, ERC721Checkpointable {
      * @notice Set the token CultureIndex.
      * @dev Only callable by the owner when not locked.
      */
-    function setCultureIndex(ICultureIndex _cultureIndex) external override onlyOwner whenCultureIndexNotLocked {
+    function setCultureIndex(ICultureIndex _cultureIndex) external onlyOwner whenCultureIndexNotLocked {
         cultureIndex = _cultureIndex;
 
         emit CultureIndexUpdated(_cultureIndex);
