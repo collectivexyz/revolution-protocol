@@ -226,7 +226,7 @@ contract CultureIndex is ICultureIndex {
      * @notice Pulls and drops the top-voted piece.
      * @return The top voted piece
      */
-    function dropTopVotedPiece() public returns (ArtPiece memory) {
+    function dropTopVotedPiece() public returns (ArtPiece memory, uint256) {
         uint256 pieceId;
         try maxHeap.extractMax() returns (uint256 _pieceId, uint256 _value) {
             pieceId = _pieceId;
@@ -247,13 +247,13 @@ contract CultureIndex is ICultureIndex {
         droppedPiecesMapping[nextDropIndex] = pieceId;
         nextDropIndex++;
 
-        emit PieceDropped(pieceId, msg.sender);
+        emit PieceDropped(pieceId, msg.sender, nextDropIndex);
 
         //for each creator, emit an event
         for (uint i = 0; i < pieces[pieceId].creators.length; i++) {
             emit PieceDroppedCreator(pieceId, pieces[pieceId].creators[i].creator, pieces[pieceId].dropper, pieces[pieceId].creators[i].bps);
         }
 
-        return pieces[pieceId];
+        return (pieces[pieceId], nextDropIndex);
     }
 }

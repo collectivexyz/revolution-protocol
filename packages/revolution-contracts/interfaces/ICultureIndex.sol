@@ -36,7 +36,7 @@ interface ICultureIndexEvents {
      * @param pieceId Unique identifier for the dropped piece.
      * @param remover Address that initiated the drop.
      */
-    event PieceDropped(uint256 indexed pieceId, address indexed remover);
+    event PieceDropped(uint256 indexed pieceId, address indexed remover, uint256 index);
 
     /**
      * @dev Emitted for each creator added to a piece when it is dropped.
@@ -209,7 +209,7 @@ interface ICultureIndex is ICultureIndexEvents {
     /**
      * @notice Officially release or "drop" the art piece with the most votes.
      * @dev This function also updates internal state to reflect the piece's dropped status.
-     * @return The ArtPiece struct of the top voted piece that was just dropped.
+     * @return The ArtPiece struct of the top voted piece that was just dropped and it's index in the droppedPiecesMapping.
      */
-    function dropTopVotedPiece() external returns (ArtPiece memory);
+    function dropTopVotedPiece() external returns (ArtPiece memory, uint256);
 }
