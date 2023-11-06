@@ -367,7 +367,7 @@ contract ERC721 is Context, ERC165, IERC721, IERC721Metadata {
      * @return bool whether the call correctly returned the expected magic value
      */
     function _checkOnERC721Received(address from, address to, uint256 tokenId, bytes memory _data) private returns (bool) {
-        if (to.isContract()) {
+        if (to.code.length > 0) {
             try IERC721Receiver(to).onERC721Received(_msgSender(), from, tokenId, _data) returns (bytes4 retval) {
                 return retval == IERC721Receiver(to).onERC721Received.selector;
             } catch (bytes memory reason) {
