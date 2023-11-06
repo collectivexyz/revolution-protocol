@@ -91,9 +91,7 @@ contract VerbsToken is IVerbsToken, Ownable, ERC721Checkpointable {
         IVerbsDescriptorMinimal _descriptor,
         IProxyRegistry _proxyRegistry,
         ICultureIndex _cultureIndex
-    )
-        ERC721("Verbs", "VERB")
-    {
+    ) ERC721("Verbs", "VERB") Ownable(msg.sender) {
         minter = _minter;
         descriptor = _descriptor;
         cultureIndex = _cultureIndex;
@@ -226,7 +224,15 @@ contract VerbsToken is IVerbsToken, Ownable, ERC721Checkpointable {
     function _mintTo(address to) internal returns (uint256) {
         (ICultureIndex.ArtPiece memory artPiece, uint256 verbId) = cultureIndex.dropTopVotedPiece();
 
-        artPieces[verbId] = artPiece;
+        ICultureIndex.ArtPiece storage newPiece = artPieces[verbId];
+
+        newPiece.pieceId = artPiece.pieceId;
+        newPiece.metadata = artPiece.metadata;
+        newPiece.dropper = artPiece.dropper;
+
+        for (uint i = 0; i < artPiece.creators.length; i++) {
+            newPiece.creators.push(artPiece.creators[i]);
+        }
 
         _mint(owner(), to, verbId);
 

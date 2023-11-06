@@ -189,7 +189,7 @@ contract CultureIndexArtPieceTest is Test {
         mockVotingToken._mint(address(voter1Test), 100);
         voter1Test.voteForPiece(firstPieceId);
 
-        ICultureIndex.ArtPiece memory poppedPiece = cultureIndex.dropTopVotedPiece();
+        (ICultureIndex.ArtPiece memory poppedPiece, ) = cultureIndex.dropTopVotedPiece();
         assertEq(poppedPiece.pieceId, firstPieceId, "Popped piece should be the first piece");
     }
 
@@ -205,7 +205,7 @@ contract CultureIndexArtPieceTest is Test {
         voter1Test.voteForPiece(firstPieceId);
         voter2Test.voteForPiece(secondPieceId);
 
-        ICultureIndex.ArtPiece memory poppedPiece = cultureIndex.dropTopVotedPiece();
+        (ICultureIndex.ArtPiece memory poppedPiece, ) = cultureIndex.dropTopVotedPiece();
         //assert its the second piece
         assertEq(poppedPiece.pieceId, secondPieceId, "Popped piece should be the second piece");
 
