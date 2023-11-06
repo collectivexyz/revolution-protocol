@@ -86,7 +86,14 @@ contract VerbsToken is IVerbsToken, Ownable, ERC721Checkpointable {
         _;
     }
 
-    constructor(address _minter, IVerbsDescriptorMinimal _descriptor, IProxyRegistry _proxyRegistry, ICultureIndex _cultureIndex) ERC721("Verbs", "VERB") {
+    constructor(
+        address _minter,
+        IVerbsDescriptorMinimal _descriptor,
+        IProxyRegistry _proxyRegistry,
+        ICultureIndex _cultureIndex
+    )
+        ERC721("Verbs", "VERB")
+    {
         minter = _minter;
         descriptor = _descriptor;
         cultureIndex = _cultureIndex;
