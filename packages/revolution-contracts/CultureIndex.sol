@@ -33,12 +33,6 @@ contract CultureIndex is ICultureIndex {
     // A mapping to keep track of whether the voter voted for the piece
     mapping(uint256 => mapping(address => bool)) public hasVoted;
 
-    // The index of the next piece to be dropped
-    uint256 public nextDropIndex = 0;
-
-    // The mapping of dropped pieces to their pieceIds
-    mapping(uint256 => uint256) public droppedPiecesMapping;
-
     /**
      *  Validates the media type and associated data.
      * @param metadata The metadata associated with the art piece.
@@ -196,37 +190,10 @@ contract CultureIndex is ICultureIndex {
     }
 
     /**
-     * @notice Fetch the total number of pieces that have been dropped.
-     * @return The total number of pieces that have been dropped.
-     */
-    function getTotalDroppedPieces() public view returns (uint256) {
-        return nextDropIndex;
-    }
-
-    /**
-     * @notice Fetch a dropped piece by its index.
-     * @return The dropped piece
-     */
-    function getDroppedPieceByIndex(uint256 index) external view returns (ArtPiece memory) {
-        uint256 pieceId = droppedPiecesMapping[index];
-        return pieces[pieceId];
-    }
-
-    /**
-     * @notice Fetch the latest dropped piece.
-     * @return The latest dropped piece
-     */
-    function getLatestDroppedPiece() public view returns (ArtPiece memory) {
-        require(nextDropIndex > 0, "No pieces have been dropped yet.");
-        uint256 latestDroppedPieceId = droppedPiecesMapping[nextDropIndex - 1];
-        return pieces[latestDroppedPieceId];
-    }
-
-    /**
      * @notice Pulls and drops the top-voted piece.
      * @return The top voted piece
      */
-    function dropTopVotedPiece() public returns (ArtPiece memory, uint256) {
+    function dropTopVotedPiece() public returns (ArtPiece memory) {
         uint256 pieceId;
         try maxHeap.extractMax() returns (uint256 _pieceId, uint256 _value) {
             pieceId = _pieceId;
@@ -244,16 +211,14 @@ contract CultureIndex is ICultureIndex {
         }
 
         pieces[pieceId].isDropped = true;
-        droppedPiecesMapping[nextDropIndex] = pieceId;
-        nextDropIndex++;
 
-        emit PieceDropped(pieceId, msg.sender, nextDropIndex);
+        emit PieceDropped(pieceId, msg.sender);
 
         //for each creator, emit an event
         for (uint i = 0; i < pieces[pieceId].creators.length; i++) {
             emit PieceDroppedCreator(pieceId, pieces[pieceId].creators[i].creator, pieces[pieceId].dropper, pieces[pieceId].creators[i].bps);
         }
 
-        return (pieces[pieceId], nextDropIndex);
+        return pieces[pieceId];
     }
 }

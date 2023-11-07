@@ -36,7 +36,7 @@ interface ICultureIndexEvents {
      * @param pieceId Unique identifier for the dropped piece.
      * @param remover Address that initiated the drop.
      */
-    event PieceDropped(uint256 indexed pieceId, address indexed remover, uint256 index);
+    event PieceDropped(uint256 indexed pieceId, address indexed remover);
 
     /**
      * @dev Emitted for each creator added to a piece when it is dropped.
@@ -128,19 +128,6 @@ interface ICultureIndex is ICultureIndexEvents {
     function hasVoted(uint256 pieceId, address voter) external view returns (bool);
 
     /**
-     * @notice Returns the index of the next piece to be dropped.
-     * @return The index for the next drop.
-     */
-    function nextDropIndex() external view returns (uint256);
-
-    /**
-     * @notice Returns the piece ID of a dropped piece based on its index.
-     * @param index The index of the dropped piece.
-     * @return The ID of the dropped piece.
-     */
-    function droppedPiecesMapping(uint256 index) external view returns (uint256);
-
-    /**
      * @notice Allows a user to create a new art piece.
      * @param metadata The metadata associated with the art piece.
      * @param creatorArray An array of creators and their associated basis points.
@@ -188,28 +175,9 @@ interface ICultureIndex is ICultureIndexEvents {
     function getVoteCount(uint256 pieceId) external view returns (uint256);
 
     /**
-     * @notice Retrieve the total number of art pieces that have been officially released or "dropped".
-     * @return The count of all dropped art pieces.
-     */
-    function getTotalDroppedPieces() external view returns (uint256);
-
-    /**
-     * @notice Fetch a specific art piece that has been dropped by its sequential index.
-     * @param index The index (in order of being dropped) of the art piece.
-     * @return The ArtPiece struct of the specified dropped piece.
-     */
-    function getDroppedPieceByIndex(uint256 index) external view returns (ArtPiece memory);
-
-    /**
-     * @notice Retrieve the most recently dropped art piece.
-     * @return The ArtPiece struct of the latest dropped piece.
-     */
-    function getLatestDroppedPiece() external view returns (ArtPiece memory);
-
-    /**
      * @notice Officially release or "drop" the art piece with the most votes.
      * @dev This function also updates internal state to reflect the piece's dropped status.
-     * @return The ArtPiece struct of the top voted piece that was just dropped and it's index in the droppedPiecesMapping.
+     * @return The ArtPiece struct of the top voted piece that was just dropped.
      */
-    function dropTopVotedPiece() external returns (ArtPiece memory, uint256);
+    function dropTopVotedPiece() external returns (ArtPiece memory);
 }

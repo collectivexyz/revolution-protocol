@@ -45,6 +45,9 @@ contract VerbsToken is IVerbsToken, Ownable, ERC721Checkpointable {
     // Whether the descriptor can be updated
     bool public isDescriptorLocked;
 
+    // The internal verb ID tracker
+    uint256 private _currentVerbId;
+
     // IPFS content hash of contract-level metadata
     string private _contractURIHash = "QmQzDwaZ7yQxHHs7sQQenJVB89riTSacSGcJRv9jtHPuz5";
 
@@ -130,7 +133,7 @@ contract VerbsToken is IVerbsToken, Ownable, ERC721Checkpointable {
      * @dev Call _mintTo with the to address(es).
      */
     function mint() public override onlyMinter returns (uint256) {
-        return _mintTo(minter);
+        return _mintTo(minter, _currentVerbId++);
     }
 
     /**
@@ -222,14 +225,17 @@ contract VerbsToken is IVerbsToken, Ownable, ERC721Checkpointable {
     /**
      * @notice Mint a Verb with `verbId` to the provided `to` address.
      */
-    function _mintTo(address to) internal returns (uint256) {
-        (ICultureIndex.ArtPiece memory artPiece, uint256 verbId) = cultureIndex.dropTopVotedPiece();
+    function _mintTo(address to, uint256 verbId) internal returns (uint256) {
+        ICultureIndex.ArtPiece memory artPiece = cultureIndex.dropTopVotedPiece();
 
         ICultureIndex.ArtPiece storage newPiece = artPieces[verbId];
 
         newPiece.pieceId = artPiece.pieceId;
         newPiece.metadata = artPiece.metadata;
         newPiece.dropper = artPiece.dropper;
+
+        //ensure creators length is not greater than 100 to prevent gas limit issues
+        require(artPiece.creators.length <= 100, "Creator array must not be > 100");
 
         for (uint i = 0; i < artPiece.creators.length; i++) {
             newPiece.creators.push(artPiece.creators[i]);
