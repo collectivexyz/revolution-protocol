@@ -130,23 +130,23 @@ contract VerbsTokenTest is Test {
     }
 
     /// @dev Tests that non-owners cannot set the contract URI
-    // function testRevertOnNonOwnerSettingContractURI() public {
-    //     setUp();
+    function testRevertOnNonOwnerSettingContractURI() public {
+        setUp();
 
-    //     address nonOwner = address(0x1); // Non-owner address
-    //     vm.startPrank(nonOwner);
+        address nonOwner = address(0x1); // Non-owner address
+        vm.startPrank(nonOwner);
 
-    //     bool hasErrorOccurred = false;
-    //     try verbsToken.setContractURIHash("NewHashHere") {
-    //         fail("Should revert on non-owner setting contract URI");
-    //     } catch Error(string memory reason) {
-    //         hasErrorOccurred = true;
-    //     }
+        bool hasErrorOccurred = false;
+        try verbsToken.setContractURIHash("NewHashHere") {
+            fail("Should revert on non-owner setting contract URI");
+        } catch {
+            hasErrorOccurred = true;
+        }
 
-    //     vm.stopPrank();
+        vm.stopPrank();
 
-    //     // assertEq(hasErrorOccurred, true, "Expected an error but none was thrown.");
-    // }
+        // assertEq(hasErrorOccurred, true, "Expected an error but none was thrown.");
+    }
 
 
     // Utility function to create a new art piece and return its ID
