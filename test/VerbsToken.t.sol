@@ -31,7 +31,7 @@ contract VerbsTokenTest is Test {
         IProxyRegistry _proxyRegistry = IProxyRegistry(address(0x2));
         ICultureIndex _cultureIndex = cultureIndex;
 
-        verbsToken = new VerbsToken(address(this), _descriptor, _proxyRegistry, _cultureIndex);
+        verbsToken = new VerbsToken(address(this), address(this), _descriptor, _proxyRegistry, _cultureIndex);
     }
 
 
@@ -100,15 +100,21 @@ contract VerbsTokenTest is Test {
     }
 
 
-    // /// @dev Tests minting by non-minter should revert
-    // function testRevertOnNonMinterMint() public {
-    //     setUp();
-    //     try verbsToken.mint() {
-    //         fail("Should revert on non-minter mint");
-    //     } catch Error(string memory reason) {
-    //         assertEq(reason, "Only minter can mint");
-    //     }
-    // }
+    /// @dev Tests minting by non-minter should revert
+    function testRevertOnNonMinterMint() public {
+        setUp();
+
+        address nonMinter = address(0xABC); // This is an arbitrary address
+        vm.startPrank(nonMinter); 
+
+        try verbsToken.mint() {
+            fail("Should revert on non-minter mint");
+        } catch Error(string memory reason) {
+            assertEq(reason, "Sender is not the minter");
+        }
+
+        vm.stopPrank();
+    }
 
     /// @dev Tests the contract URI of the VerbsToken
     function testContractURI() public {
@@ -123,15 +129,23 @@ contract VerbsTokenTest is Test {
         assertEq(verbsToken.contractURI(), "ipfs://NewHashHere", "Contract URI should be updated");
     }
 
-    // /// @dev Tests that non-owners cannot set the contract URI
+    /// @dev Tests that non-owners cannot set the contract URI
     // function testRevertOnNonOwnerSettingContractURI() public {
     //     setUp();
+
+    //     address nonOwner = address(0x1); // Non-owner address
+    //     vm.startPrank(nonOwner);
+
+    //     bool hasErrorOccurred = false;
     //     try verbsToken.setContractURIHash("NewHashHere") {
-    //         // Assuming a function setContractURIByNonOwner in VerbsToken
     //         fail("Should revert on non-owner setting contract URI");
     //     } catch Error(string memory reason) {
-    //         assertEq(reason, "Ownable: caller is not the owner");
+    //         hasErrorOccurred = true;
     //     }
+
+    //     vm.stopPrank();
+
+    //     // assertEq(hasErrorOccurred, true, "Expected an error but none was thrown.");
     // }
 
 

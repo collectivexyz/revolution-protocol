@@ -88,10 +88,11 @@ contract VerbsToken is IVerbsToken, Ownable, ERC721Checkpointable {
 
     constructor(
         address _minter,
+        address _initialOwner,
         IVerbsDescriptorMinimal _descriptor,
         IProxyRegistry _proxyRegistry,
         ICultureIndex _cultureIndex
-    ) ERC721("Verbs", "VERB") Ownable(msg.sender) {
+    ) ERC721("Verbs", "VERB") Ownable(_initialOwner) {
         minter = _minter;
         descriptor = _descriptor;
         cultureIndex = _cultureIndex;
