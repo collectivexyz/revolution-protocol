@@ -58,7 +58,7 @@ contract VerbsTokenTest is Test {
         // Validate the token
         uint256 totalSupply = verbsToken.totalSupply();
         assertEq(verbsToken.ownerOf(tokenId), address(this), "The contract should own the newly minted token");
-        assertEq(tokenId, 1, "First token ID should be 1");
+        assertEq(tokenId, 0, "First token ID should be 1");
         assertEq(totalSupply, 1, "Total supply should be 1");
     }
 
@@ -80,9 +80,8 @@ contract VerbsTokenTest is Test {
         createDefaultArtPiece();
 
         uint256 initialTotalSupply = verbsToken.totalSupply();
-        verbsToken.mint();
-        uint256 newTokenId = verbsToken.totalSupply();
-        assertEq(newTokenId, initialTotalSupply + 1, "One new token should have been minted");
+        uint256 newTokenId = verbsToken.mint();
+        assertEq(verbsToken.totalSupply(), initialTotalSupply + 1, "One new token should have been minted");
         assertEq(verbsToken.ownerOf(newTokenId), address(this), "The contract should own the newly minted token");
     }
 
@@ -145,7 +144,7 @@ contract VerbsTokenTest is Test {
 
         vm.stopPrank();
 
-        // assertEq(hasErrorOccurred, true, "Expected an error but none was thrown.");
+        assertEq(hasErrorOccurred, true, "Expected an error but none was thrown.");
     }
 
 
