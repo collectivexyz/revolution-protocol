@@ -21,6 +21,7 @@ import { Ownable } from "@openzeppelin/contracts/access/Ownable.sol";
 import { Strings } from "@openzeppelin/contracts/utils/Strings.sol";
 import { IVerbsDescriptor } from "./interfaces/IVerbsDescriptor.sol";
 import { NFTDescriptor } from "./libs/NFTDescriptor.sol";
+import { ICultureIndex } from "./interfaces/ICultureIndex.sol";
 
 contract VerbsDescriptor is IVerbsDescriptor, Ownable {
     using Strings for uint256;
@@ -34,6 +35,8 @@ contract VerbsDescriptor is IVerbsDescriptor, Ownable {
 
     // Base URI
     string public override baseURI;
+
+    constructor(address _initialOwner) Ownable(_initialOwner) {}
 
     /**
      * @notice Toggle a boolean value which determines if `tokenURI` returns a data URI
@@ -63,9 +66,9 @@ contract VerbsDescriptor is IVerbsDescriptor, Ownable {
      * @notice Given a token ID, construct a token URI for an official Vrbs DAO verb.
      * @dev The returned value may be a base64 encoded data URI or an API URL.
      */
-    function tokenURI(uint256 tokenId) external view override returns (string memory) {
+    function tokenURI(uint256 tokenId, ICultureIndex.ArtPiece memory artPiece) external view returns (string memory) {
         if (isDataURIEnabled) {
-            return dataURI(tokenId);
+            return dataURI(tokenId, artPiece);
         }
         return string(abi.encodePacked(baseURI, tokenId.toString()));
     }
@@ -73,20 +76,25 @@ contract VerbsDescriptor is IVerbsDescriptor, Ownable {
     /**
      * @notice Given a token ID, construct a base64 encoded data URI for an official Vrbs DAO verb.
      */
-    function dataURI(uint256 tokenId) public view override returns (string memory) {
+    function dataURI(uint256 tokenId, ICultureIndex.ArtPiece memory artPiece) public pure returns (string memory) {
         string memory verbId = tokenId.toString();
         string memory name = string(abi.encodePacked("Verb ", verbId));
 
-        return genericDataURI(name);
+        return genericDataURI(name, artPiece);
     }
 
     /**
      * @notice Given a name, and description, construct a base64 encoded data URI.
      */
-    function genericDataURI(string memory name) public view override returns (string memory) {
+    function genericDataURI(string memory name, ICultureIndex.ArtPiece memory artPiece) public pure returns (string memory) {
         /// @dev Get name description image and animation_url from CultureIndex
 
-        NFTDescriptor.TokenURIParams memory params = NFTDescriptor.TokenURIParams({ name: name, description: description, image: image, animation_url: animation_url });
+        NFTDescriptor.TokenURIParams memory params = NFTDescriptor.TokenURIParams({
+            name: name,
+            description: artPiece.metadata.description,
+            image: artPiece.metadata.image,
+            animation_url: artPiece.metadata.animationUrl
+        });
         return NFTDescriptor.constructTokenURI(params);
     }
 }

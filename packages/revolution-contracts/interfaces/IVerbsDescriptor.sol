@@ -18,6 +18,7 @@
 pragma solidity ^0.8.22;
 
 import { IVerbsDescriptorMinimal } from "./IVerbsDescriptorMinimal.sol";
+import { ICultureIndex } from "./ICultureIndex.sol";
 
 interface IVerbsDescriptor is IVerbsDescriptorMinimal {
     event PartsLocked();
@@ -34,9 +35,9 @@ interface IVerbsDescriptor is IVerbsDescriptorMinimal {
 
     function setBaseURI(string calldata baseURI) external;
 
-    function tokenURI(uint256 tokenId) external view override returns (string memory);
+    function tokenURI(uint256 tokenId, ICultureIndex.ArtPiece memory) external view returns (string memory);
 
-    function dataURI(uint256 tokenId) external view override returns (string memory);
+    function dataURI(uint256 tokenId, ICultureIndex.ArtPiece memory) external view returns (string memory);
 
-    function genericDataURI(string calldata name, string calldata description) external view returns (string memory);
+    function genericDataURI(string calldata name, ICultureIndex.ArtPiece memory) external view returns (string memory);
 }

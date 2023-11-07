@@ -7,28 +7,59 @@ import { IVerbsDescriptorMinimal } from "../packages/revolution-contracts/interf
 import { IProxyRegistry } from "../packages/revolution-contracts/external/opensea/IProxyRegistry.sol";
 import { ICultureIndex } from "../packages/revolution-contracts/interfaces/ICultureIndex.sol";
 import { NFTDescriptor } from "../packages/revolution-contracts/libs/NFTDescriptor.sol";
+import { Strings } from "@openzeppelin/contracts/utils/Strings.sol";
+import {CultureIndex} from "../packages/revolution-contracts/CultureIndex.sol";
+import {MockERC20} from "./MockERC20.sol";
+import {VerbsDescriptor} from "../packages/revolution-contracts/VerbsDescriptor.sol";
 
 /// @title VerbsTokenTest
 /// @dev The test suite for the VerbsToken contract
 contract VerbsTokenTest is Test {
     VerbsToken public verbsToken;
+    CultureIndex public cultureIndex;
+    MockERC20 public mockVotingToken;
+    VerbsDescriptor public descriptor;
 
     /// @dev Sets up a new VerbsToken instance before each test
     function setUp() public {
-        IVerbsDescriptorMinimal _descriptor = new MockVerbsDescriptor();
+        // Create a new CultureIndex contract
+        mockVotingToken = new MockERC20();
+        cultureIndex = new CultureIndex(address(mockVotingToken));
+        descriptor = new VerbsDescriptor(address(this));
+
+        IVerbsDescriptorMinimal _descriptor = descriptor;
         IProxyRegistry _proxyRegistry = IProxyRegistry(address(0x2));
-        ICultureIndex _cultureIndex = ICultureIndex(address(0x1));
-        
+        ICultureIndex _cultureIndex = cultureIndex;
+
         verbsToken = new VerbsToken(address(this), _descriptor, _proxyRegistry, _cultureIndex);
     }
 
 
-    /// @dev Tests the minting of a new verb token
+    /// @dev Tests the minting with no pieces added
+    function testMintWithNoPieces() public {
+          // Try to remove max and expect to fail
+        try verbsToken.mint() {
+            fail("Should revert on removing max from empty heap");
+        } catch Error(string memory reason) {
+            assertEq(reason, "No pieces available to drop");
+        }
+    }
+
+    /// @dev Tests basic minting
     function testMint() public {
-        // Assume the mint function mints a token and returns its ID
+        setUp();
+
+        // Add a piece to the CultureIndex
+        createDefaultArtPiece();
+
+        // Mint a token
         uint256 tokenId = verbsToken.mint();
 
+        // Validate the token
+        uint256 totalSupply = verbsToken.totalSupply();
+        assertEq(verbsToken.ownerOf(tokenId), address(this), "The contract should own the newly minted token");
         assertEq(tokenId, 1, "First token ID should be 1");
+        assertEq(totalSupply, 1, "Total supply should be 1");
     }
 
     /// @dev Tests the symbol of the VerbsToken
@@ -43,25 +74,30 @@ contract VerbsTokenTest is Test {
         assertEq(verbsToken.name(), "Verbs", "Name should be Verbs");
     }
 
-    // /// @dev Tests minting a verb token to itself
-    // function testMintToItself() public {
-    //     setUp();
-    //     uint256 initialTotalSupply = verbsToken.totalSupply();
-    //     verbsToken.mint();
-    //     uint256 newTokenId = verbsToken.totalSupply();
-    //     assertEq(newTokenId, initialTotalSupply + 1, "One new token should have been minted");
-    //     assertEq(verbsToken.ownerOf(newTokenId), address(this), "The contract should own the newly minted token");
-    // }
+    /// @dev Tests minting a verb token to itself
+    function testMintToItself() public {
+        setUp();
+        createDefaultArtPiece();
 
-    // /// @dev Tests burning a verb token
-    // function testBurn() public {
-    //     setUp();
-    //     uint256 tokenId = verbsToken.mint();
-    //     uint256 initialTotalSupply = verbsToken.totalSupply();
-    //     verbsToken.burn(tokenId);
-    //     uint256 newTotalSupply = verbsToken.totalSupply();
-    //     assertEq(newTotalSupply, initialTotalSupply - 1, "Total supply should decrease by 1 after burning");
-    // }
+        uint256 initialTotalSupply = verbsToken.totalSupply();
+        verbsToken.mint();
+        uint256 newTokenId = verbsToken.totalSupply();
+        assertEq(newTokenId, initialTotalSupply + 1, "One new token should have been minted");
+        assertEq(verbsToken.ownerOf(newTokenId), address(this), "The contract should own the newly minted token");
+    }
+
+    /// @dev Tests burning a verb token
+    function testBurn() public {
+        setUp();
+
+        createDefaultArtPiece();
+
+        uint256 tokenId = verbsToken.mint();
+        uint256 initialTotalSupply = verbsToken.totalSupply();
+        verbsToken.burn(tokenId);
+        uint256 newTotalSupply = verbsToken.totalSupply();
+        assertEq(newTotalSupply, initialTotalSupply - 1, "Total supply should decrease by 1 after burning");
+    }
 
 
     // /// @dev Tests minting by non-minter should revert
@@ -74,18 +110,18 @@ contract VerbsTokenTest is Test {
     //     }
     // }
 
-    // /// @dev Tests the contract URI of the VerbsToken
-    // function testContractURI() public {
-    //     setUp();
-    //     assertEq(verbsToken.contractURI(), "ipfs://QmQzDwaZ7yQxHHs7sQQenJVB89riTSacSGcJRv9jtHPuz5", "Contract URI should match");
-    // }
+    /// @dev Tests the contract URI of the VerbsToken
+    function testContractURI() public {
+        setUp();
+        assertEq(verbsToken.contractURI(), "ipfs://QmQzDwaZ7yQxHHs7sQQenJVB89riTSacSGcJRv9jtHPuz5", "Contract URI should match");
+    }
 
-    // /// @dev Tests that only the owner can set the contract URI
-    // function testSetContractURIByOwner() public {
-    //     setUp();
-    //     verbsToken.setContractURIHash("NewHashHere");
-    //     assertEq(verbsToken.contractURI(), "ipfs://NewHashHere", "Contract URI should be updated");
-    // }
+    /// @dev Tests that only the owner can set the contract URI
+    function testSetContractURIByOwner() public {
+        setUp();
+        verbsToken.setContractURIHash("NewHashHere");
+        assertEq(verbsToken.contractURI(), "ipfs://NewHashHere", "Contract URI should be updated");
+    }
 
     // /// @dev Tests that non-owners cannot set the contract URI
     // function testRevertOnNonOwnerSettingContractURI() public {
@@ -97,42 +133,63 @@ contract VerbsTokenTest is Test {
     //         assertEq(reason, "Ownable: caller is not the owner");
     //     }
     // }
+
+
+    // Utility function to create a new art piece and return its ID
+    function createArtPiece(
+        string memory name,
+        string memory description,
+        ICultureIndex.MediaType mediaType,
+        string memory image,
+        string memory text,
+        string memory animationUrl,
+        address creatorAddress,
+        uint256 creatorBps
+    ) internal returns (uint256) {
+        ICultureIndex.ArtPieceMetadata memory metadata = ICultureIndex
+            .ArtPieceMetadata({
+                name: name,
+                description: description,
+                mediaType: mediaType,
+                image: image,
+                text: text,
+                animationUrl: animationUrl
+            });
+
+        ICultureIndex.CreatorBps[]
+            memory creators = new ICultureIndex.CreatorBps[](1);
+        creators[0] = ICultureIndex.CreatorBps({
+            creator: creatorAddress,
+            bps: creatorBps
+        });
+
+        return cultureIndex.createPiece(metadata, creators);
+    }
+
+    //Utility function to create default art piece
+    function createDefaultArtPiece() public returns (uint256) {
+        return createArtPiece(
+            "Mona Lisa",
+            "A masterpiece",
+            ICultureIndex.MediaType.IMAGE,
+            "ipfs://legends",
+            "",
+            "",
+            address(0x1),
+            10000
+        );
+    }
 }
 
+/// @title VerbsTokenTest
+/// @dev The test suite for the VerbsToken contract
+contract VerbsTokenSetup is Test {
+    VerbsToken public verbsToken;
+    CultureIndex public cultureIndex;
+    VerbsDescriptor public descriptor;
 
-contract MockVerbsDescriptor is IVerbsDescriptorMinimal {
-    // ... implementation, maybe some hard-coded return values or setters for testing
-
-    /**
-     * @notice Given a token ID, construct a token URI for an official Vrbs DAO verb.
-     * @dev The returned value may be a base64 encoded data URI or an API URL.
-     */
-    function tokenURI(uint256 tokenId) external view override returns (string memory) {
-        return string(abi.encodePacked("ipfs://", tokenId.toString()));
+    constructor(address _cultureIndex, address _owner) {
+        cultureIndex = CultureIndex(_cultureIndex);
+        descriptor = VerbsDescriptor(_owner);
     }
-
-        /**
-     * @notice Given a token ID, construct a base64 encoded data URI for an official Vrbs DAO verb.
-     */
-    function dataURI(uint256 tokenId) public view override returns (string memory) {
-        string memory verbId = tokenId.toString();
-        string memory name = string(abi.encodePacked("Verb ", verbId));
-
-        return genericDataURI(name);
-    }
-
-    /**
-     * @notice Given a name, and description, construct a base64 encoded data URI.
-     */
-    function genericDataURI(string memory name) public view override returns (string memory) {
-        /// @dev Get name description image and animation_url from CultureIndex
-
-        NFTDescriptor.TokenURIParams memory params = NFTDescriptor.TokenURIParams({ name: name, description: description, image: image, animation_url: animation_url });
-        return NFTDescriptor.constructTokenURI(params);
-    }
-
-}
-
-contract MockCultureIndex is ICultureIndex {
-    // ... implementation, maybe some hard-coded return values or setters for testing
 }

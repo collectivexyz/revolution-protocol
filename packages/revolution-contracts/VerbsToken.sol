@@ -146,7 +146,7 @@ contract VerbsToken is IVerbsToken, Ownable, ERC721Checkpointable {
      */
     function tokenURI(uint256 tokenId) public view override returns (string memory) {
         require(_exists(tokenId), "VerbsToken: URI query for nonexistent token");
-        return descriptor.tokenURI(tokenId);
+        return descriptor.tokenURI(tokenId, artPieces[tokenId]);
     }
 
     /**
@@ -155,7 +155,7 @@ contract VerbsToken is IVerbsToken, Ownable, ERC721Checkpointable {
      */
     function dataURI(uint256 tokenId) public view override returns (string memory) {
         require(_exists(tokenId), "VerbsToken: URI query for nonexistent token");
-        return descriptor.dataURI(tokenId);
+        return descriptor.dataURI(tokenId, artPieces[tokenId]);
     }
 
     /**
