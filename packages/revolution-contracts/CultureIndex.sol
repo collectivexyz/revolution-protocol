@@ -64,6 +64,9 @@ contract CultureIndex is ICultureIndex, Ownable {
      * - The function will return the total basis points which must be checked to be exactly 10,000.
      */
     function getTotalBpsFromCreators(CreatorBps[] memory creatorArray) internal pure returns (uint256) {
+        //Require that creatorArray is not more than 100 to prevent gas limit issues
+        require(creatorArray.length <= 100, "Creator array must not be > 100");
+
         uint256 totalBps = 0;
         for (uint i = 0; i < creatorArray.length; i++) {
             require(creatorArray[i].creator != address(0), "Invalid creator address");
@@ -87,9 +90,6 @@ contract CultureIndex is ICultureIndex, Ownable {
      * - The sum of basis points in `creatorArray` must be exactly 10,000.
      */
     function createPiece(ArtPieceMetadata memory metadata, CreatorBps[] memory creatorArray) public returns (uint256) {
-        //Require that creatorArray is not more than 100 to prevent gas limit issues
-        require(creatorArray.length <= 100, "Creator array must not be > 100");
-
         uint256 totalBps = getTotalBpsFromCreators(creatorArray);
         require(totalBps == 10_000, "Total BPS must sum up to 10,000");
 
