@@ -66,9 +66,9 @@ contract VerbsDescriptor is IVerbsDescriptor, Ownable {
      * @notice Given a token ID, construct a token URI for an official Vrbs DAO verb.
      * @dev The returned value may be a base64 encoded data URI or an API URL.
      */
-    function tokenURI(uint256 tokenId, ICultureIndex.ArtPiece memory artPiece) external view returns (string memory) {
+    function tokenURI(uint256 tokenId, ICultureIndex.ArtPieceMetadata memory metadata) external view returns (string memory) {
         if (isDataURIEnabled) {
-            return dataURI(tokenId, artPiece);
+            return dataURI(tokenId, metadata);
         }
         return string(abi.encodePacked(baseURI, tokenId.toString()));
     }
@@ -76,24 +76,24 @@ contract VerbsDescriptor is IVerbsDescriptor, Ownable {
     /**
      * @notice Given a token ID, construct a base64 encoded data URI for an official Vrbs DAO verb.
      */
-    function dataURI(uint256 tokenId, ICultureIndex.ArtPiece memory artPiece) public pure returns (string memory) {
+    function dataURI(uint256 tokenId, ICultureIndex.ArtPieceMetadata memory metadata) public pure returns (string memory) {
         // string memory verbId = tokenId.toString();
         // string memory name = string(abi.encodePacked("Verb ", verbId));
 
-        return genericDataURI(artPiece.metadata.name, artPiece);
+        return genericDataURI(metadata.name, metadata);
     }
 
     /**
-     * @notice Given a name, and description, construct a base64 encoded data URI.
+     * @notice Given a name, and metadata, construct a base64 encoded data URI.
      */
-    function genericDataURI(string memory name, ICultureIndex.ArtPiece memory artPiece) public pure returns (string memory) {
+    function genericDataURI(string memory name, ICultureIndex.ArtPieceMetadata memory metadata) public pure returns (string memory) {
         /// @dev Get name description image and animation_url from CultureIndex
 
         NFTDescriptor.TokenURIParams memory params = NFTDescriptor.TokenURIParams({
             name: name,
-            description: artPiece.metadata.description,
-            image: artPiece.metadata.image,
-            animation_url: artPiece.metadata.animationUrl
+            description: metadata.description,
+            image: metadata.image,
+            animation_url: metadata.animationUrl
         });
         return NFTDescriptor.constructTokenURI(params);
     }

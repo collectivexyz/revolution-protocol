@@ -35,9 +35,9 @@ interface IVerbsDescriptor is IVerbsDescriptorMinimal {
 
     function setBaseURI(string calldata baseURI) external;
 
-    function tokenURI(uint256 tokenId, ICultureIndex.ArtPiece memory) external view returns (string memory);
+    function tokenURI(uint256 tokenId, ICultureIndex.ArtPieceMetadata memory) external view returns (string memory);
 
-    function dataURI(uint256 tokenId, ICultureIndex.ArtPiece memory) external view returns (string memory);
+    function dataURI(uint256 tokenId, ICultureIndex.ArtPieceMetadata memory) external view returns (string memory);
 
-    function genericDataURI(string calldata name, ICultureIndex.ArtPiece memory) external view returns (string memory);
+    function genericDataURI(string calldata name, ICultureIndex.ArtPieceMetadata memory) external view returns (string memory);
 }

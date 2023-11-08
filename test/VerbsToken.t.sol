@@ -2,7 +2,8 @@
 pragma solidity ^0.8.22;
 
 import {Test} from "forge-std/Test.sol";
-import {VerbsToken} from "../packages/revolution-contracts/VerbsToken.sol";  // Update this path
+import {VerbsToken} from "../packages/revolution-contracts/VerbsToken.sol";
+import {IVerbsToken} from "../packages/revolution-contracts/interfaces/IVerbsToken.sol";
 import { IVerbsDescriptorMinimal } from "../packages/revolution-contracts/interfaces/IVerbsDescriptorMinimal.sol";
 import { IProxyRegistry } from "../packages/revolution-contracts/external/opensea/IProxyRegistry.sol";
 import { ICultureIndex } from "../packages/revolution-contracts/interfaces/ICultureIndex.sol";
@@ -290,6 +291,152 @@ function testReentrancyOnMint() public {
     assertTrue(reentrancyOccurred, "Reentrancy guard should prevent minting in the same call stack");
 }
 
+    /// @dev Tests the initial state of the contract variables
+    function testInitialVariablesState() public {
+        setUp();
+
+        address minter = verbsToken.minter();
+        address descriptorAddress = address(verbsToken.descriptor());
+        address cultureIndexAddress = address(verbsToken.cultureIndex());
+
+        assertEq(minter, address(this), "Initial minter should be the contract deployer");
+        assertEq(descriptorAddress, address(descriptor), "Initial descriptor should be set correctly");
+        assertEq(cultureIndexAddress, address(cultureIndex), "Initial cultureIndex should be set correctly");
+
+    }
+
+    /// @dev Tests that only the owner can call owner-specific functions
+function testOwnerPrivileges() public {
+    setUp();
+
+    // Test only owner can change contract URI
+    verbsToken.setContractURIHash("NewHashHere");
+    assertEq(verbsToken.contractURI(), "ipfs://NewHashHere", "Owner should be able to change contract URI");
+
+    // Test that non-owner cannot change contract URI
+    address nonOwner = address(0x1);
+    bool nonOwnerCantChangeContractURI = false;
+    vm.startPrank(nonOwner);
+    try verbsToken.setContractURIHash("FakeHash") {
+        fail("Non-owner should not be able to change contract URI");
+    } catch {
+        nonOwnerCantChangeContractURI = true;
+    }
+    vm.stopPrank();
+
+    assertTrue(nonOwnerCantChangeContractURI, "Non-owner should not be able to change contract URI");
+}
+
+/// @dev Tests setting and updating the minter address
+function testMinterAssignment() public {
+    setUp();
+
+    // Test only owner can change minter
+    address newMinter = address(0xABC);
+    verbsToken.setMinter(newMinter);
+    assertEq(verbsToken.minter(), newMinter, "Owner should be able to change minter");
+
+    // Test that non-owner cannot change minter
+    address nonOwner = address(0x1);
+    vm.startPrank(nonOwner);
+    bool nonOwnerCantChangeMinter = false;
+    try verbsToken.setMinter(nonOwner) {
+        fail("Non-owner should not be able to change minter");
+    } catch {
+        nonOwnerCantChangeMinter = true;
+    }
+    vm.stopPrank();
+
+    assertTrue(nonOwnerCantChangeMinter, "Non-owner should not be able to change minter");
+}
+
+/// @dev Tests that minted tokens are correctly associated with the art piece from CultureIndex
+function testCorrectArtAssociation() public {
+    setUp();
+    uint256 artPieceId = createDefaultArtPiece();
+    uint256 tokenId = verbsToken.mint();
+
+    (uint256 recordedPieceId,,,) = verbsToken.artPieces(tokenId);
+
+    // Validate the token's associated art piece
+    assertEq(recordedPieceId, artPieceId, "Minted token should be associated with the correct art piece");
+}
+
+/// @dev Ensures _currentVerbId increments correctly after each mint
+function testMintingIncrement() public {
+    setUp();
+    createDefaultArtPiece();
+    createDefaultArtPiece();
+
+    uint256 tokenId1 = verbsToken.mint();
+    assertEq(verbsToken.totalSupply(), tokenId1 + 1, "CurrentVerbId should increment after first mint");
+
+    uint256 tokenId2 = verbsToken.mint();
+    assertEq(verbsToken.totalSupply(), tokenId2 + 1, "CurrentVerbId should increment after second mint");
+}
+
+/// @dev Checks if the VerbCreated event is emitted with correct parameters on minting
+function testMintingEvent() public {
+    setUp();
+    createDefaultArtPiece();
+
+    (uint256 pieceId,ICultureIndex.ArtPieceMetadata memory metadata,,) = cultureIndex.pieces(0);
+
+    emit log_uint(pieceId);
+
+    ICultureIndex.CreatorBps[] memory creators = new ICultureIndex.CreatorBps[](1);
+    creators[0] = ICultureIndex.CreatorBps({
+        creator: address(0x1),
+        bps: 10000
+    });
+
+    ICultureIndex.ArtPiece memory expectedArtPiece = ICultureIndex.ArtPiece({
+        pieceId: 0,
+        metadata: metadata,
+        creators: creators,
+        dropper: address(this),
+        isDropped: true
+    });
+
+    vm.expectEmit(true, true, true, true);
+
+    emit IVerbsToken.VerbCreated(0, expectedArtPiece);
+
+    verbsToken.mint();
+}
+
+/// @dev Tests that only the minter can burn tokens
+function testBurningPermission() public {
+    setUp();
+    createDefaultArtPiece();
+    uint256 tokenId = verbsToken.mint();
+
+    // Try to burn token as a minter
+    verbsToken.burn(tokenId);
+
+    // Try to burn token as a non-minter
+    address nonMinter = address(0xABC);
+    vm.startPrank(nonMinter);
+    try verbsToken.burn(tokenId) {
+        fail("Non-minter should not be able to burn tokens");
+    } catch Error(string memory reason) {
+        assertEq(reason, "Sender is not the minter");
+    }
+    vm.stopPrank();
+}
+
+/// @dev Validates that the token URI is correctly set and retrieved
+function testTokenURI() public {
+    setUp();
+    uint256 artPieceId = createDefaultArtPiece();
+    uint256 tokenId = verbsToken.mint();
+    (,ICultureIndex.ArtPieceMetadata memory metadata,,) = cultureIndex.pieces(artPieceId);
+    // Assuming the descriptor returns a fixed URI for the given tokenId
+    string memory expectedTokenURI = descriptor.tokenURI(tokenId, metadata);
+    assertEq(verbsToken.tokenURI(tokenId), expectedTokenURI, "Token URI should be correctly set and retrieved");
+}
+
+
 /// @dev Tests approval checks for transfer functions
 function testApprovalChecks() public {
     setUp();
@@ -412,7 +559,6 @@ function parseJson(string memory _json) internal returns (string memory name, st
 
     return (name, description, image);
 }
-
 
 }
 

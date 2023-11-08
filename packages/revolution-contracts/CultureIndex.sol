@@ -95,10 +95,11 @@ contract CultureIndex is ICultureIndex {
         // Validate the media type and associated data
         validateMediaType(metadata);
 
-        pieceCount++;
-        ArtPiece storage newPiece = pieces[pieceCount];
+        uint256 pieceId = pieceCount++;
 
-        newPiece.pieceId = pieceCount;
+        ArtPiece storage newPiece = pieces[pieceId];
+
+        newPiece.pieceId = pieceId;
         newPiece.metadata = metadata;
         newPiece.dropper = msg.sender;
 
@@ -107,13 +108,13 @@ contract CultureIndex is ICultureIndex {
         }
 
         /// @dev Insert the new piece into the max heap
-        maxHeap.insert(pieceCount, 0);
+        maxHeap.insert(pieceId, 0);
 
-        emit PieceCreated(pieceCount, msg.sender, metadata.name, metadata.description, metadata.image, metadata.animationUrl, metadata.text, uint8(metadata.mediaType));
+        emit PieceCreated(pieceId, msg.sender, metadata.name, metadata.description, metadata.image, metadata.animationUrl, metadata.text, uint8(metadata.mediaType));
 
         // Emit an event for each creator
         for (uint i = 0; i < creatorArray.length; i++) {
-            emit PieceCreatorAdded(pieceCount, creatorArray[i].creator, msg.sender, creatorArray[i].bps);
+            emit PieceCreatorAdded(pieceId, creatorArray[i].creator, msg.sender, creatorArray[i].bps);
         }
         return newPiece.pieceId;
     }
@@ -129,7 +130,7 @@ contract CultureIndex is ICultureIndex {
         uint256 weight = votingToken.balanceOf(msg.sender);
         require(weight > 0, "Weight must be greater than zero");
 
-        require(pieceId > 0 && pieceId <= pieceCount, "Invalid piece ID");
+        require(pieceId <= pieceCount, "Invalid piece ID");
         require(!hasVoted[pieceId][msg.sender], "Already voted");
         require(!pieces[pieceId].isDropped, "Piece has already been dropped");
 
