@@ -1,0 +1,221 @@
+// SPDX-License-Identifier: MIT
+pragma solidity ^0.8.22;
+
+import {Test} from "forge-std/Test.sol";
+import {VerbsToken} from "../packages/revolution-contracts/VerbsToken.sol";
+import {IVerbsToken} from "../packages/revolution-contracts/interfaces/IVerbsToken.sol";
+import { IVerbsDescriptorMinimal } from "../packages/revolution-contracts/interfaces/IVerbsDescriptorMinimal.sol";
+import { IProxyRegistry } from "../packages/revolution-contracts/external/opensea/IProxyRegistry.sol";
+import { ICultureIndex } from "../packages/revolution-contracts/interfaces/ICultureIndex.sol";
+import { NFTDescriptor } from "../packages/revolution-contracts/libs/NFTDescriptor.sol";
+import { Strings } from "@openzeppelin/contracts/utils/Strings.sol";
+import {CultureIndex} from "../packages/revolution-contracts/CultureIndex.sol";
+import {MockERC20} from "./MockERC20.sol";
+import {VerbsDescriptor} from "../packages/revolution-contracts/VerbsDescriptor.sol";
+import "./Base64Decode.sol";
+import "./JsmnSolLib.sol";
+
+/// @title VerbsTokenTest
+/// @dev The test suite for the VerbsToken contract
+contract VerbsTokenTest is Test {
+    VerbsToken public verbsToken;
+    CultureIndex public cultureIndex;
+    MockERC20 public mockVotingToken;
+    VerbsDescriptor public descriptor;
+
+    /// @dev Sets up a new VerbsToken instance before each test
+    function setUp() public {
+        // Create a new CultureIndex contract
+        mockVotingToken = new MockERC20();
+        cultureIndex = new CultureIndex(address(mockVotingToken));
+        descriptor = new VerbsDescriptor(address(this));
+
+        IVerbsDescriptorMinimal _descriptor = descriptor;
+        IProxyRegistry _proxyRegistry = IProxyRegistry(address(0x2));
+        ICultureIndex _cultureIndex = cultureIndex;
+
+        verbsToken = new VerbsToken(address(this), address(this), _descriptor, _proxyRegistry, _cultureIndex);
+    }
+
+    /// @dev Tests the symbol of the VerbsToken
+    function testSymbol() public {
+        setUp();
+        assertEq(verbsToken.symbol(), "VERB", "Symbol should be VERB");
+    }
+
+    /// @dev Tests the name of the VerbsToken
+    function testName() public {
+        setUp();
+        assertEq(verbsToken.name(), "Verbs", "Name should be Verbs");
+    }
+
+    /// @dev Tests the contract URI of the VerbsToken
+    function testContractURI() public {
+        setUp();
+        assertEq(verbsToken.contractURI(), "ipfs://QmQzDwaZ7yQxHHs7sQQenJVB89riTSacSGcJRv9jtHPuz5", "Contract URI should match");
+    }
+
+    // Utility function to create a new art piece and return its ID
+    function createArtPiece(
+        string memory name,
+        string memory description,
+        ICultureIndex.MediaType mediaType,
+        string memory image,
+        string memory text,
+        string memory animationUrl,
+        address creatorAddress,
+        uint256 creatorBps
+    ) internal returns (uint256) {
+        ICultureIndex.ArtPieceMetadata memory metadata = ICultureIndex
+            .ArtPieceMetadata({
+                name: name,
+                description: description,
+                mediaType: mediaType,
+                image: image,
+                text: text,
+                animationUrl: animationUrl
+            });
+
+        ICultureIndex.CreatorBps[]
+            memory creators = new ICultureIndex.CreatorBps[](1);
+        creators[0] = ICultureIndex.CreatorBps({
+            creator: creatorAddress,
+            bps: creatorBps
+        });
+
+        return cultureIndex.createPiece(metadata, creators);
+    }
+
+    //Utility function to create default art piece
+    function createDefaultArtPiece() public returns (uint256) {
+        return createArtPiece(
+            "Mona Lisa",
+            "A masterpiece",
+            ICultureIndex.MediaType.IMAGE,
+            "ipfs://legends",
+            "",
+            "",
+            address(0x1),
+            10000
+        );
+    }
+
+
+    /// @dev Tests the initial state of the contract variables
+    function testInitialVariablesState() public {
+        setUp();
+
+        address minter = verbsToken.minter();
+        address descriptorAddress = address(verbsToken.descriptor());
+        address cultureIndexAddress = address(verbsToken.cultureIndex());
+
+        assertEq(minter, address(this), "Initial minter should be the contract deployer");
+        assertEq(descriptorAddress, address(descriptor), "Initial descriptor should be set correctly");
+        assertEq(cultureIndexAddress, address(cultureIndex), "Initial cultureIndex should be set correctly");
+
+    }
+
+
+/// @dev Tests that minted tokens are correctly associated with the art piece from CultureIndex
+function testCorrectArtAssociation() public {
+    setUp();
+    uint256 artPieceId = createDefaultArtPiece();
+    uint256 tokenId = verbsToken.mint();
+
+    (uint256 recordedPieceId,,,) = verbsToken.artPieces(tokenId);
+
+    // Validate the token's associated art piece
+    assertEq(recordedPieceId, artPieceId, "Minted token should be associated with the correct art piece");
+}
+
+/// @dev Tests token metadata integrity after minting
+function testTokenMetadataIntegrity() public {
+    setUp();
+
+    // Create an art piece and mint a token
+    uint256 artPieceId = createDefaultArtPiece();
+    uint256 tokenId = verbsToken.mint();
+
+    // Retrieve the token metadata URI
+    string memory tokenURI = verbsToken.tokenURI(tokenId);
+
+    emit log_string(tokenURI);
+
+    // Extract the base64 encoded part of the tokenURI
+    string memory base64Metadata = substring(tokenURI, 29, bytes(tokenURI).length);
+    emit log_string(base64Metadata);
+
+    // Decode the base64 encoded metadata
+    string memory metadataJson = decodeMetadata(base64Metadata);
+    emit log_string(metadataJson);
+
+    // Parse the JSON to get metadata fields
+    (string memory name, string memory description, string memory image) = parseJson(metadataJson);
+
+    // Retrieve the expected metadata directly from the art piece for comparison
+    (,ICultureIndex.ArtPieceMetadata memory metadata,,) = cultureIndex.pieces(artPieceId);
+
+    // Assert that the token metadata matches the expected metadata from the art piece
+    assertEq(name, metadata.name, "Token name does not match expected name");
+    assertEq(description, metadata.description, "Token description does not match expected description");
+    assertEq(image, metadata.image, "Token image does not match expected image URL");
+}
+
+// Helper function to decode base64 encoded metadata
+function decodeMetadata(string memory base64Metadata) internal pure returns (string memory) {
+    // Decode the base64 string
+    return string(Base64Decode.decode(base64Metadata));
+}
+
+// Helper function to extract a substring from a string
+function substring(string memory str, uint256 startIndex, uint256 endIndex) internal pure returns (string memory) {
+    bytes memory strBytes = bytes(str);
+    bytes memory result = new bytes(endIndex - startIndex);
+    for(uint256 i = startIndex; i < endIndex; i++) {
+        result[i-startIndex] = strBytes[i];
+    }
+    return string(result);
+}
+
+// Helper function to parse JSON strings into components
+function parseJson(string memory _json) internal returns (string memory name, string memory description, string memory image) {
+    uint returnValue;
+    JsmnSolLib.Token[] memory tokens;
+    uint actualNum;
+
+    // Number of tokens to be parsed in the JSON (could be estimated or exactly known)
+    uint256 numTokens = 20; // Increase if necessary to accommodate all fields in the JSON
+
+    // Parse the JSON
+    (returnValue, tokens, actualNum) = JsmnSolLib.parse(_json, numTokens);
+
+    emit log_uint(returnValue);
+    emit log_uint(actualNum);
+    emit log_uint(tokens.length);
+
+    // Extract values from JSON by token indices
+    for(uint256 i = 0; i < actualNum; i++) {
+        JsmnSolLib.Token memory t = tokens[i];
+
+        // Check if the token is a key
+        if (t.jsmnType == JsmnSolLib.JsmnType.STRING && (i+1) < actualNum) {
+            string memory key = JsmnSolLib.getBytes(_json, t.start, t.end);
+            string memory value = JsmnSolLib.getBytes(_json, tokens[i+1].start, tokens[i+1].end);
+            
+            // Compare the key with expected fields
+            if (keccak256(bytes(key)) == keccak256(bytes("name"))) {
+                name = value;
+            } else if (keccak256(bytes(key)) == keccak256(bytes("description"))) {
+                description = value;
+            } else if (keccak256(bytes(key)) == keccak256(bytes("image"))) {
+                image = value;
+            }
+            // Skip the value token, as the key's value is always the next token
+            i++;
+        }
+    }
+
+    return (name, description, image);
+}
+
+}
