@@ -265,7 +265,117 @@ function testVotingOnArtPiece() public {
     assertEq(newVotes.length, initialVotes.length + 1, "Vote count for the voter should be incremented by 1");
 }
 
+/// @dev Tests that a vote from a voter with a zero balance is rejected.
+function testVotingWithZeroBalance() public {
+    // Arrange
+    uint256 artPieceId = createDefaultArtPiece();
+    address voter = address(0x3); // An address that does not hold any voting tokens
 
+    // Act & Assert
+    vm.prank(voter); // Set the next message sender to the voter address
+    vm.expectRevert("Weight must be greater than zero"); // This assumes your contract reverts with this message for zero balance
+    cultureIndex.vote(artPieceId); // Trying to vote
+}
+
+/// @dev Tests that a voter cannot vote for a piece more than once.
+function testDoubleVotingRestriction() public {
+    // Arrange
+    uint256 artPieceId = createDefaultArtPiece();
+    address voter = address(0x4);
+    uint256 voteWeight = 50;
+
+    // Give the voter some tokens and allow them to vote
+    mockVotingToken._mint(voter, voteWeight);
+
+    // First vote
+    vm.prank(voter);
+    cultureIndex.vote(artPieceId);
+
+    // Act & Assert
+    // Attempt to vote again
+    vm.prank(voter);
+    vm.expectRevert("Already voted"); // This assumes your contract reverts with this message for double voting
+    cultureIndex.vote(artPieceId);
+}
+
+/// @dev Tests that voting on an already dropped piece is rejected.
+function testVotingOnDroppedPiece() public {
+    // Arrange
+    uint256 artPieceId = createDefaultArtPiece();
+    address voter = address(0x5);
+    uint256 voteWeight = 100;
+
+    // Simulate dropping the piece
+    cultureIndex.dropTopVotedPiece(); // Replace with your actual function to mark a piece as dropped
+
+    // Give the voter some tokens
+    mockVotingToken._mint(voter, voteWeight);
+
+    // Act & Assert
+    vm.prank(voter); // Set the next message sender to the voter address
+    vm.expectRevert("Piece has already been dropped"); // This assumes your contract reverts with this message when voting on a dropped piece
+    cultureIndex.vote(artPieceId);
+}
+
+
+/// @dev Tests that getTopVotedPiece returns the correct art piece.
+function testGetTopVotedPiece() public {
+    // Arrange
+    uint256 firstArtPieceId = createDefaultArtPiece();
+    uint256 secondArtPieceId = createArtPiece("Second Piece", "Another masterpiece", ICultureIndex.MediaType.IMAGE, "ipfs://secondpiece", "", "", address(0x2), 10000);
+
+    // Assign vote weights
+    uint256 firstPieceVoteWeight = 100;
+    uint256 secondPieceVoteWeight = 200;
+    address voter = address(0x6);
+
+    // Give the voter some tokens and vote on both pieces
+    mockVotingToken._mint(voter, firstPieceVoteWeight);
+
+    // Vote on the first piece
+    vm.prank(voter);
+    cultureIndex.vote(firstArtPieceId);
+
+    mockVotingToken._mint(voter, secondPieceVoteWeight);
+
+    // Vote on the second piece with a higher weight
+    vm.prank(voter);
+    cultureIndex.vote(secondArtPieceId);
+
+    // Act
+    ICultureIndex.ArtPiece memory topPiece = cultureIndex.getTopVotedPiece();
+
+    // Assert
+    assertEq(topPiece.pieceId, secondArtPieceId, "The top voted piece should be the second piece with higher votes");
+}
+
+/// @dev Tests that dropTopVotedPiece updates the isDropped flag of the art piece.
+function testDropTopVotedPiece() public {
+    // Arrange
+    uint256 artPieceId = createDefaultArtPiece();
+    // Vote on the piece to make it the top voted
+    address voter = address(0x7);
+    mockVotingToken._mint(voter, 100);
+    vm.prank(voter);
+    cultureIndex.vote(artPieceId);
+
+    // Act
+    cultureIndex.dropTopVotedPiece();
+
+    // Assert
+    ICultureIndex.ArtPiece memory piece = cultureIndex.getPieceById(artPieceId); 
+    assertTrue(piece.isDropped, "Art piece should be marked as dropped after dropping");
+}
+
+/// @dev Tests that dropTopVotedPiece fails with the correct error when the heap is empty.
+function testDropTopVotedPieceOnEmptyHeap() public {
+    // Arrange
+    // Ensure no art pieces have been created or all created pieces are already dropped
+
+    // Act & Assert
+    vm.expectRevert("Heap is empty"); // This assumes your contract reverts with this message when there's nothing to drop
+    cultureIndex.dropTopVotedPiece();
+}
 
 
 /// @dev Tests token metadata integrity after minting
