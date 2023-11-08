@@ -22,7 +22,7 @@ contract CultureIndexVotingBasicTest is Test {
         mockVotingToken = new MockERC20();
 
         // Initialize your CultureIndex contract
-        cultureIndex = new CultureIndex(address(mockVotingToken));
+        cultureIndex = new CultureIndex(address(mockVotingToken), address(this));
     }
 
     /**

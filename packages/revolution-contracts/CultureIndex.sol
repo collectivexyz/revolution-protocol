@@ -4,8 +4,9 @@ pragma solidity ^0.8.22;
 import { IERC20 } from "./IERC20.sol";
 import { MaxHeap } from "./MaxHeap.sol";
 import { ICultureIndex } from "./interfaces/ICultureIndex.sol";
+import { Ownable } from "@openzeppelin/contracts/access/Ownable.sol";
 
-contract CultureIndex is ICultureIndex {
+contract CultureIndex is ICultureIndex, Ownable {
     // The MaxHeap data structure used to keep track of the top-voted piece
     MaxHeap public maxHeap;
 
@@ -13,7 +14,7 @@ contract CultureIndex is ICultureIndex {
     IERC20 public votingToken;
 
     // Initialize ERC20 Token in the constructor
-    constructor(address _votingToken) {
+    constructor(address _votingToken, address _initialOwner) Ownable(_initialOwner) {
         votingToken = IERC20(_votingToken);
         maxHeap = new MaxHeap(21_000_000_000);
     }
@@ -47,7 +48,7 @@ contract CultureIndex is ICultureIndex {
         if (metadata.mediaType == MediaType.IMAGE) {
             require(bytes(metadata.image).length > 0, "Image URL must be provided");
         } else if (metadata.mediaType == MediaType.ANIMATION) {
-            require(bytes(metadata.animationUrl).length > 0, "Video URL must be provided");
+            require(bytes(metadata.animationUrl).length > 0, "Animation URL must be provided");
         } else if (metadata.mediaType == MediaType.TEXT) {
             require(bytes(metadata.text).length > 0, "Text must be provided");
         }
@@ -196,7 +197,7 @@ contract CultureIndex is ICultureIndex {
      * @notice Pulls and drops the top-voted piece.
      * @return The top voted piece
      */
-    function dropTopVotedPiece() public returns (ArtPiece memory) {
+    function dropTopVotedPiece() public onlyOwner returns (ArtPiece memory) {
         uint256 pieceId;
         try maxHeap.extractMax() returns (uint256 _pieceId, uint256 _value) {
             pieceId = _pieceId;

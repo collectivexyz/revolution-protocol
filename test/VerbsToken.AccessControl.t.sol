@@ -27,7 +27,7 @@ contract VerbsTokenTest is Test {
     function setUp() public {
         // Create a new CultureIndex contract
         mockVotingToken = new MockERC20();
-        cultureIndex = new CultureIndex(address(mockVotingToken));
+        cultureIndex = new CultureIndex(address(mockVotingToken), address(this));
         descriptor = new VerbsDescriptor(address(this));
 
         IVerbsDescriptorMinimal _descriptor = descriptor;
@@ -214,6 +214,8 @@ function testMinterAssignment() public {
 }
 
 
+
+
 /// @dev Tests that only the minter can burn tokens
 function testBurningPermission() public {
     setUp();
@@ -251,6 +253,66 @@ function testLockMinter() public {
     assertTrue(verbsToken.isMinterLocked(), "Minter should be locked");
     vm.expectRevert("Minter is locked");
     verbsToken.setMinter(address(0x456));
+}
+
+/// @dev Tests that the minter can be set and locked appropriately
+function testMinterAssignmentAndLocking() public {
+    setUp();
+    createDefaultArtPiece();
+    // Test setting the minter and minting a token
+    verbsToken.setMinter(address(0x2));
+    vm.prank(address(0x2)); // simulate calls from the new minter address
+    verbsToken.mint();
+
+    // Lock the minter and attempt to change it, expecting a revert
+    verbsToken.lockMinter();
+    vm.expectRevert("Minter is locked");
+    verbsToken.setMinter(address(0x3));
+}
+
+
+/// @dev Tests that the descriptor can be set and locked appropriately
+function testDescriptorLocking() public {
+    setUp();
+
+    // Test setting the descriptor
+    IVerbsDescriptorMinimal newDescriptor = new VerbsDescriptor(address(this));
+    verbsToken.setDescriptor(newDescriptor);
+
+    // Lock the descriptor and attempt to change it, expecting a revert
+    verbsToken.lockDescriptor();
+    vm.expectRevert("Descriptor is locked");
+    verbsToken.setDescriptor(newDescriptor);
+}
+
+/// @dev Tests that the CultureIndex can be set and locked appropriately
+function testCultureIndexLocking() public {
+    setUp();
+
+    // Test setting the CultureIndex
+    CultureIndex newCultureIndex = new CultureIndex(address(mockVotingToken), address(this));
+    verbsToken.setCultureIndex(ICultureIndex(address(newCultureIndex)));
+
+    // Lock the CultureIndex and attempt to change it, expecting a revert
+    verbsToken.lockCultureIndex();
+    vm.expectRevert("CultureIndex is locked");
+    verbsToken.setCultureIndex(ICultureIndex(address(newCultureIndex)));
+}
+
+
+/// @dev Tests that contractURIHash can be updated and locked
+function testContractURIUpdateAndLocking() public {
+    setUp();
+
+    // Test updating the contract URI
+    string memory newURI = "QmNewHash";
+    verbsToken.setContractURIHash(newURI);
+    assertEq(verbsToken.contractURI(), string(abi.encodePacked("ipfs://", newURI)));
+
+    // Lock the descriptor (assuming contractURIHash is locked along with it) and attempt to change it
+    verbsToken.lockDescriptor();
+    vm.expectRevert("Descriptor is locked");
+    verbsToken.setContractURIHash("QmAnotherNewHash");
 }
 
 /// @dev Tests updating and locking the descriptor.

@@ -20,7 +20,7 @@ contract CultureIndexArtPieceTest is Test {
 
     function setUp() public {
         mockVotingToken = new MockERC20();
-        cultureIndex = new CultureIndex(address(mockVotingToken));
+        cultureIndex = new CultureIndex(address(mockVotingToken), address(this));
 
         // Create new test instances acting as different voters
         voter1Test = new CultureIndexVotingTest(address(cultureIndex), address(mockVotingToken));

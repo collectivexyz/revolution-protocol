@@ -27,7 +27,7 @@ contract VerbsTokenTest is Test {
     function setUp() public {
         // Create a new CultureIndex contract
         mockVotingToken = new MockERC20();
-        cultureIndex = new CultureIndex(address(mockVotingToken));
+        cultureIndex = new CultureIndex(address(mockVotingToken), address(this));
         descriptor = new VerbsDescriptor(address(this));
 
         IVerbsDescriptorMinimal _descriptor = descriptor;

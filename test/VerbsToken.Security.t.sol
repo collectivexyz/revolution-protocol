@@ -3,6 +3,7 @@ pragma solidity ^0.8.22;
 
 import {Test} from "forge-std/Test.sol";
 import {VerbsToken} from "../packages/revolution-contracts/VerbsToken.sol";
+import { ICultureIndex, ICultureIndexEvents } from "../packages/revolution-contracts/interfaces/ICultureIndex.sol";
 import {IVerbsToken} from "../packages/revolution-contracts/interfaces/IVerbsToken.sol";
 import { IVerbsDescriptorMinimal } from "../packages/revolution-contracts/interfaces/IVerbsDescriptorMinimal.sol";
 import { IProxyRegistry } from "../packages/revolution-contracts/external/opensea/IProxyRegistry.sol";
@@ -27,7 +28,7 @@ contract VerbsTokenTest is Test {
     function setUp() public {
         // Create a new CultureIndex contract
         mockVotingToken = new MockERC20();
-        cultureIndex = new CultureIndex(address(mockVotingToken));
+        cultureIndex = new CultureIndex(address(mockVotingToken), address(this));
         descriptor = new VerbsDescriptor(address(this));
 
         IVerbsDescriptorMinimal _descriptor = descriptor;
@@ -38,7 +39,17 @@ contract VerbsTokenTest is Test {
     }
 
 
-
+    //function to create basic metadata
+    function createDefaultMetadata() internal pure returns (ICultureIndex.ArtPieceMetadata memory) {
+        return ICultureIndex.ArtPieceMetadata({
+            name: "Mona Lisa",
+            description: "A masterpiece",
+            mediaType: ICultureIndex.MediaType.IMAGE,
+            image: "ipfs://legends",
+            text: "",
+            animationUrl: ""
+        });
+    }
 
 
     // Utility function to create a new art piece and return its ID
@@ -173,7 +184,127 @@ function testApprovalChecks() public {
     assertFalse(transferWithApprovalFailed, "Transfer with approval should succeed");
 }
 
+function testPrivilegeEscalation() public {
+    setUp();
+    address unauthorizedAddress = address(0xDead);
+    vm.startPrank(unauthorizedAddress);
+
+    // These should all fail when called by an unauthorized address
+    vm.expectRevert();
+    verbsToken.setMinter(unauthorizedAddress);
+
+    vm.expectRevert();
+    verbsToken.lockMinter();
+
+    vm.expectRevert();
+    verbsToken.setDescriptor(IVerbsDescriptorMinimal(unauthorizedAddress));
+
+    vm.expectRevert();
+    verbsToken.lockDescriptor();
+
+    vm.expectRevert();
+    verbsToken.setCultureIndex(ICultureIndex(unauthorizedAddress));
+
+    vm.expectRevert();
+    verbsToken.lockCultureIndex();
 }
+
+function testReentrancyOtherFunctions() public {
+    setUp();
+    createDefaultArtPiece();
+    address attacker = address(new ReentrancyAttackContractGeneral(address(verbsToken)));
+
+    // Simulate a reentrancy attack for burn
+    vm.expectRevert("Sender is not the minter");
+    ReentrancyAttackContractGeneral(attacker).attackBurn();
+}
+
+function testBasisPointsSum() public {
+    setUp();
+    bool reverted = false;
+
+    // Total basis points not equal to 10000 should revert
+    ICultureIndex.CreatorBps[] memory creators = new ICultureIndex.CreatorBps[](2);
+    creators[0] = ICultureIndex.CreatorBps({creator: address(0x1), bps: 5000});
+    creators[1] = ICultureIndex.CreatorBps({creator: address(0x2), bps: 4000});
+
+    try cultureIndex.createPiece(createDefaultMetadata(), creators) {
+        fail("Should fail: Total basis points do not sum up to 10000");
+    } catch {
+        reverted = true;
+    }
+    assertTrue(reverted, "Transaction should revert if total basis points do not sum up to 10000");
+}
+
+function testZeroAddressInCreatorArray() public {
+    setUp();
+    bool reverted = false;
+
+    // Creator array containing a zero address should revert
+    ICultureIndex.CreatorBps[] memory creators = new ICultureIndex.CreatorBps[](1);
+    creators[0] = ICultureIndex.CreatorBps({creator: address(0), bps: 10000});
+
+    try cultureIndex.createPiece(createDefaultMetadata(), creators) {
+        fail("Should fail: Creator array contains zero address");
+    } catch {
+        reverted = true;
+    }
+    assertTrue(reverted, "Transaction should revert if creator array contains zero address");
+}
+
+function testEventEmission() public {
+    setUp();
+    // Check that the PieceCreated event was emitted with correct parameters
+    vm.expectEmit(true, true, true, true);
+    emit ICultureIndexEvents.PieceCreated(0, address(this), "Mona Lisa", "A masterpiece", "ipfs://legends", "", "", uint8(ICultureIndex.MediaType.IMAGE));
+
+    // Check that the PieceCreatorAdded event was emitted with correct parameters
+    vm.expectEmit(true, true, true, true);
+    emit ICultureIndexEvents.PieceCreatorAdded(0, address(0x1), address(this), 10000);
+
+    createDefaultArtPiece();
+}
+
+
+function testFunctionalityUnderMaximumLoad() public {
+    setUp();
+    bool reverted = false;
+
+    // Create an art piece with the maximum allowed number of creators
+    ICultureIndex.CreatorBps[] memory creators = new ICultureIndex.CreatorBps[](100);
+    for (uint256 i = 0; i < creators.length; i++) {
+        creators[i] = ICultureIndex.CreatorBps({creator: address(uint160(i + 1)), bps: 100});
+    }
+
+    try cultureIndex.createPiece(createDefaultMetadata(), creators) {
+        // This should succeed if under maximum load
+    } catch {
+        reverted = true;
+        fail("Should not fail: creator array is at maximum allowed length");
+    }
+    assertFalse(reverted, "Should handle the maximum number of creators without reverting");
+}
+
+
+
+}
+
+// Helper mock contract to simulate reentrancy for other functions
+contract ReentrancyAttackContractGeneral {
+    VerbsToken private verbsToken;
+    constructor(address _verbsToken) {
+        verbsToken = VerbsToken(_verbsToken);
+    }
+
+    function attackBurn() public {
+        uint256 tokenId = verbsToken.mint();
+        verbsToken.burn(tokenId); // Attempt to re-enter here
+    }
+
+    // Implement fallback or receive function that calls burn again
+}
+
+
 
 // Helper mock contract to simulate reentrancy attack
 contract ReentrancyAttackContract {
