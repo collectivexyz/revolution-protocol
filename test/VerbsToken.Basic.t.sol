@@ -28,15 +28,11 @@ contract VerbsTokenTest is Test {
         // Create a new mock ERC20 token for voting
         mockVotingToken = new MockERC20();
 
-        // Deploy a new VerbsDescriptor, which will be used by VerbsToken
-        descriptor = new VerbsDescriptor(address(this));
-        IVerbsDescriptorMinimal _descriptor = descriptor;
-
         // Deploy a new proxy registry for OpenSea
         ProxyRegistry _proxyRegistry = new ProxyRegistry();
 
         // Create a new VerbsToken contract, passing address(this) as both the minter and the initial owner
-        verbsToken = new VerbsToken(address(this), address(this), _descriptor, _proxyRegistry, ICultureIndex(address(0)));
+        verbsToken = new VerbsToken(address(this), address(this), IVerbsDescriptorMinimal(address(0)), _proxyRegistry, ICultureIndex(address(0)));
 
         // Deploy CultureIndex with the VerbsToken's address as the initial owner
         cultureIndex = new CultureIndex(address(mockVotingToken), address(verbsToken));
@@ -44,6 +40,13 @@ contract VerbsTokenTest is Test {
 
         // Now that CultureIndex is deployed, set it in VerbsToken
         verbsToken.setCultureIndex(_cultureIndex);
+
+        // Deploy a new VerbsDescriptor, which will be used by VerbsToken
+        descriptor = new VerbsDescriptor(address(verbsToken));
+        IVerbsDescriptorMinimal _descriptor = descriptor;
+
+        // Now that VerbsDescriptor is deployed, set it in VerbsToken
+        verbsToken.setDescriptor(_descriptor);
     }
 
 
