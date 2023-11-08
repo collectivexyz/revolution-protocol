@@ -62,6 +62,24 @@ contract CultureIndexArtPieceTest is Test {
         return creators;
     }
 
+    //test that creating the first piece the pieceId is 0
+    function testFirstPieceId() public {
+        setUp();
+
+        uint256 newPieceId = createArtPiece(
+            "Mona Lisa",
+            "A masterpiece",
+            ICultureIndex.MediaType.IMAGE,
+            "ipfs://legends",
+            "",
+            "",
+            address(0x1),
+            10000
+        );
+
+        assertEq(newPieceId, 0);
+    }
+
     //returns metadata and creators in a tuple
     function createArtPieceTuple(
         string memory name,
