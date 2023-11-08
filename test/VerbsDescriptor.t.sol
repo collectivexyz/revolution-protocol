@@ -4,6 +4,9 @@ pragma solidity ^0.8.22;
 import "forge-std/Test.sol";
 import "../packages/revolution-contracts/VerbsDescriptor.sol";
 import {IVerbsDescriptor} from "../packages/revolution-contracts/interfaces/IVerbsDescriptor.sol";
+import "./Base64Decode.sol";
+import "./JsmnSolLib.sol";
+import {ICultureIndex} from "../packages/revolution-contracts/interfaces/ICultureIndex.sol";
 
 contract VerbsDescriptorTest is Test {
     VerbsDescriptor descriptor;
@@ -141,25 +144,27 @@ function testDataURI() public {
     string memory uri = descriptor.dataURI(tokenId, metadata);
     assertTrue(bytes(uri).length > 0, "dataURI should not be empty");
     // Check if the string contains the base64 identifier which indicates a base64 encoded data URI
-    assertEq(substring(uri, 0, 29), "data:application/json;base64,", "dataURI should start with 'data:application/json;base64,'");
+    assertEq(substring(bytes(uri), 0, 29), "data:application/json;base64,", "dataURI should start with 'data:application/json;base64,'");
 }
-/// @notice Test `genericDataURI` returns valid base64 encoded data URI
-function testGenericDataURI() public {
-    setUp();
 
-    ICultureIndex.ArtPieceMetadata memory metadata = ICultureIndex.ArtPieceMetadata({
-        name: "Test Art",
-        description: "A generic art piece",
-        mediaType: ICultureIndex.MediaType.IMAGE,
-        image: "https://example.com/image.png",
-        text: "",
-        animationUrl: ""
-    });
+    /// @notice Test `genericDataURI` returns valid base64 encoded data URI
+    function testGenericDataURI() public {
+        setUp();
 
-    string memory uri = descriptor.genericDataURI(metadata.name, metadata);
-    assertTrue(bytes(uri).length > 0, "genericDataURI should not be empty");
-    assertEq(substring(uri, 0, 29), "data:application/json;base64,", "dataURI should start with 'data:application/json;base64,'");
-}
+        ICultureIndex.ArtPieceMetadata memory metadata = ICultureIndex.ArtPieceMetadata({
+            name: "Test Art",
+            description: "A generic art piece",
+            mediaType: ICultureIndex.MediaType.IMAGE,
+            image: "https://example.com/image.png",
+            text: "",
+            animationUrl: ""
+        });
+
+        string memory uri = descriptor.genericDataURI(metadata.name, metadata);
+        assertTrue(bytes(uri).length > 0, "genericDataURI should not be empty");
+        assertEq(substring(bytes(uri), 0, 29), "data:application/json;base64,", "dataURI should start with 'data:application/json;base64,'");
+    }
+
 /// @notice Test `toggleDataURIEnabled` emits `DataURIToggled` event
 function testToggleDataURIEnabledEvent() public {
     setUp();
@@ -198,7 +203,7 @@ function testBaselineTokenURIWithDataURIEnabled() public {
 
     string memory uri = descriptor.tokenURI(tokenId, metadata);
     assertTrue(bytes(uri).length > 0, "URI should not be empty");
-    assertEq(substring(uri, 0, 29), "data:application/json;base64,", "dataURI should start with 'data:application/json;base64,'");
+    assertEq(substring(bytes(uri), 0, 29), "data:application/json;base64,", "dataURI should start with 'data:application/json;base64,'");
 }
 
 /// @notice Test owner can transfer ownership using `transferOwnership`
@@ -231,16 +236,212 @@ function testTransferOwnershipAccessControl() public {
     assertEq(descriptor.owner(), owner, "Ownership should not have changed");
 }
 
+/// @notice Test `tokenURI` with only image metadata set
+function testTokenURIWithOnlyImageMetadata() public {
+    setUp();
 
+    uint256 tokenId = 1;
+    ICultureIndex.ArtPieceMetadata memory metadata = ICultureIndex.ArtPieceMetadata({
+        name: "",
+        description: "",
+        mediaType: ICultureIndex.MediaType.IMAGE,
+        image: "https://example.com/image.png",
+        text: "",
+        animationUrl: ""
+    });
 
-// Helper function to get substring from a string
-function substring(string memory str, uint startIndex, uint endIndex) public pure returns (string memory) {
-    bytes memory strBytes = bytes(str);
-    bytes memory result = new bytes(endIndex - startIndex);
-    for(uint i = startIndex; i < endIndex; i++) {
-        result[i-startIndex] = strBytes[i];
-    }
-    return string(result);
+    string memory uri = descriptor.tokenURI(tokenId, metadata);
+
+    // Check if the token URI contains the image URL
+    assertUriContainsImage(uri, metadata.image, "Token URI should contain the image metadata");
 }
+
+/// @notice Test `tokenURI` with mixed media types in metadata
+function testTokenURIWithMixedMediaMetadata() public {
+    setUp();
+
+    uint256 tokenId = 3;
+    ICultureIndex.ArtPieceMetadata memory metadata = ICultureIndex.ArtPieceMetadata({
+        name: "Mixed Media Art",
+        description: "Art with mixed media types",
+        mediaType: ICultureIndex.MediaType.ANIMATION,
+        image: "https://example.com/mixed-image.png",
+        text: "",
+        animationUrl: "https://example.com/mixed-animation.mp4"
+    });
+
+    string memory uri = descriptor.tokenURI(tokenId, metadata);
+
+    // The token URI should reflect both image and animation URLs
+    assertMixedMediaUriIntegrity(uri, metadata, "Token URI should reflect mixed media types correctly");
+}
+
+/// @notice Test `tokenURI` with full metadata set
+function testTokenURIWithFullMetadata() public {
+    setUp();
+
+    uint256 tokenId = 2;
+    ICultureIndex.ArtPieceMetadata memory metadata = ICultureIndex.ArtPieceMetadata({
+        name: "Full Metadata Art",
+        description: "Complete metadata for testing",
+        mediaType: ICultureIndex.MediaType.IMAGE,
+        image: "https://example.com/full-image.png",
+        text: "This is a full metadata test.",
+        animationUrl: "https://example.com/animation.mp4"
+    });
+
+    string memory uri = descriptor.tokenURI(tokenId, metadata);
+
+    // Validate the token URI against the full metadata
+    assertFullMetadataIntegrity(uri, metadata, "Token URI should correctly represent the full metadata");
+}
+
+
+
+// Corrected use of startsWith in assertUriContainsImage function
+function assertUriContainsImage(string memory uri, string memory expectedImageUrl, string memory errorMessage) internal {
+    // Decode the URI if it's a data URI, else use as is
+    string memory metadataJson = startsWith(uri, "data:") ? decodeMetadata(uri) : uri;
+    (, , string memory imageUrl,) = parseJson(metadataJson);
+
+    assertEq(imageUrl, expectedImageUrl, errorMessage);
+}
+
+// Helper function to assert the integrity of the full metadata in the token URI
+function assertFullMetadataIntegrity(string memory uri, ICultureIndex.ArtPieceMetadata memory expectedMetadata, string memory errorMessage) internal {
+    string memory metadataJson = decodeMetadata(uri);
+    (string memory name, string memory description, string memory imageUrl, string memory animationUrl) = parseJson(metadataJson);
+
+    assertEq(name, expectedMetadata.name, string(abi.encodePacked(errorMessage, " - Name mismatch")));
+    assertEq(description, expectedMetadata.description, string(abi.encodePacked(errorMessage, " - Description mismatch")));
+    assertEq(imageUrl, expectedMetadata.image, string(abi.encodePacked(errorMessage, " - Image URL mismatch")));
+    assertEq(animationUrl, expectedMetadata.animationUrl, string(abi.encodePacked(errorMessage, " - Animation URL mismatch")));
+    // Additional assertions for text and animationUrl can be added here if required
+}
+
+
+// Helper function to assert the integrity of mixed media metadata in the token URI
+function assertMixedMediaUriIntegrity(string memory uri, ICultureIndex.ArtPieceMetadata memory expectedMetadata, string memory errorMessage) internal {
+    string memory metadataJson = decodeMetadata(uri);
+    (string memory name, string memory description, string memory imageUrl, string memory animationUrl) = parseJson(metadataJson);
+
+    assertEq(name, expectedMetadata.name, string(abi.encodePacked(errorMessage, " - Name mismatch")));
+    assertEq(description, expectedMetadata.description, string(abi.encodePacked(errorMessage, " - Description mismatch")));
+    assertEq(imageUrl, expectedMetadata.image, string(abi.encodePacked(errorMessage, " - Image URL mismatch")));
+    assertEq(animationUrl, expectedMetadata.animationUrl, string(abi.encodePacked(errorMessage, " - Animation URL mismatch")));
+}
+
+// Helper function to decode base64 encoded metadata from a data URI
+function decodeMetadata(string memory uri) internal pure returns (string memory) {
+    // Split the URI into its components and decode the base64 part
+    (,string memory base64Part) = splitDataURI(uri);
+    bytes memory decodedBytes = Base64Decode.decode(base64Part);
+    return string(decodedBytes);
+}
+
+// Helper function to parse JSON strings into components
+function parseJson(string memory _json) internal returns (string memory name, string memory description, string memory image, string memory animationUrl) {
+    uint returnValue;
+    JsmnSolLib.Token[] memory tokens;
+    uint actualNum;
+
+    // Number of tokens to be parsed in the JSON (could be estimated or exactly known)
+    uint256 numTokens = 20; // Increase if necessary to accommodate all fields in the JSON
+
+    // Parse the JSON
+    (returnValue, tokens, actualNum) = JsmnSolLib.parse(_json, numTokens);
+
+    emit log_uint(returnValue);
+    emit log_uint(actualNum);
+    emit log_uint(tokens.length);
+
+    // Extract values from JSON by token indices
+    for(uint256 i = 0; i < actualNum; i++) {
+        JsmnSolLib.Token memory t = tokens[i];
+
+        // Check if the token is a key
+        if (t.jsmnType == JsmnSolLib.JsmnType.STRING && (i+1) < actualNum) {
+            string memory key = JsmnSolLib.getBytes(_json, t.start, t.end);
+            string memory value = JsmnSolLib.getBytes(_json, tokens[i+1].start, tokens[i+1].end);
+            
+            // Compare the key with expected fields
+            if (keccak256(bytes(key)) == keccak256(bytes("name"))) {
+                name = value;
+            } else if (keccak256(bytes(key)) == keccak256(bytes("description"))) {
+                description = value;
+            } else if (keccak256(bytes(key)) == keccak256(bytes("image"))) {
+                image = value;
+            } else if (keccak256(bytes(key)) == keccak256(bytes("animation_url"))) {
+                animationUrl = value;
+            }
+            // Skip the value token, as the key's value is always the next token
+            i++;
+        }
+    }
+
+    return (name, description, image, animationUrl);
+}
+
+// Helper function to check if the URI starts with a specific string
+function startsWith(string memory fullString, string memory searchString) internal pure returns (bool) {
+    bytes memory fullStringBytes = bytes(fullString);
+    bytes memory searchStringBytes = bytes(searchString);
+
+    if (searchStringBytes.length > fullStringBytes.length) {
+        return false;
+    }
+
+    for (uint i = 0; i < searchStringBytes.length; i++) {
+        if (fullStringBytes[i] != searchStringBytes[i]) {
+            return false;
+        }
+    }
+
+    return true;
+}
+
+/// @notice Splits a data URI into its MIME type and base64 components.
+/// @param uri The data URI to split.
+/// @return mimeType The MIME type of the data.
+/// @return base64Data The base64 encoded data.
+function splitDataURI(string memory uri) internal pure returns (string memory mimeType, string memory base64Data) {
+    // Find the comma that separates the MIME type from the base64 data
+    bytes memory uriBytes = bytes(uri);
+    uint256 commaIndex = findComma(uriBytes);
+    
+    // Extract the MIME type
+    mimeType = string(substring(uriBytes, 5, commaIndex)); // Starting after 'data:'
+    
+    // Extract the base64 encoded data
+    base64Data = string(substring(uriBytes, commaIndex + 1, uriBytes.length));
+    
+    return (mimeType, base64Data);
+}
+
+/// @notice Finds the index of the first comma in a bytes array.
+/// @param b The bytes array to search.
+/// @return The index of the first comma.
+function findComma(bytes memory b) internal pure returns (uint256) {
+    for (uint256 i = 0; i < b.length; i++) {
+        if (b[i] == ",") {
+            return i;
+        }
+    }
+    revert("Comma not found in data URI");
+}
+
+/// @notice Gets a substring from a bytes array, given the start and end index.
+/// @param b The bytes array to get a substring from.
+/// @param startIndex The start index of the substring.
+/// @param endIndex The end index of the substring.
+/// @return The substring.
+function substring(bytes memory b, uint256 startIndex, uint256 endIndex) internal pure returns (bytes memory) {
+    bytes memory result = new bytes(endIndex - startIndex);
+    for (uint256 i = startIndex; i < endIndex; i++) {
+        result[i - startIndex] = b[i];
+    }
+    return result;
+}
+
 }
 
