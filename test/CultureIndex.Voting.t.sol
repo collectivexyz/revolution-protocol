@@ -51,7 +51,7 @@ contract CultureIndexVotingBasicTest is Test {
         cultureIndex.vote(newPieceId);
 
         // Validate the vote
-        ICultureIndex.Voter[] memory pieceVotes = cultureIndex.getVotes(
+        ICultureIndex.Vote[] memory pieceVotes = cultureIndex.getVotes(
             newPieceId
         );
         uint256 totalVoteWeight = cultureIndex.totalVoteWeights(newPieceId);

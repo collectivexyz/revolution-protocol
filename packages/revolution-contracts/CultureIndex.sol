@@ -25,7 +25,7 @@ contract CultureIndex is ICultureIndex {
     uint256 public pieceCount;
 
     // The list of all votes for a piece
-    mapping(uint256 => Voter[]) public votes;
+    mapping(uint256 => Vote[]) public votes;
 
     // The total voting weight for a piece
     mapping(uint256 => uint256) public totalVoteWeights;
@@ -136,7 +136,7 @@ contract CultureIndex is ICultureIndex {
 
         // Directly update state variables without reading them into local variables
         hasVoted[pieceId][msg.sender] = true;
-        votes[pieceId].push(Voter(msg.sender, weight));
+        votes[pieceId].push(Vote(msg.sender, weight));
         totalVoteWeights[pieceId] += weight;
 
         // Insert the new vote weight into the max heap
@@ -155,11 +155,11 @@ contract CultureIndex is ICultureIndex {
     }
 
     /**
-     * @notice Fetch the list of voters for a given art piece.
+     * @notice Fetch the list of votes for a given art piece.
      * @param pieceId The ID of the art piece.
-     * @return An array of Voter structs for the given art piece ID.
+     * @return An array of Vote structs for the given art piece ID.
      */
-    function getVotes(uint256 pieceId) public view returns (Voter[] memory) {
+    function getVotes(uint256 pieceId) public view returns (Vote[] memory) {
         return votes[pieceId];
     }
 

@@ -155,6 +155,119 @@ function testCreatePieceWithValidParameters() public {
 
   }
 
+  /// @dev Tests creating an art piece with invalid total basis points.
+function testCreatePieceWithInvalidBasisPoints() public {
+    // Arrange
+    string memory name = "Faulty Piece";
+    string memory description = "This should not work";
+    ICultureIndex.MediaType mediaType = ICultureIndex.MediaType.IMAGE;
+    string memory image = "ipfs://faultyimage";
+    string memory animationUrl = "";
+    string memory text = "";
+    address creatorAddress = address(0x1);
+    uint256 invalidCreatorBps = 9999; // Invalid because it does not sum up to 10000
+    
+    // Act & Assert
+    vm.expectRevert("Total BPS must sum up to 10,000");
+    createArtPiece(name, description, mediaType, image, text, animationUrl, creatorAddress, invalidCreatorBps);
+}
+
+/// @dev Tests creating an art piece with a zero address in the creator array.
+function testCreatePieceWithZeroAddress() public {
+    // Arrange
+    string memory name = "No Creator Piece";
+    string memory description = "This piece has no creator";
+    ICultureIndex.MediaType mediaType = ICultureIndex.MediaType.IMAGE;
+    string memory image = "ipfs://noimage";
+    string memory animationUrl = "";
+    string memory text = "";
+    address zeroCreatorAddress = address(0); // Zero address used intentionally for test
+    uint256 creatorBps = 10000;
+
+    // Act & Assert
+    vm.expectRevert("Invalid creator address");
+    createArtPiece(name, description, mediaType, image, text, animationUrl, zeroCreatorAddress, creatorBps);
+}
+
+/// @dev Tests that creating an art piece with more than 100 creators fails.
+function testCreatePieceWithExcessCreators() public {
+    // Arrange
+    string memory name = "Too Many Creators";
+    string memory description = "This piece has too many creators";
+    ICultureIndex.MediaType mediaType = ICultureIndex.MediaType.IMAGE;
+    string memory image = "ipfs://toomanycreators";
+    string memory animationUrl = "";
+    string memory text = "";
+    
+    // Creating a creators array with more than 100 creators should fail
+    ICultureIndex.CreatorBps[] memory creators = new ICultureIndex.CreatorBps[](101);
+    for(uint i = 0; i < 101; i++) {
+        creators[i] = ICultureIndex.CreatorBps({
+            creator: address(uint160(i + 1)),
+            bps: 100
+        });
+    }
+    
+    // Act & Assert
+    vm.expectRevert("Creator array must not be > 100");
+    cultureIndex.createPiece(
+        ICultureIndex.ArtPieceMetadata({
+            name: name,
+            description: description,
+            mediaType: mediaType,
+            image: image,
+            text: text,
+            animationUrl: animationUrl
+        }), 
+        creators
+    );
+}
+
+/// @dev Tests that the pieceCount is incremented correctly after each successful creation.
+function testPieceCountIncrement() public {
+    // Arrange
+    uint256 initialPieceCount = cultureIndex.pieceCount();
+
+    // Act
+    createDefaultArtPiece();
+    createDefaultArtPiece(); // Creating a second piece to verify increment
+
+    // Assert
+    uint256 newPieceCount = cultureIndex.pieceCount();
+    assertEq(newPieceCount, initialPieceCount + 2, "pieceCount should be incremented by 2");
+}
+
+/// @dev Tests that voting on an art piece increments the totalVoteWeights and votes mapping correctly.
+function testVotingOnArtPiece() public {
+    // Arrange
+    uint256 artPieceId = createDefaultArtPiece();
+    address voter = address(0x2);
+    uint256 voteWeight = 100;
+
+    // We assume mockVotingToken is the token used for voting, and voter has enough balance
+    mockVotingToken._mint(voter, voteWeight);
+    mockVotingToken.approve(address(cultureIndex), voteWeight);
+
+    uint256 initialTotalVoteWeight = cultureIndex.totalVoteWeights(artPieceId);
+    // Assuming that the `votes` function returns the count of votes for the given art piece by the voter
+    ICultureIndex.Vote[] memory initialVotes = cultureIndex.getVotes(artPieceId);
+
+    // Act
+    // Assuming the voter is msg.sender for the vote function, and it only takes the artPieceId
+    vm.prank(voter); // Set the next message sender to the voter address
+    cultureIndex.vote(artPieceId);
+
+    // Assert
+    uint256 newTotalVoteWeight = cultureIndex.totalVoteWeights(artPieceId);
+    ICultureIndex.Vote[] memory newVotes = cultureIndex.getVotes(artPieceId);
+
+    assertEq(newTotalVoteWeight, initialTotalVoteWeight + voteWeight, "Total vote weight should be incremented by the vote weight");
+    assertEq(newVotes.length, initialVotes.length + 1, "Vote count for the voter should be incremented by 1");
+}
+
+
+
+
 /// @dev Tests token metadata integrity after minting
 function testTokenMetadataIntegrity() public {
     setUp();

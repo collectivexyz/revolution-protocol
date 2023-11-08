@@ -101,7 +101,7 @@ interface ICultureIndex is ICultureIndexEvents {
     }
 
     // Struct representing a voter and their weight for a specific art piece.
-    struct Voter {
+    struct Vote {
         address voterAddress;
         uint256 weight;
     }
@@ -153,7 +153,7 @@ interface ICultureIndex is ICultureIndexEvents {
      * @param pieceId The ID of the art piece.
      * @return An array of Voter structs associated with the given art piece ID.
      */
-    function getVotes(uint256 pieceId) external view returns (Voter[] memory);
+    function getVotes(uint256 pieceId) external view returns (Vote[] memory);
 
     /**
      * @notice Retrieve the top-voted art piece based on the accumulated votes.

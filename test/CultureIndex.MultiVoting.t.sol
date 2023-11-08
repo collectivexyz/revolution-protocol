@@ -36,7 +36,7 @@ contract CultureIndexVotingTestManager is Test {
         voter2Test.voteForPiece(newPieceId);
 
         // Validate the weights
-        CultureIndex.Voter[] memory pieceVotes = cultureIndex.getVotes(
+        CultureIndex.Vote[] memory pieceVotes = cultureIndex.getVotes(
             newPieceId
         );
         uint256 totalVoteWeight = cultureIndex.totalVoteWeights(newPieceId);
@@ -70,14 +70,14 @@ contract CultureIndexVotingTestManager is Test {
         voter1Test.voteForPiece(secondPieceId);
 
         // Validate the weights for the first piece
-        CultureIndex.Voter[] memory firstPieceVotes = cultureIndex.getVotes(
+        CultureIndex.Vote[] memory firstPieceVotes = cultureIndex.getVotes(
             firstPieceId
         );
         assertEq(firstPieceVotes.length, 1, "Should have one vote for the first piece");
         assertEq(firstPieceVotes[0].weight, 100, "Voting weight for the first piece should be 100");
 
         // Validate the weights for the second piece
-        CultureIndex.Voter[] memory secondPieceVotes = cultureIndex.getVotes(
+        CultureIndex.Vote[] memory secondPieceVotes = cultureIndex.getVotes(
             secondPieceId
         );
         assertEq(secondPieceVotes.length, 1, "Should have one vote for the second piece");
