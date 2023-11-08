@@ -49,6 +49,32 @@ contract VerbsTokenTest is Test {
         verbsToken.setDescriptor(_descriptor);
     }
 
+    /// @dev Tests that non-owners cannot call dropTopVotedPiece on CultureIndex
+    function testNonOwnerCannotCallDropTopVotedPiece() public {
+        setUp();
+
+        // Assuming the CultureIndex is already set up and there are some pieces with votes
+        createDefaultArtPiece();
+
+        // Use an arbitrary non-owner address for the test
+        address nonOwner = address(0xBEEF);
+        vm.startPrank(nonOwner);
+
+        bool hasErrorOccurred = false;
+        try verbsToken.cultureIndex().dropTopVotedPiece() {
+            fail("Should revert when non-owner tries to call dropTopVotedPiece");
+        } catch {
+            // Catch the revert to confirm that the correct access control is in place
+            hasErrorOccurred = true;
+        }
+
+        vm.stopPrank();
+
+        // Assert that an error did indeed occur, indicating that the call was not allowed
+        assertEq(hasErrorOccurred, true, "Non-owner should not be able to call dropTopVotedPiece");
+    }
+
+
     /// @dev Tests minting by non-minter should revert
     function testRevertOnNonMinterMint() public {
         setUp();
