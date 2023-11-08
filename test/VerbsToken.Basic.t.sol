@@ -6,7 +6,7 @@ import {VerbsToken} from "../packages/revolution-contracts/VerbsToken.sol";
 import {IVerbsToken} from "../packages/revolution-contracts/interfaces/IVerbsToken.sol";
 import { IVerbsDescriptorMinimal } from "../packages/revolution-contracts/interfaces/IVerbsDescriptorMinimal.sol";
 import { IProxyRegistry } from "../packages/revolution-contracts/external/opensea/IProxyRegistry.sol";
-import { ICultureIndex } from "../packages/revolution-contracts/interfaces/ICultureIndex.sol";
+import { ICultureIndex, ICultureIndexEvents } from "../packages/revolution-contracts/interfaces/ICultureIndex.sol";
 import { NFTDescriptor } from "../packages/revolution-contracts/libs/NFTDescriptor.sol";
 import { Strings } from "@openzeppelin/contracts/utils/Strings.sol";
 import {CultureIndex} from "../packages/revolution-contracts/CultureIndex.sol";
@@ -127,6 +127,33 @@ function testCorrectArtAssociation() public {
     // Validate the token's associated art piece
     assertEq(recordedPieceId, artPieceId, "Minted token should be associated with the correct art piece");
 }
+
+/// @dev Tests creating an art piece with valid parameters.
+function testCreatePieceWithValidParameters() public {
+    // Arrange
+    string memory name = "Mona Lisa";
+    string memory description = "A masterpiece";
+    string memory image = "ipfs://legends";
+    string memory animationUrl = "";
+    string memory text = "";
+    address creatorAddress = address(0x1);
+    ICultureIndex.MediaType mediaType = ICultureIndex.MediaType.IMAGE;
+
+    // Check for PieceCreated event
+    vm.expectEmit(true, true, true, true);
+    emit ICultureIndexEvents.PieceCreated(0, address(this), name, description, image, animationUrl, text, uint8(mediaType));
+
+    uint256 artPieceId = createArtPiece(name, description, mediaType, image, text, animationUrl, creatorAddress, 10_000);
+
+    // Act
+    (,ICultureIndex.ArtPieceMetadata memory metadata,,) = cultureIndex.pieces(artPieceId);
+    
+    // Assert
+    assertEq(metadata.name, "Mona Lisa", "The name of the art piece should match the provided name.");
+    assertEq(metadata.description, "A masterpiece", "The description of the art piece should match the provided description.");
+    assertEq(metadata.image, "ipfs://legends", "The image URL of the art piece should match the provided URL.");
+
+  }
 
 /// @dev Tests token metadata integrity after minting
 function testTokenMetadataIntegrity() public {
