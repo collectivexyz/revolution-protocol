@@ -31,7 +31,7 @@ contract VerbsTokenTest is Test {
         descriptor = new VerbsDescriptor(address(this));
 
         IVerbsDescriptorMinimal _descriptor = descriptor;
-        IProxyRegistry _proxyRegistry = IProxyRegistry(address(0x2));
+        ProxyRegistry _proxyRegistry = new ProxyRegistry();
         ICultureIndex _cultureIndex = cultureIndex;
 
         verbsToken = new VerbsToken(address(this), address(this), _descriptor, _proxyRegistry, _cultureIndex);
@@ -234,5 +234,69 @@ function testBurningPermission() public {
     vm.stopPrank();
 }
 
+/// @dev Tests setting a new minter.
+function testSetMinter() public {
+    setUp();
+    address newMinter = address(0x123);
+    vm.expectEmit(true, true, true, true);
+    emit IVerbsToken.MinterUpdated(newMinter);
+    verbsToken.setMinter(newMinter);
+    assertEq(verbsToken.minter(), newMinter, "Minter should be updated to new minter");
 }
 
+/// @dev Tests locking the minter and ensuring it cannot be changed afterwards.
+function testLockMinter() public {
+    setUp();
+    verbsToken.lockMinter();
+    assertTrue(verbsToken.isMinterLocked(), "Minter should be locked");
+    vm.expectRevert("Minter is locked");
+    verbsToken.setMinter(address(0x456));
+}
+
+/// @dev Tests updating and locking the descriptor.
+function testDescriptorUpdateAndLock() public {
+    setUp();
+    IVerbsDescriptorMinimal newDescriptor = IVerbsDescriptorMinimal(address(0x789));
+    verbsToken.setDescriptor(newDescriptor);
+    assertEq(address(verbsToken.descriptor()), address(newDescriptor), "Descriptor should be updated");
+    
+    verbsToken.lockDescriptor();
+    assertTrue(verbsToken.isDescriptorLocked(), "Descriptor should be locked");
+    vm.expectRevert("Descriptor is locked");
+    verbsToken.setDescriptor(IVerbsDescriptorMinimal(address(0xABC)));
+}
+
+/// @dev Tests updating and locking the CultureIndex.
+function testCultureIndexUpdateAndLock() public {
+    setUp();
+    ICultureIndex newCultureIndex = ICultureIndex(address(0xDEF));
+    verbsToken.setCultureIndex(newCultureIndex);
+    assertEq(address(verbsToken.cultureIndex()), address(newCultureIndex), "CultureIndex should be updated");
+    
+    verbsToken.lockCultureIndex();
+    assertTrue(verbsToken.isCultureIndexLocked(), "CultureIndex should be locked");
+    vm.expectRevert("CultureIndex is locked");
+    verbsToken.setCultureIndex(ICultureIndex(address(0x101112)));
+}
+
+/// @dev Tests the `isApprovedForAll` function override for OpenSea proxy.
+function testIsApprovedForAllOverride() public {
+    setUp();
+    address owner = address(this);
+    emit log_address(owner);
+
+    address operator = address(verbsToken.proxyRegistry().proxies(owner));
+
+    emit log_address(operator);
+
+    assertTrue(verbsToken.isApprovedForAll(owner, operator), "OpenSea proxy should be approved");
+}
+
+
+}
+
+
+
+contract ProxyRegistry is IProxyRegistry {
+    mapping(address => address) public proxies;
+}

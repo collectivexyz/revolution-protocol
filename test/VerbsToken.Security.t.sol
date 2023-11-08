@@ -31,11 +31,12 @@ contract VerbsTokenTest is Test {
         descriptor = new VerbsDescriptor(address(this));
 
         IVerbsDescriptorMinimal _descriptor = descriptor;
-        IProxyRegistry _proxyRegistry = IProxyRegistry(address(0x2));
+        ProxyRegistry _proxyRegistry = new ProxyRegistry();
         ICultureIndex _cultureIndex = cultureIndex;
 
         verbsToken = new VerbsToken(address(this), address(this), _descriptor, _proxyRegistry, _cultureIndex);
     }
+
 
 
 
@@ -186,4 +187,8 @@ contract ReentrancyAttackContract {
         verbsToken.mint();
         verbsToken.mint(); // This should fail if reentrancy guard is in place
     }
+}
+
+contract ProxyRegistry is IProxyRegistry {
+    mapping(address => address) public proxies;
 }

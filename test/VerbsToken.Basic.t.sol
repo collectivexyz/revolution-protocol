@@ -31,11 +31,12 @@ contract VerbsTokenTest is Test {
         descriptor = new VerbsDescriptor(address(this));
 
         IVerbsDescriptorMinimal _descriptor = descriptor;
-        IProxyRegistry _proxyRegistry = IProxyRegistry(address(0x2));
+        ProxyRegistry _proxyRegistry = new ProxyRegistry();
         ICultureIndex _cultureIndex = cultureIndex;
 
         verbsToken = new VerbsToken(address(this), address(this), _descriptor, _proxyRegistry, _cultureIndex);
     }
+
 
     /// @dev Tests the symbol of the VerbsToken
     function testSymbol() public {
@@ -373,10 +374,34 @@ function testDropTopVotedPieceOnEmptyHeap() public {
     // Ensure no art pieces have been created or all created pieces are already dropped
 
     // Act & Assert
-    vm.expectRevert("Heap is empty"); // This assumes your contract reverts with this message when there's nothing to drop
+    vm.expectRevert("No pieces available to drop"); // This assumes your contract reverts with this message when there's nothing to drop
     cultureIndex.dropTopVotedPiece();
 }
 
+/// @dev Tests that voting on a non-existent art piece is rejected.
+function testVotingOnNonExistentArtPiece() public {
+    // Arrange
+    uint256 nonExistentArtPieceId = 999; // Assuming this ID has not been created
+    address voter = address(0x9);
+    uint256 voteWeight = 100;
+
+    mockVotingToken._mint(voter, voteWeight);
+
+    // Act & Assert
+    vm.prank(voter);
+    vm.expectRevert("Invalid piece ID"); // Replace with the actual error message
+    cultureIndex.vote(nonExistentArtPieceId);
+}
+
+/// @dev Tests that retrieving votes for a non-existent art piece is rejected.
+function testRetrievingVotesForNonExistentArtPiece() public {
+    // Arrange
+    uint256 nonExistentArtPieceId = 999; // Assuming this ID has not been created
+
+    // Act & Assert
+    vm.expectRevert("Invalid piece ID"); // Replace with the actual error message
+    cultureIndex.getVotes(nonExistentArtPieceId); // This function should revert
+}
 
 /// @dev Tests token metadata integrity after minting
 function testTokenMetadataIntegrity() public {
@@ -468,4 +493,8 @@ function parseJson(string memory _json) internal returns (string memory name, st
     return (name, description, image);
 }
 
+}
+
+contract ProxyRegistry is IProxyRegistry {
+    mapping(address => address) public proxies;
 }

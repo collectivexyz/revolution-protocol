@@ -31,11 +31,12 @@ contract VerbsTokenTest is Test {
         descriptor = new VerbsDescriptor(address(this));
 
         IVerbsDescriptorMinimal _descriptor = descriptor;
-        IProxyRegistry _proxyRegistry = IProxyRegistry(address(0x2));
+        ProxyRegistry _proxyRegistry = new ProxyRegistry();
         ICultureIndex _cultureIndex = cultureIndex;
 
         verbsToken = new VerbsToken(address(this), address(this), _descriptor, _proxyRegistry, _cultureIndex);
     }
+
 
 
     /// @dev Tests the minting with no pieces added
@@ -179,6 +180,20 @@ function testMintingEvent() public {
     verbsToken.mint();
 }
 
+// /// @dev Tests the burn function.
+// function testBurnFunction() public {
+//     setUp();
+//     uint256 tokenId = verbsToken.mint();
+    
+//     vm.expectEmit(true, true, true, true);
+//     emit IVerbsToken.VerbBurned(tokenId);
+    
+//     verbsToken.burn(tokenId);
+//     vm.expectRevert("ERC721: owner query for nonexistent token");
+//     verbsToken.ownerOf(tokenId); // This should fail because the token was burned
+// }
+
+
 /// @dev Validates that the token URI is correctly set and retrieved
 function testTokenURI() public {
     setUp();
@@ -209,3 +224,7 @@ function testTopVotedPieceMinting() public {
 
 }
 
+
+contract ProxyRegistry is IProxyRegistry {
+    mapping(address => address) public proxies;
+}

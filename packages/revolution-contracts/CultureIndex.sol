@@ -151,6 +151,7 @@ contract CultureIndex is ICultureIndex {
      * @return The ArtPiece struct associated with the given ID.
      */
     function getPieceById(uint256 pieceId) public view returns (ArtPiece memory) {
+        require(pieceId <= pieceCount, "Invalid piece ID");
         return pieces[pieceId];
     }
 
@@ -160,6 +161,7 @@ contract CultureIndex is ICultureIndex {
      * @return An array of Vote structs for the given art piece ID.
      */
     function getVotes(uint256 pieceId) public view returns (Vote[] memory) {
+        require(pieceId <= pieceCount, "Invalid piece ID");
         return votes[pieceId];
     }
 
