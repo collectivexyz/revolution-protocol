@@ -25,16 +25,25 @@ contract VerbsTokenTest is Test {
 
     /// @dev Sets up a new VerbsToken instance before each test
     function setUp() public {
-        // Create a new CultureIndex contract
+        // Create a new mock ERC20 token for voting
         mockVotingToken = new MockERC20();
-        cultureIndex = new CultureIndex(address(mockVotingToken), address(this));
-        descriptor = new VerbsDescriptor(address(this));
 
+        // Deploy a new VerbsDescriptor, which will be used by VerbsToken
+        descriptor = new VerbsDescriptor(address(this));
         IVerbsDescriptorMinimal _descriptor = descriptor;
+
+        // Deploy a new proxy registry for OpenSea
         ProxyRegistry _proxyRegistry = new ProxyRegistry();
+
+        // Create a new VerbsToken contract, passing address(this) as both the minter and the initial owner
+        verbsToken = new VerbsToken(address(this), address(this), _descriptor, _proxyRegistry, ICultureIndex(address(0)));
+
+        // Deploy CultureIndex with the VerbsToken's address as the initial owner
+        cultureIndex = new CultureIndex(address(mockVotingToken), address(verbsToken));
         ICultureIndex _cultureIndex = cultureIndex;
 
-        verbsToken = new VerbsToken(address(this), address(this), _descriptor, _proxyRegistry, _cultureIndex);
+        // Now that CultureIndex is deployed, set it in VerbsToken
+        verbsToken.setCultureIndex(_cultureIndex);
     }
 
 
