@@ -77,10 +77,10 @@ contract VerbsDescriptor is IVerbsDescriptor, Ownable {
      * @notice Given a token ID, construct a base64 encoded data URI for an official Vrbs DAO verb.
      */
     function dataURI(uint256 tokenId, ICultureIndex.ArtPiece memory artPiece) public pure returns (string memory) {
-        string memory verbId = tokenId.toString();
-        string memory name = string(abi.encodePacked("Verb ", verbId));
+        // string memory verbId = tokenId.toString();
+        // string memory name = string(abi.encodePacked("Verb ", verbId));
 
-        return genericDataURI(name, artPiece);
+        return genericDataURI(artPiece.metadata.name, artPiece);
     }
 
     /**

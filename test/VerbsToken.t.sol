@@ -11,6 +11,8 @@ import { Strings } from "@openzeppelin/contracts/utils/Strings.sol";
 import {CultureIndex} from "../packages/revolution-contracts/CultureIndex.sol";
 import {MockERC20} from "./MockERC20.sol";
 import {VerbsDescriptor} from "../packages/revolution-contracts/VerbsDescriptor.sol";
+import "./Base64Decode.sol";
+import "./JsmnSolLib.sol";
 
 /// @title VerbsTokenTest
 /// @dev The test suite for the VerbsToken contract
@@ -192,6 +194,226 @@ contract VerbsTokenTest is Test {
             10000
         );
     }
+
+    /// @dev Tests the locking of admin functions
+function testLockAdminFunctions() public {
+    setUp();
+
+    // Lock the minter, descriptor, and cultureIndex to prevent changes
+    verbsToken.lockMinter();
+    verbsToken.lockDescriptor();
+    verbsToken.lockCultureIndex();
+
+    // Attempt to change minter, descriptor, or cultureIndex and expect to fail
+    address newMinter = address(0xABC);
+    address newDescriptor = address(0xDEF);
+    address newCultureIndex = address(0x123);
+
+    bool minterLocked = false;
+    bool descriptorLocked = false;
+    bool cultureIndexLocked = false;
+
+    try verbsToken.setMinter(newMinter) {
+        fail("Should fail: minter is locked");
+    } catch {
+        minterLocked = true;
+    }
+
+    try verbsToken.setDescriptor(IVerbsDescriptorMinimal(newDescriptor)) {
+        fail("Should fail: descriptor is locked");
+    } catch {
+        descriptorLocked = true;
+    }
+
+    try verbsToken.setCultureIndex(ICultureIndex(newCultureIndex)) {
+        fail("Should fail: cultureIndex is locked");
+    } catch {
+        cultureIndexLocked = true;
+    }
+
+    assertTrue(minterLocked, "Minter should be locked");
+    assertTrue(descriptorLocked, "Descriptor should be locked");
+    assertTrue(cultureIndexLocked, "CultureIndex should be locked");
+}
+
+/// @dev Tests the creator array limit for minting
+function testCreatorArrayLimit() public {
+    setUp();
+
+    // Create an art piece with creators more than the limit (assuming the limit is 100)
+    ICultureIndex.CreatorBps[] memory creators = new ICultureIndex.CreatorBps[](101);
+    for(uint i = 0; i < 101; i++) {
+        creators[i] = ICultureIndex.CreatorBps({
+            creator: address(uint160(i + 1)), // Just a series of different addresses
+            bps: 10 // Arbitrary basis points for each creator
+        });
+    }
+
+    ICultureIndex.ArtPieceMetadata memory metadata = ICultureIndex.ArtPieceMetadata({
+        name: "Overpopulated",
+        description: "An art piece with too many creators",
+        mediaType: ICultureIndex.MediaType.IMAGE,
+        image: "ipfs://overpopulated",
+        text: "",
+        animationUrl: ""
+    });
+
+    // Attempt to create the piece and expect it to fail due to too many creators
+    bool exceededCreatorLimit = false;
+    try cultureIndex.createPiece(metadata, creators) {
+        fail("Should fail: creator array exceeds the limit");
+    } catch {
+        exceededCreatorLimit = true;
+    }
+
+    assertTrue(exceededCreatorLimit, "Should not allow creation of a piece with too many creators");
+}
+/// @dev Tests the reentrancy guard on the mint function
+function testReentrancyOnMint() public {
+    setUp();
+
+    createDefaultArtPiece();
+
+    // Simulate a reentrancy attack by calling mint within a call to mint
+    address attacker = address(new ReentrancyAttackContract(address(verbsToken)));
+    vm.startPrank(attacker);
+
+    bool reentrancyOccurred = false;
+    try ReentrancyAttackContract(attacker).attack() {
+        fail("Should fail: reentrancy should be guarded");
+    } catch {
+        reentrancyOccurred = true;
+    }
+
+    vm.stopPrank();
+
+    assertTrue(reentrancyOccurred, "Reentrancy guard should prevent minting in the same call stack");
+}
+
+/// @dev Tests approval checks for transfer functions
+function testApprovalChecks() public {
+    setUp();
+
+    createDefaultArtPiece();
+
+    uint256 tokenId = verbsToken.mint();
+
+    address spender = address(0xABC);
+    address to = address(0xDEF);
+
+    // Attempt to transfer without approval as owner
+    verbsToken.transferFrom(address(this), to, tokenId);
+
+    vm.startPrank(to);
+
+    // Approve spender and attempt to transfer as spender
+    verbsToken.approve(spender, tokenId);
+    vm.stopPrank();
+
+    vm.startPrank(spender);
+
+    bool transferWithApprovalFailed = false;
+    try verbsToken.transferFrom(to, address(this), tokenId) {
+        // Transfer should succeed
+    } catch {
+        transferWithApprovalFailed = true;
+    }
+    vm.stopPrank();
+
+    assertFalse(transferWithApprovalFailed, "Transfer with approval should succeed");
+}
+
+/// @dev Tests token metadata integrity after minting
+function testTokenMetadataIntegrity() public {
+    setUp();
+
+    // Create an art piece and mint a token
+    uint256 artPieceId = createDefaultArtPiece();
+    uint256 tokenId = verbsToken.mint();
+
+    // Retrieve the token metadata URI
+    string memory tokenURI = verbsToken.tokenURI(tokenId);
+
+    emit log_string(tokenURI);
+
+    // Extract the base64 encoded part of the tokenURI
+    string memory base64Metadata = substring(tokenURI, 29, bytes(tokenURI).length);
+    emit log_string(base64Metadata);
+
+    // Decode the base64 encoded metadata
+    string memory metadataJson = decodeMetadata(base64Metadata);
+    emit log_string(metadataJson);
+
+    // Parse the JSON to get metadata fields
+    (string memory name, string memory description, string memory image) = parseJson(metadataJson);
+
+    // Retrieve the expected metadata directly from the art piece for comparison
+    (,ICultureIndex.ArtPieceMetadata memory metadata,,) = cultureIndex.pieces(artPieceId);
+
+    // Assert that the token metadata matches the expected metadata from the art piece
+    assertEq(name, metadata.name, "Token name does not match expected name");
+    assertEq(description, metadata.description, "Token description does not match expected description");
+    assertEq(image, metadata.image, "Token image does not match expected image URL");
+}
+
+// Helper function to decode base64 encoded metadata
+function decodeMetadata(string memory base64Metadata) internal pure returns (string memory) {
+    // Decode the base64 string
+    return string(Base64Decode.decode(base64Metadata));
+}
+
+// Helper function to extract a substring from a string
+function substring(string memory str, uint256 startIndex, uint256 endIndex) internal pure returns (string memory) {
+    bytes memory strBytes = bytes(str);
+    bytes memory result = new bytes(endIndex - startIndex);
+    for(uint256 i = startIndex; i < endIndex; i++) {
+        result[i-startIndex] = strBytes[i];
+    }
+    return string(result);
+}
+
+// Helper function to parse JSON strings into components
+function parseJson(string memory _json) internal returns (string memory name, string memory description, string memory image) {
+    uint returnValue;
+    JsmnSolLib.Token[] memory tokens;
+    uint actualNum;
+
+    // Number of tokens to be parsed in the JSON (could be estimated or exactly known)
+    uint256 numTokens = 20; // Increase if necessary to accommodate all fields in the JSON
+
+    // Parse the JSON
+    (returnValue, tokens, actualNum) = JsmnSolLib.parse(_json, numTokens);
+
+    emit log_uint(returnValue);
+    emit log_uint(actualNum);
+    emit log_uint(tokens.length);
+
+    // Extract values from JSON by token indices
+    for(uint256 i = 0; i < actualNum; i++) {
+        JsmnSolLib.Token memory t = tokens[i];
+
+        // Check if the token is a key
+        if (t.jsmnType == JsmnSolLib.JsmnType.STRING && (i+1) < actualNum) {
+            string memory key = JsmnSolLib.getBytes(_json, t.start, t.end);
+            string memory value = JsmnSolLib.getBytes(_json, tokens[i+1].start, tokens[i+1].end);
+            
+            // Compare the key with expected fields
+            if (keccak256(bytes(key)) == keccak256(bytes("name"))) {
+                name = value;
+            } else if (keccak256(bytes(key)) == keccak256(bytes("description"))) {
+                description = value;
+            } else if (keccak256(bytes(key)) == keccak256(bytes("image"))) {
+                image = value;
+            }
+            // Skip the value token, as the key's value is always the next token
+            i++;
+        }
+    }
+
+    return (name, description, image);
+}
+
+
 }
 
 /// @title VerbsTokenTest
@@ -204,5 +426,19 @@ contract VerbsTokenSetup is Test {
     constructor(address _cultureIndex, address _owner) {
         cultureIndex = CultureIndex(_cultureIndex);
         descriptor = VerbsDescriptor(_owner);
+    }
+}
+
+// Helper mock contract to simulate reentrancy attack
+contract ReentrancyAttackContract {
+    VerbsToken private verbsToken;
+
+    constructor(address _verbsToken) {
+        verbsToken = VerbsToken(_verbsToken);
+    }
+
+    function attack() public {
+        verbsToken.mint();
+        verbsToken.mint(); // This should fail if reentrancy guard is in place
     }
 }
