@@ -180,18 +180,21 @@ function testMintingEvent() public {
     verbsToken.mint();
 }
 
-// /// @dev Tests the burn function.
-// function testBurnFunction() public {
-//     setUp();
-//     uint256 tokenId = verbsToken.mint();
+/// @dev Tests the burn function.
+function testBurnFunction() public {
+    setUp();
+
+    //create piece
+    createDefaultArtPiece();
+    uint256 tokenId = verbsToken.mint();
     
-//     vm.expectEmit(true, true, true, true);
-//     emit IVerbsToken.VerbBurned(tokenId);
+    vm.expectEmit(true, true, true, true);
+    emit IVerbsToken.VerbBurned(tokenId);
     
-//     verbsToken.burn(tokenId);
-//     vm.expectRevert("ERC721: owner query for nonexistent token");
-//     verbsToken.ownerOf(tokenId); // This should fail because the token was burned
-// }
+    verbsToken.burn(tokenId);
+    vm.expectRevert("ERC721: owner query for nonexistent token");
+    verbsToken.ownerOf(tokenId); // This should fail because the token was burned
+}
 
 
 /// @dev Validates that the token URI is correctly set and retrieved

@@ -493,6 +493,20 @@ function parseJson(string memory _json) internal returns (string memory name, st
     return (name, description, image);
 }
 
+/// @dev Tests the interaction with the CultureIndex during minting
+function testCultureIndexInteraction() public {
+    setUp();
+
+    //create piece
+    createDefaultArtPiece();
+
+    uint256 preMintPieceId = cultureIndex.topVotedPieceId();
+    uint256 tokenId = verbsToken.mint();
+    (uint256 pieceId,,,) = verbsToken.artPieces(tokenId);
+
+    assertTrue(pieceId == preMintPieceId, "Art piece ID should match top voted piece ID before minting");
+}
+
 }
 
 contract ProxyRegistry is IProxyRegistry {
