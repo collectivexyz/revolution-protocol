@@ -159,8 +159,10 @@ contract CultureIndex is ICultureIndex, Ownable, ReentrancyGuard {
 
         votes[pieceId][voter] = Vote(voter, weight);
         totalVoteWeights[pieceId] += weight;
-        maxHeap.updateValue(pieceId, totalVoteWeights[pieceId]);
-        emit VoteCast(pieceId, voter, weight, totalVoteWeights[pieceId]);
+
+        uint256 totalWeight = totalVoteWeights[pieceId];
+        maxHeap.updateValue(pieceId, totalWeight);
+        emit VoteCast(pieceId, voter, weight, totalWeight);
     }
 
     /**
