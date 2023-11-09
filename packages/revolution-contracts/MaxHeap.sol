@@ -50,7 +50,7 @@ contract MaxHeap is Ownable, ReentrancyGuard {
     /// @notice Reheapify the heap starting at a given position
     /// @dev This ensures that the heap property is maintained
     /// @param pos The starting position for the heapify operation
-    function maxHeapify(uint256 pos) public {
+    function maxHeapify(uint256 pos) public onlyOwner {
         uint256 left = 2 * pos + 1;
         uint256 right = 2 * pos + 2;
 

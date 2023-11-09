@@ -198,7 +198,7 @@ contract CultureIndex is ICultureIndex, Ownable, ReentrancyGuard {
      * @notice Pulls and drops the top-voted piece.
      * @return The top voted piece
      */
-    function dropTopVotedPiece() nonReentrant public onlyOwner returns (ArtPiece memory) {
+    function dropTopVotedPiece() nonReentrant onlyOwner public returns (ArtPiece memory) {
         uint256 pieceId;
         try maxHeap.extractMax() returns (uint256 _pieceId, uint256 _value) {
             pieceId = _pieceId;
