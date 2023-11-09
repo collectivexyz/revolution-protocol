@@ -128,7 +128,12 @@ contract CultureIndex is ICultureIndex, Ownable, ReentrancyGuard {
         return votes[pieceId][voter].voterAddress != address(0);
     }
 
-    function getVoterWeight(address voter) public view returns (uint256 weight) {
+
+    /**
+     * @notice Returns a voters weight for voting.
+     * @return The vote weight of the voter.
+     */
+    function getVoterWeight(address voter) public view returns (uint256) {
         require(votingToken != IERC20(address(0)), "Voting token must be set");
 
         try votingToken.balanceOf(voter) returns (uint256 balance) {
@@ -138,6 +143,14 @@ contract CultureIndex is ICultureIndex, Ownable, ReentrancyGuard {
         }
     }
 
+    /**
+     * @notice Cast a vote for a specific ArtPiece.
+     * @param pieceId The ID of the ArtPiece to vote for.
+     * @param voter The address of the voter.
+     * @param weight The weight of the vote.
+     * @dev Requires that the pieceId is valid, the voter has not already voted on this piece, and the weight is greater than zero.
+     * Emits a VoteCast event upon successful execution.
+     */
     function _vote(uint256 pieceId, address voter, uint256 weight) internal {
         require(weight > 0, "Weight must be greater than zero");
         require(!(votes[pieceId][msg.sender].voterAddress != address(0)), "Already voted");

@@ -65,6 +65,122 @@ contract CultureIndexVotingBasicTest is Test {
         assertEq(totalVoteWeight, 100, "Total voting weight should be 100");
     }
 
+    function testBatchVotingSuccess() public {
+        // Preconditions setup
+        uint256[] memory pieceIds = new uint256[](2);
+        pieceIds[0] = createDefaultArtPiece();
+        pieceIds[1] = createDefaultArtPiece();
+        mockVotingToken._mint(address(this), 200);
+
+        // Perform batch voting
+        cultureIndex.batchVote(pieceIds);
+
+        // Assertions
+        for (uint256 i = 0; i < pieceIds.length; i++) {
+            ICultureIndex.Vote memory vote = cultureIndex.getVote(pieceIds[i], address(this));
+            assertEq(vote.voterAddress, address(this), "Voter address should match");
+            assertEq(vote.weight, 200, "Vote weight should be correct");
+        }
+    }
+
+    function testBatchVotingFailsForInvalidPieceIds() public {
+        uint256[] memory pieceIds = new uint256[](2);
+        pieceIds[0] = 999; // Invalid pieceId
+        pieceIds[1] = createDefaultArtPiece(); // Valid pieceId
+        mockVotingToken._mint(address(this), 200);
+
+        // This should revert because one of the pieceIds is invalid
+        try cultureIndex.batchVote(pieceIds) {
+            fail("Batch voting with an invalid pieceId should fail");
+        } catch Error(string memory reason) {
+            assertEq(reason, "Invalid piece ID", "Should revert with invalid piece ID error");
+        }
+    }
+
+    function testBatchVotingFailsIfAlreadyVoted() public {
+        uint256 pieceId = createDefaultArtPiece();
+        mockVotingToken._mint(address(this), 100);
+        cultureIndex.vote(pieceId); // Vote for the pieceId
+
+        uint256[] memory pieceIds = new uint256[](1);
+        pieceIds[0] = pieceId;
+
+        // This should revert because the voter has already voted for this pieceId
+        try cultureIndex.batchVote(pieceIds) {
+            fail("Batch voting for an already voted pieceId should fail");
+        } catch Error(string memory reason) {
+            assertEq(reason, "Already voted", "Should revert with already voted error");
+        }
+    }
+
+    function testBatchVotingFailsIfPieceDropped() public {
+        uint256 pieceId = createDefaultArtPiece();
+        mockVotingToken._mint(address(this), 100);
+        cultureIndex.dropTopVotedPiece(); // Drop the piece
+
+        uint256[] memory pieceIds = new uint256[](1);
+        pieceIds[0] = pieceId;
+
+        // This should revert because the piece has been dropped
+        try cultureIndex.batchVote(pieceIds) {
+            fail("Batch voting for a dropped pieceId should fail");
+        } catch Error(string memory reason) {
+            assertEq(reason, "Piece has already been dropped", "Should revert with piece dropped error");
+        }
+    }
+
+
+    function testBatchVotingFailsForZeroWeight() public {
+        uint256[] memory pieceIds = new uint256[](1);
+        pieceIds[0] = createDefaultArtPiece();
+        // Do not mint any tokens to ensure weight is zero
+
+        // This should revert because the voter weight is zero
+        try cultureIndex.batchVote(pieceIds) {
+            fail("Batch voting with zero weight should fail");
+        } catch Error(string memory reason) {
+            assertEq(reason, "Weight must be greater than zero", "Should revert with weight zero error");
+        }
+    }
+
+    function testGasUsage() public {
+        // Assume createArtPiece() is a function that sets up an art piece and returns its ID
+        uint256[] memory pieceIds = new uint256[](100);
+        for (uint256 i = 0; i < 100; i++) {
+            pieceIds[i] = createDefaultArtPiece(); // Setup each art piece
+        }
+
+        // Mint enough tokens for voting
+        mockVotingToken._mint(address(this), 100 * 100); // Mint enough tokens (e.g., 100 tokens per vote)
+
+        // Measure gas for individual voting
+        uint256 startGasIndividual = gasleft();
+        for (uint256 i = 0; i < 100; i++) {
+            cultureIndex.vote(pieceIds[i]);
+        }
+        uint256 gasUsedIndividual = startGasIndividual - gasleft();
+        emit log_uint(gasUsedIndividual); // Log gas used for individual votes
+
+        // Resetting state for a fair comparison
+        setUp(); // Reset contract state (this would need to be implemented to revert to initial state)
+        uint256[] memory batchPieceIds = new uint256[](100);
+        for (uint256 i = 0; i < 100; i++) {
+            batchPieceIds[i] = createDefaultArtPiece(); // Setup each art piece
+        }
+
+        mockVotingToken._mint(address(this), 100 * 100); // Mint enough tokens (e.g., 100 tokens per vote)
+
+        // Measure gas for batch voting
+        uint256 startGasBatch = gasleft();
+        cultureIndex.batchVote(batchPieceIds);
+        uint256 gasUsedBatch = startGasBatch - gasleft();
+        emit log_uint(gasUsedBatch); // Log gas used for batch votes
+
+        // Log the difference in gas usage
+        emit log_uint(gasUsedIndividual - gasUsedBatch); // This will log the saved gas
+    }
+
+
     /**
      * @dev Test case to validate the "one vote per address" rule
      *
