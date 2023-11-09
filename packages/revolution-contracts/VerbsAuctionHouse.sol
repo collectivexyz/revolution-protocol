@@ -61,6 +61,7 @@ contract VerbsAuctionHouse is IVerbsAuctionHouse, PausableUpgradeable, Reentranc
     function initialize(
         IVerbsToken _verbs,
         address _weth,
+        address _founder,
         uint256 _timeBuffer,
         uint256 _reservePrice,
         uint8 _minBidIncrementPercentage,
@@ -68,7 +69,7 @@ contract VerbsAuctionHouse is IVerbsAuctionHouse, PausableUpgradeable, Reentranc
     ) external initializer {
         __Pausable_init();
         __ReentrancyGuard_init();
-        __Ownable_init();
+        __Ownable_init(_founder);
 
         _pause();
 
