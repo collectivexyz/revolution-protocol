@@ -36,6 +36,9 @@ jobs:
         run: |
           npm install -g pnpm
 
+      - name: Install Solidity compiler
+        run: forge install
+
       - name: Log Solidity version
         run: solc --version
 
