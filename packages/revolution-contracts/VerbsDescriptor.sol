@@ -26,9 +26,6 @@ import { ICultureIndex } from "./interfaces/ICultureIndex.sol";
 contract VerbsDescriptor is IVerbsDescriptor, Ownable {
     using Strings for uint256;
 
-    // The CultureIndex contract
-    ICultureIndex public cultureIndex;
-
     // prettier-ignore
     // https://creativecommons.org/publicdomain/zero/1.0/legalcode.txt
     bytes32 constant COPYRIGHT_CC0_1_0_UNIVERSAL_LICENSE = 0xa2010f343487d3f7618affe54f789f5487602331c0a8d03f49e9a7c547cf0499;
@@ -39,14 +36,7 @@ contract VerbsDescriptor is IVerbsDescriptor, Ownable {
     // Base URI
     string public override baseURI;
 
-    /**
-     * @notice Constructor for the VerbsDescriptor contract.
-     * @param _cultureIndex Address of the CultureIndex contract.
-     */
-    constructor(address _cultureIndex) {
-        require(_cultureIndex != address(0), "CultureIndex address cannot be 0x");
-        cultureIndex = ICultureIndex(_cultureIndex);
-    }
+    constructor(address _initialOwner) Ownable(_initialOwner) {}
 
     /**
      * @notice Toggle a boolean value which determines if `tokenURI` returns a data URI
@@ -76,9 +66,9 @@ contract VerbsDescriptor is IVerbsDescriptor, Ownable {
      * @notice Given a token ID, construct a token URI for an official Vrbs DAO verb.
      * @dev The returned value may be a base64 encoded data URI or an API URL.
      */
-    function tokenURI(uint256 tokenId) external view override returns (string memory) {
+    function tokenURI(uint256 tokenId, ICultureIndex.ArtPieceMetadata memory metadata) external view returns (string memory) {
         if (isDataURIEnabled) {
-            return dataURI(tokenId);
+            return dataURI(tokenId, metadata);
         }
         return string(abi.encodePacked(baseURI, tokenId.toString()));
     }
@@ -86,20 +76,25 @@ contract VerbsDescriptor is IVerbsDescriptor, Ownable {
     /**
      * @notice Given a token ID, construct a base64 encoded data URI for an official Vrbs DAO verb.
      */
-    function dataURI(uint256 tokenId) public view override returns (string memory) {
-        string memory verbId = tokenId.toString();
-        string memory name = string(abi.encodePacked("Verb ", verbId));
+    function dataURI(uint256 tokenId, ICultureIndex.ArtPieceMetadata memory metadata) public pure returns (string memory) {
+        // string memory verbId = tokenId.toString();
+        // string memory name = string(abi.encodePacked("Verb ", verbId));
 
-        return genericDataURI(name);
+        return genericDataURI(metadata.name, metadata);
     }
 
     /**
-     * @notice Given a name, and description, construct a base64 encoded data URI.
+     * @notice Given a name, and metadata, construct a base64 encoded data URI.
      */
-    function genericDataURI(string memory name) public view override returns (string memory) {
+    function genericDataURI(string memory name, ICultureIndex.ArtPieceMetadata memory metadata) public pure returns (string memory) {
         /// @dev Get name description image and animation_url from CultureIndex
 
-        NFTDescriptor.TokenURIParams memory params = NFTDescriptor.TokenURIParams({ name: name, description: description, image: image, animation_url: animation_url });
+        NFTDescriptor.TokenURIParams memory params = NFTDescriptor.TokenURIParams({
+            name: name,
+            description: metadata.description,
+            image: metadata.image,
+            animation_url: metadata.animationUrl
+        });
         return NFTDescriptor.constructTokenURI(params);
     }
 }

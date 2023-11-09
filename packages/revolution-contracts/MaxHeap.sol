@@ -1,10 +1,13 @@
 // SPDX-License-Identifier: GPL-3.0
 pragma solidity ^0.8.22;
 
+import { Ownable } from "@openzeppelin/contracts/access/Ownable.sol";
+import { ReentrancyGuard } from "@openzeppelin/contracts/utils/ReentrancyGuard.sol";
+
 /// @title MaxHeap implementation in Solidity
 /// @dev This contract implements a Max Heap data structure with basic operations
 /// @author Written by rocketman and gpt4
-contract MaxHeap {
+contract MaxHeap is Ownable, ReentrancyGuard {
     /// @notice Struct to represent an item in the heap by it's ID
     mapping(uint256 => uint256) public heap;
 
@@ -19,7 +22,8 @@ contract MaxHeap {
 
     /// @notice Constructor to initialize the MaxHeap
     /// @param _maxsize The maximum size of the heap
-    constructor(uint256 _maxsize) {
+    /// @param _owner The owner of the contract
+    constructor(uint256 _maxsize, address _owner) Ownable(_owner) {
         maxsize = _maxsize;
     }
 
@@ -46,7 +50,7 @@ contract MaxHeap {
     /// @notice Reheapify the heap starting at a given position
     /// @dev This ensures that the heap property is maintained
     /// @param pos The starting position for the heapify operation
-    function maxHeapify(uint256 pos) public {
+    function maxHeapify(uint256 pos) public onlyOwner {
         uint256 left = 2 * pos + 1;
         uint256 right = 2 * pos + 2;
 
@@ -71,7 +75,7 @@ contract MaxHeap {
     /// @dev The function will revert if the heap is full
     /// @param itemId The item ID to insert
     /// @param value The value to insert
-    function insert(uint256 itemId, uint256 value) public {
+    function insert(uint256 itemId, uint256 value) onlyOwner public {
         require(size < maxsize, "Heap is full");
 
         heap[size] = itemId;
@@ -90,7 +94,7 @@ contract MaxHeap {
     /// @param itemId The item ID whose vote count needs to be updated
     /// @param newValue The new value for the item
     /// @dev This function adjusts the heap to maintain the max-heap property after updating the vote count
-    function updateValue(uint256 itemId, uint256 newValue) public {
+    function updateValue(uint256 itemId, uint256 newValue) onlyOwner public {
         uint256 position = positionMapping[itemId];
         uint256 oldValue = valueMapping[itemId];
 
@@ -113,7 +117,7 @@ contract MaxHeap {
     /// @notice Extract the maximum element from the heap
     /// @dev The function will revert if the heap is empty
     /// @return The maximum element from the heap
-    function extractMax() public returns (uint256, uint256) {
+    function extractMax() external onlyOwner returns (uint256, uint256) {
         require(size > 0, "Heap is empty");
 
         uint256 popped = heap[0];
@@ -132,14 +136,3 @@ contract MaxHeap {
     }
 }
 
-contract MaxHeapTest is MaxHeap {
-    constructor(uint256 _maxsize) MaxHeap(_maxsize) {}
-
-    /// @notice Function to set a value in the heap (ONLY FOR TESTING)
-    /// @param pos The position to set
-    /// @param value The value to set at the given position
-    function _set(uint256 pos, uint256 itemId, uint256 value) public {
-        heap[pos] = itemId;
-        valueMapping[itemId] = value;
-    }
-}

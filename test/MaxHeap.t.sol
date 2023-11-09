@@ -2,7 +2,7 @@
 pragma solidity ^0.8.22;
 
 import {Test} from "forge-std/Test.sol";
-import {MaxHeapTest} from "../packages/revolution-contracts/MaxHeap.sol";  // Update this path
+import {MaxHeap} from "../packages/revolution-contracts/MaxHeap.sol";
 
 /// @title MaxHeapTestSuite
 /// @dev The test suite for the MaxHeap contract
@@ -11,8 +11,70 @@ contract MaxHeapTestSuite is Test {
 
     /// @dev Sets up a new MaxHeap instance before each test
     function setUp() public {
-        maxHeap = new MaxHeapTest(50);
+        maxHeap = new MaxHeapTest(50, address(this));
     }
+
+    /// @dev Tests that only the owner can call updateValue
+    function testUpdateValueOnlyOwner() public {
+        setUp();
+        maxHeap.insert(1, 10); // Setup a state with an element
+
+        address nonOwner = address(2);
+        vm.prank(nonOwner);
+        bool hasErrored = false;
+        try maxHeap.updateValue(1, 20) {
+            fail("updateValue should be callable only by the owner");
+        } catch {
+            hasErrored = true;
+        }
+        assertTrue(hasErrored, "updateValue should have errored");
+
+        vm.prank(address(this));
+        maxHeap.updateValue(1, 20); // No error expected
+    }
+
+    /// @dev Tests that only the owner can call insert
+    function testInsertOnlyOwner() public {
+        setUp();
+
+        address nonOwner = address(3);
+        vm.prank(nonOwner);
+        bool hasErrored = false;
+        try maxHeap.insert(2, 15) {
+            fail("insert should be callable only by the owner");
+        } catch {
+            hasErrored = true;
+        }
+        assertTrue(hasErrored, "insert should have errored");
+
+        vm.prank(address(this));
+        maxHeap.insert(2, 15); // No error expected
+    }
+
+    /// @dev Tests that only the owner can call extractMax
+    function testExtractMaxOnlyOwner() public {
+        setUp();
+
+        // Insert an element to ensure the heap is not empty
+        maxHeap.insert(1, 10);
+
+        // Try to call extractMax as a non-owner and expect it to fail
+        address nonOwner = address(2); // assume this address is not the owner
+        vm.prank(nonOwner); // this sets the next call to be from the address `nonOwner`
+        bool hasErrored = false;
+        try maxHeap.extractMax() {
+            fail("extractMax should only be callable by the owner");
+        } catch  {
+            hasErrored = true;
+        }
+
+        assertTrue(hasErrored, "extractMax should have errored");
+
+        // Call extractMax as the owner and expect it to succeed
+        vm.prank(address(this)); // set the owner to be the caller for the next transaction
+        maxHeap.extractMax(); // this should succeed without reverting
+    }
+
 
     /// @dev Tests the insert and getMax functions
     function testInsert() public {
@@ -152,5 +214,18 @@ contract MaxHeapTestSuite is Test {
         } catch Error(string memory reason) {
             assertEq(reason, "Heap is empty");
         }
+    }
+}
+
+
+contract MaxHeapTest is MaxHeap {
+    constructor(uint256 _maxsize, address _owner) MaxHeap(_maxsize, address(_owner)) {}
+
+    /// @notice Function to set a value in the heap (ONLY FOR TESTING)
+    /// @param pos The position to set
+    /// @param value The value to set at the given position
+    function _set(uint256 pos, uint256 itemId, uint256 value) public {
+        heap[pos] = itemId;
+        valueMapping[itemId] = value;
     }
 }

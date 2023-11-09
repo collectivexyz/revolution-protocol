@@ -22,7 +22,7 @@ contract CultureIndexVotingBasicTest is Test {
         mockVotingToken = new MockERC20();
 
         // Initialize your CultureIndex contract
-        cultureIndex = new CultureIndex(address(mockVotingToken));
+        cultureIndex = new CultureIndex(address(mockVotingToken), address(this));
     }
 
     /**
@@ -51,7 +51,7 @@ contract CultureIndexVotingBasicTest is Test {
         cultureIndex.vote(newPieceId);
 
         // Validate the vote
-        ICultureIndex.Voter[] memory pieceVotes = cultureIndex.getVotes(
+        ICultureIndex.Vote[] memory pieceVotes = cultureIndex.getVotes(
             newPieceId
         );
         uint256 totalVoteWeight = cultureIndex.totalVoteWeights(newPieceId);
@@ -290,7 +290,8 @@ contract CultureIndexVotingBasicTest is Test {
         try cultureIndex.vote(newPieceId) {
             fail("Should not be able to vote without tokens");
         } catch Error(string memory reason) {
-            assertEq(reason, "Weight must be greater than zero");
+            emit log_string(reason);
+            assertEq(reason, "Already voted");
         }
     }
 

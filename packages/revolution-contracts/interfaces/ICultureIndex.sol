@@ -9,7 +9,6 @@ import { IERC20 } from "../IERC20.sol";
  * @dev This interface defines the events for the CultureIndex contract.
  */
 interface ICultureIndexEvents {
-    
     /**
      * @dev Emitted when a new piece is created.
      * @param pieceId Unique identifier for the newly created piece.
@@ -59,9 +58,7 @@ interface ICultureIndexEvents {
 
     // The events emitted for the respective creators of a piece
     event PieceCreatorAdded(uint256 indexed pieceId, address indexed creatorAddress, address indexed dropper, uint256 bps);
-
 }
-
 
 /**
  * @title ICultureIndex
@@ -104,7 +101,7 @@ interface ICultureIndex is ICultureIndexEvents {
     }
 
     // Struct representing a voter and their weight for a specific art piece.
-    struct Voter {
+    struct Vote {
         address voterAddress;
         uint256 weight;
     }
@@ -129,19 +126,6 @@ interface ICultureIndex is ICultureIndexEvents {
      * @return A boolean indicating if the voter has voted for the art piece.
      */
     function hasVoted(uint256 pieceId, address voter) external view returns (bool);
-
-    /**
-     * @notice Returns the index of the next piece to be dropped.
-     * @return The index for the next drop.
-     */
-    function nextDropIndex() external view returns (uint256);
-
-    /**
-     * @notice Returns the piece ID of a dropped piece based on its index.
-     * @param index The index of the dropped piece.
-     * @return The ID of the dropped piece.
-     */
-    function droppedPiecesMapping(uint256 index) external view returns (uint256);
 
     /**
      * @notice Allows a user to create a new art piece.
@@ -169,7 +153,7 @@ interface ICultureIndex is ICultureIndexEvents {
      * @param pieceId The ID of the art piece.
      * @return An array of Voter structs associated with the given art piece ID.
      */
-    function getVotes(uint256 pieceId) external view returns (Voter[] memory);
+    function getVotes(uint256 pieceId) external view returns (Vote[] memory);
 
     /**
      * @notice Retrieve the top-voted art piece based on the accumulated votes.
@@ -189,25 +173,6 @@ interface ICultureIndex is ICultureIndexEvents {
      * @return The total count of votes for the specified art piece.
      */
     function getVoteCount(uint256 pieceId) external view returns (uint256);
-
-    /**
-     * @notice Retrieve the total number of art pieces that have been officially released or "dropped".
-     * @return The count of all dropped art pieces.
-     */
-    function getTotalDroppedPieces() external view returns (uint256);
-
-    /**
-     * @notice Fetch a specific art piece that has been dropped by its sequential index.
-     * @param index The index (in order of being dropped) of the art piece.
-     * @return The ArtPiece struct of the specified dropped piece.
-     */
-    function getDroppedPieceByIndex(uint256 index) external view returns (ArtPiece memory);
-
-    /**
-     * @notice Retrieve the most recently dropped art piece.
-     * @return The ArtPiece struct of the latest dropped piece.
-     */
-    function getLatestDroppedPiece() external view returns (ArtPiece memory);
 
     /**
      * @notice Officially release or "drop" the art piece with the most votes.

@@ -22,7 +22,7 @@ contract CultureIndexArtPieceTest is Test {
         mockVotingToken = new MockERC20();
 
         // Initialize your CultureIndex contract
-        cultureIndex = new CultureIndex(address(mockVotingToken));
+        cultureIndex = new CultureIndex(address(mockVotingToken), address(this));
     }
 
     // Function to create ArtPieceMetadata
@@ -60,6 +60,24 @@ contract CultureIndexArtPieceTest is Test {
         });
 
         return creators;
+    }
+
+    //test that creating the first piece the pieceId is 0
+    function testFirstPieceId() public {
+        setUp();
+
+        uint256 newPieceId = createArtPiece(
+            "Mona Lisa",
+            "A masterpiece",
+            ICultureIndex.MediaType.IMAGE,
+            "ipfs://legends",
+            "",
+            "",
+            address(0x1),
+            10000
+        );
+
+        assertEq(newPieceId, 0);
     }
 
     //returns metadata and creators in a tuple
@@ -347,7 +365,7 @@ contract CultureIndexArtPieceTest is Test {
     /**
      * @dev Test case to validate art piece creation with missing media data
      */
-    function testMissingMediaData() public {
+    function testMissingMediaDataImage() public {
         setUp();
 
         (CultureIndex.ArtPieceMetadata memory metadata, ICultureIndex.CreatorBps[] memory creators) = createArtPieceTuple(
@@ -367,6 +385,58 @@ contract CultureIndexArtPieceTest is Test {
             fail("Should not be able to create piece with missing media data");
         } catch Error(string memory reason) {
             assertEq(reason, "Image URL must be provided");
+        }
+    }
+
+    /**
+     * @dev Test case to validate art piece creation with missing media data
+     */
+    function testMissingMediaDataAnimation() public {
+        setUp();
+
+        (CultureIndex.ArtPieceMetadata memory metadata, ICultureIndex.CreatorBps[] memory creators) = createArtPieceTuple(
+                "Missing Media Data",
+                "Invalid Piece",
+                ICultureIndex.MediaType.ANIMATION,
+                "",
+                "",
+                "",
+                address(0x1),
+                10000
+        );
+
+        try
+            cultureIndex.createPiece(metadata, creators)
+        {
+            fail("Should not be able to create piece with missing media data");
+        } catch Error(string memory reason) {
+            assertEq(reason, "Animation URL must be provided");
+        }
+    }
+
+        /**
+     * @dev Test case to validate art piece creation with missing media data
+     */
+    function testMissingMediaDataText() public {
+        setUp();
+
+        (CultureIndex.ArtPieceMetadata memory metadata, ICultureIndex.CreatorBps[] memory creators) = createArtPieceTuple(
+                "Missing Media Data",
+                "Invalid Piece",
+                ICultureIndex.MediaType.TEXT,
+                "",
+                "",
+                "",
+                address(0x1),
+                10000
+        );
+
+        try
+            cultureIndex.createPiece(metadata, creators)
+        {
+            fail("Should not be able to create piece with missing media data");
+        } catch Error(string memory reason) {
+            assertEq(reason, "Text must be provided");
         }
     }
 

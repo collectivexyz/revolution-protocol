@@ -21,14 +21,32 @@ jobs:
         with:
           submodules: recursive
 
+      - name: Cache pnpm modules
+        uses: actions/cache@v2
+        with:
+          path: ~/.pnpm-store
+          key: ${{ runner.os }}-pnpm-${{ hashFiles('**/pnpm-lock.yaml') }}
+          restore-keys: |
+            ${{ runner.os }}-pnpm-
+
       - name: Install Foundry
         uses: foundry-rs/foundry-toolchain@v1
-        with:
-          version: nightly
 
       - name: Install pnpm
         run: |
           npm install -g pnpm
+
+      - name: Install Solidity compiler
+        run: forge install
+
+      - name: Log Solidity version
+        run: forge --version
+
+      - name: Log Foundry version
+        run: forge --version
+
+      - name: Log Node.js version
+        run: node --version
 
       - name: Update Dependencies
         run: |
@@ -36,7 +54,7 @@ jobs:
 
       - name: Run Forge test
         run: |
-          forge test -v --fail-fast
+          forge test -vvv
         id: test
 
       - name: Run Geiger Check

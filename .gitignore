@@ -16,3 +16,7 @@ docs/
 
 broadcast
 deploys
+
+.vscode
+
+bin

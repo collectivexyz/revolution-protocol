@@ -20,7 +20,7 @@ contract CultureIndexArtPieceTest is Test {
 
     function setUp() public {
         mockVotingToken = new MockERC20();
-        cultureIndex = new CultureIndex(address(mockVotingToken));
+        cultureIndex = new CultureIndex(address(mockVotingToken), address(this));
 
         // Create new test instances acting as different voters
         voter1Test = new CultureIndexVotingTest(address(cultureIndex), address(mockVotingToken));
@@ -287,6 +287,12 @@ contract CultureIndexArtPieceTest is Test {
             }
         }
 
+        //vote on all pieces
+        for (uint i = 0; i < 5_000; i++) {
+            mockVotingToken._mint(address(voter1Test), i+1);
+            voter1Test.voteForPiece(i+1);
+        }
+
         // Create another set of pieces and log the gas used for the last creation.
         for (uint i = 0; i < 25_000; i++) {
             if (i == 24_999) {
@@ -298,6 +304,9 @@ contract CultureIndexArtPieceTest is Test {
                 voter1Test.createDefaultArtPiece();
             }
         }
+
+        //assert dropping top piece is the correct pieceId
+        assertEq(cultureIndex.topVotedPieceId(), 5_000, "Top voted piece should be the 5_000th piece");
     }
 
     /// @dev Tests the gas used for popping the top voted piece to ensure somewhat constant time
@@ -346,63 +355,18 @@ contract CultureIndexArtPieceTest is Test {
         voter1Test.voteForPiece(pieceId2);
 
         // Drop the top voted piece
-        cultureIndex.dropTopVotedPiece();
+        ICultureIndex.ArtPiece memory artPiece2 = cultureIndex.dropTopVotedPiece();
         
         // Verify that the dropped piece is correctly indexed
-        assertEq(cultureIndex.droppedPiecesMapping(0), pieceId2, "First dropped piece should be pieceId2");
-        assertEq(cultureIndex.nextDropIndex(), 1, "nextDropIndex should be incremented to 1");
+        assertEq(artPiece2.pieceId, pieceId2, "First dropped piece should be pieceId2");
 
         // Drop another top voted piece
-        cultureIndex.dropTopVotedPiece();
+        ICultureIndex.ArtPiece memory artPiece1 = cultureIndex.dropTopVotedPiece();
         
         // Verify again
-        assertEq(cultureIndex.droppedPiecesMapping(1), pieceId1, "Second dropped piece should be pieceId1");
-        assertEq(cultureIndex.nextDropIndex(), 2, "nextDropIndex should be incremented to 2");
+        assertEq(artPiece1.pieceId, pieceId1, "Second dropped piece should be pieceId1");
     }
 
-
-    /// @dev Testing fetching of dropped pieces by index
-    function testGetDroppedPieceByIndex() public {
-        setUp();
-
-        // Create and vote
-        uint256 pieceId = voter1Test.createDefaultArtPiece();
-        mockVotingToken._mint(address(voter1Test), 10);
-        voter1Test.voteForPiece(pieceId);
-
-        // Drop the piece
-        cultureIndex.dropTopVotedPiece();
-
-        // Fetch by index and verify
-        ICultureIndex.ArtPiece memory droppedPiece = cultureIndex.getDroppedPieceByIndex(0);
-        assertEq(droppedPiece.pieceId, pieceId, "Dropped piece should match the created piece");
-    }
-
-    /// @dev Testing fetching the latest dropped piece
-    function testGetLatestDroppedPiece() public {
-        setUp();
-
-        // Create and vote on several pieces
-        uint256 pieceId1 = voter1Test.createDefaultArtPiece();
-        mockVotingToken._mint(address(voter1Test), 10);
-        voter1Test.voteForPiece(pieceId1);
-
-        uint256 pieceId2 = voter1Test.createDefaultArtPiece();
-        mockVotingToken._mint(address(voter1Test), 20);
-        voter1Test.voteForPiece(pieceId2);
-
-        // Drop the top voted piece
-        cultureIndex.dropTopVotedPiece();
-        
-        // Verify the latest dropped piece
-        ICultureIndex.ArtPiece memory latestDroppedPiece = cultureIndex.getLatestDroppedPiece();
-        assertEq(latestDroppedPiece.pieceId, pieceId2, "Latest dropped piece should be pieceId2");
-
-        // Drop another piece and verify again
-        cultureIndex.dropTopVotedPiece();
-        latestDroppedPiece = cultureIndex.getLatestDroppedPiece();
-        assertEq(latestDroppedPiece.pieceId, pieceId1, "Latest dropped piece should now be pieceId1");
-    }
 
     /// @dev Ensure that the dropTopVotedPiece function behaves correctly when there are no more pieces to drop
     function testDropTopVotedPieceWithNoMorePieces() public {

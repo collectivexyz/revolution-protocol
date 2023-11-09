@@ -4,8 +4,10 @@ pragma solidity ^0.8.22;
 import { IERC20 } from "./IERC20.sol";
 import { MaxHeap } from "./MaxHeap.sol";
 import { ICultureIndex } from "./interfaces/ICultureIndex.sol";
+import { Ownable } from "@openzeppelin/contracts/access/Ownable.sol";
+import { ReentrancyGuard } from "@openzeppelin/contracts/utils/ReentrancyGuard.sol";
 
-contract CultureIndex is ICultureIndex {
+contract CultureIndex is ICultureIndex, Ownable, ReentrancyGuard {
     // The MaxHeap data structure used to keep track of the top-voted piece
     MaxHeap public maxHeap;
 
@@ -13,9 +15,9 @@ contract CultureIndex is ICultureIndex {
     IERC20 public votingToken;
 
     // Initialize ERC20 Token in the constructor
-    constructor(address _votingToken) {
+    constructor(address _votingToken, address _initialOwner) Ownable(_initialOwner) {
         votingToken = IERC20(_votingToken);
-        maxHeap = new MaxHeap(21_000_000_000);
+        maxHeap = new MaxHeap(21_000_000_000, address(this));
     }
 
     // The list of all pieces
@@ -25,19 +27,13 @@ contract CultureIndex is ICultureIndex {
     uint256 public pieceCount;
 
     // The list of all votes for a piece
-    mapping(uint256 => Voter[]) public votes;
+    mapping(uint256 => Vote[]) public votes;
 
     // The total voting weight for a piece
     mapping(uint256 => uint256) public totalVoteWeights;
 
     // A mapping to keep track of whether the voter voted for the piece
     mapping(uint256 => mapping(address => bool)) public hasVoted;
-
-    // The index of the next piece to be dropped
-    uint256 public nextDropIndex = 0;
-
-    // The mapping of dropped pieces to their pieceIds
-    mapping(uint256 => uint256) public droppedPiecesMapping;
 
     /**
      *  Validates the media type and associated data.
@@ -53,7 +49,7 @@ contract CultureIndex is ICultureIndex {
         if (metadata.mediaType == MediaType.IMAGE) {
             require(bytes(metadata.image).length > 0, "Image URL must be provided");
         } else if (metadata.mediaType == MediaType.ANIMATION) {
-            require(bytes(metadata.animationUrl).length > 0, "Video URL must be provided");
+            require(bytes(metadata.animationUrl).length > 0, "Animation URL must be provided");
         } else if (metadata.mediaType == MediaType.TEXT) {
             require(bytes(metadata.text).length > 0, "Text must be provided");
         }
@@ -69,6 +65,9 @@ contract CultureIndex is ICultureIndex {
      * - The function will return the total basis points which must be checked to be exactly 10,000.
      */
     function getTotalBpsFromCreators(CreatorBps[] memory creatorArray) internal pure returns (uint256) {
+        //Require that creatorArray is not more than 100 to prevent gas limit issues
+        require(creatorArray.length <= 100, "Creator array must not be > 100");
+
         uint256 totalBps = 0;
         for (uint i = 0; i < creatorArray.length; i++) {
             require(creatorArray[i].creator != address(0), "Invalid creator address");
@@ -91,20 +90,21 @@ contract CultureIndex is ICultureIndex {
      * - `creatorArray` must not contain any zero addresses.
      * - The sum of basis points in `creatorArray` must be exactly 10,000.
      */
-    function createPiece(ArtPieceMetadata memory metadata, CreatorBps[] memory creatorArray) public returns (uint256) {
-        //Require that creatorArray is not more than 100 to prevent gas limit issues
-        require(creatorArray.length <= 100, "Creator array must not be > 100");
-
+    function createPiece(ArtPieceMetadata memory metadata, CreatorBps[] memory creatorArray) nonReentrant public returns (uint256) {
         uint256 totalBps = getTotalBpsFromCreators(creatorArray);
         require(totalBps == 10_000, "Total BPS must sum up to 10,000");
 
         // Validate the media type and associated data
         validateMediaType(metadata);
 
-        pieceCount++;
-        ArtPiece storage newPiece = pieces[pieceCount];
+        uint256 pieceId = pieceCount++;
 
-        newPiece.pieceId = pieceCount;
+        /// @dev Insert the new piece into the max heap
+        maxHeap.insert(pieceId, 0);
+        
+        ArtPiece storage newPiece = pieces[pieceId];
+
+        newPiece.pieceId = pieceId;
         newPiece.metadata = metadata;
         newPiece.dropper = msg.sender;
 
@@ -112,14 +112,11 @@ contract CultureIndex is ICultureIndex {
             newPiece.creators.push(creatorArray[i]);
         }
 
-        /// @dev Insert the new piece into the max heap
-        maxHeap.insert(pieceCount, 0);
-
-        emit PieceCreated(pieceCount, msg.sender, metadata.name, metadata.description, metadata.image, metadata.animationUrl, metadata.text, uint8(metadata.mediaType));
+        emit PieceCreated(pieceId, msg.sender, metadata.name, metadata.description, metadata.image, metadata.animationUrl, metadata.text, uint8(metadata.mediaType));
 
         // Emit an event for each creator
         for (uint i = 0; i < creatorArray.length; i++) {
-            emit PieceCreatorAdded(pieceCount, creatorArray[i].creator, msg.sender, creatorArray[i].bps);
+            emit PieceCreatorAdded(pieceId, creatorArray[i].creator, msg.sender, creatorArray[i].bps);
         }
         return newPiece.pieceId;
     }
@@ -130,18 +127,26 @@ contract CultureIndex is ICultureIndex {
      * @dev Requires that the pieceId is valid, the voter has not already voted on this piece, and the weight is greater than zero.
      * Emits a VoteCast event upon successful execution.
      */
-    function vote(uint256 pieceId) public {
+    function vote(uint256 pieceId) nonReentrant public {
         // Most likely to fail should go first
-        uint256 weight = votingToken.balanceOf(msg.sender);
-        require(weight > 0, "Weight must be greater than zero");
-
-        require(pieceId > 0 && pieceId <= pieceCount, "Invalid piece ID");
+        require(votingToken != IERC20(address(0)), "Voting token must be set");
+        require(pieceId <= pieceCount, "Invalid piece ID");
         require(!hasVoted[pieceId][msg.sender], "Already voted");
         require(!pieces[pieceId].isDropped, "Piece has already been dropped");
 
+        uint256 weight = 0;
+
+        // Try to get the voter's balance with a call to balanceOf
+        try votingToken.balanceOf(msg.sender) returns (uint256 balance) {
+            weight = balance;
+        } catch {
+            revert("Failed to get balance, voting not possible");
+        }
+        require(weight > 0, "Weight must be greater than zero");
+
         // Directly update state variables without reading them into local variables
         hasVoted[pieceId][msg.sender] = true;
-        votes[pieceId].push(Voter(msg.sender, weight));
+        votes[pieceId].push(Vote(msg.sender, weight));
         totalVoteWeights[pieceId] += weight;
 
         // Insert the new vote weight into the max heap
@@ -156,15 +161,17 @@ contract CultureIndex is ICultureIndex {
      * @return The ArtPiece struct associated with the given ID.
      */
     function getPieceById(uint256 pieceId) public view returns (ArtPiece memory) {
+        require(pieceId <= pieceCount, "Invalid piece ID");
         return pieces[pieceId];
     }
 
     /**
-     * @notice Fetch the list of voters for a given art piece.
+     * @notice Fetch the list of votes for a given art piece.
      * @param pieceId The ID of the art piece.
-     * @return An array of Voter structs for the given art piece ID.
+     * @return An array of Vote structs for the given art piece ID.
      */
-    function getVotes(uint256 pieceId) public view returns (Voter[] memory) {
+    function getVotes(uint256 pieceId) public view returns (Vote[] memory) {
+        require(pieceId <= pieceCount, "Invalid piece ID");
         return votes[pieceId];
     }
 
@@ -196,39 +203,12 @@ contract CultureIndex is ICultureIndex {
     }
 
     /**
-     * @notice Fetch the total number of pieces that have been dropped.
-     * @return The total number of pieces that have been dropped.
-     */
-    function getTotalDroppedPieces() public view returns (uint256) {
-        return nextDropIndex;
-    }
-
-    /**
-     * @notice Fetch a dropped piece by its index.
-     * @return The dropped piece
-     */
-    function getDroppedPieceByIndex(uint256 index) external view returns (ArtPiece memory) {
-        uint256 pieceId = droppedPiecesMapping[index];
-        return pieces[pieceId];
-    }
-
-    /**
-     * @notice Fetch the latest dropped piece.
-     * @return The latest dropped piece
-     */
-    function getLatestDroppedPiece() public view returns (ArtPiece memory) {
-        require(nextDropIndex > 0, "No pieces have been dropped yet.");
-        uint256 latestDroppedPieceId = droppedPiecesMapping[nextDropIndex - 1];
-        return pieces[latestDroppedPieceId];
-    }
-
-    /**
      * @notice Pulls and drops the top-voted piece.
      * @return The top voted piece
      */
-    function dropTopVotedPiece() public returns (ArtPiece memory) {
+    function dropTopVotedPiece() nonReentrant onlyOwner public returns (ArtPiece memory) {
         uint256 pieceId;
-        try maxHeap.extractMax() returns (uint256 _pieceId, uint256 _value) {
+        try maxHeap.extractMax() returns (uint256 _pieceId, uint256) {
             pieceId = _pieceId;
         } catch Error(
             string memory reason // Catch known revert reason
@@ -244,8 +224,6 @@ contract CultureIndex is ICultureIndex {
         }
 
         pieces[pieceId].isDropped = true;
-        droppedPiecesMapping[nextDropIndex] = pieceId;
-        nextDropIndex++;
 
         emit PieceDropped(pieceId, msg.sender);
 
