@@ -110,7 +110,7 @@ contract VerbsToken is IVerbsToken, Ownable, ERC721Checkpointable, ReentrancyGua
         return string(abi.encodePacked("ipfs://", _contractURIHash));
     }
 
-     /**
+    /**
      * @notice currentVerbId getter.
      */
     function currentVerbId() public view returns (uint256) {
@@ -230,12 +230,11 @@ contract VerbsToken is IVerbsToken, Ownable, ERC721Checkpointable, ReentrancyGua
         emit CultureIndexLocked();
     }
 
-
     /**
-    * @notice Fetch an art piece by its ID.
-    * @param verbId The ID of the art piece.
-    * @return The ArtPiece struct associated with the given ID.
-    */
+     * @notice Fetch an art piece by its ID.
+     * @param verbId The ID of the art piece.
+     * @return The ArtPiece struct associated with the given ID.
+     */
     function getArtPieceById(uint256 verbId) public view returns (ICultureIndex.ArtPiece memory) {
         require(verbId <= _currentVerbId, "Invalid piece ID");
         return artPieces[verbId];
@@ -247,7 +246,7 @@ contract VerbsToken is IVerbsToken, Ownable, ERC721Checkpointable, ReentrancyGua
     function _mintTo(address to) internal returns (uint256) {
         uint256 verbId;
         ICultureIndex.ArtPiece memory artPiece = cultureIndex.getTopVotedPiece();
-        
+
         // Check-Effects-Interactions Pattern
         // Perform all checks
         require(artPiece.creators.length <= 100, "Creator array must not be > 100");

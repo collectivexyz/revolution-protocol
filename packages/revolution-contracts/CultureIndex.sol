@@ -26,7 +26,7 @@ contract CultureIndex is ICultureIndex, Ownable, ReentrancyGuard {
     // The total number of pieces
     uint256 public pieceCount;
 
-    // The mapping of all votes for a piece 
+    // The mapping of all votes for a piece
     mapping(uint256 => mapping(address => Vote)) public votes;
 
     // The total voting weight for a piece
@@ -98,7 +98,7 @@ contract CultureIndex is ICultureIndex, Ownable, ReentrancyGuard {
 
         /// @dev Insert the new piece into the max heap
         maxHeap.insert(pieceId, 0);
-        
+
         ArtPiece storage newPiece = pieces[pieceId];
 
         newPiece.pieceId = pieceId;
@@ -128,37 +128,52 @@ contract CultureIndex is ICultureIndex, Ownable, ReentrancyGuard {
         return votes[pieceId][voter].voterAddress != address(0);
     }
 
+    function getVoterWeight(address voter) public view returns (uint256 weight) {
+        require(votingToken != IERC20(address(0)), "Voting token must be set");
+
+        try votingToken.balanceOf(voter) returns (uint256 balance) {
+            return balance;
+        } catch {
+            revert("Failed to get balance, voting not possible");
+        }
+    }
+
+    function _vote(uint256 pieceId, address voter, uint256 weight) internal {
+        require(weight > 0, "Weight must be greater than zero");
+        require(!(votes[pieceId][msg.sender].voterAddress != address(0)), "Already voted");
+        require(!pieces[pieceId].isDropped, "Piece has already been dropped");
+        require(pieceId <= pieceCount, "Invalid piece ID");
+
+        votes[pieceId][voter] = Vote(voter, weight);
+        totalVoteWeights[pieceId] += weight;
+        maxHeap.updateValue(pieceId, totalVoteWeights[pieceId]);
+        emit VoteCast(pieceId, voter, weight, totalVoteWeights[pieceId]);
+    }
+
     /**
      * @notice Cast a vote for a specific ArtPiece.
      * @param pieceId The ID of the ArtPiece to vote for.
      * @dev Requires that the pieceId is valid, the voter has not already voted on this piece, and the weight is greater than zero.
      * Emits a VoteCast event upon successful execution.
      */
-    function vote(uint256 pieceId) nonReentrant public {
-        // Most likely to fail should go first
-        require(votingToken != IERC20(address(0)), "Voting token must be set");
-        require(pieceId <= pieceCount, "Invalid piece ID");
-        require(!(votes[pieceId][msg.sender].voterAddress != address(0)), "Already voted");
-        require(!pieces[pieceId].isDropped, "Piece has already been dropped");
+    function vote(uint256 pieceId) public nonReentrant {
+        uint256 weight = getVoterWeight(msg.sender);
 
-        uint256 weight = 0;
+        _vote(pieceId, msg.sender, weight);
+    }
 
-        // Try to get the voter's balance with a call to balanceOf
-        try votingToken.balanceOf(msg.sender) returns (uint256 balance) {
-            weight = balance;
-        } catch {
-            revert("Failed to get balance, voting not possible");
+    /**
+     * @notice Cast a vote for a list of ArtPieces.
+     * @param pieceIds The IDs of the ArtPieces to vote for.
+     * @dev Requires that the pieceIds are valid, the voter has not already voted on this piece, and the weight is greater than zero.
+     * Emits a series of VoteCast event upon successful execution.
+     */
+    function batchVote(uint256[] memory pieceIds) public nonReentrant {
+        uint256 weight = getVoterWeight(msg.sender);
+
+        for (uint256 i = 0; i < pieceIds.length; ++i) {
+            _vote(pieceIds[i], msg.sender, weight);
         }
-        require(weight > 0, "Weight must be greater than zero");
-
-        // Directly update state variables without reading them into local variables
-        votes[pieceId][msg.sender] = Vote(msg.sender, weight);
-        totalVoteWeights[pieceId] += weight;
-
-        // Insert the new vote weight into the max heap
-        maxHeap.updateValue(pieceId, totalVoteWeights[pieceId]);
-
-        emit VoteCast(pieceId, msg.sender, weight, totalVoteWeights[pieceId]);
     }
 
     /**
@@ -203,7 +218,7 @@ contract CultureIndex is ICultureIndex, Ownable, ReentrancyGuard {
      * @notice Pulls and drops the top-voted piece.
      * @return The top voted piece
      */
-    function dropTopVotedPiece() nonReentrant onlyOwner public returns (ArtPiece memory) {
+    function dropTopVotedPiece() public nonReentrant onlyOwner returns (ArtPiece memory) {
         uint256 pieceId;
         try maxHeap.extractMax() returns (uint256 _pieceId, uint256) {
             pieceId = _pieceId;
