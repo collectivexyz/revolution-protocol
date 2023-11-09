@@ -40,7 +40,7 @@ jobs:
         run: forge install
 
       - name: Log Solidity version
-        run: solc --version
+        run: forge --version
 
       - name: Log Foundry version
         run: forge --version
