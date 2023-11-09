@@ -226,17 +226,18 @@ contract VerbsToken is IVerbsToken, Ownable, ERC721Checkpointable, ReentrancyGua
     /**
      * @notice Mint a Verb with `verbId` to the provided `to` address.
      */
-    function _mintTo(address to, uint256 verbId) nonReentrant internal returns (uint256) {
+    function _mintTo(address to, uint256 verbId) internal returns (uint256) {
         ICultureIndex.ArtPiece memory artPiece = cultureIndex.dropTopVotedPiece();
 
+        // Check-Effects-Interactions Pattern
+        // Perform all checks
+        require(artPiece.creators.length <= 100, "Creator array must not be > 100");
+    
         ICultureIndex.ArtPiece storage newPiece = artPieces[verbId];
 
         newPiece.pieceId = artPiece.pieceId;
         newPiece.metadata = artPiece.metadata;
         newPiece.dropper = artPiece.dropper;
-
-        //ensure creators length is not greater than 100 to prevent gas limit issues
-        require(artPiece.creators.length <= 100, "Creator array must not be > 100");
 
         for (uint i = 0; i < artPiece.creators.length; i++) {
             newPiece.creators.push(artPiece.creators[i]);

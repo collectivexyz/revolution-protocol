@@ -388,7 +388,7 @@ function testDropTopVotedPieceOnEmptyHeap() public {
     // Ensure no art pieces have been created or all created pieces are already dropped
 
     // Act & Assert
-    vm.expectRevert("No pieces available to drop"); // This assumes your contract reverts with this message when there's nothing to drop
+    vm.expectRevert("No pieces available to drop"); 
     verbsToken.mint();
 }
 

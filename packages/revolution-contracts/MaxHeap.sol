@@ -1,10 +1,13 @@
 // SPDX-License-Identifier: GPL-3.0
 pragma solidity ^0.8.22;
 
+import { Ownable } from "@openzeppelin/contracts/access/Ownable.sol";
+import { ReentrancyGuard } from "@openzeppelin/contracts/utils/ReentrancyGuard.sol";
+
 /// @title MaxHeap implementation in Solidity
 /// @dev This contract implements a Max Heap data structure with basic operations
 /// @author Written by rocketman and gpt4
-contract MaxHeap {
+contract MaxHeap is Ownable, ReentrancyGuard {
     /// @notice Struct to represent an item in the heap by it's ID
     mapping(uint256 => uint256) public heap;
 
@@ -19,7 +22,8 @@ contract MaxHeap {
 
     /// @notice Constructor to initialize the MaxHeap
     /// @param _maxsize The maximum size of the heap
-    constructor(uint256 _maxsize) {
+    /// @param _owner The owner of the contract
+    constructor(uint256 _maxsize, address _owner) Ownable(_owner) {
         maxsize = _maxsize;
     }
 
@@ -113,7 +117,7 @@ contract MaxHeap {
     /// @notice Extract the maximum element from the heap
     /// @dev The function will revert if the heap is empty
     /// @return The maximum element from the heap
-    function extractMax() public returns (uint256, uint256) {
+    function extractMax() external returns (uint256, uint256) {
         require(size > 0, "Heap is empty");
 
         uint256 popped = heap[0];
@@ -133,7 +137,7 @@ contract MaxHeap {
 }
 
 contract MaxHeapTest is MaxHeap {
-    constructor(uint256 _maxsize) MaxHeap(_maxsize) {}
+    constructor(uint256 _maxsize) MaxHeap(_maxsize, address(this)) {}
 
     /// @notice Function to set a value in the heap (ONLY FOR TESTING)
     /// @param pos The position to set

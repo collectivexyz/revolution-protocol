@@ -17,7 +17,7 @@ contract CultureIndex is ICultureIndex, Ownable, ReentrancyGuard {
     // Initialize ERC20 Token in the constructor
     constructor(address _votingToken, address _initialOwner) Ownable(_initialOwner) {
         votingToken = IERC20(_votingToken);
-        maxHeap = new MaxHeap(21_000_000_000);
+        maxHeap = new MaxHeap(21_000_000_000, address(this));
     }
 
     // The list of all pieces
