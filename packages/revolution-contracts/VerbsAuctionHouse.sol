@@ -23,13 +23,13 @@
 
 pragma solidity ^0.8.22;
 
-import { PausableUpgradeable } from '@openzeppelin/contracts-upgradeable/security/PausableUpgradeable.sol';
-import { ReentrancyGuardUpgradeable } from '@openzeppelin/contracts-upgradeable/security/ReentrancyGuardUpgradeable.sol';
-import { OwnableUpgradeable } from '@openzeppelin/contracts-upgradeable/access/OwnableUpgradeable.sol';
-import { IERC20 } from '@openzeppelin/contracts/token/ERC20/IERC20.sol';
-import { IVerbsAuctionHouse } from './interfaces/IVerbsAuctionHouse.sol';
-import { IVerbsToken } from './interfaces/IVerbsToken.sol';
-import { IWETH } from './interfaces/IWETH.sol';
+import { PausableUpgradeable } from "@openzeppelin/contracts-upgradeable/utils/PausableUpgradeable.sol";
+import { ReentrancyGuardUpgradeable } from "@openzeppelin/contracts-upgradeable/utils/ReentrancyGuardUpgradeable.sol";
+import { OwnableUpgradeable } from "@openzeppelin/contracts-upgradeable/access/OwnableUpgradeable.sol";
+import { IERC20 } from "@openzeppelin/contracts/token/ERC20/IERC20.sol";
+import { IVerbsAuctionHouse } from "./interfaces/IVerbsAuctionHouse.sol";
+import { IVerbsToken } from "./interfaces/IVerbsToken.sol";
+import { IWETH } from "./interfaces/IWETH.sol";
 
 contract VerbsAuctionHouse is IVerbsAuctionHouse, PausableUpgradeable, ReentrancyGuardUpgradeable, OwnableUpgradeable {
     // The Verbs ERC721 token contract
@@ -103,13 +103,10 @@ contract VerbsAuctionHouse is IVerbsAuctionHouse, PausableUpgradeable, Reentranc
     function createBid(uint256 verbId) external payable override nonReentrant {
         IVerbsAuctionHouse.Auction memory _auction = auction;
 
-        require(_auction.verbId == verbId, 'Verb not up for auction');
-        require(block.timestamp < _auction.endTime, 'Auction expired');
-        require(msg.value >= reservePrice, 'Must send at least reservePrice');
-        require(
-            msg.value >= _auction.amount + ((_auction.amount * minBidIncrementPercentage) / 100),
-            'Must send more than last bid by minBidIncrementPercentage amount'
-        );
+        require(_auction.verbId == verbId, "Verb not up for auction");
+        require(block.timestamp < _auction.endTime, "Auction expired");
+        require(msg.value >= reservePrice, "Must send at least reservePrice");
+        require(msg.value >= _auction.amount + ((_auction.amount * minBidIncrementPercentage) / 100), "Must send more than last bid by minBidIncrementPercentage amount");
 
         address payable lastBidder = _auction.bidder;
 
@@ -198,14 +195,7 @@ contract VerbsAuctionHouse is IVerbsAuctionHouse, PausableUpgradeable, Reentranc
             uint256 startTime = block.timestamp;
             uint256 endTime = startTime + duration;
 
-            auction = Auction({
-                verbId: verbId,
-                amount: 0,
-                startTime: startTime,
-                endTime: endTime,
-                bidder: payable(0),
-                settled: false
-            });
+            auction = Auction({ verbId: verbId, amount: 0, startTime: startTime, endTime: endTime, bidder: payable(0), settled: false });
 
             emit AuctionCreated(verbId, startTime, endTime);
         } catch Error(string memory) {
@@ -221,7 +211,7 @@ contract VerbsAuctionHouse is IVerbsAuctionHouse, PausableUpgradeable, Reentranc
         IVerbsAuctionHouse.Auction memory _auction = auction;
 
         require(_auction.startTime != 0, "Auction hasn't begun");
-        require(!_auction.settled, 'Auction has already been settled');
+        require(!_auction.settled, "Auction has already been settled");
         require(block.timestamp >= _auction.endTime, "Auction hasn't completed");
 
         auction.settled = true;
