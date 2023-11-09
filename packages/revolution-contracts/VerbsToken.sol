@@ -25,8 +25,9 @@ import { IVerbsToken } from "./interfaces/IVerbsToken.sol";
 import { ERC721 } from "./base/ERC721.sol";
 import { IERC721 } from "@openzeppelin/contracts/token/ERC721/IERC721.sol";
 import { IProxyRegistry } from "./external/opensea/IProxyRegistry.sol";
+import { ReentrancyGuard } from "@openzeppelin/contracts/utils/ReentrancyGuard.sol";
 
-contract VerbsToken is IVerbsToken, Ownable, ERC721Checkpointable {
+contract VerbsToken is IVerbsToken, Ownable, ERC721Checkpointable, ReentrancyGuard {
     // An address who has permissions to mint Verbs
     address public minter;
 
@@ -132,14 +133,14 @@ contract VerbsToken is IVerbsToken, Ownable, ERC721Checkpointable {
      * @notice Mint a Verb to the minter.
      * @dev Call _mintTo with the to address(es).
      */
-    function mint() public override onlyMinter returns (uint256) {
+    function mint() public override onlyMinter nonReentrant returns (uint256) {
         return _mintTo(minter, _currentVerbId++);
     }
 
     /**
      * @notice Burn a verb.
      */
-    function burn(uint256 verbId) public override onlyMinter {
+    function burn(uint256 verbId) public override onlyMinter nonReentrant {
         _burn(verbId);
         emit VerbBurned(verbId);
     }
@@ -166,7 +167,7 @@ contract VerbsToken is IVerbsToken, Ownable, ERC721Checkpointable {
      * @notice Set the token minter.
      * @dev Only callable by the owner when not locked.
      */
-    function setMinter(address _minter) external override onlyOwner whenMinterNotLocked {
+    function setMinter(address _minter) external override onlyOwner nonReentrant whenMinterNotLocked {
         minter = _minter;
 
         emit MinterUpdated(_minter);
@@ -186,7 +187,7 @@ contract VerbsToken is IVerbsToken, Ownable, ERC721Checkpointable {
      * @notice Set the token URI descriptor.
      * @dev Only callable by the owner when not locked.
      */
-    function setDescriptor(IVerbsDescriptorMinimal _descriptor) external override onlyOwner whenDescriptorNotLocked {
+    function setDescriptor(IVerbsDescriptorMinimal _descriptor) external override onlyOwner nonReentrant whenDescriptorNotLocked {
         descriptor = _descriptor;
 
         emit DescriptorUpdated(_descriptor);
@@ -206,7 +207,7 @@ contract VerbsToken is IVerbsToken, Ownable, ERC721Checkpointable {
      * @notice Set the token CultureIndex.
      * @dev Only callable by the owner when not locked.
      */
-    function setCultureIndex(ICultureIndex _cultureIndex) external onlyOwner whenCultureIndexNotLocked {
+    function setCultureIndex(ICultureIndex _cultureIndex) external onlyOwner whenCultureIndexNotLocked nonReentrant {
         cultureIndex = _cultureIndex;
 
         emit CultureIndexUpdated(_cultureIndex);
@@ -225,7 +226,7 @@ contract VerbsToken is IVerbsToken, Ownable, ERC721Checkpointable {
     /**
      * @notice Mint a Verb with `verbId` to the provided `to` address.
      */
-    function _mintTo(address to, uint256 verbId) internal returns (uint256) {
+    function _mintTo(address to, uint256 verbId) nonReentrant internal returns (uint256) {
         ICultureIndex.ArtPiece memory artPiece = cultureIndex.dropTopVotedPiece();
 
         ICultureIndex.ArtPiece storage newPiece = artPieces[verbId];
