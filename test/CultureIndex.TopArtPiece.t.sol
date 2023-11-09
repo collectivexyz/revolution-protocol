@@ -287,6 +287,12 @@ contract CultureIndexArtPieceTest is Test {
             }
         }
 
+        //vote on all pieces
+        for (uint i = 0; i < 5_000; i++) {
+            mockVotingToken._mint(address(voter1Test), i+1);
+            voter1Test.voteForPiece(i+1);
+        }
+
         // Create another set of pieces and log the gas used for the last creation.
         for (uint i = 0; i < 25_000; i++) {
             if (i == 24_999) {
@@ -298,6 +304,9 @@ contract CultureIndexArtPieceTest is Test {
                 voter1Test.createDefaultArtPiece();
             }
         }
+
+        //assert dropping top piece is the correct pieceId
+        assertEq(cultureIndex.topVotedPieceId(), 5_000, "Top voted piece should be the 5_000th piece");
     }
 
     /// @dev Tests the gas used for popping the top voted piece to ensure somewhat constant time
