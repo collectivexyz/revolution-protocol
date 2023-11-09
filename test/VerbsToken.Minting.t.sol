@@ -93,7 +93,7 @@ contract VerbsTokenTest is Test {
 
 
     // Helper function to compare arrays of creators
-    function areArraysEqual(ICultureIndex.CreatorBps[] memory arr1, ICultureIndex.CreatorBps[] memory arr2) internal view returns (bool) {
+    function areArraysEqual(ICultureIndex.CreatorBps[] memory arr1, ICultureIndex.CreatorBps[] memory arr2) internal pure returns (bool) {
         if (arr1.length != arr2.length) {
             return false;
         }

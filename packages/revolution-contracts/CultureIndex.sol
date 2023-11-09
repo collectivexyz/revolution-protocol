@@ -208,7 +208,7 @@ contract CultureIndex is ICultureIndex, Ownable, ReentrancyGuard {
      */
     function dropTopVotedPiece() nonReentrant onlyOwner public returns (ArtPiece memory) {
         uint256 pieceId;
-        try maxHeap.extractMax() returns (uint256 _pieceId, uint256 _value) {
+        try maxHeap.extractMax() returns (uint256 _pieceId, uint256) {
             pieceId = _pieceId;
         } catch Error(
             string memory reason // Catch known revert reason

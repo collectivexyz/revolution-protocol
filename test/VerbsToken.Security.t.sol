@@ -345,7 +345,7 @@ contract ReentrancyAttackContractGeneral {
 
 // Mock CultureIndex to simulate failure in dropTopVotedPiece
 contract CultureIndexMock {
-    function dropTopVotedPiece() external view returns (ICultureIndex.ArtPiece memory) {
+    function dropTopVotedPiece() external pure returns (ICultureIndex.ArtPiece memory) {
         revert("Mocked failure");
     }
 
