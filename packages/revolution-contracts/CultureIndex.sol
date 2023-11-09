@@ -87,7 +87,7 @@ contract CultureIndex is ICultureIndex, Ownable, ReentrancyGuard {
      * - `creatorArray` must not contain any zero addresses.
      * - The sum of basis points in `creatorArray` must be exactly 10,000.
      */
-    function createPiece(ArtPieceMetadata memory metadata, CreatorBps[] memory creatorArray) nonReentrant public returns (uint256) {
+    function createPiece(ArtPieceMetadata memory metadata, CreatorBps[] memory creatorArray) public returns (uint256) {
         uint256 totalBps = getTotalBpsFromCreators(creatorArray);
         require(totalBps == 10_000, "Total BPS must sum up to 10,000");
 
