@@ -117,7 +117,7 @@ contract MaxHeap is Ownable, ReentrancyGuard {
     /// @notice Extract the maximum element from the heap
     /// @dev The function will revert if the heap is empty
     /// @return The maximum element from the heap
-    function extractMax() external returns (uint256, uint256) {
+    function extractMax() external onlyOwner returns (uint256, uint256) {
         require(size > 0, "Heap is empty");
 
         uint256 popped = heap[0];
@@ -136,14 +136,3 @@ contract MaxHeap is Ownable, ReentrancyGuard {
     }
 }
 
-contract MaxHeapTest is MaxHeap {
-    constructor(uint256 _maxsize) MaxHeap(_maxsize, address(this)) {}
-
-    /// @notice Function to set a value in the heap (ONLY FOR TESTING)
-    /// @param pos The position to set
-    /// @param value The value to set at the given position
-    function _set(uint256 pos, uint256 itemId, uint256 value) public {
-        heap[pos] = itemId;
-        valueMapping[itemId] = value;
-    }
-}
