@@ -262,8 +262,6 @@ function testVotingOnArtPiece() public {
     mockVotingToken.approve(address(cultureIndex), voteWeight);
 
     uint256 initialTotalVoteWeight = cultureIndex.totalVoteWeights(artPieceId);
-    // Assuming that the `votes` function returns the count of votes for the given art piece by the voter
-    ICultureIndex.Vote[] memory initialVotes = cultureIndex.getVotes(artPieceId);
 
     // Act
     // Assuming the voter is msg.sender for the vote function, and it only takes the artPieceId
@@ -272,10 +270,8 @@ function testVotingOnArtPiece() public {
 
     // Assert
     uint256 newTotalVoteWeight = cultureIndex.totalVoteWeights(artPieceId);
-    ICultureIndex.Vote[] memory newVotes = cultureIndex.getVotes(artPieceId);
 
     assertEq(newTotalVoteWeight, initialTotalVoteWeight + voteWeight, "Total vote weight should be incremented by the vote weight");
-    assertEq(newVotes.length, initialVotes.length + 1, "Vote count for the voter should be incremented by 1");
 }
 
 /// @dev Tests that a vote from a voter with a zero balance is rejected.
@@ -414,7 +410,7 @@ function testRetrievingVotesForNonExistentArtPiece() public {
 
     // Act & Assert
     vm.expectRevert("Invalid piece ID"); // Replace with the actual error message
-    cultureIndex.getVotes(nonExistentArtPieceId); // This function should revert
+    cultureIndex.getVote(nonExistentArtPieceId, address(this)); // This function should revert
 }
 
 /// @dev Tests token metadata integrity after minting

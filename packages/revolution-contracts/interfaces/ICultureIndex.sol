@@ -151,9 +151,10 @@ interface ICultureIndex is ICultureIndexEvents {
     /**
      * @notice Fetch the list of voters for a given art piece.
      * @param pieceId The ID of the art piece.
-     * @return An array of Voter structs associated with the given art piece ID.
+     * @param voter The address of the voter.
+     * @return An Voter structs associated with the given art piece ID.
      */
-    function getVotes(uint256 pieceId) external view returns (Vote[] memory);
+    function getVote(uint256 pieceId, address voter) external view returns (Vote memory);
 
     /**
      * @notice Retrieve the top-voted art piece based on the accumulated votes.
@@ -166,13 +167,6 @@ interface ICultureIndex is ICultureIndexEvents {
      * @return The ID of the art piece with the most votes.
      */
     function topVotedPieceId() external view returns (uint256);
-
-    /**
-     * @notice Get the total number of votes cast for a specific art piece.
-     * @param pieceId The ID of the art piece.
-     * @return The total count of votes for the specified art piece.
-     */
-    function getVoteCount(uint256 pieceId) external view returns (uint256);
 
     /**
      * @notice Officially release or "drop" the art piece with the most votes.

@@ -36,24 +36,27 @@ contract CultureIndexVotingTestManager is Test {
         voter2Test.voteForPiece(newPieceId);
 
         // Validate the weights
-        CultureIndex.Vote[] memory pieceVotes = cultureIndex.getVotes(
-            newPieceId
+        CultureIndex.Vote memory pieceVotes1 = cultureIndex.getVote(
+            newPieceId, address(voter1Test)
+        );
+        CultureIndex.Vote memory pieceVotes2 = cultureIndex.getVote(
+            newPieceId, address(voter2Test)
         );
         uint256 totalVoteWeight = cultureIndex.totalVoteWeights(newPieceId);
 
-        assertEq(pieceVotes.length, 2, "Should have two votes");
         assertEq(
-            pieceVotes[0].voterAddress,
+            pieceVotes1.voterAddress,
             address(voter1Test),
             "Voter address should match"
         );
-        assertEq(pieceVotes[0].weight, 100, "Voting weight should be 100");
+        assertEq(pieceVotes1.weight, 100, "Voting weight should be 100");
+
         assertEq(
-            pieceVotes[1].voterAddress,
+            pieceVotes2.voterAddress,
             address(voter2Test),
             "Voter address should match"
         );
-        assertEq(pieceVotes[1].weight, 200, "Voting weight should be 200");
+        assertEq(pieceVotes2.weight, 200, "Voting weight should be 200");
         assertEq(totalVoteWeight, 300, "Total voting weight should be 300");
     }
 
@@ -70,18 +73,26 @@ contract CultureIndexVotingTestManager is Test {
         voter1Test.voteForPiece(secondPieceId);
 
         // Validate the weights for the first piece
-        CultureIndex.Vote[] memory firstPieceVotes = cultureIndex.getVotes(
-            firstPieceId
+        CultureIndex.Vote memory firstPieceVote = cultureIndex.getVote(
+            firstPieceId, address(voter1Test)
         );
-        assertEq(firstPieceVotes.length, 1, "Should have one vote for the first piece");
-        assertEq(firstPieceVotes[0].weight, 100, "Voting weight for the first piece should be 100");
+        assertEq(
+            firstPieceVote.voterAddress,
+            address(voter1Test),
+            "Voter address should match"
+        );
+        assertEq(firstPieceVote.weight, 100, "Voting weight for the first piece should be 100");
 
         // Validate the weights for the second piece
-        CultureIndex.Vote[] memory secondPieceVotes = cultureIndex.getVotes(
-            secondPieceId
+        CultureIndex.Vote memory secondPieceVote = cultureIndex.getVote(
+            secondPieceId, address(voter1Test)
         );
-        assertEq(secondPieceVotes.length, 1, "Should have one vote for the second piece");
-        assertEq(secondPieceVotes[0].weight, 100, "Voting weight for the second piece should be 100");
+        assertEq(
+            secondPieceVote.voterAddress,
+            address(voter1Test),
+            "Voter address should match"
+        );
+        assertEq(secondPieceVote.weight, 100, "Voting weight for the second piece should be 100");
     }
 
 }

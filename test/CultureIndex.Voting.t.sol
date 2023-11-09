@@ -51,18 +51,17 @@ contract CultureIndexVotingBasicTest is Test {
         cultureIndex.vote(newPieceId);
 
         // Validate the vote
-        ICultureIndex.Vote[] memory pieceVotes = cultureIndex.getVotes(
-            newPieceId
+        ICultureIndex.Vote memory pieceVotes = cultureIndex.getVote(
+            newPieceId, address(this)
         );
         uint256 totalVoteWeight = cultureIndex.totalVoteWeights(newPieceId);
 
-        assertEq(pieceVotes.length, 1, "Should have one vote");
         assertEq(
-            pieceVotes[0].voterAddress,
+            pieceVotes.voterAddress,
             address(this),
             "Voter address should match"
         );
-        assertEq(pieceVotes[0].weight, 100, "Voting weight should be 100");
+        assertEq(pieceVotes.weight, 100, "Voting weight should be 100");
         assertEq(totalVoteWeight, 100, "Total voting weight should be 100");
     }
 

@@ -26,14 +26,11 @@ contract CultureIndex is ICultureIndex, Ownable, ReentrancyGuard {
     // The total number of pieces
     uint256 public pieceCount;
 
-    // The list of all votes for a piece
-    mapping(uint256 => Vote[]) public votes;
+    // The mapping of all votes for a piece 
+    mapping(uint256 => mapping(address => Vote)) public votes;
 
     // The total voting weight for a piece
     mapping(uint256 => uint256) public totalVoteWeights;
-
-    // A mapping to keep track of whether the voter voted for the piece
-    mapping(uint256 => mapping(address => bool)) public hasVoted;
 
     /**
      *  Validates the media type and associated data.
@@ -122,6 +119,16 @@ contract CultureIndex is ICultureIndex, Ownable, ReentrancyGuard {
     }
 
     /**
+     * @notice Checks if a specific voter has already voted for a given art piece.
+     * @param pieceId The ID of the art piece.
+     * @param voter The address of the voter.
+     * @return A boolean indicating if the voter has voted for the art piece.
+     */
+    function hasVoted(uint256 pieceId, address voter) external view returns (bool) {
+        return votes[pieceId][voter].voterAddress != address(0);
+    }
+
+    /**
      * @notice Cast a vote for a specific ArtPiece.
      * @param pieceId The ID of the ArtPiece to vote for.
      * @dev Requires that the pieceId is valid, the voter has not already voted on this piece, and the weight is greater than zero.
@@ -131,7 +138,7 @@ contract CultureIndex is ICultureIndex, Ownable, ReentrancyGuard {
         // Most likely to fail should go first
         require(votingToken != IERC20(address(0)), "Voting token must be set");
         require(pieceId <= pieceCount, "Invalid piece ID");
-        require(!hasVoted[pieceId][msg.sender], "Already voted");
+        require(!(votes[pieceId][msg.sender].voterAddress != address(0)), "Already voted");
         require(!pieces[pieceId].isDropped, "Piece has already been dropped");
 
         uint256 weight = 0;
@@ -145,8 +152,7 @@ contract CultureIndex is ICultureIndex, Ownable, ReentrancyGuard {
         require(weight > 0, "Weight must be greater than zero");
 
         // Directly update state variables without reading them into local variables
-        hasVoted[pieceId][msg.sender] = true;
-        votes[pieceId].push(Vote(msg.sender, weight));
+        votes[pieceId][msg.sender] = Vote(msg.sender, weight);
         totalVoteWeights[pieceId] += weight;
 
         // Insert the new vote weight into the max heap
@@ -170,9 +176,9 @@ contract CultureIndex is ICultureIndex, Ownable, ReentrancyGuard {
      * @param pieceId The ID of the art piece.
      * @return An array of Vote structs for the given art piece ID.
      */
-    function getVotes(uint256 pieceId) public view returns (Vote[] memory) {
+    function getVote(uint256 pieceId, address voter) public view returns (Vote memory) {
         require(pieceId <= pieceCount, "Invalid piece ID");
-        return votes[pieceId];
+        return votes[pieceId][voter];
     }
 
     /**
@@ -191,15 +197,6 @@ contract CultureIndex is ICultureIndex, Ownable, ReentrancyGuard {
     function topVotedPieceId() external view returns (uint256) {
         (uint256 pieceId, ) = maxHeap.getMax();
         return pieceId;
-    }
-
-    /**
-     * @notice Get the number of votes for a piece
-     * @param pieceId The ID of the art piece.
-     * @return The number of votes for a piece
-     */
-    function getVoteCount(uint256 pieceId) external view returns (uint256) {
-        return votes[pieceId].length;
     }
 
     /**
