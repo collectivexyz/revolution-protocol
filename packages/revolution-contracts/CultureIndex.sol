@@ -5,8 +5,9 @@ import { IERC20 } from "./IERC20.sol";
 import { MaxHeap } from "./MaxHeap.sol";
 import { ICultureIndex } from "./interfaces/ICultureIndex.sol";
 import { Ownable } from "@openzeppelin/contracts/access/Ownable.sol";
+import { ReentrancyGuard } from "@openzeppelin/contracts/utils/ReentrancyGuard.sol";
 
-contract CultureIndex is ICultureIndex, Ownable {
+contract CultureIndex is ICultureIndex, Ownable, ReentrancyGuard {
     // The MaxHeap data structure used to keep track of the top-voted piece
     MaxHeap public maxHeap;
 
@@ -89,7 +90,7 @@ contract CultureIndex is ICultureIndex, Ownable {
      * - `creatorArray` must not contain any zero addresses.
      * - The sum of basis points in `creatorArray` must be exactly 10,000.
      */
-    function createPiece(ArtPieceMetadata memory metadata, CreatorBps[] memory creatorArray) public returns (uint256) {
+    function createPiece(ArtPieceMetadata memory metadata, CreatorBps[] memory creatorArray) nonReentrant public returns (uint256) {
         uint256 totalBps = getTotalBpsFromCreators(creatorArray);
         require(totalBps == 10_000, "Total BPS must sum up to 10,000");
 
@@ -126,7 +127,7 @@ contract CultureIndex is ICultureIndex, Ownable {
      * @dev Requires that the pieceId is valid, the voter has not already voted on this piece, and the weight is greater than zero.
      * Emits a VoteCast event upon successful execution.
      */
-    function vote(uint256 pieceId) public {
+    function vote(uint256 pieceId) nonReentrant public {
         // Most likely to fail should go first
         uint256 weight = votingToken.balanceOf(msg.sender);
         require(weight > 0, "Weight must be greater than zero");
@@ -197,7 +198,7 @@ contract CultureIndex is ICultureIndex, Ownable {
      * @notice Pulls and drops the top-voted piece.
      * @return The top voted piece
      */
-    function dropTopVotedPiece() public onlyOwner returns (ArtPiece memory) {
+    function dropTopVotedPiece() nonReentrant public onlyOwner returns (ArtPiece memory) {
         uint256 pieceId;
         try maxHeap.extractMax() returns (uint256 _pieceId, uint256 _value) {
             pieceId = _pieceId;
