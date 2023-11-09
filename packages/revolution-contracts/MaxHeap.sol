@@ -75,7 +75,7 @@ contract MaxHeap is Ownable, ReentrancyGuard {
     /// @dev The function will revert if the heap is full
     /// @param itemId The item ID to insert
     /// @param value The value to insert
-    function insert(uint256 itemId, uint256 value) public {
+    function insert(uint256 itemId, uint256 value) onlyOwner public {
         require(size < maxsize, "Heap is full");
 
         heap[size] = itemId;
@@ -94,7 +94,7 @@ contract MaxHeap is Ownable, ReentrancyGuard {
     /// @param itemId The item ID whose vote count needs to be updated
     /// @param newValue The new value for the item
     /// @dev This function adjusts the heap to maintain the max-heap property after updating the vote count
-    function updateValue(uint256 itemId, uint256 newValue) public {
+    function updateValue(uint256 itemId, uint256 newValue) onlyOwner public {
         uint256 position = positionMapping[itemId];
         uint256 oldValue = valueMapping[itemId];
 

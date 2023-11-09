@@ -14,6 +14,43 @@ contract MaxHeapTestSuite is Test {
         maxHeap = new MaxHeapTest(50, address(this));
     }
 
+    /// @dev Tests that only the owner can call updateValue
+    function testUpdateValueOnlyOwner() public {
+        setUp();
+        maxHeap.insert(1, 10); // Setup a state with an element
+
+        address nonOwner = address(2);
+        vm.prank(nonOwner);
+        bool hasErrored = false;
+        try maxHeap.updateValue(1, 20) {
+            fail("updateValue should be callable only by the owner");
+        } catch {
+            hasErrored = true;
+        }
+        assertTrue(hasErrored, "updateValue should have errored");
+
+        vm.prank(address(this));
+        maxHeap.updateValue(1, 20); // No error expected
+    }
+
+    /// @dev Tests that only the owner can call insert
+    function testInsertOnlyOwner() public {
+        setUp();
+
+        address nonOwner = address(3);
+        vm.prank(nonOwner);
+        bool hasErrored = false;
+        try maxHeap.insert(2, 15) {
+            fail("insert should be callable only by the owner");
+        } catch {
+            hasErrored = true;
+        }
+        assertTrue(hasErrored, "insert should have errored");
+
+        vm.prank(address(this));
+        maxHeap.insert(2, 15); // No error expected
+    }
+
     /// @dev Tests that only the owner can call extractMax
     function testExtractMaxOnlyOwner() public {
         setUp();
