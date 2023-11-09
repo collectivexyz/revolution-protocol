@@ -302,7 +302,7 @@ function testMintToDropTopVotedPieceFailure() public {
     setUp();
 
     // Create a default art piece to have something to mint
-    uint256 pieceId = createDefaultArtPiece();
+    createDefaultArtPiece();
 
     // Mock the CultureIndex to simulate dropTopVotedPiece failure
     address cultureIndexMock = address(new CultureIndexMock());
