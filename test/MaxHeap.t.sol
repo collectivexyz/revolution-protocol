@@ -11,7 +11,7 @@ contract MaxHeapTestSuite is Test {
 
     /// @dev Sets up a new MaxHeap instance before each test
     function setUp() public {
-        maxHeap = new MaxHeapTest(50, address(this));
+        maxHeap = new MaxHeapTest(address(this));
     }
 
     /// @dev Tests that only the owner can call updateValue
@@ -187,23 +187,6 @@ contract MaxHeapTestSuite is Test {
         assertEq(itemId, 1, "Item ID should be 1 after heapify");
     }
 
-     /// @dev Tests that the heap does not allow insertions when it's already full
-    function testCannotInsertWhenFull() public {
-        setUp();
-
-        // Fill the heap to its max size
-        for(uint i = 0; i < maxHeap.maxsize(); i++) {
-            maxHeap.insert(i, i);
-        }
-
-        // Try to insert again and expect to fail
-        try maxHeap.insert(1,100) {
-            fail("Should not be able to insert when heap is full");
-        } catch Error(string memory reason) {
-            assertEq(reason, "Heap is full");
-        }
-    }
-
     /// @dev Tests that the heap does not allow removal of max element when it's empty
     function testCannotRemoveMaxWhenEmpty() public {
         setUp();
@@ -219,7 +202,7 @@ contract MaxHeapTestSuite is Test {
 
 
 contract MaxHeapTest is MaxHeap {
-    constructor(uint256 _maxsize, address _owner) MaxHeap(_maxsize, address(_owner)) {}
+    constructor(address _owner) MaxHeap(address(_owner)) {}
 
     /// @notice Function to set a value in the heap (ONLY FOR TESTING)
     /// @param pos The position to set

@@ -12,7 +12,6 @@ contract MaxHeap is Ownable, ReentrancyGuard {
     mapping(uint256 => uint256) public heap;
 
     uint256 public size = 0;
-    uint256 public maxsize;
 
     /// @notice Mapping to keep track of the value of an item in the heap
     mapping(uint256 => uint256) public valueMapping;
@@ -21,10 +20,8 @@ contract MaxHeap is Ownable, ReentrancyGuard {
     mapping(uint256 => uint256) public positionMapping;
 
     /// @notice Constructor to initialize the MaxHeap
-    /// @param _maxsize The maximum size of the heap
     /// @param _owner The owner of the contract
-    constructor(uint256 _maxsize, address _owner) Ownable(_owner) {
-        maxsize = _maxsize;
+    constructor(address _owner) Ownable(_owner) {
     }
 
     /// @notice Get the parent index of a given position
@@ -39,12 +36,8 @@ contract MaxHeap is Ownable, ReentrancyGuard {
     /// @param fpos The position of the first node
     /// @param spos The position of the second node
     function swap(uint256 fpos, uint256 spos) private {
-        uint256 temp = heap[fpos];
-        heap[fpos] = heap[spos];
-        heap[spos] = temp;
-
-        positionMapping[heap[fpos]] = fpos;
-        positionMapping[heap[spos]] = spos;
+        (heap[fpos], heap[spos]) = (heap[spos], heap[fpos]);
+        (positionMapping[heap[fpos]], positionMapping[heap[spos]]) = (fpos, spos);
     }
 
     /// @notice Reheapify the heap starting at a given position
@@ -76,8 +69,6 @@ contract MaxHeap is Ownable, ReentrancyGuard {
     /// @param itemId The item ID to insert
     /// @param value The value to insert
     function insert(uint256 itemId, uint256 value) onlyOwner public {
-        require(size < maxsize, "Heap is full");
-
         heap[size] = itemId;
         valueMapping[itemId] = value; // Update the value mapping
         positionMapping[itemId] = size; // Update the position mapping

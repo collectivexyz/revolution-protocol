@@ -8,7 +8,7 @@ contract MaxHeapUpdateTestSuite is Test {
     MaxHeapTest public heap;
 
     constructor() {
-        heap = new MaxHeapTest(10, address(this));  // Create a heap with a max size of 10 for testing
+        heap = new MaxHeapTest(address(this));  // Create a heap with a max size of 10 for testing
     }
 
     function testInitialInsertAndMax() public {
