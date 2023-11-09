@@ -99,6 +99,9 @@ contract CultureIndex is ICultureIndex, Ownable, ReentrancyGuard {
 
         uint256 pieceId = pieceCount++;
 
+        /// @dev Insert the new piece into the max heap
+        maxHeap.insert(pieceId, 0);
+        
         ArtPiece storage newPiece = pieces[pieceId];
 
         newPiece.pieceId = pieceId;
@@ -108,9 +111,6 @@ contract CultureIndex is ICultureIndex, Ownable, ReentrancyGuard {
         for (uint i = 0; i < creatorArray.length; i++) {
             newPiece.creators.push(creatorArray[i]);
         }
-
-        /// @dev Insert the new piece into the max heap
-        maxHeap.insert(pieceId, 0);
 
         emit PieceCreated(pieceId, msg.sender, metadata.name, metadata.description, metadata.image, metadata.animationUrl, metadata.text, uint8(metadata.mediaType));
 
@@ -129,12 +129,20 @@ contract CultureIndex is ICultureIndex, Ownable, ReentrancyGuard {
      */
     function vote(uint256 pieceId) nonReentrant public {
         // Most likely to fail should go first
-        uint256 weight = votingToken.balanceOf(msg.sender);
-        require(weight > 0, "Weight must be greater than zero");
-
+        require(votingToken != IERC20(address(0)), "Voting token must be set");
         require(pieceId <= pieceCount, "Invalid piece ID");
         require(!hasVoted[pieceId][msg.sender], "Already voted");
         require(!pieces[pieceId].isDropped, "Piece has already been dropped");
+
+        uint256 weight = 0;
+
+        // Try to get the voter's balance with a call to balanceOf
+        try votingToken.balanceOf(msg.sender) returns (uint256 balance) {
+            weight = balance;
+        } catch {
+            revert("Failed to get balance, voting not possible");
+        }
+        require(weight > 0, "Weight must be greater than zero");
 
         // Directly update state variables without reading them into local variables
         hasVoted[pieceId][msg.sender] = true;

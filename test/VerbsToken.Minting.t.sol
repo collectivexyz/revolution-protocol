@@ -57,7 +57,7 @@ contract VerbsTokenTest is Test {
         try verbsToken.mint() {
             fail("Should revert on removing max from empty heap");
         } catch Error(string memory reason) {
-            assertEq(reason, "No pieces available to drop");
+            assertEq(reason, "Heap is empty");
         }
     }
 

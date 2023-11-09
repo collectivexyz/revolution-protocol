@@ -297,6 +297,33 @@ function testFunctionalityUnderMaximumLoad() public {
     assertFalse(reverted, "Should handle the maximum number of creators without reverting");
 }
 
+/// @dev Tests the _mintTo function for failure in dropTopVotedPiece and ensures verbId is not incremented
+function testMintToDropTopVotedPieceFailure() public {
+    setUp();
+
+    // Create a default art piece to have something to mint
+    uint256 pieceId = createDefaultArtPiece();
+
+    // Mock the CultureIndex to simulate dropTopVotedPiece failure
+    address cultureIndexMock = address(new CultureIndexMock());
+    verbsToken.setCultureIndex(ICultureIndex(cultureIndexMock));
+
+    // Store current verbId before test
+    uint256 currentVerbIdBefore = 0;
+
+    bool dropTopVotedPieceFailed = false;
+    try verbsToken.mint() {
+        fail("dropTopVotedPiece failure should have caused _mintTo to revert");
+    } catch {
+        dropTopVotedPieceFailed = true;
+    }
+
+    // Verify verbId has not incremented after failure
+    uint256 currentVerbIdAfter = verbsToken.currentVerbId();
+    assertEq(currentVerbIdBefore, currentVerbIdAfter, "verbId should not increment after failure");
+
+    assertTrue(dropTopVotedPieceFailed, "_mintTo should revert if dropTopVotedPiece fails");
+}
 
 
 }
@@ -314,6 +341,16 @@ contract ReentrancyAttackContractGeneral {
     }
 
     // Implement fallback or receive function that calls burn again
+}
+
+// Mock CultureIndex to simulate failure in dropTopVotedPiece
+contract CultureIndexMock {
+    function dropTopVotedPiece() external view returns (ICultureIndex.ArtPiece memory) {
+        revert("Mocked failure");
+    }
+
+    // Implement other methods of ICultureIndex as needed, potentially as no-ops
+
 }
 
 

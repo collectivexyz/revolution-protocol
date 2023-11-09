@@ -110,6 +110,13 @@ contract VerbsToken is IVerbsToken, Ownable, ERC721Checkpointable, ReentrancyGua
         return string(abi.encodePacked("ipfs://", _contractURIHash));
     }
 
+     /**
+     * @notice currentVerbId getter.
+     */
+    function currentVerbId() public view returns (uint256) {
+        return _currentVerbId;
+    }
+
     /**
      * @notice Set the _contractURIHash.
      * @dev Only callable by the owner.
@@ -134,7 +141,7 @@ contract VerbsToken is IVerbsToken, Ownable, ERC721Checkpointable, ReentrancyGua
      * @dev Call _mintTo with the to address(es).
      */
     function mint() public override onlyMinter nonReentrant returns (uint256) {
-        return _mintTo(minter, _currentVerbId++);
+        return _mintTo(minter);
     }
 
     /**
@@ -226,13 +233,23 @@ contract VerbsToken is IVerbsToken, Ownable, ERC721Checkpointable, ReentrancyGua
     /**
      * @notice Mint a Verb with `verbId` to the provided `to` address.
      */
-    function _mintTo(address to, uint256 verbId) internal returns (uint256) {
-        ICultureIndex.ArtPiece memory artPiece = cultureIndex.dropTopVotedPiece();
-
+    function _mintTo(address to) internal returns (uint256) {
+        uint256 verbId;
+        ICultureIndex.ArtPiece memory artPiece = cultureIndex.getTopVotedPiece();
+        
         // Check-Effects-Interactions Pattern
         // Perform all checks
         require(artPiece.creators.length <= 100, "Creator array must not be > 100");
-    
+
+        // Use try/catch to handle potential failure
+        try cultureIndex.dropTopVotedPiece() returns (ICultureIndex.ArtPiece memory _artPiece) {
+            artPiece = _artPiece;
+            verbId = _currentVerbId++;
+        } catch {
+            // Handle failure (e.g., revert, emit an event, set a flag, etc.)
+            revert("dropTopVotedPiece failed");
+        }
+
         ICultureIndex.ArtPiece storage newPiece = artPieces[verbId];
 
         newPiece.pieceId = artPiece.pieceId;
