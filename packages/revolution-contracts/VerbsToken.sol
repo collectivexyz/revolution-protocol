@@ -230,6 +230,17 @@ contract VerbsToken is IVerbsToken, Ownable, ERC721Checkpointable, ReentrancyGua
         emit CultureIndexLocked();
     }
 
+
+    /**
+    * @notice Fetch an art piece by its ID.
+    * @param verbId The ID of the art piece.
+    * @return The ArtPiece struct associated with the given ID.
+    */
+    function getArtPieceById(uint256 verbId) public view returns (ICultureIndex.ArtPiece memory) {
+        require(verbId <= _currentVerbId, "Invalid piece ID");
+        return artPieces[verbId];
+    }
+
     /**
      * @notice Mint a Verb with `verbId` to the provided `to` address.
      */
@@ -255,6 +266,7 @@ contract VerbsToken is IVerbsToken, Ownable, ERC721Checkpointable, ReentrancyGua
         newPiece.pieceId = artPiece.pieceId;
         newPiece.metadata = artPiece.metadata;
         newPiece.dropper = artPiece.dropper;
+        newPiece.isDropped = artPiece.isDropped;
 
         for (uint i = 0; i < artPiece.creators.length; i++) {
             newPiece.creators.push(artPiece.creators[i]);

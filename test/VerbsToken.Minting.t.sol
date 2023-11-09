@@ -49,7 +49,61 @@ contract VerbsTokenTest is Test {
         verbsToken.setDescriptor(_descriptor);
     }
 
+    /// @dev Ensures the dropped art piece is equivalent to the top-voted piece
+    function testDroppedArtPieceMatchesTopVoted() public {
+        setUp();
 
+        // Create a new art piece and simulate it being the top voted piece
+        uint256 pieceId = createDefaultArtPiece();
+        mockVotingToken._mint(address(this), 10);
+        cultureIndex.vote(pieceId); // Simulate voting for the piece to make it top-voted
+
+        // Fetch the top voted piece before minting
+        ICultureIndex.ArtPiece memory topVotedPieceBeforeMint = cultureIndex.getTopVotedPiece();
+
+        // Mint a token
+        uint256 tokenId = verbsToken.mint();
+
+        // Fetch the dropped art piece associated with the minted token
+        ICultureIndex.ArtPiece memory droppedArtPiece = verbsToken.getArtPieceById(tokenId);
+
+        // Now compare the relevant fields of topVotedPieceBeforeMint and droppedArtPiece
+        assertEq(droppedArtPiece.pieceId, topVotedPieceBeforeMint.pieceId, "Piece ID should match");
+        assertEq(droppedArtPiece.dropper, topVotedPieceBeforeMint.dropper, "Dropper address should match");
+        //ensure isDropped is now true
+        assertTrue(droppedArtPiece.isDropped, "isDropped should be true");
+        assertTrue(areArraysEqual(droppedArtPiece.creators, topVotedPieceBeforeMint.creators), "Creators array should match");
+        assertTrue(areArtPieceMetadataEqual(droppedArtPiece.metadata, topVotedPieceBeforeMint.metadata), "Metadata should match");
+    }
+
+    // Helper function to compare ArtPieceMetadata structs
+    function areArtPieceMetadataEqual(
+        ICultureIndex.ArtPieceMetadata memory metadata1,
+        ICultureIndex.ArtPieceMetadata memory metadata2
+    ) internal pure returns (bool) {
+        return (
+            keccak256(bytes(metadata1.name)) == keccak256(bytes(metadata2.name)) &&
+            keccak256(bytes(metadata1.description)) == keccak256(bytes(metadata2.description)) &&
+            metadata1.mediaType == metadata2.mediaType &&
+            keccak256(bytes(metadata1.image)) == keccak256(bytes(metadata2.image)) &&
+            keccak256(bytes(metadata1.text)) == keccak256(bytes(metadata2.text)) &&
+            keccak256(bytes(metadata1.animationUrl)) == keccak256(bytes(metadata2.animationUrl))
+        );
+    }
+
+
+    // Helper function to compare arrays of creators
+    function areArraysEqual(ICultureIndex.CreatorBps[] memory arr1, ICultureIndex.CreatorBps[] memory arr2) internal view returns (bool) {
+        if (arr1.length != arr2.length) {
+            return false;
+        }
+        for (uint i = 0; i < arr1.length; i++) {
+            if (arr1[i].creator != arr2[i].creator || arr1[i].bps != arr2[i].bps) {
+                return false;
+            }
+        }
+        return true;
+    }
 
     /// @dev Tests the minting with no pieces added
     function testMintWithNoPieces() public {
