@@ -30,13 +30,22 @@ jobs:
         run: |
           npm install -g pnpm
 
+      - name: Log Solidity version
+        run: solc --version
+
+      - name: Log Foundry version
+        run: forge --version
+
+      - name: Log Node.js version
+        run: node --version
+
       - name: Update Dependencies
         run: |
           git submodule foreach --recursive 'if [ -f pnpm-lock.yaml ]; then pnpm install; fi'
 
       - name: Run Forge test
         run: |
-          forge test -v --fail-fast
+          forge test -vvv
         id: test
 
       - name: Run Geiger Check
