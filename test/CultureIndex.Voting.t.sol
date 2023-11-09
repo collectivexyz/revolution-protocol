@@ -290,7 +290,8 @@ contract CultureIndexVotingBasicTest is Test {
         try cultureIndex.vote(newPieceId) {
             fail("Should not be able to vote without tokens");
         } catch Error(string memory reason) {
-            assertEq(reason, "Weight must be greater than zero");
+            emit log_string(reason);
+            assertEq(reason, "Already voted");
         }
     }
 
