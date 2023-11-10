@@ -90,6 +90,10 @@ contract VerbsAuctionHouseTest is Test {
         assertEq(auctionStartTime, startTime, "Auction start time should be set correctly");
         assertEq(auctionEndTime, startTime + auctionHouse.duration(), "Auction end time should be set correctly");
         assertEq(verbId, 0, "Auction should be for the zeroth verb");
+        assertEq(amount, 0, "Auction amount should be 0");
+        assertEq(bidder, address(0), "Auction bidder should be 0");
+        assertEq(settled, false, "Auction should not be settled");
+        
     }
 
 
