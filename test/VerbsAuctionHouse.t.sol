@@ -12,6 +12,7 @@ import {CultureIndex} from "../packages/revolution-contracts/CultureIndex.sol";
 import { IVerbsDescriptorMinimal } from "../packages/revolution-contracts/interfaces/IVerbsDescriptorMinimal.sol";
 import { ICultureIndex, ICultureIndexEvents } from "../packages/revolution-contracts/interfaces/ICultureIndex.sol";
 import { IVerbsAuctionHouse } from "../packages/revolution-contracts/interfaces/IVerbsAuctionHouse.sol";
+import { IERC20 } from "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 
 contract VerbsAuctionHouseTest is Test {
     VerbsAuctionHouse public auctionHouse;
@@ -211,6 +212,34 @@ contract VerbsAuctionHouseTest is Test {
         auctionHouse.settleAuction(); // Attempt to settle before the auction ends
     }
 
+    function testTransferFailureAndFallbackToWETH() public {
+        setUp();
+        createDefaultArtPiece();
+        auctionHouse.unpause();
+
+        address recipient = address(new ContractThatRejectsEther());
+
+        auctionHouse.transferOwnership(recipient);
+
+        uint256 amount = 1 ether;
+
+        vm.deal(address(auctionHouse), amount);
+        auctionHouse.createBid{value: amount}(0); // Assuming first auction's verbId is 0
+
+        // Initially, recipient should have 0 ether and 0 WETH
+        assertEq(recipient.balance, 0);
+        assertEq(IERC20(address(mockWETH)).balanceOf(recipient), 0);
+
+        //go in future
+        vm.warp(block.timestamp + auctionHouse.duration() + 1); // Fast forward time to end the auction
+
+        auctionHouse.settleCurrentAndCreateNewAuction();
+
+        // Check if the recipient received WETH instead of Ether
+        assertEq(IERC20(address(mockWETH)).balanceOf(recipient), amount);
+        assertEq(recipient.balance, 0); // Ether balance should still be 0
+    }
+
 
     // Utility function to create a new art piece and return its ID
     function createArtPiece(
@@ -260,4 +289,22 @@ contract VerbsAuctionHouseTest is Test {
 
 contract ProxyRegistry is IProxyRegistry {
     mapping(address => address) public proxies;
+}
+
+contract ContractWithoutReceiveOrFallback {
+    // This contract intentionally does not have receive() or fallback()
+    // functions to test the behavior of sending Ether to such a contract.
+}
+
+
+contract ContractThatRejectsEther {
+    // This contract has a receive() function that reverts any Ether transfers.
+    receive() external payable {
+        revert("Rejecting Ether transfer");
+    }
+
+    // Alternatively, you could use a fallback function that reverts.
+    // fallback() external payable {
+    //     revert("Rejecting Ether transfer");
+    // }
 }
