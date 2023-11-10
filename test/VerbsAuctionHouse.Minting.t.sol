@@ -18,7 +18,6 @@ import { PausableUpgradeable } from "@openzeppelin/contracts-upgradeable/utils/P
 
 contract VerbsAuctionHouseMintTest is VerbsAuctionHouseTest {
 
-
    function testMintFailureDueToEmptyNFTList() public {
         setUp();
         emit log_address(address(auctionHouse));
@@ -33,6 +32,22 @@ contract VerbsAuctionHouseMintTest is VerbsAuctionHouseTest {
     }
 
 
+    function testBehaviorOnMintFailureDuringAuctionCreation() public {
+        // Pre-conditions setup to trigger mint failure
+
+        auctionHouse.unpause();
+
+        (uint256 verbId, uint256 amount, uint256 auctionStartTime, uint256 auctionEndTime, address payable bidder, bool settled) = auctionHouse.auction();
+
+        // Check that auction is not created
+        assertEq(verbId, 0);
+        assertEq(amount, 0);
+        assertEq(auctionStartTime, 0);
+        assertEq(auctionEndTime, 0);
+        assertEq(bidder, address(0));
+        assertEq(settled, false);
+        
+    }
 
 }
 
