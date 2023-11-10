@@ -99,7 +99,7 @@ contract TokenEmitter is LinearVRGDA, ITokenEmitter, AccessControlEnumerable, Re
     function getTokenAmountForMultiPurchase(uint256 payment) public view returns (uint256) {
         // payment is split up into chunks of numTokens
         // each chunk is estimated and the total is returned
-        // chunk up the payments into 0.01eth chunks
+        // chunk up the payments into 0.001eth chunks
 
         //counter to keep track of how much eth is left in the payment
         uint256 remainingEth = payment;
@@ -108,7 +108,7 @@ contract TokenEmitter is LinearVRGDA, ITokenEmitter, AccessControlEnumerable, Re
         uint256 tokenAmount = 0;
 
         // solhint-disable-next-line var-name-mixedcase
-        uint256 INCREMENT_SIZE = 1e18;
+        uint256 INCREMENT_SIZE = 1e15;
 
         // loop through the payment and add the estimated amount of tokens to the total
         while (remainingEth > 0) {

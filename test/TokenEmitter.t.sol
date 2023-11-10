@@ -238,6 +238,27 @@ contract TokenEmitterTest is Test {
 
     }
 
+    function testGetTokenAmountForMultiPurchaseGeneral() public {
+        vm.startPrank(address(0));
+
+        // Set up a typical payment amount
+        uint256 payment = 10 ether; // A typical payment amount
+
+        uint256 SOME_MAX_EXPECTED_VALUE = emitter.getTokenAmountForMultiPurchase(10.01 ether);
+
+        // Call the function with the typical payment amount
+        uint256 tokenAmount = emitter.getTokenAmountForMultiPurchase(payment);
+
+        // Assert that the token amount is reasonable (not zero or unexpectedly high)
+        assertGt(tokenAmount, 0, "Token amount should be greater than zero");
+        assertLt(tokenAmount, SOME_MAX_EXPECTED_VALUE, "Token amount should be less than some max expected value");
+
+        // Log the token amount for debugging
+        emit Log("Token Amount for Typical Payment: ", tokenAmount);
+
+        vm.stopPrank();
+    }
+
     function testUNSAFE_getOverestimateTokenAmount() public {
         vm.startPrank(address(0));
         
