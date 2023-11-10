@@ -78,7 +78,7 @@ contract TokenEmitter is LinearVRGDA, ITokenEmitter, AccessControlEnumerable, Re
             sum += _bps[i];
         }
 
-        require(sum == 10_000, "BPS must add up to 10_000");
+        require(sum == 10_000, "bps must add up to 10_000");
         return totalTokens;
     }
 

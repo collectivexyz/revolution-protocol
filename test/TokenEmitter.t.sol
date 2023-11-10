@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: UNLICENSED
-pragma solidity ^0.8.15;
+pragma solidity ^0.8.22;
 
 import { Test } from "forge-std/Test.sol";
 import { TokenEmitter } from "../packages/revolution-contracts/TokenEmitter.sol";
@@ -76,6 +76,36 @@ contract TokenEmitterTest is Test {
 
         emitter.buyToken{ value: 1e18 }(recipients, bps, 1);
         assert(emitter.balanceOf(address(1)) == emitter.balanceOf(address(2)));
+    }
+
+        // Test to ensure the total basis points add up to 100%
+    function testTotalBasisPoints() public {
+        vm.startPrank(address(0));
+
+        address[] memory recipients = new address[](2);
+        recipients[0] = address(1);
+        recipients[1] = address(2);
+
+        // Test case with correct total of 10,000 basis points (100%)
+        uint256[] memory correctBps = new uint256[](2);
+        correctBps[0] = 5000; // 50%
+        correctBps[1] = 5000; // 50%
+
+        // Attempting a valid token purchase
+        emitter.buyToken{ value: 1e18 }(recipients, correctBps, 1);
+        uint totalSupplyAfterValidPurchase = emitter.totalSupply();
+        assertGt(totalSupplyAfterValidPurchase, 0, "Token purchase should have increased total supply");
+
+        // Test case with incorrect total of basis points
+        uint256[] memory incorrectBps = new uint256[](2);
+        incorrectBps[0] = 4000; // 40%
+        incorrectBps[1] = 4000; // 40%
+
+        // Expecting the transaction to revert due to incorrect total basis points
+        vm.expectRevert("bps must add up to 10_000");
+        emitter.buyToken{ value: 1e18 }(recipients, incorrectBps, 1);
+
+        vm.stopPrank();
     }
 
     // // TODO: test scamming creator fails with percentage low
