@@ -53,14 +53,14 @@ contract TokenEmitter is LinearVRGDA, ITokenEmitter, AccessControlEnumerable, Re
         return token.balanceOf(_owner);
     }
 
-    // takes a list of addresses and a list of payout percentages
+    // takes a list of addresses and a list of payout percentages as basis points
     function buyToken(
         address[] memory _addresses,
-        uint[] memory _percentages,
+        uint[] memory _bps,
         uint256
     ) public payable nonReentrant returns (uint256) {
-        // ensure the same number of addresses and percentages
-        require(_addresses.length == _percentages.length, "Parallel arrays required");
+        // ensure the same number of addresses and _bps
+        require(_addresses.length == _bps.length, "Parallel arrays required");
 
         uint totalTokens = getTokenAmountForMultiPurchase(msg.value);
         (bool success, ) = treasury.call{ value: msg.value }("");
@@ -72,13 +72,13 @@ contract TokenEmitter is LinearVRGDA, ITokenEmitter, AccessControlEnumerable, Re
 
         // calculates how much governance to give each address
         for (uint i = 0; i < _addresses.length; i++) {
-            uint tokens = (totalTokens * _percentages[i]) / 100;
+            uint tokens = (totalTokens * _bps[i]) / 10_000;
             // transfer governance to address
             _mint(_addresses[i], tokens);
-            sum += _percentages[i];
+            sum += _bps[i];
         }
 
-        require(sum == 100, "Percentages must add up to 100");
+        require(sum == 10_000, "BPS must add up to 10_000");
         return totalTokens;
     }
 

@@ -35,10 +35,10 @@ contract TokenEmitterTest is Test {
         address[] memory recipients = new address[](1);
         recipients[0] = address(1);
 
-        uint256[] memory percentages = new uint256[](1);
-        percentages[0] = 100;
+        uint256[] memory bps = new uint256[](1);
+        bps[0] = 10_000;
 
-        emitter.buyToken{ value: 1e18 }(recipients, percentages, 1);
+        emitter.buyToken{ value: 1e18 }(recipients, bps, 1);
         emit Log("Balance: ", emitter.balanceOf(address(1)));
     }
 
@@ -51,12 +51,12 @@ contract TokenEmitterTest is Test {
         address[] memory secondRecipients = new address[](1);
         secondRecipients[0] = address(2);
 
-        uint256[] memory percentages = new uint256[](1);
-        percentages[0] = 100;
+        uint256[] memory bps = new uint256[](1);
+        bps[0] = 10_000;
 
-        emitter.buyToken{ value: 10e18 }(firstRecipients, percentages, 1);
+        emitter.buyToken{ value: 10e18 }(firstRecipients, bps, 1);
 
-        emitter.buyToken{ value: 10e18 }(secondRecipients, percentages, 1);
+        emitter.buyToken{ value: 10e18 }(secondRecipients, bps, 1);
 
         // should get more expensive
         assert(emitter.balanceOf(address(1)) > emitter.balanceOf(address(2)));
@@ -70,11 +70,11 @@ contract TokenEmitterTest is Test {
         recipients[0] = address(1);
         recipients[1] = address(2);
 
-        uint256[] memory percentages = new uint256[](2);
-        percentages[0] = 50;
-        percentages[1] = 50;
+        uint256[] memory bps = new uint256[](2);
+        bps[0] = 5_000;
+        bps[1] = 5_000;
 
-        emitter.buyToken{ value: 1e18 }(recipients, percentages, 1);
+        emitter.buyToken{ value: 1e18 }(recipients, bps, 1);
         assert(emitter.balanceOf(address(1)) == emitter.balanceOf(address(2)));
     }
 
@@ -86,11 +86,11 @@ contract TokenEmitterTest is Test {
     //     recipients[0] = address(1);
     //     recipients[1] = address(2);
 
-    //     uint256[] memory percentages = new uint256[](2);
-    //     percentages[0] = 95;
-    //     percentages[1] = 5;
+    //     uint256[] memory bps = new uint256[](2);
+    //     bps[0] = 9_500;
+    //     bps[1] = 500;
 
-    //     emitter.buyToken{value: 1e18}(recipients, percentages);
+    //     emitter.buyToken{value: 1e18}(recipients, bps);
     // }
 
     function testBuyingTwiceAmountIsNotMoreThanTwiceEmittedTokens() public {
@@ -99,13 +99,13 @@ contract TokenEmitterTest is Test {
         address[] memory recipients = new address[](1);
         recipients[0] = address(1);
 
-        uint256[] memory percentages = new uint256[](1);
-        percentages[0] = 100;
+        uint256[] memory bps = new uint256[](1);
+        bps[0] = 10_000;
 
-        emitter.buyToken{ value: 1e18 }(recipients, percentages, 1);
+        emitter.buyToken{ value: 1e18 }(recipients, bps, 1);
         uint256 firstAmount = emitter.balanceOf(address(1));
 
-        emitter.buyToken{ value: 1e18 }(recipients, percentages, 1);
+        emitter.buyToken{ value: 1e18 }(recipients, bps, 1);
         uint256 secondAmountDifference = emitter.balanceOf(address(1)) - firstAmount;
 
         assert(secondAmountDifference <= 2 * emitter.totalSupply());
@@ -148,10 +148,10 @@ contract TokenEmitterTest is Test {
         address[] memory recipients = new address[](1);
         recipients[0] = address(1);
 
-        uint256[] memory percentages = new uint256[](1);
-        percentages[0] = 100;
+        uint256[] memory bps = new uint256[](1);
+        bps[0] = 10_000;
 
-        emitter1.buyToken{ value: 1e18 }(recipients, percentages, 1);
+        emitter1.buyToken{ value: 1e18 }(recipients, bps, 1);
 
         vm.stopPrank();
         vm.prank(address(emitter1));
@@ -159,7 +159,7 @@ contract TokenEmitterTest is Test {
         governanceToken.transferAdmin(address(emitter2));
 
         vm.prank(address(0));
-        emitter2.buyToken{ value: 1e18 }(recipients, percentages, 1);
+        emitter2.buyToken{ value: 1e18 }(recipients, bps, 1);
     }
 
     function testTransferTokenAdmin() public {
