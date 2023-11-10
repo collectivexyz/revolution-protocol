@@ -203,4 +203,64 @@ contract TokenEmitterTest is Test {
         vm.prank(address(0));
         emitter.transferTokenAdmin(address(2));
     }
+    
+    function testBuyTokenReentrancy() public {
+        vm.startPrank(address(0));
+
+        // Deploy the malicious treasury contract
+        MaliciousTreasury maliciousTreasury = new MaliciousTreasury(address(emitter));
+
+        // Initialize TokenEmitter with the address of the malicious treasury
+        NontransferableERC20 governanceToken = new NontransferableERC20("Revolution Governance", "GOV");
+        uint256 toScale = 1e18;
+        uint256 tokensPerTimeUnit = 10_000;
+        TokenEmitter emitter2 = new TokenEmitter(governanceToken, address(maliciousTreasury), 1e14, 1e17, int256(tokensPerTimeUnit * toScale));
+        governanceToken.transferAdmin(address(emitter2));
+
+        vm.deal(address(0), 100000 ether);
+        vm.stopPrank();
+
+        // Send 1 ETH to the malicious treasury
+        vm.prank(address(0));
+
+        //buy tokens and see if malicious treasury can reenter
+        address[] memory recipients = new address[](1);
+        recipients[0] = address(1);
+        uint256[] memory bps = new uint256[](1);
+        bps[0] = 10_000;
+        vm.expectRevert();
+        emitter2.buyToken{ value: 1e18 }(recipients, bps, 1);
+
+        emit log_uint(emitter2.totalSupply());
+        emit log_uint(emitter2.balanceOf(address(maliciousTreasury)));
+
+        assertTrue(true);
+
+    }
+
 }
+
+
+contract MaliciousTreasury {
+    TokenEmitter emitter;
+    bool public reentryAttempted;
+
+    constructor(address _emitter) {
+        emitter = TokenEmitter(_emitter);
+        reentryAttempted = false;
+    }
+
+    // Fallback function to enable re-entrance to TokenEmitter
+    function call() external payable {
+        reentryAttempted = true;
+        address[] memory recipients = new address[](1);
+        recipients[0] = address(this);
+        uint256[] memory bps = new uint256[](1);
+        bps[0] = 10_000;
+
+        // Attempt to re-enter TokenEmitter
+        emitter.buyToken{value: msg.value}(recipients, bps, 1);
+
+    }
+}
+
