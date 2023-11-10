@@ -15,9 +15,6 @@ interface ITokenEmitter {
     // solhint-disable-next-line func-name-mixedcase
     function UNSAFE_getOverestimateTokenAmount(uint256 payment, uint256 supply) external view returns (uint256);
 
-    // solhint-disable-next-line func-name-mixedcase
-    function UNSAFE_updateTreasury(address _newTreasury) external;
-
     function getTokenPrice(uint256 currentTotalSupply) external view returns (uint256);
 
     function totalSupply() external view returns (uint);

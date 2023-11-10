@@ -3,7 +3,7 @@ pragma solidity ^0.8.22;
 
 import { LinearVRGDA } from "./libs/LinearVRGDA.sol";
 import { ERC20 } from "@openzeppelin/contracts/token/ERC20/ERC20.sol";
-import { toDaysWadUnsafe } from "solmate/src/utils/SignedWadMath.sol";
+import { toDaysWadUnsafe } from "solmate/utils/SignedWadMath.sol";
 import { Strings } from "@openzeppelin/contracts/utils/Strings.sol";
 import { AccessControlEnumerable } from "@openzeppelin/contracts/access/extensions/AccessControlEnumerable.sol";
 import { NontransferableERC20 } from "./NontransferableERC20.sol";
@@ -55,11 +55,6 @@ contract TokenEmitter is LinearVRGDA, ITokenEmitter, AccessControlEnumerable, Re
         return token.balanceOf(_owner);
     }
 
-    // solhint-disable-next-line func-name-mixedcase
-    function UNSAFE_updateTreasury(address _newTreasury) public onlyRole(DEFAULT_ADMIN_ROLE) {
-        treasury = _newTreasury;
-    }
-
     // takes a list of addresses and a list of payout percentages
     function buyToken(
         address[] memory _addresses,
@@ -91,9 +86,15 @@ contract TokenEmitter is LinearVRGDA, ITokenEmitter, AccessControlEnumerable, Re
 
     // This returns a safe, underestimated amount of governance.
     function _getTokenAmountForSinglePurchase(uint256 payment, uint256 supply) public view returns (uint256) {
-        uint256 initialEstimatedAmount = UNSAFE_getOverestimateTokenAmount(payment, supply);
-        uint256 overestimatedPrice = getTokenPrice(supply + initialEstimatedAmount);
+        // get the initial estimated amount of tokens - assuming we priced your entire purchase at supply + 1 (akin to buying 1 NFT)
+        uint256 overestimatedAmount = UNSAFE_getOverestimateTokenAmount(payment, supply);
+
+        // get the overestimated price - assuming we priced your entire purchase at supply + 1 (akin to buying 1 NFT)
+        uint256 overestimatedPrice = getTokenPrice(supply + overestimatedAmount);
+
+        // get the underestimated price - assuming you paid for the entire purchase at the price of the last token
         uint256 underestimatedAmount = payment / overestimatedPrice;
+
         return underestimatedAmount;
     }
 
@@ -102,33 +103,43 @@ contract TokenEmitter is LinearVRGDA, ITokenEmitter, AccessControlEnumerable, Re
         // each chunk is estimated and the total is returned
         // chunk up the payments into 0.01eth chunks
 
+        //counter to keep track of how much eth is left in the payment
         uint256 remainingEth = payment;
-        uint256 total = 0;
+
+        // the total amount of tokens to return
+        uint256 tokenAmount = 0;
+
         // solhint-disable-next-line var-name-mixedcase
         uint256 INCREMENT_SIZE = 1e18;
+
+        // loop through the payment and add the estimated amount of tokens to the total
         while (remainingEth > 0) {
+            // if the remaining eth is less than the increment size, calculate the tokenAmount for the remaining eth
             if (remainingEth < INCREMENT_SIZE) {
-                total += _getTokenAmountForSinglePurchase(remainingEth, totalSupply() + total);
+                tokenAmount += _getTokenAmountForSinglePurchase(remainingEth, totalSupply() + tokenAmount);
                 remainingEth = 0;
-            } else {
-                total += _getTokenAmountForSinglePurchase(INCREMENT_SIZE, totalSupply() + total);
+            } 
+            // otherwise, calculate tokenAmount for the increment size
+            else {
+                tokenAmount += _getTokenAmountForSinglePurchase(INCREMENT_SIZE, totalSupply() + tokenAmount);
                 remainingEth -= INCREMENT_SIZE;
             }
         }
-        return total;
+        return tokenAmount;
     }
 
     // This will return MORE GOVERNANCE than it should. Never reward the user with this; the DAO will get taken over.
     // solhint-disable-next-line func-name-mixedcase
     function UNSAFE_getOverestimateTokenAmount(uint256 payment, uint256 supply) public view returns (uint256) {
-        uint256 initialPrice = getTokenPrice(supply);
-        uint256 initialEstimatedAmount = payment / initialPrice;
+        uint256 priceForFirstToken = getTokenPrice(supply);
+        uint256 initialEstimatedAmount = payment / priceForFirstToken;
         return initialEstimatedAmount;
     }
 
-    function getTokenPrice(uint256 currentTotalSupply) public view returns (uint256) {
+    function getTokenPrice(uint256 tokensSoldSoFar) public view returns (uint256) {
+        // Note: By using toDaysWadUnsafe(block.timestamp - startTime) we are establishing that 1 "unit of time" is 1 day.
         // solhint-disable-next-line not-rely-on-time
-        uint256 price = getVRGDAPrice(toDaysWadUnsafe(block.timestamp - startTime), currentTotalSupply);
+        uint256 price = getVRGDAPrice(toDaysWadUnsafe(block.timestamp - startTime), tokensSoldSoFar);
         // TODO make test that price never hits zero
         return price;
     }
