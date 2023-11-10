@@ -23,6 +23,12 @@ contract MockERC20 {
         return balances[_owner];
     }
 
+    //deposit
+    function deposit() external payable {
+        balances[msg.sender] += msg.value;
+        totalSupply += msg.value;
+    }
+
     function allowance(
         address _owner,
         address _spender

@@ -128,7 +128,6 @@ contract CultureIndex is ICultureIndex, Ownable, ReentrancyGuard {
         return votes[pieceId][voter].voterAddress != address(0);
     }
 
-
     /**
      * @notice Returns a voters weight for voting.
      * @return The vote weight of the voter.
