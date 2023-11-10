@@ -63,7 +63,7 @@ contract TokenEmitter is LinearVRGDA, ITokenEmitter, AccessControlEnumerable, Re
         require(_addresses.length == _bps.length, "Parallel arrays required");
 
         uint totalTokens = getTokenAmountForMultiPurchase(msg.value);
-        (bool success, ) = treasury.call{ value: msg.value }("");
+        (bool success, ) = treasury.call{ value: msg.value }(new bytes(0));
         require(success, "Transfer failed.");
 
         // calculates how much total governance to give
