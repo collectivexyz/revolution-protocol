@@ -3,7 +3,7 @@ pragma solidity ^0.8.22;
 
 import { LinearVRGDA } from "./libs/LinearVRGDA.sol";
 import { ERC20 } from "@openzeppelin/contracts/token/ERC20/ERC20.sol";
-import { toDaysWadUnsafe } from "lib/solmate/src/utils/SignedWadMath.sol";
+import { toDaysWadUnsafe } from "solmate/src/utils/SignedWadMath.sol";
 import { Strings } from "@openzeppelin/contracts/utils/Strings.sol";
 import { AccessControlEnumerable } from "@openzeppelin/contracts/access/extensions/AccessControlEnumerable.sol";
 import { NontransferableERC20 } from "./NontransferableERC20.sol";

@@ -2,7 +2,6 @@
 pragma solidity >=0.8.22;
 
 import {unsafeWadDiv} from "solmate/utils/SignedWadMath.sol";
-
 import {VRGDA} from "./VRGDA.sol";
 
 /// @title Linear Variable Rate Gradual Dutch Auction
