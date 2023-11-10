@@ -238,6 +238,33 @@ contract TokenEmitterTest is Test {
 
     }
 
+    function testGetTokenPrice() public {
+        vm.startPrank(address(0));
+
+        vm.deal(address(0), 100000 ether);
+        vm.stopPrank();
+
+        uint256 priceFirstPurchase = emitter.getTokenPrice(0);
+        emit log_uint(priceFirstPurchase);
+
+        uint256 priceAfterManyPurchases = emitter.getTokenPrice(1_000);
+        emit log_uint(priceAfterManyPurchases);
+
+        // Simulate the passage of time
+        uint256 daysElapsed = 21_000_000; // Change this value to test different scenarios
+        vm.warp(block.timestamp + daysElapsed * 1 days);
+
+        uint256 priceAfterManyDays = emitter.getTokenPrice(1_001);
+
+        emit log_uint(priceAfterManyDays);
+
+        // Assert that the price is greater than zero
+        assertGt(priceAfterManyDays, 0, "Price should never hit zero");
+
+        // Optionally, add more assertions here to check if the price calculation is correct
+        // based on your pricing model (getVRGDAPrice logic)
+    }
+
 }
 
 

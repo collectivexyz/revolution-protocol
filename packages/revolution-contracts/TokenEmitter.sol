@@ -138,7 +138,7 @@ contract TokenEmitter is LinearVRGDA, ITokenEmitter, AccessControlEnumerable, Re
         // Note: By using toDaysWadUnsafe(block.timestamp - startTime) we are establishing that 1 "unit of time" is 1 day.
         // solhint-disable-next-line not-rely-on-time
         uint256 price = getVRGDAPrice(toDaysWadUnsafe(block.timestamp - startTime), tokensSoldSoFar);
-        // TODO make test that price never hits zero
+
         return price;
     }
 
