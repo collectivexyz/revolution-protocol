@@ -238,6 +238,30 @@ contract TokenEmitterTest is Test {
 
     }
 
+    function testUNSAFE_getOverestimateTokenAmount() public {
+        vm.startPrank(address(0));
+        
+        vm.deal(address(0), 100000 ether);
+        vm.stopPrank();
+
+        // Define payment and supply for the test
+        uint256 payment = 1 ether; // Change this value to test different scenarios
+        uint256 supply = 1000;     // Change this value to test different scenarios
+
+        uint256 overestimatedAmount = emitter.UNSAFE_getOverestimateTokenAmount(payment, supply);
+
+        // Now get the correct token amount for comparison
+        uint256 correctAmount = emitter.getTokenAmountForMultiPurchase(payment);
+
+        // Assert that the overestimated amount is indeed greater than the correct amount
+        assertGt(overestimatedAmount, correctAmount, "Overestimated amount should be greater than correct amount");
+
+        // Log the amounts for debugging purposes
+        emit Log("Overestimated Amount: ", overestimatedAmount);
+        emit Log("Correct Amount: ", correctAmount);
+    }
+
+
     function testGetTokenPrice() public {
         vm.startPrank(address(0));
 
