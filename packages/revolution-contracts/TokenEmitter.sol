@@ -11,8 +11,6 @@ import { ITokenEmitter } from "./interfaces/ITokenEmitter.sol";
 import { ReentrancyGuard } from "@openzeppelin/contracts/utils/ReentrancyGuard.sol";
 
 contract TokenEmitter is LinearVRGDA, ITokenEmitter, AccessControlEnumerable, ReentrancyGuard {
-    //TODO: make treasury editable. Remember to remove the old treasury from admin status and add the new one when changing it in the function.
-
     // Events
     event Transfer(address indexed from, address indexed to, uint256 value);
     event Log(string name, uint256 value);
@@ -38,7 +36,7 @@ contract TokenEmitter is LinearVRGDA, ITokenEmitter, AccessControlEnumerable, Re
         token = _token;
 
         // TODO: remove this once we don't need to move so fast
-        _setupRole(DEFAULT_ADMIN_ROLE, msg.sender);
+        _grantRole(DEFAULT_ADMIN_ROLE, msg.sender);
     }
 
     function _mint(address _to, uint _amount) private {

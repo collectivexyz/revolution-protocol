@@ -54,7 +54,7 @@ contract NontransferableERC20 is AccessControlEnumerable {
         _name = name_;
         _symbol = symbol_;
 
-        _setupRole(DEFAULT_ADMIN_ROLE, msg.sender);
+        _grantRole(DEFAULT_ADMIN_ROLE, msg.sender);
     }
 
     /**
