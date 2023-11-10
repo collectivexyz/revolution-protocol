@@ -240,6 +240,57 @@ contract VerbsAuctionHouseTest is Test {
         assertEq(recipient.balance, 0); // Ether balance should still be 0
     }
 
+    function testTransferToEOA() public {
+        setUp();
+        createDefaultArtPiece();
+        auctionHouse.unpause();
+
+        address recipient = address(0x123); // Some EOA address
+        uint256 amount = 1 ether;
+
+        auctionHouse.transferOwnership(recipient);
+
+        vm.deal(address(auctionHouse), amount);
+        auctionHouse.createBid{value: amount}(0); // Assuming first auction's verbId is 0
+
+        // Initially, recipient should have 0 ether
+        assertEq(recipient.balance, 0);
+
+        //go in future
+        vm.warp(block.timestamp + auctionHouse.duration() + 1); // Fast forward time to end the auction
+
+        auctionHouse.settleCurrentAndCreateNewAuction();
+
+        // Check if the recipient received Ether
+        assertEq(recipient.balance, amount);
+    }
+
+    function testTransferToContractWithoutReceiveOrFallback() public {
+        setUp();
+        createDefaultArtPiece();
+        auctionHouse.unpause();
+
+        address recipient = address(new ContractWithoutReceiveOrFallback());
+        uint256 amount = 1 ether;
+
+        auctionHouse.transferOwnership(recipient);
+        
+        vm.deal(address(auctionHouse), amount);
+        auctionHouse.createBid{value: amount}(0); // Assuming first auction's verbId is 0
+
+        // Initially, recipient should have 0 ether and 0 WETH
+        assertEq(recipient.balance, 0);
+        assertEq(IERC20(address(mockWETH)).balanceOf(recipient), 0);
+
+        //go in future
+        vm.warp(block.timestamp + auctionHouse.duration() + 1); // Fast forward time to end the auction
+
+        auctionHouse.settleCurrentAndCreateNewAuction();
+
+        // Check if the recipient received WETH instead of Ether
+        assertEq(IERC20(address(mockWETH)).balanceOf(recipient), amount);
+        assertEq(recipient.balance, 0); // Ether balance should still be 0
+    }
 
     // Utility function to create a new art piece and return its ID
     function createArtPiece(
