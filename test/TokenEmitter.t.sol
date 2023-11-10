@@ -18,7 +18,10 @@ contract TokenEmitterTest is Test {
         // 0.1 per governance, 10% price decay per day, 100 governance sale target per day
         NontransferableERC20 governanceToken = new NontransferableERC20("Revolution Governance", "GOV");
 
-        emitter = new TokenEmitter(governanceToken, treasury, 1e14, 1e17, 1e22);
+        uint256 toScale = 1e18;
+
+        uint256 tokensPerTimeUnit = 10_000;
+        emitter = new TokenEmitter(governanceToken, treasury, 1e14, 1e17, int256(tokensPerTimeUnit * toScale));
 
         governanceToken.transferAdmin(address(emitter));
 
@@ -103,9 +106,9 @@ contract TokenEmitterTest is Test {
         uint256 firstAmount = emitter.balanceOf(address(1));
 
         emitter.buyToken{ value: 1e18 }(recipients, percentages, 1);
-        uint256 secondAmount = emitter.balanceOf(address(1)) - firstAmount;
+        uint256 secondAmountDifference = emitter.balanceOf(address(1)) - firstAmount;
 
-        assert(secondAmount <= 2 * emitter.totalSupply());
+        assert(secondAmountDifference <= 2 * emitter.totalSupply());
     }
 
     function testBuyingLaterIsBetter() public {
