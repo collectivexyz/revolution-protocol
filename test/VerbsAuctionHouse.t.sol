@@ -162,7 +162,55 @@ contract VerbsAuctionHouseTest is Test {
         auctionHouse.unpause();
         vm.stopPrank();
     }
+
+    function testSettlingAuctionWithWinningBid() public {
+        setUp();
+        createDefaultArtPiece();
+        auctionHouse.unpause();
+
+        uint256 balanceBefore = address(this).balance;
+
+        uint256 bidAmount = auctionHouse.reservePrice();
+        vm.deal(address(1), bidAmount);
+        vm.startPrank(address(1));
+        auctionHouse.createBid{value: bidAmount}(0); // Assuming first auction's verbId is 0
+        vm.stopPrank();
+
+        vm.warp(block.timestamp + auctionHouse.duration() + 1); // Fast forward time to end the auction
+
+        createDefaultArtPiece();
+        auctionHouse.settleCurrentAndCreateNewAuction();
+
+        uint256 balanceAfter = address(this).balance;
+
+        assertEq(verbs.ownerOf(0), address(1), "Verb should be transferred to the highest bidder");
+        assertEq(balanceAfter - balanceBefore, bidAmount, "Bid amount should be transferred to the auction house owner");
+    }
+
     
+    function testSettlingAuctionWithNoBids() public {
+        setUp();
+        uint256 verbId = createDefaultArtPiece();
+        auctionHouse.unpause();
+
+        vm.warp(block.timestamp + auctionHouse.duration() + 1); // Fast forward time to end the auction
+        
+        // Assuming verbs.burn is called for auctions with no bids
+        vm.expectEmit(true, true, true, true);
+        emit IVerbsToken.VerbBurned(verbId);
+
+        auctionHouse.settleCurrentAndCreateNewAuction();
+    }
+
+    function testSettlingAuctionPrematurely() public {
+        setUp();
+        createDefaultArtPiece();
+        auctionHouse.unpause();
+
+        vm.expectRevert();
+        auctionHouse.settleAuction(); // Attempt to settle before the auction ends
+    }
+
 
     // Utility function to create a new art piece and return its ID
     function createArtPiece(
