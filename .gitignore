@@ -20,3 +20,7 @@ deploys
 .vscode
 
 bin
+
+.deps
+
+packages/*/artifacts/**/*.json
