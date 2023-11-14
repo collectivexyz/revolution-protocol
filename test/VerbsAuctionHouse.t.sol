@@ -25,13 +25,14 @@ contract VerbsAuctionHouseTest is Test {
     VerbsDescriptor public descriptor;
     CultureIndex public cultureIndex;
     TokenEmitter public tokenEmitter;
+    NontransferableERC20 public governanceToken;
 
     // 1,000 tokens per day is the target emission
     uint256 tokensPerTimeUnit = 1_000;
 
     function setUp() public {
         mockWETH = new MockERC20();
-        NontransferableERC20 governanceToken = new NontransferableERC20(address(this), "Revolution Governance", "GOV", 4);        
+        governanceToken = new NontransferableERC20(address(this), "Revolution Governance", "GOV", 4);        
 
         // Additional setup for VerbsToken similar to VerbsTokenTest
         ProxyRegistry _proxyRegistry = new ProxyRegistry();
@@ -328,6 +329,61 @@ contract VerbsAuctionHouseTest is Test {
 
         assertEq(IERC20(address(mockWETH)).balanceOf(recipient), bps(amount, 10_000 - creatorRate));
         assertEq(recipient.balance, 0); // Ether balance should still be 0
+    }
+
+    function testSettlingAuctionWithWinningBidAndCreatorPayout() public {
+        setUp();
+        uint256 verbId = createArtPiece(
+            "Art Piece",
+            "A new art piece",
+            ICultureIndex.MediaType.IMAGE,
+            "ipfs://image",
+            "",
+            "",
+            address(0x1),
+            10_000
+        );
+
+        uint256 creatorRate = auctionHouse.creatorRateBps();
+        uint256 entropyRate = auctionHouse.entropyRateBps();
+
+        auctionHouse.unpause();
+
+        uint256 bidAmount = auctionHouse.reservePrice();
+        vm.deal(address(1), bidAmount);
+        vm.startPrank(address(1));
+        auctionHouse.createBid{value: bidAmount}(verbId);
+        vm.stopPrank();
+
+        //the amount of creator's eth to be spent on governance
+        uint256 expectedCreatorShare = bidAmount * (entropyRate * creatorRate) / 10_000 / 10_000;
+        uint256 etherToSpendOnGovernance = bidAmount * creatorRate / 10_000 - expectedCreatorShare;
+
+        vm.warp(block.timestamp + auctionHouse.duration() + 1); // Fast forward time to end the auction
+
+        uint256 expectedGovernanceTokens = tokenEmitter.getTokenAmountForMultiPurchase(etherToSpendOnGovernance);
+
+        // Track ETH balances
+        uint256 balanceBeforeCreator = address(0x1).balance;
+        uint256 balanceBeforeContract = address(this).balance;
+
+        // Track governance token balances
+        uint256 governanceTokenBalanceBeforeCreator = governanceToken.balanceOf(address(0x1));
+
+        auctionHouse.settleCurrentAndCreateNewAuction();
+
+        // Checking if the creator received their share
+        assertEq(address(0x1).balance - balanceBeforeCreator, expectedCreatorShare, "Creator did not receive the correct amount of ETH");
+
+        // Checking if the contract received the correct amount
+        uint256 expectedContractShare = bidAmount - expectedCreatorShare;
+        assertEq(address(this).balance - balanceBeforeContract, expectedContractShare, "Contract did not receive the correct amount of ETH");
+
+        // Checking ownership of the verb
+        assertEq(verbs.ownerOf(verbId), address(1), "Verb should be transferred to the highest bidder");
+
+        assertEq(governanceToken.balanceOf(address(0x1)) - governanceTokenBalanceBeforeCreator, expectedGovernanceTokens, "Creator did not receive the correct amount of governance tokens");
+
     }
 
     // Utility function to create a new art piece and return its ID
