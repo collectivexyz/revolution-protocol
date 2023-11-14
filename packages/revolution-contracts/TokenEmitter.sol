@@ -5,12 +5,11 @@ import { LinearVRGDA } from "./libs/LinearVRGDA.sol";
 import { ERC20 } from "@openzeppelin/contracts/token/ERC20/ERC20.sol";
 import { toDaysWadUnsafe } from "solmate/utils/SignedWadMath.sol";
 import { Strings } from "@openzeppelin/contracts/utils/Strings.sol";
-import { AccessControlEnumerable } from "@openzeppelin/contracts/access/extensions/AccessControlEnumerable.sol";
 import { NontransferableERC20 } from "./NontransferableERC20.sol";
 import { ITokenEmitter } from "./interfaces/ITokenEmitter.sol";
 import { ReentrancyGuard } from "@openzeppelin/contracts/utils/ReentrancyGuard.sol";
 
-contract TokenEmitter is LinearVRGDA, ITokenEmitter, AccessControlEnumerable, ReentrancyGuard {
+contract TokenEmitter is LinearVRGDA, ITokenEmitter, ReentrancyGuard {
     // Events
     event Transfer(address indexed from, address indexed to, uint256 value);
     event Log(string name, uint256 value);
@@ -34,9 +33,6 @@ contract TokenEmitter is LinearVRGDA, ITokenEmitter, AccessControlEnumerable, Re
         treasury = _treasury;
 
         token = _token;
-
-        // TODO: remove this once we don't need to move so fast
-        _grantRole(DEFAULT_ADMIN_ROLE, msg.sender);
     }
 
     function _mint(address _to, uint _amount) private {
