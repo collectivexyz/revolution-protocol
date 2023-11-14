@@ -246,35 +246,36 @@ contract VerbsAuctionHouse is IVerbsAuctionHouse, PausableUpgradeable, Reentranc
             uint256 auctioneerPayment = uint256(wadDiv(wadMul(int256(_auction.amount), 10000 - int256(creatorRateBps)), 10000));
 
             //Total amount of ether going to creator
-            uint256 creatorAmount = _auction.amount - auctioneerPayment;
+            uint256 creatorPayment = _auction.amount - auctioneerPayment;
 
             //Ether reserved to pay the creator directly
-            uint256 creatorDirectPayment = uint256(wadDiv(wadMul(int256(creatorAmount), int256(entropyRateBps)), 10000));
+            uint256 creatorDirectPayment = uint256(wadDiv(wadMul(int256(creatorPayment), int256(entropyRateBps)), 10000));
             //Ether reserved to buy creator governance
-            uint256 creatorGovernancePayment = creatorAmount - creatorDirectPayment;
+            uint256 creatorGovernancePayment = creatorPayment - creatorDirectPayment;
 
             uint256 numCreators = verbs.getArtPieceById(_auction.verbId).creators.length;
 
+            //Build arrays for tokenEmitter.buyToken
             address[] memory vrgdaReceivers = new address[](numCreators);
             uint256[] memory vrgdaSplits = new uint256[](numCreators);
 
-            //transfer auction amount to the DAO treasury
+            //Transfer auction amount to the DAO treasury
             _safeTransferETHWithFallback(owner(), auctioneerPayment);
 
-            //transfer creator's share to the creator, for each creator
+            //Transfer creator's share to the creator, for each creator, and build arrays for tokenEmitter.buyToken
             for (uint256 i = 0; i < numCreators; i++) {
                 ICultureIndex.CreatorBps memory creator = verbs.getArtPieceById(_auction.verbId).creators[i];
                 vrgdaReceivers[i] = creator.creator;
                 vrgdaSplits[i] = creator.bps;
 
-                //calculate etherAmount for specific creator based on BPS splits
+                //Calculate etherAmount for specific creator based on BPS splits
                 uint256 etherAmount = uint256(wadDiv(wadMul(int256(creatorDirectPayment), int256(creator.bps)), 10000));
 
-                //transfer creator's share to the creator
+                //Transfer creator's share to the creator
                 _safeTransferETHWithFallback(creator.creator, etherAmount);
             }
 
-            //buy token from tokenEmitter for all the creators
+            //Buy token from tokenEmitter for all the creators
             tokenEmitter.buyToken{ value: creatorGovernancePayment }(vrgdaReceivers, vrgdaSplits, creatorGovernancePayment);
         }
 
