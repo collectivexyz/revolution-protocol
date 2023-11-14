@@ -331,6 +331,113 @@ contract VerbsAuctionHouseTest is Test {
         assertEq(recipient.balance, 0); // Ether balance should still be 0
     }
 
+    function testSettlingAuctionWithMultipleCreators() public {
+        setUp();
+        uint256 creatorRate = auctionHouse.creatorRateBps();
+        uint256 entropyRate = auctionHouse.entropyRateBps();
+
+        address[] memory creatorAddresses = new address[](5);
+        uint256[] memory creatorBps = new uint256[](5);
+        uint256 totalBps = 0;
+
+        // Assume 5 creators with equal shares
+        for (uint256 i = 0; i < 3; i++) {
+            creatorAddresses[i] = address(uint160(i + 1)); // Example creator addresses
+            creatorBps[i] = 2000; // 20% for each creator
+            totalBps += creatorBps[i];
+        }
+
+        //add a creator with  21% and then 19%
+        creatorAddresses[3] = address(uint160(4));
+        creatorBps[3] = 2100;
+        totalBps += creatorBps[3];
+
+        creatorAddresses[4] = address(uint160(5));
+        creatorBps[4] = 1900;
+        totalBps += creatorBps[4];
+
+        uint256 verbId = createArtPieceMultiCreator(
+            "Multi Creator Art",
+            "An art piece with multiple creators",
+            ICultureIndex.MediaType.IMAGE,
+            "ipfs://multi-creator-art",
+            "",
+            "",
+            creatorAddresses,
+            creatorBps
+        );
+
+        auctionHouse.unpause();
+
+        uint256 bidAmount = auctionHouse.reservePrice();
+        vm.deal(address(1), bidAmount);
+        vm.startPrank(address(1));
+        auctionHouse.createBid{value: bidAmount}(verbId);
+        vm.stopPrank();
+
+        vm.warp(block.timestamp + auctionHouse.duration() + 1); // Fast forward time to end the auction
+
+        // Track balances before auction settlement
+        uint256[] memory balancesBefore = new uint256[](creatorAddresses.length);
+        uint256[] memory governanceTokenBalancesBefore = new uint256[](creatorAddresses.length);
+        for (uint256 i = 0; i < creatorAddresses.length; i++) {
+            balancesBefore[i] = address(creatorAddresses[i]).balance;
+            governanceTokenBalancesBefore[i] = governanceToken.balanceOf(creatorAddresses[i]);
+        }
+
+        // Track expected governance token payout
+        uint256 expectedGovernanceTokenPayout = tokenEmitter.getTokenAmountForMultiPurchase(bidAmount * creatorRate * entropyRate / 10_000 / 10_000);
+
+        auctionHouse.settleCurrentAndCreateNewAuction();
+
+        // Verify each creator's payout
+        for (uint256 i = 0; i < creatorAddresses.length; i++) {
+            uint256 expectedEtherShare = bidAmount * creatorBps[i] * creatorRate / totalBps / 10_000;
+            assertEq(address(creatorAddresses[i]).balance - balancesBefore[i], expectedEtherShare * entropyRate / 10_000, "Incorrect ETH payout for creator");
+
+            uint256 expectedGovernanceTokenShare = expectedGovernanceTokenPayout * creatorBps[i] / totalBps;
+
+            assertEq(governanceToken.balanceOf(creatorAddresses[i]) - governanceTokenBalancesBefore[i], expectedGovernanceTokenShare, "Incorrect governance token payout for creator");
+        }
+
+        // Verify ownership of the verb
+        assertEq(verbs.ownerOf(verbId), address(1), "Verb should be transferred to the highest bidder");
+    }
+
+    // Utility function to create a new art piece with multiple creators and return its ID
+    function createArtPieceMultiCreator(
+        string memory name,
+        string memory description,
+        ICultureIndex.MediaType mediaType,
+        string memory image,
+        string memory text,
+        string memory animationUrl,
+        address[] memory creatorAddresses,
+        uint256[] memory creatorBps
+    ) internal returns (uint256) {
+        ICultureIndex.ArtPieceMetadata memory metadata = ICultureIndex
+            .ArtPieceMetadata({
+                name: name,
+                description: description,
+                mediaType: mediaType,
+                image: image,
+                text: text,
+                animationUrl: animationUrl
+            });
+
+        ICultureIndex.CreatorBps[] memory creators = new ICultureIndex.CreatorBps[](creatorAddresses.length);
+        for (uint256 i = 0; i < creatorAddresses.length; i++) {
+            creators[i] = ICultureIndex.CreatorBps({
+                creator: creatorAddresses[i],
+                bps: creatorBps[i]
+            });
+        }
+
+        return cultureIndex.createPiece(metadata, creators);
+    }
+
+
+
     function testSettlingAuctionWithWinningBidAndCreatorPayout() public {
         setUp();
         uint256 verbId = createArtPiece(
@@ -397,24 +504,22 @@ contract VerbsAuctionHouseTest is Test {
         address creatorAddress,
         uint256 creatorBps
     ) internal returns (uint256) {
-        ICultureIndex.ArtPieceMetadata memory metadata = ICultureIndex
-            .ArtPieceMetadata({
-                name: name,
-                description: description,
-                mediaType: mediaType,
-                image: image,
-                text: text,
-                animationUrl: animationUrl
-            });
+        address[] memory creatorAddresses = new address[](1);
+        creatorAddresses[0] = creatorAddress;
 
-        ICultureIndex.CreatorBps[]
-            memory creators = new ICultureIndex.CreatorBps[](1);
-        creators[0] = ICultureIndex.CreatorBps({
-            creator: creatorAddress,
-            bps: creatorBps
-        });
+        uint256[] memory creatorBpsArray = new uint256[](1);
+        creatorBpsArray[0] = creatorBps;
 
-        return cultureIndex.createPiece(metadata, creators);
+        return createArtPieceMultiCreator(
+            name,
+            description,
+            mediaType,
+            image,
+            text,
+            animationUrl,
+            creatorAddresses,
+            creatorBpsArray
+        );
     }
 
     //Utility function to create default art piece
