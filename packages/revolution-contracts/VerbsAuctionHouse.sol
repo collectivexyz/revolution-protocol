@@ -30,10 +30,16 @@ import { IERC20 } from "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import { IVerbsAuctionHouse } from "./interfaces/IVerbsAuctionHouse.sol";
 import { IVerbsToken } from "./interfaces/IVerbsToken.sol";
 import { IWETH } from "./interfaces/IWETH.sol";
+import { ITokenEmitter } from "./interfaces/ITokenEmitter.sol";
+import { wadMul, wadDiv } from "solmate/utils/SignedWadMath.sol";
+import { ICultureIndex } from "./interfaces/ICultureIndex.sol";
 
 contract VerbsAuctionHouse is IVerbsAuctionHouse, PausableUpgradeable, ReentrancyGuardUpgradeable, OwnableUpgradeable {
     // The Verbs ERC721 token contract
     IVerbsToken public verbs;
+
+    // The ERC20 governance token
+    ITokenEmitter public tokenEmitter;
 
     // The address of the WETH contract
     address public weth;
@@ -46,6 +52,12 @@ contract VerbsAuctionHouse is IVerbsAuctionHouse, PausableUpgradeable, Reentranc
 
     // The minimum percentage difference between the last bid amount and the current bid
     uint8 public minBidIncrementPercentage;
+
+    // The split of the winning bid that is reserved for the creator of the Verb in basis points
+    uint256 public creatorRateBps;
+
+    // The split of (auction proceeds * creatorRate) that is sent to the creator as ether in basis points
+    uint256 public entropyRateBps;
 
     // The duration of a single auction
     uint256 public duration;
@@ -60,12 +72,15 @@ contract VerbsAuctionHouse is IVerbsAuctionHouse, PausableUpgradeable, Reentranc
      */
     function initialize(
         IVerbsToken _verbs,
+        ITokenEmitter _tokenEmitter,
         address _weth,
         address _founder,
         uint256 _timeBuffer,
         uint256 _reservePrice,
         uint8 _minBidIncrementPercentage,
-        uint256 _duration
+        uint256 _duration,
+        uint256 _creatorRateBps,
+        uint256 _entropyRateBps
     ) external initializer {
         __Pausable_init();
         __ReentrancyGuard_init();
@@ -74,11 +89,14 @@ contract VerbsAuctionHouse is IVerbsAuctionHouse, PausableUpgradeable, Reentranc
         _pause();
 
         verbs = _verbs;
+        tokenEmitter = _tokenEmitter;
         weth = _weth;
         timeBuffer = _timeBuffer;
         reservePrice = _reservePrice;
         minBidIncrementPercentage = _minBidIncrementPercentage;
         duration = _duration;
+        creatorRateBps = _creatorRateBps;
+        entropyRateBps = _entropyRateBps;
     }
 
     /**
@@ -224,7 +242,41 @@ contract VerbsAuctionHouse is IVerbsAuctionHouse, PausableUpgradeable, Reentranc
         }
 
         if (_auction.amount > 0) {
-            _safeTransferETHWithFallback(owner(), _auction.amount);
+            // Ether going to owner of the auction
+            uint256 auctioneerPayment = uint256(wadDiv(wadMul(int256(_auction.amount), 10000 - int256(creatorRateBps)), 10000));
+
+            //Total amount of ether going to creator
+            uint256 creatorPayment = _auction.amount - auctioneerPayment;
+
+            //Ether reserved to pay the creator directly
+            uint256 creatorDirectPayment = uint256(wadDiv(wadMul(int256(creatorPayment), int256(entropyRateBps)), 10000));
+            //Ether reserved to buy creator governance
+            uint256 creatorGovernancePayment = creatorPayment - creatorDirectPayment;
+
+            uint256 numCreators = verbs.getArtPieceById(_auction.verbId).creators.length;
+
+            //Build arrays for tokenEmitter.buyToken
+            address[] memory vrgdaReceivers = new address[](numCreators);
+            uint256[] memory vrgdaSplits = new uint256[](numCreators);
+
+            //Transfer auction amount to the DAO treasury
+            _safeTransferETHWithFallback(owner(), auctioneerPayment);
+
+            //Transfer creator's share to the creator, for each creator, and build arrays for tokenEmitter.buyToken
+            for (uint256 i = 0; i < numCreators; i++) {
+                ICultureIndex.CreatorBps memory creator = verbs.getArtPieceById(_auction.verbId).creators[i];
+                vrgdaReceivers[i] = creator.creator;
+                vrgdaSplits[i] = creator.bps;
+
+                //Calculate etherAmount for specific creator based on BPS splits
+                uint256 etherAmount = uint256(wadDiv(wadMul(int256(creatorDirectPayment), int256(creator.bps)), 10000));
+
+                //Transfer creator's share to the creator
+                _safeTransferETHWithFallback(creator.creator, etherAmount);
+            }
+
+            //Buy token from tokenEmitter for all the creators
+            tokenEmitter.buyToken{ value: creatorGovernancePayment }(vrgdaReceivers, vrgdaSplits, creatorGovernancePayment);
         }
 
         emit AuctionSettled(_auction.verbId, _auction.bidder, _auction.amount);

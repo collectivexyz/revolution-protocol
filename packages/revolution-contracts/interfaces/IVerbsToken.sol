@@ -53,4 +53,6 @@ interface IVerbsToken is IERC721 {
     function lockDescriptor() external;
 
     function lockCultureIndex() external;
+
+    function getArtPieceById(uint256 tokenId) external view returns (ICultureIndex.ArtPiece memory);
 }

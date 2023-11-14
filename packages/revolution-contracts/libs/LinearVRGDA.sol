@@ -1,8 +1,8 @@
 // SPDX-License-Identifier: MIT
 pragma solidity >=0.8.22;
 
-import {unsafeWadDiv} from "solmate/utils/SignedWadMath.sol";
-import {VRGDA} from "./VRGDA.sol";
+import { unsafeWadDiv } from "solmate/utils/SignedWadMath.sol";
+import { VRGDA } from "./VRGDA.sol";
 
 /// @title Linear Variable Rate Gradual Dutch Auction
 /// @author transmissions11 <t11s@paradigm.xyz>
@@ -21,11 +21,7 @@ abstract contract LinearVRGDA is VRGDA {
     /// @param _targetPrice The target price for a token if sold on pace, scaled by 1e18.
     /// @param _priceDecayPercent The percent price decays per unit of time with no sales, scaled by 1e18.
     /// @param _perTimeUnit The number of tokens to target selling in 1 full unit of time, scaled by 1e18.
-    constructor(
-        int256 _targetPrice,
-        int256 _priceDecayPercent,
-        int256 _perTimeUnit
-    ) VRGDA(_targetPrice, _priceDecayPercent) {
+    constructor(int256 _targetPrice, int256 _priceDecayPercent, int256 _perTimeUnit) VRGDA(_targetPrice, _priceDecayPercent) {
         perTimeUnit = _perTimeUnit;
     }
 

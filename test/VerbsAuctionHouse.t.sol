@@ -13,6 +13,10 @@ import { IVerbsDescriptorMinimal } from "../packages/revolution-contracts/interf
 import { ICultureIndex, ICultureIndexEvents } from "../packages/revolution-contracts/interfaces/ICultureIndex.sol";
 import { IVerbsAuctionHouse } from "../packages/revolution-contracts/interfaces/IVerbsAuctionHouse.sol";
 import { IERC20 } from "@openzeppelin/contracts/token/ERC20/IERC20.sol";
+import { NontransferableERC20 } from "../packages/revolution-contracts/NontransferableERC20.sol";
+import { TokenEmitter } from "../packages/revolution-contracts/TokenEmitter.sol";
+import { ITokenEmitter } from "../packages/revolution-contracts/interfaces/ITokenEmitter.sol";
+import { wadMul, wadDiv } from "solmate/utils/SignedWadMath.sol";
 
 contract VerbsAuctionHouseTest is Test {
     VerbsAuctionHouse public auctionHouse;
@@ -20,15 +24,29 @@ contract VerbsAuctionHouseTest is Test {
     VerbsToken public verbs;
     VerbsDescriptor public descriptor;
     CultureIndex public cultureIndex;
+    TokenEmitter public tokenEmitter;
+    NontransferableERC20 public governanceToken;
+
+    // 1,000 tokens per day is the target emission
+    uint256 tokensPerTimeUnit = 1_000;
 
     function setUp() public {
         mockWETH = new MockERC20();
+        governanceToken = new NontransferableERC20(address(this), "Revolution Governance", "GOV", 4);        
 
         // Additional setup for VerbsToken similar to VerbsTokenTest
         ProxyRegistry _proxyRegistry = new ProxyRegistry();
 
         CultureIndex _cultureIndex = new CultureIndex(address(mockWETH), address(this));
         cultureIndex = _cultureIndex;
+
+        //20% - how much the price decays per unit of time with no sales
+        int256 priceDecayPercent = 1e18 / 10;
+        // 1e11 or 0.0000001 is 2 cents per token even at $200k eth price
+        int256 tokenTargetPrice = 1e11;
+
+        tokenEmitter = new TokenEmitter(governanceToken, address(this), tokenTargetPrice, priceDecayPercent, int256(1e18 * 1e4 * tokensPerTimeUnit));
+        governanceToken.transferOwnership(address(tokenEmitter));
 
         // Initialize VerbsToken with additional parameters
         verbs = new VerbsToken(
@@ -53,17 +71,26 @@ contract VerbsAuctionHouseTest is Test {
         // Initialize the auction house with mock contracts and parameters
         auctionHouse.initialize(
             IVerbsToken(address(verbs)),
+            ITokenEmitter(address(tokenEmitter)),
             address(mockWETH),
             address(this), // Owner of the auction house
             15 minutes,    // timeBuffer
             1 ether,       // reservePrice
             5,             // minBidIncrementPercentage
-            24 hours       // duration
+            24 hours,       // duration
+            2_000,          // creatorRateBps
+            5_000         //entropyRateBps
         );
 
         //set minter of verbstoken to be auction house
         verbs.setMinter(address(auctionHouse));
         verbs.lockMinter();
+    }
+
+
+    //calculate bps amount given split
+    function bps(uint256 x, uint256 y) public returns (uint256) {
+        return uint256(wadDiv(wadMul(int256(x), int256(y)), 10000));
     }
 
     // Fallback function to allow contract to receive Ether
@@ -103,7 +130,7 @@ contract VerbsAuctionHouseTest is Test {
 
         auctionHouse.unpause();
         uint256 bidAmount = auctionHouse.reservePrice() + 0.1 ether;
-        vm.deal(address(1), bidAmount + 1 ether);
+        vm.deal(address(1), bidAmount + 2 ether);
 
         vm.startPrank(address(1));
         auctionHouse.createBid{value: bidAmount}(0); // Assuming the first auction's verbId is 0
@@ -189,7 +216,11 @@ contract VerbsAuctionHouseTest is Test {
         uint256 balanceAfter = address(this).balance;
 
         assertEq(verbs.ownerOf(0), address(1), "Verb should be transferred to the highest bidder");
-        assertEq(balanceAfter - balanceBefore, bidAmount, "Bid amount should be transferred to the auction house owner");
+        
+        uint256 creatorRate = auctionHouse.creatorRateBps();
+        uint256 entropyRate = auctionHouse.entropyRateBps();
+
+        assertEq(balanceAfter - balanceBefore, (bidAmount * (10_000 - creatorRate * entropyRate / 10_000) / 10_000), "Bid amount minus entropy should be transferred to the auction house owner");
     }
 
     
@@ -240,7 +271,8 @@ contract VerbsAuctionHouseTest is Test {
         auctionHouse.settleCurrentAndCreateNewAuction();
 
         // Check if the recipient received WETH instead of Ether
-        assertEq(IERC20(address(mockWETH)).balanceOf(recipient), amount);
+        uint256 creatorRate = auctionHouse.creatorRateBps();
+        assertEq(IERC20(address(mockWETH)).balanceOf(recipient), bps(amount, 10_000 - creatorRate));
         assertEq(recipient.balance, 0); // Ether balance should still be 0
     }
 
@@ -266,7 +298,8 @@ contract VerbsAuctionHouseTest is Test {
         auctionHouse.settleCurrentAndCreateNewAuction();
 
         // Check if the recipient received Ether
-        assertEq(recipient.balance, amount);
+        uint256 creatorRate = auctionHouse.creatorRateBps();
+        assertEq(recipient.balance, bps(amount, 10_000 - creatorRate));
     }
 
     function testTransferToContractWithoutReceiveOrFallback() public {
@@ -292,8 +325,172 @@ contract VerbsAuctionHouseTest is Test {
         auctionHouse.settleCurrentAndCreateNewAuction();
 
         // Check if the recipient received WETH instead of Ether
-        assertEq(IERC20(address(mockWETH)).balanceOf(recipient), amount);
+        uint256 creatorRate = auctionHouse.creatorRateBps();
+
+        assertEq(IERC20(address(mockWETH)).balanceOf(recipient), bps(amount, 10_000 - creatorRate));
         assertEq(recipient.balance, 0); // Ether balance should still be 0
+    }
+
+    function testSettlingAuctionWithMultipleCreators() public {
+        setUp();
+        uint256 creatorRate = auctionHouse.creatorRateBps();
+        uint256 entropyRate = auctionHouse.entropyRateBps();
+
+        address[] memory creatorAddresses = new address[](5);
+        uint256[] memory creatorBps = new uint256[](5);
+        uint256 totalBps = 0;
+
+        // Assume 5 creators with equal shares
+        for (uint256 i = 0; i < 3; i++) {
+            creatorAddresses[i] = address(uint160(i + 1)); // Example creator addresses
+            creatorBps[i] = 2000; // 20% for each creator
+            totalBps += creatorBps[i];
+        }
+
+        //add a creator with  21% and then 19%
+        creatorAddresses[3] = address(uint160(4));
+        creatorBps[3] = 2100;
+        totalBps += creatorBps[3];
+
+        creatorAddresses[4] = address(uint160(5));
+        creatorBps[4] = 1900;
+        totalBps += creatorBps[4];
+
+        uint256 verbId = createArtPieceMultiCreator(
+            "Multi Creator Art",
+            "An art piece with multiple creators",
+            ICultureIndex.MediaType.IMAGE,
+            "ipfs://multi-creator-art",
+            "",
+            "",
+            creatorAddresses,
+            creatorBps
+        );
+
+        auctionHouse.unpause();
+
+        uint256 bidAmount = auctionHouse.reservePrice();
+        vm.deal(address(1), bidAmount);
+        vm.startPrank(address(1));
+        auctionHouse.createBid{value: bidAmount}(verbId);
+        vm.stopPrank();
+
+        vm.warp(block.timestamp + auctionHouse.duration() + 1); // Fast forward time to end the auction
+
+        // Track balances before auction settlement
+        uint256[] memory balancesBefore = new uint256[](creatorAddresses.length);
+        uint256[] memory governanceTokenBalancesBefore = new uint256[](creatorAddresses.length);
+        for (uint256 i = 0; i < creatorAddresses.length; i++) {
+            balancesBefore[i] = address(creatorAddresses[i]).balance;
+            governanceTokenBalancesBefore[i] = governanceToken.balanceOf(creatorAddresses[i]);
+        }
+
+        // Track expected governance token payout
+        uint256 expectedGovernanceTokenPayout = tokenEmitter.getTokenAmountForMultiPurchase(bidAmount * creatorRate * entropyRate / 10_000 / 10_000);
+
+        auctionHouse.settleCurrentAndCreateNewAuction();
+
+        // Verify each creator's payout
+        for (uint256 i = 0; i < creatorAddresses.length; i++) {
+            uint256 expectedEtherShare = bidAmount * creatorBps[i] * creatorRate / totalBps / 10_000;
+            assertEq(address(creatorAddresses[i]).balance - balancesBefore[i], expectedEtherShare * entropyRate / 10_000, "Incorrect ETH payout for creator");
+
+            uint256 expectedGovernanceTokenShare = expectedGovernanceTokenPayout * creatorBps[i] / totalBps;
+
+            assertEq(governanceToken.balanceOf(creatorAddresses[i]) - governanceTokenBalancesBefore[i], expectedGovernanceTokenShare, "Incorrect governance token payout for creator");
+        }
+
+        // Verify ownership of the verb
+        assertEq(verbs.ownerOf(verbId), address(1), "Verb should be transferred to the highest bidder");
+    }
+
+    // Utility function to create a new art piece with multiple creators and return its ID
+    function createArtPieceMultiCreator(
+        string memory name,
+        string memory description,
+        ICultureIndex.MediaType mediaType,
+        string memory image,
+        string memory text,
+        string memory animationUrl,
+        address[] memory creatorAddresses,
+        uint256[] memory creatorBps
+    ) internal returns (uint256) {
+        ICultureIndex.ArtPieceMetadata memory metadata = ICultureIndex
+            .ArtPieceMetadata({
+                name: name,
+                description: description,
+                mediaType: mediaType,
+                image: image,
+                text: text,
+                animationUrl: animationUrl
+            });
+
+        ICultureIndex.CreatorBps[] memory creators = new ICultureIndex.CreatorBps[](creatorAddresses.length);
+        for (uint256 i = 0; i < creatorAddresses.length; i++) {
+            creators[i] = ICultureIndex.CreatorBps({
+                creator: creatorAddresses[i],
+                bps: creatorBps[i]
+            });
+        }
+
+        return cultureIndex.createPiece(metadata, creators);
+    }
+
+
+
+    function testSettlingAuctionWithWinningBidAndCreatorPayout() public {
+        setUp();
+        uint256 verbId = createArtPiece(
+            "Art Piece",
+            "A new art piece",
+            ICultureIndex.MediaType.IMAGE,
+            "ipfs://image",
+            "",
+            "",
+            address(0x1),
+            10_000
+        );
+
+        uint256 creatorRate = auctionHouse.creatorRateBps();
+        uint256 entropyRate = auctionHouse.entropyRateBps();
+
+        auctionHouse.unpause();
+
+        uint256 bidAmount = auctionHouse.reservePrice();
+        vm.deal(address(1), bidAmount);
+        vm.startPrank(address(1));
+        auctionHouse.createBid{value: bidAmount}(verbId);
+        vm.stopPrank();
+
+        //the amount of creator's eth to be spent on governance
+        uint256 expectedCreatorShare = bidAmount * (entropyRate * creatorRate) / 10_000 / 10_000;
+        uint256 etherToSpendOnGovernance = bidAmount * creatorRate / 10_000 - expectedCreatorShare;
+
+        vm.warp(block.timestamp + auctionHouse.duration() + 1); // Fast forward time to end the auction
+
+        uint256 expectedGovernanceTokens = tokenEmitter.getTokenAmountForMultiPurchase(etherToSpendOnGovernance);
+
+        // Track ETH balances
+        uint256 balanceBeforeCreator = address(0x1).balance;
+        uint256 balanceBeforeContract = address(this).balance;
+
+        // Track governance token balances
+        uint256 governanceTokenBalanceBeforeCreator = governanceToken.balanceOf(address(0x1));
+
+        auctionHouse.settleCurrentAndCreateNewAuction();
+
+        // Checking if the creator received their share
+        assertEq(address(0x1).balance - balanceBeforeCreator, expectedCreatorShare, "Creator did not receive the correct amount of ETH");
+
+        // Checking if the contract received the correct amount
+        uint256 expectedContractShare = bidAmount - expectedCreatorShare;
+        assertEq(address(this).balance - balanceBeforeContract, expectedContractShare, "Contract did not receive the correct amount of ETH");
+
+        // Checking ownership of the verb
+        assertEq(verbs.ownerOf(verbId), address(1), "Verb should be transferred to the highest bidder");
+
+        assertEq(governanceToken.balanceOf(address(0x1)) - governanceTokenBalanceBeforeCreator, expectedGovernanceTokens, "Creator did not receive the correct amount of governance tokens");
+
     }
 
     // Utility function to create a new art piece and return its ID
@@ -307,24 +504,22 @@ contract VerbsAuctionHouseTest is Test {
         address creatorAddress,
         uint256 creatorBps
     ) internal returns (uint256) {
-        ICultureIndex.ArtPieceMetadata memory metadata = ICultureIndex
-            .ArtPieceMetadata({
-                name: name,
-                description: description,
-                mediaType: mediaType,
-                image: image,
-                text: text,
-                animationUrl: animationUrl
-            });
+        address[] memory creatorAddresses = new address[](1);
+        creatorAddresses[0] = creatorAddress;
 
-        ICultureIndex.CreatorBps[]
-            memory creators = new ICultureIndex.CreatorBps[](1);
-        creators[0] = ICultureIndex.CreatorBps({
-            creator: creatorAddress,
-            bps: creatorBps
-        });
+        uint256[] memory creatorBpsArray = new uint256[](1);
+        creatorBpsArray[0] = creatorBps;
 
-        return cultureIndex.createPiece(metadata, creators);
+        return createArtPieceMultiCreator(
+            name,
+            description,
+            mediaType,
+            image,
+            text,
+            animationUrl,
+            creatorAddresses,
+            creatorBpsArray
+        );
     }
 
     //Utility function to create default art piece

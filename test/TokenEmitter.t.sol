@@ -18,11 +18,13 @@ contract TokenEmitterTest is Test {
         vm.startPrank(address(0));
 
         address treasury = address(0);
+        vm.deal(address(0), 100000 ether);
+        vm.stopPrank();
 
         //20% - how much the price decays per unit of time with no sales
         int256 priceDecayPercent = 1e18 / 10;
 
-        NontransferableERC20 governanceToken = new NontransferableERC20("Revolution Governance", "GOV", 4);        
+        NontransferableERC20 governanceToken = new NontransferableERC20(address(this), "Revolution Governance", "GOV", 4);        
 
         // 1e11 or 0.0000001 is 2 cents per token even at $200k eth price
         int256 tokenTargetPrice = 1e11;
@@ -30,10 +32,11 @@ contract TokenEmitterTest is Test {
         //this setup assumes an ideal of 1e18 or 1 ETH (1k (1e3) * 1e11 * 4 decimals) coming into the system per day, token prices will increaase if more ETH comes in
         emitter = new TokenEmitter(governanceToken, treasury, tokenTargetPrice, priceDecayPercent, int256(1e18 * 1e4 * tokensPerTimeUnit));
 
-        governanceToken.transferAdmin(address(emitter));
+        address emitterAddress = address(emitter);
+        address thisAddress = address(this);
+        address currentOwner = governanceToken.owner();
 
-        vm.deal(address(0), 100000 ether);
-        vm.stopPrank();
+        governanceToken.transferOwnership(emitterAddress);
     }
 
     function testBuyingLaterIsBetter() public {
@@ -174,20 +177,18 @@ contract TokenEmitterTest is Test {
         // transfers ownership to the second
         // ensures that the second can mint and calling buyGovernance succeeds
 
-        vm.startPrank(address(0));
-
         address treasury = address(0);
 
         // 0.1 per governance, 10% price decay per day, 100 governance sale target per day
-        NontransferableERC20 governanceToken = new NontransferableERC20("Revolution Governance", "GOV", 4);
+        NontransferableERC20 governanceToken = new NontransferableERC20(address(this), "Revolution Governance", "GOV", 4);
 
         TokenEmitter emitter1 = new TokenEmitter(governanceToken, treasury, 1e14, 1e17, 1e22);
 
         TokenEmitter emitter2 = new TokenEmitter(governanceToken, treasury, 1e14, 1e17, 1e22);
 
-        governanceToken.transferAdmin(address(emitter1));
+        governanceToken.transferOwnership(address(emitter1));
 
-        vm.deal(address(0), 100000 ether);
+        vm.deal(address(this), 100000 ether);
 
         address[] memory recipients = new address[](1);
         recipients[0] = address(1);
@@ -197,46 +198,27 @@ contract TokenEmitterTest is Test {
 
         emitter1.buyToken{ value: 1e18 }(recipients, bps, 1);
 
-        vm.stopPrank();
         vm.prank(address(emitter1));
 
-        governanceToken.transferAdmin(address(emitter2));
+        governanceToken.transferOwnership(address(emitter2));
 
         vm.prank(address(0));
         emitter2.buyToken{ value: 1e18 }(recipients, bps, 1);
     }
-
-    function testTransferTokenAdmin() public {
-        vm.prank(address(0));
-        emitter.transferTokenAdmin(address(1));
-    }
-
-    function testFailTransferTokenAdminIfNotAdmin() public {
-        vm.prank(address(0));
-        emitter.transferTokenAdmin(address(1));
-        vm.prank(address(0));
-        emitter.transferTokenAdmin(address(2));
-    }
     
     function testBuyTokenReentrancy() public {
-        vm.startPrank(address(0));
-
         // Deploy the malicious treasury contract
         MaliciousTreasury maliciousTreasury = new MaliciousTreasury(address(emitter));
 
         // Initialize TokenEmitter with the address of the malicious treasury
-        NontransferableERC20 governanceToken = new NontransferableERC20("Revolution Governance", "GOV", 4);
+        NontransferableERC20 governanceToken = new NontransferableERC20(address(this), "Revolution Governance", "GOV", 4);
         uint256 toScale = 1e18 * 1e4;
         uint256 tokensPerTimeUnit_ = 10_000;
         
         TokenEmitter emitter2 = new TokenEmitter(governanceToken, address(maliciousTreasury), 1e14, 1e17, int256(tokensPerTimeUnit_ * toScale));
-        governanceToken.transferAdmin(address(emitter2));
+        governanceToken.transferOwnership(address(emitter2));
 
-        vm.deal(address(0), 100000 ether);
-        vm.stopPrank();
-
-        // Send 1 ETH to the malicious treasury
-        vm.prank(address(0));
+        vm.deal(address(this), 100000 ether);
 
         //buy tokens and see if malicious treasury can reenter
         address[] memory recipients = new address[](1);
