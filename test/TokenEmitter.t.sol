@@ -36,10 +36,6 @@ contract TokenEmitterTest is Test {
         address thisAddress = address(this);
         address currentOwner = governanceToken.owner();
 
-        emit log_address(emitterAddress);
-        emit log_address(thisAddress);
-        emit log_address(currentOwner);
-
         governanceToken.transferOwnership(emitterAddress);
     }
 

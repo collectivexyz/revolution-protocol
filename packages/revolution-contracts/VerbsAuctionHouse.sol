@@ -227,8 +227,6 @@ contract VerbsAuctionHouse is IVerbsAuctionHouse, PausableUpgradeable, Reentranc
      * @dev If there are no bids, the Verb is burned.
      */
     function _settleAuction() internal {
-        uint256 startGas = gasleft();
-
         IVerbsAuctionHouse.Auction memory _auction = auction;
 
         require(_auction.startTime != 0, "Auction hasn't begun");
@@ -244,16 +242,16 @@ contract VerbsAuctionHouse is IVerbsAuctionHouse, PausableUpgradeable, Reentranc
         }
 
         if (_auction.amount > 0) {
-            uint256 initialBalance = address(this).balance;
+            // Ether going to owner of the auction
+            uint256 auctioneerPayment = uint256(wadDiv(wadMul(int256(_auction.amount), 10000 - int256(creatorRateBps)), 10000));
 
-            // Calculate the auctioneer's cut.
-            uint256 auctioneerEtherAmountCut = uint256(wadDiv(wadMul(int256(_auction.amount), 10000 - int256(creatorRateBps)), 10000));
+            //Total amount of ether going to creator
+            uint256 creatorAmount = _auction.amount - auctioneerPayment;
 
-            //Calculate amount going to creator
-            uint256 creatorAmount = _auction.amount - auctioneerEtherAmountCut;
-            //Calculate amount of ether being sent to creator
-            uint256 creatorEtherAmount = uint256(wadDiv(wadMul(int256(creatorAmount), int256(entropyRateBps)), 10000));
-            uint256 creatorGovernanceAmount = creatorAmount - creatorEtherAmount;
+            //Ether reserved to pay the creator directly
+            uint256 creatorDirectPayment = uint256(wadDiv(wadMul(int256(creatorAmount), int256(entropyRateBps)), 10000));
+            //Ether reserved to buy creator governance
+            uint256 creatorGovernancePayment = creatorAmount - creatorDirectPayment;
 
             uint256 numCreators = verbs.getArtPieceById(_auction.verbId).creators.length;
 
@@ -261,7 +259,7 @@ contract VerbsAuctionHouse is IVerbsAuctionHouse, PausableUpgradeable, Reentranc
             uint256[] memory vrgdaSplits = new uint256[](numCreators);
 
             //transfer auction amount to the DAO treasury
-            _safeTransferETHWithFallback(owner(), auctioneerEtherAmountCut);
+            _safeTransferETHWithFallback(owner(), auctioneerPayment);
 
             //transfer creator's share to the creator, for each creator
             for (uint256 i = 0; i < numCreators; i++) {
@@ -270,21 +268,14 @@ contract VerbsAuctionHouse is IVerbsAuctionHouse, PausableUpgradeable, Reentranc
                 vrgdaSplits[i] = creator.bps;
 
                 //calculate etherAmount for specific creator based on BPS splits
-                uint256 etherAmount = uint256(wadDiv(wadMul(int256(creatorEtherAmount), int256(creator.bps)), 10000));
+                uint256 etherAmount = uint256(wadDiv(wadMul(int256(creatorDirectPayment), int256(creator.bps)), 10000));
 
                 //transfer creator's share to the creator
                 _safeTransferETHWithFallback(creator.creator, etherAmount);
-
-                //keep running total of remaining creatorAmount
-                creatorAmount - etherAmount;
             }
 
-            uint256 gasUsed = startGas - gasleft();
-
-            creatorAmount -= gasUsed * 1e10;
-
             //buy token from tokenEmitter for all the creators
-            // tokenEmitter.buyToken{ value: creatorAmount * 2 / 5 }(vrgdaReceivers, vrgdaSplits, creatorAmount * 2 / 5);
+            tokenEmitter.buyToken{ value: creatorGovernancePayment }(vrgdaReceivers, vrgdaSplits, creatorGovernancePayment);
         }
 
         emit AuctionSettled(_auction.verbId, _auction.bidder, _auction.amount);

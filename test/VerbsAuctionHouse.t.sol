@@ -217,8 +217,9 @@ contract VerbsAuctionHouseTest is Test {
         assertEq(verbs.ownerOf(0), address(1), "Verb should be transferred to the highest bidder");
         
         uint256 creatorRate = auctionHouse.creatorRateBps();
+        uint256 entropyRate = auctionHouse.entropyRateBps();
 
-        assertEq(balanceAfter - balanceBefore, bps(bidAmount, 10_000 - creatorRate), "Bid amount should be transferred to the auction house owner");
+        assertEq(balanceAfter - balanceBefore, (bidAmount * (10_000 - creatorRate * entropyRate / 10_000) / 10_000), "Bid amount minus entropy should be transferred to the auction house owner");
     }
 
     
