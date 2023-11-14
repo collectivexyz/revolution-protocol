@@ -43,6 +43,7 @@ contract NontransferableERC20 is AccessControlEnumerable {
 
     string private _name;
     string private _symbol;
+    uint8 private immutable _decimals;
 
     /**
      * @dev Sets the values for {name} and {symbol}.
@@ -50,9 +51,10 @@ contract NontransferableERC20 is AccessControlEnumerable {
      * All two of these values are immutable: they can only be set once during
      * construction.
      */
-    constructor(string memory name_, string memory symbol_) {
+    constructor(string memory name_, string memory symbol_, uint8 decimals_) {
         _name = name_;
         _symbol = symbol_;
+        _decimals = decimals_;
 
         _grantRole(DEFAULT_ADMIN_ROLE, msg.sender);
     }
@@ -86,7 +88,7 @@ contract NontransferableERC20 is AccessControlEnumerable {
      * {IERC20-balanceOf} and {IERC20-transfer}.
      */
     function decimals() public view virtual returns (uint8) {
-        return 2;
+        return _decimals;
     }
 
     /**

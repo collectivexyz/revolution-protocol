@@ -44,7 +44,7 @@ contract TokenEmitter is LinearVRGDA, ITokenEmitter, AccessControlEnumerable, Re
     }
 
     function totalSupply() public view returns (uint) {
-        // returns total supply of issued so far
+        // returns total supply issued so far
         return token.totalSupply();
     }
 
@@ -99,7 +99,7 @@ contract TokenEmitter is LinearVRGDA, ITokenEmitter, AccessControlEnumerable, Re
     function getTokenAmountForMultiPurchase(uint256 payment) public view returns (uint256) {
         // payment is split up into chunks of numTokens
         // each chunk is estimated and the total is returned
-        // chunk up the payments into 0.001eth chunks
+        // chunk up the payments into 0.001 eth chunks
 
         //counter to keep track of how much eth is left in the payment
         uint256 remainingEth = payment;
