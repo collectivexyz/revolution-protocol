@@ -32,9 +32,9 @@ pragma solidity ^0.8.22;
  * allowances. See {IERC20-approve}.
  */
 
-import { AccessControlEnumerable } from "@openzeppelin/contracts/access/extensions/AccessControlEnumerable.sol";
+import { Ownable } from "@openzeppelin/contracts/access/Ownable.sol";
 
-contract NontransferableERC20 is AccessControlEnumerable {
+contract NontransferableERC20 is Ownable {
     mapping(address => uint256) private _balances;
 
     event Transfer(address indexed from, address indexed to, uint256 value);
@@ -51,12 +51,10 @@ contract NontransferableERC20 is AccessControlEnumerable {
      * All two of these values are immutable: they can only be set once during
      * construction.
      */
-    constructor(string memory name_, string memory symbol_, uint8 decimals_) {
+    constructor(address _initialOwner, string memory name_, string memory symbol_, uint8 decimals_) Ownable(_initialOwner) {
         _name = name_;
         _symbol = symbol_;
         _decimals = decimals_;
-
-        _grantRole(DEFAULT_ADMIN_ROLE, msg.sender);
     }
 
     /**
@@ -175,7 +173,7 @@ contract NontransferableERC20 is AccessControlEnumerable {
         _afterTokenTransfer(address(0), account, amount);
     }
 
-    function mint(address account, uint256 amount) public onlyRole(DEFAULT_ADMIN_ROLE) {
+    function mint(address account, uint256 amount) public onlyOwner {
         _mint(account, amount);
     }
 
@@ -241,9 +239,4 @@ contract NontransferableERC20 is AccessControlEnumerable {
      */
     // solhint-disable-next-line no-empty-blocks
     function _afterTokenTransfer(address from, address to, uint256 amount) internal virtual {}
-
-    function transferAdmin(address _newAdmin) public onlyRole(DEFAULT_ADMIN_ROLE) {
-        _grantRole(DEFAULT_ADMIN_ROLE, _newAdmin);
-        _revokeRole(DEFAULT_ADMIN_ROLE, msg.sender);
-    }
 }

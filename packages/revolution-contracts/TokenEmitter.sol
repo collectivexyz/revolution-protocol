@@ -54,11 +54,7 @@ contract TokenEmitter is LinearVRGDA, ITokenEmitter, AccessControlEnumerable, Re
     }
 
     // takes a list of addresses and a list of payout percentages as basis points
-    function buyToken(
-        address[] memory _addresses,
-        uint[] memory _bps,
-        uint256
-    ) public payable nonReentrant returns (uint256) {
+    function buyToken(address[] memory _addresses, uint[] memory _bps, uint256) public payable nonReentrant returns (uint256) {
         // ensure the same number of addresses and _bps
         require(_addresses.length == _bps.length, "Parallel arrays required");
 
@@ -116,7 +112,7 @@ contract TokenEmitter is LinearVRGDA, ITokenEmitter, AccessControlEnumerable, Re
             if (remainingEth < INCREMENT_SIZE) {
                 tokenAmount += _getTokenAmountForSinglePurchase(remainingEth, totalSupply() + tokenAmount);
                 remainingEth = 0;
-            } 
+            }
             // otherwise, calculate tokenAmount for the increment size
             else {
                 tokenAmount += _getTokenAmountForSinglePurchase(INCREMENT_SIZE, totalSupply() + tokenAmount);
@@ -140,9 +136,5 @@ contract TokenEmitter is LinearVRGDA, ITokenEmitter, AccessControlEnumerable, Re
         uint256 price = getVRGDAPrice(toDaysWadUnsafe(block.timestamp - startTime), tokensSoldSoFar);
 
         return price;
-    }
-
-    function transferTokenAdmin(address _newOwner) public onlyRole(DEFAULT_ADMIN_ROLE) {
-        token.transferAdmin(_newOwner);
     }
 }

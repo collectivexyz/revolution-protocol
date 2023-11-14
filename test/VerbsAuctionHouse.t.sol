@@ -13,6 +13,10 @@ import { IVerbsDescriptorMinimal } from "../packages/revolution-contracts/interf
 import { ICultureIndex, ICultureIndexEvents } from "../packages/revolution-contracts/interfaces/ICultureIndex.sol";
 import { IVerbsAuctionHouse } from "../packages/revolution-contracts/interfaces/IVerbsAuctionHouse.sol";
 import { IERC20 } from "@openzeppelin/contracts/token/ERC20/IERC20.sol";
+import { NontransferableERC20 } from "../packages/revolution-contracts/NontransferableERC20.sol";
+import { TokenEmitter } from "../packages/revolution-contracts/TokenEmitter.sol";
+import { ITokenEmitter } from "../packages/revolution-contracts/interfaces/ITokenEmitter.sol";
+import { wadMul, wadDiv } from "solmate/utils/SignedWadMath.sol";
 
 contract VerbsAuctionHouseTest is Test {
     VerbsAuctionHouse public auctionHouse;
@@ -20,15 +24,28 @@ contract VerbsAuctionHouseTest is Test {
     VerbsToken public verbs;
     VerbsDescriptor public descriptor;
     CultureIndex public cultureIndex;
+    TokenEmitter public tokenEmitter;
+
+    // 1,000 tokens per day is the target emission
+    uint256 tokensPerTimeUnit = 1_000;
 
     function setUp() public {
         mockWETH = new MockERC20();
+        NontransferableERC20 governanceToken = new NontransferableERC20(address(this), "Revolution Governance", "GOV", 4);        
 
         // Additional setup for VerbsToken similar to VerbsTokenTest
         ProxyRegistry _proxyRegistry = new ProxyRegistry();
 
         CultureIndex _cultureIndex = new CultureIndex(address(mockWETH), address(this));
         cultureIndex = _cultureIndex;
+
+        //20% - how much the price decays per unit of time with no sales
+        int256 priceDecayPercent = 1e18 / 10;
+        // 1e11 or 0.0000001 is 2 cents per token even at $200k eth price
+        int256 tokenTargetPrice = 1e11;
+
+        tokenEmitter = new TokenEmitter(governanceToken, address(this), tokenTargetPrice, priceDecayPercent, int256(1e18 * 1e4 * tokensPerTimeUnit));
+        governanceToken.transferOwnership(address(tokenEmitter));
 
         // Initialize VerbsToken with additional parameters
         verbs = new VerbsToken(
@@ -53,17 +70,26 @@ contract VerbsAuctionHouseTest is Test {
         // Initialize the auction house with mock contracts and parameters
         auctionHouse.initialize(
             IVerbsToken(address(verbs)),
+            ITokenEmitter(address(tokenEmitter)),
             address(mockWETH),
             address(this), // Owner of the auction house
             15 minutes,    // timeBuffer
             1 ether,       // reservePrice
             5,             // minBidIncrementPercentage
-            24 hours       // duration
+            24 hours,       // duration
+            2_000,          // creatorRateBps
+            5_000         //entropyRateBps
         );
 
         //set minter of verbstoken to be auction house
         verbs.setMinter(address(auctionHouse));
         verbs.lockMinter();
+    }
+
+
+    //calculate bps amount given split
+    function bps(uint256 x, uint256 y) public returns (uint256) {
+        return uint256(wadDiv(wadMul(int256(x), int256(y)), 10000));
     }
 
     // Fallback function to allow contract to receive Ether
@@ -103,7 +129,7 @@ contract VerbsAuctionHouseTest is Test {
 
         auctionHouse.unpause();
         uint256 bidAmount = auctionHouse.reservePrice() + 0.1 ether;
-        vm.deal(address(1), bidAmount + 1 ether);
+        vm.deal(address(1), bidAmount + 2 ether);
 
         vm.startPrank(address(1));
         auctionHouse.createBid{value: bidAmount}(0); // Assuming the first auction's verbId is 0
@@ -189,7 +215,10 @@ contract VerbsAuctionHouseTest is Test {
         uint256 balanceAfter = address(this).balance;
 
         assertEq(verbs.ownerOf(0), address(1), "Verb should be transferred to the highest bidder");
-        assertEq(balanceAfter - balanceBefore, bidAmount, "Bid amount should be transferred to the auction house owner");
+        
+        uint256 creatorRate = auctionHouse.creatorRateBps();
+
+        assertEq(balanceAfter - balanceBefore, bps(bidAmount, 10_000 - creatorRate), "Bid amount should be transferred to the auction house owner");
     }
 
     
@@ -240,7 +269,8 @@ contract VerbsAuctionHouseTest is Test {
         auctionHouse.settleCurrentAndCreateNewAuction();
 
         // Check if the recipient received WETH instead of Ether
-        assertEq(IERC20(address(mockWETH)).balanceOf(recipient), amount);
+        uint256 creatorRate = auctionHouse.creatorRateBps();
+        assertEq(IERC20(address(mockWETH)).balanceOf(recipient), bps(amount, 10_000 - creatorRate));
         assertEq(recipient.balance, 0); // Ether balance should still be 0
     }
 
@@ -266,7 +296,8 @@ contract VerbsAuctionHouseTest is Test {
         auctionHouse.settleCurrentAndCreateNewAuction();
 
         // Check if the recipient received Ether
-        assertEq(recipient.balance, amount);
+        uint256 creatorRate = auctionHouse.creatorRateBps();
+        assertEq(recipient.balance, bps(amount, 10_000 - creatorRate));
     }
 
     function testTransferToContractWithoutReceiveOrFallback() public {
@@ -292,7 +323,9 @@ contract VerbsAuctionHouseTest is Test {
         auctionHouse.settleCurrentAndCreateNewAuction();
 
         // Check if the recipient received WETH instead of Ether
-        assertEq(IERC20(address(mockWETH)).balanceOf(recipient), amount);
+        uint256 creatorRate = auctionHouse.creatorRateBps();
+
+        assertEq(IERC20(address(mockWETH)).balanceOf(recipient), bps(amount, 10_000 - creatorRate));
         assertEq(recipient.balance, 0); // Ether balance should still be 0
     }
 
