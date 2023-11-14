@@ -16,7 +16,7 @@ import { IERC20 } from "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import { NontransferableERC20 } from "../packages/revolution-contracts/NontransferableERC20.sol";
 import { TokenEmitter } from "../packages/revolution-contracts/TokenEmitter.sol";
 import { ITokenEmitter } from "../packages/revolution-contracts/interfaces/ITokenEmitter.sol";
-import { wadMul, wadDiv } from "solmate/utils/SignedWadMath.sol";
+import { wadMul, wadDiv } from "../packages/revolution-contracts/libs/SignedWadMath.sol";
 
 contract VerbsAuctionHouseTest is Test {
     VerbsAuctionHouse public auctionHouse;
@@ -37,7 +37,7 @@ contract VerbsAuctionHouseTest is Test {
         // Additional setup for VerbsToken similar to VerbsTokenTest
         ProxyRegistry _proxyRegistry = new ProxyRegistry();
 
-        CultureIndex _cultureIndex = new CultureIndex(address(mockWETH), address(this));
+        CultureIndex _cultureIndex = new CultureIndex(address(governanceToken), address(this));
         cultureIndex = _cultureIndex;
 
         //20% - how much the price decays per unit of time with no sales

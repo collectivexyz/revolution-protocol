@@ -31,7 +31,7 @@ import { IVerbsAuctionHouse } from "./interfaces/IVerbsAuctionHouse.sol";
 import { IVerbsToken } from "./interfaces/IVerbsToken.sol";
 import { IWETH } from "./interfaces/IWETH.sol";
 import { ITokenEmitter } from "./interfaces/ITokenEmitter.sol";
-import { wadMul, wadDiv } from "solmate/utils/SignedWadMath.sol";
+import { wadMul, wadDiv } from "./libs/SignedWadMath.sol";
 import { ICultureIndex } from "./interfaces/ICultureIndex.sol";
 
 contract VerbsAuctionHouse is IVerbsAuctionHouse, PausableUpgradeable, ReentrancyGuardUpgradeable, OwnableUpgradeable {
