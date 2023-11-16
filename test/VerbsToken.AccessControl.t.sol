@@ -7,7 +7,6 @@ import {IVerbsToken} from "../packages/revolution-contracts/interfaces/IVerbsTok
 import { IVerbsDescriptorMinimal } from "../packages/revolution-contracts/interfaces/IVerbsDescriptorMinimal.sol";
 import { IProxyRegistry } from "../packages/revolution-contracts/external/opensea/IProxyRegistry.sol";
 import { ICultureIndex } from "../packages/revolution-contracts/interfaces/ICultureIndex.sol";
-import { NFTDescriptor } from "../packages/revolution-contracts/libs/NFTDescriptor.sol";
 import { Strings } from "@openzeppelin/contracts/utils/Strings.sol";
 import {CultureIndex} from "../packages/revolution-contracts/CultureIndex.sol";
 import {MockERC20} from "./MockERC20.sol";

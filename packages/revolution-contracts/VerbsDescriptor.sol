@@ -20,7 +20,7 @@ pragma solidity ^0.8.22;
 import { Ownable } from "@openzeppelin/contracts/access/Ownable.sol";
 import { Strings } from "@openzeppelin/contracts/utils/Strings.sol";
 import { IVerbsDescriptor } from "./interfaces/IVerbsDescriptor.sol";
-import { NFTDescriptor } from "./libs/NFTDescriptor.sol";
+import { Base64 } from "@openzeppelin/contracts/utils/Base64.sol";
 import { ICultureIndex } from "./interfaces/ICultureIndex.sol";
 
 contract VerbsDescriptor is IVerbsDescriptor, Ownable {
@@ -39,8 +39,36 @@ contract VerbsDescriptor is IVerbsDescriptor, Ownable {
     // Token name prefix
     string public tokenNamePrefix;
 
+    // Token URI params for constructing metadata
+    struct TokenURIParams {
+        string name;
+        string description;
+        string image;
+        string animation_url;
+    }
+
     constructor(address _initialOwner, string memory _tokenNamePrefix) Ownable(_initialOwner) {
         tokenNamePrefix = _tokenNamePrefix;
+    }
+
+    /**
+     * @notice Construct an ERC721 token URI.
+     */
+    function constructTokenURI(TokenURIParams memory params) public pure returns (string memory) {
+        string memory json = string(
+            abi.encodePacked(
+                '{"name":"',
+                params.name,
+                '", "description":"',
+                params.description,
+                '", "image": "',
+                params.image,
+                '", "animation_url": "',
+                params.animation_url,
+                '"}'
+            )
+        );
+        return string(abi.encodePacked("data:application/json;base64,", Base64.encode(bytes(json))));
     }
 
     /**
@@ -94,12 +122,12 @@ contract VerbsDescriptor is IVerbsDescriptor, Ownable {
     function genericDataURI(string memory name, ICultureIndex.ArtPieceMetadata memory metadata) public pure returns (string memory) {
         /// @dev Get name description image and animation_url from CultureIndex
 
-        NFTDescriptor.TokenURIParams memory params = NFTDescriptor.TokenURIParams({
+        TokenURIParams memory params = TokenURIParams({
             name: name,
             description: metadata.description,
             image: metadata.image,
             animation_url: metadata.animationUrl
         });
-        return NFTDescriptor.constructTokenURI(params);
+        return constructTokenURI(params);
     }
 }
