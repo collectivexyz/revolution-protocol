@@ -95,8 +95,10 @@ contract VerbsToken is IVerbsToken, Ownable, ERC721Checkpointable, ReentrancyGua
         address _initialOwner,
         IVerbsDescriptorMinimal _descriptor,
         IProxyRegistry _proxyRegistry,
-        ICultureIndex _cultureIndex
-    ) ERC721("Verbs", "VERB") Ownable(_initialOwner) {
+        ICultureIndex _cultureIndex,
+        string memory _tokenName,
+        string memory _tokenSymbol
+    ) ERC721(_tokenName, _tokenSymbol) Ownable(_initialOwner) {
         minter = _minter;
         descriptor = _descriptor;
         cultureIndex = _cultureIndex;

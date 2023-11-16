@@ -32,7 +32,7 @@ contract VerbsTokenTest is Test {
         ProxyRegistry _proxyRegistry = new ProxyRegistry();
 
         // Create a new VerbsToken contract, passing address(this) as both the minter and the initial owner
-        verbsToken = new VerbsToken(address(this), address(this), IVerbsDescriptorMinimal(address(0)), _proxyRegistry, ICultureIndex(address(0)));
+        verbsToken = new VerbsToken(address(this), address(this), IVerbsDescriptorMinimal(address(0)), _proxyRegistry, ICultureIndex(address(0)), "Vrbs", "VRBS");
 
         // Deploy CultureIndex with the VerbsToken's address as the initial owner
         cultureIndex = new CultureIndex(address(mockVotingToken), address(verbsToken));

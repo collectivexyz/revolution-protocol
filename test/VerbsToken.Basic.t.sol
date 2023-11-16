@@ -24,6 +24,8 @@ contract VerbsTokenTest is Test {
     VerbsDescriptor public descriptor;
 
     string tokenNamePrefix = "Vrb";
+    string tokenName = "Vrbs";
+    string tokenSymbol = "VRBS";
 
     /// @dev Sets up a new VerbsToken instance before each test
     function setUp() public {
@@ -34,7 +36,7 @@ contract VerbsTokenTest is Test {
         ProxyRegistry _proxyRegistry = new ProxyRegistry();
 
         // Create a new VerbsToken contract, passing address(this) as both the minter and the initial owner
-        verbsToken = new VerbsToken(address(this), address(this), IVerbsDescriptorMinimal(address(0)), _proxyRegistry, ICultureIndex(address(0)));
+        verbsToken = new VerbsToken(address(this), address(this), IVerbsDescriptorMinimal(address(0)), _proxyRegistry, ICultureIndex(address(0)), tokenName, tokenSymbol);
 
         // Deploy CultureIndex with the VerbsToken's address as the initial owner
         cultureIndex = new CultureIndex(address(mockVotingToken), address(verbsToken));
@@ -55,13 +57,13 @@ contract VerbsTokenTest is Test {
     /// @dev Tests the symbol of the VerbsToken
     function testSymbol() public {
         setUp();
-        assertEq(verbsToken.symbol(), "VERB", "Symbol should be VERB");
+        assertEq(verbsToken.symbol(), tokenSymbol, "Symbol should be VRBS");
     }
 
     /// @dev Tests the name of the VerbsToken
     function testName() public {
         setUp();
-        assertEq(verbsToken.name(), "Verbs", "Name should be Verbs");
+        assertEq(verbsToken.name(), tokenName, "Name should be Vrbs");
     }
 
     /// @dev Tests the contract URI of the VerbsToken

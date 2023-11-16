@@ -54,7 +54,9 @@ contract VerbsAuctionHouseTest is Test {
             address(this),             // Address of the owner
             IVerbsDescriptorMinimal(address(0)),
             _proxyRegistry,
-            ICultureIndex(address(_cultureIndex))
+            ICultureIndex(address(_cultureIndex)),
+            "Vrbs",
+            "VRBS"
         );
 
         cultureIndex.transferOwnership(address(verbs));
