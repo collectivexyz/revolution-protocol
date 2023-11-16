@@ -12,9 +12,11 @@ contract VerbsDescriptorTest is Test {
     VerbsDescriptor descriptor;
     address owner;
 
+    string tokenNamePrefix = "Vrb";
+
     function setUp() public {
         owner = address(this);
-        descriptor = new VerbsDescriptor(owner);
+        descriptor = new VerbsDescriptor(owner, tokenNamePrefix);
     }
 
     /// @notice Test that toggling `isDataURIEnabled` changes state correctly
@@ -273,7 +275,7 @@ function testTokenURIWithMixedMediaMetadata() public {
     string memory uri = descriptor.tokenURI(tokenId, metadata);
 
     // The token URI should reflect both image and animation URLs
-    assertMixedMediaUriIntegrity(uri, metadata, "Token URI should reflect mixed media types correctly");
+    assertFullMetadataIntegrity(uri, metadata, tokenId, "Token URI should reflect mixed media types correctly");
 }
 
 /// @notice Test `tokenURI` with full metadata set
@@ -293,7 +295,7 @@ function testTokenURIWithFullMetadata() public {
     string memory uri = descriptor.tokenURI(tokenId, metadata);
 
     // Validate the token URI against the full metadata
-    assertFullMetadataIntegrity(uri, metadata, "Token URI should correctly represent the full metadata");
+    assertFullMetadataIntegrity(uri, metadata, tokenId, "Token URI should correctly represent the full metadata");
 }
 
 
@@ -308,27 +310,18 @@ function assertUriContainsImage(string memory uri, string memory expectedImageUr
 }
 
 // Helper function to assert the integrity of the full metadata in the token URI
-function assertFullMetadataIntegrity(string memory uri, ICultureIndex.ArtPieceMetadata memory expectedMetadata, string memory errorMessage) internal {
+function assertFullMetadataIntegrity(string memory uri, ICultureIndex.ArtPieceMetadata memory expectedMetadata, uint256 tokenId, string memory errorMessage) internal {
     string memory metadataJson = decodeMetadata(uri);
     (string memory name, string memory description, string memory imageUrl, string memory animationUrl) = parseJson(metadataJson);
 
-    assertEq(name, expectedMetadata.name, string(abi.encodePacked(errorMessage, " - Name mismatch")));
+    //expected name should tokenNamePrefix + space + tokenId
+    string memory expectedName = string(abi.encodePacked(tokenNamePrefix, " ", Strings.toString(tokenId)));
+
+    assertEq(name, expectedName, string(abi.encodePacked(errorMessage, " - Name mismatch")));
     assertEq(description, expectedMetadata.description, string(abi.encodePacked(errorMessage, " - Description mismatch")));
     assertEq(imageUrl, expectedMetadata.image, string(abi.encodePacked(errorMessage, " - Image URL mismatch")));
     assertEq(animationUrl, expectedMetadata.animationUrl, string(abi.encodePacked(errorMessage, " - Animation URL mismatch")));
     // Additional assertions for text and animationUrl can be added here if required
-}
-
-
-// Helper function to assert the integrity of mixed media metadata in the token URI
-function assertMixedMediaUriIntegrity(string memory uri, ICultureIndex.ArtPieceMetadata memory expectedMetadata, string memory errorMessage) internal {
-    string memory metadataJson = decodeMetadata(uri);
-    (string memory name, string memory description, string memory imageUrl, string memory animationUrl) = parseJson(metadataJson);
-
-    assertEq(name, expectedMetadata.name, string(abi.encodePacked(errorMessage, " - Name mismatch")));
-    assertEq(description, expectedMetadata.description, string(abi.encodePacked(errorMessage, " - Description mismatch")));
-    assertEq(imageUrl, expectedMetadata.image, string(abi.encodePacked(errorMessage, " - Image URL mismatch")));
-    assertEq(animationUrl, expectedMetadata.animationUrl, string(abi.encodePacked(errorMessage, " - Animation URL mismatch")));
 }
 
 // Helper function to decode base64 encoded metadata from a data URI

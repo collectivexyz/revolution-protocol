@@ -36,7 +36,12 @@ contract VerbsDescriptor is IVerbsDescriptor, Ownable {
     // Base URI
     string public override baseURI;
 
-    constructor(address _initialOwner) Ownable(_initialOwner) {}
+    // Token name prefix
+    string public tokenNamePrefix;
+
+    constructor(address _initialOwner, string memory _tokenNamePrefix) Ownable(_initialOwner) {
+        tokenNamePrefix = _tokenNamePrefix;
+    }
 
     /**
      * @notice Toggle a boolean value which determines if `tokenURI` returns a data URI
@@ -76,11 +81,11 @@ contract VerbsDescriptor is IVerbsDescriptor, Ownable {
     /**
      * @notice Given a token ID, construct a base64 encoded data URI for an official Vrbs DAO verb.
      */
-    function dataURI(uint256 tokenId, ICultureIndex.ArtPieceMetadata memory metadata) public pure returns (string memory) {
-        // string memory verbId = tokenId.toString();
-        // string memory name = string(abi.encodePacked("Verb ", verbId));
+    function dataURI(uint256 tokenId, ICultureIndex.ArtPieceMetadata memory metadata) public view returns (string memory) {
+        string memory verbId = tokenId.toString();
+        string memory name = string(abi.encodePacked(tokenNamePrefix, " ", verbId));
 
-        return genericDataURI(metadata.name, metadata);
+        return genericDataURI(name, metadata);
     }
 
     /**

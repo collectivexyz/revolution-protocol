@@ -60,7 +60,7 @@ contract VerbsAuctionHouseTest is Test {
         cultureIndex.transferOwnership(address(verbs));
 
         // Deploy a new VerbsDescriptor, which will be used by VerbsToken
-        descriptor = new VerbsDescriptor(address(verbs));
+        descriptor = new VerbsDescriptor(address(verbs), "Verb");
         IVerbsDescriptorMinimal _descriptor = descriptor;
 
         // Set the culture index and descriptor in VerbsToken

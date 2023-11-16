@@ -23,6 +23,8 @@ contract VerbsTokenTest is Test {
     MockERC20 public mockVotingToken;
     VerbsDescriptor public descriptor;
 
+    string tokenNamePrefix = "Vrb";
+
     /// @dev Sets up a new VerbsToken instance before each test
     function setUp() public {
         // Create a new mock ERC20 token for voting
@@ -42,7 +44,7 @@ contract VerbsTokenTest is Test {
         verbsToken.setCultureIndex(_cultureIndex);
 
         // Deploy a new VerbsDescriptor, which will be used by VerbsToken
-        descriptor = new VerbsDescriptor(address(verbsToken));
+        descriptor = new VerbsDescriptor(address(verbsToken), tokenNamePrefix);
         IVerbsDescriptorMinimal _descriptor = descriptor;
 
         // Now that VerbsDescriptor is deployed, set it in VerbsToken
@@ -440,8 +442,11 @@ function testTokenMetadataIntegrity() public {
     // Retrieve the expected metadata directly from the art piece for comparison
     (,ICultureIndex.ArtPieceMetadata memory metadata,,) = cultureIndex.pieces(artPieceId);
 
+    //assert name equals Verb + tokenId
+    string memory expectedName = string(abi.encodePacked(tokenNamePrefix, " ", Strings.toString(tokenId)));
+
     // Assert that the token metadata matches the expected metadata from the art piece
-    assertEq(name, metadata.name, "Token name does not match expected name");
+    assertEq(name, expectedName, "Token name does not match expected name");
     assertEq(description, metadata.description, "Token description does not match expected description");
     assertEq(image, metadata.image, "Token image does not match expected image URL");
 }

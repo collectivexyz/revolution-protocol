@@ -43,7 +43,7 @@ contract VerbsTokenTest is Test {
         verbsToken.setCultureIndex(_cultureIndex);
 
         // Deploy a new VerbsDescriptor, which will be used by VerbsToken
-        descriptor = new VerbsDescriptor(address(verbsToken));
+        descriptor = new VerbsDescriptor(address(verbsToken), "Verb");
         IVerbsDescriptorMinimal _descriptor = descriptor;
 
         // Now that VerbsDescriptor is deployed, set it in VerbsToken

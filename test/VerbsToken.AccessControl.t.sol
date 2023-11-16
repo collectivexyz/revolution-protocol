@@ -42,7 +42,7 @@ contract VerbsTokenTest is Test {
         verbsToken.setCultureIndex(_cultureIndex);
 
         // Deploy a new VerbsDescriptor, which will be used by VerbsToken
-        descriptor = new VerbsDescriptor(address(verbsToken));
+        descriptor = new VerbsDescriptor(address(verbsToken), "Verb");
         IVerbsDescriptorMinimal _descriptor = descriptor;
 
         // Now that VerbsDescriptor is deployed, set it in VerbsToken
@@ -314,7 +314,7 @@ function testDescriptorLocking() public {
     setUp();
 
     // Test setting the descriptor
-    IVerbsDescriptorMinimal newDescriptor = new VerbsDescriptor(address(this));
+    IVerbsDescriptorMinimal newDescriptor = new VerbsDescriptor(address(this), "Verb");
     verbsToken.setDescriptor(newDescriptor);
 
     // Lock the descriptor and attempt to change it, expecting a revert
