@@ -161,6 +161,26 @@ contract VerbsAuctionHouse is IVerbsAuctionHouse, PausableUpgradeable, Reentranc
     }
 
     /**
+     * @notice Set the split of the winning bid that is reserved for the creator of the Verb in basis points.
+     * @dev Only callable by the owner.
+     * @param _creatorRateBps New creator rate in basis points.
+     */
+    function setCreatorRateBps(uint256 _creatorRateBps) external onlyOwner {
+        creatorRateBps = _creatorRateBps;
+        emit CreatorRateBpsUpdated(_creatorRateBps);
+    }
+
+    /**
+     * @notice Set the split of (auction proceeds * creatorRate) that is sent to the creator as ether in basis points.
+     * @dev Only callable by the owner.
+     * @param _entropyRateBps New entropy rate in basis points.
+     */
+    function setEntropyRateBps(uint256 _entropyRateBps) external onlyOwner {
+        entropyRateBps = _entropyRateBps;
+        emit EntropyRateBpsUpdated(_entropyRateBps);
+    }
+
+    /**
      * @notice Unpause the Verbs auction house.
      * @dev This function can only be called by the owner when the
      * contract is paused. If required, this function will start a new auction.

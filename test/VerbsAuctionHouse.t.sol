@@ -89,6 +89,54 @@ contract VerbsAuctionHouseTest is Test {
         verbs.lockMinter();
     }
 
+    function testEventEmission() public {
+        uint256 newCreatorRateBps = 2500;
+        uint256 newEntropyRateBps = 6000;
+
+        // Expect events when changing creatorRateBps
+        vm.expectEmit(true, true, true, true);
+        emit IVerbsAuctionHouse.CreatorRateBpsUpdated(newCreatorRateBps);
+        auctionHouse.setCreatorRateBps(newCreatorRateBps);
+
+        // Expect events when changing entropyRateBps
+        vm.expectEmit(true, true, true, true);
+        emit IVerbsAuctionHouse.EntropyRateBpsUpdated(newEntropyRateBps);
+        auctionHouse.setEntropyRateBps(newEntropyRateBps);
+    }
+
+
+    function testValueUpdates() public {
+        uint256 newCreatorRateBps = 2500;
+        uint256 newEntropyRateBps = 6000;
+
+        // Change creatorRateBps as the owner
+        auctionHouse.setCreatorRateBps(newCreatorRateBps);
+        assertEq(auctionHouse.creatorRateBps(), newCreatorRateBps, "creatorRateBps should be updated");
+
+        // Change entropyRateBps as the owner
+        auctionHouse.setEntropyRateBps(newEntropyRateBps);
+        assertEq(auctionHouse.entropyRateBps(), newEntropyRateBps, "entropyRateBps should be updated");
+    }
+
+
+    function testOwnerOnlyAccess() public {
+        uint256 newCreatorRateBps = 2500;
+        uint256 newEntropyRateBps = 6000;
+
+        // Attempt to change creatorRateBps as a non-owner
+        vm.startPrank(address(2));
+        vm.expectRevert();
+        auctionHouse.setCreatorRateBps(newCreatorRateBps);
+        vm.stopPrank();
+
+        // Attempt to change entropyRateBps as a non-owner
+        vm.startPrank(address(2));
+        vm.expectRevert();
+        auctionHouse.setEntropyRateBps(newEntropyRateBps);
+        vm.stopPrank();
+    }
+
+
 
     //calculate bps amount given split
     function bps(uint256 x, uint256 y) public returns (uint256) {
