@@ -113,13 +113,6 @@ contract VerbsToken is IVerbsToken, Ownable, ERC721Checkpointable, ReentrancyGua
     }
 
     /**
-     * @notice currentVerbId getter.
-     */
-    function currentVerbId() public view returns (uint256) {
-        return _currentVerbId;
-    }
-
-    /**
      * @notice Set the _contractURIHash.
      * @dev Only callable by the owner.
      */

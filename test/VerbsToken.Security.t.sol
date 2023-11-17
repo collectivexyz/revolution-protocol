@@ -308,7 +308,7 @@ function testMintToDropTopVotedPieceFailure() public {
     verbsToken.setCultureIndex(ICultureIndex(cultureIndexMock));
 
     // Store current verbId before test
-    uint256 currentVerbIdBefore = 0;
+    uint256 supplyBefore = 0;
 
     bool dropTopVotedPieceFailed = false;
     try verbsToken.mint() {
@@ -318,8 +318,8 @@ function testMintToDropTopVotedPieceFailure() public {
     }
 
     // Verify verbId has not incremented after failure
-    uint256 currentVerbIdAfter = verbsToken.currentVerbId();
-    assertEq(currentVerbIdBefore, currentVerbIdAfter, "verbId should not increment after failure");
+    uint256 totalSupply = verbsToken.totalSupply();
+    assertEq(supplyBefore, totalSupply, "verbId should not increment after failure");
 
     assertTrue(dropTopVotedPieceFailed, "_mintTo should revert if dropTopVotedPiece fails");
 }
