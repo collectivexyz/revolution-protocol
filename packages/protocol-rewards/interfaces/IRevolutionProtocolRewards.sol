@@ -3,31 +3,31 @@ pragma solidity 0.8.22;
 
 /// @title IProtocolRewards
 /// @notice The interface for deposits & withdrawals for Protocol Rewards
-interface IVerbsProtocolRewards {
+interface IRevolutionProtocolRewards {
     /// @notice Rewards Deposit Event
     /// @param creator Creator for NFT rewards
     /// @param createReferral Creator referral
     /// @param mintReferral Mint referral user
     /// @param firstMinter First minter reward recipient
-    /// @param zora ZORA recipient
+    /// @param revolution Revolution recipient
     /// @param from The caller of the deposit
     /// @param creatorReward Creator reward amount
     /// @param createReferralReward Creator referral reward
     /// @param mintReferralReward Mint referral amount
     /// @param firstMinterReward First minter reward amount
-    /// @param zoraReward ZORA amount
+    /// @param revolutionReward Revolution amount
     event RewardsDeposit(
         address indexed creator,
         address indexed createReferral,
         address indexed mintReferral,
         address firstMinter,
-        address zora,
+        address revolution,
         address from,
         uint256 creatorReward,
         uint256 createReferralReward,
         uint256 mintReferralReward,
         uint256 firstMinterReward,
-        uint256 zoraReward
+        uint256 revolutionReward
     );
 
     /// @notice Deposit Event
@@ -78,7 +78,7 @@ interface IVerbsProtocolRewards {
     /// @param comment Optional comment to include with mint
     function depositBatch(address[] calldata recipients, uint256[] calldata amounts, bytes4[] calldata reasons, string calldata comment) external payable;
 
-    /// @notice Used by Zora ERC-721 & ERC-1155 contracts to deposit protocol rewards
+    /// @notice Used by Revolution Token contracts to deposit protocol rewards
     /// @param creator Creator for NFT rewards
     /// @param creatorReward Creator reward amount
     /// @param createReferral Creator referral
@@ -87,8 +87,8 @@ interface IVerbsProtocolRewards {
     /// @param mintReferralReward Mint referral amount
     /// @param firstMinter First minter reward
     /// @param firstMinterReward First minter reward amount
-    /// @param zora ZORA recipient
-    /// @param zoraReward ZORA amount
+    /// @param revolution Revolution recipient
+    /// @param revolutionReward Revolution amount
     function depositRewards(
         address creator,
         uint256 creatorReward,
@@ -98,8 +98,8 @@ interface IVerbsProtocolRewards {
         uint256 mintReferralReward,
         address firstMinter,
         uint256 firstMinterReward,
-        address zora,
-        uint256 zoraReward
+        address revolution,
+        uint256 revolutionReward
     ) external payable;
 
     /// @notice Withdraw protocol rewards

@@ -2,17 +2,17 @@
 pragma solidity 0.8.22;
 
 import {EIP712} from "@openzeppelin/contracts/utils/cryptography/EIP712.sol";
-import {IVerbsProtocolRewards} from "./interfaces/IVerbsProtocolRewards.sol";
+import {IRevolutionProtocolRewards} from "./interfaces/IRevolutionProtocolRewards.sol";
 
 // LICENSE
-// VerbsProtocolRewards.sol is a modified version of Zora's ProtocolRewards.sol:
+// RevolutionProtocolRewards.sol is a modified version of Zora's ProtocolRewards.sol:
 // https://github.com/ourzora/zora-protocol/blob/38e9e788c258426037d9bc8a1e8821bf3ce8acf6/packages/protocol-rewards/src/ProtocolRewards.sol
 //
 // ProtocolRewards.sol source code Copyright Zora licensed under the MIT license.
 
 /// @title ProtocolRewards
 /// @notice Manager of deposits & withdrawals for protocol rewards
-contract ProtocolRewards is IVerbsProtocolRewards, EIP712 {
+contract ProtocolRewards is IRevolutionProtocolRewards, EIP712 {
     /// @notice The EIP-712 typehash for gasless withdraws
     bytes32 public constant WITHDRAW_TYPEHASH = keccak256("Withdraw(address from,address to,uint256 amount,uint256 nonce,uint256 deadline)");
 
@@ -90,7 +90,7 @@ contract ProtocolRewards is IVerbsProtocolRewards, EIP712 {
         }
     }
 
-    /// @notice Used by Zora ERC-721 & ERC-1155 contracts to deposit protocol rewards
+    /// @notice Used by Revolution token contracts to deposit protocol rewards
     /// @param creator Creator for NFT rewards
     /// @param creatorReward Creator reward amount
     /// @param createReferral Creator referral
@@ -99,8 +99,8 @@ contract ProtocolRewards is IVerbsProtocolRewards, EIP712 {
     /// @param mintReferralReward Mint referral amount
     /// @param firstMinter First minter reward
     /// @param firstMinterReward First minter reward amount
-    /// @param zora ZORA recipient
-    /// @param zoraReward ZORA amount
+    /// @param revolution Revolution recipient
+    /// @param revolutionReward Revolution amount
     function depositRewards(
         address creator,
         uint256 creatorReward,
@@ -110,10 +110,10 @@ contract ProtocolRewards is IVerbsProtocolRewards, EIP712 {
         uint256 mintReferralReward,
         address firstMinter,
         uint256 firstMinterReward,
-        address zora,
-        uint256 zoraReward
+        address revolution,
+        uint256 revolutionReward
     ) external payable {
-        if (msg.value != (creatorReward + createReferralReward + mintReferralReward + firstMinterReward + zoraReward)) {
+        if (msg.value != (creatorReward + createReferralReward + mintReferralReward + firstMinterReward + revolutionReward)) {
             revert INVALID_DEPOSIT();
         }
 
@@ -130,8 +130,8 @@ contract ProtocolRewards is IVerbsProtocolRewards, EIP712 {
             if (firstMinter != address(0)) {
                 balanceOf[firstMinter] += firstMinterReward;
             }
-            if (zora != address(0)) {
-                balanceOf[zora] += zoraReward;
+            if (revolution != address(0)) {
+                balanceOf[revolution] += revolutionReward;
             }
         }
 
@@ -140,13 +140,13 @@ contract ProtocolRewards is IVerbsProtocolRewards, EIP712 {
             createReferral,
             mintReferral,
             firstMinter,
-            zora,
+            revolution,
             msg.sender,
             creatorReward,
             createReferralReward,
             mintReferralReward,
             firstMinterReward,
-            zoraReward
+            revolutionReward
         );
     }
 
