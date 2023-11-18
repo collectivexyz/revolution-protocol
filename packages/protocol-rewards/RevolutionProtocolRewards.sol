@@ -47,7 +47,7 @@ contract ProtocolRewards is IRevolutionProtocolRewards, EIP712 {
     /// @param recipients recipients to send the amount to, array aligns with amounts
     /// @param amounts amounts to send to each recipient, array aligns with recipients
     /// @param reasons optional bytes4 hash for indexing
-    /// @param comment Optional comment to include with mint
+    /// @param comment Optional comment to include with purchase
     function depositBatch(address[] calldata recipients, uint256[] calldata amounts, bytes4[] calldata reasons, string calldata comment) external payable {
         uint256 numRecipients = recipients.length;
 
@@ -91,29 +91,29 @@ contract ProtocolRewards is IRevolutionProtocolRewards, EIP712 {
     }
 
     /// @notice Used by Revolution token contracts to deposit protocol rewards
-    /// @param creator Creator for NFT rewards
+    /// @param creator Creator
     /// @param creatorReward Creator reward amount
-    /// @param createReferral Creator referral
-    /// @param createReferralReward Creator referral reward
-    /// @param mintReferral Mint referral user
-    /// @param mintReferralReward Mint referral amount
-    /// @param firstMinter First minter reward
-    /// @param firstMinterReward First minter reward amount
+    /// @param builderReferral Builder referral
+    /// @param builderReferralReward Builder referral reward
+    /// @param purchaseReferral Purchase referral user
+    /// @param purchaseReferralReward Purchase referral amount
+    /// @param deployer Deployer
+    /// @param deployerReward Deployer reward amount
     /// @param revolution Revolution recipient
     /// @param revolutionReward Revolution amount
     function depositRewards(
         address creator,
         uint256 creatorReward,
-        address createReferral,
-        uint256 createReferralReward,
-        address mintReferral,
-        uint256 mintReferralReward,
-        address firstMinter,
-        uint256 firstMinterReward,
+        address builderReferral,
+        uint256 builderReferralReward,
+        address purchaseReferral,
+        uint256 purchaseReferralReward,
+        address deployer,
+        uint256 deployerReward,
         address revolution,
         uint256 revolutionReward
     ) external payable {
-        if (msg.value != (creatorReward + createReferralReward + mintReferralReward + firstMinterReward + revolutionReward)) {
+        if (msg.value != (creatorReward + builderReferralReward + purchaseReferralReward + deployerReward + revolutionReward)) {
             revert INVALID_DEPOSIT();
         }
 
@@ -121,14 +121,14 @@ contract ProtocolRewards is IRevolutionProtocolRewards, EIP712 {
             if (creator != address(0)) {
                 balanceOf[creator] += creatorReward;
             }
-            if (createReferral != address(0)) {
-                balanceOf[createReferral] += createReferralReward;
+            if (builderReferral != address(0)) {
+                balanceOf[builderReferral] += builderReferralReward;
             }
-            if (mintReferral != address(0)) {
-                balanceOf[mintReferral] += mintReferralReward;
+            if (purchaseReferral != address(0)) {
+                balanceOf[purchaseReferral] += purchaseReferralReward;
             }
-            if (firstMinter != address(0)) {
-                balanceOf[firstMinter] += firstMinterReward;
+            if (deployer != address(0)) {
+                balanceOf[deployer] += deployerReward;
             }
             if (revolution != address(0)) {
                 balanceOf[revolution] += revolutionReward;
@@ -137,15 +137,15 @@ contract ProtocolRewards is IRevolutionProtocolRewards, EIP712 {
 
         emit RewardsDeposit(
             creator,
-            createReferral,
-            mintReferral,
-            firstMinter,
+            builderReferral,
+            purchaseReferral,
+            deployer,
             revolution,
             msg.sender,
             creatorReward,
-            createReferralReward,
-            mintReferralReward,
-            firstMinterReward,
+            builderReferralReward,
+            purchaseReferralReward,
+            deployerReward,
             revolutionReward
         );
     }

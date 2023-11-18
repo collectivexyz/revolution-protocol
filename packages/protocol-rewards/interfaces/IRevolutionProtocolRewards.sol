@@ -6,27 +6,27 @@ pragma solidity 0.8.22;
 interface IRevolutionProtocolRewards {
     /// @notice Rewards Deposit Event
     /// @param creator Creator for NFT rewards
-    /// @param createReferral Creator referral
-    /// @param mintReferral Mint referral user
-    /// @param firstMinter First minter reward recipient
+    /// @param builderReferral Builder referral
+    /// @param purchaseReferral Purchase referral user
+    /// @param deployer Deployer reward recipient
     /// @param revolution Revolution recipient
     /// @param from The caller of the deposit
     /// @param creatorReward Creator reward amount
-    /// @param createReferralReward Creator referral reward
-    /// @param mintReferralReward Mint referral amount
-    /// @param firstMinterReward First minter reward amount
+    /// @param builderReferralReward Builder referral reward
+    /// @param purchaseReferralReward Purchase referral amount
+    /// @param deployerReward Deployer reward amount
     /// @param revolutionReward Revolution amount
     event RewardsDeposit(
         address indexed creator,
-        address indexed createReferral,
-        address indexed mintReferral,
-        address firstMinter,
+        address indexed builderReferral,
+        address indexed purchaseReferral,
+        address deployer,
         address revolution,
         address from,
         uint256 creatorReward,
-        uint256 createReferralReward,
-        uint256 mintReferralReward,
-        uint256 firstMinterReward,
+        uint256 builderReferralReward,
+        uint256 purchaseReferralReward,
+        uint256 deployerReward,
         uint256 revolutionReward
     );
 
@@ -75,29 +75,29 @@ interface IRevolutionProtocolRewards {
     /// @param recipients recipients to send the amount to, array aligns with amounts
     /// @param amounts amounts to send to each recipient, array aligns with recipients
     /// @param reasons optional bytes4 hash for indexing
-    /// @param comment Optional comment to include with mint
+    /// @param comment Optional comment to include with purchase
     function depositBatch(address[] calldata recipients, uint256[] calldata amounts, bytes4[] calldata reasons, string calldata comment) external payable;
 
-    /// @notice Used by Revolution Token contracts to deposit protocol rewards
-    /// @param creator Creator for NFT rewards
+    /// @notice Used by Revolution token contracts to deposit protocol rewards
+    /// @param creator Creator
     /// @param creatorReward Creator reward amount
-    /// @param createReferral Creator referral
-    /// @param createReferralReward Creator referral reward
-    /// @param mintReferral Mint referral user
-    /// @param mintReferralReward Mint referral amount
-    /// @param firstMinter First minter reward
-    /// @param firstMinterReward First minter reward amount
+    /// @param builderReferral Builder referral
+    /// @param builderReferralReward Builder referral reward
+    /// @param purchaseReferral Purchase referral user
+    /// @param purchaseReferralReward Purchase referral amount
+    /// @param deployer Deployer
+    /// @param deployerReward Deployer reward amount
     /// @param revolution Revolution recipient
     /// @param revolutionReward Revolution amount
     function depositRewards(
         address creator,
         uint256 creatorReward,
-        address createReferral,
-        uint256 createReferralReward,
-        address mintReferral,
-        uint256 mintReferralReward,
-        address firstMinter,
-        uint256 firstMinterReward,
+        address builderReferral,
+        uint256 builderReferralReward,
+        address purchaseReferral,
+        uint256 purchaseReferralReward,
+        address deployer,
+        uint256 deployerReward,
         address revolution,
         uint256 revolutionReward
     ) external payable;
