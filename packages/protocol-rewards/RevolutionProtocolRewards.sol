@@ -91,8 +91,6 @@ contract ProtocolRewards is IRevolutionProtocolRewards, EIP712 {
     }
 
     /// @notice Used by Revolution token contracts to deposit protocol rewards
-    /// @param creator Creator
-    /// @param creatorReward Creator reward amount
     /// @param builderReferral Builder referral
     /// @param builderReferralReward Builder referral reward
     /// @param purchaseReferral Purchase referral user
@@ -102,8 +100,6 @@ contract ProtocolRewards is IRevolutionProtocolRewards, EIP712 {
     /// @param revolution Revolution recipient
     /// @param revolutionReward Revolution amount
     function depositRewards(
-        address creator,
-        uint256 creatorReward,
         address builderReferral,
         uint256 builderReferralReward,
         address purchaseReferral,
@@ -113,14 +109,11 @@ contract ProtocolRewards is IRevolutionProtocolRewards, EIP712 {
         address revolution,
         uint256 revolutionReward
     ) external payable {
-        if (msg.value != (creatorReward + builderReferralReward + purchaseReferralReward + deployerReward + revolutionReward)) {
+        if (msg.value != (builderReferralReward + purchaseReferralReward + deployerReward + revolutionReward)) {
             revert INVALID_DEPOSIT();
         }
 
         unchecked {
-            if (creator != address(0)) {
-                balanceOf[creator] += creatorReward;
-            }
             if (builderReferral != address(0)) {
                 balanceOf[builderReferral] += builderReferralReward;
             }
@@ -136,13 +129,11 @@ contract ProtocolRewards is IRevolutionProtocolRewards, EIP712 {
         }
 
         emit RewardsDeposit(
-            creator,
             builderReferral,
             purchaseReferral,
             deployer,
             revolution,
             msg.sender,
-            creatorReward,
             builderReferralReward,
             purchaseReferralReward,
             deployerReward,

@@ -5,25 +5,21 @@ pragma solidity 0.8.22;
 /// @notice The interface for deposits & withdrawals for Protocol Rewards
 interface IRevolutionProtocolRewards {
     /// @notice Rewards Deposit Event
-    /// @param creator Creator for rewards
     /// @param builderReferral Builder referral
     /// @param purchaseReferral Purchase referral user
     /// @param deployer Deployer reward recipient
     /// @param revolution Revolution recipient
     /// @param from The caller of the deposit
-    /// @param creatorReward Creator reward amount
     /// @param builderReferralReward Builder referral reward
     /// @param purchaseReferralReward Purchase referral amount
     /// @param deployerReward Deployer reward amount
     /// @param revolutionReward Revolution amount
     event RewardsDeposit(
-        address indexed creator,
         address indexed builderReferral,
         address indexed purchaseReferral,
         address deployer,
         address revolution,
         address from,
-        uint256 creatorReward,
         uint256 builderReferralReward,
         uint256 purchaseReferralReward,
         uint256 deployerReward,
@@ -79,8 +75,6 @@ interface IRevolutionProtocolRewards {
     function depositBatch(address[] calldata recipients, uint256[] calldata amounts, bytes4[] calldata reasons, string calldata comment) external payable;
 
     /// @notice Used by Revolution token contracts to deposit protocol rewards
-    /// @param creator Creator
-    /// @param creatorReward Creator reward amount
     /// @param builderReferral Builder referral
     /// @param builderReferralReward Builder referral reward
     /// @param purchaseReferral Purchase referral user
@@ -90,8 +84,6 @@ interface IRevolutionProtocolRewards {
     /// @param revolution Revolution recipient
     /// @param revolutionReward Revolution amount
     function depositRewards(
-        address creator,
-        uint256 creatorReward,
         address builderReferral,
         uint256 builderReferralReward,
         address purchaseReferral,
