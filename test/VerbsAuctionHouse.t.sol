@@ -17,6 +17,7 @@ import { NontransferableERC20 } from "../packages/revolution-contracts/Nontransf
 import { TokenEmitter } from "../packages/revolution-contracts/TokenEmitter.sol";
 import { ITokenEmitter } from "../packages/revolution-contracts/interfaces/ITokenEmitter.sol";
 import { wadMul, wadDiv } from "../packages/revolution-contracts/libs/SignedWadMath.sol";
+import { RevolutionProtocolRewards } from "../packages/protocol-rewards/RevolutionProtocolRewards.sol";
 
 contract VerbsAuctionHouseTest is Test {
     VerbsAuctionHouse public auctionHouse;
@@ -33,7 +34,8 @@ contract VerbsAuctionHouseTest is Test {
     function setUp() public {
         mockWETH = new MockERC20();
         governanceToken = new NontransferableERC20(address(this), "Revolution Governance", "GOV", 4);        
-
+        RevolutionProtocolRewards protocolRewards = new RevolutionProtocolRewards();
+        
         // Additional setup for VerbsToken similar to VerbsTokenTest
         ProxyRegistry _proxyRegistry = new ProxyRegistry();
 
@@ -45,7 +47,7 @@ contract VerbsAuctionHouseTest is Test {
         // 1e11 or 0.0000001 is 2 cents per token even at $200k eth price
         int256 tokenTargetPrice = 1e11;
 
-        tokenEmitter = new TokenEmitter(governanceToken, address(this), tokenTargetPrice, priceDecayPercent, int256(1e18 * 1e4 * tokensPerTimeUnit));
+        tokenEmitter = new TokenEmitter(governanceToken, address(protocolRewards), address(this), address(this), tokenTargetPrice, priceDecayPercent, int256(1e18 * 1e4 * tokensPerTimeUnit));
         governanceToken.transferOwnership(address(tokenEmitter));
 
         // Initialize VerbsToken with additional parameters

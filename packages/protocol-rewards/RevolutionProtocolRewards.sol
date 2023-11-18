@@ -12,7 +12,7 @@ import {IRevolutionProtocolRewards} from "./interfaces/IRevolutionProtocolReward
 
 /// @title ProtocolRewards
 /// @notice Manager of deposits & withdrawals for protocol rewards
-contract ProtocolRewards is IRevolutionProtocolRewards, EIP712 {
+contract RevolutionProtocolRewards is IRevolutionProtocolRewards, EIP712 {
     /// @notice The EIP-712 typehash for gasless withdraws
     bytes32 public constant WITHDRAW_TYPEHASH = keccak256("Withdraw(address from,address to,uint256 amount,uint256 nonce,uint256 deadline)");
 
@@ -22,7 +22,7 @@ contract ProtocolRewards is IRevolutionProtocolRewards, EIP712 {
     /// @notice An account's nonce for gasless withdraws
     mapping(address => uint256) public nonces;
 
-    constructor() payable EIP712("ProtocolRewards", "1") {}
+    constructor() payable EIP712("RevolutionProtocolRewards", "1") {}
 
     /// @notice The total amount of ETH held in the contract
     function totalSupply() external view returns (uint256) {

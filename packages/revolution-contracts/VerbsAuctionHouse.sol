@@ -274,6 +274,7 @@ contract VerbsAuctionHouse is IVerbsAuctionHouse, PausableUpgradeable, Reentranc
             uint256 creatorGovernancePayment = creatorPayment - creatorDirectPayment;
 
             uint256 numCreators = verbs.getArtPieceById(_auction.verbId).creators.length;
+            address deployer = verbs.getArtPieceById(_auction.verbId).dropper;
 
             //Build arrays for tokenEmitter.buyToken
             address[] memory vrgdaReceivers = new address[](numCreators);
@@ -296,7 +297,7 @@ contract VerbsAuctionHouse is IVerbsAuctionHouse, PausableUpgradeable, Reentranc
             }
 
             //Buy token from tokenEmitter for all the creators
-            tokenEmitter.buyToken{ value: creatorGovernancePayment }(vrgdaReceivers, vrgdaSplits, creatorGovernancePayment);
+            tokenEmitter.buyToken{ value: creatorGovernancePayment }(vrgdaReceivers, vrgdaSplits, address(0), address(0), deployer);
         }
 
         emit AuctionSettled(_auction.verbId, _auction.bidder, _auction.amount);

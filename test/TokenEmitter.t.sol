@@ -5,6 +5,7 @@ import { Test } from "forge-std/Test.sol";
 import { unsafeWadDiv } from "../packages/revolution-contracts/libs/SignedWadMath.sol";
 import { TokenEmitter } from "../packages/revolution-contracts/TokenEmitter.sol";
 import { NontransferableERC20 } from "../packages/revolution-contracts/NontransferableERC20.sol";
+import { RevolutionProtocolRewards } from "../packages/protocol-rewards/RevolutionProtocolRewards.sol";
 
 contract TokenEmitterTest is Test {
     TokenEmitter public emitter;
@@ -16,6 +17,7 @@ contract TokenEmitterTest is Test {
 
     function setUp() public {
         vm.startPrank(address(0));
+        RevolutionProtocolRewards protocolRewards = new RevolutionProtocolRewards();
 
         address treasury = address(0);
         vm.deal(address(0), 100000 ether);
@@ -30,7 +32,7 @@ contract TokenEmitterTest is Test {
         int256 tokenTargetPrice = 1e11;
 
         //this setup assumes an ideal of 1e18 or 1 ETH (1k (1e3) * 1e11 * 4 decimals) coming into the system per day, token prices will increaase if more ETH comes in
-        emitter = new TokenEmitter(governanceToken, treasury, tokenTargetPrice, priceDecayPercent, int256(1e18 * 1e4 * tokensPerTimeUnit));
+        emitter = new TokenEmitter(governanceToken, address(protocolRewards), address(this), treasury, tokenTargetPrice, priceDecayPercent, int256(1e18 * 1e4 * tokensPerTimeUnit));
 
         address emitterAddress = address(emitter);
         address thisAddress = address(this);
@@ -67,7 +69,7 @@ contract TokenEmitterTest is Test {
         uint256[] memory bps = new uint256[](1);
         bps[0] = 10_000;
 
-        emitter.buyToken{ value: 1e18 }(recipients, bps, 1);
+        emitter.buyToken{ value: 1e18 }(recipients, bps, address(0), address(0), address(0));
         emit Log("Balance: ", emitter.balanceOf(address(1)));
     }
 
@@ -83,9 +85,9 @@ contract TokenEmitterTest is Test {
         uint256[] memory bps = new uint256[](1);
         bps[0] = 10_000;
 
-        emitter.buyToken{ value: 10e18 }(firstRecipients, bps, 1);
+        emitter.buyToken{ value: 10e18 }(firstRecipients, bps, address(0), address(0), address(0));
 
-        emitter.buyToken{ value: 10e18 }(secondRecipients, bps, 1);
+        emitter.buyToken{ value: 10e18 }(secondRecipients, bps, address(0), address(0), address(0));
 
         // should get more expensive
         assert(emitter.balanceOf(address(1)) > emitter.balanceOf(address(2)));
@@ -103,7 +105,7 @@ contract TokenEmitterTest is Test {
         bps[0] = 5_000;
         bps[1] = 5_000;
 
-        emitter.buyToken{ value: 1e18 }(recipients, bps, 1);
+        emitter.buyToken{ value: 1e18 }(recipients, bps, address(0), address(0), address(0));
         assert(emitter.balanceOf(address(1)) == emitter.balanceOf(address(2)));
     }
 
@@ -121,7 +123,7 @@ contract TokenEmitterTest is Test {
         correctBps[1] = 5000; // 50%
 
         // Attempting a valid token purchase
-        emitter.buyToken{ value: 1e18 }(recipients, correctBps, 1);
+        emitter.buyToken{ value: 1e18 }(recipients, correctBps, address(0), address(0), address(0));
         uint totalSupplyAfterValidPurchase = emitter.totalSupply();
         assertGt(totalSupplyAfterValidPurchase, 0, "Token purchase should have increased total supply");
 
@@ -132,7 +134,7 @@ contract TokenEmitterTest is Test {
 
         // Expecting the transaction to revert due to incorrect total basis points
         vm.expectRevert("bps must add up to 10_000");
-        emitter.buyToken{ value: 1e18 }(recipients, incorrectBps, 1);
+        emitter.buyToken{ value: 1e18 }(recipients, incorrectBps, address(0), address(0), address(0));
 
         vm.stopPrank();
     }
@@ -161,10 +163,10 @@ contract TokenEmitterTest is Test {
         uint256[] memory bps = new uint256[](1);
         bps[0] = 10_000;
 
-        emitter.buyToken{ value: 1e18 }(recipients, bps, 1);
+        emitter.buyToken{ value: 1e18 }(recipients, bps, address(0), address(0), address(0));
         uint256 firstAmount = emitter.balanceOf(address(1));
 
-        emitter.buyToken{ value: 1e18 }(recipients, bps, 1);
+        emitter.buyToken{ value: 1e18 }(recipients, bps, address(0), address(0), address(0));
         uint256 secondAmountDifference = emitter.balanceOf(address(1)) - firstAmount;
 
         assert(secondAmountDifference <= 2 * emitter.totalSupply());
@@ -181,10 +183,11 @@ contract TokenEmitterTest is Test {
 
         // 0.1 per governance, 10% price decay per day, 100 governance sale target per day
         NontransferableERC20 governanceToken = new NontransferableERC20(address(this), "Revolution Governance", "GOV", 4);
+        RevolutionProtocolRewards protocolRewards = new RevolutionProtocolRewards();
 
-        TokenEmitter emitter1 = new TokenEmitter(governanceToken, treasury, 1e14, 1e17, 1e22);
+        TokenEmitter emitter1 = new TokenEmitter(governanceToken, address(protocolRewards), address(this), treasury, 1e14, 1e17, 1e22);
 
-        TokenEmitter emitter2 = new TokenEmitter(governanceToken, treasury, 1e14, 1e17, 1e22);
+        TokenEmitter emitter2 = new TokenEmitter(governanceToken, address(protocolRewards), address(this), treasury, 1e14, 1e17, 1e22);
 
         governanceToken.transferOwnership(address(emitter1));
 
@@ -196,14 +199,14 @@ contract TokenEmitterTest is Test {
         uint256[] memory bps = new uint256[](1);
         bps[0] = 10_000;
 
-        emitter1.buyToken{ value: 1e18 }(recipients, bps, 1);
+        emitter1.buyToken{ value: 1e18 }(recipients, bps, address(0), address(0), address(0));
 
         vm.prank(address(emitter1));
 
         governanceToken.transferOwnership(address(emitter2));
 
         vm.prank(address(0));
-        emitter2.buyToken{ value: 1e18 }(recipients, bps, 1);
+        emitter2.buyToken{ value: 1e18 }(recipients, bps, address(0), address(0), address(0));
     }
     
     function testBuyTokenReentrancy() public {
@@ -214,8 +217,9 @@ contract TokenEmitterTest is Test {
         NontransferableERC20 governanceToken = new NontransferableERC20(address(this), "Revolution Governance", "GOV", 4);
         uint256 toScale = 1e18 * 1e4;
         uint256 tokensPerTimeUnit_ = 10_000;
-        
-        TokenEmitter emitter2 = new TokenEmitter(governanceToken, address(maliciousTreasury), 1e14, 1e17, int256(tokensPerTimeUnit_ * toScale));
+        RevolutionProtocolRewards protocolRewards = new RevolutionProtocolRewards();
+
+        TokenEmitter emitter2 = new TokenEmitter(governanceToken, address(protocolRewards), address(this), address(maliciousTreasury), 1e14, 1e17, int256(tokensPerTimeUnit_ * toScale));
         governanceToken.transferOwnership(address(emitter2));
 
         vm.deal(address(this), 100000 ether);
@@ -226,7 +230,7 @@ contract TokenEmitterTest is Test {
         uint256[] memory bps = new uint256[](1);
         bps[0] = 10_000;
         vm.expectRevert();
-        emitter2.buyToken{ value: 1e18 }(recipients, bps, 1);
+        emitter2.buyToken{ value: 1e18 }(recipients, bps, address(0), address(0), address(0));
 
         emit log_uint(emitter2.totalSupply());
         emit log_uint(emitter2.balanceOf(address(maliciousTreasury)));
@@ -261,7 +265,7 @@ contract TokenEmitterTest is Test {
         uint256[] memory bps = new uint256[](1);
         bps[0] = 10_000;
 
-        emitter.buyToken{ value: payment }(recipients, bps, 1);
+        emitter.buyToken{ value: payment }(recipients, bps, address(0), address(0), address(0));
 
         uint256 newTokenAmount = emitter.getTokenAmountForMultiPurchase(payment);
 
@@ -381,7 +385,7 @@ contract MaliciousTreasury {
         bps[0] = 10_000;
 
         // Attempt to re-enter TokenEmitter
-        emitter.buyToken{value: msg.value}(recipients, bps, 1);
+        emitter.buyToken{value: msg.value}(recipients, bps, address(0), address(0), address(0));
 
     }
 }
