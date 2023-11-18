@@ -18,7 +18,7 @@ abstract contract RewardSplits {
     error ONLY_CREATE_REFERRAL();
 
     // 2.1%
-    uint256 internal constant TOTAL_REWARD_PER_MINT_BPS = 210;
+    uint256 internal constant TOTAL_REWARD_PER_PURCHASE_BPS = 210;
 
     uint256 internal constant DEPLOYER_REWARD_BPS = 23;
     uint256 internal constant REVOLUTION_REWARD_BPS = 77;
@@ -38,7 +38,7 @@ abstract contract RewardSplits {
     }
 
     function computeTotalReward(uint256 paymentAmountWei) public pure returns (uint256) {
-        return paymentAmountWei * TOTAL_REWARD_PER_MINT_BPS / 10_000;
+        return paymentAmountWei * TOTAL_REWARD_PER_PURCHASE_BPS / 10_000;
     }
 
     function computePurchaseRewards(uint256 paymentAmountWei) public pure returns (RewardsSettings memory) {
@@ -66,6 +66,10 @@ abstract contract RewardSplits {
 
         if (purchaseReferral == address(0)) {
             purchaseReferral = revolutionRewardRecipient;
+        }
+
+        if (deployer == address(0)) {
+            deployer = revolutionRewardRecipient;
         }
 
         protocolRewards.depositRewards{value: totalReward}(
