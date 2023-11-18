@@ -54,7 +54,6 @@ abstract contract RewardSplits {
     function _depositPurchaseRewards(
         uint256 totalReward,
         uint256 paymentAmountWei,
-        address creator,
         address builderReferral,
         address purchaseReferral,
         address deployer
