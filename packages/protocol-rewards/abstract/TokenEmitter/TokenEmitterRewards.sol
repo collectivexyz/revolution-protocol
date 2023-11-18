@@ -6,7 +6,7 @@ import {RewardSplits} from "../RewardSplits.sol";
 abstract contract TokenEmitterRewards is RewardSplits {
     constructor(address _protocolRewards, address _revolutionRewardRecipient) payable RewardSplits(_protocolRewards, _revolutionRewardRecipient) {}
 
-    function _handleRewardsAndGetValueSent(
+    function _handleRewardsAndGetValueToSend(
         uint256 msgValue,
         address builderReferral,
         address purchaseReferral,
@@ -20,6 +20,8 @@ abstract contract TokenEmitterRewards is RewardSplits {
 
         _depositPurchaseRewards(totalReward, msgValue, builderReferral, purchaseReferral, deployer);
 
-        return totalReward;
+        unchecked {
+            return msgValue - totalReward;
+        }
     }
 }

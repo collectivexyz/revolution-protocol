@@ -8,8 +8,9 @@ import { Strings } from "@openzeppelin/contracts/utils/Strings.sol";
 import { NontransferableERC20 } from "./NontransferableERC20.sol";
 import { ITokenEmitter } from "./interfaces/ITokenEmitter.sol";
 import { ReentrancyGuard } from "@openzeppelin/contracts/utils/ReentrancyGuard.sol";
+import { TokenEmitterRewards } from "../protocol-rewards/abstract/TokenEmitter/TokenEmitterRewards.sol";
 
-contract TokenEmitter is LinearVRGDA, ITokenEmitter, ReentrancyGuard {
+contract TokenEmitter is LinearVRGDA, ITokenEmitter, ReentrancyGuard, TokenEmitterRewards {
     // Events
     event Transfer(address indexed from, address indexed to, uint256 value);
     event Log(string name, uint256 value);
@@ -25,11 +26,13 @@ contract TokenEmitter is LinearVRGDA, ITokenEmitter, ReentrancyGuard {
     // approved contracts, owner, and a token contract address
     constructor(
         NontransferableERC20 _token,
+        address _protocolRewards,
+        address _mintFeeRecipient,
         address _treasury,
         int256 _targetPrice, // SCALED BY E18. Target price. This is somewhat arbitrary for governance emissions, since there is no "target price" for 1 governance share.
         int256 _priceDecayPercent, // SCALED BY E18. Price decay percent. This indicates how aggressively you discount governance when sales are not occurring.
         int256 _governancePerTimeUnit // SCALED BY E18. The number of tokens to target selling in 1 full unit of time.
-    ) LinearVRGDA(_targetPrice, _priceDecayPercent, _governancePerTimeUnit) {
+    ) TokenEmitterRewards(_protocolRewards, _mintFeeRecipient) LinearVRGDA(_targetPrice, _priceDecayPercent, _governancePerTimeUnit) {
         treasury = _treasury;
 
         token = _token;
@@ -50,12 +53,20 @@ contract TokenEmitter is LinearVRGDA, ITokenEmitter, ReentrancyGuard {
     }
 
     // takes a list of addresses and a list of payout percentages as basis points
-    function buyToken(address[] memory _addresses, uint[] memory _bps, uint256) public payable nonReentrant returns (uint256) {
+    function buyToken(address[] memory _addresses, uint[] memory _bps, address builder, address purchaseReferral, address deployer) public payable nonReentrant returns (uint256) {
         // ensure the same number of addresses and _bps
         require(_addresses.length == _bps.length, "Parallel arrays required");
 
-        uint totalTokens = getTokenAmountForMultiPurchase(msg.value);
-        (bool success, ) = treasury.call{ value: msg.value }(new bytes(0));
+        // Get value to send and handle mint fee
+        uint256 msgValueRemaining = _handleRewardsAndGetValueToSend(
+            msg.value,
+            builder,
+            purchaseReferral,
+            deployer
+        );
+
+        uint totalTokens = getTokenAmountForMultiPurchase(msgValueRemaining);
+        (bool success, ) = treasury.call{ value: msgValueRemaining }(new bytes(0));
         require(success, "Transfer failed.");
 
         // calculates how much total governance to give
