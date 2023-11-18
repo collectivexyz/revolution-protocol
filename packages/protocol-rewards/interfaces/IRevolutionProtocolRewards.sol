@@ -5,7 +5,7 @@ pragma solidity 0.8.22;
 /// @notice The interface for deposits & withdrawals for Protocol Rewards
 interface IRevolutionProtocolRewards {
     /// @notice Rewards Deposit Event
-    /// @param creator Creator for NFT rewards
+    /// @param creator Creator for rewards
     /// @param builderReferral Builder referral
     /// @param purchaseReferral Purchase referral user
     /// @param deployer Deployer reward recipient
