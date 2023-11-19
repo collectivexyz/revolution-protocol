@@ -18,6 +18,7 @@ import { TokenEmitter } from "../packages/revolution-contracts/TokenEmitter.sol"
 import { ITokenEmitter } from "../packages/revolution-contracts/interfaces/ITokenEmitter.sol";
 import { wadMul, wadDiv } from "../packages/revolution-contracts/libs/SignedWadMath.sol";
 import { RevolutionProtocolRewards } from "../packages/protocol-rewards/RevolutionProtocolRewards.sol";
+import {TokenEmitterRewards} from "../packages/protocol-rewards/abstract/TokenEmitter/TokenEmitterRewards.sol";
 
 contract VerbsAuctionHouseTest is Test {
     VerbsAuctionHouse public auctionHouse;
@@ -47,7 +48,9 @@ contract VerbsAuctionHouseTest is Test {
         // 1e11 or 0.0000001 is 2 cents per token even at $200k eth price
         int256 tokenTargetPrice = 1e11;
 
-        tokenEmitter = new TokenEmitter(governanceToken, address(protocolRewards), address(this), address(this), tokenTargetPrice, priceDecayPercent, int256(1e18 * 1e4 * tokensPerTimeUnit));
+        address protocolFeeRecipient = address(0x42069);
+
+        tokenEmitter = new TokenEmitter(governanceToken, address(protocolRewards), protocolFeeRecipient, address(this), tokenTargetPrice, priceDecayPercent, int256(1e18 * 1e4 * tokensPerTimeUnit));
         governanceToken.transferOwnership(address(tokenEmitter));
 
         // Initialize VerbsToken with additional parameters
@@ -516,7 +519,12 @@ contract VerbsAuctionHouseTest is Test {
 
         //the amount of creator's eth to be spent on governance
         uint256 expectedCreatorShare = bidAmount * (entropyRate * creatorRate) / 10_000 / 10_000;
-        uint256 etherToSpendOnGovernance = bidAmount * creatorRate / 10_000 - expectedCreatorShare;
+        uint256 etherToSpendOnGovernanceTotal = bidAmount * creatorRate / 10_000 - expectedCreatorShare;
+        //Get expected protocol fee amount
+        uint256 feeAmount = tokenEmitter.computeTotalReward(etherToSpendOnGovernanceTotal);
+
+        // Get expected amount of ETH to be spent on governance
+        uint256 etherToSpendOnGovernance = etherToSpendOnGovernanceTotal - feeAmount;
 
         vm.warp(block.timestamp + auctionHouse.duration() + 1); // Fast forward time to end the auction
 
@@ -524,7 +532,7 @@ contract VerbsAuctionHouseTest is Test {
 
         // Track ETH balances
         uint256 balanceBeforeCreator = address(0x1).balance;
-        uint256 balanceBeforeContract = address(this).balance;
+        uint256 balanceBeforeTreasury = address(this).balance;
 
         // Track governance token balances
         uint256 governanceTokenBalanceBeforeCreator = governanceToken.balanceOf(address(0x1));
@@ -535,8 +543,8 @@ contract VerbsAuctionHouseTest is Test {
         assertEq(address(0x1).balance - balanceBeforeCreator, expectedCreatorShare, "Creator did not receive the correct amount of ETH");
 
         // Checking if the contract received the correct amount
-        uint256 expectedContractShare = bidAmount - expectedCreatorShare;
-        assertEq(address(this).balance - balanceBeforeContract, expectedContractShare, "Contract did not receive the correct amount of ETH");
+        uint256 expectedContractShare = bidAmount - expectedCreatorShare - feeAmount;
+        assertEq(address(this).balance - balanceBeforeTreasury, expectedContractShare, "Contract did not receive the correct amount of ETH");
 
         // Checking ownership of the verb
         assertEq(verbs.ownerOf(verbId), address(1), "Verb should be transferred to the highest bidder");

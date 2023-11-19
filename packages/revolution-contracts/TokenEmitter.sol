@@ -27,12 +27,12 @@ contract TokenEmitter is LinearVRGDA, ITokenEmitter, ReentrancyGuard, TokenEmitt
     constructor(
         NontransferableERC20 _token,
         address _protocolRewards,
-        address _mintFeeRecipient,
+        address _protocolFeeRecipient,
         address _treasury,
         int256 _targetPrice, // SCALED BY E18. Target price. This is somewhat arbitrary for governance emissions, since there is no "target price" for 1 governance share.
         int256 _priceDecayPercent, // SCALED BY E18. Price decay percent. This indicates how aggressively you discount governance when sales are not occurring.
         int256 _governancePerTimeUnit // SCALED BY E18. The number of tokens to target selling in 1 full unit of time.
-    ) TokenEmitterRewards(_protocolRewards, _mintFeeRecipient) LinearVRGDA(_targetPrice, _priceDecayPercent, _governancePerTimeUnit) {
+    ) TokenEmitterRewards(_protocolRewards, _protocolFeeRecipient) LinearVRGDA(_targetPrice, _priceDecayPercent, _governancePerTimeUnit) {
         treasury = _treasury;
 
         token = _token;
