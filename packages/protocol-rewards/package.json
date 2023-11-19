@@ -13,7 +13,8 @@
     "build:contracts": "forge build",
     "prettier:check": "prettier --check 'src/**/*.sol' 'test/**/*.sol' 'script/**/*.sol'",
     "prettier": "prettier --write 'src/**/*.sol' 'test/**/*.sol' 'script/**/*.sol'",
-    "lint": "prettier --check 'src/**/*.sol' 'test/**/*.sol' 'script/**/*.sol'"
+    "lint": "prettier --check 'src/**/*.sol' 'test/**/*.sol' 'script/**/*.sol'",
+    "clean": "forge cache clean && if [ -d out ]; then forge clean; fi"
   },
   "devDependencies": {
     "prettier": "2.8.8",
