@@ -1,14 +1,14 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.22;
 
-import {Test} from "forge-std/Test.sol";
-import {VerbsAuctionHouse} from "../../packages/revolution-contracts/VerbsAuctionHouse.sol";
-import {MockERC20} from "../MockERC20.sol";
-import {VerbsToken} from "../../packages/revolution-contracts/VerbsToken.sol";
-import {IVerbsToken} from "../../packages/revolution-contracts/interfaces/IVerbsToken.sol";
+import { Test } from "forge-std/Test.sol";
+import { VerbsAuctionHouse } from "../../packages/revolution-contracts/VerbsAuctionHouse.sol";
+import { MockERC20 } from "../MockERC20.sol";
+import { VerbsToken } from "../../packages/revolution-contracts/VerbsToken.sol";
+import { IVerbsToken } from "../../packages/revolution-contracts/interfaces/IVerbsToken.sol";
 import { IProxyRegistry } from "../../packages/revolution-contracts/external/opensea/IProxyRegistry.sol";
-import {VerbsDescriptor} from "../../packages/revolution-contracts/VerbsDescriptor.sol";
-import {CultureIndex} from "../../packages/revolution-contracts/CultureIndex.sol";
+import { VerbsDescriptor } from "../../packages/revolution-contracts/VerbsDescriptor.sol";
+import { CultureIndex } from "../../packages/revolution-contracts/CultureIndex.sol";
 import { IVerbsDescriptorMinimal } from "../../packages/revolution-contracts/interfaces/IVerbsDescriptorMinimal.sol";
 import { ICultureIndex, ICultureIndexEvents } from "../../packages/revolution-contracts/interfaces/ICultureIndex.sol";
 import { IVerbsAuctionHouse } from "../../packages/revolution-contracts/interfaces/IVerbsAuctionHouse.sol";
@@ -18,7 +18,7 @@ import { TokenEmitter } from "../../packages/revolution-contracts/TokenEmitter.s
 import { ITokenEmitter } from "../../packages/revolution-contracts/interfaces/ITokenEmitter.sol";
 import { wadMul, wadDiv } from "../../packages/revolution-contracts/libs/SignedWadMath.sol";
 import { RevolutionProtocolRewards } from "../../packages/protocol-rewards/RevolutionProtocolRewards.sol";
-import {TokenEmitterRewards} from "../../packages/protocol-rewards/abstract/TokenEmitter/TokenEmitterRewards.sol";
+import { TokenEmitterRewards } from "../../packages/protocol-rewards/abstract/TokenEmitter/TokenEmitterRewards.sol";
 import { VerbsAuctionHouseTest } from "../VerbsAuctionHouse.t.sol";
 
 contract VerbsAuctionHouseSettleTest is VerbsAuctionHouseTest {
@@ -40,7 +40,7 @@ contract VerbsAuctionHouseSettleTest is VerbsAuctionHouseTest {
         uint256 bidAmount = auctionHouse.reservePrice();
         vm.deal(address(1), bidAmount);
         vm.startPrank(address(1));
-        auctionHouse.createBid{value: bidAmount}(0); // Assuming first auction's verbId is 0
+        auctionHouse.createBid{ value: bidAmount }(0); // Assuming first auction's verbId is 0
         vm.stopPrank();
 
         vm.warp(block.timestamp + auctionHouse.duration() + 1); // Fast forward time to end the auction
@@ -51,28 +51,27 @@ contract VerbsAuctionHouseSettleTest is VerbsAuctionHouseTest {
         uint256 balanceAfter = address(this).balance;
 
         assertEq(verbs.ownerOf(0), address(1), "Verb should be transferred to the highest bidder");
-        
+
         uint256 creatorRate = auctionHouse.creatorRateBps();
         uint256 entropyRate = auctionHouse.entropyRateBps();
 
         //calculate fee
-        uint256 amountToOwner = bidAmount * (10_000 - creatorRate * entropyRate / 10_000) / 10_000;
+        uint256 amountToOwner = (bidAmount * (10_000 - (creatorRate * entropyRate) / 10_000)) / 10_000;
 
         //amount spent on governance
-        uint256 etherToSpendOnGovernanceTotal = bidAmount * creatorRate / 10_000 - bidAmount * (entropyRate * creatorRate) / 10_000 / 10_000;
+        uint256 etherToSpendOnGovernanceTotal = (bidAmount * creatorRate) / 10_000 - (bidAmount * (entropyRate * creatorRate)) / 10_000 / 10_000;
         uint256 feeAmount = tokenEmitter.computeTotalReward(etherToSpendOnGovernanceTotal);
 
         assertEq(balanceAfter - balanceBefore, amountToOwner - feeAmount, "Bid amount minus entropy should be transferred to the auction house owner");
     }
 
-    
     function testSettlingAuctionWithNoBids() public {
         setUp();
         uint256 verbId = createDefaultArtPiece();
         auctionHouse.unpause();
 
         vm.warp(block.timestamp + auctionHouse.duration() + 1); // Fast forward time to end the auction
-        
+
         // Assuming verbs.burn is called for auctions with no bids
         vm.expectEmit(true, true, true, true);
         emit IVerbsToken.VerbBurned(verbId);
@@ -101,7 +100,7 @@ contract VerbsAuctionHouseSettleTest is VerbsAuctionHouseTest {
         uint256 amount = 1 ether;
 
         vm.deal(address(auctionHouse), amount);
-        auctionHouse.createBid{value: amount}(0); // Assuming first auction's verbId is 0
+        auctionHouse.createBid{ value: amount }(0); // Assuming first auction's verbId is 0
 
         // Initially, recipient should have 0 ether and 0 WETH
         assertEq(recipient.balance, 0);
@@ -129,7 +128,7 @@ contract VerbsAuctionHouseSettleTest is VerbsAuctionHouseTest {
         auctionHouse.transferOwnership(recipient);
 
         vm.deal(address(auctionHouse), amount);
-        auctionHouse.createBid{value: amount}(0); // Assuming first auction's verbId is 0
+        auctionHouse.createBid{ value: amount }(0); // Assuming first auction's verbId is 0
 
         // Initially, recipient should have 0 ether
         assertEq(recipient.balance, 0);
@@ -153,9 +152,9 @@ contract VerbsAuctionHouseSettleTest is VerbsAuctionHouseTest {
         uint256 amount = 1 ether;
 
         auctionHouse.transferOwnership(recipient);
-        
+
         vm.deal(address(auctionHouse), amount);
-        auctionHouse.createBid{value: amount}(0); // Assuming first auction's verbId is 0
+        auctionHouse.createBid{ value: amount }(0); // Assuming first auction's verbId is 0
 
         // Initially, recipient should have 0 ether and 0 WETH
         assertEq(recipient.balance, 0);
@@ -214,7 +213,7 @@ contract VerbsAuctionHouseSettleTest is VerbsAuctionHouseTest {
         uint256 bidAmount = auctionHouse.reservePrice();
         vm.deal(address(1), bidAmount);
         vm.startPrank(address(1));
-        auctionHouse.createBid{value: bidAmount}(verbId);
+        auctionHouse.createBid{ value: bidAmount }(verbId);
         vm.stopPrank();
 
         vm.warp(block.timestamp + auctionHouse.duration() + 1); // Fast forward time to end the auction
@@ -228,20 +227,26 @@ contract VerbsAuctionHouseSettleTest is VerbsAuctionHouseTest {
         }
 
         // Track expected governance token payout
-        uint256 etherToSpendOnGovernanceTotal = bidAmount * creatorRate / 10_000 - bidAmount * (entropyRate * creatorRate) / 10_000 / 10_000;
+        uint256 etherToSpendOnGovernanceTotal = (bidAmount * creatorRate) / 10_000 - (bidAmount * (entropyRate * creatorRate)) / 10_000 / 10_000;
 
-        uint256 expectedGovernanceTokenPayout = tokenEmitter.getTokenAmountForMultiPurchase(etherToSpendOnGovernanceTotal - tokenEmitter.computeTotalReward(etherToSpendOnGovernanceTotal));
+        uint256 expectedGovernanceTokenPayout = tokenEmitter.getTokenAmountForMultiPurchase(
+            etherToSpendOnGovernanceTotal - tokenEmitter.computeTotalReward(etherToSpendOnGovernanceTotal)
+        );
 
         auctionHouse.settleCurrentAndCreateNewAuction();
 
         // Verify each creator's payout
         for (uint256 i = 0; i < creatorAddresses.length; i++) {
-            uint256 expectedEtherShare = bidAmount * creatorBps[i] * creatorRate / totalBps / 10_000;
-            assertEq(address(creatorAddresses[i]).balance - balancesBefore[i], expectedEtherShare * entropyRate / 10_000, "Incorrect ETH payout for creator");
+            uint256 expectedEtherShare = (bidAmount * creatorBps[i] * creatorRate) / totalBps / 10_000;
+            assertEq(address(creatorAddresses[i]).balance - balancesBefore[i], (expectedEtherShare * entropyRate) / 10_000, "Incorrect ETH payout for creator");
 
-            uint256 expectedGovernanceTokenShare = expectedGovernanceTokenPayout * creatorBps[i] / totalBps;
+            uint256 expectedGovernanceTokenShare = (expectedGovernanceTokenPayout * creatorBps[i]) / totalBps;
 
-            assertEq(governanceToken.balanceOf(creatorAddresses[i]) - governanceTokenBalancesBefore[i], expectedGovernanceTokenShare, "Incorrect governance token payout for creator");
+            assertEq(
+                governanceToken.balanceOf(creatorAddresses[i]) - governanceTokenBalancesBefore[i],
+                expectedGovernanceTokenShare,
+                "Incorrect governance token payout for creator"
+            );
         }
 
         // Verify ownership of the verb
@@ -250,16 +255,7 @@ contract VerbsAuctionHouseSettleTest is VerbsAuctionHouseTest {
 
     function testSettlingAuctionWithWinningBidAndCreatorPayout() public {
         setUp();
-        uint256 verbId = createArtPiece(
-            "Art Piece",
-            "A new art piece",
-            ICultureIndex.MediaType.IMAGE,
-            "ipfs://image",
-            "",
-            "",
-            address(0x1),
-            10_000
-        );
+        uint256 verbId = createArtPiece("Art Piece", "A new art piece", ICultureIndex.MediaType.IMAGE, "ipfs://image", "", "", address(0x1), 10_000);
 
         uint256 creatorRate = auctionHouse.creatorRateBps();
         uint256 entropyRate = auctionHouse.entropyRateBps();
@@ -269,12 +265,12 @@ contract VerbsAuctionHouseSettleTest is VerbsAuctionHouseTest {
         uint256 bidAmount = auctionHouse.reservePrice();
         vm.deal(address(1), bidAmount);
         vm.startPrank(address(1));
-        auctionHouse.createBid{value: bidAmount}(verbId);
+        auctionHouse.createBid{ value: bidAmount }(verbId);
         vm.stopPrank();
 
         //the amount of creator's eth to be spent on governance
-        uint256 expectedCreatorShare = bidAmount * (entropyRate * creatorRate) / 10_000 / 10_000;
-        uint256 etherToSpendOnGovernanceTotal = bidAmount * creatorRate / 10_000 - expectedCreatorShare;
+        uint256 expectedCreatorShare = (bidAmount * (entropyRate * creatorRate)) / 10_000 / 10_000;
+        uint256 etherToSpendOnGovernanceTotal = (bidAmount * creatorRate) / 10_000 - expectedCreatorShare;
         //Get expected protocol fee amount
         uint256 feeAmount = tokenEmitter.computeTotalReward(etherToSpendOnGovernanceTotal);
 
@@ -304,8 +300,11 @@ contract VerbsAuctionHouseSettleTest is VerbsAuctionHouseTest {
         // Checking ownership of the verb
         assertEq(verbs.ownerOf(verbId), address(1), "Verb should be transferred to the highest bidder");
 
-        assertEq(governanceToken.balanceOf(address(0x1)) - governanceTokenBalanceBeforeCreator, expectedGovernanceTokens, "Creator did not receive the correct amount of governance tokens");
-
+        assertEq(
+            governanceToken.balanceOf(address(0x1)) - governanceTokenBalanceBeforeCreator,
+            expectedGovernanceTokens,
+            "Creator did not receive the correct amount of governance tokens"
+        );
     }
 }
 
@@ -313,7 +312,6 @@ contract ContractWithoutReceiveOrFallback {
     // This contract intentionally does not have receive() or fallback()
     // functions to test the behavior of sending Ether to such a contract.
 }
-
 
 contract ContractThatRejectsEther {
     // This contract has a receive() function that reverts any Ether transfers.

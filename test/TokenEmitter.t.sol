@@ -26,13 +26,21 @@ contract TokenEmitterTest is Test {
         //20% - how much the price decays per unit of time with no sales
         int256 priceDecayPercent = 1e18 / 10;
 
-        NontransferableERC20 governanceToken = new NontransferableERC20(address(this), "Revolution Governance", "GOV", 4);        
+        NontransferableERC20 governanceToken = new NontransferableERC20(address(this), "Revolution Governance", "GOV", 4);
 
         // 1e11 or 0.0000001 is 2 cents per token even at $200k eth price
         int256 tokenTargetPrice = 1e11;
 
         //this setup assumes an ideal of 1e18 or 1 ETH (1k (1e3) * 1e11 * 4 decimals) coming into the system per day, token prices will increaase if more ETH comes in
-        emitter = new TokenEmitter(governanceToken, address(protocolRewards), address(this), treasury, tokenTargetPrice, priceDecayPercent, int256(1e18 * 1e4 * tokensPerTimeUnit));
+        emitter = new TokenEmitter(
+            governanceToken,
+            address(protocolRewards),
+            address(this),
+            treasury,
+            tokenTargetPrice,
+            priceDecayPercent,
+            int256(1e18 * 1e4 * tokensPerTimeUnit)
+        );
 
         address emitterAddress = address(emitter);
         address thisAddress = address(this);
@@ -48,13 +56,13 @@ contract TokenEmitterTest is Test {
 
         uint256 firstPrice = emitter.getTokenPrice(emitter.totalSupply());
         int256 targetSaleTimeFirst = emitter.getTargetSaleTime(int256(emitter.totalSupply()));
-        
+
         // solhint-disable-next-line not-rely-on-time
         vm.warp(block.timestamp + (10 days));
 
         uint256 secondPrice = emitter.getTokenPrice(emitter.totalSupply());
         int256 targetSaleTimeSecond = emitter.getTargetSaleTime(int256(emitter.totalSupply()));
-       
+
         uint256 laterAmount = emitter.getTokenAmountForMultiPurchase(1e18);
 
         assertGt(laterAmount, initAmount, "Later amount should be greater than initial amount");
@@ -208,7 +216,7 @@ contract TokenEmitterTest is Test {
         vm.prank(address(0));
         emitter2.buyToken{ value: 1e18 }(recipients, bps, address(0), address(0), address(0));
     }
-    
+
     function testBuyTokenReentrancy() public {
         // Deploy the malicious treasury contract
         MaliciousTreasury maliciousTreasury = new MaliciousTreasury(address(emitter));
@@ -219,7 +227,15 @@ contract TokenEmitterTest is Test {
         uint256 tokensPerTimeUnit_ = 10_000;
         RevolutionProtocolRewards protocolRewards = new RevolutionProtocolRewards();
 
-        TokenEmitter emitter2 = new TokenEmitter(governanceToken, address(protocolRewards), address(this), address(maliciousTreasury), 1e14, 1e17, int256(tokensPerTimeUnit_ * toScale));
+        TokenEmitter emitter2 = new TokenEmitter(
+            governanceToken,
+            address(protocolRewards),
+            address(this),
+            address(maliciousTreasury),
+            1e14,
+            1e17,
+            int256(tokensPerTimeUnit_ * toScale)
+        );
         governanceToken.transferOwnership(address(emitter2));
 
         vm.deal(address(this), 100000 ether);
@@ -308,23 +324,22 @@ contract TokenEmitterTest is Test {
         uint256 largestPaymentTokenAmount = emitter.getTokenAmountForMultiPurchase(largestPayment);
         //spending 1000x the daily amount should get you less than 50x the tokens
         assertLt(largestPaymentTokenAmount, 50 * tokensPerTimeUnit * 1e4, "Token amount for largest payment should be less than some realistic upper bound");
-        
+
         emit log_string("Largest Payment Token Amount: ");
         emit log_uint(largestPaymentTokenAmount);
 
         vm.stopPrank();
     }
 
-
     function testUNSAFE_getOverestimateTokenAmount() public {
         vm.startPrank(address(0));
-        
+
         vm.deal(address(0), 100000 ether);
         vm.stopPrank();
 
         // Define payment and supply for the test
-        uint256 payment = 1_000 ether; 
-        uint256 supply = 0;    
+        uint256 payment = 1_000 ether;
+        uint256 supply = 0;
 
         uint256 overestimatedAmount = emitter.UNSAFE_getOverestimateTokenAmount(payment, supply);
 
@@ -338,7 +353,6 @@ contract TokenEmitterTest is Test {
         emit Log("Overestimated Amount: ", overestimatedAmount);
         emit Log("Correct Amount: ", correctAmount);
     }
-
 
     function testGetTokenPrice() public {
         vm.startPrank(address(0));
@@ -363,9 +377,7 @@ contract TokenEmitterTest is Test {
         // Assert that the price is greater than zero
         assertGt(priceAfterManyDays, 0, "Price should never hit zero");
     }
-
 }
-
 
 contract MaliciousTreasury {
     TokenEmitter emitter;
@@ -385,8 +397,6 @@ contract MaliciousTreasury {
         bps[0] = 10_000;
 
         // Attempt to re-enter TokenEmitter
-        emitter.buyToken{value: msg.value}(recipients, bps, address(0), address(0), address(0));
-
+        emitter.buyToken{ value: msg.value }(recipients, bps, address(0), address(0), address(0));
     }
 }
-

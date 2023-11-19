@@ -2,11 +2,13 @@
   "name": "@collectivexyz/revolution",
   "version": "0.0.0",
   "scripts": {
-    "prettier:check": "prettier --check \"packages/revolution-contracts/**/*.sol\"",
-    "prettier:fix": "prettier --write \"packages/revolution-contracts/**/*.sol\"",
-    "hint": "solhint packages/**/*.sol test/**/*.sol ",
-    "build": "forge build",
+    "build:sizes": "forge build --sizes",
+    "dev": "FOUNDRY_PROFILE=dev forge test --watch -vvv",
     "test": "forge test -vvv",
+    "build:contracts": "forge build",
+    "prettier:check": "prettier --check 'packages/**/*.sol' 'test/**/*.sol'",
+    "prettier": "prettier --write 'packages/**/*.sol' 'test/**/*.sol'",
+    "lint": "prettier --check 'packages/**/*.sol' 'test/**/*.sol'",
     "clean": "forge cache clean && if [ -d out ]; then forge clean; fi"
   },
   "devDependencies": {

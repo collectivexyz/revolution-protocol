@@ -1,16 +1,16 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.22;
 
-import {Test} from "forge-std/Test.sol";
-import {VerbsToken} from "../packages/revolution-contracts/VerbsToken.sol";
-import {IVerbsToken} from "../packages/revolution-contracts/interfaces/IVerbsToken.sol";
+import { Test } from "forge-std/Test.sol";
+import { VerbsToken } from "../packages/revolution-contracts/VerbsToken.sol";
+import { IVerbsToken } from "../packages/revolution-contracts/interfaces/IVerbsToken.sol";
 import { IVerbsDescriptorMinimal } from "../packages/revolution-contracts/interfaces/IVerbsDescriptorMinimal.sol";
 import { IProxyRegistry } from "../packages/revolution-contracts/external/opensea/IProxyRegistry.sol";
 import { ICultureIndex } from "../packages/revolution-contracts/interfaces/ICultureIndex.sol";
 import { Strings } from "@openzeppelin/contracts/utils/Strings.sol";
-import {CultureIndex} from "../packages/revolution-contracts/CultureIndex.sol";
-import {MockERC20} from "./MockERC20.sol";
-import {VerbsDescriptor} from "../packages/revolution-contracts/VerbsDescriptor.sol";
+import { CultureIndex } from "../packages/revolution-contracts/CultureIndex.sol";
+import { MockERC20 } from "./MockERC20.sol";
+import { VerbsDescriptor } from "../packages/revolution-contracts/VerbsDescriptor.sol";
 import "./utils/Base64Decode.sol";
 import "./JsmnSolLib.sol";
 
@@ -76,20 +76,14 @@ contract VerbsTokenTest is Test {
     }
 
     // Helper function to compare ArtPieceMetadata structs
-    function areArtPieceMetadataEqual(
-        ICultureIndex.ArtPieceMetadata memory metadata1,
-        ICultureIndex.ArtPieceMetadata memory metadata2
-    ) internal pure returns (bool) {
-        return (
-            keccak256(bytes(metadata1.name)) == keccak256(bytes(metadata2.name)) &&
+    function areArtPieceMetadataEqual(ICultureIndex.ArtPieceMetadata memory metadata1, ICultureIndex.ArtPieceMetadata memory metadata2) internal pure returns (bool) {
+        return (keccak256(bytes(metadata1.name)) == keccak256(bytes(metadata2.name)) &&
             keccak256(bytes(metadata1.description)) == keccak256(bytes(metadata2.description)) &&
             metadata1.mediaType == metadata2.mediaType &&
             keccak256(bytes(metadata1.image)) == keccak256(bytes(metadata2.image)) &&
             keccak256(bytes(metadata1.text)) == keccak256(bytes(metadata2.text)) &&
-            keccak256(bytes(metadata1.animationUrl)) == keccak256(bytes(metadata2.animationUrl))
-        );
+            keccak256(bytes(metadata1.animationUrl)) == keccak256(bytes(metadata2.animationUrl)));
     }
-
 
     // Helper function to compare arrays of creators
     function areArraysEqual(ICultureIndex.CreatorBps[] memory arr1, ICultureIndex.CreatorBps[] memory arr2) internal pure returns (bool) {
@@ -106,7 +100,7 @@ contract VerbsTokenTest is Test {
 
     /// @dev Tests the minting with no pieces added
     function testMintWithNoPieces() public {
-          // Try to remove max and expect to fail
+        // Try to remove max and expect to fail
         try verbsToken.mint() {
             fail("Should revert on removing max from empty heap");
         } catch Error(string memory reason) {
@@ -155,7 +149,6 @@ contract VerbsTokenTest is Test {
         assertEq(newTotalSupply, initialTotalSupply - 1, "Total supply should decrease by 1 after burning");
     }
 
-
     // Utility function to create a new art piece and return its ID
     function createArtPiece(
         string memory name,
@@ -167,131 +160,110 @@ contract VerbsTokenTest is Test {
         address creatorAddress,
         uint256 creatorBps
     ) internal returns (uint256) {
-        ICultureIndex.ArtPieceMetadata memory metadata = ICultureIndex
-            .ArtPieceMetadata({
-                name: name,
-                description: description,
-                mediaType: mediaType,
-                image: image,
-                text: text,
-                animationUrl: animationUrl
-            });
-
-        ICultureIndex.CreatorBps[]
-            memory creators = new ICultureIndex.CreatorBps[](1);
-        creators[0] = ICultureIndex.CreatorBps({
-            creator: creatorAddress,
-            bps: creatorBps
+        ICultureIndex.ArtPieceMetadata memory metadata = ICultureIndex.ArtPieceMetadata({
+            name: name,
+            description: description,
+            mediaType: mediaType,
+            image: image,
+            text: text,
+            animationUrl: animationUrl
         });
+
+        ICultureIndex.CreatorBps[] memory creators = new ICultureIndex.CreatorBps[](1);
+        creators[0] = ICultureIndex.CreatorBps({ creator: creatorAddress, bps: creatorBps });
 
         return cultureIndex.createPiece(metadata, creators);
     }
 
     //Utility function to create default art piece
     function createDefaultArtPiece() public returns (uint256) {
-        return createArtPiece(
-            "Mona Lisa",
-            "A masterpiece",
-            ICultureIndex.MediaType.IMAGE,
-            "ipfs://legends",
-            "",
-            "",
-            address(0x1),
-            10000
-        );
+        return createArtPiece("Mona Lisa", "A masterpiece", ICultureIndex.MediaType.IMAGE, "ipfs://legends", "", "", address(0x1), 10000);
     }
 
+    /// @dev Ensures _currentVerbId increments correctly after each mint
+    function testMintingIncrement() public {
+        setUp();
+        createDefaultArtPiece();
+        createDefaultArtPiece();
 
-/// @dev Ensures _currentVerbId increments correctly after each mint
-function testMintingIncrement() public {
-    setUp();
-    createDefaultArtPiece();
-    createDefaultArtPiece();
+        uint256 tokenId1 = verbsToken.mint();
+        assertEq(verbsToken.totalSupply(), tokenId1 + 1, "CurrentVerbId should increment after first mint");
 
-    uint256 tokenId1 = verbsToken.mint();
-    assertEq(verbsToken.totalSupply(), tokenId1 + 1, "CurrentVerbId should increment after first mint");
+        uint256 tokenId2 = verbsToken.mint();
+        assertEq(verbsToken.totalSupply(), tokenId2 + 1, "CurrentVerbId should increment after second mint");
+    }
 
-    uint256 tokenId2 = verbsToken.mint();
-    assertEq(verbsToken.totalSupply(), tokenId2 + 1, "CurrentVerbId should increment after second mint");
+    /// @dev Checks if the VerbCreated event is emitted with correct parameters on minting
+    function testMintingEvent() public {
+        setUp();
+        createDefaultArtPiece();
+
+        (uint256 pieceId, ICultureIndex.ArtPieceMetadata memory metadata, , ) = cultureIndex.pieces(0);
+
+        emit log_uint(pieceId);
+
+        ICultureIndex.CreatorBps[] memory creators = new ICultureIndex.CreatorBps[](1);
+        creators[0] = ICultureIndex.CreatorBps({ creator: address(0x1), bps: 10000 });
+
+        ICultureIndex.ArtPiece memory expectedArtPiece = ICultureIndex.ArtPiece({
+            pieceId: 0,
+            metadata: metadata,
+            creators: creators,
+            dropper: address(this),
+            isDropped: true
+        });
+
+        vm.expectEmit(true, true, true, true);
+
+        emit IVerbsToken.VerbCreated(0, expectedArtPiece);
+
+        verbsToken.mint();
+    }
+
+    /// @dev Tests the burn function.
+    function testBurnFunction() public {
+        setUp();
+
+        //create piece
+        createDefaultArtPiece();
+        uint256 tokenId = verbsToken.mint();
+
+        vm.expectEmit(true, true, true, true);
+        emit IVerbsToken.VerbBurned(tokenId);
+
+        verbsToken.burn(tokenId);
+        vm.expectRevert("ERC721: owner query for nonexistent token");
+        verbsToken.ownerOf(tokenId); // This should fail because the token was burned
+    }
+
+    /// @dev Validates that the token URI is correctly set and retrieved
+    function testTokenURI() public {
+        setUp();
+        uint256 artPieceId = createDefaultArtPiece();
+        uint256 tokenId = verbsToken.mint();
+        (, ICultureIndex.ArtPieceMetadata memory metadata, , ) = cultureIndex.pieces(artPieceId);
+        // Assuming the descriptor returns a fixed URI for the given tokenId
+        string memory expectedTokenURI = descriptor.tokenURI(tokenId, metadata);
+        assertEq(verbsToken.tokenURI(tokenId), expectedTokenURI, "Token URI should be correctly set and retrieved");
+    }
+
+    /// @dev Ensures minting fetches and associates the top-voted piece from CultureIndex
+    function testTopVotedPieceMinting() public {
+        setUp();
+
+        // Create a new piece and simulate it being the top voted piece
+        uint256 pieceId = createDefaultArtPiece(); // This function should exist within the test contract
+        mockVotingToken._mint(address(this), 10);
+        cultureIndex.vote(pieceId); // Assuming vote function exists and we cast 10 votes
+
+        // Mint a token
+        uint256 tokenId = verbsToken.mint();
+
+        // Validate the token is associated with the top voted piece
+        (uint256 mintedPieceId, , , ) = verbsToken.artPieces(tokenId);
+        assertEq(mintedPieceId, pieceId, "Minted token should be associated with the top voted piece");
+    }
 }
-
-/// @dev Checks if the VerbCreated event is emitted with correct parameters on minting
-function testMintingEvent() public {
-    setUp();
-    createDefaultArtPiece();
-
-    (uint256 pieceId,ICultureIndex.ArtPieceMetadata memory metadata,,) = cultureIndex.pieces(0);
-
-    emit log_uint(pieceId);
-
-    ICultureIndex.CreatorBps[] memory creators = new ICultureIndex.CreatorBps[](1);
-    creators[0] = ICultureIndex.CreatorBps({
-        creator: address(0x1),
-        bps: 10000
-    });
-
-    ICultureIndex.ArtPiece memory expectedArtPiece = ICultureIndex.ArtPiece({
-        pieceId: 0,
-        metadata: metadata,
-        creators: creators,
-        dropper: address(this),
-        isDropped: true
-    });
-
-    vm.expectEmit(true, true, true, true);
-
-    emit IVerbsToken.VerbCreated(0, expectedArtPiece);
-
-    verbsToken.mint();
-}
-
-/// @dev Tests the burn function.
-function testBurnFunction() public {
-    setUp();
-
-    //create piece
-    createDefaultArtPiece();
-    uint256 tokenId = verbsToken.mint();
-    
-    vm.expectEmit(true, true, true, true);
-    emit IVerbsToken.VerbBurned(tokenId);
-    
-    verbsToken.burn(tokenId);
-    vm.expectRevert("ERC721: owner query for nonexistent token");
-    verbsToken.ownerOf(tokenId); // This should fail because the token was burned
-}
-
-
-/// @dev Validates that the token URI is correctly set and retrieved
-function testTokenURI() public {
-    setUp();
-    uint256 artPieceId = createDefaultArtPiece();
-    uint256 tokenId = verbsToken.mint();
-    (,ICultureIndex.ArtPieceMetadata memory metadata,,) = cultureIndex.pieces(artPieceId);
-    // Assuming the descriptor returns a fixed URI for the given tokenId
-    string memory expectedTokenURI = descriptor.tokenURI(tokenId, metadata);
-    assertEq(verbsToken.tokenURI(tokenId), expectedTokenURI, "Token URI should be correctly set and retrieved");
-}
-
-/// @dev Ensures minting fetches and associates the top-voted piece from CultureIndex
-function testTopVotedPieceMinting() public {
-    setUp();
-
-    // Create a new piece and simulate it being the top voted piece
-    uint256 pieceId = createDefaultArtPiece(); // This function should exist within the test contract
-    mockVotingToken._mint(address(this), 10);
-    cultureIndex.vote(pieceId); // Assuming vote function exists and we cast 10 votes
-
-    // Mint a token
-    uint256 tokenId = verbsToken.mint();
-
-    // Validate the token is associated with the top voted piece
-    (uint256 mintedPieceId,,,) = verbsToken.artPieces(tokenId);
-    assertEq(mintedPieceId, pieceId, "Minted token should be associated with the top voted piece");
-}
-
-}
-
 
 contract ProxyRegistry is IProxyRegistry {
     mapping(address => address) public proxies;

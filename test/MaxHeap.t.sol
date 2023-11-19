@@ -1,8 +1,8 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.22;
 
-import {Test} from "forge-std/Test.sol";
-import {MaxHeap} from "../packages/revolution-contracts/MaxHeap.sol";
+import { Test } from "forge-std/Test.sol";
+import { MaxHeap } from "../packages/revolution-contracts/MaxHeap.sol";
 
 /// @title MaxHeapTestSuite
 /// @dev The test suite for the MaxHeap contract
@@ -64,7 +64,7 @@ contract MaxHeapTestSuite is Test {
         bool hasErrored = false;
         try maxHeap.extractMax() {
             fail("extractMax should only be callable by the owner");
-        } catch  {
+        } catch {
             hasErrored = true;
         }
 
@@ -75,15 +75,14 @@ contract MaxHeapTestSuite is Test {
         maxHeap.extractMax(); // this should succeed without reverting
     }
 
-
     /// @dev Tests the insert and getMax functions
     function testInsert() public {
         setUp();
 
         // Insert values into the max heap
-        maxHeap.insert(1,5);
-        maxHeap.insert(2,7);
-        maxHeap.insert(3,3);
+        maxHeap.insert(1, 5);
+        maxHeap.insert(2, 7);
+        maxHeap.insert(3, 3);
 
         // Validate the max value
         (uint256 maxItemId, uint256 maxValue) = maxHeap.getMax();
@@ -96,9 +95,9 @@ contract MaxHeapTestSuite is Test {
         setUp();
 
         // Insert and then remove max
-        maxHeap.insert(1,5);
-        maxHeap.insert(2,7);
-        maxHeap.insert(3,3);
+        maxHeap.insert(1, 5);
+        maxHeap.insert(2, 7);
+        maxHeap.insert(3, 3);
         maxHeap.extractMax();
 
         // Validate the new max value
@@ -112,12 +111,12 @@ contract MaxHeapTestSuite is Test {
         setUp();
 
         // Insert values and manually violate the heap property
-        maxHeap.insert(1,5);
-        maxHeap.insert(2,7);
+        maxHeap.insert(1, 5);
+        maxHeap.insert(2, 7);
         maxHeap.insert(3, 15);
         maxHeap.insert(4, 3);
         //set max to [10,2]
-        maxHeap._set(0, 10,2);  // Assume a '_set' function for testing
+        maxHeap._set(0, 10, 2); // Assume a '_set' function for testing
 
         // Run heapify from the root
         maxHeap.maxHeapify(0);
@@ -131,9 +130,9 @@ contract MaxHeapTestSuite is Test {
     /// @dev Tests inserting duplicate values into the heap
     function testInsertDuplicateValues() public {
         setUp();
-        maxHeap.insert(1,5);
-        maxHeap.insert(2,5);
-        maxHeap.insert(3,5);
+        maxHeap.insert(1, 5);
+        maxHeap.insert(2, 5);
+        maxHeap.insert(3, 5);
         (uint256 maxItemId, uint256 maxValue) = maxHeap.getMax();
         assertEq(maxValue, 5, "Max value should still be 5");
         assertEq(maxItemId, 1, "Max piece ID should be 1");
@@ -143,8 +142,8 @@ contract MaxHeapTestSuite is Test {
     /// @dev Tests that the heap is empty after all elements are removed
     function testHeapEmptyAfterAllRemoved() public {
         setUp();
-        maxHeap.insert(1,5);
-        maxHeap.insert(2,7);
+        maxHeap.insert(1, 5);
+        maxHeap.insert(2, 7);
         maxHeap.extractMax();
         maxHeap.extractMax();
         assertEq(maxHeap.size(), 0, "Heap should be empty");
@@ -163,9 +162,9 @@ contract MaxHeapTestSuite is Test {
         for (uint256 i = 0; i < values.length; i++) {
             maxHeap.insert(i, values[i]);
         }
-        
-        uint256 lastVal = type(uint256).max;  // Start with the maximum uint256 value
-        while(maxHeap.size() > 0) {
+
+        uint256 lastVal = type(uint256).max; // Start with the maximum uint256 value
+        while (maxHeap.size() > 0) {
             (, uint256 voteCount) = maxHeap.extractMax();
             assertTrue(voteCount <= lastVal, "Heap property violated");
             lastVal = voteCount;
@@ -175,11 +174,11 @@ contract MaxHeapTestSuite is Test {
     /// @dev Tests the maxHeapify function on a non-root node
     function testHeapifyOnNonRoot() public {
         setUp();
-        maxHeap.insert(1,10);
-        maxHeap.insert(2,15);
-        maxHeap.insert(3,5);
-        maxHeap.insert(4,12);
-        maxHeap._set(1, 200,4);  // Assume a '_set' function for testing
+        maxHeap.insert(1, 10);
+        maxHeap.insert(2, 15);
+        maxHeap.insert(3, 5);
+        maxHeap.insert(4, 12);
+        maxHeap._set(1, 200, 4); // Assume a '_set' function for testing
         maxHeap.maxHeapify(1);
         uint256 itemId = maxHeap.heap(1);
         uint256 val = maxHeap.valueMapping(itemId);
@@ -199,7 +198,6 @@ contract MaxHeapTestSuite is Test {
         }
     }
 }
-
 
 contract MaxHeapTest is MaxHeap {
     constructor(address _owner) MaxHeap(address(_owner)) {}

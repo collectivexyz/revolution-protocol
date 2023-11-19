@@ -1,14 +1,14 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.22;
 
-import {Test} from "forge-std/Test.sol";
-import {VerbsAuctionHouse} from "../../packages/revolution-contracts/VerbsAuctionHouse.sol";
-import {MockERC20} from "../MockERC20.sol";
-import {VerbsToken} from "../../packages/revolution-contracts/VerbsToken.sol";
-import {IVerbsToken} from "../../packages/revolution-contracts/interfaces/IVerbsToken.sol";
+import { Test } from "forge-std/Test.sol";
+import { VerbsAuctionHouse } from "../../packages/revolution-contracts/VerbsAuctionHouse.sol";
+import { MockERC20 } from "../MockERC20.sol";
+import { VerbsToken } from "../../packages/revolution-contracts/VerbsToken.sol";
+import { IVerbsToken } from "../../packages/revolution-contracts/interfaces/IVerbsToken.sol";
 import { IProxyRegistry } from "../../packages/revolution-contracts/external/opensea/IProxyRegistry.sol";
-import {VerbsDescriptor} from "../../packages/revolution-contracts/VerbsDescriptor.sol";
-import {CultureIndex} from "../../packages/revolution-contracts/CultureIndex.sol";
+import { VerbsDescriptor } from "../../packages/revolution-contracts/VerbsDescriptor.sol";
+import { CultureIndex } from "../../packages/revolution-contracts/CultureIndex.sol";
 import { IVerbsDescriptorMinimal } from "../../packages/revolution-contracts/interfaces/IVerbsDescriptorMinimal.sol";
 import { ICultureIndex, ICultureIndexEvents } from "../../packages/revolution-contracts/interfaces/ICultureIndex.sol";
 import { IVerbsAuctionHouse } from "../../packages/revolution-contracts/interfaces/IVerbsAuctionHouse.sol";
@@ -17,8 +17,7 @@ import { VerbsAuctionHouseTest } from "../VerbsAuctionHouse.t.sol";
 import { PausableUpgradeable } from "@openzeppelin/contracts-upgradeable/utils/PausableUpgradeable.sol";
 
 contract VerbsAuctionHouseMintTest is VerbsAuctionHouseTest {
-
-   function testMintFailureDueToEmptyNFTList() public {
+    function testMintFailureDueToEmptyNFTList() public {
         setUp();
         emit log_address(address(auctionHouse));
 
@@ -30,7 +29,6 @@ contract VerbsAuctionHouseMintTest is VerbsAuctionHouseTest {
         // Expect that the auction is paused due to error
         assertEq(auctionHouse.paused(), true, "Auction house should be paused");
     }
-
 
     function testBehaviorOnMintFailureDuringAuctionCreation() public {
         // Pre-conditions setup to trigger mint failure
@@ -46,8 +44,5 @@ contract VerbsAuctionHouseMintTest is VerbsAuctionHouseTest {
         assertEq(auctionEndTime, 0);
         assertEq(bidder, address(0));
         assertEq(settled, false);
-        
     }
-
 }
-

@@ -1,14 +1,14 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.22;
 
-import {Test} from "forge-std/Test.sol";
-import {VerbsAuctionHouse} from "../../packages/revolution-contracts/VerbsAuctionHouse.sol";
-import {MockERC20} from "../MockERC20.sol";
-import {VerbsToken} from "../../packages/revolution-contracts/VerbsToken.sol";
-import {IVerbsToken} from "../../packages/revolution-contracts/interfaces/IVerbsToken.sol";
+import { Test } from "forge-std/Test.sol";
+import { VerbsAuctionHouse } from "../../packages/revolution-contracts/VerbsAuctionHouse.sol";
+import { MockERC20 } from "../MockERC20.sol";
+import { VerbsToken } from "../../packages/revolution-contracts/VerbsToken.sol";
+import { IVerbsToken } from "../../packages/revolution-contracts/interfaces/IVerbsToken.sol";
 import { IProxyRegistry } from "../../packages/revolution-contracts/external/opensea/IProxyRegistry.sol";
-import {VerbsDescriptor} from "../../packages/revolution-contracts/VerbsDescriptor.sol";
-import {CultureIndex} from "../../packages/revolution-contracts/CultureIndex.sol";
+import { VerbsDescriptor } from "../../packages/revolution-contracts/VerbsDescriptor.sol";
+import { CultureIndex } from "../../packages/revolution-contracts/CultureIndex.sol";
 import { IVerbsDescriptorMinimal } from "../../packages/revolution-contracts/interfaces/IVerbsDescriptorMinimal.sol";
 import { ICultureIndex, ICultureIndexEvents } from "../../packages/revolution-contracts/interfaces/ICultureIndex.sol";
 import { IVerbsAuctionHouse } from "../../packages/revolution-contracts/interfaces/IVerbsAuctionHouse.sol";
@@ -18,11 +18,10 @@ import { TokenEmitter } from "../../packages/revolution-contracts/TokenEmitter.s
 import { ITokenEmitter } from "../../packages/revolution-contracts/interfaces/ITokenEmitter.sol";
 import { wadMul, wadDiv } from "../../packages/revolution-contracts/libs/SignedWadMath.sol";
 import { RevolutionProtocolRewards } from "../../packages/protocol-rewards/RevolutionProtocolRewards.sol";
-import {TokenEmitterRewards} from "../../packages/protocol-rewards/abstract/TokenEmitter/TokenEmitterRewards.sol";
+import { TokenEmitterRewards } from "../../packages/protocol-rewards/abstract/TokenEmitter/TokenEmitterRewards.sol";
 import { VerbsAuctionHouseTest } from "../VerbsAuctionHouse.t.sol";
 
 contract VerbsAuctionHouseBasicTest is VerbsAuctionHouseTest {
-
     function testEventEmission() public {
         uint256 newCreatorRateBps = 2500;
         uint256 newEntropyRateBps = 6000;
@@ -38,7 +37,6 @@ contract VerbsAuctionHouseBasicTest is VerbsAuctionHouseTest {
         auctionHouse.setEntropyRateBps(newEntropyRateBps);
     }
 
-
     function testValueUpdates() public {
         uint256 newCreatorRateBps = 2500;
         uint256 newEntropyRateBps = 6000;
@@ -51,7 +49,6 @@ contract VerbsAuctionHouseBasicTest is VerbsAuctionHouseTest {
         auctionHouse.setEntropyRateBps(newEntropyRateBps);
         assertEq(auctionHouse.entropyRateBps(), newEntropyRateBps, "entropyRateBps should be updated");
     }
-
 
     function testOwnerOnlyAccess() public {
         uint256 newCreatorRateBps = 2500;
@@ -74,14 +71,12 @@ contract VerbsAuctionHouseBasicTest is VerbsAuctionHouseTest {
     receive() external payable {}
 
     function testInitializationParameters() public {
-
         assertEq(auctionHouse.weth(), address(mockWETH), "WETH address should be set correctly");
         assertEq(auctionHouse.timeBuffer(), 15 minutes, "Time buffer should be set correctly");
         assertEq(auctionHouse.reservePrice(), 1 ether, "Reserve price should be set correctly");
         assertEq(auctionHouse.minBidIncrementPercentage(), 5, "Min bid increment percentage should be set correctly");
         assertEq(auctionHouse.duration(), 24 hours, "Auction duration should be set correctly");
     }
-    
 
     function testAuctionCreation() public {
         setUp();
@@ -97,9 +92,7 @@ contract VerbsAuctionHouseBasicTest is VerbsAuctionHouseTest {
         assertEq(amount, 0, "Auction amount should be 0");
         assertEq(bidder, address(0), "Auction bidder should be 0");
         assertEq(settled, false, "Auction should not be settled");
-        
     }
-
 
     function testBiddingProcess() public {
         setUp();
@@ -110,7 +103,7 @@ contract VerbsAuctionHouseBasicTest is VerbsAuctionHouseTest {
         vm.deal(address(1), bidAmount + 2 ether);
 
         vm.startPrank(address(1));
-        auctionHouse.createBid{value: bidAmount}(0); // Assuming the first auction's verbId is 0
+        auctionHouse.createBid{ value: bidAmount }(0); // Assuming the first auction's verbId is 0
         (uint256 verbId, uint256 amount, , uint256 endTime, address payable bidder, ) = auctionHouse.auction();
 
         assertEq(amount, bidAmount, "Bid amount should be set correctly");
@@ -124,7 +117,7 @@ contract VerbsAuctionHouseBasicTest is VerbsAuctionHouseTest {
 
         assertEq(verbs.ownerOf(verbId), address(1), "Verb should be transferred to the auction house");
     }
-    
+
     function testSettlingAuctions() public {
         setUp();
         createDefaultArtPiece();
@@ -143,8 +136,6 @@ contract VerbsAuctionHouseBasicTest is VerbsAuctionHouseTest {
         assertEq(settled, false, "Auction should not be settled because new one created");
     }
 
-    
-
     function testAdministrativeFunctions() public {
         uint256 newTimeBuffer = 10 minutes;
         auctionHouse.setTimeBuffer(newTimeBuffer);
@@ -158,7 +149,6 @@ contract VerbsAuctionHouseBasicTest is VerbsAuctionHouseTest {
         auctionHouse.setMinBidIncrementPercentage(newMinBidIncrementPercentage);
         assertEq(auctionHouse.minBidIncrementPercentage(), newMinBidIncrementPercentage, "Min bid increment percentage should be updated correctly");
     }
-    
 
     function testAccessControl() public {
         vm.startPrank(address(1));

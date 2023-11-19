@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: MIT
 pragma solidity 0.8.22;
 
-import {IRevolutionProtocolRewards} from "../interfaces/IRevolutionProtocolRewards.sol";
+import { IRevolutionProtocolRewards } from "../interfaces/IRevolutionProtocolRewards.sol";
 
 struct RewardsSettings {
     uint256 builderReferralReward;
@@ -38,26 +38,20 @@ abstract contract RewardSplits {
     }
 
     function computeTotalReward(uint256 paymentAmountWei) public pure returns (uint256) {
-        return paymentAmountWei * TOTAL_REWARD_PER_PURCHASE_BPS / 10_000;
+        return (paymentAmountWei * TOTAL_REWARD_PER_PURCHASE_BPS) / 10_000;
     }
 
     function computePurchaseRewards(uint256 paymentAmountWei) public pure returns (RewardsSettings memory) {
         return
             RewardsSettings({
-                builderReferralReward: paymentAmountWei * BUILDER_REWARD_BPS / 10_000,
-                purchaseReferralReward: paymentAmountWei * PURCHASE_REFERRAL_BPS / 10_000,
-                deployerReward: paymentAmountWei * DEPLOYER_REWARD_BPS / 10_000,
-                revolutionReward: paymentAmountWei * REVOLUTION_REWARD_BPS / 10_000
+                builderReferralReward: (paymentAmountWei * BUILDER_REWARD_BPS) / 10_000,
+                purchaseReferralReward: (paymentAmountWei * PURCHASE_REFERRAL_BPS) / 10_000,
+                deployerReward: (paymentAmountWei * DEPLOYER_REWARD_BPS) / 10_000,
+                revolutionReward: (paymentAmountWei * REVOLUTION_REWARD_BPS) / 10_000
             });
     }
 
-    function _depositPurchaseRewards(
-        uint256 totalReward,
-        uint256 paymentAmountWei,
-        address builderReferral,
-        address purchaseReferral,
-        address deployer
-    ) internal {
+    function _depositPurchaseRewards(uint256 totalReward, uint256 paymentAmountWei, address builderReferral, address purchaseReferral, address deployer) internal {
         RewardsSettings memory settings = computePurchaseRewards(paymentAmountWei);
 
         if (builderReferral == address(0)) {
@@ -72,7 +66,7 @@ abstract contract RewardSplits {
             deployer = revolutionRewardRecipient;
         }
 
-        protocolRewards.depositRewards{value: totalReward}(
+        protocolRewards.depositRewards{ value: totalReward }(
             builderReferral,
             settings.builderReferralReward,
             purchaseReferral,

@@ -53,17 +53,18 @@ contract TokenEmitter is LinearVRGDA, ITokenEmitter, ReentrancyGuard, TokenEmitt
     }
 
     // takes a list of addresses and a list of payout percentages as basis points
-    function buyToken(address[] memory _addresses, uint[] memory _bps, address builder, address purchaseReferral, address deployer) public payable nonReentrant returns (uint256) {
+    function buyToken(
+        address[] memory _addresses,
+        uint[] memory _bps,
+        address builder,
+        address purchaseReferral,
+        address deployer
+    ) public payable nonReentrant returns (uint256) {
         // ensure the same number of addresses and _bps
         require(_addresses.length == _bps.length, "Parallel arrays required");
 
         // Get value to send and handle mint fee
-        uint256 msgValueRemaining = _handleRewardsAndGetValueToSend(
-            msg.value,
-            builder,
-            purchaseReferral,
-            deployer
-        );
+        uint256 msgValueRemaining = _handleRewardsAndGetValueToSend(msg.value, builder, purchaseReferral, deployer);
 
         uint totalTokens = getTokenAmountForMultiPurchase(msgValueRemaining);
         (bool success, ) = treasury.call{ value: msgValueRemaining }(new bytes(0));

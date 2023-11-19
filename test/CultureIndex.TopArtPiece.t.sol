@@ -1,11 +1,11 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.22;
 
-import {Test} from "forge-std/Test.sol";
-import {CultureIndex} from "../packages/revolution-contracts/CultureIndex.sol";
-import {MockERC20} from "./MockERC20.sol";
-import {CultureIndexVotingTest} from "./CultureIndex.Voting.t.sol";
-import {ICultureIndex} from "../packages/revolution-contracts/interfaces/ICultureIndex.sol";
+import { Test } from "forge-std/Test.sol";
+import { CultureIndex } from "../packages/revolution-contracts/CultureIndex.sol";
+import { MockERC20 } from "./MockERC20.sol";
+import { CultureIndexVotingTest } from "./CultureIndex.Voting.t.sol";
+import { ICultureIndex } from "../packages/revolution-contracts/interfaces/ICultureIndex.sol";
 
 /**
  * @title CultureIndexArtPieceTest
@@ -16,7 +16,6 @@ contract CultureIndexArtPieceTest is Test {
     CultureIndexVotingTest public voter2Test;
     CultureIndex public cultureIndex;
     MockERC20 public mockVotingToken;
-    
 
     function setUp() public {
         mockVotingToken = new MockERC20();
@@ -35,31 +34,25 @@ contract CultureIndexArtPieceTest is Test {
         string memory image,
         string memory text,
         string memory animationUrl
-    ) public pure returns (CultureIndex.ArtPieceMetadata memory) { // <-- Change visibility and mutability as needed
-        ICultureIndex.ArtPieceMetadata memory metadata = ICultureIndex
-            .ArtPieceMetadata({
-                name: name,
-                description: description,
-                mediaType: mediaType,
-                image: image,
-                text: text,
-                animationUrl: animationUrl
-            });
+    ) public pure returns (CultureIndex.ArtPieceMetadata memory) {
+        // <-- Change visibility and mutability as needed
+        ICultureIndex.ArtPieceMetadata memory metadata = ICultureIndex.ArtPieceMetadata({
+            name: name,
+            description: description,
+            mediaType: mediaType,
+            image: image,
+            text: text,
+            animationUrl: animationUrl
+        });
 
         return metadata;
     }
 
     // Function to create CreatorBps array
-    function createArtPieceCreators(
-        address creatorAddress,
-        uint256 creatorBps
-    ) public pure returns (CultureIndex.CreatorBps[] memory) { // <-- Change visibility and mutability as needed
-        ICultureIndex.CreatorBps[]
-            memory creators = new ICultureIndex.CreatorBps[](1);
-        creators[0] = ICultureIndex.CreatorBps({
-            creator: creatorAddress,
-            bps: creatorBps
-        });
+    function createArtPieceCreators(address creatorAddress, uint256 creatorBps) public pure returns (CultureIndex.CreatorBps[] memory) {
+        // <-- Change visibility and mutability as needed
+        ICultureIndex.CreatorBps[] memory creators = new ICultureIndex.CreatorBps[](1);
+        creators[0] = ICultureIndex.CreatorBps({ creator: creatorAddress, bps: creatorBps });
 
         return creators;
     }
@@ -74,24 +67,14 @@ contract CultureIndexArtPieceTest is Test {
         string memory animationUrl,
         address creatorAddress,
         uint256 creatorBps
-    ) public pure returns (CultureIndex.ArtPieceMetadata memory, ICultureIndex.CreatorBps[] memory) { // <-- Change here
-        ICultureIndex.ArtPieceMetadata memory metadata = createArtPieceMetadata(
-            name,
-            description,
-            mediaType,
-            image,
-            text,
-            animationUrl
-        );
+    ) public pure returns (CultureIndex.ArtPieceMetadata memory, ICultureIndex.CreatorBps[] memory) {
+        // <-- Change here
+        ICultureIndex.ArtPieceMetadata memory metadata = createArtPieceMetadata(name, description, mediaType, image, text, animationUrl);
 
-        ICultureIndex.CreatorBps[] memory creators = createArtPieceCreators(
-            creatorAddress,
-            creatorBps
-        );
+        ICultureIndex.CreatorBps[] memory creators = createArtPieceCreators(creatorAddress, creatorBps);
 
         return (metadata, creators);
     }
-
 
     function createArtPiece(
         string memory name,
@@ -102,7 +85,8 @@ contract CultureIndexArtPieceTest is Test {
         string memory animationUrl,
         address creatorAddress,
         uint256 creatorBps
-    ) public returns (uint256) { // <-- Change here
+    ) public returns (uint256) {
+        // <-- Change here
         //use createArtPieceTuple to create metadata and creators
         (CultureIndex.ArtPieceMetadata memory metadata, ICultureIndex.CreatorBps[] memory creators) = createArtPieceTuple(
             name,
@@ -118,7 +102,7 @@ contract CultureIndexArtPieceTest is Test {
         return cultureIndex.createPiece(metadata, creators);
     }
 
-   function testVoteAndVerifyTopVotedPiece() public {
+    function testVoteAndVerifyTopVotedPiece() public {
         setUp();
 
         uint256 firstPieceId = voter1Test.createDefaultArtPiece();
@@ -144,7 +128,6 @@ contract CultureIndexArtPieceTest is Test {
         mockVotingToken._mint(address(voter2Test), 21_000);
         voter2Test.voteForPiece(thirdPieceId);
         assertEq(cultureIndex.topVotedPieceId(), thirdPieceId, "Third piece should now be top-voted");
-
     }
 
     function testFetchTopVotedPiece() public {
@@ -213,7 +196,6 @@ contract CultureIndexArtPieceTest is Test {
         assertEq(topPieceId, firstPieceId, "Top voted piece should be the first piece");
     }
 
-
     /// @dev Tests that log gas required to vote on a piece isn't out of control as heap grows
     function testGasForLargeVotes() public {
         setUp();
@@ -228,8 +210,8 @@ contract CultureIndexArtPieceTest is Test {
 
         //vote on all pieces
         for (uint i = 2; i < 5_000; i++) {
-            voter1Test.voteForPiece(i+1);
-            voter2Test.voteForPiece(i+1);
+            voter1Test.voteForPiece(i + 1);
+            voter2Test.voteForPiece(i + 1);
         }
 
         //vote once and calculate gas used
@@ -248,10 +230,10 @@ contract CultureIndexArtPieceTest is Test {
 
         //vote on all pieces
         for (uint i = 5_002; i < 25_000; i++) {
-            voter1Test.voteForPiece(i+1);
+            voter1Test.voteForPiece(i + 1);
             mockVotingToken._mint(address(voter1Test), i);
-            mockVotingToken._mint(address(voter2Test), i*2);
-            voter2Test.voteForPiece(i+1);
+            mockVotingToken._mint(address(voter2Test), i * 2);
+            voter2Test.voteForPiece(i + 1);
         }
 
         //vote once and calculate gas used
@@ -274,7 +256,6 @@ contract CultureIndexArtPieceTest is Test {
         uint256 gasUsed = startGas - gasleft();
         emit log_uint(gasUsed);
 
-
         // Create a set number of pieces and log the gas used for the last creation.
         for (uint i = 0; i < 5_000; i++) {
             if (i == 4_999) {
@@ -289,8 +270,8 @@ contract CultureIndexArtPieceTest is Test {
 
         //vote on all pieces
         for (uint i = 0; i < 5_000; i++) {
-            mockVotingToken._mint(address(voter1Test), i+1);
-            voter1Test.voteForPiece(i+1);
+            mockVotingToken._mint(address(voter1Test), i + 1);
+            voter1Test.voteForPiece(i + 1);
         }
 
         // Create another set of pieces and log the gas used for the last creation.
@@ -316,7 +297,7 @@ contract CultureIndexArtPieceTest is Test {
         // Create and vote on a set number of pieces.
         for (uint i = 0; i < 5_000; i++) {
             uint256 pieceId = voter1Test.createDefaultArtPiece();
-            mockVotingToken._mint(address(voter1Test), i*2 + 1);
+            mockVotingToken._mint(address(voter1Test), i * 2 + 1);
             voter1Test.voteForPiece(pieceId);
         }
 
@@ -329,7 +310,7 @@ contract CultureIndexArtPieceTest is Test {
         // Create and vote on another set of pieces.
         for (uint i = 0; i < 25_000; i++) {
             uint256 pieceId = voter1Test.createDefaultArtPiece();
-            mockVotingToken._mint(address(voter1Test), i*3 + 1);
+            mockVotingToken._mint(address(voter1Test), i * 3 + 1);
             voter1Test.voteForPiece(pieceId);
         }
 
@@ -356,17 +337,16 @@ contract CultureIndexArtPieceTest is Test {
 
         // Drop the top voted piece
         ICultureIndex.ArtPiece memory artPiece2 = cultureIndex.dropTopVotedPiece();
-        
+
         // Verify that the dropped piece is correctly indexed
         assertEq(artPiece2.pieceId, pieceId2, "First dropped piece should be pieceId2");
 
         // Drop another top voted piece
         ICultureIndex.ArtPiece memory artPiece1 = cultureIndex.dropTopVotedPiece();
-        
+
         // Verify again
         assertEq(artPiece1.pieceId, pieceId1, "Second dropped piece should be pieceId1");
     }
-
 
     /// @dev Ensure that the dropTopVotedPiece function behaves correctly when there are no more pieces to drop
     function testDropTopVotedPieceWithNoMorePieces() public {
@@ -388,8 +368,6 @@ contract CultureIndexArtPieceTest is Test {
             // if we're here, an error occurred
             hasErrorOccurred = true;
         }
-        assertEq(hasErrorOccurred,true, "Expected an error when trying to drop with no more pieces.");
+        assertEq(hasErrorOccurred, true, "Expected an error when trying to drop with no more pieces.");
     }
-
-
 }

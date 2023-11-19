@@ -1,8 +1,8 @@
 // SPDX-License-Identifier: MIT
 pragma solidity 0.8.22;
 
-import {EIP712} from "@openzeppelin/contracts/utils/cryptography/EIP712.sol";
-import {IRevolutionProtocolRewards} from "./interfaces/IRevolutionProtocolRewards.sol";
+import { EIP712 } from "@openzeppelin/contracts/utils/cryptography/EIP712.sol";
+import { IRevolutionProtocolRewards } from "./interfaces/IRevolutionProtocolRewards.sol";
 
 // LICENSE
 // RevolutionProtocolRewards.sol is a modified version of Zora's ProtocolRewards.sol:
@@ -163,7 +163,7 @@ contract RevolutionProtocolRewards is IRevolutionProtocolRewards, EIP712 {
 
         emit Withdraw(owner, to, amount);
 
-        (bool success, ) = to.call{value: amount}("");
+        (bool success, ) = to.call{ value: amount }("");
 
         if (!success) {
             revert TRANSFER_FAILED();
@@ -190,7 +190,7 @@ contract RevolutionProtocolRewards is IRevolutionProtocolRewards, EIP712 {
 
         emit Withdraw(to, to, amount);
 
-        (bool success, ) = to.call{value: amount}("");
+        (bool success, ) = to.call{ value: amount }("");
 
         if (!success) {
             revert TRANSFER_FAILED();
@@ -240,7 +240,7 @@ contract RevolutionProtocolRewards is IRevolutionProtocolRewards, EIP712 {
 
         emit Withdraw(from, to, amount);
 
-        (bool success, ) = to.call{value: amount}("");
+        (bool success, ) = to.call{ value: amount }("");
 
         if (!success) {
             revert TRANSFER_FAILED();
