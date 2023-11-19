@@ -5,7 +5,7 @@ import { Test } from "forge-std/Test.sol";
 import { unsafeWadDiv } from "../packages/revolution-contracts/libs/SignedWadMath.sol";
 import { TokenEmitter } from "../packages/revolution-contracts/TokenEmitter.sol";
 import { NontransferableERC20 } from "../packages/revolution-contracts/NontransferableERC20.sol";
-import { RevolutionProtocolRewards } from "../packages/protocol-rewards/RevolutionProtocolRewards.sol";
+import { RevolutionProtocolRewards } from "../packages/protocol-rewards/src/RevolutionProtocolRewards.sol";
 
 contract TokenEmitterTest is Test {
     TokenEmitter public emitter;

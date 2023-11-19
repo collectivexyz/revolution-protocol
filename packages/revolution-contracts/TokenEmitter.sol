@@ -8,7 +8,7 @@ import { Strings } from "@openzeppelin/contracts/utils/Strings.sol";
 import { NontransferableERC20 } from "./NontransferableERC20.sol";
 import { ITokenEmitter } from "./interfaces/ITokenEmitter.sol";
 import { ReentrancyGuard } from "@openzeppelin/contracts/utils/ReentrancyGuard.sol";
-import { TokenEmitterRewards } from "../protocol-rewards/abstract/TokenEmitter/TokenEmitterRewards.sol";
+import { TokenEmitterRewards } from "../protocol-rewards/src/abstract/TokenEmitter/TokenEmitterRewards.sol";
 
 contract TokenEmitter is LinearVRGDA, ITokenEmitter, ReentrancyGuard, TokenEmitterRewards {
     // Events

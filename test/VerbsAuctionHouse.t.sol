@@ -17,8 +17,8 @@ import { NontransferableERC20 } from "../packages/revolution-contracts/Nontransf
 import { TokenEmitter } from "../packages/revolution-contracts/TokenEmitter.sol";
 import { ITokenEmitter } from "../packages/revolution-contracts/interfaces/ITokenEmitter.sol";
 import { wadMul, wadDiv } from "../packages/revolution-contracts/libs/SignedWadMath.sol";
-import { RevolutionProtocolRewards } from "../packages/protocol-rewards/RevolutionProtocolRewards.sol";
-import { TokenEmitterRewards } from "../packages/protocol-rewards/abstract/TokenEmitter/TokenEmitterRewards.sol";
+import { RevolutionProtocolRewards } from "../packages/protocol-rewards/src/RevolutionProtocolRewards.sol";
+import { TokenEmitterRewards } from "../packages/protocol-rewards/src/abstract/TokenEmitter/TokenEmitterRewards.sol";
 
 contract VerbsAuctionHouseTest is Test {
     VerbsAuctionHouse public auctionHouse;
