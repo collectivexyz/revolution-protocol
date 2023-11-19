@@ -1,0 +1,23 @@
+{
+  "name": "@collectivexyz/protocol-rewards",
+  "version": "0.0.1",
+  "repository": "https://github.com/collectivexyz/revolution-protocol.git",
+  "license": "MIT",
+  "files": [
+    "src/"
+  ],
+  "scripts": {
+    "build:sizes": "forge build --sizes",
+    "dev": "FOUNDRY_PROFILE=dev forge test --watch -vvv",
+    "test": "forge test -vvv",
+    "build:contracts": "forge build",
+    "prettier:check": "prettier --check 'src/**/*.sol' 'test/**/*.sol' 'script/**/*.sol'",
+    "prettier": "prettier --write 'src/**/*.sol' 'test/**/*.sol' 'script/**/*.sol'",
+    "lint": "prettier --check 'src/**/*.sol' 'test/**/*.sol' 'script/**/*.sol'"
+  },
+  "devDependencies": {
+    "prettier": "2.8.8",
+    "prettier-plugin-solidity": "1.1.3",
+    "solhint": "3.4.1"
+  }
+}
