@@ -4,7 +4,7 @@ pragma solidity ^0.8.22;
 import "forge-std/Test.sol";
 import "../packages/revolution-contracts/VerbsDescriptor.sol";
 import {IVerbsDescriptor} from "../packages/revolution-contracts/interfaces/IVerbsDescriptor.sol";
-import "./Base64Decode.sol";
+import "./utils/Base64Decode.sol";
 import "./JsmnSolLib.sol";
 import {ICultureIndex} from "../packages/revolution-contracts/interfaces/ICultureIndex.sol";
 

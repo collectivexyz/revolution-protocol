@@ -11,7 +11,7 @@ import { Strings } from "@openzeppelin/contracts/utils/Strings.sol";
 import {CultureIndex} from "../packages/revolution-contracts/CultureIndex.sol";
 import {MockERC20} from "./MockERC20.sol";
 import {VerbsDescriptor} from "../packages/revolution-contracts/VerbsDescriptor.sol";
-import "./Base64Decode.sol";
+import "./utils/Base64Decode.sol";
 import "./JsmnSolLib.sol";
 
 /// @title VerbsTokenTest
