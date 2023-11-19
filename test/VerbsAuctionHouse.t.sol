@@ -275,7 +275,14 @@ contract VerbsAuctionHouseTest is Test {
         uint256 creatorRate = auctionHouse.creatorRateBps();
         uint256 entropyRate = auctionHouse.entropyRateBps();
 
-        assertEq(balanceAfter - balanceBefore, (bidAmount * (10_000 - creatorRate * entropyRate / 10_000) / 10_000), "Bid amount minus entropy should be transferred to the auction house owner");
+        //calculate fee
+        uint256 amountToOwner = bidAmount * (10_000 - creatorRate * entropyRate / 10_000) / 10_000;
+
+        //amount spent on governance
+        uint256 etherToSpendOnGovernanceTotal = bidAmount * creatorRate / 10_000 - bidAmount * (entropyRate * creatorRate) / 10_000 / 10_000;
+        uint256 feeAmount = tokenEmitter.computeTotalReward(etherToSpendOnGovernanceTotal);
+
+        assertEq(balanceAfter - balanceBefore, amountToOwner - feeAmount, "Bid amount minus entropy should be transferred to the auction house owner");
     }
 
     
@@ -441,7 +448,9 @@ contract VerbsAuctionHouseTest is Test {
         }
 
         // Track expected governance token payout
-        uint256 expectedGovernanceTokenPayout = tokenEmitter.getTokenAmountForMultiPurchase(bidAmount * creatorRate * entropyRate / 10_000 / 10_000);
+        uint256 etherToSpendOnGovernanceTotal = bidAmount * creatorRate / 10_000 - bidAmount * (entropyRate * creatorRate) / 10_000 / 10_000;
+
+        uint256 expectedGovernanceTokenPayout = tokenEmitter.getTokenAmountForMultiPurchase(etherToSpendOnGovernanceTotal - tokenEmitter.computeTotalReward(etherToSpendOnGovernanceTotal));
 
         auctionHouse.settleCurrentAndCreateNewAuction();
 
