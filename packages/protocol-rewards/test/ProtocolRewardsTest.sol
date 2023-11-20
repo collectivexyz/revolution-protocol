@@ -1,16 +1,15 @@
 // SPDX-License-Identifier: MIT
-pragma solidity 0.8.17;
+pragma solidity 0.8.22;
 
 import "forge-std/Test.sol";
 
-import "../src/ProtocolRewards.sol";
+import "../src/RevolutionProtocolRewards.sol";
 
-import "./utils/MockNFTs.sol";
 
 contract ProtocolRewardsTest is Test {
     uint256 internal constant ETH_SUPPLY = 120_200_000 ether;
 
-    ProtocolRewards internal protocolRewards;
+    RevolutionProtocolRewards internal protocolRewards;
 
     address internal collector;
     address internal creator;
@@ -20,7 +19,7 @@ contract ProtocolRewardsTest is Test {
     address internal zora;
 
     function setUp() public virtual {
-        protocolRewards = new ProtocolRewards();
+        protocolRewards = new RevolutionProtocolRewards();
 
         vm.label(address(protocolRewards), "protocolRewards");
 

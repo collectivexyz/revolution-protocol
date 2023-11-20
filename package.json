@@ -6,7 +6,8 @@
     "test": "turbo run test",
     "dev": "turbo run dev",
     "lint": "turbo run lint",
-    "format": "turbo run format"
+    "format": "turbo run format",
+    "clean": "turbo run clean"
   },
   "devDependencies": {
     "prettier": "2.8.8",

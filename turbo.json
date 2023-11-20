@@ -12,6 +12,9 @@
     "build:sizes": {
       "dependsOn": ["^build:sizes"]
     },
+    "clean": {
+      "dependsOn": ["^clean"]
+    },
     "test": {
       "dependsOn": ["^test"]
     },

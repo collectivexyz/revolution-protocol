@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: MIT
-pragma solidity 0.8.17;
+pragma solidity 0.8.22;
 
 import "forge-std/Base.sol";
 
@@ -7,7 +7,7 @@ import "../ProtocolRewardsTest.sol";
 
 contract Handler is CommonBase, StdCheats, StdUtils {
     uint256 internal constant ETH_SUPPLY = 120_200_000 ether;
-    ProtocolRewards internal immutable rewards;
+    RevolutionProtocolRewards internal immutable rewards;
 
     uint256 public ghost_depositSum;
     uint256 public ghost_withdrawSum;
@@ -16,7 +16,7 @@ contract Handler is CommonBase, StdCheats, StdUtils {
     uint256 public numActors;
     mapping(uint256 => address) public actors;
 
-    constructor(ProtocolRewards _rewards) {
+    constructor(RevolutionProtocolRewards _rewards) {
         rewards = _rewards;
 
         vm.deal(address(this), ETH_SUPPLY);
