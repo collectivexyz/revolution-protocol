@@ -26,4 +26,4 @@ bin
 
 .deps
 
-packages/*/artifacts/**/*.json
+packages/*/src/artifacts/**/*.json
