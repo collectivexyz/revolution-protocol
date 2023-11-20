@@ -23,7 +23,7 @@ import { VerbsAuctionHouseTest } from "./AuctionHouse.t.sol";
 
 contract VerbsAuctionHouseSettleTest is VerbsAuctionHouseTest {
     //calculate bps amount given split
-    function bps(uint256 x, uint256 y) public returns (uint256) {
+    function bps(uint256 x, uint256 y) pure public returns (uint256) {
         return uint256(wadDiv(wadMul(int256(x), int256(y)), 10000));
     }
 

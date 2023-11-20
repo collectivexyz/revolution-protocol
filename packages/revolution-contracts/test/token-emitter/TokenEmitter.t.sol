@@ -296,16 +296,9 @@ contract TokenEmitterTest is Test {
     function testGetTokenAmountForMultiPurchaseEdgeCases() public {
         vm.startPrank(address(0));
 
-        uint256 tokenSupply = emitter.totalSupply();
-
         // Edge Case 1: Very Small Payment
         uint256 smallPayment = 0.00001 ether;
         uint256 smallPaymentTokenAmount = emitter.getTokenAmountForMultiPurchase(smallPayment);
-        uint256 smallPaymentAmount2 = emitter._getTokenAmountForSinglePurchase(smallPayment, tokenSupply);
-        uint256 overEstimated = emitter.UNSAFE_getOverestimateTokenAmount(smallPayment, tokenSupply);
-        uint256 priceForFirstToken = emitter.getTokenPrice(tokenSupply);
-        //assert that the overestimated amount is greater than the correct amount
-        // assertGt(overEstimated, smallPaymentAmount2, "Overestimated amount should be greater than correct amount");
         assertGt(smallPaymentTokenAmount, 0, "Token amount for small payment should be greater than zero");
         emit log_uint(smallPaymentTokenAmount);
 
