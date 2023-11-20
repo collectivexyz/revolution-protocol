@@ -1,0 +1,1140 @@
+{
+	"compiler": {
+		"version": "0.8.22+commit.4fc1097e"
+	},
+	"language": "Solidity",
+	"output": {
+		"abi": [
+			{
+				"inputs": [
+					{
+						"internalType": "address",
+						"name": "_votingToken",
+						"type": "address"
+					},
+					{
+						"internalType": "address",
+						"name": "_initialOwner",
+						"type": "address"
+					}
+				],
+				"stateMutability": "nonpayable",
+				"type": "constructor"
+			},
+			{
+				"inputs": [
+					{
+						"internalType": "address",
+						"name": "owner",
+						"type": "address"
+					}
+				],
+				"name": "OwnableInvalidOwner",
+				"type": "error"
+			},
+			{
+				"inputs": [
+					{
+						"internalType": "address",
+						"name": "account",
+						"type": "address"
+					}
+				],
+				"name": "OwnableUnauthorizedAccount",
+				"type": "error"
+			},
+			{
+				"inputs": [],
+				"name": "ReentrancyGuardReentrantCall",
+				"type": "error"
+			},
+			{
+				"anonymous": false,
+				"inputs": [
+					{
+						"indexed": true,
+						"internalType": "address",
+						"name": "previousOwner",
+						"type": "address"
+					},
+					{
+						"indexed": true,
+						"internalType": "address",
+						"name": "newOwner",
+						"type": "address"
+					}
+				],
+				"name": "OwnershipTransferred",
+				"type": "event"
+			},
+			{
+				"anonymous": false,
+				"inputs": [
+					{
+						"indexed": true,
+						"internalType": "uint256",
+						"name": "pieceId",
+						"type": "uint256"
+					},
+					{
+						"indexed": true,
+						"internalType": "address",
+						"name": "dropper",
+						"type": "address"
+					},
+					{
+						"indexed": false,
+						"internalType": "string",
+						"name": "name",
+						"type": "string"
+					},
+					{
+						"indexed": false,
+						"internalType": "string",
+						"name": "description",
+						"type": "string"
+					},
+					{
+						"indexed": false,
+						"internalType": "string",
+						"name": "image",
+						"type": "string"
+					},
+					{
+						"indexed": false,
+						"internalType": "string",
+						"name": "animationUrl",
+						"type": "string"
+					},
+					{
+						"indexed": false,
+						"internalType": "string",
+						"name": "text",
+						"type": "string"
+					},
+					{
+						"indexed": false,
+						"internalType": "uint8",
+						"name": "mediaType",
+						"type": "uint8"
+					}
+				],
+				"name": "PieceCreated",
+				"type": "event"
+			},
+			{
+				"anonymous": false,
+				"inputs": [
+					{
+						"indexed": true,
+						"internalType": "uint256",
+						"name": "pieceId",
+						"type": "uint256"
+					},
+					{
+						"indexed": true,
+						"internalType": "address",
+						"name": "creatorAddress",
+						"type": "address"
+					},
+					{
+						"indexed": true,
+						"internalType": "address",
+						"name": "dropper",
+						"type": "address"
+					},
+					{
+						"indexed": false,
+						"internalType": "uint256",
+						"name": "bps",
+						"type": "uint256"
+					}
+				],
+				"name": "PieceCreatorAdded",
+				"type": "event"
+			},
+			{
+				"anonymous": false,
+				"inputs": [
+					{
+						"indexed": true,
+						"internalType": "uint256",
+						"name": "pieceId",
+						"type": "uint256"
+					},
+					{
+						"indexed": true,
+						"internalType": "address",
+						"name": "remover",
+						"type": "address"
+					}
+				],
+				"name": "PieceDropped",
+				"type": "event"
+			},
+			{
+				"anonymous": false,
+				"inputs": [
+					{
+						"indexed": true,
+						"internalType": "uint256",
+						"name": "pieceId",
+						"type": "uint256"
+					},
+					{
+						"indexed": true,
+						"internalType": "address",
+						"name": "creatorAddress",
+						"type": "address"
+					},
+					{
+						"indexed": true,
+						"internalType": "address",
+						"name": "dropper",
+						"type": "address"
+					},
+					{
+						"indexed": false,
+						"internalType": "uint256",
+						"name": "bps",
+						"type": "uint256"
+					}
+				],
+				"name": "PieceDroppedCreator",
+				"type": "event"
+			},
+			{
+				"anonymous": false,
+				"inputs": [
+					{
+						"indexed": true,
+						"internalType": "uint256",
+						"name": "pieceId",
+						"type": "uint256"
+					},
+					{
+						"indexed": true,
+						"internalType": "address",
+						"name": "voter",
+						"type": "address"
+					},
+					{
+						"indexed": false,
+						"internalType": "uint256",
+						"name": "weight",
+						"type": "uint256"
+					},
+					{
+						"indexed": false,
+						"internalType": "uint256",
+						"name": "totalWeight",
+						"type": "uint256"
+					}
+				],
+				"name": "VoteCast",
+				"type": "event"
+			},
+			{
+				"inputs": [
+					{
+						"internalType": "uint256[]",
+						"name": "pieceIds",
+						"type": "uint256[]"
+					}
+				],
+				"name": "batchVote",
+				"outputs": [],
+				"stateMutability": "nonpayable",
+				"type": "function"
+			},
+			{
+				"inputs": [
+					{
+						"components": [
+							{
+								"internalType": "string",
+								"name": "name",
+								"type": "string"
+							},
+							{
+								"internalType": "string",
+								"name": "description",
+								"type": "string"
+							},
+							{
+								"internalType": "enum ICultureIndex.MediaType",
+								"name": "mediaType",
+								"type": "uint8"
+							},
+							{
+								"internalType": "string",
+								"name": "image",
+								"type": "string"
+							},
+							{
+								"internalType": "string",
+								"name": "text",
+								"type": "string"
+							},
+							{
+								"internalType": "string",
+								"name": "animationUrl",
+								"type": "string"
+							}
+						],
+						"internalType": "struct ICultureIndex.ArtPieceMetadata",
+						"name": "metadata",
+						"type": "tuple"
+					},
+					{
+						"components": [
+							{
+								"internalType": "address",
+								"name": "creator",
+								"type": "address"
+							},
+							{
+								"internalType": "uint256",
+								"name": "bps",
+								"type": "uint256"
+							}
+						],
+						"internalType": "struct ICultureIndex.CreatorBps[]",
+						"name": "creatorArray",
+						"type": "tuple[]"
+					}
+				],
+				"name": "createPiece",
+				"outputs": [
+					{
+						"internalType": "uint256",
+						"name": "",
+						"type": "uint256"
+					}
+				],
+				"stateMutability": "nonpayable",
+				"type": "function"
+			},
+			{
+				"inputs": [],
+				"name": "dropTopVotedPiece",
+				"outputs": [
+					{
+						"components": [
+							{
+								"internalType": "uint256",
+								"name": "pieceId",
+								"type": "uint256"
+							},
+							{
+								"components": [
+									{
+										"internalType": "string",
+										"name": "name",
+										"type": "string"
+									},
+									{
+										"internalType": "string",
+										"name": "description",
+										"type": "string"
+									},
+									{
+										"internalType": "enum ICultureIndex.MediaType",
+										"name": "mediaType",
+										"type": "uint8"
+									},
+									{
+										"internalType": "string",
+										"name": "image",
+										"type": "string"
+									},
+									{
+										"internalType": "string",
+										"name": "text",
+										"type": "string"
+									},
+									{
+										"internalType": "string",
+										"name": "animationUrl",
+										"type": "string"
+									}
+								],
+								"internalType": "struct ICultureIndex.ArtPieceMetadata",
+								"name": "metadata",
+								"type": "tuple"
+							},
+							{
+								"components": [
+									{
+										"internalType": "address",
+										"name": "creator",
+										"type": "address"
+									},
+									{
+										"internalType": "uint256",
+										"name": "bps",
+										"type": "uint256"
+									}
+								],
+								"internalType": "struct ICultureIndex.CreatorBps[]",
+								"name": "creators",
+								"type": "tuple[]"
+							},
+							{
+								"internalType": "address",
+								"name": "dropper",
+								"type": "address"
+							},
+							{
+								"internalType": "bool",
+								"name": "isDropped",
+								"type": "bool"
+							}
+						],
+						"internalType": "struct ICultureIndex.ArtPiece",
+						"name": "",
+						"type": "tuple"
+					}
+				],
+				"stateMutability": "nonpayable",
+				"type": "function"
+			},
+			{
+				"inputs": [
+					{
+						"internalType": "uint256",
+						"name": "pieceId",
+						"type": "uint256"
+					}
+				],
+				"name": "getPieceById",
+				"outputs": [
+					{
+						"components": [
+							{
+								"internalType": "uint256",
+								"name": "pieceId",
+								"type": "uint256"
+							},
+							{
+								"components": [
+									{
+										"internalType": "string",
+										"name": "name",
+										"type": "string"
+									},
+									{
+										"internalType": "string",
+										"name": "description",
+										"type": "string"
+									},
+									{
+										"internalType": "enum ICultureIndex.MediaType",
+										"name": "mediaType",
+										"type": "uint8"
+									},
+									{
+										"internalType": "string",
+										"name": "image",
+										"type": "string"
+									},
+									{
+										"internalType": "string",
+										"name": "text",
+										"type": "string"
+									},
+									{
+										"internalType": "string",
+										"name": "animationUrl",
+										"type": "string"
+									}
+								],
+								"internalType": "struct ICultureIndex.ArtPieceMetadata",
+								"name": "metadata",
+								"type": "tuple"
+							},
+							{
+								"components": [
+									{
+										"internalType": "address",
+										"name": "creator",
+										"type": "address"
+									},
+									{
+										"internalType": "uint256",
+										"name": "bps",
+										"type": "uint256"
+									}
+								],
+								"internalType": "struct ICultureIndex.CreatorBps[]",
+								"name": "creators",
+								"type": "tuple[]"
+							},
+							{
+								"internalType": "address",
+								"name": "dropper",
+								"type": "address"
+							},
+							{
+								"internalType": "bool",
+								"name": "isDropped",
+								"type": "bool"
+							}
+						],
+						"internalType": "struct ICultureIndex.ArtPiece",
+						"name": "",
+						"type": "tuple"
+					}
+				],
+				"stateMutability": "view",
+				"type": "function"
+			},
+			{
+				"inputs": [],
+				"name": "getTopVotedPiece",
+				"outputs": [
+					{
+						"components": [
+							{
+								"internalType": "uint256",
+								"name": "pieceId",
+								"type": "uint256"
+							},
+							{
+								"components": [
+									{
+										"internalType": "string",
+										"name": "name",
+										"type": "string"
+									},
+									{
+										"internalType": "string",
+										"name": "description",
+										"type": "string"
+									},
+									{
+										"internalType": "enum ICultureIndex.MediaType",
+										"name": "mediaType",
+										"type": "uint8"
+									},
+									{
+										"internalType": "string",
+										"name": "image",
+										"type": "string"
+									},
+									{
+										"internalType": "string",
+										"name": "text",
+										"type": "string"
+									},
+									{
+										"internalType": "string",
+										"name": "animationUrl",
+										"type": "string"
+									}
+								],
+								"internalType": "struct ICultureIndex.ArtPieceMetadata",
+								"name": "metadata",
+								"type": "tuple"
+							},
+							{
+								"components": [
+									{
+										"internalType": "address",
+										"name": "creator",
+										"type": "address"
+									},
+									{
+										"internalType": "uint256",
+										"name": "bps",
+										"type": "uint256"
+									}
+								],
+								"internalType": "struct ICultureIndex.CreatorBps[]",
+								"name": "creators",
+								"type": "tuple[]"
+							},
+							{
+								"internalType": "address",
+								"name": "dropper",
+								"type": "address"
+							},
+							{
+								"internalType": "bool",
+								"name": "isDropped",
+								"type": "bool"
+							}
+						],
+						"internalType": "struct ICultureIndex.ArtPiece",
+						"name": "",
+						"type": "tuple"
+					}
+				],
+				"stateMutability": "view",
+				"type": "function"
+			},
+			{
+				"inputs": [
+					{
+						"internalType": "uint256",
+						"name": "pieceId",
+						"type": "uint256"
+					},
+					{
+						"internalType": "address",
+						"name": "voter",
+						"type": "address"
+					}
+				],
+				"name": "getVote",
+				"outputs": [
+					{
+						"components": [
+							{
+								"internalType": "address",
+								"name": "voterAddress",
+								"type": "address"
+							},
+							{
+								"internalType": "uint256",
+								"name": "weight",
+								"type": "uint256"
+							}
+						],
+						"internalType": "struct ICultureIndex.Vote",
+						"name": "",
+						"type": "tuple"
+					}
+				],
+				"stateMutability": "view",
+				"type": "function"
+			},
+			{
+				"inputs": [
+					{
+						"internalType": "address",
+						"name": "voter",
+						"type": "address"
+					}
+				],
+				"name": "getVoterWeight",
+				"outputs": [
+					{
+						"internalType": "uint256",
+						"name": "",
+						"type": "uint256"
+					}
+				],
+				"stateMutability": "view",
+				"type": "function"
+			},
+			{
+				"inputs": [
+					{
+						"internalType": "uint256",
+						"name": "pieceId",
+						"type": "uint256"
+					},
+					{
+						"internalType": "address",
+						"name": "voter",
+						"type": "address"
+					}
+				],
+				"name": "hasVoted",
+				"outputs": [
+					{
+						"internalType": "bool",
+						"name": "",
+						"type": "bool"
+					}
+				],
+				"stateMutability": "view",
+				"type": "function"
+			},
+			{
+				"inputs": [],
+				"name": "maxHeap",
+				"outputs": [
+					{
+						"internalType": "contract MaxHeap",
+						"name": "",
+						"type": "address"
+					}
+				],
+				"stateMutability": "view",
+				"type": "function"
+			},
+			{
+				"inputs": [],
+				"name": "owner",
+				"outputs": [
+					{
+						"internalType": "address",
+						"name": "",
+						"type": "address"
+					}
+				],
+				"stateMutability": "view",
+				"type": "function"
+			},
+			{
+				"inputs": [],
+				"name": "pieceCount",
+				"outputs": [
+					{
+						"internalType": "uint256",
+						"name": "",
+						"type": "uint256"
+					}
+				],
+				"stateMutability": "view",
+				"type": "function"
+			},
+			{
+				"inputs": [
+					{
+						"internalType": "uint256",
+						"name": "",
+						"type": "uint256"
+					}
+				],
+				"name": "pieces",
+				"outputs": [
+					{
+						"internalType": "uint256",
+						"name": "pieceId",
+						"type": "uint256"
+					},
+					{
+						"components": [
+							{
+								"internalType": "string",
+								"name": "name",
+								"type": "string"
+							},
+							{
+								"internalType": "string",
+								"name": "description",
+								"type": "string"
+							},
+							{
+								"internalType": "enum ICultureIndex.MediaType",
+								"name": "mediaType",
+								"type": "uint8"
+							},
+							{
+								"internalType": "string",
+								"name": "image",
+								"type": "string"
+							},
+							{
+								"internalType": "string",
+								"name": "text",
+								"type": "string"
+							},
+							{
+								"internalType": "string",
+								"name": "animationUrl",
+								"type": "string"
+							}
+						],
+						"internalType": "struct ICultureIndex.ArtPieceMetadata",
+						"name": "metadata",
+						"type": "tuple"
+					},
+					{
+						"internalType": "address",
+						"name": "dropper",
+						"type": "address"
+					},
+					{
+						"internalType": "bool",
+						"name": "isDropped",
+						"type": "bool"
+					}
+				],
+				"stateMutability": "view",
+				"type": "function"
+			},
+			{
+				"inputs": [],
+				"name": "renounceOwnership",
+				"outputs": [],
+				"stateMutability": "nonpayable",
+				"type": "function"
+			},
+			{
+				"inputs": [],
+				"name": "topVotedPieceId",
+				"outputs": [
+					{
+						"internalType": "uint256",
+						"name": "",
+						"type": "uint256"
+					}
+				],
+				"stateMutability": "view",
+				"type": "function"
+			},
+			{
+				"inputs": [
+					{
+						"internalType": "uint256",
+						"name": "",
+						"type": "uint256"
+					}
+				],
+				"name": "totalVoteWeights",
+				"outputs": [
+					{
+						"internalType": "uint256",
+						"name": "",
+						"type": "uint256"
+					}
+				],
+				"stateMutability": "view",
+				"type": "function"
+			},
+			{
+				"inputs": [
+					{
+						"internalType": "address",
+						"name": "newOwner",
+						"type": "address"
+					}
+				],
+				"name": "transferOwnership",
+				"outputs": [],
+				"stateMutability": "nonpayable",
+				"type": "function"
+			},
+			{
+				"inputs": [
+					{
+						"internalType": "uint256",
+						"name": "pieceId",
+						"type": "uint256"
+					}
+				],
+				"name": "vote",
+				"outputs": [],
+				"stateMutability": "nonpayable",
+				"type": "function"
+			},
+			{
+				"inputs": [
+					{
+						"internalType": "uint256",
+						"name": "",
+						"type": "uint256"
+					},
+					{
+						"internalType": "address",
+						"name": "",
+						"type": "address"
+					}
+				],
+				"name": "votes",
+				"outputs": [
+					{
+						"internalType": "address",
+						"name": "voterAddress",
+						"type": "address"
+					},
+					{
+						"internalType": "uint256",
+						"name": "weight",
+						"type": "uint256"
+					}
+				],
+				"stateMutability": "view",
+				"type": "function"
+			},
+			{
+				"inputs": [],
+				"name": "votingToken",
+				"outputs": [
+					{
+						"internalType": "contract IERC20",
+						"name": "",
+						"type": "address"
+					}
+				],
+				"stateMutability": "view",
+				"type": "function"
+			}
+		],
+		"devdoc": {
+			"errors": {
+				"OwnableInvalidOwner(address)": [
+					{
+						"details": "The owner is not a valid owner account. (eg. `address(0)`)"
+					}
+				],
+				"OwnableUnauthorizedAccount(address)": [
+					{
+						"details": "The caller account is not authorized to perform an operation."
+					}
+				],
+				"ReentrancyGuardReentrantCall()": [
+					{
+						"details": "Unauthorized reentrant call."
+					}
+				]
+			},
+			"events": {
+				"PieceCreated(uint256,address,string,string,string,string,string,uint8)": {
+					"details": "Emitted when a new piece is created.",
+					"params": {
+						"animationUrl": "(Optional) URL for the animation associated with the art piece.",
+						"description": "Description of the art piece.",
+						"dropper": "Address that created the piece.",
+						"image": "URL for the image associated with the art piece.",
+						"mediaType": "Integer representation of the media type for the art piece.",
+						"name": "Name of the art piece.",
+						"pieceId": "Unique identifier for the newly created piece.",
+						"text": "Text content for the art piece."
+					}
+				},
+				"PieceDropped(uint256,address)": {
+					"details": "Emitted when a top-voted piece is dropped or released.",
+					"params": {
+						"pieceId": "Unique identifier for the dropped piece.",
+						"remover": "Address that initiated the drop."
+					}
+				},
+				"PieceDroppedCreator(uint256,address,address,uint256)": {
+					"details": "Emitted for each creator added to a piece when it is dropped.",
+					"params": {
+						"bps": "Basis points associated with the creator for revenue sharing.",
+						"creatorAddress": "Address of the creator.",
+						"dropper": "Address that created the piece.",
+						"pieceId": "Unique identifier for the dropped piece."
+					}
+				},
+				"VoteCast(uint256,address,uint256,uint256)": {
+					"details": "Emitted when a vote is cast for a piece.",
+					"params": {
+						"pieceId": "Unique identifier for the piece being voted for.",
+						"totalWeight": "Total weight of votes for the piece after the new vote.",
+						"voter": "Address of the voter.",
+						"weight": "Weight of the vote."
+					}
+				}
+			},
+			"kind": "dev",
+			"methods": {
+				"batchVote(uint256[])": {
+					"details": "Requires that the pieceIds are valid, the voter has not already voted on this piece, and the weight is greater than zero. Emits a series of VoteCast event upon successful execution.",
+					"params": {
+						"pieceIds": "The IDs of the ArtPieces to vote for."
+					}
+				},
+				"createPiece((string,string,uint8,string,string,string),(address,uint256)[])": {
+					"params": {
+						"creatorArray": "An array of creators who contributed to the piece, along with their respective basis points that must sum up to 10,000.",
+						"metadata": "The metadata associated with the art piece, including name, description, image, and optional animation URL."
+					},
+					"returns": {
+						"_0": "Returns the unique ID of the newly created art piece. Emits a {PieceCreated} event for the newly created piece. Emits a {PieceCreatorAdded} event for each creator added to the piece. Requirements: - `metadata` must include name, description, and image. Animation URL is optional. - `creatorArray` must not contain any zero addresses. - The sum of basis points in `creatorArray` must be exactly 10,000."
+					}
+				},
+				"dropTopVotedPiece()": {
+					"returns": {
+						"_0": "The top voted piece"
+					}
+				},
+				"getPieceById(uint256)": {
+					"params": {
+						"pieceId": "The ID of the art piece."
+					},
+					"returns": {
+						"_0": "The ArtPiece struct associated with the given ID."
+					}
+				},
+				"getTopVotedPiece()": {
+					"returns": {
+						"_0": "The ArtPiece struct of the top-voted art piece."
+					}
+				},
+				"getVote(uint256,address)": {
+					"params": {
+						"pieceId": "The ID of the art piece."
+					},
+					"returns": {
+						"_0": "An array of Vote structs for the given art piece ID."
+					}
+				},
+				"getVoterWeight(address)": {
+					"returns": {
+						"_0": "The vote weight of the voter."
+					}
+				},
+				"hasVoted(uint256,address)": {
+					"params": {
+						"pieceId": "The ID of the art piece.",
+						"voter": "The address of the voter."
+					},
+					"returns": {
+						"_0": "A boolean indicating if the voter has voted for the art piece."
+					}
+				},
+				"owner()": {
+					"details": "Returns the address of the current owner."
+				},
+				"renounceOwnership()": {
+					"details": "Leaves the contract without owner. It will not be possible to call `onlyOwner` functions. Can only be called by the current owner. NOTE: Renouncing ownership will leave the contract without an owner, thereby disabling any functionality that is only available to the owner."
+				},
+				"topVotedPieceId()": {
+					"returns": {
+						"_0": "The top-voted pieceId"
+					}
+				},
+				"transferOwnership(address)": {
+					"details": "Transfers ownership of the contract to a new account (`newOwner`). Can only be called by the current owner."
+				},
+				"vote(uint256)": {
+					"details": "Requires that the pieceId is valid, the voter has not already voted on this piece, and the weight is greater than zero. Emits a VoteCast event upon successful execution.",
+					"params": {
+						"pieceId": "The ID of the ArtPiece to vote for."
+					}
+				}
+			},
+			"stateVariables": {
+				"pieceCount": {
+					"return": "The total count of art pieces.",
+					"returns": {
+						"_0": "The total count of art pieces."
+					}
+				},
+				"totalVoteWeights": {
+					"params": {
+						"pieceId": "The ID of the art piece."
+					},
+					"return": "The total vote weight for the art piece.",
+					"returns": {
+						"_0": "The total vote weight for the art piece."
+					}
+				}
+			},
+			"version": 1
+		},
+		"userdoc": {
+			"kind": "user",
+			"methods": {
+				"batchVote(uint256[])": {
+					"notice": "Cast a vote for a list of ArtPieces."
+				},
+				"createPiece((string,string,uint8,string,string,string),(address,uint256)[])": {
+					"notice": "Creates a new piece of art with associated metadata and creators."
+				},
+				"dropTopVotedPiece()": {
+					"notice": "Pulls and drops the top-voted piece."
+				},
+				"getPieceById(uint256)": {
+					"notice": "Fetch an art piece by its ID."
+				},
+				"getTopVotedPiece()": {
+					"notice": "Fetch the top-voted art piece."
+				},
+				"getVote(uint256,address)": {
+					"notice": "Fetch the list of votes for a given art piece."
+				},
+				"getVoterWeight(address)": {
+					"notice": "Returns a voters weight for voting."
+				},
+				"hasVoted(uint256,address)": {
+					"notice": "Checks if a specific voter has already voted for a given art piece."
+				},
+				"pieceCount()": {
+					"notice": "Returns the total number of art pieces."
+				},
+				"topVotedPieceId()": {
+					"notice": "Fetch the top-voted pieceId"
+				},
+				"totalVoteWeights(uint256)": {
+					"notice": "Returns the total voting weight for a specific art piece."
+				},
+				"vote(uint256)": {
+					"notice": "Cast a vote for a specific ArtPiece."
+				}
+			},
+			"version": 1
+		}
+	},
+	"settings": {
+		"compilationTarget": {
+			"packages/revolution-contracts/CultureIndex.sol": "CultureIndex"
+		},
+		"evmVersion": "shanghai",
+		"libraries": {},
+		"metadata": {
+			"bytecodeHash": "ipfs"
+		},
+		"optimizer": {
+			"enabled": true,
+			"runs": 200
+		},
+		"remappings": []
+	},
+	"sources": {
+		"@openzeppelin/contracts/access/Ownable.sol": {
+			"keccak256": "0xff6d0bb2e285473e5311d9d3caacb525ae3538a80758c10649a4d61029b017bb",
+			"license": "MIT",
+			"urls": [
+				"bzz-raw://8ed324d3920bb545059d66ab97d43e43ee85fd3bd52e03e401f020afb0b120f6",
+				"dweb:/ipfs/QmfEckWLmZkDDcoWrkEvMWhms66xwTLff9DDhegYpvHo1a"
+			]
+		},
+		"@openzeppelin/contracts/utils/Context.sol": {
+			"keccak256": "0x75a4ee64c68dbd5f38bddd06e664a64c8271b4caa554fb6f0607dfd672bb4bf3",
+			"license": "MIT",
+			"urls": [
+				"bzz-raw://0c4e6cb30d3601e2f7af5af09e265508147cb275a8dcd99d6f7363645cc56867",
+				"dweb:/ipfs/QmNgFkoXNWoUbAyw71rr1sKQ95Rj2GfvYiWg79xEYDn2NY"
+			]
+		},
+		"@openzeppelin/contracts/utils/ReentrancyGuard.sol": {
+			"keccak256": "0xf980daa263b661ab8ddee7d4fd833c7da7e7995e2c359ff1f17e67e4112f2236",
+			"license": "MIT",
+			"urls": [
+				"bzz-raw://7448ab095d6940130bcf76ba47a2eab14148c83119523b93dd89f6d84edd6c02",
+				"dweb:/ipfs/QmawrZ4voKQjH3oomXT3Kuheb3Mnmo2VvVpxg8Ne5UJUrd"
+			]
+		},
+		"packages/revolution-contracts/CultureIndex.sol": {
+			"keccak256": "0x47eec31a2d2f2adb2e5d2d553f2cd470a7642bd12e93f6f8cabea45abcaa976f",
+			"license": "GPL-3.0",
+			"urls": [
+				"bzz-raw://cc2cecb7b6cc13c299756783d3299cd8c044e2122458f0f98f39e21eecea3dcd",
+				"dweb:/ipfs/QmZc6R8mvwF3GhNfZC86y9X4KndWvcNj4YMP4TNaXpsV3H"
+			]
+		},
+		"packages/revolution-contracts/IERC20.sol": {
+			"keccak256": "0x3a239ccf79ef9b83e24ca1e33ba83d58a92cb95a8f91cfbe16922fa21ca1e4d3",
+			"license": "MIT",
+			"urls": [
+				"bzz-raw://0562394107a823a25d9d0c56df7bc2a495bd7d881dd807a90d7f7d8572e0229c",
+				"dweb:/ipfs/QmdJMbe8F4u8BEUjiSedZpbLuzyuzGTvaaojZ9uST1q3jQ"
+			]
+		},
+		"packages/revolution-contracts/MaxHeap.sol": {
+			"keccak256": "0x96ec5f181cc28068bcdce421f204a4d032e70c134f129894ad807f59037fcaf2",
+			"license": "GPL-3.0",
+			"urls": [
+				"bzz-raw://c52bb71293f330330e88ce4413b894c0109d6b42c6591ffc27b794e313c34830",
+				"dweb:/ipfs/QmcSMFTvvB4ZXGTWS68txFZQfiyNQDoMAA1uoW11EaDcSM"
+			]
+		},
+		"packages/revolution-contracts/interfaces/ICultureIndex.sol": {
+			"keccak256": "0x6c1cbd665b80374f30f51048e393536a2d3049550539d42a90462973e750ef7d",
+			"license": "GPL-3.0",
+			"urls": [
+				"bzz-raw://91b03b96e86ef46c46a510e1af1c9d1a56894fc70cf761a31b8fd8d727a17ef0",
+				"dweb:/ipfs/QmYXHiVPtdgvrugJ5yTT4wqKYgYYUD9PZD7EsgcKLn7Uzs"
+			]
+		}
+	},
+	"version": 1
+}
