@@ -11,7 +11,7 @@ contract WithdrawTest is ProtocolRewardsTest {
         vm.deal(collector, 10 ether);
 
         vm.prank(collector);
-        protocolRewards.deposit{value: 10 ether}(creator, "", "");
+        protocolRewards.deposit{ value: 10 ether }(creator, "", "");
     }
 
     function getDomainSeparator() internal view virtual returns (bytes32) {

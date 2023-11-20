@@ -22,6 +22,16 @@ importers:
         version: 1.10.16
 
   packages/protocol-rewards:
+    dependencies:
+      '@openzeppelin/contracts':
+        specifier: 5.0.0
+        version: 5.0.0
+      ds-test:
+        specifier: https://github.com/dapphub/ds-test#cd98eff28324bfac652e63a239a60632a761790b
+        version: github.com/dapphub/ds-test/cd98eff28324bfac652e63a239a60632a761790b
+      forge-std:
+        specifier: https://github.com/foundry-rs/forge-std#705263c95892a906d7af65f0f73ce8a4a0c80b80
+        version: github.com/foundry-rs/forge-std/705263c95892a906d7af65f0f73ce8a4a0c80b80
     devDependencies:
       prettier:
         specifier: 2.8.8

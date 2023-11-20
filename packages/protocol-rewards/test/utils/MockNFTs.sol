@@ -1,13 +1,13 @@
 // SPDX-License-Identifier: MIT
 pragma solidity 0.8.17;
 
-import {ERC721} from "./ERC721.sol";
-import {ERC1155} from "./ERC1155.sol";
+import { ERC721 } from "./ERC721.sol";
+import { ERC1155 } from "./ERC1155.sol";
 
-import {ERC721RewardsStorageV1} from "../../src/abstract/ERC721/ERC721RewardsStorageV1.sol";
-import {ERC721Rewards} from "../../src/abstract/ERC721/ERC721Rewards.sol";
-import {ERC1155Rewards} from "../../src/abstract/ERC1155/ERC1155Rewards.sol";
-import {ERC1155RewardsStorageV1} from "../../src/abstract/ERC1155/ERC1155RewardsStorageV1.sol";
+import { ERC721RewardsStorageV1 } from "../../src/abstract/ERC721/ERC721RewardsStorageV1.sol";
+import { ERC721Rewards } from "../../src/abstract/ERC721/ERC721Rewards.sol";
+import { ERC1155Rewards } from "../../src/abstract/ERC1155/ERC1155Rewards.sol";
+import { ERC1155RewardsStorageV1 } from "../../src/abstract/ERC1155/ERC1155RewardsStorageV1.sol";
 
 contract MockERC721 is ERC721, ERC721Rewards, ERC721RewardsStorageV1 {
     address public creator;

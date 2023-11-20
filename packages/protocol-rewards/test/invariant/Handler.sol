@@ -59,13 +59,13 @@ contract Handler is CommonBase, StdCheats, StdUtils {
     function deposit(uint256 amount) public validateActor(msg.sender) createActor(msg.sender) {
         amount = bound(amount, 0, address(this).balance);
 
-        (bool success, ) = currentActor.call{value: amount}("");
+        (bool success, ) = currentActor.call{ value: amount }("");
         if (!success) {
             return;
         }
 
         vm.prank(currentActor);
-        rewards.deposit{value: amount}(currentActor, "", "");
+        rewards.deposit{ value: amount }(currentActor, "", "");
 
         ghost_depositSum += amount;
     }

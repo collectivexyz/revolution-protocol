@@ -54,7 +54,7 @@ jobs:
 
       - name: Run Forge test
         run: |
-          forge test -vvv
+          turbo run test
         id: test
 
       - name: Run Geiger Check

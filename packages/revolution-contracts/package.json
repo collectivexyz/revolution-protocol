@@ -11,9 +11,9 @@
     "dev": "FOUNDRY_PROFILE=dev forge test --watch -vvv",
     "test": "forge test -vvv",
     "build:contracts": "forge build",
-    "prettier:check": "prettier --check 'src/**/*.sol' 'test/**/*.sol' 'script/**/*.sol'",
-    "prettier": "prettier --write 'src/**/*.sol' 'test/**/*.sol' 'script/**/*.sol'",
-    "lint": "prettier --check 'src/**/*.sol' 'test/**/*.sol' 'script/**/*.sol'",
+    "prettier:check": "prettier --check 'src/**/*.sol' 'test/**/*.sol'",
+    "prettier": "prettier --write 'src/**/*.sol' 'test/**/*.sol'",
+    "lint": "prettier --check 'src/**/*.sol' 'test/**/*.sol'",
     "clean": "forge cache clean && if [ -d out ]; then forge clean; fi"
   },
   "devDependencies": {
