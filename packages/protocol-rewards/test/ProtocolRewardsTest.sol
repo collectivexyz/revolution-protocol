@@ -12,11 +12,10 @@ contract ProtocolRewardsTest is Test {
     RevolutionProtocolRewards internal protocolRewards;
 
     address internal collector;
-    address internal creator;
-    address internal createReferral;
-    address internal mintReferral;
-    address internal firstMinter;
-    address internal zora;
+    address internal builderReferral;
+    address internal purchaseReferral;
+    address internal deployer;
+    address internal revolution;
 
     function setUp() public virtual {
         protocolRewards = new RevolutionProtocolRewards();
@@ -24,10 +23,9 @@ contract ProtocolRewardsTest is Test {
         vm.label(address(protocolRewards), "protocolRewards");
 
         collector = makeAddr("collector");
-        creator = makeAddr("creator");
-        createReferral = makeAddr("createReferral");
-        mintReferral = makeAddr("mintReferral");
-        firstMinter = makeAddr("firstMinter");
-        zora = makeAddr("zora");
+        builderReferral = makeAddr("builderReferral");
+        purchaseReferral = makeAddr("purchaseReferral");
+        deployer = makeAddr("firstMinter");
+        revolution = makeAddr("revolution");
     }
 }
