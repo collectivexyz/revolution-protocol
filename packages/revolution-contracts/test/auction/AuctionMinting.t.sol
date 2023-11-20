@@ -13,7 +13,7 @@ import { IVerbsDescriptorMinimal } from "../../src/interfaces/IVerbsDescriptorMi
 import { ICultureIndex, ICultureIndexEvents } from "../../src/interfaces/ICultureIndex.sol";
 import { IVerbsAuctionHouse } from "../../src/interfaces/IVerbsAuctionHouse.sol";
 import { IERC20 } from "@openzeppelin/contracts/token/ERC20/IERC20.sol";
-import { VerbsAuctionHouseTest } from "./VerbsAuctionHouse.t.sol";
+import { VerbsAuctionHouseTest } from "./AuctionHouse.t.sol";
 import { PausableUpgradeable } from "@openzeppelin/contracts-upgradeable/utils/PausableUpgradeable.sol";
 
 contract VerbsAuctionHouseMintTest is VerbsAuctionHouseTest {

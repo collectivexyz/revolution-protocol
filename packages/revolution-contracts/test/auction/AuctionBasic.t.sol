@@ -19,7 +19,7 @@ import { ITokenEmitter } from "../../src/interfaces/ITokenEmitter.sol";
 import { wadMul, wadDiv } from "../../src/libs/SignedWadMath.sol";
 import { RevolutionProtocolRewards } from "@collectivexyz/protocol-rewards/src/RevolutionProtocolRewards.sol";
 import { TokenEmitterRewards } from "@collectivexyz/protocol-rewards/src/abstract/TokenEmitter/TokenEmitterRewards.sol";
-import { VerbsAuctionHouseTest } from "./VerbsAuctionHouse.t.sol";
+import { VerbsAuctionHouseTest } from "./AuctionHouse.t.sol";
 
 contract VerbsAuctionHouseBasicTest is VerbsAuctionHouseTest {
     function testEventEmission() public {

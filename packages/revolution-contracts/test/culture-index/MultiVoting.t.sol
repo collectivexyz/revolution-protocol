@@ -3,7 +3,7 @@ pragma solidity ^0.8.22;
 
 import { Test } from "forge-std/Test.sol";
 import { CultureIndex } from "../../src/CultureIndex.sol";
-import { CultureIndexVotingTest } from "./CultureIndex.Voting.t.sol";
+import { CultureIndexVotingTest } from "./Voting.t.sol";
 import { MockERC20 } from "../mock/MockERC20.sol";
 
 contract CultureIndexVotingTestManager is Test {
