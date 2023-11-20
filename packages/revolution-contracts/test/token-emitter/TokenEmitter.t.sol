@@ -43,8 +43,6 @@ contract TokenEmitterTest is Test {
         );
 
         address emitterAddress = address(emitter);
-        address thisAddress = address(this);
-        address currentOwner = governanceToken.owner();
 
         governanceToken.transferOwnership(emitterAddress);
     }
@@ -55,17 +53,21 @@ contract TokenEmitterTest is Test {
         uint256 initAmount = emitter.getTokenAmountForMultiPurchase(1e18);
 
         uint256 firstPrice = emitter.getTokenPrice(emitter.totalSupply());
-        int256 targetSaleTimeFirst = emitter.getTargetSaleTime(int256(emitter.totalSupply()));
+        int256 targetSaleTimeFirst = emitter.getTargetSaleTime(int256(emitter.totalSupply() + tokensPerTimeUnit * 2 * 1e4));
 
         // solhint-disable-next-line not-rely-on-time
         vm.warp(block.timestamp + (10 days));
 
         uint256 secondPrice = emitter.getTokenPrice(emitter.totalSupply());
-        int256 targetSaleTimeSecond = emitter.getTargetSaleTime(int256(emitter.totalSupply()));
+        int256 targetSaleTimeSecond = emitter.getTargetSaleTime(int256(emitter.totalSupply() + tokensPerTimeUnit * 2 * 1e4 * 10));
 
         uint256 laterAmount = emitter.getTokenAmountForMultiPurchase(1e18);
 
         assertGt(laterAmount, initAmount, "Later amount should be greater than initial amount");
+
+        assertLt(secondPrice, firstPrice, "Second price should be less than first price");
+
+        assertGt(targetSaleTimeSecond, targetSaleTimeFirst, "Second target sale time should be greater than first target sale time");
     }
 
     function testBuyToken() public {
@@ -302,6 +304,8 @@ contract TokenEmitterTest is Test {
         uint256 smallPaymentAmount2 = emitter._getTokenAmountForSinglePurchase(smallPayment, tokenSupply);
         uint256 overEstimated = emitter.UNSAFE_getOverestimateTokenAmount(smallPayment, tokenSupply);
         uint256 priceForFirstToken = emitter.getTokenPrice(tokenSupply);
+        //assert that the overestimated amount is greater than the correct amount
+        // assertGt(overEstimated, smallPaymentAmount2, "Overestimated amount should be greater than correct amount");
         assertGt(smallPaymentTokenAmount, 0, "Token amount for small payment should be greater than zero");
         emit log_uint(smallPaymentTokenAmount);
 
@@ -327,6 +331,7 @@ contract TokenEmitterTest is Test {
 
         emit log_string("Largest Payment Token Amount: ");
         emit log_uint(largestPaymentTokenAmount);
+        
 
         vm.stopPrank();
     }

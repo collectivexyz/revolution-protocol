@@ -76,7 +76,6 @@ contract VerbsAuctionHouseTest is Test {
 
         // Deploy a new VerbsDescriptor, which will be used by VerbsToken
         descriptor = new VerbsDescriptor(address(verbs), "Verb");
-        IVerbsDescriptorMinimal _descriptor = descriptor;
 
         // Set the culture index and descriptor in VerbsToken
         verbs.setCultureIndex(ICultureIndex(address(_cultureIndex)));
