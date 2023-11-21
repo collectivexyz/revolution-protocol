@@ -32,9 +32,9 @@ contract VRGDAC {
 
     /// @notice Sets target price and per time unit price decay for the VRGDA.
     /// @param _targetPrice The target price for a token if sold on pace, scaled by 1e18.
-    /// @param _perTimeUnit The number of tokens to target selling in 1 full unit of time, scaled by 1e18.
     /// @param _priceDecayPercent The percent price decays per unit of time with no sales, scaled by 1e18.
-    constructor(int256 _targetPrice, int256 _perTimeUnit, int256 _priceDecayPercent) {
+    /// @param _perTimeUnit The number of tokens to target selling in 1 full unit of time, scaled by 1e18.
+    constructor(int256 _targetPrice, int256 _priceDecayPercent, int256 _perTimeUnit) {
         targetPrice = _targetPrice;
 
         perTimeUnit = _perTimeUnit;

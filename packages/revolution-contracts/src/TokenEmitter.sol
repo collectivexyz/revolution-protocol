@@ -19,18 +19,21 @@ contract TokenEmitter is VRGDAC, ITokenEmitter, ReentrancyGuard, TokenEmitterRew
     // solhint-disable-next-line not-rely-on-time
     uint public immutable startTime = block.timestamp;
 
+    // Keeps track of ETH spent
+    uint public totalSpent;
+
     // approved contracts, owner, and a token contract address
     constructor(
         NontransferableERC20 _token,
         address _protocolRewards,
         address _protocolFeeRecipient,
         address _treasury,
-        int _targetPrice, // SCALED BY E18. Target price. 
-        int _priceDecayPercent, // SCALED BY E18. Price decay percent. This indicates how aggressively you discount tokens when sales are not occurring.
-        int _tokensPerTimeUnit // SCALED BY E18. The number of tokens to target selling in 1 full unit of time.
-    ) TokenEmitterRewards(_protocolRewards, _protocolFeeRecipient) VRGDAC(_targetPrice, _tokensPerTimeUnit, _priceDecayPercent) {
+        int _targetPrice, // The target price for a token if sold on pace, scaled by 1e18.
+        int _priceDecayPercent, // The percent price decays per unit of time with no sales, scaled by 1e18.
+        int _tokensPerTimeUnit // The number of tokens to target selling in 1 full unit of time, scaled by 1e18.
+    ) TokenEmitterRewards(_protocolRewards, _protocolFeeRecipient) VRGDAC(_targetPrice, _priceDecayPercent, _tokensPerTimeUnit) {
         treasury = _treasury;
-
+        
         token = _token;
     }
 
@@ -66,6 +69,8 @@ contract TokenEmitter is VRGDAC, ITokenEmitter, ReentrancyGuard, TokenEmitterRew
         (bool success, ) = treasury.call{ value: msgValueRemaining }(new bytes(0));
         require(success, "Transfer failed.");
 
+        //todo need to find better place to do this
+        totalSpent += msgValueRemaining;
         uint sum = 0;
 
         // calculates how many tokens to give each address
@@ -96,7 +101,7 @@ contract TokenEmitter is VRGDAC, ITokenEmitter, ReentrancyGuard, TokenEmitterRew
         // solhint-disable-next-line not-rely-on-time
         return yToX({
             timeSinceStart: toDaysWadUnsafe(block.timestamp - startTime),
-            sold: int(totalSupply()),
+            sold: int(totalSpent),
             amount: int(paymentWei)
         });
     }
