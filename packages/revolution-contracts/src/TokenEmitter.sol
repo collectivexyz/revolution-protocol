@@ -19,9 +19,6 @@ contract TokenEmitter is VRGDAC, ITokenEmitter, ReentrancyGuard, TokenEmitterRew
     // solhint-disable-next-line not-rely-on-time
     uint public immutable startTime = block.timestamp;
 
-    // Keeps track of ETH spent
-    uint public totalSpent;
-
     // approved contracts, owner, and a token contract address
     constructor(
         NontransferableERC20 _token,
@@ -69,8 +66,6 @@ contract TokenEmitter is VRGDAC, ITokenEmitter, ReentrancyGuard, TokenEmitterRew
         (bool success, ) = treasury.call{ value: msgValueRemaining }(new bytes(0));
         require(success, "Transfer failed.");
 
-        //todo need to find better place to do this
-        totalSpent += msgValueRemaining;
         uint sum = 0;
 
         // calculates how many tokens to give each address
@@ -101,7 +96,7 @@ contract TokenEmitter is VRGDAC, ITokenEmitter, ReentrancyGuard, TokenEmitterRew
         // solhint-disable-next-line not-rely-on-time
         return yToX({
             timeSinceStart: toDaysWadUnsafe(block.timestamp - startTime),
-            sold: int(totalSpent),
+            sold: int(totalSupply()),
             amount: int(paymentWei)
         });
     }
