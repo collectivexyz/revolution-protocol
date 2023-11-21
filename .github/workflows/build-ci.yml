@@ -36,26 +36,17 @@ jobs:
         run: |
           npm install -g pnpm
 
-      - name: Install Solidity compiler
-        run: forge install
-
-      - name: Log Solidity version
-        run: forge --version
-
-      - name: Log Foundry version
-        run: forge --version
-
-      - name: Log Node.js version
-        run: node --version
-
       - name: Update Dependencies
         run: |
-          git submodule foreach --recursive 'if [ -f pnpm-lock.yaml ]; then pnpm install; fi'
+          pnpm install
 
-      - name: Run Forge test
+      - name: Run protocol-rewards tests
         run: |
-          forge test -vvv
-        id: test
+          cd packages/protocol-rewards && pnpm test
+
+      - name: Run revolution-contracts tests
+        run: |
+          cd packages/revolution-contracts && pnpm test
 
       - name: Run Geiger Check
         run: |

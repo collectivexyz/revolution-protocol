@@ -2,6 +2,9 @@
 cache/
 out/
 
+#turbo
+.turbo
+
 # Ignores development broadcast logs
 !/broadcast
 /broadcast/*/31337/
@@ -23,4 +26,4 @@ bin
 
 .deps
 
-packages/*/artifacts/**/*.json
+packages/*/src/artifacts/**/*.json
