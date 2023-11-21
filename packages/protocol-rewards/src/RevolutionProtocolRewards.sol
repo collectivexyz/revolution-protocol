@@ -25,7 +25,7 @@ contract RevolutionProtocolRewards is IRevolutionProtocolRewards, EIP712 {
     constructor() payable EIP712("RevolutionProtocolRewards", "1") {}
 
     /// @notice The total amount of ETH held in the contract
-    function totalSupply() external view returns (uint256) {
+    function totalRewardsSupply() external view returns (uint256) {
         return address(this).balance;
     }
 

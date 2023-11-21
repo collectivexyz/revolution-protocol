@@ -4,22 +4,15 @@ pragma solidity 0.8.22;
 import {TokenEmitterRewards} from "../../src/abstract/TokenEmitter/TokenEmitterRewards.sol";
 import {TokenEmitter, NontransferableERC20} from "./TokenEmitter.sol";
 
-contract MockTokenEmitter is TokenEmitterRewards {
-    error MOCK_TOKENEMITTER_INVALID_REMAINING_VALUE();
-
+contract MockTokenEmitter is TokenEmitter {
     address public treasury;
 
     constructor(
+        NontransferableERC20 _token,
         address _treasury,
         address _protocolRewards,
         address _revolutionRewardRecipient
-    )  TokenEmitterRewards(_protocolRewards, _revolutionRewardRecipient) {
+    ) TokenEmitter(_token, _protocolRewards, _revolutionRewardRecipient, _treasury, 1e11, 1e17, 1e22) {
         treasury = _treasury;
-    }
-
-    function purchaseWithRewards(address builderReferral, address purchaseReferral, address deployer) external payable {
-        uint256 remainingValue = _handleRewardsAndGetValueToSend(msg.value, builderReferral, purchaseReferral, deployer);
-
-        // TODO add buy token call
     }
 }

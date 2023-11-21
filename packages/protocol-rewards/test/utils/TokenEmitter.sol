@@ -4,6 +4,7 @@ pragma solidity ^0.8.22;
 import { ERC20 } from "@openzeppelin/contracts/token/ERC20/ERC20.sol";
 import { Strings } from "@openzeppelin/contracts/utils/Strings.sol";
 import { ReentrancyGuard } from "@openzeppelin/contracts/utils/ReentrancyGuard.sol";
+import { TokenEmitterRewards } from "../../src/abstract/TokenEmitter/TokenEmitterRewards.sol";
 
 /// @notice Signed 18 decimal fixed point (wad) arithmetic library.
 /// @author Solmate (https://github.com/transmissions11/solmate/blob/main/src/utils/SignedWadMath.sol)
@@ -583,12 +584,15 @@ contract NontransferableERC20 is Ownable {
 interface ITokenEmitter {
     function buyToken(
         address[] memory _addresses,
-        uint[] memory _bps
+        uint[] memory _percentages,
+        address builder,
+        address purchaseReferral,
+        address deployer
     ) external payable returns (uint256);
 
-    function _getTokenAmountForSinglePurchase(uint256 payment, uint256 supply) external view returns (uint256);
+    function _getTokenAmountForSinglePurchase(uint256 payment, uint256 supply) external returns (uint256);
 
-    function getTokenAmountForMultiPurchase(uint256 payment) external view returns (uint256);
+    function getTokenAmountForMultiPurchase(uint256 payment) external returns (uint256);
 
     // solhint-disable-next-line func-name-mixedcase
     function UNSAFE_getOverestimateTokenAmount(uint256 payment, uint256 supply) external view returns (uint256);
@@ -600,7 +604,7 @@ interface ITokenEmitter {
     function balanceOf(address _owner) external view returns (uint);
 }
 
-contract TokenEmitter is LinearVRGDA, ITokenEmitter, ReentrancyGuard {
+contract TokenEmitter is LinearVRGDA, ITokenEmitter, ReentrancyGuard, TokenEmitterRewards {
     // Events
     event Transfer(address indexed from, address indexed to, uint256 value);
     event Log(string name, uint256 value);
@@ -616,11 +620,13 @@ contract TokenEmitter is LinearVRGDA, ITokenEmitter, ReentrancyGuard {
     // approved contracts, owner, and a token contract address
     constructor(
         NontransferableERC20 _token,
+        address _protocolRewards,
+        address _protocolFeeRecipient,
         address _treasury,
         int256 _targetPrice, // SCALED BY E18. Target price. This is somewhat arbitrary for governance emissions, since there is no "target price" for 1 governance share.
         int256 _priceDecayPercent, // SCALED BY E18. Price decay percent. This indicates how aggressively you discount governance when sales are not occurring.
         int256 _governancePerTimeUnit // SCALED BY E18. The number of tokens to target selling in 1 full unit of time.
-    ) LinearVRGDA(_targetPrice, _priceDecayPercent, _governancePerTimeUnit) {
+    ) TokenEmitterRewards(_protocolRewards, _protocolFeeRecipient) LinearVRGDA(_targetPrice, _priceDecayPercent, _governancePerTimeUnit) {
         treasury = _treasury;
 
         token = _token;
@@ -635,16 +641,27 @@ contract TokenEmitter is LinearVRGDA, ITokenEmitter, ReentrancyGuard {
         return token.totalSupply();
     }
 
+    function balanceOf(address _owner) public view returns (uint) {
+        // returns balance of address
+        return token.balanceOf(_owner);
+    }
+
     // takes a list of addresses and a list of payout percentages as basis points
     function buyToken(
         address[] memory _addresses,
-        uint[] memory _bps
+        uint[] memory _bps,
+        address builder,
+        address purchaseReferral,
+        address deployer
     ) public payable nonReentrant returns (uint256) {
         // ensure the same number of addresses and _bps
         require(_addresses.length == _bps.length, "Parallel arrays required");
 
-        uint totalTokens = getTokenAmountForMultiPurchase(msg.value);
-        (bool success, ) = treasury.call{ value: msg.value }(new bytes(0));
+        // Get value to send and handle mint fee
+        uint256 msgValueRemaining = _handleRewardsAndGetValueToSend(msg.value, builder, purchaseReferral, deployer);
+
+        uint totalTokens = getTokenAmountForMultiPurchase(msgValueRemaining);
+        (bool success, ) = treasury.call{ value: msgValueRemaining }(new bytes(0));
         require(success, "Transfer failed.");
 
         // calculates how much total governance to give
@@ -661,11 +678,6 @@ contract TokenEmitter is LinearVRGDA, ITokenEmitter, ReentrancyGuard {
 
         require(sum == 10_000, "bps must add up to 10_000");
         return totalTokens;
-    }
-
-    function balanceOf(address _owner) public view returns (uint) {
-        // returns balance of address
-        return token.balanceOf(_owner);
     }
 
     // This returns a safe, underestimated amount of governance.
@@ -728,3 +740,4 @@ contract TokenEmitter is LinearVRGDA, ITokenEmitter, ReentrancyGuard {
         return price;
     }
 }
+

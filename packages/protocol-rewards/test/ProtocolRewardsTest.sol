@@ -17,6 +17,7 @@ contract ProtocolRewardsTest is Test {
     address internal purchaseReferral;
     address internal deployer;
     address internal revolution;
+    address internal treasury;
 
     function setUp() public virtual {
         protocolRewards = new RevolutionProtocolRewards();
@@ -28,5 +29,6 @@ contract ProtocolRewardsTest is Test {
         purchaseReferral = makeAddr("purchaseReferral");
         deployer = makeAddr("firstMinter");
         revolution = makeAddr("revolution");
+        treasury = makeAddr("treasury");
     }
 }

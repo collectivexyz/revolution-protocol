@@ -29,7 +29,7 @@ contract WithdrawTest is ProtocolRewardsTest {
 
     function testWithdraw() public {
         uint256 beforeBuilderBalance = builderReferral.balance;
-        uint256 beforeTotalSupply = protocolRewards.totalSupply();
+        uint256 beforeTotalSupply = protocolRewards.totalRewardsSupply();
 
         uint256 builderRewardsBalance = protocolRewards.balanceOf(builderReferral);
 
@@ -37,12 +37,12 @@ contract WithdrawTest is ProtocolRewardsTest {
         protocolRewards.withdraw(builderReferral, builderRewardsBalance);
 
         assertEq(builderReferral.balance, beforeBuilderBalance + builderRewardsBalance);
-        assertEq(protocolRewards.totalSupply(), beforeTotalSupply - builderRewardsBalance);
+        assertEq(protocolRewards.totalRewardsSupply(), beforeTotalSupply - builderRewardsBalance);
     }
 
     function testWithdrawFullBalance() public {
         uint256 beforeBuilderBalance = builderReferral.balance;
-        uint256 beforeTotalSupply = protocolRewards.totalSupply();
+        uint256 beforeTotalSupply = protocolRewards.totalRewardsSupply();
 
         uint256 builderRewardsBalance = protocolRewards.balanceOf(builderReferral);
 
@@ -50,7 +50,7 @@ contract WithdrawTest is ProtocolRewardsTest {
         protocolRewards.withdraw(builderReferral, 0);
 
         assertEq(builderReferral.balance, beforeBuilderBalance + builderRewardsBalance);
-        assertEq(protocolRewards.totalSupply(), beforeTotalSupply - builderRewardsBalance);
+        assertEq(protocolRewards.totalRewardsSupply(), beforeTotalSupply - builderRewardsBalance);
     }
 
     function testRevert_InvalidWithdrawToAddress() public {
@@ -71,26 +71,26 @@ contract WithdrawTest is ProtocolRewardsTest {
 
     function testWithdrawFor() public {
         uint256 beforeBuilderBalance = builderReferral.balance;
-        uint256 beforeTotalSupply = protocolRewards.totalSupply();
+        uint256 beforeTotalSupply = protocolRewards.totalRewardsSupply();
 
         uint256 builderRewardsBalance = protocolRewards.balanceOf(builderReferral);
 
         protocolRewards.withdrawFor(builderReferral, builderRewardsBalance);
 
         assertEq(builderReferral.balance, beforeBuilderBalance + builderRewardsBalance);
-        assertEq(protocolRewards.totalSupply(), beforeTotalSupply - builderRewardsBalance);
+        assertEq(protocolRewards.totalRewardsSupply(), beforeTotalSupply - builderRewardsBalance);
     }
 
     function testWithdrawForFullBalance() public {
         uint256 beforeBuilderBalance = builderReferral.balance;
-        uint256 beforeTotalSupply = protocolRewards.totalSupply();
+        uint256 beforeTotalSupply = protocolRewards.totalRewardsSupply();
 
         uint256 builderRewardsBalance = protocolRewards.balanceOf(builderReferral);
 
         protocolRewards.withdrawFor(builderReferral, 0);
 
         assertEq(builderReferral.balance, beforeBuilderBalance + builderRewardsBalance);
-        assertEq(protocolRewards.totalSupply(), beforeTotalSupply - builderRewardsBalance);
+        assertEq(protocolRewards.totalRewardsSupply(), beforeTotalSupply - builderRewardsBalance);
     }
 
     function testRevert_WithdrawForInvalidAmount() public {
@@ -122,12 +122,12 @@ contract WithdrawTest is ProtocolRewardsTest {
         (uint8 v, bytes32 r, bytes32 s) = vm.sign(builderPrivateKey, digest);
 
         uint256 beforeBuilderBalance = builderReferral.balance;
-        uint256 beforeTotalSupply = protocolRewards.totalSupply();
+        uint256 beforeTotalSupply = protocolRewards.totalRewardsSupply();
 
         protocolRewards.withdrawWithSig(builderReferral, builderReferral, builderRewardsBalance, deadline, v, r, s);
 
         assertEq(builderReferral.balance, beforeBuilderBalance + builderRewardsBalance);
-        assertEq(protocolRewards.totalSupply(), beforeTotalSupply - builderRewardsBalance);
+        assertEq(protocolRewards.totalRewardsSupply(), beforeTotalSupply - builderRewardsBalance);
     }
 
     function testWithdrawWithSigFullBalance() public {
@@ -145,12 +145,12 @@ contract WithdrawTest is ProtocolRewardsTest {
         (uint8 v, bytes32 r, bytes32 s) = vm.sign(builderPrivateKey, digest);
 
         uint256 beforeBuilderBalance = builderReferral.balance;
-        uint256 beforeTotalSupply = protocolRewards.totalSupply();
+        uint256 beforeTotalSupply = protocolRewards.totalRewardsSupply();
 
         protocolRewards.withdrawWithSig(builderReferral, builderReferral, 0, deadline, v, r, s);
 
         assertEq(builderReferral.balance, beforeBuilderBalance + builderRewardsBalance);
-        assertEq(protocolRewards.totalSupply(), beforeTotalSupply - builderRewardsBalance);
+        assertEq(protocolRewards.totalRewardsSupply(), beforeTotalSupply - builderRewardsBalance);
     }
 
     function testRevert_SigExpired() public {

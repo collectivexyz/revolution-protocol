@@ -29,7 +29,7 @@ contract ProtocolRewardsInvariantTest is ProtocolRewardsTest {
     }
 
     function invariant_TotalSupplyMatchesTotalDeposits() public {
-        assertEq(protocolRewards.totalSupply(), handler.ghost_depositSum() - handler.ghost_withdrawSum());
+        assertEq(protocolRewards.totalRewardsSupply(), handler.ghost_depositSum() - handler.ghost_withdrawSum());
     }
 
     function invariant_UserBalanceCannotExceedTotalSupply() public {
@@ -37,6 +37,6 @@ contract ProtocolRewardsInvariantTest is ProtocolRewardsTest {
     }
 
     function ensureActorBalanceDoesNotExceedTotalSupply(address actor) external {
-        assertLe(protocolRewards.balanceOf(actor), protocolRewards.totalSupply());
+        assertLe(protocolRewards.balanceOf(actor), protocolRewards.totalRewardsSupply());
     }
 }

@@ -20,10 +20,10 @@ abstract contract RewardSplits {
     // 2.1%
     uint256 internal constant TOTAL_REWARD_PER_PURCHASE_BPS = 210;
 
-    uint256 internal constant DEPLOYER_REWARD_BPS = 23;
+    uint256 internal constant DEPLOYER_REWARD_BPS = 21;
     uint256 internal constant REVOLUTION_REWARD_BPS = 77;
     uint256 internal constant BUILDER_REWARD_BPS = 77;
-    uint256 internal constant PURCHASE_REFERRAL_BPS = 33;
+    uint256 internal constant PURCHASE_REFERRAL_BPS = 35;
 
     uint256 public minPurchaseAmount = 0.0000001 ether;
     uint256 public maxPurchaseAmount = 5_000 ether;
@@ -41,11 +41,11 @@ abstract contract RewardSplits {
     }
 
     function computeTotalReward(uint256 paymentAmountWei) public view returns (uint256) {
-        if(paymentAmountWei < minPurchaseAmount) {
+        if(paymentAmountWei <= minPurchaseAmount) {
             revert INVALID_ETH_AMOUNT();
         }
 
-        if(paymentAmountWei > maxPurchaseAmount) {
+        if(paymentAmountWei >= maxPurchaseAmount) {
             revert INVALID_ETH_AMOUNT();
         }
 
@@ -53,11 +53,11 @@ abstract contract RewardSplits {
     }
 
     function computePurchaseRewards(uint256 paymentAmountWei) public view returns (RewardsSettings memory, uint256) {
-        if(paymentAmountWei < minPurchaseAmount) {
+        if(paymentAmountWei <= minPurchaseAmount) {
             revert INVALID_ETH_AMOUNT();
         }
 
-        if(paymentAmountWei > maxPurchaseAmount) {
+        if(paymentAmountWei >= maxPurchaseAmount) {
             revert INVALID_ETH_AMOUNT();
         }
 
