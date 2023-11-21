@@ -40,9 +40,13 @@ jobs:
         run: |
           pnpm install
 
-      - name: Run tests
+      - name: Run protocol-rewards tests
         run: |
           cd packages/protocol-rewards && pnpm test
+
+      - name: Run revolution-contracts tests
+        run: |
+          cd packages/revolution-contracts && pnpm test
 
       - name: Run Geiger Check
         run: |
