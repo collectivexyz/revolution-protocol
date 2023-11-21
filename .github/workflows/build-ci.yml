@@ -38,7 +38,7 @@ jobs:
 
       - name: Update Dependencies
         run: |
-          git submodule foreach --recursive 'if [ -f pnpm-lock.yaml ]; then pnpm install; fi'
+          pnpm install
 
       - name: Run tests
         run: |
