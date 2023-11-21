@@ -42,29 +42,31 @@ contract TokenEmitterRewardsTest is ProtocolRewardsTest {
         }
     }
 
-    // function testNullReferralRecipient(uint16 numTokens, uint256 pricePerToken) public {
-    //     vm.assume(numTokens > 0);
-    //     vm.assume(pricePerToken > 0 && pricePerToken < 100 ether);
+    function testNullReferralRecipient(uint256 msgValue) public {
+        mockTokenEmitter = new MockTokenEmitter(address(this), address(protocolRewards), revolution);
 
-    //     mockTokenEmitter = new mockTokenEmitter(creator, address(0), address(protocolRewards), zora);
+        vm.deal(collector, msgValue);
 
-    //     mockTokenEmitter.setSalePrice(pricePerToken);
+        vm.prank(collector);
+        if(msgValue < mockTokenEmitter.minPurchaseAmount() || msgValue > mockTokenEmitter.maxPurchaseAmount()) {
+            //expect INVALID_ETH_AMOUNT()
+            vm.expectRevert();
+        }
+        mockTokenEmitter.purchaseWithRewards{value: msgValue}(builderReferral, address(0), deployer);
 
-    //     uint256 totalReward = mockTokenEmitter.computeTotalReward(numTokens);
-    //     uint256 totalSale = numTokens * pricePerToken;
-    //     uint256 totalValue = totalReward + totalSale;
+        if(msgValue < mockTokenEmitter.minPurchaseAmount() || msgValue > mockTokenEmitter.maxPurchaseAmount()) {
+            //expect INVALID_ETH_AMOUNT()
+            vm.expectRevert();
+        }
+        (RewardsSettings memory settings, uint256 totalReward) = mockTokenEmitter.computePurchaseRewards(msgValue);
 
-    //     vm.deal(collector, totalValue);
-
-    //     vm.prank(collector);
-    //     mockTokenEmitter.purchaseWithRewards{value: totalValue}(collector, 0, numTokens, address(0));
-
-    // (RewardsSettings memory settings,) = mockTokenEmitter.computePurchaseRewards(msgValue);
-
-    //     assertEq(protocolRewards.totalSupply(), totalReward);
-    //     assertEq(protocolRewards.balanceOf(collector), settings.firstMinterReward);
-    //     assertEq(protocolRewards.balanceOf(revolution), settings.revolutionReward + settings.mintReferralReward + settings.createReferralReward);
-    // }
+        if(msgValue >= mockTokenEmitter.minPurchaseAmount() && msgValue <= mockTokenEmitter.maxPurchaseAmount()) {
+            assertApproxEqAbs(protocolRewards.totalSupply(), totalReward, 5);
+            assertApproxEqAbs(protocolRewards.balanceOf(builderReferral), settings.builderReferralReward, 5);
+            assertApproxEqAbs(protocolRewards.balanceOf(deployer), settings.deployerReward, 5);
+            assertApproxEqAbs(protocolRewards.balanceOf(revolution), settings.purchaseReferralReward + settings.revolutionReward, 5);
+        }
+    }
 
     // function testRevertInvalidEth(uint16 numTokens, uint256 pricePerToken) public {
     //     vm.assume(numTokens > 0);
