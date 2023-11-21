@@ -6,10 +6,10 @@ fuzz_runs = 500
 libs = ['node_modules']
 optimizer = true
 optimizer_runs = 500000
+via_ir = true
 out = 'out'
 script = 'script'
 src = 'src'
-via_ir = true
 
 [profile.dev]
 optimizer = false 
