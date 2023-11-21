@@ -68,30 +68,10 @@ contract TokenEmitterRewardsTest is ProtocolRewardsTest {
         }
     }
 
-    // function testRevertInvalidEth(uint16 numTokens, uint256 pricePerToken) public {
-    //     vm.assume(numTokens > 0);
-    //     vm.assume(pricePerToken > 0 && pricePerToken < 100 ether);
+    function testRevertInvalidEth(uint16 msgValue) public {
+        vm.assume(msgValue < mockTokenEmitter.minPurchaseAmount() || msgValue > mockTokenEmitter.maxPurchaseAmount());
 
-    //     mockTokenEmitter.setSalePrice(pricePerToken);
-
-    //     vm.expectRevert(abi.encodeWithSignature("INVALID_ETH_AMOUNT()"));
-    //     mockTokenEmitter.purchaseWithRewards(collector, 0, numTokens, mintReferral);
-    // }
-
-    // function testRevertInvalidEthRemaining(uint16 numTokens, uint256 pricePerToken) public {
-    //     vm.assume(numTokens > 0);
-    //     vm.assume(pricePerToken > 0 && pricePerToken < 100 ether);
-
-    //     mockTokenEmitter.setSalePrice(pricePerToken);
-
-    //     uint256 totalReward = mockTokenEmitter.computeTotalReward(numTokens);
-    //     uint256 totalSale = numTokens * pricePerToken;
-    //     uint256 totalValue = totalReward + totalSale;
-
-    //     vm.deal(collector, totalValue);
-
-    //     vm.prank(collector);
-    //     vm.expectRevert(abi.encodeWithSignature("MOCK_TOKENEMITTER_INVALID_REMAINING_VALUE()"));
-    //     mockTokenEmitter.purchaseWithRewards{value: totalValue - 1}(collector, 0, numTokens, mintReferral);
-    // }
+        vm.expectRevert(abi.encodeWithSignature("INVALID_ETH_AMOUNT()"));
+        mockTokenEmitter.computePurchaseRewards(msgValue);
+    }
 }

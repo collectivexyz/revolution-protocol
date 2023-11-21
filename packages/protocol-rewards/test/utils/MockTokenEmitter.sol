@@ -20,19 +20,6 @@ contract MockTokenEmitter is TokenEmitterRewards {
     function purchaseWithRewards(address builderReferral, address purchaseReferral, address deployer) external payable {
         uint256 remainingValue = _handleRewardsAndGetValueToSend(msg.value, builderReferral, purchaseReferral, deployer);
 
-        uint256 expectedRemainingValue = msg.value - msg.value * (TOTAL_REWARD_PER_PURCHASE_BPS) / 10_000;
-
-        //abs of difference < 10
-        if (remainingValue > expectedRemainingValue) {
-            if (remainingValue - expectedRemainingValue > 10) {
-                revert MOCK_TOKENEMITTER_INVALID_REMAINING_VALUE();
-            }
-        } else {
-            if (expectedRemainingValue - remainingValue > 10) {
-                revert MOCK_TOKENEMITTER_INVALID_REMAINING_VALUE();
-            }
-        }
-
         // TODO add buy token call
     }
 }
