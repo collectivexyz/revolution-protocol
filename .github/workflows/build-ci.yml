@@ -9,6 +9,12 @@ on:
     branches:
       - "*"
 
+  workflow_call:
+    inputs:
+      package_folder:
+        required: true
+        type: string
+
 jobs:
   forge_test:
     strategy:
@@ -40,10 +46,9 @@ jobs:
         run: |
           git submodule foreach --recursive 'if [ -f pnpm-lock.yaml ]; then pnpm install; fi'
 
-      - name: Run Forge test
+      - name: Run tests
         run: |
-          turbo run test
-        id: test
+          cd ${{ inputs.package_folder}} && pnpm test
 
       - name: Run Geiger Check
         run: |
