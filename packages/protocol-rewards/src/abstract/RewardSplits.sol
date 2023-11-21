@@ -18,12 +18,12 @@ abstract contract RewardSplits {
     error ONLY_CREATE_REFERRAL();
 
     // 2.1%
-    uint256 internal constant TOTAL_REWARD_PER_PURCHASE_BPS = 210;
+    uint256 internal constant TOTAL_REWARD_PER_PURCHASE_BPS = 221;
 
     uint256 internal constant DEPLOYER_REWARD_BPS = 21;
-    uint256 internal constant REVOLUTION_REWARD_BPS = 77;
-    uint256 internal constant BUILDER_REWARD_BPS = 77;
-    uint256 internal constant PURCHASE_REFERRAL_BPS = 35;
+    uint256 internal constant REVOLUTION_REWARD_BPS = 75;
+    uint256 internal constant BUILDER_REWARD_BPS = 75;
+    uint256 internal constant PURCHASE_REFERRAL_BPS = 50;
 
     uint256 public minPurchaseAmount = 0.0000001 ether;
     uint256 public maxPurchaseAmount = 5_000 ether;
