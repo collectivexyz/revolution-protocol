@@ -96,7 +96,7 @@ contract TokenEmitterTest is Test {
         emitter.buyToken{ value: 10e18 }(secondRecipients, bps, address(0), address(0), address(0));
 
         // should get more expensive
-        assert(emitter.balanceOf(address(1)) > emitter.balanceOf(address(2)));
+        assertGt(emitter.balanceOf(address(1)), emitter.balanceOf(address(2)));
     }
 
     // test multiple payouts

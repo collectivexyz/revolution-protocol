@@ -52,12 +52,34 @@ contract VRGDAC {
     //////////////////////////////////////////////////////////////*/
 
 
+    // y to pay
+    // given # of tokens sold and # to buy, returns amount to pay
     function xToY(int256 timeSinceStart, int256 sold, int256 amount) public view virtual returns (int256) {
         unchecked {
             return pIntegral(timeSinceStart, sold + amount) - pIntegral(timeSinceStart, sold);
         }
     }
 
+    // y to pay alt
+    function xToYAlt(int256 timeSinceStart, int256 sold, int256 amount) public view virtual returns (int256) {
+
+        //initial setups
+        int256 ONEminusK = 1e18 - priceDecayPercent;
+        int256 P0xR = wadMul(targetPrice, perTimeUnit);
+        int256 ln1mK = wadLn(ONEminusK);
+
+        //exponents
+        int256 XSTARTdR = wadDiv(sold, perTimeUnit);
+        int256 XSTARTpXBOUGHTdR = wadDiv(sold + amount, perTimeUnit);
+
+        int256 coefficient = wadDiv(P0xR, ln1mK);
+
+        int256 parenthesis = wadPow(ONEminusK, timeSinceStart - XSTARTdR) - wadPow(ONEminusK, timeSinceStart - XSTARTpXBOUGHTdR);
+
+        return wadMul(coefficient, parenthesis);
+    }
+
+    // // given amount to pay and amount sold so far, returns # of tokens to sell
     function yToX(int256 timeSinceStart, int256 sold, int256 amount) public view virtual returns (int256) {
         unchecked {
             return wadMul(
@@ -69,7 +91,8 @@ contract VRGDAC {
             );
         }
     }
-    
+
+    // given # of tokens sold, returns integral of price p(x) = p0 * (1 - k)^(x/r)
     function pIntegral(int256 timeSinceStart, int256 sold) internal view returns (int256) {
         return wadDiv(
             -wadMul(
@@ -80,6 +103,7 @@ contract VRGDAC {
         );
     }
 
+    // // given # of tokens sold, returns price p(x) = p0 * (1 - k)^(t - (x/r)) - (x/r) makes it a linearvrgda issuance
     function p(int256 timeSinceStart, int256 sold) internal view returns (int256) {
         return wadMul(targetPrice, wadPow(1e18 - priceDecayPercent, timeSinceStart - unsafeWadDiv(sold, perTimeUnit)));
     }
