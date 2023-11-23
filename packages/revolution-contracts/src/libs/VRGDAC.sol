@@ -80,7 +80,7 @@ contract VRGDAC {
     }
 
     // // given amount to pay and amount sold so far, returns # of tokens to sell
-    function yToXOld(int256 timeSinceStart, int256 sold, int256 amount) public view virtual returns (int256) {
+    function yToX(int256 timeSinceStart, int256 sold, int256 amount) public view virtual returns (int256) {
         unchecked {
             return wadMul(
                 -wadDiv(
@@ -93,14 +93,15 @@ contract VRGDAC {
     }
 
     // // given amount to pay and amount sold so far, returns # of tokens to sell
-    function yToX(int256 timeSinceStart, int256 sold, int256 amount) public view virtual returns (int256) {
+    function yToXRaw(int256 timeSinceStart, int256 sold, int256 amount) public view virtual returns (int256) {
+        int256 soldDifference = wadMul(perTimeUnit, timeSinceStart) - sold;
         unchecked {
             return wadMul(
                 perTimeUnit,
                 wadDiv(
                     wadLn(wadDiv(
-                        wadMul(targetPrice, wadMul(perTimeUnit, wadExp(wadMul(wadMul(perTimeUnit, timeSinceStart) - sold, wadDiv(decayConstant, perTimeUnit))))),
-                        wadMul(targetPrice, wadMul(perTimeUnit, wadPow(decayConstant, wadDiv(wadMul(perTimeUnit, timeSinceStart) - sold, perTimeUnit)))) - wadMul(amount, decayConstant)
+                        wadMul(targetPrice, wadMul(perTimeUnit, wadExp(wadMul(soldDifference, wadDiv(decayConstant, perTimeUnit))))),
+                        wadMul(targetPrice, wadMul(perTimeUnit, wadPow(1e18 - priceDecayPercent, wadDiv(soldDifference, perTimeUnit)))) - wadMul(amount, decayConstant)
                     )),
                     decayConstant
                 )

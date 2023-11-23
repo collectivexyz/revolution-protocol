@@ -47,24 +47,64 @@ contract TokenEmitterTest is Test {
         governanceToken.transferOwnership(emitterAddress);
     }
 
-    // function testBuyingLaterIsBetter() public {
-    //     vm.startPrank(address(0));
+    function testTransferTokenContractOwnership() public {
+        // makes a token emitter with one nontransferableerc20
+        // makes a second with the same one
+        // ensures that the second cannot mint and calling buyGovernance fails
+        // transfers ownership to the second
+        // ensures that the second can mint and calling buyGovernance succeeds
 
-    //     int256 initAmount = emitter.getTokenQuoteForPayment(1e18);
+        address treasury = address(0);
 
-    //     int256 firstPrice = emitter.buyTokenQuote(emitter.totalSupply());
+        // // 0.1 per governance, 10% price decay per day, 100 governance sale target per day
+        NontransferableERC20 governanceToken = new NontransferableERC20(address(this), "Revolution Governance", "GOV", 4);
+        RevolutionProtocolRewards protocolRewards = new RevolutionProtocolRewards();
 
-    //     // solhint-disable-next-line not-rely-on-time
-    //     vm.warp(block.timestamp + (10 days));
+        TokenEmitter emitter1 = new TokenEmitter(governanceToken, address(protocolRewards), address(this), treasury, 1e14, 1e17, 1e22);
 
-    //     int256 secondPrice = emitter.buyTokenQuote(emitter.totalSupply());
+        TokenEmitter emitter2 = new TokenEmitter(governanceToken, address(protocolRewards), address(this), treasury, 1e14, 1e17, 1e22);
 
-    //     int256 laterAmount = emitter.getTokenQuoteForPayment(1e18);
+        governanceToken.transferOwnership(address(emitter1));
 
-    //     assertGt(laterAmount, initAmount, "Later amount should be greater than initial amount");
+        vm.deal(address(this), 100000 ether);
 
-    //     assertLt(secondPrice, firstPrice, "Second price should be less than first price");
-    // }
+        address[] memory recipients = new address[](1);
+        recipients[0] = address(1);
+
+        uint256[] memory bps = new uint256[](1);
+        bps[0] = 10_000;
+
+        emitter1.buyToken{ value: 1e18 }(recipients, bps, address(0), address(0), address(0));
+
+        vm.prank(address(emitter1));
+
+        governanceToken.transferOwnership(address(emitter2));
+
+        vm.prank(address(0));
+        emitter2.buyToken{ value: 1e18 }(recipients, bps, address(0), address(0), address(0));
+    }
+
+    function testBuyingLaterIsBetter() public {
+        vm.startPrank(address(0));
+
+        int256 initAmount = emitter.getTokenQuoteForPayment(1e18);
+
+        int256 firstPrice = emitter.buyTokenQuote(1e19);
+
+        // solhint-disable-next-line not-rely-on-time
+        vm.warp(block.timestamp + (10 days));
+
+        int256 secondPrice = emitter.buyTokenQuote(1e19);
+
+        emit log_int(firstPrice);
+        emit log_int(secondPrice);
+
+        int256 laterAmount = emitter.getTokenQuoteForPayment(1e18);
+
+        assertGt(laterAmount, initAmount, "Later amount should be greater than initial amount");
+
+        assertLt(secondPrice, firstPrice, "Second price should be less than first price");
+    }
 
     function testBuyToken() public {
         vm.startPrank(address(0));
@@ -91,9 +131,9 @@ contract TokenEmitterTest is Test {
         uint256[] memory bps = new uint256[](1);
         bps[0] = 10_000;
 
-        emitter.buyToken{ value: 10e18 }(firstRecipients, bps, address(0), address(0), address(0));
+        emitter.buyToken{ value: 1e18 }(firstRecipients, bps, address(0), address(0), address(0));
 
-        emitter.buyToken{ value: 10e18 }(secondRecipients, bps, address(0), address(0), address(0));
+        emitter.buyToken{ value: 1e18 }(secondRecipients, bps, address(0), address(0), address(0));
 
         // should get more expensive
         assertGt(emitter.balanceOf(address(1)), emitter.balanceOf(address(2)));
@@ -145,7 +185,7 @@ contract TokenEmitterTest is Test {
         vm.stopPrank();
     }
 
-    // // TODO: test scamming creator fails with percentage low
+    // // // TODO: test scamming creator fails with percentage low
     // function testFailLowPercentage() public {
     //     vm.startPrank(address(0));
 
@@ -176,43 +216,6 @@ contract TokenEmitterTest is Test {
         uint256 secondAmountDifference = emitter.balanceOf(address(1)) - firstAmount;
 
         assert(secondAmountDifference <= 2 * emitter.totalSupply());
-    }
-
-    function testTransferTokenContractOwnership() public {
-        // makes a token emitter with one nontransferableerc20
-        // makes a second with the same one
-        // ensures that the second cannot mint and calling buyGovernance fails
-        // transfers ownership to the second
-        // ensures that the second can mint and calling buyGovernance succeeds
-
-        address treasury = address(0);
-
-        // 0.1 per governance, 10% price decay per day, 100 governance sale target per day
-        NontransferableERC20 governanceToken = new NontransferableERC20(address(this), "Revolution Governance", "GOV", 4);
-        RevolutionProtocolRewards protocolRewards = new RevolutionProtocolRewards();
-
-        TokenEmitter emitter1 = new TokenEmitter(governanceToken, address(protocolRewards), address(this), treasury, 1e14, 1e17, 1e22);
-
-        TokenEmitter emitter2 = new TokenEmitter(governanceToken, address(protocolRewards), address(this), treasury, 1e14, 1e17, 1e22);
-
-        governanceToken.transferOwnership(address(emitter1));
-
-        vm.deal(address(this), 100000 ether);
-
-        address[] memory recipients = new address[](1);
-        recipients[0] = address(1);
-
-        uint256[] memory bps = new uint256[](1);
-        bps[0] = 10_000;
-
-        emitter1.buyToken{ value: 1e18 }(recipients, bps, address(0), address(0), address(0));
-
-        vm.prank(address(emitter1));
-
-        governanceToken.transferOwnership(address(emitter2));
-
-        vm.prank(address(0));
-        emitter2.buyToken{ value: 1e18 }(recipients, bps, address(0), address(0), address(0));
     }
 
     function testBuyTokenReentrancy() public {
@@ -286,65 +289,65 @@ contract TokenEmitterTest is Test {
         // vm.stopPrank();
     }
 
-    // function testGetTokenAmountForMultiPurchaseEdgeCases() public {
-    //     vm.startPrank(address(0));
+    function testGetTokenAmountForMultiPurchaseEdgeCases() public {
+        vm.startPrank(address(0));
 
-    //     // Edge Case 1: Very Small Payment
-    //     uint256 smallPayment = 0.00001 ether;
-    //     int256 smallPaymentTokenAmount = emitter.getTokenQuoteForPayment(smallPayment);
-    //     assertGt(smallPaymentTokenAmount, 0, "Token amount for small payment should be greater than zero");
-    //     emit log_int(smallPaymentTokenAmount);
+        // Edge Case 1: Very Small Payment
+        uint256 smallPayment = 0.00001 ether;
+        int256 smallPaymentTokenAmount = emitter.getTokenQuoteForPayment(smallPayment);
+        assertGt(smallPaymentTokenAmount, 0, "Token amount for small payment should be greater than zero");
+        emit log_int(smallPaymentTokenAmount);
 
-    //     // A days worth of payment amount
-    //     int256 dailyPaymentTokenAmount = emitter.getTokenQuoteForPayment(1 ether);
-    //     assertLt(uint256(dailyPaymentTokenAmount), tokensPerTimeUnit * 1e4, "Token amount for daily payment should be less than tokens per day");
-    //     emit log_string("Daily Payment Token Amount: ");
-    //     emit log_int(dailyPaymentTokenAmount);
+        // A days worth of payment amount
+        int256 dailyPaymentTokenAmount = emitter.getTokenQuoteForPayment(1 ether);
+        assertLt(uint256(dailyPaymentTokenAmount), tokensPerTimeUnit * 1e4, "Token amount for daily payment should be less than tokens per day");
+        emit log_string("Daily Payment Token Amount: ");
+        emit log_int(dailyPaymentTokenAmount);
 
-    //     // Edge Case 2: Very Large Payment
-    //     // An unusually large payment amount
-    //     int256 largePaymentTokenAmount = emitter.getTokenQuoteForPayment(100 ether);
-    //     //spending 100x the expected amount per day should get you < 25x the tokens
-    //     uint256 SOME_REALISTIC_UPPER_BOUND = 25 * tokensPerTimeUnit * 1e4;
-    //     assertLt(uint256(largePaymentTokenAmount), SOME_REALISTIC_UPPER_BOUND, "Token amount for large payment should be less than some realistic upper bound");
-    //     emit log_string("Large Payment Token Amount: ");
-    //     emit log_int(largePaymentTokenAmount);
+        // Edge Case 2: Very Large Payment
+        // An unusually large payment amount
+        int256 largePaymentTokenAmount = emitter.getTokenQuoteForPayment(100 ether);
+        //spending 100x the expected amount per day should get you < 25x the tokens
+        uint256 SOME_REALISTIC_UPPER_BOUND = 25 * tokensPerTimeUnit * 1e4;
+        assertLt(uint256(largePaymentTokenAmount), SOME_REALISTIC_UPPER_BOUND, "Token amount for large payment should be less than some realistic upper bound");
+        emit log_string("Large Payment Token Amount: ");
+        emit log_int(largePaymentTokenAmount);
 
-    //     uint256 largestPayment = 1_000 ether; // An unusually large payment amount
-    //     int256 largestPaymentTokenAmount = emitter.getTokenQuoteForPayment(largestPayment);
-    //     //spending 1000x the daily amount should get you less than 50x the tokens
-    //     assertLt(uint256(largestPaymentTokenAmount), 50 * tokensPerTimeUnit * 1e4, "Token amount for largest payment should be less than some realistic upper bound");
+        uint256 largestPayment = 1_000 ether; // An unusually large payment amount
+        int256 largestPaymentTokenAmount = emitter.getTokenQuoteForPayment(largestPayment);
+        //spending 1000x the daily amount should get you less than 50x the tokens
+        assertLt(uint256(largestPaymentTokenAmount), 50 * tokensPerTimeUnit * 1e4, "Token amount for largest payment should be less than some realistic upper bound");
 
-    //     emit log_string("Largest Payment Token Amount: ");
-    //     emit log_int(largestPaymentTokenAmount);
+        emit log_string("Largest Payment Token Amount: ");
+        emit log_int(largestPaymentTokenAmount);
         
 
-    //     vm.stopPrank();
-    // }
+        vm.stopPrank();
+    }
 
-    // function testGetTokenPrice() public {
-    //     vm.startPrank(address(0));
+    function testGetTokenPrice() public {
+        vm.startPrank(address(0));
 
-    //     vm.deal(address(0), 100000 ether);
-    //     vm.stopPrank();
+        vm.deal(address(0), 100000 ether);
+        vm.stopPrank();
 
-    //     int256 priceFirstPurchase = emitter.buyTokenQuote(0);
-    //     emit log_int(priceFirstPurchase);
+        int256 priceFirstPurchase = emitter.buyTokenQuote(0);
+        emit log_int(priceFirstPurchase);
 
-    //     int256 priceAfterManyPurchases = emitter.buyTokenQuote(1_000);
-    //     emit log_int(priceAfterManyPurchases);
+        int256 priceAfterManyPurchases = emitter.buyTokenQuote(1e18);
+        emit log_int(priceAfterManyPurchases);
 
-    //     // Simulate the passage of time
-    //     uint256 daysElapsed = 21_000_000; // Change this value to test different scenarios
-    //     vm.warp(block.timestamp + daysElapsed * 1 days);
+        // Simulate the passage of time
+        uint256 daysElapsed = 2; // Change this value to test different scenarios
+        vm.warp(block.timestamp + daysElapsed * 1 days);
 
-    //     int256 priceAfterManyDays = emitter.buyTokenQuote(1_001);
+        int256 priceAfterManyDays = emitter.buyTokenQuote(1e18);
 
-    //     emit log_int(priceAfterManyDays);
+        emit log_int(priceAfterManyDays);
 
-    //     // Assert that the price is greater than zero
-    //     assertGt(priceAfterManyDays, 0, "Price should never hit zero");
-    // }
+        // Assert that the price is greater than zero
+        assertGt(priceAfterManyDays, 0, "Price should never hit zero");
+    }
 }
 
 contract MaliciousTreasury {

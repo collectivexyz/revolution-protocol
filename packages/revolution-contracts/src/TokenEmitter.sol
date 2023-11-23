@@ -3,7 +3,7 @@ pragma solidity ^0.8.22;
 
 import { VRGDAC } from "./libs/VRGDAC.sol";
 import { ERC20 } from "@openzeppelin/contracts/token/ERC20/ERC20.sol";
-import { toDaysWadUnsafe } from "./libs/SignedWadMath.sol";
+import { toDaysWadUnsafe, wadDiv, wadMul } from "./libs/SignedWadMath.sol";
 import { Strings } from "@openzeppelin/contracts/utils/Strings.sol";
 import { NontransferableERC20 } from "./NontransferableERC20.sol";
 import { ITokenEmitter } from "./interfaces/ITokenEmitter.sol";
@@ -86,7 +86,7 @@ contract TokenEmitter is VRGDAC, ITokenEmitter, ReentrancyGuard, TokenEmitterRew
         // solhint-disable-next-line not-rely-on-time
         return xToY({
             timeSinceStart: toDaysWadUnsafe(block.timestamp - startTime),
-            sold: int(totalSupply()),
+            sold: wadMul(int256(totalSupply()), 1e36),
             amount: int(amount)
         });
     }
@@ -94,10 +94,10 @@ contract TokenEmitter is VRGDAC, ITokenEmitter, ReentrancyGuard, TokenEmitterRew
     function getTokenQuoteForPayment(uint paymentWei) public view returns (int gainedX) {
         // Note: By using toDaysWadUnsafe(block.timestamp - startTime) we are establishing that 1 "unit of time" is 1 day.
         // solhint-disable-next-line not-rely-on-time
-        return yToX({
+        return wadDiv(yToX({
             timeSinceStart: toDaysWadUnsafe(block.timestamp - startTime),
-            sold: int(totalSupply()),
+            sold: wadMul(int256(totalSupply()), 1e36),
             amount: int(paymentWei)
-        });
+        }), 1e36);
     }
 }
