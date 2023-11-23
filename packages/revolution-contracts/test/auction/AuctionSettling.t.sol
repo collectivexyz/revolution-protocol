@@ -174,8 +174,8 @@ contract VerbsAuctionHouseSettleTest is VerbsAuctionHouseTest {
 
     function testSettlingAuctionWithMultipleCreators() public {
         setUp();
-        uint256 creatorRate = auctionHouse.creatorRateBps();
-        uint256 entropyRate = auctionHouse.entropyRateBps();
+        uint256 creatorRate = (auctionHouse.creatorRateBps());
+        uint256 entropyRate = (auctionHouse.entropyRateBps());
 
         address[] memory creatorAddresses = new address[](5);
         uint256[] memory creatorBps = new uint256[](5);
@@ -227,20 +227,20 @@ contract VerbsAuctionHouseSettleTest is VerbsAuctionHouseTest {
         }
 
         // Track expected governance token payout
-        uint256 etherToSpendOnGovernanceTotal = (bidAmount * creatorRate) / 10_000 - (bidAmount * (entropyRate * creatorRate)) / 10_000 / 10_000;
+        uint256 etherToSpendOnGovernanceTotal = uint256((bidAmount * creatorRate) / 10_000 - (bidAmount * (entropyRate * creatorRate)) / 10_000 / 10_000);
 
-        uint256 expectedGovernanceTokenPayout = tokenEmitter.getTokenAmountForMultiPurchase(
+        uint256 expectedGovernanceTokenPayout = uint256(tokenEmitter.getTokenQuoteForPayment(
             etherToSpendOnGovernanceTotal - tokenEmitter.computeTotalReward(etherToSpendOnGovernanceTotal)
-        );
+        ));
 
         auctionHouse.settleCurrentAndCreateNewAuction();
 
         // Verify each creator's payout
         for (uint256 i = 0; i < creatorAddresses.length; i++) {
-            uint256 expectedEtherShare = (bidAmount * creatorBps[i] * creatorRate) / totalBps / 10_000;
+            uint256 expectedEtherShare = uint256((bidAmount * creatorBps[i] * creatorRate) / totalBps / 10_000);
             assertEq(address(creatorAddresses[i]).balance - balancesBefore[i], (expectedEtherShare * entropyRate) / 10_000, "Incorrect ETH payout for creator");
 
-            uint256 expectedGovernanceTokenShare = (expectedGovernanceTokenPayout * creatorBps[i]) / totalBps;
+            uint256 expectedGovernanceTokenShare = uint256((expectedGovernanceTokenPayout * creatorBps[i]) / totalBps);
 
             assertEq(
                 governanceToken.balanceOf(creatorAddresses[i]) - governanceTokenBalancesBefore[i],
@@ -279,7 +279,7 @@ contract VerbsAuctionHouseSettleTest is VerbsAuctionHouseTest {
 
         vm.warp(block.timestamp + auctionHouse.duration() + 1); // Fast forward time to end the auction
 
-        uint256 expectedGovernanceTokens = tokenEmitter.getTokenAmountForMultiPurchase(etherToSpendOnGovernance);
+        uint256 expectedGovernanceTokens = uint256(tokenEmitter.getTokenQuoteForPayment(etherToSpendOnGovernance));
 
         // Track ETH balances
         uint256 balanceBeforeCreator = address(0x1).balance;

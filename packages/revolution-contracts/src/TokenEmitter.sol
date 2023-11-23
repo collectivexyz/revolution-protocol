@@ -1,27 +1,23 @@
 // SPDX-License-Identifier: UNLICENSED
 pragma solidity ^0.8.22;
 
-import { LinearVRGDA } from "./libs/LinearVRGDA.sol";
+import { VRGDAC } from "./libs/VRGDAC.sol";
 import { ERC20 } from "@openzeppelin/contracts/token/ERC20/ERC20.sol";
-import { toDaysWadUnsafe } from "./libs/SignedWadMath.sol";
+import { toDaysWadUnsafe, wadDiv, wadMul } from "./libs/SignedWadMath.sol";
 import { Strings } from "@openzeppelin/contracts/utils/Strings.sol";
 import { NontransferableERC20 } from "./NontransferableERC20.sol";
 import { ITokenEmitter } from "./interfaces/ITokenEmitter.sol";
 import { ReentrancyGuard } from "@openzeppelin/contracts/utils/ReentrancyGuard.sol";
 import { TokenEmitterRewards } from "@collectivexyz/protocol-rewards/src/abstract/TokenEmitter/TokenEmitterRewards.sol";
 
-contract TokenEmitter is LinearVRGDA, ITokenEmitter, ReentrancyGuard, TokenEmitterRewards {
-    // Events
-    event Transfer(address indexed from, address indexed to, uint256 value);
-    event Log(string name, uint256 value);
-
+contract TokenEmitter is VRGDAC, ITokenEmitter, ReentrancyGuard, TokenEmitterRewards {
     // Vars
     address private treasury;
 
     NontransferableERC20 public token;
 
     // solhint-disable-next-line not-rely-on-time
-    uint256 public immutable startTime = block.timestamp;
+    uint public immutable startTime = block.timestamp;
 
     // approved contracts, owner, and a token contract address
     constructor(
@@ -29,12 +25,12 @@ contract TokenEmitter is LinearVRGDA, ITokenEmitter, ReentrancyGuard, TokenEmitt
         address _protocolRewards,
         address _protocolFeeRecipient,
         address _treasury,
-        int256 _targetPrice, // SCALED BY E18. Target price. This is somewhat arbitrary for governance emissions, since there is no "target price" for 1 governance share.
-        int256 _priceDecayPercent, // SCALED BY E18. Price decay percent. This indicates how aggressively you discount governance when sales are not occurring.
-        int256 _governancePerTimeUnit // SCALED BY E18. The number of tokens to target selling in 1 full unit of time.
-    ) TokenEmitterRewards(_protocolRewards, _protocolFeeRecipient) LinearVRGDA(_targetPrice, _priceDecayPercent, _governancePerTimeUnit) {
+        int _targetPrice, // The target price for a token if sold on pace, scaled by 1e18.
+        int _priceDecayPercent, // The percent price decays per unit of time with no sales, scaled by 1e18.
+        int _tokensPerTimeUnit // The number of tokens to target selling in 1 full unit of time, scaled by 1e18.
+    ) TokenEmitterRewards(_protocolRewards, _protocolFeeRecipient) VRGDAC(_targetPrice, _priceDecayPercent, _tokensPerTimeUnit) {
         treasury = _treasury;
-
+        
         token = _token;
     }
 
@@ -59,26 +55,25 @@ contract TokenEmitter is LinearVRGDA, ITokenEmitter, ReentrancyGuard, TokenEmitt
         address builder,
         address purchaseReferral,
         address deployer
-    ) public payable nonReentrant returns (uint256) {
+    ) public payable nonReentrant returns (uint) {
         // ensure the same number of addresses and _bps
         require(_addresses.length == _bps.length, "Parallel arrays required");
 
         // Get value to send and handle mint fee
-        uint256 msgValueRemaining = _handleRewardsAndGetValueToSend(msg.value, builder, purchaseReferral, deployer);
+        uint msgValueRemaining = _handleRewardsAndGetValueToSend(msg.value, builder, purchaseReferral, deployer);
 
-        uint totalTokens = getTokenAmountForMultiPurchase(msgValueRemaining);
+        uint totalTokens = uint(getTokenQuoteForPayment(msgValueRemaining));
         (bool success, ) = treasury.call{ value: msgValueRemaining }(new bytes(0));
         require(success, "Transfer failed.");
 
-        // calculates how much total governance to give
-
         uint sum = 0;
 
-        // calculates how much governance to give each address
+        // calculates how many tokens to give each address
         for (uint i = 0; i < _addresses.length; i++) {
+            //todo seems dangerous with rouding, fix it up
             uint tokens = (totalTokens * _bps[i]) / 10_000;
-            // transfer governance to address
-            _mint(_addresses[i], tokens);
+            // transfer tokens to address
+            _mint(_addresses[i], uint(tokens));
             sum += _bps[i];
         }
 
@@ -86,63 +81,23 @@ contract TokenEmitter is LinearVRGDA, ITokenEmitter, ReentrancyGuard, TokenEmitt
         return totalTokens;
     }
 
-    // This returns a safe, underestimated amount of governance.
-    function _getTokenAmountForSinglePurchase(uint256 payment, uint256 supply) public view returns (uint256) {
-        // get the initial estimated amount of tokens - assuming we priced your entire purchase at supply + 1 (akin to buying 1 NFT)
-        uint256 overestimatedAmount = UNSAFE_getOverestimateTokenAmount(payment, supply);
-
-        // get the overestimated price - assuming we priced your entire purchase at supply + 1 (akin to buying 1 NFT)
-        uint256 overestimatedPrice = getTokenPrice(supply + overestimatedAmount);
-
-        // get the underestimated price - assuming you paid for the entire purchase at the price of the last token
-        uint256 underestimatedAmount = payment / overestimatedPrice;
-
-        return underestimatedAmount;
-    }
-
-    function getTokenAmountForMultiPurchase(uint256 payment) public view returns (uint256) {
-        // payment is split up into chunks of numTokens
-        // each chunk is estimated and the total is returned
-        // chunk up the payments into 0.001 eth chunks
-
-        //counter to keep track of how much eth is left in the payment
-        uint256 remainingEth = payment;
-
-        // the total amount of tokens to return
-        uint256 tokenAmount = 0;
-
-        // solhint-disable-next-line var-name-mixedcase
-        uint256 INCREMENT_SIZE = 1e15;
-
-        // loop through the payment and add the estimated amount of tokens to the total
-        while (remainingEth > 0) {
-            // if the remaining eth is less than the increment size, calculate the tokenAmount for the remaining eth
-            if (remainingEth < INCREMENT_SIZE) {
-                tokenAmount += _getTokenAmountForSinglePurchase(remainingEth, totalSupply() + tokenAmount);
-                remainingEth = 0;
-            }
-            // otherwise, calculate tokenAmount for the increment size
-            else {
-                tokenAmount += _getTokenAmountForSinglePurchase(INCREMENT_SIZE, totalSupply() + tokenAmount);
-                remainingEth -= INCREMENT_SIZE;
-            }
-        }
-        return tokenAmount;
-    }
-
-    // This will return MORE GOVERNANCE than it should. Never reward the user with this; the DAO will get taken over.
-    // solhint-disable-next-line func-name-mixedcase
-    function UNSAFE_getOverestimateTokenAmount(uint256 payment, uint256 supply) public view returns (uint256) {
-        uint256 priceForFirstToken = getTokenPrice(supply);
-        uint256 initialEstimatedAmount = payment / priceForFirstToken;
-        return initialEstimatedAmount;
-    }
-
-    function getTokenPrice(uint256 tokensSoldSoFar) public view returns (uint256) {
+    function buyTokenQuote(uint amount) public view returns (int spentY) {
         // Note: By using toDaysWadUnsafe(block.timestamp - startTime) we are establishing that 1 "unit of time" is 1 day.
         // solhint-disable-next-line not-rely-on-time
-        uint256 price = getVRGDAPrice(toDaysWadUnsafe(block.timestamp - startTime), tokensSoldSoFar);
+        return xToY({
+            timeSinceStart: toDaysWadUnsafe(block.timestamp - startTime),
+            sold: wadMul(int256(totalSupply()), 1e36),
+            amount: int(amount)
+        });
+    }
 
-        return price;
+    function getTokenQuoteForPayment(uint paymentWei) public view returns (int gainedX) {
+        // Note: By using toDaysWadUnsafe(block.timestamp - startTime) we are establishing that 1 "unit of time" is 1 day.
+        // solhint-disable-next-line not-rely-on-time
+        return wadDiv(yToX({
+            timeSinceStart: toDaysWadUnsafe(block.timestamp - startTime),
+            sold: wadMul(int256(totalSupply()), 1e36),
+            amount: int(paymentWei)
+        }), 1e36);
     }
 }
