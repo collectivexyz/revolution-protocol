@@ -322,7 +322,7 @@ contract VerbsDescriptorTest is Test {
         string memory expectedName = string(abi.encodePacked(tokenNamePrefix, " ", Strings.toString(tokenId)));
 
         assertEq(name, expectedName, string(abi.encodePacked(errorMessage, " - Name mismatch")));
-        assertEq(description, expectedMetadata.description, string(abi.encodePacked(errorMessage, " - Description mismatch")));
+        assertEq(description, string(abi.encodePacked(expectedMetadata.name, ". ", expectedMetadata.description)), string(abi.encodePacked(errorMessage, " - Description mismatch")));
         assertEq(imageUrl, expectedMetadata.image, string(abi.encodePacked(errorMessage, " - Image URL mismatch")));
         assertEq(animationUrl, expectedMetadata.animationUrl, string(abi.encodePacked(errorMessage, " - Animation URL mismatch")));
         // Additional assertions for text and animationUrl can be added here if required
