@@ -60,7 +60,7 @@ contract VRGDAC {
         }
     }
 
-    // // given amount to pay and amount sold so far, returns # of tokens to sell
+    // given amount to pay and amount sold so far, returns # of tokens to sell
     function yToX(int256 timeSinceStart, int256 sold, int256 amount) public view virtual returns (int256) {
         unchecked {
             return wadMul(
@@ -73,7 +73,7 @@ contract VRGDAC {
         }
     }
 
-    // // given amount to pay and amount sold so far, returns # of tokens to sell
+    // given amount to pay and amount sold so far, returns # of tokens to sell - raw form
     function yToXRaw(int256 timeSinceStart, int256 sold, int256 amount) public view virtual returns (int256) {
         int256 soldDifference = wadMul(perTimeUnit, timeSinceStart) - sold;
         unchecked {
@@ -101,7 +101,7 @@ contract VRGDAC {
         );
     }
 
-    // // given # of tokens sold, returns price p(x) = p0 * (1 - k)^(t - (x/r)) - (x/r) makes it a linearvrgda issuance
+    // given # of tokens sold, returns price p(x) = p0 * (1 - k)^(t - (x/r)) - (x/r) makes it a linearvrgda issuance
     function p(int256 timeSinceStart, int256 sold) internal view returns (int256) {
         return wadMul(targetPrice, wadPow(1e18 - priceDecayPercent, timeSinceStart - unsafeWadDiv(sold, perTimeUnit)));
     }
