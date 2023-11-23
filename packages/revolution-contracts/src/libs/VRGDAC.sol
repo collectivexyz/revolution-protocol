@@ -60,25 +60,6 @@ contract VRGDAC {
         }
     }
 
-    // y to pay alt
-    function xToYAlt(int256 timeSinceStart, int256 sold, int256 amount) public view virtual returns (int256) {
-
-        //initial setups
-        int256 ONEminusK = 1e18 - priceDecayPercent;
-        int256 P0xR = wadMul(targetPrice, perTimeUnit);
-        int256 ln1mK = wadLn(ONEminusK);
-
-        //exponents
-        int256 XSTARTdR = wadDiv(sold, perTimeUnit);
-        int256 XSTARTpXBOUGHTdR = wadDiv(sold + amount, perTimeUnit);
-
-        int256 coefficient = wadDiv(P0xR, ln1mK);
-
-        int256 parenthesis = wadPow(ONEminusK, timeSinceStart - XSTARTdR) - wadPow(ONEminusK, timeSinceStart - XSTARTpXBOUGHTdR);
-
-        return wadMul(coefficient, parenthesis);
-    }
-
     // // given amount to pay and amount sold so far, returns # of tokens to sell
     function yToX(int256 timeSinceStart, int256 sold, int256 amount) public view virtual returns (int256) {
         unchecked {
