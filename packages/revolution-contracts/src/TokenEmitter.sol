@@ -2,7 +2,6 @@
 pragma solidity ^0.8.22;
 
 import { VRGDAC } from "./libs/VRGDAC.sol";
-import { ERC20 } from "@openzeppelin/contracts/token/ERC20/ERC20.sol";
 import { toDaysWadUnsafe, wadDiv, wadMul } from "./libs/SignedWadMath.sol";
 import { Strings } from "@openzeppelin/contracts/utils/Strings.sol";
 import { NontransferableERC20 } from "./NontransferableERC20.sol";
