@@ -271,22 +271,22 @@ contract TokenEmitterTest is Test {
         // Assert that the token amount is reasonable (not zero or unexpectedly high)
         assertGt(tokenAmount, 0, "Token amount should be greater than zero");
         assertLt(tokenAmount, int256(SOME_MAX_EXPECTED_VALUE), "Token amount should be less than some max expected value");
-        // assertLt(tokenAmount, slightlyMore, "Token amount should be less than slightly more");
+        assertLt(tokenAmount, slightlyMore, "Token amount should be less than slightly more");
 
-        // //buy 10 ether of tokens
-        // address[] memory recipients = new address[](1);
-        // recipients[0] = address(1);
-        // uint256[] memory bps = new uint256[](1);
-        // bps[0] = 10_000;
+        //buy 10 ether of tokens
+        address[] memory recipients = new address[](1);
+        recipients[0] = address(1);
+        uint256[] memory bps = new uint256[](1);
+        bps[0] = 10_000;
 
-        // emitter.buyToken{ value: payment }(recipients, bps, address(0), address(0), address(0));
+        emitter.buyToken{ value: payment }(recipients, bps, address(0), address(0), address(0));
 
-        // int256 newTokenAmount = emitter.getTokenQuoteForPayment(payment);
+        int256 newTokenAmount = emitter.getTokenQuoteForPayment(payment);
 
-        // // Assert that the new token amount is less than the previous tokenAmount
-        // assertLt(newTokenAmount, tokenAmount, "Token amount should be less than previous token amount");
+        // Assert that the new token amount is less than the previous tokenAmount
+        assertLt(newTokenAmount, tokenAmount, "Token amount should be less than previous token amount");
 
-        // vm.stopPrank();
+        vm.stopPrank();
     }
 
     function testGetTokenAmountForMultiPurchaseEdgeCases() public {
