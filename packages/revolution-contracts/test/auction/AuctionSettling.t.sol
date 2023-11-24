@@ -23,7 +23,7 @@ import { VerbsAuctionHouseTest } from "./AuctionHouse.t.sol";
 
 contract VerbsAuctionHouseSettleTest is VerbsAuctionHouseTest {
     //calculate bps amount given split
-    function bps(uint256 x, uint256 y) pure public returns (uint256) {
+    function bps(uint256 x, uint256 y) public pure returns (uint256) {
         return uint256(wadDiv(wadMul(int256(x), int256(y)), 10000));
     }
 
@@ -229,9 +229,9 @@ contract VerbsAuctionHouseSettleTest is VerbsAuctionHouseTest {
         // Track expected governance token payout
         uint256 etherToSpendOnGovernanceTotal = uint256((bidAmount * creatorRate) / 10_000 - (bidAmount * (entropyRate * creatorRate)) / 10_000 / 10_000);
 
-        uint256 expectedGovernanceTokenPayout = uint256(tokenEmitter.getTokenQuoteForPayment(
-            etherToSpendOnGovernanceTotal - tokenEmitter.computeTotalReward(etherToSpendOnGovernanceTotal)
-        ));
+        uint256 expectedGovernanceTokenPayout = uint256(
+            tokenEmitter.getTokenQuoteForPayment(etherToSpendOnGovernanceTotal - tokenEmitter.computeTotalReward(etherToSpendOnGovernanceTotal))
+        );
 
         auctionHouse.settleCurrentAndCreateNewAuction();
 

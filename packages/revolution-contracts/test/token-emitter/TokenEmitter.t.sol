@@ -320,7 +320,6 @@ contract TokenEmitterTest is Test {
 
         emit log_string("Largest Payment Token Amount: ");
         emit log_int(largestPaymentTokenAmount);
-        
 
         vm.stopPrank();
     }

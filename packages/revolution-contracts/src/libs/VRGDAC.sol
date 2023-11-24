@@ -1,16 +1,7 @@
 // SPDX-License-Identifier: MIT
 pragma solidity 0.8.22;
 
-import {
-    wadExp,
-    wadLn,
-    wadMul,
-    wadDiv,
-    unsafeWadMul,
-    unsafeWadDiv,
-    toWadUnsafe,
-    wadPow
-} from "./SignedWadMath.sol";
+import { wadExp, wadLn, wadMul, wadDiv, unsafeWadMul, unsafeWadDiv, toWadUnsafe, wadPow } from "./SignedWadMath.sol";
 
 /// @title Continuous Variable Rate Gradual Dutch Auction
 /// @author transmissions11 <t11s@paradigm.xyz>
@@ -23,7 +14,7 @@ contract VRGDAC {
     //////////////////////////////////////////////////////////////*/
 
     int256 public immutable targetPrice;
-    
+
     int256 public immutable perTimeUnit;
 
     int256 public immutable decayConstant;
@@ -51,7 +42,6 @@ contract VRGDAC {
                               PRICING LOGIC
     //////////////////////////////////////////////////////////////*/
 
-
     // y to pay
     // given # of tokens sold and # to buy, returns amount to pay
     function xToY(int256 timeSinceStart, int256 sold, int256 amount) public view virtual returns (int256) {
@@ -63,13 +53,7 @@ contract VRGDAC {
     // given amount to pay and amount sold so far, returns # of tokens to sell
     function yToX(int256 timeSinceStart, int256 sold, int256 amount) public view virtual returns (int256) {
         unchecked {
-            return wadMul(
-                -wadDiv(
-                    wadLn(1e18 - wadMul(amount, wadDiv(decayConstant, wadMul(perTimeUnit, p(timeSinceStart, sold))))),
-                    decayConstant
-                ),
-                perTimeUnit
-            );
+            return wadMul(-wadDiv(wadLn(1e18 - wadMul(amount, wadDiv(decayConstant, wadMul(perTimeUnit, p(timeSinceStart, sold))))), decayConstant), perTimeUnit);
         }
     }
 
@@ -77,28 +61,33 @@ contract VRGDAC {
     function yToXRaw(int256 timeSinceStart, int256 sold, int256 amount) public view virtual returns (int256) {
         int256 soldDifference = wadMul(perTimeUnit, timeSinceStart) - sold;
         unchecked {
-            return wadMul(
-                perTimeUnit,
-                wadDiv(
-                    wadLn(wadDiv(
-                        wadMul(targetPrice, wadMul(perTimeUnit, wadExp(wadMul(soldDifference, wadDiv(decayConstant, perTimeUnit))))),
-                        wadMul(targetPrice, wadMul(perTimeUnit, wadPow(1e18 - priceDecayPercent, wadDiv(soldDifference, perTimeUnit)))) - wadMul(amount, decayConstant)
-                    )),
-                    decayConstant
-                )
-            );
+            return
+                wadMul(
+                    perTimeUnit,
+                    wadDiv(
+                        wadLn(
+                            wadDiv(
+                                wadMul(targetPrice, wadMul(perTimeUnit, wadExp(wadMul(soldDifference, wadDiv(decayConstant, perTimeUnit))))),
+                                wadMul(targetPrice, wadMul(perTimeUnit, wadPow(1e18 - priceDecayPercent, wadDiv(soldDifference, perTimeUnit)))) -
+                                    wadMul(amount, decayConstant)
+                            )
+                        ),
+                        decayConstant
+                    )
+                );
         }
     }
 
     // given # of tokens sold, returns integral of price p(x) = p0 * (1 - k)^(x/r)
     function pIntegral(int256 timeSinceStart, int256 sold) internal view returns (int256) {
-        return wadDiv(
-            -wadMul(
-                wadMul(targetPrice, perTimeUnit),
-                wadPow(1e18 - priceDecayPercent, timeSinceStart - unsafeWadDiv(sold, perTimeUnit)) - wadPow(1e18 - priceDecayPercent, timeSinceStart)
-            ),
-            decayConstant
-        );
+        return
+            wadDiv(
+                -wadMul(
+                    wadMul(targetPrice, perTimeUnit),
+                    wadPow(1e18 - priceDecayPercent, timeSinceStart - unsafeWadDiv(sold, perTimeUnit)) - wadPow(1e18 - priceDecayPercent, timeSinceStart)
+                ),
+                decayConstant
+            );
     }
 
     // given # of tokens sold, returns price p(x) = p0 * (1 - k)^(t - (x/r)) - (x/r) makes it a linearvrgda issuance

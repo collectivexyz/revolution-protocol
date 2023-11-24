@@ -122,7 +122,12 @@ contract VerbsDescriptor is IVerbsDescriptor, Ownable {
     function genericDataURI(string memory name, ICultureIndex.ArtPieceMetadata memory metadata) public pure returns (string memory) {
         /// @dev Get name description image and animation_url from CultureIndex
 
-        TokenURIParams memory params = TokenURIParams({ name: name, description: string(abi.encodePacked(metadata.name, ". ", metadata.description)), image: metadata.image, animation_url: metadata.animationUrl });
+        TokenURIParams memory params = TokenURIParams({
+            name: name,
+            description: string(abi.encodePacked(metadata.name, ". ", metadata.description)),
+            image: metadata.image,
+            animation_url: metadata.animationUrl
+        });
         return constructTokenURI(params);
     }
 }
