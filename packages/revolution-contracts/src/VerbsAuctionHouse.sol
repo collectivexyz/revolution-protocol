@@ -56,6 +56,9 @@ contract VerbsAuctionHouse is IVerbsAuctionHouse, PausableUpgradeable, Reentranc
     // The split of the winning bid that is reserved for the creator of the Verb in basis points
     uint256 public creatorRateBps;
 
+    // The all time minimum split of the winning bid that is reserved for the creator of the Verb in basis points
+    uint256 public minCreatorRateBps;
+
     // The split of (auction proceeds * creatorRate) that is sent to the creator as ether in basis points
     uint256 public entropyRateBps;
 
@@ -80,13 +83,16 @@ contract VerbsAuctionHouse is IVerbsAuctionHouse, PausableUpgradeable, Reentranc
         uint8 _minBidIncrementPercentage,
         uint256 _duration,
         uint256 _creatorRateBps,
-        uint256 _entropyRateBps
+        uint256 _entropyRateBps,
+        uint256 _minCreatorRateBps
     ) external initializer {
         __Pausable_init();
         __ReentrancyGuard_init();
         __Ownable_init(_founder);
 
         _pause();
+
+        require(_creatorRateBps >= _minCreatorRateBps , "Creator rate must be greater than or equal to the creator rate");
 
         verbs = _verbs;
         tokenEmitter = _tokenEmitter;
@@ -97,6 +103,7 @@ contract VerbsAuctionHouse is IVerbsAuctionHouse, PausableUpgradeable, Reentranc
         duration = _duration;
         creatorRateBps = _creatorRateBps;
         entropyRateBps = _entropyRateBps;
+        minCreatorRateBps = _minCreatorRateBps;
     }
 
     /**
@@ -166,8 +173,30 @@ contract VerbsAuctionHouse is IVerbsAuctionHouse, PausableUpgradeable, Reentranc
      * @param _creatorRateBps New creator rate in basis points.
      */
     function setCreatorRateBps(uint256 _creatorRateBps) external onlyOwner {
+        require(_creatorRateBps >= minCreatorRateBps, "Creator rate must be greater than or equal to minCreatorRateBps");
+        require(_creatorRateBps <= 10_000, "Creator rate must be less than or equal to 10_000");
+        require(_creatorRateBps >= 0, "Creator rate must be greater than or equal to 0");
         creatorRateBps = _creatorRateBps;
+
         emit CreatorRateBpsUpdated(_creatorRateBps);
+    }
+
+    /**
+     * @notice Set the minimum split of the winning bid that is reserved for the creator of the Verb in basis points.
+     * @dev Only callable by the owner.
+     * @param _minCreatorRateBps New minimum creator rate in basis points.
+     */
+    function setMinCreatorRateBps(uint256 _minCreatorRateBps) external onlyOwner {
+        require(_minCreatorRateBps <= creatorRateBps, "Min creator rate must be less than or equal to creator rate");
+        require(_minCreatorRateBps <= 10_000, "Min creator rate must be less than or equal to 10_000");
+        require(_minCreatorRateBps >= 0, "Min creator rate must be greater than or equal to 0");
+
+        //ensure new min rate cannot be lower than previous min rate
+        require(_minCreatorRateBps > minCreatorRateBps, "Min creator rate must be greater than previous minCreatorRateBps");
+
+        minCreatorRateBps = _minCreatorRateBps;
+
+        emit MinCreatorRateBpsUpdated(_minCreatorRateBps);
     }
 
     /**
@@ -176,6 +205,9 @@ contract VerbsAuctionHouse is IVerbsAuctionHouse, PausableUpgradeable, Reentranc
      * @param _entropyRateBps New entropy rate in basis points.
      */
     function setEntropyRateBps(uint256 _entropyRateBps) external onlyOwner {
+        require(_entropyRateBps <= 10_000, "Entropy rate must be less than or equal to 10_000");
+        require(_entropyRateBps >= 0, "Entropy rate must be greater than or equal to 0");
+
         entropyRateBps = _entropyRateBps;
         emit EntropyRateBpsUpdated(_entropyRateBps);
     }
@@ -263,13 +295,14 @@ contract VerbsAuctionHouse is IVerbsAuctionHouse, PausableUpgradeable, Reentranc
 
         if (_auction.amount > 0) {
             // Ether going to owner of the auction
-            uint256 auctioneerPayment = uint256(wadDiv(wadMul(int256(_auction.amount), 10000 - int256(creatorRateBps)), 10000));
+            uint256 auctioneerPayment = uint256(wadDiv(wadMul(int256(_auction.amount), 10_000 - int256(creatorRateBps)), 10_000));
 
             //Total amount of ether going to creator
             uint256 creatorPayment = _auction.amount - auctioneerPayment;
 
             //Ether reserved to pay the creator directly
-            uint256 creatorDirectPayment = uint256(wadDiv(wadMul(int256(creatorPayment), int256(entropyRateBps)), 10000));
+            uint256 creatorDirectPayment = uint256(wadDiv(wadMul(int256(creatorPayment), int256(entropyRateBps)), 10_000));
+
             //Ether reserved to buy creator governance
             uint256 creatorGovernancePayment = creatorPayment - creatorDirectPayment;
 
@@ -295,7 +328,6 @@ contract VerbsAuctionHouse is IVerbsAuctionHouse, PausableUpgradeable, Reentranc
                 //Transfer creator's share to the creator
                 _safeTransferETHWithFallback(creator.creator, etherAmount);
             }
-
             //Buy token from tokenEmitter for all the creators
             tokenEmitter.buyToken{ value: creatorGovernancePayment }(vrgdaReceivers, vrgdaSplits, address(0), address(0), deployer);
         }
