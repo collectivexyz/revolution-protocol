@@ -4,7 +4,7 @@ pragma solidity ^0.8.22;
 import { VRGDAC } from "./libs/VRGDAC.sol";
 import { toDaysWadUnsafe, wadDiv, wadMul } from "./libs/SignedWadMath.sol";
 import { Strings } from "@openzeppelin/contracts/utils/Strings.sol";
-import { NontransferableERC20 } from "./NontransferableERC20.sol";
+import { NontransferableERC20Votes } from "./NontransferableERC20Votes.sol";
 import { ITokenEmitter } from "./interfaces/ITokenEmitter.sol";
 import { ReentrancyGuard } from "@openzeppelin/contracts/utils/ReentrancyGuard.sol";
 import { TokenEmitterRewards } from "@collectivexyz/protocol-rewards/src/abstract/TokenEmitter/TokenEmitterRewards.sol";
@@ -13,14 +13,14 @@ contract TokenEmitter is VRGDAC, ITokenEmitter, ReentrancyGuard, TokenEmitterRew
     // Vars
     address private treasury;
 
-    NontransferableERC20 public token;
+    NontransferableERC20Votes public token;
 
     // solhint-disable-next-line not-rely-on-time
     uint public immutable startTime = block.timestamp;
 
     // approved contracts, owner, and a token contract address
     constructor(
-        NontransferableERC20 _token,
+        NontransferableERC20Votes _token,
         address _protocolRewards,
         address _protocolFeeRecipient,
         address _treasury,

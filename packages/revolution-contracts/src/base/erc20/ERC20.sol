@@ -4,9 +4,9 @@
 pragma solidity ^0.8.22;
 
 import { Context } from "@openzeppelin/contracts/utils/Context.sol";
-import { IERC20 } from "../../interfaces/erc20/IERC20.sol";
-import { IERC20Metadata } from "../../interfaces/erc20/IERC20Metadata.sol";
-import { IERC20Errors } from "../../interfaces/erc20/IERC20Errors.sol";
+import { IERC20 } from "../../interfaces/ERC20/IERC20.sol";
+import { IERC20Metadata } from "../../interfaces/ERC20/IERC20Metadata.sol";
+import { IERC20Errors } from "../../interfaces/ERC20/IERC20Errors.sol";
 
 /**
  * @dev Implementation of the {IERC20} interface.
@@ -168,7 +168,7 @@ abstract contract ERC20 is Context, IERC20, IERC20Metadata, IERC20Errors {
      *
      * NOTE: This function is not virtual, {_update} should be overridden instead.
      */
-    function _transfer(address from, address to, uint256 value) internal {
+    function _transfer(address from, address to, uint256 value) internal virtual {
         if (from == address(0)) {
             revert ERC20InvalidSender(address(0));
         }
@@ -223,7 +223,7 @@ abstract contract ERC20 is Context, IERC20, IERC20Metadata, IERC20Errors {
      *
      * NOTE: This function is not virtual, {_update} should be overridden instead.
      */
-    function _mint(address account, uint256 value) internal {
+    function _mint(address account, uint256 value) internal virtual {
         if (account == address(0)) {
             revert ERC20InvalidReceiver(address(0));
         }
@@ -260,7 +260,7 @@ abstract contract ERC20 is Context, IERC20, IERC20Metadata, IERC20Errors {
      *
      * Overrides to this logic should be done to the variant with an additional `bool emitEvent` argument.
      */
-    function _approve(address owner, address spender, uint256 value) internal {
+    function _approve(address owner, address spender, uint256 value) internal virtual {
         _approve(owner, spender, value, true);
     }
 
