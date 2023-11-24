@@ -4,38 +4,25 @@
 pragma solidity ^0.8.22;
 
 /**
- * @dev Implementation of the {IERC20} interface.
+ * @dev Extension of ERC-20 to support Compound-like voting and delegation. This version is more generic than Compound's,
+ * and supports token supply up to 2^208^ - 1, while COMP is limited to 2^96^ - 1. The token is also nontransferable.
  *
- * This implementation is agnostic to the way tokens are created. This means
- * that a supply mechanism has to be added in a derived contract using {_mint}.
- * For a generic mechanism see {ERC20PresetMinterPauser}.
+ * NOTE: This contract does not provide interface compatibility with Compound's COMP token.
  *
- * TIP: For a detailed writeup see our guide
- * https://forum.openzeppelin.com/t/how-to-implement-erc20-supply-mechanisms/226[How
- * to implement supply mechanisms].
+ * This extension keeps a history (checkpoints) of each account's vote power. Vote power can be delegated either
+ * by calling the {delegate} function directly, or by providing a signature to be used with {delegateBySig}. Voting
+ * power can be queried through the public accessors {getVotes} and {getPastVotes}.
  *
- * The default value of {decimals} is 18. To change this, you should override
- * this function so it returns a different value.
- *
- * We have followed general OpenZeppelin Contracts guidelines: functions revert
- * instead returning `false` on failure. This behavior is nonetheless
- * conventional and does not conflict with the expectations of ERC20
- * applications.
- *
- * Additionally, an {Approval} event is emitted on calls to {transferFrom}.
- * This allows applications to reconstruct the allowance for all accounts just
- * by listening to said events. Other implementations of the EIP may not emit
- * these events, as it isn't required by the specification.
- *
- * Finally, the non-standard {decreaseAllowance} and {increaseAllowance}
- * functions have been added to mitigate the well-known issues around setting
- * allowances. See {IERC20-approve}.
+ * By default, token balance does not account for voting power. This makes transfers cheaper. The downside is that it
+ * requires users to delegate to themselves in order to activate checkpoints and have their voting power tracked.
  */
 
 import { Ownable } from "@openzeppelin/contracts/access/Ownable.sol";
+import { ERC20Votes } from "./base/erc20/ERC20Votes.sol";
 import { ERC20 } from "./base/erc20/ERC20.sol";
+import { EIP712 } from "@openzeppelin/contracts/utils/cryptography/EIP712.sol";
 
-contract NontransferableERC20Votes is Ownable, ERC20 {
+contract NontransferableERC20Votes is Ownable, ERC20Votes {
     mapping(address account => uint256) private _balances;
 
     uint256 private _totalSupply;
@@ -48,7 +35,7 @@ contract NontransferableERC20Votes is Ownable, ERC20 {
      * All two of these values are immutable: they can only be set once during
      * construction.
      */
-    constructor(address _initialOwner, string memory name_, string memory symbol_, uint8 decimals_) Ownable(_initialOwner) ERC20(name_, symbol_) {
+    constructor(address _initialOwner, string memory name_, string memory symbol_, uint8 decimals_) Ownable(_initialOwner) ERC20(name_, symbol_) EIP712(name_, "1") {
         _decimals = decimals_;
     }
 
@@ -72,7 +59,7 @@ contract NontransferableERC20Votes is Ownable, ERC20 {
     /**
      * @dev Not allowed
      */
-    function transfer(address, uint256) public override virtual returns (bool) {
+    function transfer(address, uint256) public virtual override returns (bool) {
         return false;
     }
 
@@ -98,43 +85,6 @@ contract NontransferableERC20Votes is Ownable, ERC20 {
     }
 
     /**
-     * @dev Transfers a `value` amount of tokens from `from` to `to`, or alternatively mints (or burns) if `from`
-     * (or `to`) is the zero address. All customizations to transfers, mints, and burns should be done by overriding
-     * this function.
-     *
-     * Emits a {Transfer} event.
-     */
-    function _update(address from, address to, uint256 value) internal override virtual {
-        if (from == address(0)) {
-            // Overflow check required: The rest of the code assumes that totalSupply never overflows
-            _totalSupply += value;
-        } else {
-            uint256 fromBalance = _balances[from];
-            if (fromBalance < value) {
-                revert ERC20InsufficientBalance(from, fromBalance, value);
-            }
-            unchecked {
-                // Overflow not possible: value <= fromBalance <= totalSupply.
-                _balances[from] = fromBalance - value;
-            }
-        }
-
-        if (to == address(0)) {
-            unchecked {
-                // Overflow not possible: value <= totalSupply or value <= fromBalance <= totalSupply.
-                _totalSupply -= value;
-            }
-        } else {
-            unchecked {
-                // Overflow not possible: balance + value is at most totalSupply, which we know fits into a uint256.
-                _balances[to] += value;
-            }
-        }
-
-        emit Transfer(from, to, value);
-    }
-
-    /**
      * @dev Creates a `value` amount of tokens and assigns them to `account`, by transferring it from address(0).
      * Relies on the `_update` mechanism
      *
@@ -155,21 +105,21 @@ contract NontransferableERC20Votes is Ownable, ERC20 {
 
     /**
      * @dev Not allowed
-    */
+     */
     function _approve(address owner, address spender, uint256 value) internal override {
         return;
     }
 
     /**
      * @dev Not allowed
-    */
+     */
     function _approve(address owner, address spender, uint256 value, bool emitEvent) internal virtual override {
         return;
     }
 
     /**
      * @dev Not allowed
-    */
+     */
     function _spendAllowance(address owner, address spender, uint256 value) internal virtual override {
         return;
     }
