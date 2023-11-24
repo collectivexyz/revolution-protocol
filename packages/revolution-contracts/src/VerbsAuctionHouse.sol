@@ -35,9 +35,6 @@ import { wadMul, wadDiv } from "./libs/SignedWadMath.sol";
 import { ICultureIndex } from "./interfaces/ICultureIndex.sol";
 
 contract VerbsAuctionHouse is IVerbsAuctionHouse, PausableUpgradeable, ReentrancyGuardUpgradeable, OwnableUpgradeable {
-    event Log(string message, uint256 val);
-    event Log_Address(string message, address val);
-
     // The Verbs ERC721 token contract
     IVerbsToken public verbs;
 
@@ -300,23 +297,14 @@ contract VerbsAuctionHouse is IVerbsAuctionHouse, PausableUpgradeable, Reentranc
             // Ether going to owner of the auction
             uint256 auctioneerPayment = uint256(wadDiv(wadMul(int256(_auction.amount), 10_000 - int256(creatorRateBps)), 10_000));
 
-            //log the amount
-            emit Log("auction.amount", _auction.amount);
-            emit Log("auctioneerPayment", auctioneerPayment);
-
             //Total amount of ether going to creator
             uint256 creatorPayment = _auction.amount - auctioneerPayment;
-            emit Log("creatorPayment", creatorPayment);
 
             //Ether reserved to pay the creator directly
             uint256 creatorDirectPayment = uint256(wadDiv(wadMul(int256(creatorPayment), int256(entropyRateBps)), 10_000));
 
-            emit Log("creatorDirectPayment", creatorDirectPayment);
-
             //Ether reserved to buy creator governance
             uint256 creatorGovernancePayment = creatorPayment - creatorDirectPayment;
-
-            emit Log("creatorGovernancePayment", creatorGovernancePayment);
 
             uint256 numCreators = verbs.getArtPieceById(_auction.verbId).creators.length;
             address deployer = verbs.getArtPieceById(_auction.verbId).dropper;
@@ -340,11 +328,6 @@ contract VerbsAuctionHouse is IVerbsAuctionHouse, PausableUpgradeable, Reentranc
                 //Transfer creator's share to the creator
                 _safeTransferETHWithFallback(creator.creator, etherAmount);
             }
-            emit Log("creatorGovernancePayment", creatorGovernancePayment);
-            emit Log("vrgdaReceivers", vrgdaReceivers.length);
-            emit Log("vrgdaSplits", vrgdaSplits.length);
-            emit Log_Address("vrgdaReceivers[0]", vrgdaReceivers[0]);
-            emit Log("vrgdaSplits[0]", vrgdaSplits[0]);
             //Buy token from tokenEmitter for all the creators
             tokenEmitter.buyToken{ value: creatorGovernancePayment }(vrgdaReceivers, vrgdaSplits, address(0), address(0), deployer);
         }
