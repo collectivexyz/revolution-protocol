@@ -93,7 +93,8 @@ contract VerbsAuctionHouseTest is Test {
             5, // minBidIncrementPercentage
             24 hours, // duration
             2_000, // creatorRateBps
-            5_000 //entropyRateBps
+            5_000, //entropyRateBps
+            1_000 //minCreatorRateBps
         );
 
         //set minter of verbstoken to be auction house
