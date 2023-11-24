@@ -2,13 +2,13 @@
 pragma solidity 0.8.22;
 
 import {TokenEmitterRewards} from "../../src/abstract/TokenEmitter/TokenEmitterRewards.sol";
-import {TokenEmitter, NontransferableERC20} from "./TokenEmitter.sol";
+import {TokenEmitter, NontransferableERC20Votes} from "./TokenEmitter.sol";
 
 contract MockTokenEmitter is TokenEmitter {
     address public treasury;
 
     constructor(
-        NontransferableERC20 _token,
+        NontransferableERC20Votes _token,
         address _treasury,
         address _protocolRewards,
         address _revolutionRewardRecipient
