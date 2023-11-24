@@ -42,11 +42,11 @@ jobs:
 
       - name: Run protocol-rewards tests
         run: |
-          cd packages/protocol-rewards && pnpm test
+          cd packages/protocol-rewards && pnpm clean && pnpm test
 
       - name: Run revolution-contracts tests
         run: |
-          cd packages/revolution-contracts && pnpm test
+          cd packages/revolution-contracts && pnpm clean && pnpm test
 
       - name: Run Geiger Check
         run: |
