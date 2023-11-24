@@ -56,6 +56,9 @@ contract VerbsAuctionHouse is IVerbsAuctionHouse, PausableUpgradeable, Reentranc
     // The split of the winning bid that is reserved for the creator of the Verb in basis points
     uint256 public creatorRateBps;
 
+    // The all time minimum split of the winning bid that is reserved for the creator of the Verb in basis points
+    uint256 public minCreatorRateBps;
+
     // The split of (auction proceeds * creatorRate) that is sent to the creator as ether in basis points
     uint256 public entropyRateBps;
 
@@ -80,7 +83,8 @@ contract VerbsAuctionHouse is IVerbsAuctionHouse, PausableUpgradeable, Reentranc
         uint8 _minBidIncrementPercentage,
         uint256 _duration,
         uint256 _creatorRateBps,
-        uint256 _entropyRateBps
+        uint256 _entropyRateBps,
+        uint256 _minCreatorRateBps
     ) external initializer {
         __Pausable_init();
         __ReentrancyGuard_init();
@@ -97,6 +101,7 @@ contract VerbsAuctionHouse is IVerbsAuctionHouse, PausableUpgradeable, Reentranc
         duration = _duration;
         creatorRateBps = _creatorRateBps;
         entropyRateBps = _entropyRateBps;
+        minCreatorRateBps = _minCreatorRateBps;
     }
 
     /**
@@ -166,6 +171,7 @@ contract VerbsAuctionHouse is IVerbsAuctionHouse, PausableUpgradeable, Reentranc
      * @param _creatorRateBps New creator rate in basis points.
      */
     function setCreatorRateBps(uint256 _creatorRateBps) external onlyOwner {
+        require(_creatorRateBps >= minCreatorRateBps, "Creator rate must be greater than minCreatorRateBps");
         creatorRateBps = _creatorRateBps;
         emit CreatorRateBpsUpdated(_creatorRateBps);
     }
