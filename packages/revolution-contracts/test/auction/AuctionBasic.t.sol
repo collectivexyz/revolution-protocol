@@ -3,11 +3,13 @@ pragma solidity ^0.8.22;
 
 import { VerbsAuctionHouseTest } from "./AuctionHouse.t.sol";
 import { IVerbsAuctionHouse } from "../../src/interfaces/IVerbsAuctionHouse.sol";
+import { wadMul, wadDiv } from "../../src/libs/SignedWadMath.sol";
 
 contract VerbsAuctionHouseBasicTest is VerbsAuctionHouseTest {
-    function testEventEmission() public {
-        uint256 newCreatorRateBps = 2500;
-        uint256 newEntropyRateBps = 6000;
+    function testEventEmission(uint256 newCreatorRateBps, uint256 newEntropyRateBps) public {
+        vm.assume(newCreatorRateBps > auctionHouse.minCreatorRateBps());
+        vm.assume(newCreatorRateBps <= 10_000);
+        vm.assume(newEntropyRateBps <= 10_000);
 
         // Expect events when changing creatorRateBps
         vm.expectEmit(true, true, true, true);
@@ -20,8 +22,8 @@ contract VerbsAuctionHouseBasicTest is VerbsAuctionHouseTest {
         auctionHouse.setEntropyRateBps(newEntropyRateBps);
     }
 
-    function testSetEntropyRateBps() public {
-        uint256 newEntropyRateBps = 5000;
+    function testSetEntropyRateBps(uint256 newEntropyRateBps) public {
+        vm.assume(newEntropyRateBps <= 10_000);
 
         // Expect an event emission
         vm.expectEmit(true, true, true, true);
@@ -44,8 +46,8 @@ contract VerbsAuctionHouseBasicTest is VerbsAuctionHouseTest {
         vm.stopPrank();
     }
 
-    function testSetEntropyRateBpsInvalidValues() public {
-        uint256 invalidEntropyRateBps = 15000; // Greater than 10,000
+    function testSetEntropyRateBpsInvalidValues(uint256 invalidEntropyRateBps) public {
+        vm.assume(invalidEntropyRateBps > 10_000);
 
         // Attempt to set an invalid entropy rate
         vm.expectRevert("Entropy rate must be less than or equal to 10_000");
@@ -79,7 +81,7 @@ contract VerbsAuctionHouseBasicTest is VerbsAuctionHouseTest {
         //if newMinCreatorRate is greater than creatorRateBps, then expect error
         if (newMinCreatorRateBps > auctionHouse.creatorRateBps()) {
             vm.expectRevert("Min creator rate must be less than or equal to creator rate");
-        } else if (newMinCreatorRateBps < auctionHouse.minCreatorRateBps()) {
+        } else if (newMinCreatorRateBps <= auctionHouse.minCreatorRateBps()) {
             vm.expectRevert("Min creator rate must be greater than previous minCreatorRateBps");
         } else {
             // Expect an event emission
@@ -109,7 +111,7 @@ contract VerbsAuctionHouseBasicTest is VerbsAuctionHouseTest {
         vm.assume(uint256(invalidMinCreatorRateBps) < auctionHouse.creatorRateBps());
 
         // Attempt to set an invalid minimum creator rate
-        if(uint256(invalidMinCreatorRateBps) < auctionHouse.minCreatorRateBps()) {
+        if(uint256(invalidMinCreatorRateBps) <= auctionHouse.minCreatorRateBps()) {
             vm.expectRevert("Min creator rate must be greater than previous minCreatorRateBps");
         } else if (uint256(invalidMinCreatorRateBps) > 10_000) {
             vm.expectRevert("Min creator rate must be less than or equal to 10_000");
@@ -117,8 +119,8 @@ contract VerbsAuctionHouseBasicTest is VerbsAuctionHouseTest {
         auctionHouse.setMinCreatorRateBps(uint256(invalidMinCreatorRateBps));
     }
 
-    function testMinCreatorRateLoweringRestriction() public {
-        uint256 lowerMinCreatorRateBps = auctionHouse.minCreatorRateBps() - 500;
+    function testMinCreatorRateLoweringRestriction(uint256 lowerMinCreatorRateBps) public {
+        vm.assume(lowerMinCreatorRateBps < auctionHouse.minCreatorRateBps());
 
         // Attempt to set a lower minimum creator rate than the current one
         vm.expectRevert("Min creator rate must be greater than previous minCreatorRateBps");
@@ -183,12 +185,13 @@ contract VerbsAuctionHouseBasicTest is VerbsAuctionHouseTest {
         assertEq(settled, false, "Auction should not be settled");
     }
 
-    function testBiddingProcess() public {
+    function testBiddingProcess(uint256 bidAmount) public {
+        vm.assume(bidAmount > auctionHouse.reservePrice());
+        vm.assume(bidAmount < 10_000_000 ether);
         setUp();
         createDefaultArtPiece();
 
         auctionHouse.unpause();
-        uint256 bidAmount = auctionHouse.reservePrice() + 0.1 ether;
         vm.deal(address(1), bidAmount + 2 ether);
 
         vm.startPrank(address(1));
@@ -201,10 +204,33 @@ contract VerbsAuctionHouseBasicTest is VerbsAuctionHouseTest {
 
         vm.warp(endTime + 1);
         createDefaultArtPiece();
+        // Ether going to owner of the auction
+        uint256 auctioneerPayment = uint256(wadDiv(wadMul(int256(bidAmount), 10_000 - int256(auctionHouse.creatorRateBps())), 10_000));
 
+        //Total amount of ether going to creator
+        uint256 creatorPayment = bidAmount - auctioneerPayment;
+
+        //Ether reserved to pay the creator directly
+        uint256 creatorDirectPayment = uint256(wadDiv(wadMul(int256(creatorPayment), int256(auctionHouse.entropyRateBps())), 10_000));
+
+        //Ether reserved to buy creator governance
+        uint256 creatorGovernancePayment = creatorPayment - creatorDirectPayment;
+
+        bool shouldExpectRevert = creatorGovernancePayment <= tokenEmitter.minPurchaseAmount() || creatorGovernancePayment >= tokenEmitter.maxPurchaseAmount();
+
+        // // BPS too small to issue rewards
+        if (shouldExpectRevert) {
+            //expect INVALID_ETH_AMOUNT()
+            vm.expectRevert();
+        }
         auctionHouse.settleCurrentAndCreateNewAuction(); // This will settle the current auction and create a new one
 
-        assertEq(verbs.ownerOf(verbId), address(1), "Verb should be transferred to the auction house");
+        if(shouldExpectRevert) {
+            (, , , , , bool settled) = auctionHouse.auction();
+            assertEq(settled, false, "Auction should not be settled because new one created");
+        } else {
+            assertEq(verbs.ownerOf(verbId), address(1), "Verb should be transferred to the auction house");
+        }
     }
 
     function testSettlingAuctions() public {
@@ -225,16 +251,13 @@ contract VerbsAuctionHouseBasicTest is VerbsAuctionHouseTest {
         assertEq(settled, false, "Auction should not be settled because new one created");
     }
 
-    function testAdministrativeFunctions() public {
-        uint256 newTimeBuffer = 10 minutes;
+    function testAdministrativeFunctions(uint256 newTimeBuffer, uint256 newReservePrice, uint8 newMinBidIncrementPercentage) public {
         auctionHouse.setTimeBuffer(newTimeBuffer);
         assertEq(auctionHouse.timeBuffer(), newTimeBuffer, "Time buffer should be updated correctly");
 
-        uint256 newReservePrice = 2 ether;
         auctionHouse.setReservePrice(newReservePrice);
         assertEq(auctionHouse.reservePrice(), newReservePrice, "Reserve price should be updated correctly");
 
-        uint8 newMinBidIncrementPercentage = 10;
         auctionHouse.setMinBidIncrementPercentage(newMinBidIncrementPercentage);
         assertEq(auctionHouse.minBidIncrementPercentage(), newMinBidIncrementPercentage, "Min bid increment percentage should be updated correctly");
     }
