@@ -4,7 +4,7 @@ pragma solidity ^0.8.22;
 import { VRGDAC } from "./libs/VRGDAC.sol";
 import { toDaysWadUnsafe, wadDiv, wadMul } from "./libs/SignedWadMath.sol";
 import { Strings } from "@openzeppelin/contracts/utils/Strings.sol";
-import { NontransferableERC20 } from "./NontransferableERC20.sol";
+import { NontransferableERC20Votes } from "./NontransferableERC20Votes.sol";
 import { ITokenEmitter } from "./interfaces/ITokenEmitter.sol";
 import { ReentrancyGuard } from "@openzeppelin/contracts/utils/ReentrancyGuard.sol";
 import { TokenEmitterRewards } from "@collectivexyz/protocol-rewards/src/abstract/TokenEmitter/TokenEmitterRewards.sol";
@@ -13,14 +13,14 @@ contract TokenEmitter is VRGDAC, ITokenEmitter, ReentrancyGuard, TokenEmitterRew
     // Vars
     address private treasury;
 
-    NontransferableERC20 public token;
+    NontransferableERC20Votes public token;
 
     // solhint-disable-next-line not-rely-on-time
     uint public immutable startTime = block.timestamp;
 
     // approved contracts, owner, and a token contract address
     constructor(
-        NontransferableERC20 _token,
+        NontransferableERC20Votes _token,
         address _protocolRewards,
         address _protocolFeeRecipient,
         address _treasury,
@@ -29,7 +29,7 @@ contract TokenEmitter is VRGDAC, ITokenEmitter, ReentrancyGuard, TokenEmitterRew
         int _tokensPerTimeUnit // The number of tokens to target selling in 1 full unit of time, scaled by 1e18.
     ) TokenEmitterRewards(_protocolRewards, _protocolFeeRecipient) VRGDAC(_targetPrice, _priceDecayPercent, _tokensPerTimeUnit) {
         treasury = _treasury;
-        
+
         token = _token;
     }
 
@@ -83,20 +83,12 @@ contract TokenEmitter is VRGDAC, ITokenEmitter, ReentrancyGuard, TokenEmitterRew
     function buyTokenQuote(uint amount) public view returns (int spentY) {
         // Note: By using toDaysWadUnsafe(block.timestamp - startTime) we are establishing that 1 "unit of time" is 1 day.
         // solhint-disable-next-line not-rely-on-time
-        return xToY({
-            timeSinceStart: toDaysWadUnsafe(block.timestamp - startTime),
-            sold: wadMul(int256(totalSupply()), 1e36),
-            amount: int(amount)
-        });
+        return xToY({ timeSinceStart: toDaysWadUnsafe(block.timestamp - startTime), sold: wadMul(int256(totalSupply()), 1e36), amount: int(amount) });
     }
 
     function getTokenQuoteForPayment(uint paymentWei) public view returns (int gainedX) {
         // Note: By using toDaysWadUnsafe(block.timestamp - startTime) we are establishing that 1 "unit of time" is 1 day.
         // solhint-disable-next-line not-rely-on-time
-        return wadDiv(yToX({
-            timeSinceStart: toDaysWadUnsafe(block.timestamp - startTime),
-            sold: wadMul(int256(totalSupply()), 1e36),
-            amount: int(paymentWei)
-        }), 1e36);
+        return wadDiv(yToX({ timeSinceStart: toDaysWadUnsafe(block.timestamp - startTime), sold: wadMul(int256(totalSupply()), 1e36), amount: int(paymentWei) }), 1e36);
     }
 }

@@ -25,7 +25,7 @@
 // MODIFICATIONS:
 // Consumes modified `ERC721` contract. See notes in `ERC721.sol`.
 
-pragma solidity ^0.8.0;
+pragma solidity ^0.8.22;
 
 import "./ERC721.sol";
 import "@openzeppelin/contracts/token/ERC721/extensions/IERC721Enumerable.sol";

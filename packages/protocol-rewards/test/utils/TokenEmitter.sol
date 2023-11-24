@@ -1,10 +1,559 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.22;
 
-import { ERC20 } from "@openzeppelin/contracts/token/ERC20/ERC20.sol";
 import { Strings } from "@openzeppelin/contracts/utils/Strings.sol";
 import { ReentrancyGuard } from "@openzeppelin/contracts/utils/ReentrancyGuard.sol";
 import { TokenEmitterRewards } from "../../src/abstract/TokenEmitter/TokenEmitterRewards.sol";
+import { Ownable } from "@openzeppelin/contracts/access/Ownable.sol";
+import { EIP712 } from "@openzeppelin/contracts/utils/cryptography/EIP712.sol";
+import { Votes } from "@openzeppelin/contracts/governance/utils/Votes.sol";
+import { Checkpoints } from "@openzeppelin/contracts/utils/structs/Checkpoints.sol";
+import { Context } from "@openzeppelin/contracts/utils/Context.sol";
+import { IERC20 } from "@openzeppelin/contracts/token/ERC20/IERC20.sol";
+import { IERC20Metadata } from "@openzeppelin/contracts/token/ERC20/extensions/IERC20Metadata.sol";
+
+/**
+ * @dev Standard ERC-20 Errors
+ * Interface of the https://eips.ethereum.org/EIPS/eip-6093[ERC-6093] custom errors for ERC-20 tokens.
+ */
+interface IERC20Errors {
+    /**
+     * @dev Indicates an error related to the current `balance` of a `sender`. Used in transfers.
+     * @param sender Address whose tokens are being transferred.
+     * @param balance Current balance for the interacting account.
+     * @param needed Minimum amount required to perform a transfer.
+     */
+    error ERC20InsufficientBalance(address sender, uint256 balance, uint256 needed);
+
+    /**
+     * @dev Indicates a failure with the token `sender`. Used in transfers.
+     * @param sender Address whose tokens are being transferred.
+     */
+    error ERC20InvalidSender(address sender);
+
+    /**
+     * @dev Indicates a failure with the token `receiver`. Used in transfers.
+     * @param receiver Address to which tokens are being transferred.
+     */
+    error ERC20InvalidReceiver(address receiver);
+
+    /**
+     * @dev Indicates a failure with the `spender`’s `allowance`. Used in transfers.
+     * @param spender Address that may be allowed to operate on tokens without being their owner.
+     * @param allowance Amount of tokens a `spender` is allowed to operate with.
+     * @param needed Minimum amount required to perform a transfer.
+     */
+    error ERC20InsufficientAllowance(address spender, uint256 allowance, uint256 needed);
+
+    /**
+     * @dev Indicates a failure with the `approver` of a token to be approved. Used in approvals.
+     * @param approver Address initiating an approval operation.
+     */
+    error ERC20InvalidApprover(address approver);
+
+    /**
+     * @dev Indicates a failure with the `spender` to be approved. Used in approvals.
+     * @param spender Address that may be allowed to operate on tokens without being their owner.
+     */
+    error ERC20InvalidSpender(address spender);
+}
+
+/**
+ * @dev Standard ERC-721 Errors
+ * Interface of the https://eips.ethereum.org/EIPS/eip-6093[ERC-6093] custom errors for ERC-721 tokens.
+ */
+interface IERC721Errors {
+    /**
+     * @dev Indicates that an address can't be an owner. For example, `address(0)` is a forbidden owner in ERC-20.
+     * Used in balance queries.
+     * @param owner Address of the current owner of a token.
+     */
+    error ERC721InvalidOwner(address owner);
+
+    /**
+     * @dev Indicates a `tokenId` whose `owner` is the zero address.
+     * @param tokenId Identifier number of a token.
+     */
+    error ERC721NonexistentToken(uint256 tokenId);
+
+    /**
+     * @dev Indicates an error related to the ownership over a particular token. Used in transfers.
+     * @param sender Address whose tokens are being transferred.
+     * @param tokenId Identifier number of a token.
+     * @param owner Address of the current owner of a token.
+     */
+    error ERC721IncorrectOwner(address sender, uint256 tokenId, address owner);
+
+    /**
+     * @dev Indicates a failure with the token `sender`. Used in transfers.
+     * @param sender Address whose tokens are being transferred.
+     */
+    error ERC721InvalidSender(address sender);
+
+    /**
+     * @dev Indicates a failure with the token `receiver`. Used in transfers.
+     * @param receiver Address to which tokens are being transferred.
+     */
+    error ERC721InvalidReceiver(address receiver);
+
+    /**
+     * @dev Indicates a failure with the `operator`’s approval. Used in transfers.
+     * @param operator Address that may be allowed to operate on tokens without being their owner.
+     * @param tokenId Identifier number of a token.
+     */
+    error ERC721InsufficientApproval(address operator, uint256 tokenId);
+
+    /**
+     * @dev Indicates a failure with the `approver` of a token to be approved. Used in approvals.
+     * @param approver Address initiating an approval operation.
+     */
+    error ERC721InvalidApprover(address approver);
+
+    /**
+     * @dev Indicates a failure with the `operator` to be approved. Used in approvals.
+     * @param operator Address that may be allowed to operate on tokens without being their owner.
+     */
+    error ERC721InvalidOperator(address operator);
+}
+
+/**
+ * @dev Standard ERC-1155 Errors
+ * Interface of the https://eips.ethereum.org/EIPS/eip-6093[ERC-6093] custom errors for ERC-1155 tokens.
+ */
+interface IERC1155Errors {
+    /**
+     * @dev Indicates an error related to the current `balance` of a `sender`. Used in transfers.
+     * @param sender Address whose tokens are being transferred.
+     * @param balance Current balance for the interacting account.
+     * @param needed Minimum amount required to perform a transfer.
+     * @param tokenId Identifier number of a token.
+     */
+    error ERC1155InsufficientBalance(address sender, uint256 balance, uint256 needed, uint256 tokenId);
+
+    /**
+     * @dev Indicates a failure with the token `sender`. Used in transfers.
+     * @param sender Address whose tokens are being transferred.
+     */
+    error ERC1155InvalidSender(address sender);
+
+    /**
+     * @dev Indicates a failure with the token `receiver`. Used in transfers.
+     * @param receiver Address to which tokens are being transferred.
+     */
+    error ERC1155InvalidReceiver(address receiver);
+
+    /**
+     * @dev Indicates a failure with the `operator`’s approval. Used in transfers.
+     * @param operator Address that may be allowed to operate on tokens without being their owner.
+     * @param owner Address of the current owner of a token.
+     */
+    error ERC1155MissingApprovalForAll(address operator, address owner);
+
+    /**
+     * @dev Indicates a failure with the `approver` of a token to be approved. Used in approvals.
+     * @param approver Address initiating an approval operation.
+     */
+    error ERC1155InvalidApprover(address approver);
+
+    /**
+     * @dev Indicates a failure with the `operator` to be approved. Used in approvals.
+     * @param operator Address that may be allowed to operate on tokens without being their owner.
+     */
+    error ERC1155InvalidOperator(address operator);
+
+    /**
+     * @dev Indicates an array length mismatch between ids and values in a safeBatchTransferFrom operation.
+     * Used in batch transfers.
+     * @param idsLength Length of the array of token identifiers
+     * @param valuesLength Length of the array of token amounts
+     */
+    error ERC1155InvalidArrayLength(uint256 idsLength, uint256 valuesLength);
+}
+
+
+/**
+ * @dev Implementation of the {IERC20} interface.
+ *
+ * This implementation is agnostic to the way tokens are created. This means
+ * that a supply mechanism has to be added in a derived contract using {_mint}.
+ *
+ * TIP: For a detailed writeup see our guide
+ * https://forum.openzeppelin.com/t/how-to-implement-erc20-supply-mechanisms/226[How
+ * to implement supply mechanisms].
+ *
+ * The default value of {decimals} is 18. To change this, you should override
+ * this function so it returns a different value.
+ *
+ * We have followed general OpenZeppelin Contracts guidelines: functions revert
+ * instead returning `false` on failure. This behavior is nonetheless
+ * conventional and does not conflict with the expectations of ERC-20
+ * applications.
+ *
+ * Additionally, an {Approval} event is emitted on calls to {transferFrom}.
+ * This allows applications to reconstruct the allowance for all accounts just
+ * by listening to said events. Other implementations of the ERC may not emit
+ * these events, as it isn't required by the specification.
+ */
+abstract contract ERC20 is Context, IERC20, IERC20Metadata, IERC20Errors {
+    mapping(address account => uint256) private _balances;
+
+    mapping(address account => mapping(address spender => uint256)) private _allowances;
+
+    uint256 private _totalSupply;
+
+    string private _name;
+    string private _symbol;
+
+    /**
+     * @dev Sets the values for {name} and {symbol}.
+     *
+     * All two of these values are immutable: they can only be set once during
+     * construction.
+     */
+    constructor(string memory name_, string memory symbol_) {
+        _name = name_;
+        _symbol = symbol_;
+    }
+
+    /**
+     * @dev Returns the name of the token.
+     */
+    function name() public view virtual returns (string memory) {
+        return _name;
+    }
+
+    /**
+     * @dev Returns the symbol of the token, usually a shorter version of the
+     * name.
+     */
+    function symbol() public view virtual returns (string memory) {
+        return _symbol;
+    }
+
+    /**
+     * @dev Returns the number of decimals used to get its user representation.
+     * For example, if `decimals` equals `2`, a balance of `505` tokens should
+     * be displayed to a user as `5.05` (`505 / 10 ** 2`).
+     *
+     * Tokens usually opt for a value of 18, imitating the relationship between
+     * Ether and Wei. This is the default value returned by this function, unless
+     * it's overridden.
+     *
+     * NOTE: This information is only used for _display_ purposes: it in
+     * no way affects any of the arithmetic of the contract, including
+     * {IERC20-balanceOf} and {IERC20-transfer}.
+     */
+    function decimals() public view virtual returns (uint8) {
+        return 18;
+    }
+
+    /**
+     * @dev See {IERC20-totalSupply}.
+     */
+    function totalSupply() public view virtual returns (uint256) {
+        return _totalSupply;
+    }
+
+    /**
+     * @dev See {IERC20-balanceOf}.
+     */
+    function balanceOf(address account) public view virtual returns (uint256) {
+        return _balances[account];
+    }
+
+    /**
+     * @dev See {IERC20-transfer}.
+     *
+     * Requirements:
+     *
+     * - `to` cannot be the zero address.
+     * - the caller must have a balance of at least `value`.
+     */
+    function transfer(address to, uint256 value) public virtual returns (bool) {
+        address owner = _msgSender();
+        _transfer(owner, to, value);
+        return true;
+    }
+
+    /**
+     * @dev See {IERC20-allowance}.
+     */
+    function allowance(address owner, address spender) public view virtual returns (uint256) {
+        return _allowances[owner][spender];
+    }
+
+    /**
+     * @dev See {IERC20-approve}.
+     *
+     * NOTE: If `value` is the maximum `uint256`, the allowance is not updated on
+     * `transferFrom`. This is semantically equivalent to an infinite approval.
+     *
+     * Requirements:
+     *
+     * - `spender` cannot be the zero address.
+     */
+    function approve(address spender, uint256 value) public virtual returns (bool) {
+        address owner = _msgSender();
+        _approve(owner, spender, value);
+        return true;
+    }
+
+    /**
+     * @dev See {IERC20-transferFrom}.
+     *
+     * Emits an {Approval} event indicating the updated allowance. This is not
+     * required by the ERC. See the note at the beginning of {ERC20}.
+     *
+     * NOTE: Does not update the allowance if the current allowance
+     * is the maximum `uint256`.
+     *
+     * Requirements:
+     *
+     * - `from` and `to` cannot be the zero address.
+     * - `from` must have a balance of at least `value`.
+     * - the caller must have allowance for ``from``'s tokens of at least
+     * `value`.
+     */
+    function transferFrom(address from, address to, uint256 value) public virtual returns (bool) {
+        address spender = _msgSender();
+        _spendAllowance(from, spender, value);
+        _transfer(from, to, value);
+        return true;
+    }
+
+    /**
+     * @dev Moves a `value` amount of tokens from `from` to `to`.
+     *
+     * This internal function is equivalent to {transfer}, and can be used to
+     * e.g. implement automatic token fees, slashing mechanisms, etc.
+     *
+     * Emits a {Transfer} event.
+     *
+     * NOTE: This function is not virtual, {_update} should be overridden instead.
+     */
+    function _transfer(address from, address to, uint256 value) internal virtual {
+        if (from == address(0)) {
+            revert ERC20InvalidSender(address(0));
+        }
+        if (to == address(0)) {
+            revert ERC20InvalidReceiver(address(0));
+        }
+        _update(from, to, value);
+    }
+
+    /**
+     * @dev Transfers a `value` amount of tokens from `from` to `to`, or alternatively mints (or burns) if `from`
+     * (or `to`) is the zero address. All customizations to transfers, mints, and burns should be done by overriding
+     * this function.
+     *
+     * Emits a {Transfer} event.
+     */
+    function _update(address from, address to, uint256 value) internal virtual {
+        if (from == address(0)) {
+            // Overflow check required: The rest of the code assumes that totalSupply never overflows
+            _totalSupply += value;
+        } else {
+            uint256 fromBalance = _balances[from];
+            if (fromBalance < value) {
+                revert ERC20InsufficientBalance(from, fromBalance, value);
+            }
+            unchecked {
+                // Overflow not possible: value <= fromBalance <= totalSupply.
+                _balances[from] = fromBalance - value;
+            }
+        }
+
+        if (to == address(0)) {
+            unchecked {
+                // Overflow not possible: value <= totalSupply or value <= fromBalance <= totalSupply.
+                _totalSupply -= value;
+            }
+        } else {
+            unchecked {
+                // Overflow not possible: balance + value is at most totalSupply, which we know fits into a uint256.
+                _balances[to] += value;
+            }
+        }
+
+        emit Transfer(from, to, value);
+    }
+
+    /**
+     * @dev Creates a `value` amount of tokens and assigns them to `account`, by transferring it from address(0).
+     * Relies on the `_update` mechanism
+     *
+     * Emits a {Transfer} event with `from` set to the zero address.
+     *
+     * NOTE: This function is not virtual, {_update} should be overridden instead.
+     */
+    function _mint(address account, uint256 value) internal virtual {
+        if (account == address(0)) {
+            revert ERC20InvalidReceiver(address(0));
+        }
+        _update(address(0), account, value);
+    }
+
+    /**
+     * @dev Destroys a `value` amount of tokens from `account`, lowering the total supply.
+     * Relies on the `_update` mechanism.
+     *
+     * Emits a {Transfer} event with `to` set to the zero address.
+     *
+     * NOTE: This function is not virtual, {_update} should be overridden instead
+     */
+    function _burn(address account, uint256 value) internal {
+        if (account == address(0)) {
+            revert ERC20InvalidSender(address(0));
+        }
+        _update(account, address(0), value);
+    }
+
+    /**
+     * @dev Sets `value` as the allowance of `spender` over the `owner` s tokens.
+     *
+     * This internal function is equivalent to `approve`, and can be used to
+     * e.g. set automatic allowances for certain subsystems, etc.
+     *
+     * Emits an {Approval} event.
+     *
+     * Requirements:
+     *
+     * - `owner` cannot be the zero address.
+     * - `spender` cannot be the zero address.
+     *
+     * Overrides to this logic should be done to the variant with an additional `bool emitEvent` argument.
+     */
+    function _approve(address owner, address spender, uint256 value) internal virtual {
+        _approve(owner, spender, value, true);
+    }
+
+    /**
+     * @dev Variant of {_approve} with an optional flag to enable or disable the {Approval} event.
+     *
+     * By default (when calling {_approve}) the flag is set to true. On the other hand, approval changes made by
+     * `_spendAllowance` during the `transferFrom` operation set the flag to false. This saves gas by not emitting any
+     * `Approval` event during `transferFrom` operations.
+     *
+     * Anyone who wishes to continue emitting `Approval` events on the`transferFrom` operation can force the flag to
+     * true using the following override:
+     * ```
+     * function _approve(address owner, address spender, uint256 value, bool) internal virtual override {
+     *     super._approve(owner, spender, value, true);
+     * }
+     * ```
+     *
+     * Requirements are the same as {_approve}.
+     */
+    function _approve(address owner, address spender, uint256 value, bool emitEvent) internal virtual {
+        if (owner == address(0)) {
+            revert ERC20InvalidApprover(address(0));
+        }
+        if (spender == address(0)) {
+            revert ERC20InvalidSpender(address(0));
+        }
+        _allowances[owner][spender] = value;
+        if (emitEvent) {
+            emit Approval(owner, spender, value);
+        }
+    }
+
+    /**
+     * @dev Updates `owner` s allowance for `spender` based on spent `value`.
+     *
+     * Does not update the allowance value in case of infinite allowance.
+     * Revert if not enough allowance is available.
+     *
+     * Does not emit an {Approval} event.
+     */
+    function _spendAllowance(address owner, address spender, uint256 value) internal virtual {
+        uint256 currentAllowance = allowance(owner, spender);
+        if (currentAllowance != type(uint256).max) {
+            if (currentAllowance < value) {
+                revert ERC20InsufficientAllowance(spender, currentAllowance, value);
+            }
+            unchecked {
+                _approve(owner, spender, currentAllowance - value, false);
+            }
+        }
+    }
+}
+
+
+/**
+ * @dev Extension of ERC-20 to support Compound-like voting and delegation. This version is more generic than Compound's,
+ * and supports token supply up to 2^208^ - 1, while COMP is limited to 2^96^ - 1.
+ *
+ * NOTE: This contract does not provide interface compatibility with Compound's COMP token.
+ *
+ * This extension keeps a history (checkpoints) of each account's vote power. Vote power can be delegated either
+ * by calling the {delegate} function directly, or by providing a signature to be used with {delegateBySig}. Voting
+ * power can be queried through the public accessors {getVotes} and {getPastVotes}.
+ *
+ * By default, token balance does not account for voting power. This makes transfers cheaper. The downside is that it
+ * requires users to delegate to themselves in order to activate checkpoints and have their voting power tracked.
+ */
+abstract contract ERC20Votes is ERC20, Votes {
+    /**
+     * @dev Total supply cap has been exceeded, introducing a risk of votes overflowing.
+     */
+    error ERC20ExceededSafeSupply(uint256 increasedSupply, uint256 cap);
+
+    /**
+     * @dev Maximum token supply. Defaults to `type(uint208).max` (2^208^ - 1).
+     *
+     * This maximum is enforced in {_update}. It limits the total supply of the token, which is otherwise a uint256,
+     * so that checkpoints can be stored in the Trace208 structure used by {{Votes}}. Increasing this value will not
+     * remove the underlying limitation, and will cause {_update} to fail because of a math overflow in
+     * {_transferVotingUnits}. An override could be used to further restrict the total supply (to a lower value) if
+     * additional logic requires it. When resolving override conflicts on this function, the minimum should be
+     * returned.
+     */
+    function _maxSupply() internal view virtual returns (uint256) {
+        return type(uint208).max;
+    }
+
+    /**
+     * @dev Move voting power when tokens are transferred.
+     *
+     * Emits a {IVotes-DelegateVotesChanged} event.
+     */
+    function _update(address from, address to, uint256 value) internal virtual override {
+        super._update(from, to, value);
+        if (from == address(0)) {
+            uint256 supply = totalSupply();
+            uint256 cap = _maxSupply();
+            if (supply > cap) {
+                revert ERC20ExceededSafeSupply(supply, cap);
+            }
+        }
+        _transferVotingUnits(from, to, value);
+    }
+
+    /**
+     * @dev Returns the voting units of an `account`.
+     *
+     * WARNING: Overriding this function may compromise the internal vote accounting.
+     * `ERC20Votes` assumes tokens map to voting units 1:1 and this is not easy to change.
+     */
+    function _getVotingUnits(address account) internal view virtual override returns (uint256) {
+        return balanceOf(account);
+    }
+
+    /**
+     * @dev Get number of checkpoints for `account`.
+     */
+    function numCheckpoints(address account) public view virtual returns (uint32) {
+        return _numCheckpoints(account);
+    }
+
+    /**
+     * @dev Get the `pos`-th checkpoint for `account`.
+     */
+    function checkpoints(address account, uint32 pos) public view virtual returns (Checkpoints.Checkpoint208 memory) {
+        return _checkpoints(account, pos);
+    }
+}
+
 
 /// @notice Signed 18 decimal fixed point (wad) arithmetic library.
 /// @author Solmate (https://github.com/transmissions11/solmate/blob/main/src/utils/SignedWadMath.sol)
@@ -244,28 +793,35 @@ function unsafeDiv(int256 x, int256 y) pure returns (int256 r) {
     }
 }
 
-/// @title Variable Rate Gradual Dutch Auction
+
+/// @title Continuous Variable Rate Gradual Dutch Auction
 /// @author transmissions11 <t11s@paradigm.xyz>
 /// @author FrankieIsLost <frankie@paradigm.xyz>
+/// @author Dan Robinson <dan@paradigm.xyz>
 /// @notice Sell tokens roughly according to an issuance schedule.
-abstract contract VRGDA {
+contract VRGDAC {
     /*//////////////////////////////////////////////////////////////
                             VRGDA PARAMETERS
     //////////////////////////////////////////////////////////////*/
 
-    /// @notice Target price for a token, to be scaled according to sales pace.
-    /// @dev Represented as an 18 decimal fixed point number.
     int256 public immutable targetPrice;
 
-    /// @dev Precomputed constant that allows us to rewrite a pow() as an exp().
-    /// @dev Represented as an 18 decimal fixed point number.
-    int256 internal immutable decayConstant;
+    int256 public immutable perTimeUnit;
+
+    int256 public immutable decayConstant;
+
+    int256 public immutable priceDecayPercent;
 
     /// @notice Sets target price and per time unit price decay for the VRGDA.
     /// @param _targetPrice The target price for a token if sold on pace, scaled by 1e18.
     /// @param _priceDecayPercent The percent price decays per unit of time with no sales, scaled by 1e18.
-    constructor(int256 _targetPrice, int256 _priceDecayPercent) {
+    /// @param _perTimeUnit The number of tokens to target selling in 1 full unit of time, scaled by 1e18.
+    constructor(int256 _targetPrice, int256 _priceDecayPercent, int256 _perTimeUnit) {
         targetPrice = _targetPrice;
+
+        perTimeUnit = _perTimeUnit;
+
+        priceDecayPercent = _priceDecayPercent;
 
         decayConstant = wadLn(1e18 - _priceDecayPercent);
 
@@ -277,112 +833,79 @@ abstract contract VRGDA {
                               PRICING LOGIC
     //////////////////////////////////////////////////////////////*/
 
-    /// @notice Calculate the price of a token according to the VRGDA formula.
-    /// @param timeSinceStart Time passed since the VRGDA began, scaled by 1e18.
-    /// @param sold The total number of tokens that have been sold so far.
-    /// @return The price of a token according to VRGDA, scaled by 1e18.
-    function getVRGDAPrice(int256 timeSinceStart, uint256 sold) public view virtual returns (uint256) {
+    // y to pay
+    // given # of tokens sold and # to buy, returns amount to pay
+    function xToY(int256 timeSinceStart, int256 sold, int256 amount) public view virtual returns (int256) {
         unchecked {
-            // prettier-ignore
-            uint256 price = uint256(wadMul(targetPrice, wadExp(unsafeWadMul(decayConstant,
-                // Theoretically calling toWadUnsafe with sold can silently overflow but under
-                // any reasonable circumstance it will never be large enough. We use sold + 1 as
-                // the VRGDA formula's n param represents the nth token and sold is the n-1th token.
-                timeSinceStart - getTargetSaleTime(toWadUnsafe(sold + 1))
-            ))));
-
-            uint256 priceFloor = 1;
-
-            if (price < priceFloor) {
-                return priceFloor;
-            }
-
-            return price;
+            return pIntegral(timeSinceStart, sold + amount) - pIntegral(timeSinceStart, sold);
         }
     }
 
-    /// @dev Given a number of tokens sold, return the target time that number of tokens should be sold by.
-    /// @param sold A number of tokens sold, scaled by 1e18, to get the corresponding target sale time for.
-    /// @return The target time the tokens should be sold by, scaled by 1e18, where the time is
-    /// relative, such that 0 means the tokens should be sold immediately when the VRGDA begins.
-    function getTargetSaleTime(int256 sold) public view virtual returns (int256);
-}
-
-
-/// @title Linear Variable Rate Gradual Dutch Auction
-/// @author transmissions11 <t11s@paradigm.xyz>
-/// @author FrankieIsLost <frankie@paradigm.xyz>
-/// @notice VRGDA with a linear issuance curve.
-abstract contract LinearVRGDA is VRGDA {
-    /*//////////////////////////////////////////////////////////////
-                           PRICING PARAMETERS
-    //////////////////////////////////////////////////////////////*/
-
-    /// @dev The total number of tokens to target selling every full unit of time.
-    /// @dev Represented as an 18 decimal fixed point number.
-    int256 internal immutable perTimeUnit;
-
-    /// @notice Sets pricing parameters for the VRGDA.
-    /// @param _targetPrice The target price for a token if sold on pace, scaled by 1e18.
-    /// @param _priceDecayPercent The percent price decays per unit of time with no sales, scaled by 1e18.
-    /// @param _perTimeUnit The number of tokens to target selling in 1 full unit of time, scaled by 1e18.
-    constructor(int256 _targetPrice, int256 _priceDecayPercent, int256 _perTimeUnit) VRGDA(_targetPrice, _priceDecayPercent) {
-        perTimeUnit = _perTimeUnit;
+    // given amount to pay and amount sold so far, returns # of tokens to sell
+    function yToX(int256 timeSinceStart, int256 sold, int256 amount) public view virtual returns (int256) {
+        unchecked {
+            return wadMul(-wadDiv(wadLn(1e18 - wadMul(amount, wadDiv(decayConstant, wadMul(perTimeUnit, p(timeSinceStart, sold))))), decayConstant), perTimeUnit);
+        }
     }
 
-    /*//////////////////////////////////////////////////////////////
-                              PRICING LOGIC
-    //////////////////////////////////////////////////////////////*/
+    // given amount to pay and amount sold so far, returns # of tokens to sell - raw form
+    function yToXRaw(int256 timeSinceStart, int256 sold, int256 amount) public view virtual returns (int256) {
+        int256 soldDifference = wadMul(perTimeUnit, timeSinceStart) - sold;
+        unchecked {
+            return
+                wadMul(
+                    perTimeUnit,
+                    wadDiv(
+                        wadLn(
+                            wadDiv(
+                                wadMul(targetPrice, wadMul(perTimeUnit, wadExp(wadMul(soldDifference, wadDiv(decayConstant, perTimeUnit))))),
+                                wadMul(targetPrice, wadMul(perTimeUnit, wadPow(1e18 - priceDecayPercent, wadDiv(soldDifference, perTimeUnit)))) -
+                                    wadMul(amount, decayConstant)
+                            )
+                        ),
+                        decayConstant
+                    )
+                );
+        }
+    }
 
-    /// @dev Given a number of tokens sold, return the target time that number of tokens should be sold by.
-    /// @param sold A number of tokens sold, scaled by 1e18, to get the corresponding target sale time for.
-    /// @return The target time the tokens should be sold by, scaled by 1e18, where the time is
-    /// relative, such that 0 means the tokens should be sold immediately when the VRGDA begins.
-    function getTargetSaleTime(int256 sold) public view virtual override returns (int256) {
-        return unsafeWadDiv(sold, perTimeUnit);
+    // given # of tokens sold, returns integral of price p(x) = p0 * (1 - k)^(x/r)
+    function pIntegral(int256 timeSinceStart, int256 sold) internal view returns (int256) {
+        return
+            wadDiv(
+                -wadMul(
+                    wadMul(targetPrice, perTimeUnit),
+                    wadPow(1e18 - priceDecayPercent, timeSinceStart - unsafeWadDiv(sold, perTimeUnit)) - wadPow(1e18 - priceDecayPercent, timeSinceStart)
+                ),
+                decayConstant
+            );
+    }
+
+    // given # of tokens sold, returns price p(x) = p0 * (1 - k)^(t - (x/r)) - (x/r) makes it a linearvrgda issuance
+    function p(int256 timeSinceStart, int256 sold) internal view returns (int256) {
+        return wadMul(targetPrice, wadPow(1e18 - priceDecayPercent, timeSinceStart - unsafeWadDiv(sold, perTimeUnit)));
     }
 }
 
 /**
- * @dev Implementation of the {IERC20} interface.
+ * @dev Extension of ERC-20 to support Compound-like voting and delegation. This version is more generic than Compound's,
+ * and supports token supply up to 2^208^ - 1, while COMP is limited to 2^96^ - 1. The token is also nontransferable.
  *
- * This implementation is agnostic to the way tokens are created. This means
- * that a supply mechanism has to be added in a derived contract using {_mint}.
- * For a generic mechanism see {ERC20PresetMinterPauser}.
+ * NOTE: This contract does not provide interface compatibility with Compound's COMP token.
  *
- * TIP: For a detailed writeup see our guide
- * https://forum.openzeppelin.com/t/how-to-implement-erc20-supply-mechanisms/226[How
- * to implement supply mechanisms].
+ * This extension keeps a history (checkpoints) of each account's vote power. Vote power can be delegated either
+ * by calling the {delegate} function directly, or by providing a signature to be used with {delegateBySig}. Voting
+ * power can be queried through the public accessors {getVotes} and {getPastVotes}.
  *
- * The default value of {decimals} is 18. To change this, you should override
- * this function so it returns a different value.
- *
- * We have followed general OpenZeppelin Contracts guidelines: functions revert
- * instead returning `false` on failure. This behavior is nonetheless
- * conventional and does not conflict with the expectations of ERC20
- * applications.
- *
- * Additionally, an {Approval} event is emitted on calls to {transferFrom}.
- * This allows applications to reconstruct the allowance for all accounts just
- * by listening to said events. Other implementations of the EIP may not emit
- * these events, as it isn't required by the specification.
- *
- * Finally, the non-standard {decreaseAllowance} and {increaseAllowance}
- * functions have been added to mitigate the well-known issues around setting
- * allowances. See {IERC20-approve}.
+ * By default, token balance does not account for voting power. This makes transfers cheaper. The downside is that it
+ * requires users to delegate to themselves in order to activate checkpoints and have their voting power tracked.
  */
 
-import { Ownable } from "@openzeppelin/contracts/access/Ownable.sol";
-
-contract NontransferableERC20 is Ownable {
-    mapping(address => uint256) private _balances;
-
-    event Transfer(address indexed from, address indexed to, uint256 value);
+contract NontransferableERC20Votes is Ownable, ERC20Votes {
+    mapping(address account => uint256) private _balances;
 
     uint256 private _totalSupply;
 
-    string private _name;
-    string private _symbol;
     uint8 private immutable _decimals;
 
     /**
@@ -391,25 +914,8 @@ contract NontransferableERC20 is Ownable {
      * All two of these values are immutable: they can only be set once during
      * construction.
      */
-    constructor(address _initialOwner, string memory name_, string memory symbol_, uint8 decimals_) Ownable(_initialOwner) {
-        _name = name_;
-        _symbol = symbol_;
+    constructor(address _initialOwner, string memory name_, string memory symbol_, uint8 decimals_) Ownable(_initialOwner) ERC20(name_, symbol_) EIP712(name_, "1") {
         _decimals = decimals_;
-    }
-
-    /**
-     * @dev Returns the name of the token.
-     */
-    function name() public view virtual returns (string memory) {
-        return _name;
-    }
-
-    /**
-     * @dev Returns the symbol of the token, usually a shorter version of the
-     * name.
-     */
-    function symbol() public view virtual returns (string memory) {
-        return _symbol;
     }
 
     /**
@@ -425,92 +931,51 @@ contract NontransferableERC20 is Ownable {
      * no way affects any of the arithmetic of the contract, including
      * {IERC20-balanceOf} and {IERC20-transfer}.
      */
-    function decimals() public view virtual returns (uint8) {
+    function decimals() public view virtual override returns (uint8) {
         return _decimals;
     }
 
     /**
-     * @dev See {IERC20-totalSupply}.
+     * @dev Not allowed
      */
-    function totalSupply() public view virtual returns (uint256) {
-        return _totalSupply;
-    }
-
-    /**
-     * @dev See {IERC20-balanceOf}.
-     */
-    function balanceOf(address account) public view virtual returns (uint256) {
-        return _balances[account];
-    }
-
-    /**
-     * @dev See {IERC20-transfer}.
-     *
-     * Requirements:
-     *
-     * - `to` cannot be the zero address.
-     * - the caller must have a balance of at least `amount`.
-     */
-    function transfer(address, uint256) public virtual returns (bool) {
+    function transfer(address, uint256) public virtual override returns (bool) {
         return false;
     }
 
     /**
-     * @dev See {IERC20-approve}.
-     *
-     * NOTE: If `amount` is the maximum `uint256`, the allowance is not updated on
-     * `transferFrom`. This is semantically equivalent to an infinite approval.
-     *
-     * Requirements:
-     *
-     * - `spender` cannot be the zero address.
+     * @dev Not allowed
      */
-    function approve(address, uint256) public virtual returns (bool) {
+    function _transfer(address from, address to, uint256 value) internal override {
+        return;
+    }
+
+    /**
+     * @dev Not allowed
+     */
+    function transferFrom(address, address, uint256) public virtual override returns (bool) {
         return false;
     }
 
     /**
-     * @dev See {IERC20-transferFrom}.
-     *
-     * Emits an {Approval} event indicating the updated allowance. This is not
-     * required by the EIP. See the note at the beginning of {ERC20}.
-     *
-     * NOTE: Does not update the allowance if the current allowance
-     * is the maximum `uint256`.
-     *
-     * Requirements:
-     *
-     * - `from` and `to` cannot be the zero address.
-     * - `from` must have a balance of at least `amount`.
-     * - the caller must have allowance for ``from``'s tokens of at least
-     * `amount`.
+     * @dev Not allowed
      */
-    function transferFrom(address, address, uint256) public virtual returns (bool) {
+    function approve(address, uint256) public virtual override returns (bool) {
         return false;
     }
 
-    /** @dev Creates `amount` tokens and assigns them to `account`, increasing
-     * the total supply.
+    /**
+     * @dev Creates a `value` amount of tokens and assigns them to `account`, by transferring it from address(0).
+     * Relies on the `_update` mechanism
      *
      * Emits a {Transfer} event with `from` set to the zero address.
      *
-     * Requirements:
-     *
-     * - `account` cannot be the zero address.
+     * NOTE: This function is not virtual, {_update} should be overridden instead.
      */
-    function _mint(address account, uint256 amount) internal virtual {
-        // only allow the owner to mint tokens
-
-        _beforeTokenTransfer(address(0), account, amount);
-
-        _totalSupply += amount;
-        unchecked {
-            // Overflow not possible: balance + amount is at most totalSupply + amount, which is checked above.
-            _balances[account] += amount;
+    function _mint(address account, uint256 value) internal override {
+        if (account == address(0)) {
+            revert ERC20InvalidReceiver(address(0));
         }
-        emit Transfer(address(0), account, amount);
-
-        _afterTokenTransfer(address(0), account, amount);
+        _update(address(0), account, value);
     }
 
     function mint(address account, uint256 amount) public onlyOwner {
@@ -518,115 +983,56 @@ contract NontransferableERC20 is Ownable {
     }
 
     /**
-     * @dev Destroys `amount` tokens from `account`, reducing the
-     * total supply.
-     *
-     * Emits a {Transfer} event with `to` set to the zero address.
-     *
-     * Requirements:
-     *
-     * - `account` cannot be the zero address.
-     * - `account` must have at least `amount` tokens.
+     * @dev Not allowed
      */
-    function _burn(address account, uint256 amount) internal virtual {
-        require(account != address(0), "ERC20: zero address");
-
-        _beforeTokenTransfer(account, address(0), amount);
-
-        uint256 accountBalance = _balances[account];
-        require(accountBalance >= amount, "ERC20: burn exceeds balance");
-        unchecked {
-            _balances[account] = accountBalance - amount;
-            // Overflow not possible: amount <= accountBalance <= totalSupply.
-            _totalSupply -= amount;
-        }
-
-        emit Transfer(account, address(0), amount);
-
-        _afterTokenTransfer(account, address(0), amount);
+    function _approve(address owner, address spender, uint256 value) internal override {
+        return;
     }
 
     /**
-     * @dev Hook that is called before any transfer of tokens. This includes
-     * minting and burning.
-     *
-     * Calling conditions:
-     *
-     * - when `from` and `to` are both non-zero, `amount` of ``from``'s tokens
-     * will be transferred to `to`.
-     * - when `from` is zero, `amount` tokens will be minted for `to`.
-     * - when `to` is zero, `amount` of ``from``'s tokens will be burned.
-     * - `from` and `to` are never both zero.
-     *
-     * To learn more about hooks, head to xref:ROOT:extending-contracts.adoc#using-hooks[Using Hooks].
+     * @dev Not allowed
      */
-    // solhint-disable-next-line no-empty-blocks
-    function _beforeTokenTransfer(address from, address to, uint256 amount) internal virtual {}
+    function _approve(address owner, address spender, uint256 value, bool emitEvent) internal virtual override {
+        return;
+    }
 
     /**
-     * @dev Hook that is called after any transfer of tokens. This includes
-     * minting and burning.
-     *
-     * Calling conditions:
-     *
-     * - when `from` and `to` are both non-zero, `amount` of ``from``'s tokens
-     * has been transferred to `to`.
-     * - when `from` is zero, `amount` tokens have been minted for `to`.
-     * - when `to` is zero, `amount` of ``from``'s tokens have been burned.
-     * - `from` and `to` are never both zero.
-     *
-     * To learn more about hooks, head to xref:ROOT:extending-contracts.adoc#using-hooks[Using Hooks].
+     * @dev Not allowed
      */
-    // solhint-disable-next-line no-empty-blocks
-    function _afterTokenTransfer(address from, address to, uint256 amount) internal virtual {}
+    function _spendAllowance(address owner, address spender, uint256 value) internal virtual override {
+        return;
+    }
 }
 
+
 interface ITokenEmitter {
-    function buyToken(
-        address[] memory _addresses,
-        uint[] memory _percentages,
-        address builder,
-        address purchaseReferral,
-        address deployer
-    ) external payable returns (uint256);
-
-    function _getTokenAmountForSinglePurchase(uint256 payment, uint256 supply) external returns (uint256);
-
-    function getTokenAmountForMultiPurchase(uint256 payment) external returns (uint256);
-
-    // solhint-disable-next-line func-name-mixedcase
-    function UNSAFE_getOverestimateTokenAmount(uint256 payment, uint256 supply) external view returns (uint256);
-
-    function getTokenPrice(uint256 currentTotalSupply) external view returns (uint256);
+    function buyToken(address[] memory _addresses, uint[] memory _bps, address builder, address purchaseReferral, address deployer) external payable returns (uint);
 
     function totalSupply() external view returns (uint);
 
     function balanceOf(address _owner) external view returns (uint);
 }
 
-contract TokenEmitter is LinearVRGDA, ITokenEmitter, ReentrancyGuard, TokenEmitterRewards {
-    // Events
-    event Transfer(address indexed from, address indexed to, uint256 value);
-    event Log(string name, uint256 value);
 
+contract TokenEmitter is VRGDAC, ITokenEmitter, ReentrancyGuard, TokenEmitterRewards {
     // Vars
     address private treasury;
 
-    NontransferableERC20 public token;
+    NontransferableERC20Votes public token;
 
     // solhint-disable-next-line not-rely-on-time
-    uint256 public immutable startTime = block.timestamp;
+    uint public immutable startTime = block.timestamp;
 
     // approved contracts, owner, and a token contract address
     constructor(
-        NontransferableERC20 _token,
+        NontransferableERC20Votes _token,
         address _protocolRewards,
         address _protocolFeeRecipient,
         address _treasury,
-        int256 _targetPrice, // SCALED BY E18. Target price. This is somewhat arbitrary for governance emissions, since there is no "target price" for 1 governance share.
-        int256 _priceDecayPercent, // SCALED BY E18. Price decay percent. This indicates how aggressively you discount governance when sales are not occurring.
-        int256 _governancePerTimeUnit // SCALED BY E18. The number of tokens to target selling in 1 full unit of time.
-    ) TokenEmitterRewards(_protocolRewards, _protocolFeeRecipient) LinearVRGDA(_targetPrice, _priceDecayPercent, _governancePerTimeUnit) {
+        int _targetPrice, // The target price for a token if sold on pace, scaled by 1e18.
+        int _priceDecayPercent, // The percent price decays per unit of time with no sales, scaled by 1e18.
+        int _tokensPerTimeUnit // The number of tokens to target selling in 1 full unit of time, scaled by 1e18.
+    ) TokenEmitterRewards(_protocolRewards, _protocolFeeRecipient) VRGDAC(_targetPrice, _priceDecayPercent, _tokensPerTimeUnit) {
         treasury = _treasury;
 
         token = _token;
@@ -653,26 +1059,25 @@ contract TokenEmitter is LinearVRGDA, ITokenEmitter, ReentrancyGuard, TokenEmitt
         address builder,
         address purchaseReferral,
         address deployer
-    ) public payable nonReentrant returns (uint256) {
+    ) public payable nonReentrant returns (uint) {
         // ensure the same number of addresses and _bps
         require(_addresses.length == _bps.length, "Parallel arrays required");
 
         // Get value to send and handle mint fee
-        uint256 msgValueRemaining = _handleRewardsAndGetValueToSend(msg.value, builder, purchaseReferral, deployer);
+        uint msgValueRemaining = _handleRewardsAndGetValueToSend(msg.value, builder, purchaseReferral, deployer);
 
-        uint totalTokens = getTokenAmountForMultiPurchase(msgValueRemaining);
+        uint totalTokens = uint(getTokenQuoteForPayment(msgValueRemaining));
         (bool success, ) = treasury.call{ value: msgValueRemaining }(new bytes(0));
         require(success, "Transfer failed.");
 
-        // calculates how much total governance to give
-
         uint sum = 0;
 
-        // calculates how much governance to give each address
+        // calculates how many tokens to give each address
         for (uint i = 0; i < _addresses.length; i++) {
+            //todo seems dangerous with rouding, fix it up
             uint tokens = (totalTokens * _bps[i]) / 10_000;
-            // transfer governance to address
-            _mint(_addresses[i], tokens);
+            // transfer tokens to address
+            _mint(_addresses[i], uint(tokens));
             sum += _bps[i];
         }
 
@@ -680,64 +1085,17 @@ contract TokenEmitter is LinearVRGDA, ITokenEmitter, ReentrancyGuard, TokenEmitt
         return totalTokens;
     }
 
-    // This returns a safe, underestimated amount of governance.
-    function _getTokenAmountForSinglePurchase(uint256 payment, uint256 supply) public view returns (uint256) {
-        // get the initial estimated amount of tokens - assuming we priced your entire purchase at supply + 1 (akin to buying 1 NFT)
-        uint256 overestimatedAmount = UNSAFE_getOverestimateTokenAmount(payment, supply);
-
-        // get the overestimated price - assuming we priced your entire purchase at supply + 1 (akin to buying 1 NFT)
-        uint256 overestimatedPrice = getTokenPrice(supply + overestimatedAmount);
-
-        // get the underestimated price - assuming you paid for the entire purchase at the price of the last token
-        uint256 underestimatedAmount = payment / overestimatedPrice;
-
-        return underestimatedAmount;
-    }
-
-    function getTokenAmountForMultiPurchase(uint256 payment) public view returns (uint256) {
-        // payment is split up into chunks of numTokens
-        // each chunk is estimated and the total is returned
-        // chunk up the payments into 0.001 eth chunks
-
-        //counter to keep track of how much eth is left in the payment
-        uint256 remainingEth = payment;
-
-        // the total amount of tokens to return
-        uint256 tokenAmount = 0;
-
-        // solhint-disable-next-line var-name-mixedcase
-        uint256 INCREMENT_SIZE = 1e15;
-
-        // loop through the payment and add the estimated amount of tokens to the total
-        while (remainingEth > 0) {
-            // if the remaining eth is less than the increment size, calculate the tokenAmount for the remaining eth
-            if (remainingEth < INCREMENT_SIZE) {
-                tokenAmount += _getTokenAmountForSinglePurchase(remainingEth, totalSupply() + tokenAmount);
-                remainingEth = 0;
-            }
-            // otherwise, calculate tokenAmount for the increment size
-            else {
-                tokenAmount += _getTokenAmountForSinglePurchase(INCREMENT_SIZE, totalSupply() + tokenAmount);
-                remainingEth -= INCREMENT_SIZE;
-            }
-        }
-        return tokenAmount;
-    }
-
-    // This will return MORE GOVERNANCE than it should. Never reward the user with this; the DAO will get taken over.
-    // solhint-disable-next-line func-name-mixedcase
-    function UNSAFE_getOverestimateTokenAmount(uint256 payment, uint256 supply) public view returns (uint256) {
-        uint256 priceForFirstToken = getTokenPrice(supply);
-        uint256 initialEstimatedAmount = payment / priceForFirstToken;
-        return initialEstimatedAmount;
-    }
-
-    function getTokenPrice(uint256 tokensSoldSoFar) public view returns (uint256) {
+    function buyTokenQuote(uint amount) public view returns (int spentY) {
         // Note: By using toDaysWadUnsafe(block.timestamp - startTime) we are establishing that 1 "unit of time" is 1 day.
         // solhint-disable-next-line not-rely-on-time
-        uint256 price = getVRGDAPrice(toDaysWadUnsafe(block.timestamp - startTime), tokensSoldSoFar);
+        return xToY({ timeSinceStart: toDaysWadUnsafe(block.timestamp - startTime), sold: wadMul(int256(totalSupply()), 1e36), amount: int(amount) });
+    }
 
-        return price;
+    function getTokenQuoteForPayment(uint paymentWei) public view returns (int gainedX) {
+        // Note: By using toDaysWadUnsafe(block.timestamp - startTime) we are establishing that 1 "unit of time" is 1 day.
+        // solhint-disable-next-line not-rely-on-time
+        return wadDiv(yToX({ timeSinceStart: toDaysWadUnsafe(block.timestamp - startTime), sold: wadMul(int256(totalSupply()), 1e36), amount: int(paymentWei) }), 1e36);
     }
 }
+
 

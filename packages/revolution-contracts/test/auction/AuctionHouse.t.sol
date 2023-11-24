@@ -13,7 +13,7 @@ import { IVerbsDescriptorMinimal } from "../../src/interfaces/IVerbsDescriptorMi
 import { ICultureIndex, ICultureIndexEvents } from "../../src/interfaces/ICultureIndex.sol";
 import { IVerbsAuctionHouse } from "../../src/interfaces/IVerbsAuctionHouse.sol";
 import { IERC20 } from "@openzeppelin/contracts/token/ERC20/IERC20.sol";
-import { NontransferableERC20 } from "../../src/NontransferableERC20.sol";
+import { NontransferableERC20Votes } from "../../src/NontransferableERC20Votes.sol";
 import { TokenEmitter } from "../../src/TokenEmitter.sol";
 import { ITokenEmitter } from "../../src/interfaces/ITokenEmitter.sol";
 import { wadMul, wadDiv } from "../../src/libs/SignedWadMath.sol";
@@ -27,14 +27,14 @@ contract VerbsAuctionHouseTest is Test {
     VerbsDescriptor public descriptor;
     CultureIndex public cultureIndex;
     TokenEmitter public tokenEmitter;
-    NontransferableERC20 public governanceToken;
+    NontransferableERC20Votes public governanceToken;
 
     // 1,000 tokens per day is the target emission
     uint256 tokensPerTimeUnit = 1_000;
 
     function setUp() public {
         mockWETH = new MockERC20();
-        governanceToken = new NontransferableERC20(address(this), "Revolution Governance", "GOV", 4);
+        governanceToken = new NontransferableERC20Votes(address(this), "Revolution Governance", "GOV", 4);
         RevolutionProtocolRewards protocolRewards = new RevolutionProtocolRewards();
 
         // Additional setup for VerbsToken similar to VerbsTokenTest

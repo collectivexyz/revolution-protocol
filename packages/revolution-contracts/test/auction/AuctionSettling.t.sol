@@ -1,29 +1,15 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.22;
 
-import { Test } from "forge-std/Test.sol";
-import { VerbsAuctionHouse } from "../../src/VerbsAuctionHouse.sol";
-import { MockERC20 } from "../mock/MockERC20.sol";
-import { VerbsToken } from "../../src/VerbsToken.sol";
-import { IVerbsToken } from "../../src/interfaces/IVerbsToken.sol";
-import { IProxyRegistry } from "../../src/external/opensea/IProxyRegistry.sol";
-import { VerbsDescriptor } from "../../src/VerbsDescriptor.sol";
-import { CultureIndex } from "../../src/CultureIndex.sol";
-import { IVerbsDescriptorMinimal } from "../../src/interfaces/IVerbsDescriptorMinimal.sol";
-import { ICultureIndex, ICultureIndexEvents } from "../../src/interfaces/ICultureIndex.sol";
-import { IVerbsAuctionHouse } from "../../src/interfaces/IVerbsAuctionHouse.sol";
-import { IERC20 } from "@openzeppelin/contracts/token/ERC20/IERC20.sol";
-import { NontransferableERC20 } from "../../src/NontransferableERC20.sol";
-import { TokenEmitter } from "../../src/TokenEmitter.sol";
-import { ITokenEmitter } from "../../src/interfaces/ITokenEmitter.sol";
-import { wadMul, wadDiv } from "../../src/libs/SignedWadMath.sol";
-import { RevolutionProtocolRewards } from "@collectivexyz/protocol-rewards/src/RevolutionProtocolRewards.sol";
-import { TokenEmitterRewards } from "@collectivexyz/protocol-rewards/src/abstract/TokenEmitter/TokenEmitterRewards.sol";
 import { VerbsAuctionHouseTest } from "./AuctionHouse.t.sol";
+import { IERC20 } from "@openzeppelin/contracts/token/ERC20/IERC20.sol";
+import { wadMul, wadDiv } from "../../src/libs/SignedWadMath.sol";
+import { ICultureIndex } from "../../src/interfaces/ICultureIndex.sol";
+import { IVerbsToken } from "../../src/interfaces/IVerbsToken.sol";
 
 contract VerbsAuctionHouseSettleTest is VerbsAuctionHouseTest {
     //calculate bps amount given split
-    function bps(uint256 x, uint256 y) pure public returns (uint256) {
+    function bps(uint256 x, uint256 y) public pure returns (uint256) {
         return uint256(wadDiv(wadMul(int256(x), int256(y)), 10000));
     }
 
@@ -229,9 +215,9 @@ contract VerbsAuctionHouseSettleTest is VerbsAuctionHouseTest {
         // Track expected governance token payout
         uint256 etherToSpendOnGovernanceTotal = uint256((bidAmount * creatorRate) / 10_000 - (bidAmount * (entropyRate * creatorRate)) / 10_000 / 10_000);
 
-        uint256 expectedGovernanceTokenPayout = uint256(tokenEmitter.getTokenQuoteForPayment(
-            etherToSpendOnGovernanceTotal - tokenEmitter.computeTotalReward(etherToSpendOnGovernanceTotal)
-        ));
+        uint256 expectedGovernanceTokenPayout = uint256(
+            tokenEmitter.getTokenQuoteForPayment(etherToSpendOnGovernanceTotal - tokenEmitter.computeTotalReward(etherToSpendOnGovernanceTotal))
+        );
 
         auctionHouse.settleCurrentAndCreateNewAuction();
 

@@ -4,7 +4,7 @@ pragma solidity ^0.8.22;
 import { Test } from "forge-std/Test.sol";
 import { unsafeWadDiv } from "../../src/libs/SignedWadMath.sol";
 import { TokenEmitter } from "../../src/TokenEmitter.sol";
-import { NontransferableERC20 } from "../../src/NontransferableERC20.sol";
+import { NontransferableERC20Votes } from "../../src/NontransferableERC20Votes.sol";
 import { RevolutionProtocolRewards } from "@collectivexyz/protocol-rewards/src/RevolutionProtocolRewards.sol";
 
 contract TokenEmitterTest is Test {
@@ -26,7 +26,7 @@ contract TokenEmitterTest is Test {
         //20% - how much the price decays per unit of time with no sales
         int256 priceDecayPercent = 1e18 / 10;
 
-        NontransferableERC20 governanceToken = new NontransferableERC20(address(this), "Revolution Governance", "GOV", 4);
+        NontransferableERC20Votes governanceToken = new NontransferableERC20Votes(address(this), "Revolution Governance", "GOV", 4);
 
         // 1e11 or 0.0000001 is 2 cents per token even at $200k eth price
         int256 tokenTargetPrice = 1e11;
@@ -57,7 +57,7 @@ contract TokenEmitterTest is Test {
         address treasury = address(0);
 
         // // 0.1 per governance, 10% price decay per day, 100 governance sale target per day
-        NontransferableERC20 governanceToken = new NontransferableERC20(address(this), "Revolution Governance", "GOV", 4);
+        NontransferableERC20Votes governanceToken = new NontransferableERC20Votes(address(this), "Revolution Governance", "GOV", 4);
         RevolutionProtocolRewards protocolRewards = new RevolutionProtocolRewards();
 
         TokenEmitter emitter1 = new TokenEmitter(governanceToken, address(protocolRewards), address(this), treasury, 1e14, 1e17, 1e22);
@@ -223,7 +223,7 @@ contract TokenEmitterTest is Test {
         MaliciousTreasury maliciousTreasury = new MaliciousTreasury(address(emitter));
 
         // Initialize TokenEmitter with the address of the malicious treasury
-        NontransferableERC20 governanceToken = new NontransferableERC20(address(this), "Revolution Governance", "GOV", 4);
+        NontransferableERC20Votes governanceToken = new NontransferableERC20Votes(address(this), "Revolution Governance", "GOV", 4);
         uint256 toScale = 1e18 * 1e4;
         uint256 tokensPerTimeUnit_ = 10_000;
         RevolutionProtocolRewards protocolRewards = new RevolutionProtocolRewards();
@@ -320,7 +320,6 @@ contract TokenEmitterTest is Test {
 
         emit log_string("Largest Payment Token Amount: ");
         emit log_int(largestPaymentTokenAmount);
-        
 
         vm.stopPrank();
     }
