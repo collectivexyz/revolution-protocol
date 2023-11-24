@@ -49,6 +49,8 @@ interface IVerbsAuctionHouse {
 
     event CreatorRateBpsUpdated(uint256 rateBps);
 
+    event MinCreatorRateBpsUpdated(uint256 rateBps);
+
     event EntropyRateBpsUpdated(uint256 rateBps);
 
     function settleAuction() external;
