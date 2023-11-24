@@ -63,17 +63,17 @@ contract TokenEmitter is VRGDAC, ITokenEmitter, ReentrancyGuard, TokenEmitterRew
         // Get value to send and handle mint fee
         uint msgValueRemaining = _handleRewardsAndGetValueToSend(msg.value, builder, purchaseReferral, deployer);
 
-        int totalTokens = getTokenQuoteForPayment(msgValueRemaining);
+        int totalTokensWad = getTokenQuoteForPaymentWad(msgValueRemaining);
         (bool success, ) = treasury.call{ value: msgValueRemaining }(new bytes(0));
         require(success, "Transfer failed.");
 
         uint sum = 0;
-        emittedTokenWad += totalTokens;
+        emittedTokenWad += totalTokensWad;
 
         // calculates how many tokens to give each address
         for (uint i = 0; i < _addresses.length; i++) {
             //todo seems dangerous with rouding, fix it up
-            int tokens = wadDiv(wadMul(totalTokens, int(_bps[i])), 10_000);
+            int tokens = wadDiv(wadMul(totalTokensWad, int(_bps[i])), 10_000 * 1e18);
             // transfer tokens to address
             _mint(_addresses[i], uint(tokens));
             sum += _bps[i];
@@ -81,7 +81,7 @@ contract TokenEmitter is VRGDAC, ITokenEmitter, ReentrancyGuard, TokenEmitterRew
 
         require(sum == 10_000, "bps must add up to 10_000");
         
-        return uint(totalTokens);
+        return uint(wadDiv(totalTokensWad, 1e18));
     }
 
     function buyTokenQuote(uint amount) public view returns (int spentY) {
@@ -90,9 +90,13 @@ contract TokenEmitter is VRGDAC, ITokenEmitter, ReentrancyGuard, TokenEmitterRew
         return xToY({ timeSinceStart: toDaysWadUnsafe(block.timestamp - startTime), sold: emittedTokenWad, amount: int(amount) });
     }
 
-    function getTokenQuoteForPayment(uint paymentWei) public view returns (int gainedX) {
+    function getTokenQuoteForPaymentWad(uint paymentWei) public view returns (int gainedX) {
         // Note: By using toDaysWadUnsafe(block.timestamp - startTime) we are establishing that 1 "unit of time" is 1 day.
         // solhint-disable-next-line not-rely-on-time
         return yToX({ timeSinceStart: toDaysWadUnsafe(block.timestamp - startTime), sold: emittedTokenWad, amount: int(paymentWei) });
+    }
+
+    function getTokenQuoteForPayment(uint paymentWei) public view returns (int gainedX) {
+        return wadDiv(getTokenQuoteForPaymentWad(paymentWei), 1e36);
     }
 }
