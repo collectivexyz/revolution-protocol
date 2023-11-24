@@ -2,8 +2,8 @@
 pragma solidity 0.8.22;
 
 import "../ProtocolRewardsTest.sol";
-import {RewardsSettings} from "../../src/abstract/RewardSplits.sol";
-import {NontransferableERC20Votes} from "../utils/TokenEmitter.sol";
+import { RewardsSettings } from "../../src/abstract/RewardSplits.sol";
+import { NontransferableERC20Votes } from "../utils/TokenEmitter.sol";
 
 contract TokenEmitterRewardsTest is ProtocolRewardsTest {
     MockTokenEmitter internal mockTokenEmitter;
@@ -34,18 +34,18 @@ contract TokenEmitterRewardsTest is ProtocolRewardsTest {
 
         vm.prank(collector);
         // // BPS too small to issue rewards
-        if(shouldExpectRevert) {
+        if (shouldExpectRevert) {
             //expect INVALID_ETH_AMOUNT()
             vm.expectRevert();
         }
-        mockTokenEmitter.buyToken{value: msgValue}(addresses, bps, builderReferral, purchaseReferral, deployer);
+        mockTokenEmitter.buyToken{ value: msgValue }(addresses, bps, builderReferral, purchaseReferral, deployer);
 
-        if(shouldExpectRevert) {
+        if (shouldExpectRevert) {
             vm.expectRevert();
         }
         (RewardsSettings memory settings, uint256 totalReward) = mockTokenEmitter.computePurchaseRewards(msgValue);
 
-        if(!shouldExpectRevert) {
+        if (!shouldExpectRevert) {
             assertApproxEqAbs(protocolRewards.totalRewardsSupply(), totalReward, 5);
             assertApproxEqAbs(protocolRewards.balanceOf(builderReferral), settings.builderReferralReward, 5);
             assertApproxEqAbs(protocolRewards.balanceOf(purchaseReferral), settings.purchaseReferralReward, 5);
@@ -68,23 +68,23 @@ contract TokenEmitterRewardsTest is ProtocolRewardsTest {
         addresses[0] = collector;
         uint[] memory bps = new uint[](1);
         bps[0] = 10_000;
-        
+
         vm.deal(collector, msgValue);
 
         vm.prank(collector);
-        if(shouldExpectRevert) {
+        if (shouldExpectRevert) {
             //expect INVALID_ETH_AMOUNT()
             vm.expectRevert();
         }
-        mockTokenEmitter.buyToken{value: msgValue}(addresses, bps, builderReferral, address(0), deployer);
+        mockTokenEmitter.buyToken{ value: msgValue }(addresses, bps, builderReferral, address(0), deployer);
 
-        if(shouldExpectRevert) {
+        if (shouldExpectRevert) {
             //expect INVALID_ETH_AMOUNT()
             vm.expectRevert();
         }
         (RewardsSettings memory settings, uint256 totalReward) = mockTokenEmitter.computePurchaseRewards(msgValue);
 
-        if(!shouldExpectRevert) {
+        if (!shouldExpectRevert) {
             assertApproxEqAbs(protocolRewards.totalRewardsSupply(), totalReward, 5);
             assertApproxEqAbs(protocolRewards.balanceOf(builderReferral), settings.builderReferralReward, 5);
             assertApproxEqAbs(protocolRewards.balanceOf(deployer), settings.deployerReward, 5);

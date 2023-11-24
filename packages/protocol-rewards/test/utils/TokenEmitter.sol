@@ -170,7 +170,6 @@ interface IERC1155Errors {
     error ERC1155InvalidArrayLength(uint256 idsLength, uint256 valuesLength);
 }
 
-
 /**
  * @dev Implementation of the {IERC20} interface.
  *
@@ -478,7 +477,6 @@ abstract contract ERC20 is Context, IERC20, IERC20Metadata, IERC20Errors {
     }
 }
 
-
 /**
  * @dev Extension of ERC-20 to support Compound-like voting and delegation. This version is more generic than Compound's,
  * and supports token supply up to 2^208^ - 1, while COMP is limited to 2^96^ - 1.
@@ -553,7 +551,6 @@ abstract contract ERC20Votes is ERC20, Votes {
         return _checkpoints(account, pos);
     }
 }
-
 
 /// @notice Signed 18 decimal fixed point (wad) arithmetic library.
 /// @author Solmate (https://github.com/transmissions11/solmate/blob/main/src/utils/SignedWadMath.sol)
@@ -793,7 +790,6 @@ function unsafeDiv(int256 x, int256 y) pure returns (int256 r) {
     }
 }
 
-
 /// @title Continuous Variable Rate Gradual Dutch Auction
 /// @author transmissions11 <t11s@paradigm.xyz>
 /// @author FrankieIsLost <frankie@paradigm.xyz>
@@ -1004,7 +1000,6 @@ contract NontransferableERC20Votes is Ownable, ERC20Votes {
     }
 }
 
-
 interface ITokenEmitter {
     function buyToken(address[] memory _addresses, uint[] memory _bps, address builder, address purchaseReferral, address deployer) external payable returns (uint);
 
@@ -1012,7 +1007,6 @@ interface ITokenEmitter {
 
     function balanceOf(address _owner) external view returns (uint);
 }
-
 
 contract TokenEmitter is VRGDAC, ITokenEmitter, ReentrancyGuard, TokenEmitterRewards {
     // Vars
@@ -1097,5 +1091,3 @@ contract TokenEmitter is VRGDAC, ITokenEmitter, ReentrancyGuard, TokenEmitterRew
         return wadDiv(yToX({ timeSinceStart: toDaysWadUnsafe(block.timestamp - startTime), sold: wadMul(int256(totalSupply()), 1e36), amount: int(paymentWei) }), 1e36);
     }
 }
-
-

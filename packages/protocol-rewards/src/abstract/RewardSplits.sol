@@ -41,11 +41,11 @@ abstract contract RewardSplits {
     }
 
     function computeTotalReward(uint256 paymentAmountWei) public view returns (uint256) {
-        if(paymentAmountWei <= minPurchaseAmount) {
+        if (paymentAmountWei <= minPurchaseAmount) {
             revert INVALID_ETH_AMOUNT();
         }
 
-        if(paymentAmountWei >= maxPurchaseAmount) {
+        if (paymentAmountWei >= maxPurchaseAmount) {
             revert INVALID_ETH_AMOUNT();
         }
 
@@ -53,21 +53,30 @@ abstract contract RewardSplits {
     }
 
     function computePurchaseRewards(uint256 paymentAmountWei) public view returns (RewardsSettings memory, uint256) {
-        if(paymentAmountWei <= minPurchaseAmount) {
+        if (paymentAmountWei <= minPurchaseAmount) {
             revert INVALID_ETH_AMOUNT();
         }
 
-        if(paymentAmountWei >= maxPurchaseAmount) {
+        if (paymentAmountWei >= maxPurchaseAmount) {
             revert INVALID_ETH_AMOUNT();
         }
 
-        return
-            (RewardsSettings({
+        return (
+            RewardsSettings({
                 builderReferralReward: (paymentAmountWei * BUILDER_REWARD_BPS) / 10_000,
                 purchaseReferralReward: (paymentAmountWei * PURCHASE_REFERRAL_BPS) / 10_000,
                 deployerReward: (paymentAmountWei * DEPLOYER_REWARD_BPS) / 10_000,
                 revolutionReward: (paymentAmountWei * REVOLUTION_REWARD_BPS) / 10_000
-            }), (paymentAmountWei * BUILDER_REWARD_BPS) / 10_000 + (paymentAmountWei * PURCHASE_REFERRAL_BPS) / 10_000 + (paymentAmountWei * DEPLOYER_REWARD_BPS) / 10_000 + (paymentAmountWei * REVOLUTION_REWARD_BPS) / 10_000);
+            }),
+            (paymentAmountWei * BUILDER_REWARD_BPS) /
+                10_000 +
+                (paymentAmountWei * PURCHASE_REFERRAL_BPS) /
+                10_000 +
+                (paymentAmountWei * DEPLOYER_REWARD_BPS) /
+                10_000 +
+                (paymentAmountWei * REVOLUTION_REWARD_BPS) /
+                10_000
+        );
     }
 
     function _depositPurchaseRewards(uint256 paymentAmountWei, address builderReferral, address purchaseReferral, address deployer) internal returns (uint256) {

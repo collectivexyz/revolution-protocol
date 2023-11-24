@@ -1,8 +1,8 @@
 // SPDX-License-Identifier: MIT
 pragma solidity 0.8.22;
 
-import {TokenEmitterRewards} from "../../src/abstract/TokenEmitter/TokenEmitterRewards.sol";
-import {TokenEmitter, NontransferableERC20Votes} from "./TokenEmitter.sol";
+import { TokenEmitterRewards } from "../../src/abstract/TokenEmitter/TokenEmitterRewards.sol";
+import { TokenEmitter, NontransferableERC20Votes } from "./TokenEmitter.sol";
 
 contract MockTokenEmitter is TokenEmitter {
     address public treasury;
