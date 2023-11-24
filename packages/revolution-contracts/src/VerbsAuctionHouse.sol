@@ -92,7 +92,7 @@ contract VerbsAuctionHouse is IVerbsAuctionHouse, PausableUpgradeable, Reentranc
 
         _pause();
 
-        require(_minCreatorRateBps <= _creatorRateBps, "Min creator rate must be less than or equal to creator rate");
+        require(_creatorRateBps >= _minCreatorRateBps , "Creator rate must be greater than or equal to the creator rate");
 
         verbs = _verbs;
         tokenEmitter = _tokenEmitter;
