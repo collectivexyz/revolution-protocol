@@ -20,9 +20,115 @@ contract VerbsAuctionHouseBasicTest is VerbsAuctionHouseTest {
         auctionHouse.setEntropyRateBps(newEntropyRateBps);
     }
 
-    function testValueUpdates() public {
-        uint256 newCreatorRateBps = 2500;
-        uint256 newEntropyRateBps = 6000;
+    function testSetEntropyRateBps() public {
+        uint256 newEntropyRateBps = 5000;
+
+        // Expect an event emission
+        vm.expectEmit(true, true, true, true);
+        emit IVerbsAuctionHouse.EntropyRateBpsUpdated(newEntropyRateBps);
+
+        // Update the rate
+        auctionHouse.setEntropyRateBps(newEntropyRateBps);
+
+        // Assert new rate
+        assertEq(auctionHouse.entropyRateBps(), newEntropyRateBps);
+    }
+
+    function testSetEntropyRateBpsRestrictToOwner() public {
+        uint256 newEntropyRateBps = 5000;
+
+        // Attempt to change entropyRateBps as a non-owner
+        vm.startPrank(address(2));
+        vm.expectRevert();
+        auctionHouse.setEntropyRateBps(newEntropyRateBps);
+        vm.stopPrank();
+    }
+
+    function testSetEntropyRateBpsInvalidValues() public {
+        uint256 invalidEntropyRateBps = 15000; // Greater than 10,000
+
+        // Attempt to set an invalid entropy rate
+        vm.expectRevert("Entropy rate must be less than or equal to 10_000");
+        auctionHouse.setEntropyRateBps(invalidEntropyRateBps);
+
+        // Assert that the rate was not updated
+        assertEq(auctionHouse.entropyRateBps(), 5000);
+
+        int256 invalidEntropyRateBps2 = -1; // Greater than 10,000
+
+        // Attempt to set an invalid entropy rate
+        vm.expectRevert();
+        auctionHouse.setEntropyRateBps(uint256(invalidEntropyRateBps2));
+
+        // Assert that the rate was not updated
+        assertEq(auctionHouse.entropyRateBps(), 5000);
+    }
+
+    function testSetMinCreatorRateBps(uint256 newMinCreatorRateBps, uint256 creatorRateBps) public {
+        if(creatorRateBps > 10_000) {
+            vm.expectRevert("Creator rate must be less than or equal to 10_000");
+        } else if (creatorRateBps < auctionHouse.minCreatorRateBps()) {
+            vm.expectRevert("Creator rate must be greater than or equal to minCreatorRateBps");
+        } else {
+            // Expect an event emission
+            vm.expectEmit(true, true, true, true);
+            emit IVerbsAuctionHouse.CreatorRateBpsUpdated(creatorRateBps);
+        }
+        auctionHouse.setCreatorRateBps(creatorRateBps);
+
+        //if newMinCreatorRate is greater than creatorRateBps, then expect error
+        if (newMinCreatorRateBps > auctionHouse.creatorRateBps()) {
+            vm.expectRevert("Min creator rate must be less than or equal to creator rate");
+        } else if (newMinCreatorRateBps < auctionHouse.minCreatorRateBps()) {
+            vm.expectRevert("Min creator rate must be greater than previous minCreatorRateBps");
+        } else {
+            // Expect an event emission
+            vm.expectEmit(true, true, true, true);
+            emit IVerbsAuctionHouse.MinCreatorRateBpsUpdated(newMinCreatorRateBps);
+        }
+        // Update the minimum rate
+        auctionHouse.setMinCreatorRateBps(newMinCreatorRateBps);
+
+        // Assert new minimum rate
+        if (newMinCreatorRateBps <= auctionHouse.creatorRateBps() && newMinCreatorRateBps >= auctionHouse.minCreatorRateBps()) {
+            assertEq(auctionHouse.minCreatorRateBps(), newMinCreatorRateBps);
+        }
+    }
+
+    function testSetMinCreatorRateBpsRestrictToOwner(uint256 newMinCreatorRateBps) public {
+        vm.assume(newMinCreatorRateBps < auctionHouse.creatorRateBps());
+
+        // Attempt to change minCreatorRateBps as a non-owner
+        vm.startPrank(address(2));
+        vm.expectRevert();
+        auctionHouse.setMinCreatorRateBps(newMinCreatorRateBps);
+        vm.stopPrank();
+    }
+
+    function testSetMinCreatorRateBpsInvalidValues(int256 invalidMinCreatorRateBps) public {
+        vm.assume(uint256(invalidMinCreatorRateBps) < auctionHouse.creatorRateBps());
+
+        // Attempt to set an invalid minimum creator rate
+        if(uint256(invalidMinCreatorRateBps) < auctionHouse.minCreatorRateBps()) {
+            vm.expectRevert("Min creator rate must be greater than previous minCreatorRateBps");
+        } else if (uint256(invalidMinCreatorRateBps) > 10_000) {
+            vm.expectRevert("Min creator rate must be less than or equal to 10_000");
+        }
+        auctionHouse.setMinCreatorRateBps(uint256(invalidMinCreatorRateBps));
+    }
+
+    function testMinCreatorRateLoweringRestriction() public {
+        uint256 lowerMinCreatorRateBps = auctionHouse.minCreatorRateBps() - 500;
+
+        // Attempt to set a lower minimum creator rate than the current one
+        vm.expectRevert("Min creator rate must be greater than previous minCreatorRateBps");
+        auctionHouse.setMinCreatorRateBps(lowerMinCreatorRateBps);
+    }
+
+    function testValueUpdates(uint256 newCreatorRateBps, uint256 newEntropyRateBps) public {
+        vm.assume(newCreatorRateBps > auctionHouse.minCreatorRateBps());
+        vm.assume(newCreatorRateBps <= 10_000);
+        vm.assume(newEntropyRateBps <= 10_000);
 
         // Change creatorRateBps as the owner
         auctionHouse.setCreatorRateBps(newCreatorRateBps);

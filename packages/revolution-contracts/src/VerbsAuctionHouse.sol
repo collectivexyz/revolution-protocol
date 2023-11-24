@@ -173,29 +173,29 @@ contract VerbsAuctionHouse is IVerbsAuctionHouse, PausableUpgradeable, Reentranc
      * @param _creatorRateBps New creator rate in basis points.
      */
     function setCreatorRateBps(uint256 _creatorRateBps) external onlyOwner {
-        require(_creatorRateBps >= minCreatorRateBps, "Creator rate must be greater than minCreatorRateBps");
+        require(_creatorRateBps >= minCreatorRateBps, "Creator rate must be greater than or equal to minCreatorRateBps");
         require(_creatorRateBps <= 10_000, "Creator rate must be less than or equal to 10_000");
-        require (_creatorRateBps >= 0, "Creator rate must be greater than or equal to 0");
+        require(_creatorRateBps >= 0, "Creator rate must be greater than or equal to 0");
         creatorRateBps = _creatorRateBps;
 
         emit CreatorRateBpsUpdated(_creatorRateBps);
     }
 
     /**
-    * @notice Set the minimum split of the winning bid that is reserved for the creator of the Verb in basis points.
-    * @dev Only callable by the owner.
-    * @param _minCreatorRateBps New minimum creator rate in basis points.
-    */
+     * @notice Set the minimum split of the winning bid that is reserved for the creator of the Verb in basis points.
+     * @dev Only callable by the owner.
+     * @param _minCreatorRateBps New minimum creator rate in basis points.
+     */
     function setMinCreatorRateBps(uint256 _minCreatorRateBps) external onlyOwner {
         require(_minCreatorRateBps <= creatorRateBps, "Min creator rate must be less than or equal to creator rate");
         require(_minCreatorRateBps <= 10_000, "Min creator rate must be less than or equal to 10_000");
         require(_minCreatorRateBps >= 0, "Min creator rate must be greater than or equal to 0");
 
         //ensure new min rate cannot be lower than previous min rate
-        require(_minCreatorRateBps > minCreatorRateBps, "Min creator rate must be greater to previous minCreatorRateBps");
+        require(_minCreatorRateBps > minCreatorRateBps, "Min creator rate must be greater than previous minCreatorRateBps");
 
         minCreatorRateBps = _minCreatorRateBps;
-        
+
         emit MinCreatorRateBpsUpdated(_minCreatorRateBps);
     }
 
