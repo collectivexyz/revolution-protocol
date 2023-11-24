@@ -17,12 +17,12 @@ abstract contract RewardSplits {
     error INVALID_ETH_AMOUNT();
     error ONLY_CREATE_REFERRAL();
 
-    // 2.1%
-    uint256 internal constant TOTAL_REWARD_PER_PURCHASE_BPS = 221;
+    // 2.5%
+    uint256 internal constant TOTAL_REWARD_PER_PURCHASE_BPS = 250;
 
-    uint256 internal constant DEPLOYER_REWARD_BPS = 21;
+    uint256 internal constant DEPLOYER_REWARD_BPS = 25;
     uint256 internal constant REVOLUTION_REWARD_BPS = 75;
-    uint256 internal constant BUILDER_REWARD_BPS = 75;
+    uint256 internal constant BUILDER_REWARD_BPS = 100;
     uint256 internal constant PURCHASE_REFERRAL_BPS = 50;
 
     uint256 public minPurchaseAmount = 0.0000001 ether;
