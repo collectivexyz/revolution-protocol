@@ -68,4 +68,10 @@ interface IVerbsAuctionHouse {
     function setReservePrice(uint256 reservePrice) external;
 
     function setMinBidIncrementPercentage(uint8 minBidIncrementPercentage) external;
+
+    function setCreatorRateBps(uint256 _creatorRateBps) external;
+
+    function setMinCreatorRateBps(uint256 _minCreatorRateBps) external;
+
+    function setEntropyRateBps(uint256 _entropyRateBps) external;
 }
