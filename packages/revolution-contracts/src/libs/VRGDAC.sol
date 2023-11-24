@@ -50,15 +50,8 @@ contract VRGDAC {
         }
     }
 
-    // given amount to pay and amount sold so far, returns # of tokens to sell
-    function yToX(int256 timeSinceStart, int256 sold, int256 amount) public view virtual returns (int256) {
-        unchecked {
-            return wadMul(-wadDiv(wadLn(1e18 - wadMul(amount, wadDiv(decayConstant, wadMul(perTimeUnit, p(timeSinceStart, sold))))), decayConstant), perTimeUnit);
-        }
-    }
-
     // given amount to pay and amount sold so far, returns # of tokens to sell - raw form
-    function yToXRaw(int256 timeSinceStart, int256 sold, int256 amount) public view virtual returns (int256) {
+    function yToX(int256 timeSinceStart, int256 sold, int256 amount) public view virtual returns (int256) {
         int256 soldDifference = wadMul(perTimeUnit, timeSinceStart) - sold;
         unchecked {
             return
