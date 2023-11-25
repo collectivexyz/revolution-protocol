@@ -56,7 +56,7 @@ contract TokenEmitter is VRGDAC, ITokenEmitter, ReentrancyGuard, TokenEmitterRew
         address builder,
         address purchaseReferral,
         address deployer
-    ) public payable nonReentrant returns (uint) {
+    ) public payable nonReentrant returns (uint tokensSoldWad) {
         // ensure the same number of addresses and _bps
         require(_addresses.length == _bps.length, "Parallel arrays required");
 
@@ -73,7 +73,7 @@ contract TokenEmitter is VRGDAC, ITokenEmitter, ReentrancyGuard, TokenEmitterRew
         // calculates how many tokens to give each address
         for (uint i = 0; i < _addresses.length; i++) {
             //todo seems dangerous with rouding, fix it up
-            int tokens = wadDiv(wadMul(totalTokensWad, int(_bps[i])), 10_000 * 1e18);
+            int tokens = wadDiv(wadMul(totalTokensWad, int(_bps[i] * 1e18)), 10_000 * 1e18 * 1e18);
             // transfer tokens to address
             _mint(_addresses[i], uint(tokens));
             sum += _bps[i];
@@ -81,7 +81,7 @@ contract TokenEmitter is VRGDAC, ITokenEmitter, ReentrancyGuard, TokenEmitterRew
 
         require(sum == 10_000, "bps must add up to 10_000");
         
-        return uint(wadDiv(totalTokensWad, 1e18));
+        return uint(totalTokensWad);
     }
 
     function buyTokenQuote(uint amount) public view returns (int spentY) {

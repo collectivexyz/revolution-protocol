@@ -1010,6 +1010,8 @@ contract TokenEmitter is VRGDAC, ITokenEmitter, ReentrancyGuard, TokenEmitterRew
     // solhint-disable-next-line not-rely-on-time
     uint public immutable startTime = block.timestamp;
 
+    int256 emittedTokenWad;
+
     // approved contracts, owner, and a token contract address
     constructor(
         NontransferableERC20Votes _token,
@@ -1046,41 +1048,46 @@ contract TokenEmitter is VRGDAC, ITokenEmitter, ReentrancyGuard, TokenEmitterRew
         address builder,
         address purchaseReferral,
         address deployer
-    ) public payable nonReentrant returns (uint) {
+    ) public payable nonReentrant returns (uint tokensSoldWad) {
         // ensure the same number of addresses and _bps
         require(_addresses.length == _bps.length, "Parallel arrays required");
 
         // Get value to send and handle mint fee
         uint msgValueRemaining = _handleRewardsAndGetValueToSend(msg.value, builder, purchaseReferral, deployer);
 
-        uint totalTokens = uint(getTokenQuoteForPayment(msgValueRemaining));
+        int totalTokensWad = getTokenQuoteForPaymentWad(msgValueRemaining);
         (bool success, ) = treasury.call{ value: msgValueRemaining }(new bytes(0));
         require(success, "Transfer failed.");
 
         uint sum = 0;
+        emittedTokenWad += totalTokensWad;
 
         // calculates how many tokens to give each address
         for (uint i = 0; i < _addresses.length; i++) {
-            //todo seems dangerous with rouding, fix it up
-            uint tokens = (totalTokens * _bps[i]) / 10_000;
+            int tokens = wadDiv(wadMul(totalTokensWad, int(_bps[i] * 1e18)), (10_000 * 1e18) * 1e18);
             // transfer tokens to address
             _mint(_addresses[i], uint(tokens));
             sum += _bps[i];
         }
 
         require(sum == 10_000, "bps must add up to 10_000");
-        return totalTokens;
+        
+        return uint(totalTokensWad);
     }
 
     function buyTokenQuote(uint amount) public view returns (int spentY) {
         // Note: By using toDaysWadUnsafe(block.timestamp - startTime) we are establishing that 1 "unit of time" is 1 day.
         // solhint-disable-next-line not-rely-on-time
-        return xToY({ timeSinceStart: toDaysWadUnsafe(block.timestamp - startTime), sold: wadMul(int256(totalSupply()), 1e36), amount: int(amount) });
+        return xToY({ timeSinceStart: toDaysWadUnsafe(block.timestamp - startTime), sold: emittedTokenWad, amount: int(amount) });
+    }
+
+    function getTokenQuoteForPaymentWad(uint paymentWei) public view returns (int gainedX) {
+        // Note: By using toDaysWadUnsafe(block.timestamp - startTime) we are establishing that 1 "unit of time" is 1 day.
+        // solhint-disable-next-line not-rely-on-time
+        return yToX({ timeSinceStart: toDaysWadUnsafe(block.timestamp - startTime), sold: emittedTokenWad, amount: int(paymentWei) });
     }
 
     function getTokenQuoteForPayment(uint paymentWei) public view returns (int gainedX) {
-        // Note: By using toDaysWadUnsafe(block.timestamp - startTime) we are establishing that 1 "unit of time" is 1 day.
-        // solhint-disable-next-line not-rely-on-time
-        return wadDiv(yToX({ timeSinceStart: toDaysWadUnsafe(block.timestamp - startTime), sold: wadMul(int256(totalSupply()), 1e36), amount: int(paymentWei) }), 1e36);
+        return wadDiv(getTokenQuoteForPaymentWad(paymentWei), 1e36);
     }
 }
