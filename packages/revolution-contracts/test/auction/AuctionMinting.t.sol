@@ -7,7 +7,6 @@ import { PausableUpgradeable } from "@openzeppelin/contracts-upgradeable/utils/P
 contract VerbsAuctionHouseMintTest is VerbsAuctionHouseTest {
     function testMintFailureDueToEmptyNFTList() public {
         setUp();
-        emit log_address(address(auctionHouse));
 
         // Pre-conditions setup to ensure the CultureIndex is empty
         vm.expectEmit(true, true, true, true);
@@ -19,7 +18,9 @@ contract VerbsAuctionHouseMintTest is VerbsAuctionHouseTest {
     }
 
     function testBehaviorOnMintFailureDuringAuctionCreation() public {
-        // Pre-conditions setup to trigger mint failure
+        //check auction paused emitted
+        vm.expectEmit(true, true, true, true);
+        emit PausableUpgradeable.Paused(address(this));
 
         auctionHouse.unpause();
 
