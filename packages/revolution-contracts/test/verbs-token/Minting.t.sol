@@ -14,41 +14,11 @@ import { VerbsDescriptor } from "../../src/VerbsDescriptor.sol";
 import { NontransferableERC20Votes } from "../../src/NontransferableERC20Votes.sol";
 import "../utils/Base64Decode.sol";
 import "../utils/JsmnSolLib.sol";
+import { VerbsTokenTestSuite } from "./VerbsToken.t.sol";
 
 /// @title VerbsTokenTest
 /// @dev The test suite for the VerbsToken contract
-contract VerbsTokenTest is Test {
-    VerbsToken public verbsToken;
-    CultureIndex public cultureIndex;
-    NontransferableERC20Votes public govToken;
-    VerbsDescriptor public descriptor;
-
-    /// @dev Sets up a new VerbsToken instance before each test
-    function setUp() public {
-        // Create a new mock ERC20 token for voting
-        govToken = new NontransferableERC20Votes(address(this), "Revolution Governance", "GOV", 4);
-
-        // Deploy a new proxy registry for OpenSea
-        ProxyRegistry _proxyRegistry = new ProxyRegistry();
-
-        // Create a new VerbsToken contract, passing address(this) as both the minter and the initial owner
-        verbsToken = new VerbsToken(address(this), address(this), IVerbsDescriptorMinimal(address(0)), _proxyRegistry, ICultureIndex(address(0)), "Vrbs", "VRBS");
-
-        // Deploy CultureIndex with the VerbsToken's address as the initial owner
-        cultureIndex = new CultureIndex(address(govToken), address(verbsToken));
-        ICultureIndex _cultureIndex = cultureIndex;
-
-        // Now that CultureIndex is deployed, set it in VerbsToken
-        verbsToken.setCultureIndex(_cultureIndex);
-
-        // Deploy a new VerbsDescriptor, which will be used by VerbsToken
-        descriptor = new VerbsDescriptor(address(verbsToken), "Verb");
-        IVerbsDescriptorMinimal _descriptor = descriptor;
-
-        // Now that VerbsDescriptor is deployed, set it in VerbsToken
-        verbsToken.setDescriptor(_descriptor);
-    }
-
+contract TokenMintingTest is VerbsTokenTestSuite {
     /// @dev Ensures the dropped art piece is equivalent to the top-voted piece
     function testDroppedArtPieceMatchesTopVoted() public {
         setUp();
@@ -154,38 +124,7 @@ contract VerbsTokenTest is Test {
         uint256 newTotalSupply = verbsToken.totalSupply();
         assertEq(newTotalSupply, initialTotalSupply - 1, "Total supply should decrease by 1 after burning");
     }
-
-    // Utility function to create a new art piece and return its ID
-    function createArtPiece(
-        string memory name,
-        string memory description,
-        ICultureIndex.MediaType mediaType,
-        string memory image,
-        string memory text,
-        string memory animationUrl,
-        address creatorAddress,
-        uint256 creatorBps
-    ) internal returns (uint256) {
-        ICultureIndex.ArtPieceMetadata memory metadata = ICultureIndex.ArtPieceMetadata({
-            name: name,
-            description: description,
-            mediaType: mediaType,
-            image: image,
-            text: text,
-            animationUrl: animationUrl
-        });
-
-        ICultureIndex.CreatorBps[] memory creators = new ICultureIndex.CreatorBps[](1);
-        creators[0] = ICultureIndex.CreatorBps({ creator: creatorAddress, bps: creatorBps });
-
-        return cultureIndex.createPiece(metadata, creators);
-    }
-
-    //Utility function to create default art piece
-    function createDefaultArtPiece() public returns (uint256) {
-        return createArtPiece("Mona Lisa", "A masterpiece", ICultureIndex.MediaType.IMAGE, "ipfs://legends", "", "", address(0x1), 10000);
-    }
-
+    
     /// @dev Ensures _currentVerbId increments correctly after each mint
     function testMintingIncrement() public {
         setUp();

@@ -13,45 +13,11 @@ import { MockERC20 } from "../mock/MockERC20.sol";
 import { VerbsDescriptor } from "../../src/VerbsDescriptor.sol";
 import "../utils/Base64Decode.sol";
 import "../utils/JsmnSolLib.sol";
+import { VerbsTokenTestSuite } from "./VerbsToken.t.sol";
 
 /// @title VerbsTokenTest
 /// @dev The test suite for the VerbsToken contract
-contract VerbsTokenTest is Test {
-    VerbsToken public verbsToken;
-    CultureIndex public cultureIndex;
-    MockERC20 public mockVotingToken;
-    VerbsDescriptor public descriptor;
-
-    string tokenNamePrefix = "Vrb";
-    string tokenName = "Vrbs";
-    string tokenSymbol = "VRBS";
-
-    /// @dev Sets up a new VerbsToken instance before each test
-    function setUp() public {
-        // Create a new mock ERC20 token for voting
-        mockVotingToken = new MockERC20();
-
-        // Deploy a new proxy registry for OpenSea
-        ProxyRegistry _proxyRegistry = new ProxyRegistry();
-
-        // Create a new VerbsToken contract, passing address(this) as both the minter and the initial owner
-        verbsToken = new VerbsToken(address(this), address(this), IVerbsDescriptorMinimal(address(0)), _proxyRegistry, ICultureIndex(address(0)), tokenName, tokenSymbol);
-
-        // Deploy CultureIndex with the VerbsToken's address as the initial owner
-        cultureIndex = new CultureIndex(address(mockVotingToken), address(verbsToken));
-        ICultureIndex _cultureIndex = cultureIndex;
-
-        // Now that CultureIndex is deployed, set it in VerbsToken
-        verbsToken.setCultureIndex(_cultureIndex);
-
-        // Deploy a new VerbsDescriptor, which will be used by VerbsToken
-        descriptor = new VerbsDescriptor(address(verbsToken), tokenNamePrefix);
-        IVerbsDescriptorMinimal _descriptor = descriptor;
-
-        // Now that VerbsDescriptor is deployed, set it in VerbsToken
-        verbsToken.setDescriptor(_descriptor);
-    }
-
+contract TokenBasicTest is VerbsTokenTestSuite {
     /// @dev Tests the symbol of the VerbsToken
     function testSymbol() public {
         setUp();
@@ -68,37 +34,6 @@ contract VerbsTokenTest is Test {
     function testContractURI() public {
         setUp();
         assertEq(verbsToken.contractURI(), "ipfs://QmQzDwaZ7yQxHHs7sQQenJVB89riTSacSGcJRv9jtHPuz5", "Contract URI should match");
-    }
-
-    // Utility function to create a new art piece and return its ID
-    function createArtPiece(
-        string memory name,
-        string memory description,
-        ICultureIndex.MediaType mediaType,
-        string memory image,
-        string memory text,
-        string memory animationUrl,
-        address creatorAddress,
-        uint256 creatorBps
-    ) internal returns (uint256) {
-        ICultureIndex.ArtPieceMetadata memory metadata = ICultureIndex.ArtPieceMetadata({
-            name: name,
-            description: description,
-            mediaType: mediaType,
-            image: image,
-            text: text,
-            animationUrl: animationUrl
-        });
-
-        ICultureIndex.CreatorBps[] memory creators = new ICultureIndex.CreatorBps[](1);
-        creators[0] = ICultureIndex.CreatorBps({ creator: creatorAddress, bps: creatorBps });
-
-        return cultureIndex.createPiece(metadata, creators);
-    }
-
-    //Utility function to create default art piece
-    function createDefaultArtPiece() public returns (uint256) {
-        return createArtPiece("Mona Lisa", "A masterpiece", ICultureIndex.MediaType.IMAGE, "ipfs://legends", "", "", address(0x1), 10000);
     }
 
     /// @dev Tests the initial state of the contract variables
@@ -231,9 +166,10 @@ contract VerbsTokenTest is Test {
         address voter = address(0x2);
         uint256 voteWeight = 100;
 
-        // We assume mockVotingToken is the token used for voting, and voter has enough balance
-        mockVotingToken._mint(voter, voteWeight);
-        mockVotingToken.approve(address(cultureIndex), voteWeight);
+        // We assume govToken is the token used for voting, and voter has enough balance
+        govToken.mint(voter, voteWeight);
+
+        vm.roll(block.number + 1);
 
         uint256 initialTotalVoteWeight = cultureIndex.totalVoteWeights(artPieceId);
 
@@ -268,7 +204,8 @@ contract VerbsTokenTest is Test {
         uint256 voteWeight = 50;
 
         // Give the voter some tokens and allow them to vote
-        mockVotingToken._mint(voter, voteWeight);
+        govToken.mint(voter, voteWeight);
+        vm.roll(block.number + 1);
 
         // First vote
         vm.prank(voter);
@@ -292,7 +229,8 @@ contract VerbsTokenTest is Test {
         verbsToken.mint(); // Replace with your actual function to mark a piece as dropped
 
         // Give the voter some tokens
-        mockVotingToken._mint(voter, voteWeight);
+        govToken.mint(voter, voteWeight);
+        vm.roll(block.number + 1);
 
         // Act & Assert
         vm.prank(voter); // Set the next message sender to the voter address
@@ -321,13 +259,15 @@ contract VerbsTokenTest is Test {
         address voter = address(0x6);
 
         // Give the voter some tokens and vote on both pieces
-        mockVotingToken._mint(voter, firstPieceVoteWeight);
+        govToken.mint(voter, firstPieceVoteWeight);
 
         // Vote on the first piece
         vm.prank(voter);
+        vm.roll(block.number + 1);
         cultureIndex.vote(firstArtPieceId);
 
-        mockVotingToken._mint(voter, secondPieceVoteWeight);
+        govToken.mint(voter, secondPieceVoteWeight);
+        vm.roll(block.number + 1);
 
         // Vote on the second piece with a higher weight
         vm.prank(voter);
@@ -346,7 +286,8 @@ contract VerbsTokenTest is Test {
         uint256 artPieceId = createDefaultArtPiece();
         // Vote on the piece to make it the top voted
         address voter = address(0x7);
-        mockVotingToken._mint(voter, 100);
+        govToken.mint(voter, 100);
+        vm.roll(block.number + 1);
         vm.startPrank(voter);
         cultureIndex.vote(artPieceId);
         vm.stopPrank();
@@ -377,7 +318,8 @@ contract VerbsTokenTest is Test {
         address voter = address(0x9);
         uint256 voteWeight = 100;
 
-        mockVotingToken._mint(voter, voteWeight);
+        govToken.mint(voter, voteWeight);
+        vm.roll(block.number + 1);
 
         // Act & Assert
         vm.prank(voter);
