@@ -31,7 +31,6 @@ import { IVerbsAuctionHouse } from "./interfaces/IVerbsAuctionHouse.sol";
 import { IVerbsToken } from "./interfaces/IVerbsToken.sol";
 import { IWETH } from "./interfaces/IWETH.sol";
 import { ITokenEmitter } from "./interfaces/ITokenEmitter.sol";
-import { wadMul, wadDiv } from "./libs/SignedWadMath.sol";
 import { ICultureIndex } from "./interfaces/ICultureIndex.sol";
 
 contract VerbsAuctionHouse is IVerbsAuctionHouse, PausableUpgradeable, ReentrancyGuardUpgradeable, OwnableUpgradeable {
@@ -295,13 +294,13 @@ contract VerbsAuctionHouse is IVerbsAuctionHouse, PausableUpgradeable, Reentranc
 
         if (_auction.amount > 0) {
             // Ether going to owner of the auction
-            uint256 auctioneerPayment = uint256(wadDiv(wadMul(int256(_auction.amount), 10_000 - int256(creatorRateBps)), 10_000));
+            uint256 auctioneerPayment = _auction.amount * (10_000 - creatorRateBps) / 10_000;
 
             //Total amount of ether going to creator
             uint256 creatorPayment = _auction.amount - auctioneerPayment;
 
             //Ether reserved to pay the creator directly
-            uint256 creatorDirectPayment = uint256(wadDiv(wadMul(int256(creatorPayment), int256(entropyRateBps)), 10_000));
+            uint256 creatorDirectPayment = creatorPayment * entropyRateBps / 10_000;
 
             //Ether reserved to buy creator governance
             uint256 creatorGovernancePayment = creatorPayment - creatorDirectPayment;
@@ -323,7 +322,7 @@ contract VerbsAuctionHouse is IVerbsAuctionHouse, PausableUpgradeable, Reentranc
                 vrgdaSplits[i] = creator.bps;
 
                 //Calculate etherAmount for specific creator based on BPS splits
-                uint256 etherAmount = uint256(wadDiv(wadMul(int256(creatorDirectPayment), int256(creator.bps)), 10000));
+                uint256 etherAmount = creatorDirectPayment * creator.bps / 10_000;
 
                 //Transfer creator's share to the creator
                 _safeTransferETHWithFallback(creator.creator, etherAmount);
