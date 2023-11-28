@@ -177,6 +177,7 @@ contract CultureIndex is ICultureIndex, Ownable, ReentrancyGuard {
      * Emits a VoteCast event upon successful execution.
      */
     function vote(uint256 pieceId) public nonReentrant {
+        require(pieceId <= pieceCount, "Invalid piece ID");
         uint256 weight = getVoterWeight(msg.sender, pieces[pieceId].creationBlock);
 
         _vote(pieceId, msg.sender, weight);
@@ -190,6 +191,7 @@ contract CultureIndex is ICultureIndex, Ownable, ReentrancyGuard {
      */
     function batchVote(uint256[] memory pieceIds) public nonReentrant {
         for (uint256 i = 0; i < pieceIds.length; ++i) {
+            require(pieceIds[i] <= pieceCount, "Invalid piece ID");
             _vote(pieceIds[i], msg.sender, getVoterWeight(msg.sender, pieces[pieceIds[i]].creationBlock));
         }
     }
