@@ -15,6 +15,8 @@ contract CultureIndexVotingTestManager is CultureIndexTestSuite {
         govToken.mint(address(voter1Test), 100);
         govToken.mint(address(voter2Test), 200);
 
+        vm.roll(block.number + 1); // advance block for vote snapshotting
+
         // Call vote from both test instances
         voter1Test.voteForPiece(newPieceId);
         voter2Test.voteForPiece(newPieceId);
@@ -39,6 +41,7 @@ contract CultureIndexVotingTestManager is CultureIndexTestSuite {
 
         // Mint tokens to a test contract (acting as a voter)
         govToken.mint(address(voter1Test), 100);
+        vm.roll(block.number + 1); // advance block for vote snapshotting
 
         // Call vote from the same test instance for both pieces
         voter1Test.voteForPiece(firstPieceId);
