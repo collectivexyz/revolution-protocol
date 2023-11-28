@@ -340,47 +340,4 @@ contract CultureIndexVotingBasicTest is CultureIndexTestSuite {
     }
 }
 
-contract CultureIndexVotingTest is Test {
-    CultureIndex public cultureIndex;
-    MockERC20 public mockVotingToken;
 
-    constructor(address _cultureIndex, address _mockVotingToken) {
-        cultureIndex = CultureIndex(_cultureIndex);
-        mockVotingToken = MockERC20(_mockVotingToken);
-    }
-
-    // Utility function to create a new art piece and return its ID
-    function createArtPiece(
-        string memory name,
-        string memory description,
-        ICultureIndex.MediaType mediaType,
-        string memory image,
-        string memory text,
-        string memory animationUrl,
-        address creatorAddress,
-        uint256 creatorBps
-    ) internal returns (uint256) {
-        ICultureIndex.ArtPieceMetadata memory metadata = ICultureIndex.ArtPieceMetadata({
-            name: name,
-            description: description,
-            mediaType: mediaType,
-            image: image,
-            text: text,
-            animationUrl: animationUrl
-        });
-
-        ICultureIndex.CreatorBps[] memory creators = new ICultureIndex.CreatorBps[](1);
-        creators[0] = ICultureIndex.CreatorBps({ creator: creatorAddress, bps: creatorBps });
-
-        return cultureIndex.createPiece(metadata, creators);
-    }
-
-    //Utility function to create default art piece
-    function createDefaultArtPiece() public returns (uint256) {
-        return createArtPiece("Mona Lisa", "A masterpiece", ICultureIndex.MediaType.IMAGE, "ipfs://legends", "", "", address(0x1), 10000);
-    }
-
-    function voteForPiece(uint256 pieceId) public {
-        cultureIndex.vote(pieceId);
-    }
-}

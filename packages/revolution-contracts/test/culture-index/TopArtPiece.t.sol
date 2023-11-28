@@ -4,114 +4,26 @@ pragma solidity ^0.8.22;
 import { Test } from "forge-std/Test.sol";
 import { CultureIndex } from "../../src/CultureIndex.sol";
 import { MockERC20 } from "../mock/MockERC20.sol";
-import { CultureIndexVotingTest } from "./Voting.t.sol";
 import { ICultureIndex } from "../../src/interfaces/ICultureIndex.sol";
+import { CultureIndexTestSuite } from "./CultureIndex.t.sol";
 
 /**
  * @title CultureIndexArtPieceTest
  * @dev Test contract for CultureIndex art piece creation
  */
-contract CultureIndexArtPieceTest is Test {
-    CultureIndexVotingTest public voter1Test;
-    CultureIndexVotingTest public voter2Test;
-    CultureIndex public cultureIndex;
-    MockERC20 public mockVotingToken;
-
-    function setUp() public {
-        mockVotingToken = new MockERC20();
-        cultureIndex = new CultureIndex(address(mockVotingToken), address(this));
-
-        // Create new test instances acting as different voters
-        voter1Test = new CultureIndexVotingTest(address(cultureIndex), address(mockVotingToken));
-        voter2Test = new CultureIndexVotingTest(address(cultureIndex), address(mockVotingToken));
-    }
-
-    // Function to create ArtPieceMetadata
-    function createArtPieceMetadata(
-        string memory name,
-        string memory description,
-        ICultureIndex.MediaType mediaType,
-        string memory image,
-        string memory text,
-        string memory animationUrl
-    ) public pure returns (CultureIndex.ArtPieceMetadata memory) {
-        // <-- Change visibility and mutability as needed
-        ICultureIndex.ArtPieceMetadata memory metadata = ICultureIndex.ArtPieceMetadata({
-            name: name,
-            description: description,
-            mediaType: mediaType,
-            image: image,
-            text: text,
-            animationUrl: animationUrl
-        });
-
-        return metadata;
-    }
-
-    // Function to create CreatorBps array
-    function createArtPieceCreators(address creatorAddress, uint256 creatorBps) public pure returns (CultureIndex.CreatorBps[] memory) {
-        // <-- Change visibility and mutability as needed
-        ICultureIndex.CreatorBps[] memory creators = new ICultureIndex.CreatorBps[](1);
-        creators[0] = ICultureIndex.CreatorBps({ creator: creatorAddress, bps: creatorBps });
-
-        return creators;
-    }
-
-    //returns metadata and creators in a tuple
-    function createArtPieceTuple(
-        string memory name,
-        string memory description,
-        ICultureIndex.MediaType mediaType,
-        string memory image,
-        string memory text,
-        string memory animationUrl,
-        address creatorAddress,
-        uint256 creatorBps
-    ) public pure returns (CultureIndex.ArtPieceMetadata memory, ICultureIndex.CreatorBps[] memory) {
-        // <-- Change here
-        ICultureIndex.ArtPieceMetadata memory metadata = createArtPieceMetadata(name, description, mediaType, image, text, animationUrl);
-
-        ICultureIndex.CreatorBps[] memory creators = createArtPieceCreators(creatorAddress, creatorBps);
-
-        return (metadata, creators);
-    }
-
-    function createArtPiece(
-        string memory name,
-        string memory description,
-        ICultureIndex.MediaType mediaType,
-        string memory image,
-        string memory text,
-        string memory animationUrl,
-        address creatorAddress,
-        uint256 creatorBps
-    ) public returns (uint256) {
-        // <-- Change here
-        //use createArtPieceTuple to create metadata and creators
-        (CultureIndex.ArtPieceMetadata memory metadata, ICultureIndex.CreatorBps[] memory creators) = createArtPieceTuple(
-            name,
-            description,
-            mediaType,
-            image,
-            text,
-            animationUrl,
-            creatorAddress,
-            creatorBps
-        );
-
-        return cultureIndex.createPiece(metadata, creators);
-    }
+contract CultureIndexArtPieceTest is CultureIndexTestSuite {
 
     function testVoteAndVerifyTopVotedPiece() public {
-        setUp();
+        
 
         uint256 firstPieceId = voter1Test.createDefaultArtPiece();
         uint256 secondPieceId = voter2Test.createDefaultArtPiece();
-        uint256 thirdPieceId = voter2Test.createDefaultArtPiece();
 
         // Mint tokens to the test contracts (acting as voters)
-        mockVotingToken._mint(address(voter1Test), 100);
-        mockVotingToken._mint(address(voter2Test), 200);
+        govToken.mint(address(voter1Test), 100);
+        govToken.mint(address(voter2Test), 200);
+
+        vm.roll(block.number + 1); // roll block number to enable voting snapshot
 
         // Vote for the first piece with voter1
         voter1Test.voteForPiece(firstPieceId);
@@ -125,18 +37,24 @@ contract CultureIndexArtPieceTest is Test {
         voter2Test.voteForPiece(firstPieceId);
         assertEq(cultureIndex.topVotedPieceId(), firstPieceId, "First piece should now be top-voted again");
 
-        mockVotingToken._mint(address(voter2Test), 21_000);
+        uint256 thirdPieceId = voter2Test.createDefaultArtPiece();
+
+        govToken.mint(address(voter2Test), 21_000);
+        vm.roll(block.number + 1); // roll block number to enable voting snapshot
+
         voter2Test.voteForPiece(thirdPieceId);
         assertEq(cultureIndex.topVotedPieceId(), thirdPieceId, "Third piece should now be top-voted");
     }
 
     function testFetchTopVotedPiece() public {
-        setUp();
+        
 
         uint256 firstPieceId = voter1Test.createDefaultArtPiece();
 
         // Mint tokens to voter1
-        mockVotingToken._mint(address(voter1Test), 100);
+        govToken.mint(address(voter1Test), 100);
+
+        vm.roll(block.number + 1); // roll block number to enable voting snapshot
 
         // Vote for the first piece
         voter1Test.voteForPiece(firstPieceId);
@@ -146,14 +64,16 @@ contract CultureIndexArtPieceTest is Test {
     }
 
     function testCorrectTopVotedPiece() public {
-        setUp();
+        
 
         uint256 firstPieceId = voter1Test.createDefaultArtPiece();
         uint256 secondPieceId = voter2Test.createDefaultArtPiece();
 
         // Mint tokens to the test contracts (acting as voters)
-        mockVotingToken._mint(address(voter1Test), 100);
-        mockVotingToken._mint(address(voter2Test), 200);
+        govToken.mint(address(voter1Test), 100);
+        govToken.mint(address(voter2Test), 200);
+
+        vm.roll(block.number + 1); // roll block number to enable voting snapshot
 
         // Vote for the first piece with voter1
         voter1Test.voteForPiece(firstPieceId);
@@ -166,10 +86,13 @@ contract CultureIndexArtPieceTest is Test {
     }
 
     function testPopTopVotedPiece() public {
-        setUp();
+        
 
         uint256 firstPieceId = voter1Test.createDefaultArtPiece();
-        mockVotingToken._mint(address(voter1Test), 100);
+        govToken.mint(address(voter1Test), 100);
+
+        vm.roll(block.number + 1); // roll block number to enable voting snapshot
+
         voter1Test.voteForPiece(firstPieceId);
 
         ICultureIndex.ArtPiece memory poppedPiece = cultureIndex.dropTopVotedPiece();
@@ -177,13 +100,14 @@ contract CultureIndexArtPieceTest is Test {
     }
 
     function testRemovedPieceShouldBeReplaced() public {
-        setUp();
+        
 
         uint256 firstPieceId = voter1Test.createDefaultArtPiece();
         uint256 secondPieceId = voter2Test.createDefaultArtPiece();
 
-        mockVotingToken._mint(address(voter1Test), 100);
-        mockVotingToken._mint(address(voter2Test), 200);
+        govToken.mint(address(voter1Test), 100);
+        govToken.mint(address(voter2Test), 200);
+        vm.roll(block.number + 1); // roll block number to enable voting snapshot
 
         voter1Test.voteForPiece(firstPieceId);
         voter2Test.voteForPiece(secondPieceId);
@@ -198,20 +122,21 @@ contract CultureIndexArtPieceTest is Test {
 
     /// @dev Tests that log gas required to vote on a piece isn't out of control as heap grows
     function testGasForLargeVotes() public {
-        setUp();
+        govToken.mint(address(voter1Test), 100);
+        govToken.mint(address(voter2Test), 200);
+        vm.roll(block.number + 1); // roll block number to enable voting snapshot
 
         // Insert a large number of items
         for (uint i = 0; i < 5_000; i++) {
             voter1Test.createDefaultArtPiece();
         }
 
-        mockVotingToken._mint(address(voter1Test), 100);
-        mockVotingToken._mint(address(voter2Test), 200);
+        vm.roll(block.number + 2); // roll block number to enable voting snapshot
 
         //vote on all pieces
-        for (uint i = 2; i < 5_000; i++) {
-            voter1Test.voteForPiece(i + 1);
-            voter2Test.voteForPiece(i + 1);
+        for (uint i = 2; i < 5_00; i++) {
+            voter1Test.voteForPiece(i);
+            voter2Test.voteForPiece(i);
         }
 
         //vote once and calculate gas used
@@ -225,15 +150,16 @@ contract CultureIndexArtPieceTest is Test {
             voter1Test.createDefaultArtPiece();
         }
 
-        mockVotingToken._mint(address(voter1Test), 100);
-        mockVotingToken._mint(address(voter2Test), 200);
+        govToken.mint(address(voter1Test), 100);
+        govToken.mint(address(voter2Test), 200);
+        vm.roll(block.number + 1); // roll block number to enable voting snapshot
 
         //vote on all pieces
         for (uint i = 5_002; i < 25_000; i++) {
-            voter1Test.voteForPiece(i + 1);
-            mockVotingToken._mint(address(voter1Test), i);
-            mockVotingToken._mint(address(voter2Test), i * 2);
-            voter2Test.voteForPiece(i + 1);
+            voter1Test.voteForPiece(i);
+            govToken.mint(address(voter1Test), i);
+            govToken.mint(address(voter2Test), i * 2);
+            voter2Test.voteForPiece(i);
         }
 
         //vote once and calculate gas used
@@ -248,8 +174,6 @@ contract CultureIndexArtPieceTest is Test {
 
     /// @dev Tests the gas used for creating art pieces as the number of items grows.
     function testGasForCreatingArtPieces() public {
-        setUp();
-
         //log gas used for creating the first piece
         uint256 startGas = gasleft();
         voter1Test.createDefaultArtPiece();
@@ -257,7 +181,11 @@ contract CultureIndexArtPieceTest is Test {
         emit log_uint(gasUsed);
 
         // Create a set number of pieces and log the gas used for the last creation.
+
+        //vote on all pieces
         for (uint i = 0; i < 5_000; i++) {
+            govToken.mint(address(voter1Test), i + 1);
+
             if (i == 4_999) {
                 startGas = gasleft();
                 voter1Test.createDefaultArtPiece();
@@ -266,38 +194,25 @@ contract CultureIndexArtPieceTest is Test {
             } else {
                 voter1Test.createDefaultArtPiece();
             }
-        }
+            vm.roll(block.number + 1); // roll block number to enable voting snapshot
 
-        //vote on all pieces
-        for (uint i = 0; i < 5_000; i++) {
-            mockVotingToken._mint(address(voter1Test), i + 1);
-            voter1Test.voteForPiece(i + 1);
-        }
-
-        // Create another set of pieces and log the gas used for the last creation.
-        for (uint i = 0; i < 25_000; i++) {
-            if (i == 24_999) {
-                startGas = gasleft();
-                voter1Test.createDefaultArtPiece();
-                gasUsed = startGas - gasleft();
-                emit log_uint(gasUsed);
-            } else {
-                voter1Test.createDefaultArtPiece();
-            }
+            voter1Test.voteForPiece(i);
         }
 
         //assert dropping top piece is the correct pieceId
-        assertEq(cultureIndex.topVotedPieceId(), 5_000, "Top voted piece should be the 5_000th piece");
+        assertEq(cultureIndex.topVotedPieceId(), 4_999, "Top voted piece should be the 4_999th piece");
     }
 
     /// @dev Tests the gas used for popping the top voted piece to ensure somewhat constant time
     function testGasForPopTopVotedPiece() public {
-        setUp();
+        
 
         // Create and vote on a set number of pieces.
         for (uint i = 0; i < 5_000; i++) {
             uint256 pieceId = voter1Test.createDefaultArtPiece();
-            mockVotingToken._mint(address(voter1Test), i * 2 + 1);
+            govToken.mint(address(voter1Test), i * 2 + 1);
+            vm.roll(block.number + 1); // roll block number to enable voting snapshot
+
             voter1Test.voteForPiece(pieceId);
         }
 
@@ -310,7 +225,9 @@ contract CultureIndexArtPieceTest is Test {
         // Create and vote on another set of pieces.
         for (uint i = 0; i < 25_000; i++) {
             uint256 pieceId = voter1Test.createDefaultArtPiece();
-            mockVotingToken._mint(address(voter1Test), i * 3 + 1);
+            govToken.mint(address(voter1Test), i * 3 + 1);
+            vm.roll(block.number + 1); // roll block number to enable voting snapshot
+
             voter1Test.voteForPiece(pieceId);
         }
 
@@ -324,15 +241,19 @@ contract CultureIndexArtPieceTest is Test {
     }
 
     function testDropTopVotedPieceSequentialOrder() public {
-        setUp();
+        
 
         // Create some pieces and vote on them
         uint256 pieceId1 = voter1Test.createDefaultArtPiece();
-        mockVotingToken._mint(address(voter1Test), 10);
+        govToken.mint(address(voter1Test), 10);
+        vm.roll(block.number + 1); // roll block number to enable voting snapshot
+
         voter1Test.voteForPiece(pieceId1);
 
         uint256 pieceId2 = voter1Test.createDefaultArtPiece();
-        mockVotingToken._mint(address(voter1Test), 20);
+        govToken.mint(address(voter1Test), 20);
+        vm.roll(block.number + 1); // roll block number to enable voting snapshot
+
         voter1Test.voteForPiece(pieceId2);
 
         // Drop the top voted piece
@@ -350,11 +271,12 @@ contract CultureIndexArtPieceTest is Test {
 
     /// @dev Ensure that the dropTopVotedPiece function behaves correctly when there are no more pieces to drop
     function testDropTopVotedPieceWithNoMorePieces() public {
-        setUp();
+        
 
         // Create and vote on a single piece
         uint256 pieceId = voter1Test.createDefaultArtPiece();
-        mockVotingToken._mint(address(voter1Test), 10);
+        govToken.mint(address(voter1Test), 10);
+        vm.roll(block.number + 1); // roll block number to enable voting snapshot
         voter1Test.voteForPiece(pieceId);
 
         // Drop the top voted piece

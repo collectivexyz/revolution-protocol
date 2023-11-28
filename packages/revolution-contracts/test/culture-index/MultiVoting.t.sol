@@ -3,30 +3,17 @@ pragma solidity ^0.8.22;
 
 import { Test } from "forge-std/Test.sol";
 import { CultureIndex } from "../../src/CultureIndex.sol";
-import { CultureIndexVotingTest } from "./Voting.t.sol";
 import { MockERC20 } from "../mock/MockERC20.sol";
+import { CultureIndexTestSuite } from "./CultureIndex.t.sol";
 
-contract CultureIndexVotingTestManager is Test {
-    CultureIndexVotingTest public voter1Test;
-    CultureIndexVotingTest public voter2Test;
-    CultureIndex public cultureIndex;
-    MockERC20 public mockVotingToken;
-
-    function setUp() public {
-        mockVotingToken = new MockERC20();
-        cultureIndex = new CultureIndex(address(mockVotingToken), address(this));
-
-        // Create new test instances acting as different voters
-        voter1Test = new CultureIndexVotingTest(address(cultureIndex), address(mockVotingToken));
-        voter2Test = new CultureIndexVotingTest(address(cultureIndex), address(mockVotingToken));
-    }
+contract CultureIndexVotingTestManager is CultureIndexTestSuite {
 
     function testVotingWithDifferentWeights() public {
         uint256 newPieceId = voter1Test.createDefaultArtPiece();
 
         // Mint tokens to the test contracts (acting as voters)
-        mockVotingToken._mint(address(voter1Test), 100);
-        mockVotingToken._mint(address(voter2Test), 200);
+        govToken.mint(address(voter1Test), 100);
+        govToken.mint(address(voter2Test), 200);
 
         // Call vote from both test instances
         voter1Test.voteForPiece(newPieceId);
@@ -51,7 +38,7 @@ contract CultureIndexVotingTestManager is Test {
         uint256 secondPieceId = voter2Test.createDefaultArtPiece();
 
         // Mint tokens to a test contract (acting as a voter)
-        mockVotingToken._mint(address(voter1Test), 100);
+        govToken.mint(address(voter1Test), 100);
 
         // Call vote from the same test instance for both pieces
         voter1Test.voteForPiece(firstPieceId);

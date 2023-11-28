@@ -14,6 +14,8 @@ import { NontransferableERC20Votes } from "../../src/NontransferableERC20Votes.s
 contract CultureIndexTestSuite is Test {
     CultureIndex public cultureIndex;
     NontransferableERC20Votes public govToken;
+    CultureIndexVotingTest public voter1Test;
+    CultureIndexVotingTest public voter2Test;
 
     /**
      * @dev Setup function for each test case
@@ -23,6 +25,10 @@ contract CultureIndexTestSuite is Test {
 
         // Initialize your CultureIndex contract
         cultureIndex = new CultureIndex(address(govToken), address(this));
+
+        // Create new test instances acting as different voters
+        voter1Test = new CultureIndexVotingTest(address(cultureIndex), address(govToken));
+        voter2Test = new CultureIndexVotingTest(address(cultureIndex), address(govToken));
     }
 
         //returns metadata and creators in a tuple
