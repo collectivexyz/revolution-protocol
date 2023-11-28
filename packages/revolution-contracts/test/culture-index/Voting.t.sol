@@ -6,24 +6,13 @@ import { CultureIndex } from "../../src/CultureIndex.sol";
 import { MockERC20 } from "../mock/MockERC20.sol";
 import { ICultureIndex } from "../../src/interfaces/ICultureIndex.sol";
 import { NontransferableERC20Votes } from "../../src/NontransferableERC20Votes.sol";
+import { CultureIndexTestSuite } from "./CultureIndex.t.sol";
 
 /**
  * @title CultureIndexTest
  * @dev Test contract for CultureIndex
  */
-contract CultureIndexVotingBasicTest is Test {
-    CultureIndex public cultureIndex;
-    NontransferableERC20Votes public govToken;
-
-    /**
-     * @dev Setup function for each test case
-     */
-    function setUp() public {
-        govToken = new NontransferableERC20Votes(address(this), "Revolution Governance", "GOV", 4);
-
-        // Initialize your CultureIndex contract
-        cultureIndex = new CultureIndex(address(govToken), address(this));
-    }
+contract CultureIndexVotingBasicTest is CultureIndexTestSuite {
 
     /**
      * @dev Test case to validate voting functionality
@@ -285,37 +274,6 @@ contract CultureIndexVotingBasicTest is Test {
         }
     }
 
-    // Utility function to create a new art piece and return its ID
-    function createArtPiece(
-        string memory name,
-        string memory description,
-        ICultureIndex.MediaType mediaType,
-        string memory image,
-        string memory text,
-        string memory animationUrl,
-        address creatorAddress,
-        uint256 creatorBps
-    ) internal returns (uint256) {
-        ICultureIndex.ArtPieceMetadata memory metadata = ICultureIndex.ArtPieceMetadata({
-            name: name,
-            description: description,
-            mediaType: mediaType,
-            image: image,
-            text: text,
-            animationUrl: animationUrl
-        });
-
-        ICultureIndex.CreatorBps[] memory creators = new ICultureIndex.CreatorBps[](1);
-        creators[0] = ICultureIndex.CreatorBps({ creator: creatorAddress, bps: creatorBps });
-
-        return cultureIndex.createPiece(metadata, creators);
-    }
-
-    //Utility function to create default art piece
-    function createDefaultArtPiece() public returns (uint256) {
-        return createArtPiece("Mona Lisa", "A masterpiece", ICultureIndex.MediaType.IMAGE, "ipfs://legends", "", "", address(0x1), 10000);
-    }
-
     function testVoteAfterTransferringTokens() public {
         setUp();
         uint256 newPieceId = createDefaultArtPiece();
@@ -379,10 +337,6 @@ contract CultureIndexVotingBasicTest is Test {
         } catch Error(string memory reason) {
             assertEq(reason, "Piece has already been dropped");
         }
-    }
-
-    function voteForPiece(uint256 pieceId) public {
-        cultureIndex.vote(pieceId);
     }
 }
 
