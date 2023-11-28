@@ -4,7 +4,7 @@
 pragma solidity ^0.8.22;
 
 import { ERC20 } from "./ERC20.sol";
-import { Votes } from "@openzeppelin/contracts/governance/utils/Votes.sol";
+import { Votes } from "../Votes.sol";
 import { Checkpoints } from "@openzeppelin/contracts/utils/structs/Checkpoints.sol";
 
 /**
@@ -46,6 +46,7 @@ abstract contract ERC20Votes is ERC20, Votes {
      * Emits a {IVotes-DelegateVotesChanged} event.
      */
     function _update(address from, address to, uint256 value) internal virtual override {
+        emit Log("ERC20Votes._update", value);
         super._update(from, to, value);
         if (from == address(0)) {
             uint256 supply = totalSupply();

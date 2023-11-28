@@ -120,7 +120,7 @@ contract VerbsTokenTest is Test {
         uint256 artPieceId = createDefaultArtPiece();
         uint256 tokenId = verbsToken.mint();
 
-        (uint256 recordedPieceId, , , ) = verbsToken.artPieces(tokenId);
+        (uint256 recordedPieceId, , , ,) = verbsToken.artPieces(tokenId);
 
         // Validate the token's associated art piece
         assertEq(recordedPieceId, artPieceId, "Minted token should be associated with the correct art piece");
@@ -144,7 +144,7 @@ contract VerbsTokenTest is Test {
         uint256 artPieceId = createArtPiece(name, description, mediaType, image, text, animationUrl, creatorAddress, 10_000);
 
         // Act
-        (, ICultureIndex.ArtPieceMetadata memory metadata, , ) = cultureIndex.pieces(artPieceId);
+        (, ICultureIndex.ArtPieceMetadata memory metadata, , ,) = cultureIndex.pieces(artPieceId);
 
         // Assert
         assertEq(metadata.name, "Mona Lisa", "The name of the art piece should match the provided name.");
@@ -420,7 +420,7 @@ contract VerbsTokenTest is Test {
         (string memory name, string memory description, string memory image) = parseJson(metadataJson);
 
         // Retrieve the expected metadata directly from the art piece for comparison
-        (, ICultureIndex.ArtPieceMetadata memory metadata, , ) = cultureIndex.pieces(artPieceId);
+        (, ICultureIndex.ArtPieceMetadata memory metadata, , ,) = cultureIndex.pieces(artPieceId);
 
         //assert name equals Verb + tokenId
         string memory expectedName = string(abi.encodePacked(tokenNamePrefix, " ", Strings.toString(tokenId)));
@@ -497,7 +497,7 @@ contract VerbsTokenTest is Test {
 
         uint256 preMintPieceId = cultureIndex.topVotedPieceId();
         uint256 tokenId = verbsToken.mint();
-        (uint256 pieceId, , , ) = verbsToken.artPieces(tokenId);
+        (uint256 pieceId, , , ,) = verbsToken.artPieces(tokenId);
 
         assertTrue(pieceId == preMintPieceId, "Art piece ID should match top voted piece ID before minting");
     }

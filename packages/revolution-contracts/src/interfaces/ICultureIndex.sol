@@ -98,6 +98,7 @@ interface ICultureIndex is ICultureIndexEvents {
         CreatorBps[] creators;
         address dropper;
         bool isDropped;
+        uint256 creationBlock;
     }
 
     // Struct representing a voter and their weight for a specific art piece.

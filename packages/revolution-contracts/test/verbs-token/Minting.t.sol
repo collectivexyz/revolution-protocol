@@ -11,6 +11,7 @@ import { Strings } from "@openzeppelin/contracts/utils/Strings.sol";
 import { CultureIndex } from "../../src/CultureIndex.sol";
 import { MockERC20 } from "../mock/MockERC20.sol";
 import { VerbsDescriptor } from "../../src/VerbsDescriptor.sol";
+import { NontransferableERC20Votes } from "../../src/NontransferableERC20Votes.sol";
 import "../utils/Base64Decode.sol";
 import "../utils/JsmnSolLib.sol";
 
@@ -19,13 +20,13 @@ import "../utils/JsmnSolLib.sol";
 contract VerbsTokenTest is Test {
     VerbsToken public verbsToken;
     CultureIndex public cultureIndex;
-    MockERC20 public mockVotingToken;
+    NontransferableERC20Votes public govToken;
     VerbsDescriptor public descriptor;
 
     /// @dev Sets up a new VerbsToken instance before each test
     function setUp() public {
         // Create a new mock ERC20 token for voting
-        mockVotingToken = new MockERC20();
+        govToken = new NontransferableERC20Votes(address(this), "Revolution Governance", "GOV", 4);
 
         // Deploy a new proxy registry for OpenSea
         ProxyRegistry _proxyRegistry = new ProxyRegistry();
@@ -34,7 +35,7 @@ contract VerbsTokenTest is Test {
         verbsToken = new VerbsToken(address(this), address(this), IVerbsDescriptorMinimal(address(0)), _proxyRegistry, ICultureIndex(address(0)), "Vrbs", "VRBS");
 
         // Deploy CultureIndex with the VerbsToken's address as the initial owner
-        cultureIndex = new CultureIndex(address(mockVotingToken), address(verbsToken));
+        cultureIndex = new CultureIndex(address(govToken), address(verbsToken));
         ICultureIndex _cultureIndex = cultureIndex;
 
         // Now that CultureIndex is deployed, set it in VerbsToken
@@ -52,9 +53,14 @@ contract VerbsTokenTest is Test {
     function testDroppedArtPieceMatchesTopVoted() public {
         setUp();
 
+        govToken.mint(address(this), 10);
+
         // Create a new art piece and simulate it being the top voted piece
         uint256 pieceId = createDefaultArtPiece();
-        mockVotingToken._mint(address(this), 10);
+
+        // ensure vote snapshot is taken
+        vm.roll(block.number + 1);
+
         cultureIndex.vote(pieceId); // Simulate voting for the piece to make it top-voted
 
         // Fetch the top voted piece before minting
@@ -198,7 +204,7 @@ contract VerbsTokenTest is Test {
         setUp();
         createDefaultArtPiece();
 
-        (uint256 pieceId, ICultureIndex.ArtPieceMetadata memory metadata, , ) = cultureIndex.pieces(0);
+        (uint256 pieceId, ICultureIndex.ArtPieceMetadata memory metadata, , ,) = cultureIndex.pieces(0);
 
         emit log_uint(pieceId);
 
@@ -210,7 +216,8 @@ contract VerbsTokenTest is Test {
             metadata: metadata,
             creators: creators,
             dropper: address(this),
-            isDropped: true
+            isDropped: true,
+            creationBlock: block.number
         });
 
         vm.expectEmit(true, true, true, true);
@@ -241,7 +248,7 @@ contract VerbsTokenTest is Test {
         setUp();
         uint256 artPieceId = createDefaultArtPiece();
         uint256 tokenId = verbsToken.mint();
-        (, ICultureIndex.ArtPieceMetadata memory metadata, , ) = cultureIndex.pieces(artPieceId);
+        (, ICultureIndex.ArtPieceMetadata memory metadata, , ,) = cultureIndex.pieces(artPieceId);
         // Assuming the descriptor returns a fixed URI for the given tokenId
         string memory expectedTokenURI = descriptor.tokenURI(tokenId, metadata);
         assertEq(verbsToken.tokenURI(tokenId), expectedTokenURI, "Token URI should be correctly set and retrieved");
@@ -253,14 +260,19 @@ contract VerbsTokenTest is Test {
 
         // Create a new piece and simulate it being the top voted piece
         uint256 pieceId = createDefaultArtPiece(); // This function should exist within the test contract
-        mockVotingToken._mint(address(this), 10);
+        
+        govToken.mint(address(this), 10);
+
+        // ensure vote snapshot is taken    
+        vm.roll(block.number + 1);
+
         cultureIndex.vote(pieceId); // Assuming vote function exists and we cast 10 votes
 
         // Mint a token
         uint256 tokenId = verbsToken.mint();
 
         // Validate the token is associated with the top voted piece
-        (uint256 mintedPieceId, , , ) = verbsToken.artPieces(tokenId);
+        (uint256 mintedPieceId, , , ,) = verbsToken.artPieces(tokenId);
         assertEq(mintedPieceId, pieceId, "Minted token should be associated with the top voted piece");
     }
 }
