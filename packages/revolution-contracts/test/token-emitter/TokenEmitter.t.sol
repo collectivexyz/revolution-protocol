@@ -6,6 +6,7 @@ import { unsafeWadDiv } from "../../src/libs/SignedWadMath.sol";
 import { TokenEmitter } from "../../src/TokenEmitter.sol";
 import { NontransferableERC20Votes } from "../../src/NontransferableERC20Votes.sol";
 import { RevolutionProtocolRewards } from "@collectivexyz/protocol-rewards/src/RevolutionProtocolRewards.sol";
+import { wadDiv } from "../../src/libs/SignedWadMath.sol";
 
 contract TokenEmitterTest is Test {
     TokenEmitter public emitter;
@@ -253,15 +254,14 @@ contract TokenEmitterTest is Test {
         emit log_uint(emitter2.balanceOf(address(maliciousTreasury)));
     }
 
-    function testGetTokenAmountForMultiPurchaseGeneral() public {
+    function testGetTokenAmountForMultiPurchaseGeneral(uint256 payment) public {
+        vm.assume(payment > emitter.minPurchaseAmount() * 1e4);
+        vm.assume(payment < emitter.maxPurchaseAmount());
         vm.startPrank(address(0));
 
-        // Set up a typical payment amount
-        uint256 payment = 1 ether; // A typical payment amount
+        uint256 SOME_MAX_EXPECTED_VALUE = uint256(wadDiv(int256(payment), 1 ether)) * 1e4 * tokensPerTimeUnit;
 
-        uint256 SOME_MAX_EXPECTED_VALUE = tokensPerTimeUnit * 1e4;
-
-        int256 slightlyMore = emitter.getTokenQuoteForPayment(payment + 0.01 ether);
+        int256 slightlyMore = emitter.getTokenQuoteForPayment(payment * 101 / 100);
 
         // Call the function with the typical payment amount
         int256 tokenAmount = emitter.getTokenQuoteForPayment(payment);
@@ -330,14 +330,11 @@ contract TokenEmitterTest is Test {
         vm.deal(address(0), 100000 ether);
         vm.stopPrank();
 
-        int256 priceFirstPurchase = emitter.buyTokenQuote(0);
-        emit log_int(priceFirstPurchase);
-
         int256 priceAfterManyPurchases = emitter.buyTokenQuote(1e18);
         emit log_int(priceAfterManyPurchases);
 
         // Simulate the passage of time
-        uint256 daysElapsed = 2; // Change this value to test different scenarios
+        uint256 daysElapsed = 221; 
         vm.warp(block.timestamp + daysElapsed * 1 days);
 
         int256 priceAfterManyDays = emitter.buyTokenQuote(1e18);
