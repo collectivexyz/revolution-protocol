@@ -115,11 +115,11 @@ contract CultureIndexTestSuite is Test {
 
 contract CultureIndexVotingTest is Test {
     CultureIndex public cultureIndex;
-    MockERC20 public mockVotingToken;
+    NontransferableERC20Votes public govToken;
 
-    constructor(address _cultureIndex, address _mockVotingToken) {
+    constructor(address _cultureIndex, address _votingToken) {
         cultureIndex = CultureIndex(_cultureIndex);
-        mockVotingToken = MockERC20(_mockVotingToken);
+        govToken = NontransferableERC20Votes(_votingToken);
     }
 
     // Utility function to create a new art piece and return its ID

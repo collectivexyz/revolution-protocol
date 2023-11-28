@@ -6,7 +6,6 @@ import { MaxHeap } from "./MaxHeap.sol";
 import { ICultureIndex } from "./interfaces/ICultureIndex.sol";
 import { Ownable } from "@openzeppelin/contracts/access/Ownable.sol";
 import { ReentrancyGuard } from "@openzeppelin/contracts/utils/ReentrancyGuard.sol";
-import { ERC721Checkpointable } from "./base/ERC721Checkpointable.sol";
 
 contract CultureIndex is ICultureIndex, Ownable, ReentrancyGuard {
     // The MaxHeap data structure used to keep track of the top-voted piece
@@ -17,13 +16,9 @@ contract CultureIndex is ICultureIndex, Ownable, ReentrancyGuard {
     // The ERC20 token used for voting
     ERC20Votes public votingToken20;
 
-    // The ERC721 token used for voting
-    // ERC721Checkpointable public votingToken721;
-
     // Initialize ERC20 Token in the constructor
     constructor(address _erc20VotingToken, address _initialOwner) Ownable(_initialOwner) {
         votingToken20 = ERC20Votes(_erc20VotingToken);
-        // votingToken721 = ERC721Checkpointable(_erc721VotingToken);
         maxHeap = new MaxHeap(address(this));
     }
 
