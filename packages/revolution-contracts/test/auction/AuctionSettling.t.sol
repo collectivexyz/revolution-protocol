@@ -11,15 +11,14 @@ contract VerbsAuctionHouseSettleTest is VerbsAuctionHouseTest {
     receive() external payable {}
 
     function testSettlingAuctionWithWinningBid(uint8 nDays) public {
-        setUp();
         createDefaultArtPiece();
         auctionHouse.unpause();
 
         uint256 balanceBefore = address(this).balance;
 
         uint256 bidAmount = auctionHouse.reservePrice();
-        vm.deal(address(1), bidAmount);
-        vm.startPrank(address(1));
+        vm.deal(address(11), bidAmount);
+        vm.startPrank(address(11));
         auctionHouse.createBid{ value: bidAmount }(0); // Assuming first auction's verbId is 0
         vm.stopPrank();
 
@@ -31,9 +30,9 @@ contract VerbsAuctionHouseSettleTest is VerbsAuctionHouseTest {
 
         uint256 balanceAfter = address(this).balance;
 
-        assertEq(verbs.ownerOf(0), address(1), "Verb should be transferred to the highest bidder");
+        assertEq(verbs.ownerOf(0), address(11), "Verb should be transferred to the highest bidder");
         // cultureIndex currentVotes of highest bidder should be 10
-        assertEq(cultureIndex.getCurrentVotes(address(1)), cultureIndex.erc721VotingTokenWeight(), "Highest bidder should have 10 votes");
+        assertEq(cultureIndex.getCurrentVotes(address(11)), cultureIndex.erc721VotingTokenWeight(), "Highest bidder should have 10 votes");
 
         uint256 creatorRate = auctionHouse.creatorRateBps();
         uint256 entropyRate = auctionHouse.entropyRateBps();
