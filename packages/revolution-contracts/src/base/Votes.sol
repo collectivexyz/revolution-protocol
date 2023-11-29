@@ -32,9 +32,6 @@ import {Time} from "@openzeppelin/contracts/utils/types/Time.sol";
 abstract contract Votes is Context, EIP712, Nonces, IERC5805 {
     using Checkpoints for Checkpoints.Trace208;
 
-    event Log(string message, uint256 value);
-    event LogAddress(string message, address value);
-
     bytes32 private constant DELEGATION_TYPEHASH =
         keccak256("Delegation(address delegatee,uint256 nonce,uint256 expiry)");
 
@@ -190,11 +187,6 @@ abstract contract Votes is Context, EIP712, Nonces, IERC5805 {
         if (to == address(0)) {
             _push(_totalCheckpoints, _subtract, SafeCast.toUint208(amount));
         }
-        emit Log("Votes._transferVotingUnits", amount);
-        emit LogAddress("Votes._transferVotingUnits.from", from);
-        emit LogAddress("Votes._transferVotingUnits.to", to);
-        emit LogAddress("Votes._transferVotingUnits.delegates(from)", delegates(from));
-        emit LogAddress("Votes._transferVotingUnits.delegates(to)", delegates(to));
         _moveDelegateVotes(delegates(from), delegates(to), amount);
     }
 
@@ -202,10 +194,7 @@ abstract contract Votes is Context, EIP712, Nonces, IERC5805 {
      * @dev Moves delegated votes from one delegate to another.
      */
     function _moveDelegateVotes(address from, address to, uint256 amount) private {
-        emit Log("Votes._moveDelegateVotes", amount);
         if (from != to && amount > 0) {
-            emit LogAddress("Votes._moveDelegateVotes.from", from);
-            emit LogAddress("Votes._moveDelegateVotes.to", to);
             if (from != address(0)) {
                 (uint256 oldValue, uint256 newValue) = _push(
                     _delegateCheckpoints[from],
@@ -215,7 +204,6 @@ abstract contract Votes is Context, EIP712, Nonces, IERC5805 {
                 emit DelegateVotesChanged(from, oldValue, newValue);
             }
             if (to != address(0)) {
-                emit Log("Votes._moveDelegateVotes.to", amount);
                 (uint256 oldValue, uint256 newValue) = _push(
                     _delegateCheckpoints[to],
                     _add,

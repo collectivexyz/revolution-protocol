@@ -11,8 +11,6 @@ contract CultureIndex is ICultureIndex, Ownable, ReentrancyGuard {
     // The MaxHeap data structure used to keep track of the top-voted piece
     MaxHeap public maxHeap;
 
-    event Log(string message, uint256 value);
-
     // The ERC20 token used for voting
     ERC20Votes public votingToken20;
 
@@ -175,9 +173,6 @@ contract CultureIndex is ICultureIndex, Ownable, ReentrancyGuard {
      */
     function vote(uint256 pieceId) public nonReentrant {
         require(pieceId < _currentPieceId, "Invalid piece ID");
-        emit Log("Voting for pieceId", pieceId);
-        emit Log("Voting with creationBlock", pieces[pieceId].creationBlock);
-        emit Log("Voting with creationBlock", getPieceById(pieceId).creationBlock);
         uint256 weight = getVoterWeight(msg.sender, pieces[pieceId].creationBlock);
 
         _vote(pieceId, msg.sender, weight);
@@ -230,7 +225,7 @@ contract CultureIndex is ICultureIndex, Ownable, ReentrancyGuard {
      * @return The number of pieces
      */
     function pieceCount() external view returns (uint256) {
-        return _currentPieceId - 1;
+        return _currentPieceId; 
     }
 
     /**

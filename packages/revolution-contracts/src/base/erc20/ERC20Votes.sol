@@ -46,7 +46,6 @@ abstract contract ERC20Votes is ERC20, Votes {
      * Emits a {IVotes-DelegateVotesChanged} event.
      */
     function _update(address from, address to, uint256 value) internal virtual override {
-        emit Log("ERC20Votes._update", value);
         super._update(from, to, value);
         if (from == address(0)) {
             uint256 supply = totalSupply();

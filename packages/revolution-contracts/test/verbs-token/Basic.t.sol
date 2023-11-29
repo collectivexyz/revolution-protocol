@@ -188,6 +188,7 @@ contract TokenBasicTest is VerbsTokenTestSuite {
     function testVotingWithZeroBalance() public {
         // Arrange
         uint256 artPieceId = createDefaultArtPiece();
+        vm.roll(block.number + 1);
         address voter = address(0x3); // An address that does not hold any voting tokens
 
         // Act & Assert
@@ -242,16 +243,6 @@ contract TokenBasicTest is VerbsTokenTestSuite {
     function testGetTopVotedPiece() public {
         // Arrange
         uint256 firstArtPieceId = createDefaultArtPiece();
-        uint256 secondArtPieceId = createArtPiece(
-            "Second Piece",
-            "Another masterpiece",
-            ICultureIndex.MediaType.IMAGE,
-            "ipfs://secondpiece",
-            "",
-            "",
-            address(0x2),
-            10000
-        );
 
         // Assign vote weights
         uint256 firstPieceVoteWeight = 100;
@@ -265,11 +256,21 @@ contract TokenBasicTest is VerbsTokenTestSuite {
         vm.prank(voter);
         vm.roll(block.number + 1);
         cultureIndex.vote(firstArtPieceId);
-
+        
         govToken.mint(voter, secondPieceVoteWeight);
-        vm.roll(block.number + 1);
 
         // Vote on the second piece with a higher weight
+        uint256 secondArtPieceId = createArtPiece(
+            "Second Piece",
+            "Another masterpiece",
+            ICultureIndex.MediaType.IMAGE,
+            "ipfs://secondpiece",
+            "",
+            "",
+            address(0x2),
+            10000
+        );
+        vm.roll(block.number + 1);
         vm.prank(voter);
         cultureIndex.vote(secondArtPieceId);
 
