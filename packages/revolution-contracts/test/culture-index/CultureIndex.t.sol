@@ -42,6 +42,8 @@ contract CultureIndexTestSuite is Test {
         // Initialize your CultureIndex contract
         cultureIndex = new CultureIndex(address(govToken), address(verbs), address(this), 10);
 
+        verbs.setCultureIndex(cultureIndex);
+
         // Create new test instances acting as different voters
         voter1Test = new CultureIndexVotingTest(address(cultureIndex), address(govToken));
         voter2Test = new CultureIndexVotingTest(address(cultureIndex), address(govToken));
