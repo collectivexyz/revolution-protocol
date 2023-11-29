@@ -1,113 +1,22 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.22;
 
-import { Test } from "forge-std/Test.sol";
 import { CultureIndex } from "../../src/CultureIndex.sol";
 import { MockERC20 } from "../mock/MockERC20.sol";
 import { ICultureIndex } from "../../src/interfaces/ICultureIndex.sol";
+import { CultureIndexTestSuite } from "./CultureIndex.t.sol";
 
 /**
  * @title CultureIndexArtPieceTest
  * @dev Test contract for CultureIndex art piece creation
  */
-contract CultureIndexArtPieceTest is Test {
-    CultureIndex public cultureIndex;
-    MockERC20 public mockVotingToken;
-
-    /**
-     * @dev Setup function for each test case
-     */
-    function setUp() public {
-        // Initialize your mock ERC20 token here, if needed
-        mockVotingToken = new MockERC20();
-
-        // Initialize your CultureIndex contract
-        cultureIndex = new CultureIndex(address(mockVotingToken), address(this));
-    }
-
-    // Function to create ArtPieceMetadata
-    function createArtPieceMetadata(
-        string memory name,
-        string memory description,
-        ICultureIndex.MediaType mediaType,
-        string memory image,
-        string memory text,
-        string memory animationUrl
-    ) public pure returns (CultureIndex.ArtPieceMetadata memory) {
-        // <-- Change visibility and mutability as needed
-        ICultureIndex.ArtPieceMetadata memory metadata = ICultureIndex.ArtPieceMetadata({
-            name: name,
-            description: description,
-            mediaType: mediaType,
-            image: image,
-            text: text,
-            animationUrl: animationUrl
-        });
-
-        return metadata;
-    }
-
-    // Function to create CreatorBps array
-    function createArtPieceCreators(address creatorAddress, uint256 creatorBps) public pure returns (CultureIndex.CreatorBps[] memory) {
-        // <-- Change visibility and mutability as needed
-        ICultureIndex.CreatorBps[] memory creators = new ICultureIndex.CreatorBps[](1);
-        creators[0] = ICultureIndex.CreatorBps({ creator: creatorAddress, bps: creatorBps });
-
-        return creators;
-    }
+contract CultureIndexArtPieceTest is CultureIndexTestSuite {
 
     //test that creating the first piece the pieceId is 0
     function testFirstPieceId() public {
-        setUp();
-
         uint256 newPieceId = createArtPiece("Mona Lisa", "A masterpiece", ICultureIndex.MediaType.IMAGE, "ipfs://legends", "", "", address(0x1), 10000);
 
         assertEq(newPieceId, 0);
-    }
-
-    //returns metadata and creators in a tuple
-    function createArtPieceTuple(
-        string memory name,
-        string memory description,
-        ICultureIndex.MediaType mediaType,
-        string memory image,
-        string memory text,
-        string memory animationUrl,
-        address creatorAddress,
-        uint256 creatorBps
-    ) public pure returns (CultureIndex.ArtPieceMetadata memory, ICultureIndex.CreatorBps[] memory) {
-        // <-- Change here
-        ICultureIndex.ArtPieceMetadata memory metadata = createArtPieceMetadata(name, description, mediaType, image, text, animationUrl);
-
-        ICultureIndex.CreatorBps[] memory creators = createArtPieceCreators(creatorAddress, creatorBps);
-
-        return (metadata, creators);
-    }
-
-    function createArtPiece(
-        string memory name,
-        string memory description,
-        ICultureIndex.MediaType mediaType,
-        string memory image,
-        string memory text,
-        string memory animationUrl,
-        address creatorAddress,
-        uint256 creatorBps
-    ) public returns (uint256) {
-        // <-- Change here
-        //use createArtPieceTuple to create metadata and creators
-        (CultureIndex.ArtPieceMetadata memory metadata, ICultureIndex.CreatorBps[] memory creators) = createArtPieceTuple(
-            name,
-            description,
-            mediaType,
-            image,
-            text,
-            animationUrl,
-            creatorAddress,
-            creatorBps
-        );
-
-        return cultureIndex.createPiece(metadata, creators);
     }
 
     /**

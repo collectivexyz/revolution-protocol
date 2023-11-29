@@ -5,25 +5,14 @@ import { Test } from "forge-std/Test.sol";
 import { CultureIndex } from "../../src/CultureIndex.sol";
 import { MockERC20 } from "../mock/MockERC20.sol";
 import { ICultureIndex } from "../../src/interfaces/ICultureIndex.sol";
+import { NontransferableERC20Votes } from "../../src/NontransferableERC20Votes.sol";
+import { CultureIndexTestSuite } from "./CultureIndex.t.sol";
 
 /**
  * @title CultureIndexTest
  * @dev Test contract for CultureIndex
  */
-contract CultureIndexVotingBasicTest is Test {
-    CultureIndex public cultureIndex;
-    MockERC20 public mockVotingToken;
-
-    /**
-     * @dev Setup function for each test case
-     */
-    function setUp() public {
-        // Initialize your mock ERC20 token here, if needed
-        mockVotingToken = new MockERC20();
-
-        // Initialize your CultureIndex contract
-        cultureIndex = new CultureIndex(address(mockVotingToken), address(this));
-    }
+contract CultureIndexVotingBasicTest is CultureIndexTestSuite {
 
     /**
      * @dev Test case to validate voting functionality
@@ -36,7 +25,9 @@ contract CultureIndexVotingBasicTest is Test {
         uint256 newPieceId = createArtPiece("Mona Lisa", "A masterpiece", ICultureIndex.MediaType.IMAGE, "ipfs://legends", "", "", address(0x1), 10000);
 
         // Mint some tokens to the voter
-        mockVotingToken._mint(address(this), 100);
+        govToken.mint(address(this), 100);
+
+        vm.roll(block.number + 1); // Roll forward to ensure votes are snapshotted
 
         // Cast a vote
         cultureIndex.vote(newPieceId);
@@ -55,7 +46,8 @@ contract CultureIndexVotingBasicTest is Test {
         uint256[] memory pieceIds = new uint256[](2);
         pieceIds[0] = createDefaultArtPiece();
         pieceIds[1] = createDefaultArtPiece();
-        mockVotingToken._mint(address(this), 200);
+        govToken.mint(address(this), 200);
+        vm.roll(block.number + 1); // Roll forward to ensure votes are snapshotted
 
         // Perform batch voting
         cultureIndex.batchVote(pieceIds);
@@ -72,7 +64,8 @@ contract CultureIndexVotingBasicTest is Test {
         uint256[] memory pieceIds = new uint256[](2);
         pieceIds[0] = 999; // Invalid pieceId
         pieceIds[1] = createDefaultArtPiece(); // Valid pieceId
-        mockVotingToken._mint(address(this), 200);
+        govToken.mint(address(this), 200);
+        vm.roll(block.number + 1); // Roll forward to ensure votes are snapshotted
 
         // This should revert because one of the pieceIds is invalid
         try cultureIndex.batchVote(pieceIds) {
@@ -84,7 +77,9 @@ contract CultureIndexVotingBasicTest is Test {
 
     function testBatchVotingFailsIfAlreadyVoted() public {
         uint256 pieceId = createDefaultArtPiece();
-        mockVotingToken._mint(address(this), 100);
+        govToken.mint(address(this), 100);
+        vm.roll(block.number + 1); // Roll forward to ensure votes are snapshotted
+
         cultureIndex.vote(pieceId); // Vote for the pieceId
 
         uint256[] memory pieceIds = new uint256[](1);
@@ -100,7 +95,9 @@ contract CultureIndexVotingBasicTest is Test {
 
     function testBatchVotingFailsIfPieceDropped() public {
         uint256 pieceId = createDefaultArtPiece();
-        mockVotingToken._mint(address(this), 100);
+        govToken.mint(address(this), 100);
+        vm.roll(block.number + 1); // Roll forward to ensure votes are snapshotted
+
         cultureIndex.dropTopVotedPiece(); // Drop the piece
 
         uint256[] memory pieceIds = new uint256[](1);
@@ -117,6 +114,7 @@ contract CultureIndexVotingBasicTest is Test {
     function testBatchVotingFailsForZeroWeight() public {
         uint256[] memory pieceIds = new uint256[](1);
         pieceIds[0] = createDefaultArtPiece();
+        vm.roll(block.number + 1); // Roll forward to ensure votes are snapshotted
         // Do not mint any tokens to ensure weight is zero
 
         // This should revert because the voter weight is zero
@@ -135,7 +133,8 @@ contract CultureIndexVotingBasicTest is Test {
         }
 
         // Mint enough tokens for voting
-        mockVotingToken._mint(address(this), 100 * 100); // Mint enough tokens (e.g., 100 tokens per vote)
+        govToken.mint(address(this), 100 * 100); // Mint enough tokens (e.g., 100 tokens per vote)
+        vm.roll(block.number + 1); // Roll forward to ensure votes are snapshotted
 
         // Measure gas for individual voting
         uint256 startGasIndividual = gasleft();
@@ -152,7 +151,8 @@ contract CultureIndexVotingBasicTest is Test {
             batchPieceIds[i] = createDefaultArtPiece(); // Setup each art piece
         }
 
-        mockVotingToken._mint(address(this), 100 * 100); // Mint enough tokens (e.g., 100 tokens per vote)
+        govToken.mint(address(this), 100 * 100); // Mint enough tokens (e.g., 100 tokens per vote)
+        vm.roll(block.number + 1); // Roll forward to ensure votes are snapshotted
 
         // Measure gas for batch voting
         uint256 startGasBatch = gasleft();
@@ -175,7 +175,8 @@ contract CultureIndexVotingBasicTest is Test {
         uint256 newPieceId = createArtPiece("Mona Lisa", "A masterpiece", ICultureIndex.MediaType.IMAGE, "ipfs://legends", "", "", address(0x1), 10000);
 
         // Mint some tokens to the voter
-        mockVotingToken._mint(address(this), 100);
+        govToken.mint(address(this), 100);
+        vm.roll(block.number + 1); // Roll forward to ensure votes are snapshotted
 
         // Cast a vote
         cultureIndex.vote(newPieceId);
@@ -198,6 +199,8 @@ contract CultureIndexVotingBasicTest is Test {
         setUp();
         uint256 newPieceId = createArtPiece("Starry Night", "A masterpiece", ICultureIndex.MediaType.IMAGE, "ipfs://legends", "", "", address(0x1), 10000);
 
+        vm.roll(block.number + 1); // Roll forward to ensure votes are snapshotted
+
         // Try to vote and expect to fail
         try cultureIndex.vote(newPieceId) {
             fail("Should not be able to vote without tokens");
@@ -219,7 +222,8 @@ contract CultureIndexVotingBasicTest is Test {
         uint256 secondPieceId = createArtPiece("Starry Night", "Another masterpiece", ICultureIndex.MediaType.IMAGE, "ipfs://starrynight", "", "", address(0x2), 10000);
 
         // Mint some tokens to the voter
-        mockVotingToken._mint(address(this), 200);
+        govToken.mint(address(this), 200);
+        vm.roll(block.number + 1); // Roll forward to ensure votes are snapshotted
 
         // Cast a vote for the first piece
         cultureIndex.vote(firstPieceId);
@@ -253,6 +257,7 @@ contract CultureIndexVotingBasicTest is Test {
         uint256 firstPieceId = createArtPiece("Mona Lisa", "A masterpiece", ICultureIndex.MediaType.IMAGE, "ipfs://legends", "", "", address(0x1), 10000);
 
         uint256 secondPieceId = createArtPiece("Starry Night", "Another masterpiece", ICultureIndex.MediaType.IMAGE, "ipfs://starrynight", "", "", address(0x2), 10000);
+        vm.roll(block.number + 1); // Roll forward to ensure votes are snapshotted
 
         // Try to vote for the first piece and expect to fail
         try cultureIndex.vote(firstPieceId) {
@@ -269,48 +274,21 @@ contract CultureIndexVotingBasicTest is Test {
         }
     }
 
-    // Utility function to create a new art piece and return its ID
-    function createArtPiece(
-        string memory name,
-        string memory description,
-        ICultureIndex.MediaType mediaType,
-        string memory image,
-        string memory text,
-        string memory animationUrl,
-        address creatorAddress,
-        uint256 creatorBps
-    ) internal returns (uint256) {
-        ICultureIndex.ArtPieceMetadata memory metadata = ICultureIndex.ArtPieceMetadata({
-            name: name,
-            description: description,
-            mediaType: mediaType,
-            image: image,
-            text: text,
-            animationUrl: animationUrl
-        });
-
-        ICultureIndex.CreatorBps[] memory creators = new ICultureIndex.CreatorBps[](1);
-        creators[0] = ICultureIndex.CreatorBps({ creator: creatorAddress, bps: creatorBps });
-
-        return cultureIndex.createPiece(metadata, creators);
-    }
-
-    //Utility function to create default art piece
-    function createDefaultArtPiece() public returns (uint256) {
-        return createArtPiece("Mona Lisa", "A masterpiece", ICultureIndex.MediaType.IMAGE, "ipfs://legends", "", "", address(0x1), 10000);
-    }
-
     function testVoteAfterTransferringTokens() public {
         setUp();
         uint256 newPieceId = createDefaultArtPiece();
 
         // Mint tokens and vote
-        mockVotingToken._mint(address(this), 100);
+        govToken.mint(address(this), 100);
+        vm.roll(block.number + 1); // Roll forward to ensure votes are snapshotted
+
         cultureIndex.vote(newPieceId);
 
         // Transfer all tokens to another account
         address anotherAccount = address(0x4);
-        mockVotingToken.transfer(anotherAccount, 100);
+        govToken.transfer(anotherAccount, 100);
+
+        vm.prank(anotherAccount);
 
         // Try to vote again and expect to fail
         try cultureIndex.vote(newPieceId) {
@@ -325,7 +303,8 @@ contract CultureIndexVotingBasicTest is Test {
         setUp();
 
         // Mint some tokens to the voter
-        mockVotingToken._mint(address(this), 100);
+        govToken.mint(address(this), 100);
+        vm.roll(block.number + 1); // Roll forward to ensure votes are snapshotted
 
         // Attempt to vote for an invalid piece ID
         try cultureIndex.vote(9999) {
@@ -346,7 +325,8 @@ contract CultureIndexVotingBasicTest is Test {
         setUp();
 
         uint256 newPieceId = createDefaultArtPiece();
-        mockVotingToken._mint(address(this), 100);
+        govToken.mint(address(this), 100);
+        vm.roll(block.number + 1); // Roll forward to ensure votes are snapshotted
 
         // Drop the top-voted piece (which should be the new piece)
         cultureIndex.dropTopVotedPiece();
@@ -358,53 +338,6 @@ contract CultureIndexVotingBasicTest is Test {
             assertEq(reason, "Piece has already been dropped");
         }
     }
-
-    function voteForPiece(uint256 pieceId) public {
-        cultureIndex.vote(pieceId);
-    }
 }
 
-contract CultureIndexVotingTest is Test {
-    CultureIndex public cultureIndex;
-    MockERC20 public mockVotingToken;
 
-    constructor(address _cultureIndex, address _mockVotingToken) {
-        cultureIndex = CultureIndex(_cultureIndex);
-        mockVotingToken = MockERC20(_mockVotingToken);
-    }
-
-    // Utility function to create a new art piece and return its ID
-    function createArtPiece(
-        string memory name,
-        string memory description,
-        ICultureIndex.MediaType mediaType,
-        string memory image,
-        string memory text,
-        string memory animationUrl,
-        address creatorAddress,
-        uint256 creatorBps
-    ) internal returns (uint256) {
-        ICultureIndex.ArtPieceMetadata memory metadata = ICultureIndex.ArtPieceMetadata({
-            name: name,
-            description: description,
-            mediaType: mediaType,
-            image: image,
-            text: text,
-            animationUrl: animationUrl
-        });
-
-        ICultureIndex.CreatorBps[] memory creators = new ICultureIndex.CreatorBps[](1);
-        creators[0] = ICultureIndex.CreatorBps({ creator: creatorAddress, bps: creatorBps });
-
-        return cultureIndex.createPiece(metadata, creators);
-    }
-
-    //Utility function to create default art piece
-    function createDefaultArtPiece() public returns (uint256) {
-        return createArtPiece("Mona Lisa", "A masterpiece", ICultureIndex.MediaType.IMAGE, "ipfs://legends", "", "", address(0x1), 10000);
-    }
-
-    function voteForPiece(uint256 pieceId) public {
-        cultureIndex.vote(pieceId);
-    }
-}

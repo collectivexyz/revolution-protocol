@@ -4,7 +4,7 @@
 pragma solidity ^0.8.22;
 
 import { ERC20 } from "./ERC20.sol";
-import { Votes } from "@openzeppelin/contracts/governance/utils/Votes.sol";
+import { Votes } from "../Votes.sol";
 import { Checkpoints } from "@openzeppelin/contracts/utils/structs/Checkpoints.sol";
 
 /**

@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: GPL-3.0
 pragma solidity ^0.8.22;
 
-import { IERC20 } from "@openzeppelin/contracts/token/ERC20/IERC20.sol";
+import { ERC20Votes } from "./base/erc20/ERC20Votes.sol";
 import { MaxHeap } from "./MaxHeap.sol";
 import { ICultureIndex } from "./interfaces/ICultureIndex.sol";
 import { Ownable } from "@openzeppelin/contracts/access/Ownable.sol";
@@ -12,19 +12,19 @@ contract CultureIndex is ICultureIndex, Ownable, ReentrancyGuard {
     MaxHeap public maxHeap;
 
     // The ERC20 token used for voting
-    IERC20 public votingToken;
+    ERC20Votes public votingToken20;
 
     // Initialize ERC20 Token in the constructor
-    constructor(address _votingToken, address _initialOwner) Ownable(_initialOwner) {
-        votingToken = IERC20(_votingToken);
+    constructor(address _erc20VotingToken, address _initialOwner) Ownable(_initialOwner) {
+        votingToken20 = ERC20Votes(_erc20VotingToken);
         maxHeap = new MaxHeap(address(this));
     }
 
     // The list of all pieces
     mapping(uint256 => ArtPiece) public pieces;
 
-    // The total number of pieces
-    uint256 public pieceCount;
+    // The internal piece ID tracker
+    uint256 public _currentPieceId;
 
     // The mapping of all votes for a piece
     mapping(uint256 => mapping(address => Vote)) public votes;
@@ -94,7 +94,7 @@ contract CultureIndex is ICultureIndex, Ownable, ReentrancyGuard {
         // Validate the media type and associated data
         validateMediaType(metadata);
 
-        uint256 pieceId = pieceCount++;
+        uint256 pieceId = _currentPieceId++;
 
         /// @dev Insert the new piece into the max heap
         maxHeap.insert(pieceId, 0);
@@ -104,6 +104,7 @@ contract CultureIndex is ICultureIndex, Ownable, ReentrancyGuard {
         newPiece.pieceId = pieceId;
         newPiece.metadata = metadata;
         newPiece.dropper = msg.sender;
+        newPiece.creationBlock = block.number;
 
         for (uint i = 0; i < creatorArray.length; i++) {
             newPiece.creators.push(creatorArray[i]);
@@ -132,10 +133,10 @@ contract CultureIndex is ICultureIndex, Ownable, ReentrancyGuard {
      * @notice Returns a voters weight for voting.
      * @return The vote weight of the voter.
      */
-    function getVoterWeight(address voter) public view returns (uint256) {
-        require(votingToken != IERC20(address(0)), "Voting token must be set");
+    function getVoterWeight(address voter, uint256 timepoint) public view returns (uint256) {
+        require(votingToken20 != ERC20Votes(address(0)), "Voting token must be set");
 
-        try votingToken.balanceOf(voter) returns (uint256 balance) {
+        try votingToken20.getPastVotes(voter, timepoint) returns (uint256 balance) {
             return balance;
         } catch {
             revert("Failed to get balance, voting not possible");
@@ -154,7 +155,7 @@ contract CultureIndex is ICultureIndex, Ownable, ReentrancyGuard {
         require(weight > 0, "Weight must be greater than zero");
         require(!(votes[pieceId][msg.sender].voterAddress != address(0)), "Already voted");
         require(!pieces[pieceId].isDropped, "Piece has already been dropped");
-        require(pieceId <= pieceCount, "Invalid piece ID");
+        require(pieceId < _currentPieceId, "Invalid piece ID");
 
         votes[pieceId][voter] = Vote(voter, weight);
         totalVoteWeights[pieceId] += weight;
@@ -171,7 +172,8 @@ contract CultureIndex is ICultureIndex, Ownable, ReentrancyGuard {
      * Emits a VoteCast event upon successful execution.
      */
     function vote(uint256 pieceId) public nonReentrant {
-        uint256 weight = getVoterWeight(msg.sender);
+        require(pieceId < _currentPieceId, "Invalid piece ID");
+        uint256 weight = getVoterWeight(msg.sender, pieces[pieceId].creationBlock);
 
         _vote(pieceId, msg.sender, weight);
     }
@@ -183,10 +185,9 @@ contract CultureIndex is ICultureIndex, Ownable, ReentrancyGuard {
      * Emits a series of VoteCast event upon successful execution.
      */
     function batchVote(uint256[] memory pieceIds) public nonReentrant {
-        uint256 weight = getVoterWeight(msg.sender);
-
         for (uint256 i = 0; i < pieceIds.length; ++i) {
-            _vote(pieceIds[i], msg.sender, weight);
+            require(pieceIds[i] < _currentPieceId, "Invalid piece ID");
+            _vote(pieceIds[i], msg.sender, getVoterWeight(msg.sender, pieces[pieceIds[i]].creationBlock));
         }
     }
 
@@ -196,7 +197,7 @@ contract CultureIndex is ICultureIndex, Ownable, ReentrancyGuard {
      * @return The ArtPiece struct associated with the given ID.
      */
     function getPieceById(uint256 pieceId) public view returns (ArtPiece memory) {
-        require(pieceId <= pieceCount, "Invalid piece ID");
+        require(pieceId < _currentPieceId, "Invalid piece ID");
         return pieces[pieceId];
     }
 
@@ -206,7 +207,7 @@ contract CultureIndex is ICultureIndex, Ownable, ReentrancyGuard {
      * @return An array of Vote structs for the given art piece ID.
      */
     function getVote(uint256 pieceId, address voter) public view returns (Vote memory) {
-        require(pieceId <= pieceCount, "Invalid piece ID");
+        require(pieceId < _currentPieceId, "Invalid piece ID");
         return votes[pieceId][voter];
     }
 
@@ -217,6 +218,14 @@ contract CultureIndex is ICultureIndex, Ownable, ReentrancyGuard {
     function getTopVotedPiece() public view returns (ArtPiece memory) {
         (uint256 pieceId, ) = maxHeap.getMax();
         return pieces[pieceId];
+    }
+
+    /**
+     * @notice Fetch the number of pieces
+     * @return The number of pieces
+     */
+    function pieceCount() external view returns (uint256) {
+        return _currentPieceId; 
     }
 
     /**
