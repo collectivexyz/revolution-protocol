@@ -82,6 +82,48 @@ contract CultureIndexVotingBasicTest is CultureIndexTestSuite {
         assertEq(topVotedPiece.pieceId, pieceId2, "Piece with higher total vote weight should be top voted");
     }
 
+    function testNoDoubleVotingAfterERC721Transfer() public {
+        //make culture index owned by verbs
+        cultureIndex.transferOwnership(address(verbs));
+        
+        // create 2 art pieces
+        createDefaultArtPiece();
+        uint256 artPieceId = createDefaultArtPiece();
+        address voter = address(0x1);
+        address recipient = address(0x2);
+        uint256 tokenId = 0; 
+
+        // Mint an ERC721 token to the voter
+        verbs.mint();
+        verbs.transferFrom(address(this), voter, tokenId);
+        assertEq(verbs.ownerOf(tokenId), voter);
+
+        // Voter casts a vote for the art piece
+        vm.startPrank(voter);
+        vm.roll(block.number + 1);
+        cultureIndex.vote(artPieceId);
+        vm.stopPrank();
+
+        // Transfer the ERC721 token from voter to recipient
+        vm.startPrank(voter);
+        verbs.transferFrom(voter, recipient, tokenId);
+        vm.stopPrank();
+        assertEq(verbs.ownerOf(tokenId), recipient);
+
+        // Attempt to have the original voter cast another vote
+        vm.startPrank(voter);
+        vm.expectRevert("Already voted");
+        cultureIndex.vote(artPieceId);
+        vm.stopPrank();
+
+        // Attempt to have recipient cast a vote
+        vm.startPrank(recipient);
+        vm.expectRevert("Weight must be greater than zero");
+        cultureIndex.vote(artPieceId);
+        vm.stopPrank();
+    }
+
+
     /// @dev Tests reset of vote weight after transferring all tokens
     function testVoteWeightResetAfterTokenTransfer() public {
         uint256 pieceId = createDefaultArtPiece();
