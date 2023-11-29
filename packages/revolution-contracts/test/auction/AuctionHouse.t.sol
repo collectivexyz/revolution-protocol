@@ -19,6 +19,7 @@ import { ITokenEmitter } from "../../src/interfaces/ITokenEmitter.sol";
 import { wadMul, wadDiv } from "../../src/libs/SignedWadMath.sol";
 import { RevolutionProtocolRewards } from "@collectivexyz/protocol-rewards/src/RevolutionProtocolRewards.sol";
 import { TokenEmitterRewards } from "@collectivexyz/protocol-rewards/src/abstract/TokenEmitter/TokenEmitterRewards.sol";
+import { ERC721Checkpointable } from "../../src/base/ERC721Checkpointable.sol";
 
 contract VerbsAuctionHouseTest is Test {
     VerbsAuctionHouse public auctionHouse;
@@ -40,7 +41,7 @@ contract VerbsAuctionHouseTest is Test {
         // Additional setup for VerbsToken similar to VerbsTokenTest
         ProxyRegistry _proxyRegistry = new ProxyRegistry();
 
-        CultureIndex _cultureIndex = new CultureIndex(address(governanceToken), address(this));
+        CultureIndex _cultureIndex = new CultureIndex(address(governanceToken), address(0), address(this));
         cultureIndex = _cultureIndex;
 
         //20% - how much the price decays per unit of time with no sales
@@ -71,6 +72,8 @@ contract VerbsAuctionHouseTest is Test {
             "Vrbs",
             "VRBS"
         );
+
+        cultureIndex.setERC721VotingToken(address(verbs));
 
         cultureIndex.transferOwnership(address(verbs));
 

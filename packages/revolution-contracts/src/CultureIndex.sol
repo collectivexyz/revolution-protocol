@@ -6,6 +6,7 @@ import { MaxHeap } from "./MaxHeap.sol";
 import { ICultureIndex } from "./interfaces/ICultureIndex.sol";
 import { Ownable } from "@openzeppelin/contracts/access/Ownable.sol";
 import { ReentrancyGuard } from "@openzeppelin/contracts/utils/ReentrancyGuard.sol";
+import { ERC721Checkpointable } from "./base/ERC721Checkpointable.sol";
 
 contract CultureIndex is ICultureIndex, Ownable, ReentrancyGuard {
     // The MaxHeap data structure used to keep track of the top-voted piece
@@ -14,9 +15,16 @@ contract CultureIndex is ICultureIndex, Ownable, ReentrancyGuard {
     // The ERC20 token used for voting
     ERC20Votes public votingToken20;
 
+    // The ERC721 token used for voting
+    ERC721Checkpointable public votingToken721;
+
+    // Whether the 721 voting token can be updated
+    bool public isERC721VotingTokenLocked;
+
     // Initialize ERC20 Token in the constructor
-    constructor(address _erc20VotingToken, address _initialOwner) Ownable(_initialOwner) {
+    constructor(address _erc20VotingToken, address _erc721VotingToken, address _initialOwner) Ownable(_initialOwner) {
         votingToken20 = ERC20Votes(_erc20VotingToken);
+        votingToken721 = ERC721Checkpointable(_erc721VotingToken);
         maxHeap = new MaxHeap(address(this));
     }
 
@@ -31,6 +39,34 @@ contract CultureIndex is ICultureIndex, Ownable, ReentrancyGuard {
 
     // The total voting weight for a piece
     mapping(uint256 => uint256) public totalVoteWeights;
+
+    /**
+     * @notice Require that the 721VotingToken has not been locked.
+     */
+    modifier whenERC721VotingTokenNotLocked() {
+        require(!isERC721VotingTokenLocked, "ERC721VotingToken is locked");
+        _;
+    }
+
+    /**
+     * @notice Set the ERC721 voting token.
+     * @dev Only callable by the owner when not locked.
+     */
+    function setERC721VotingToken(address _ERC721VotingToken) external override onlyOwner nonReentrant whenERC721VotingTokenNotLocked {
+        votingToken721 = ERC721Checkpointable(_ERC721VotingToken);
+
+        emit ERC721VotingTokenUpdated(_ERC721VotingToken);
+    }
+
+    /**
+     * @notice Lock the ERC721 voting token.
+     * @dev This cannot be reversed and is only callable by the owner when not locked.
+     */
+    function lockERC721VotingToken() external override onlyOwner whenERC721VotingTokenNotLocked {
+        isERC721VotingTokenLocked = true;
+
+        emit ERC721VotingTokenLocked();
+    }
 
     /**
      *  Validates the media type and associated data.

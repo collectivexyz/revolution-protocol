@@ -39,7 +39,7 @@ contract VerbsTokenTestSuite is Test {
         verbsToken = new VerbsToken(address(this), address(this), IVerbsDescriptorMinimal(address(0)), _proxyRegistry, ICultureIndex(address(0)), tokenName, tokenSymbol);
 
         // Deploy CultureIndex with the VerbsToken's address as the initial owner
-        cultureIndex = new CultureIndex(address(govToken), address(verbsToken));
+        cultureIndex = new CultureIndex(address(govToken), address(verbsToken), address(verbsToken));
         ICultureIndex _cultureIndex = cultureIndex;
 
         // Now that CultureIndex is deployed, set it in VerbsToken

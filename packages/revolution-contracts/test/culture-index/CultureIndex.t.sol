@@ -24,7 +24,7 @@ contract CultureIndexTestSuite is Test {
         govToken = new NontransferableERC20Votes(address(this), "Revolution Governance", "GOV", 4);
 
         // Initialize your CultureIndex contract
-        cultureIndex = new CultureIndex(address(govToken), address(this));
+        cultureIndex = new CultureIndex(address(govToken), address(0), address(this));
 
         // Create new test instances acting as different voters
         voter1Test = new CultureIndexVotingTest(address(cultureIndex), address(govToken));
