@@ -13,18 +13,23 @@ contract CultureIndex is ICultureIndex, Ownable, ReentrancyGuard {
     MaxHeap public maxHeap;
 
     // The ERC20 token used for voting
-    ERC20Votes public votingToken20;
+    ERC20Votes public erc20VotingToken;
 
     // The ERC721 token used for voting
-    ERC721Checkpointable public votingToken721;
+    ERC721Checkpointable public erc721VotingToken;
 
     // Whether the 721 voting token can be updated
     bool public isERC721VotingTokenLocked;
 
+    // The weight of the 721 voting token
+    uint256 public erc721VotingTokenWeight;
+
     // Initialize ERC20 Token in the constructor
-    constructor(address _erc20VotingToken, address _erc721VotingToken, address _initialOwner) Ownable(_initialOwner) {
-        votingToken20 = ERC20Votes(_erc20VotingToken);
-        votingToken721 = ERC721Checkpointable(_erc721VotingToken);
+    constructor(address _erc20VotingToken, address _erc721VotingToken, address _initialOwner, uint256 _erc721VotingTokenWeight) Ownable(_initialOwner) {
+        erc20VotingToken = ERC20Votes(_erc20VotingToken);
+        erc721VotingToken = ERC721Checkpointable(_erc721VotingToken);
+        erc721VotingTokenWeight = _erc721VotingTokenWeight;
+
         maxHeap = new MaxHeap(address(this));
     }
 
@@ -53,7 +58,7 @@ contract CultureIndex is ICultureIndex, Ownable, ReentrancyGuard {
      * @dev Only callable by the owner when not locked.
      */
     function setERC721VotingToken(address _ERC721VotingToken) external override onlyOwner nonReentrant whenERC721VotingTokenNotLocked {
-        votingToken721 = ERC721Checkpointable(_ERC721VotingToken);
+        erc721VotingToken = ERC721Checkpointable(_ERC721VotingToken);
 
         emit ERC721VotingTokenUpdated(_ERC721VotingToken);
     }
@@ -166,17 +171,46 @@ contract CultureIndex is ICultureIndex, Ownable, ReentrancyGuard {
     }
 
     /**
+    * @notice Returns the voting power of a voter at the current block.
+    * @param account The address of the voter.
+    * @return The voting power of the voter.
+    */
+    function getCurrentVotes(address account) external view override returns (uint256) {
+        return _getVotingWeight(account, block.number);
+    }
+
+    /**
+    * @notice Returns the voting power of a voter at the current block.
+    * @param account The address of the voter.
+    * @return The voting power of the voter.
+    */
+    function getPriorVotes(address account, uint256 blockNumber) external view override returns (uint256) {
+        return _getVotingWeight(account, blockNumber);
+    }
+
+    /**
      * @notice Returns a voters weight for voting.
      * @return The vote weight of the voter.
      */
-    function getVoterWeight(address voter, uint256 timepoint) public view returns (uint256) {
-        require(votingToken20 != ERC20Votes(address(0)), "Voting token must be set");
+    function _getVotingWeight(address voter, uint256 blockNumber) internal view returns (uint256) {
+        require(erc20VotingToken != ERC20Votes(address(0)), "ERC20Voting token must be set");
+        require(erc721VotingToken != ERC721Checkpointable(address(0)), "ERC721Voting token must be set");
 
-        try votingToken20.getPastVotes(voter, timepoint) returns (uint256 balance) {
-            return balance;
+        uint256 votingWeight = 0;
+
+        try erc721VotingToken.getPriorVotes(voter, blockNumber) returns (uint96 balance) {
+            votingWeight += balance;
         } catch {
             revert("Failed to get balance, voting not possible");
         }
+
+        try erc20VotingToken.getPastVotes(voter, blockNumber) returns (uint256 balance) {
+            votingWeight += balance;
+        } catch {
+            revert("Failed to get balance, voting not possible");
+        }
+
+        return votingWeight;
     }
 
     /**
@@ -209,7 +243,7 @@ contract CultureIndex is ICultureIndex, Ownable, ReentrancyGuard {
      */
     function vote(uint256 pieceId) public nonReentrant {
         require(pieceId < _currentPieceId, "Invalid piece ID");
-        uint256 weight = getVoterWeight(msg.sender, pieces[pieceId].creationBlock);
+        uint256 weight = _getVotingWeight(msg.sender, pieces[pieceId].creationBlock);
 
         _vote(pieceId, msg.sender, weight);
     }
@@ -223,7 +257,7 @@ contract CultureIndex is ICultureIndex, Ownable, ReentrancyGuard {
     function batchVote(uint256[] memory pieceIds) public nonReentrant {
         for (uint256 i = 0; i < pieceIds.length; ++i) {
             require(pieceIds[i] < _currentPieceId, "Invalid piece ID");
-            _vote(pieceIds[i], msg.sender, getVoterWeight(msg.sender, pieces[pieceIds[i]].creationBlock));
+            _vote(pieceIds[i], msg.sender, _getVotingWeight(msg.sender, pieces[pieceIds[i]].creationBlock));
         }
     }
 

@@ -185,4 +185,7 @@ interface ICultureIndex is ICultureIndexEvents {
 
     function lockERC721VotingToken() external;
 
+    function getCurrentVotes(address account) external view returns (uint256);
+
+    function getPriorVotes(address account, uint256 blockNumber) external view returns (uint256);
 }

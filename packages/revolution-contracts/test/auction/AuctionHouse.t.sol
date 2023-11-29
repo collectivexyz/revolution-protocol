@@ -41,7 +41,7 @@ contract VerbsAuctionHouseTest is Test {
         // Additional setup for VerbsToken similar to VerbsTokenTest
         ProxyRegistry _proxyRegistry = new ProxyRegistry();
 
-        CultureIndex _cultureIndex = new CultureIndex(address(governanceToken), address(0), address(this));
+        CultureIndex _cultureIndex = new CultureIndex(address(governanceToken), address(0), address(this), 10);
         cultureIndex = _cultureIndex;
 
         //20% - how much the price decays per unit of time with no sales
