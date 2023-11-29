@@ -7,12 +7,52 @@ import { MockERC20 } from "../mock/MockERC20.sol";
 import { ICultureIndex } from "../../src/interfaces/ICultureIndex.sol";
 import { NontransferableERC20Votes } from "../../src/NontransferableERC20Votes.sol";
 import { CultureIndexTestSuite } from "./CultureIndex.t.sol";
+import { Votes } from "../../src/base/Votes.sol";
+import { ERC721Checkpointable } from "../../src/base/ERC721Checkpointable.sol";
 
 /**
  * @title CultureIndexTest
  * @dev Test contract for CultureIndex
  */
 contract CultureIndexVotingBasicTest is CultureIndexTestSuite {
+    /// @dev Tests the vote weight calculation with ERC721 token
+    function testCalculateVoteWeight() public {
+        setUp();
+        address voter = address(0x1);
+        uint256 erc20Weight = 100;
+        uint256 erc721Weight = 2; // Number of ERC721 tokens held by the voter
+
+        // Mock the ERC20 and ERC721 token balances
+        vm.mockCall(address(cultureIndex.erc20VotingToken()), abi.encodeWithSelector(Votes.getVotes.selector, voter), abi.encode(erc20Weight));
+        vm.mockCall(address(cultureIndex.erc721VotingToken()), abi.encodeWithSelector(ERC721Checkpointable.getCurrentVotes.selector, voter), abi.encode(erc721Weight));
+
+        uint256 expectedWeight = erc20Weight + (erc721Weight * cultureIndex.erc721VotingTokenWeight());
+        uint256 actualWeight = cultureIndex.getCurrentVotes(voter);
+        assertEq(expectedWeight, actualWeight);
+    }
+
+    /// @dev Tests voting with ERC721 token
+    function testVoteWithERC721Token() public {
+        uint pieceId = createDefaultArtPiece();
+
+        address voter = address(0x1);
+        uint256 erc721Weight = 3; // Number of ERC721 tokens held by the voter
+
+        // Mock ERC721 token balance
+        vm.mockCall(address(cultureIndex.erc721VotingToken()), abi.encodeWithSelector(ERC721Checkpointable.getPriorVotes.selector, voter, block.number), abi.encode(erc721Weight));
+
+        // Cast vote
+        vm.startPrank(voter);
+        vm.roll(block.number + 1);
+        cultureIndex.vote(pieceId);
+        vm.stopPrank();
+
+        // Check vote is recorded with correct weight
+        uint256 expectedWeight = erc721Weight * cultureIndex.erc721VotingTokenWeight();
+        ICultureIndex.Vote memory vote = cultureIndex.getVote(pieceId, voter);
+        assertEq(vote.weight, expectedWeight);
+    }
+
 
     /**
      * @dev Test case to validate voting functionality
