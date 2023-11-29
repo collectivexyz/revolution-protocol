@@ -73,9 +73,9 @@ contract VerbsAuctionHouseTest is Test {
             "VRBS"
         );
 
-        _cultureIndex.setERC721VotingToken(address(verbs));
+        _cultureIndex.setERC721VotingToken(verbs);
 
-        cultureIndex.setERC721VotingToken(address(verbs));
+        cultureIndex.setERC721VotingToken(verbs);
 
         cultureIndex.transferOwnership(address(verbs));
 

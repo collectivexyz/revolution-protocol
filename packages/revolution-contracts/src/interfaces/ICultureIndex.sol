@@ -3,6 +3,7 @@
 pragma solidity ^0.8.22;
 
 import { IERC20 } from "@openzeppelin/contracts/token/ERC20/IERC20.sol";
+import { ERC721Checkpointable } from "../base/ERC721Checkpointable.sol";
 
 /**
  * @title ICultureIndexEvents
@@ -10,7 +11,7 @@ import { IERC20 } from "@openzeppelin/contracts/token/ERC20/IERC20.sol";
  */
 interface ICultureIndexEvents {
 
-    event ERC721VotingTokenUpdated(address minter);
+    event ERC721VotingTokenUpdated(ERC721Checkpointable ERC721VotingToken);
 
     event ERC721VotingTokenLocked();
 
@@ -181,7 +182,7 @@ interface ICultureIndex is ICultureIndexEvents {
      */
     function dropTopVotedPiece() external returns (ArtPiece memory);
 
-    function setERC721VotingToken(address _ERC721VotingToken) external;
+    function setERC721VotingToken(ERC721Checkpointable _ERC721VotingToken) external;
 
     function lockERC721VotingToken() external;
 

@@ -57,8 +57,8 @@ contract CultureIndex is ICultureIndex, Ownable, ReentrancyGuard {
      * @notice Set the ERC721 voting token.
      * @dev Only callable by the owner when not locked.
      */
-    function setERC721VotingToken(address _ERC721VotingToken) external override onlyOwner nonReentrant whenERC721VotingTokenNotLocked {
-        erc721VotingToken = ERC721Checkpointable(_ERC721VotingToken);
+    function setERC721VotingToken(ERC721Checkpointable _ERC721VotingToken) external override onlyOwner nonReentrant whenERC721VotingTokenNotLocked {
+        erc721VotingToken = _ERC721VotingToken;
 
         emit ERC721VotingTokenUpdated(_ERC721VotingToken);
     }
