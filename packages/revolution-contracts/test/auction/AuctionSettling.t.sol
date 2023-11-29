@@ -98,6 +98,8 @@ contract VerbsAuctionHouseSettleTest is VerbsAuctionHouseTest {
         uint256 creatorRate = auctionHouse.creatorRateBps();
         assertEq(IERC20(address(mockWETH)).balanceOf(recipient), amount * (10_000 - creatorRate) / 10_000);
         assertEq(recipient.balance, 0); // Ether balance should still be 0
+        //make sure voting weight on culture index is 721 vote weight for winning bidder
+        assertEq(cultureIndex.getCurrentVotes(address(this)), cultureIndex.erc721VotingTokenWeight(), "Highest bidder should have 10 votes");
     }
 
     function testTransferToEOA() public {
