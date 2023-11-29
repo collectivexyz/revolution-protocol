@@ -3,12 +3,18 @@
 pragma solidity ^0.8.22;
 
 import { IERC20 } from "@openzeppelin/contracts/token/ERC20/IERC20.sol";
+import { ERC721Checkpointable } from "../base/ERC721Checkpointable.sol";
 
 /**
  * @title ICultureIndexEvents
  * @dev This interface defines the events for the CultureIndex contract.
  */
 interface ICultureIndexEvents {
+
+    event ERC721VotingTokenUpdated(ERC721Checkpointable ERC721VotingToken);
+
+    event ERC721VotingTokenLocked();
+
     /**
      * @dev Emitted when a new piece is created.
      * @param pieceId Unique identifier for the newly created piece.
@@ -175,4 +181,12 @@ interface ICultureIndex is ICultureIndexEvents {
      * @return The ArtPiece struct of the top voted piece that was just dropped.
      */
     function dropTopVotedPiece() external returns (ArtPiece memory);
+
+    function setERC721VotingToken(ERC721Checkpointable _ERC721VotingToken) external;
+
+    function lockERC721VotingToken() external;
+
+    function getCurrentVotes(address account) external view returns (uint256);
+
+    function getPriorVotes(address account, uint256 blockNumber) external view returns (uint256);
 }

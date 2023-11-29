@@ -244,8 +244,10 @@ contract TokenAccessControlTest is VerbsTokenTestSuite {
         setUp();
 
         // Test setting the CultureIndex
-        CultureIndex newCultureIndex = new CultureIndex(address(govToken), address(this));
+        CultureIndex newCultureIndex = new CultureIndex(address(govToken), address(0), address(this), 10);
         verbsToken.setCultureIndex(ICultureIndex(address(newCultureIndex)));
+
+        newCultureIndex.setERC721VotingToken(verbsToken);
 
         // Lock the CultureIndex and attempt to change it, expecting a revert
         verbsToken.lockCultureIndex();

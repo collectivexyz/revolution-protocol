@@ -7,12 +7,213 @@ import { MockERC20 } from "../mock/MockERC20.sol";
 import { ICultureIndex } from "../../src/interfaces/ICultureIndex.sol";
 import { NontransferableERC20Votes } from "../../src/NontransferableERC20Votes.sol";
 import { CultureIndexTestSuite } from "./CultureIndex.t.sol";
+import { Votes } from "../../src/base/Votes.sol";
+import { ERC721Checkpointable } from "../../src/base/ERC721Checkpointable.sol";
 
 /**
  * @title CultureIndexTest
  * @dev Test contract for CultureIndex
  */
 contract CultureIndexVotingBasicTest is CultureIndexTestSuite {
+    /// @dev Tests the vote weight calculation with ERC721 token
+    function testCalculateVoteWeight() public {
+        setUp();
+        address voter = address(0x1);
+        uint256 erc20Weight = 100;
+        uint256 erc721Weight = 2; // Number of ERC721 tokens held by the voter
+
+        // Mock the ERC20 and ERC721 token balances
+        vm.mockCall(address(cultureIndex.erc20VotingToken()), abi.encodeWithSelector(Votes.getVotes.selector, voter), abi.encode(erc20Weight));
+        vm.mockCall(address(cultureIndex.erc721VotingToken()), abi.encodeWithSelector(ERC721Checkpointable.getCurrentVotes.selector, voter), abi.encode(erc721Weight));
+
+        uint256 expectedWeight = erc20Weight + (erc721Weight * cultureIndex.erc721VotingTokenWeight());
+        uint256 actualWeight = cultureIndex.getCurrentVotes(voter);
+        assertEq(expectedWeight, actualWeight);
+    }
+
+    /// @dev Tests voting with ERC721 token
+    function testVoteWithERC721Token() public {
+        uint pieceId = createDefaultArtPiece();
+
+        address voter = address(0x1);
+        uint256 erc721Weight = 3; // Number of ERC721 tokens held by the voter
+
+        // Mock ERC721 token balance
+        vm.mockCall(address(cultureIndex.erc721VotingToken()), abi.encodeWithSelector(ERC721Checkpointable.getPriorVotes.selector, voter, block.number), abi.encode(erc721Weight));
+
+        // Cast vote
+        vm.startPrank(voter);
+        vm.roll(block.number + 1);
+        cultureIndex.vote(pieceId);
+        vm.stopPrank();
+
+        // Check vote is recorded with correct weight
+        uint256 expectedWeight = erc721Weight * cultureIndex.erc721VotingTokenWeight();
+        ICultureIndex.Vote memory vote = cultureIndex.getVote(pieceId, voter);
+        assertEq(vote.weight, expectedWeight);
+    }
+
+    /// @dev Tests impact of vote weights on top-voted piece ranking
+    function testVoteWeightImpactOnTopVotedPiece() public {
+        uint256 pieceId1 = createDefaultArtPiece();
+        address voter1 = address(0x1);
+        address voter2 = address(0x2);
+
+        // Voter1 votes for piece1
+        govToken.mint(voter1, 100);
+        vm.roll(block.number + 1); // Roll forward to ensure votes are snapshotted
+
+        vm.startPrank(voter1);
+        cultureIndex.vote(pieceId1);
+        vm.stopPrank();
+
+        uint256 pieceId2 = createDefaultArtPiece();
+
+        // Voter2 votes for piece2 with higher weight
+        govToken.mint(voter2, 200);
+        vm.roll(block.number + 2); // Roll forward to ensure votes are snapshotted
+
+        vm.startPrank(voter2);
+        cultureIndex.vote(pieceId2);
+        vm.stopPrank();
+
+        // Check top-voted piece
+        ICultureIndex.ArtPiece memory topVotedPiece = cultureIndex.getTopVotedPiece();
+        assertEq(topVotedPiece.pieceId, pieceId2, "Piece with higher total vote weight should be top voted");
+    }
+
+    function testNoDoubleVotingAfterERC721Transfer() public {
+        //make culture index owned by verbs
+        cultureIndex.transferOwnership(address(verbs));
+        
+        // create 2 art pieces
+        createDefaultArtPiece();
+        uint256 artPieceId = createDefaultArtPiece();
+        address voter = address(0x1);
+        address recipient = address(0x2);
+        uint256 tokenId = 0; 
+
+        // Mint an ERC721 token to the voter
+        verbs.mint();
+        verbs.transferFrom(address(this), voter, tokenId);
+        assertEq(verbs.ownerOf(tokenId), voter);
+
+        // Voter casts a vote for the art piece
+        vm.startPrank(voter);
+        vm.roll(block.number + 1);
+        cultureIndex.vote(artPieceId);
+        vm.stopPrank();
+
+        // Transfer the ERC721 token from voter to recipient
+        vm.startPrank(voter);
+        verbs.transferFrom(voter, recipient, tokenId);
+        vm.stopPrank();
+        assertEq(verbs.ownerOf(tokenId), recipient);
+
+        // Attempt to have the original voter cast another vote
+        vm.startPrank(voter);
+        vm.expectRevert("Already voted");
+        cultureIndex.vote(artPieceId);
+        vm.stopPrank();
+
+        // Attempt to have recipient cast a vote
+        vm.startPrank(recipient);
+        vm.expectRevert("Weight must be greater than zero");
+        cultureIndex.vote(artPieceId);
+        vm.stopPrank();
+    }
+
+
+    /// @dev Tests reset of vote weight after transferring all tokens
+    function testVoteWeightResetAfterTokenTransfer() public {
+        uint256 pieceId = createDefaultArtPiece();
+        address voter = address(0x1);
+        uint256 voteWeight = 100;
+
+        // Set initial token balance and cast vote
+        govToken.mint(voter, voteWeight);
+        vm.startPrank(voter);
+        vm.roll(block.number + 1);
+
+        cultureIndex.vote(pieceId);
+        vm.stopPrank();
+
+        govToken.mint(voter, voteWeight);
+
+        cultureIndex.transferOwnership(address(verbs));
+
+        verbs.mint(); // Mint an ERC721 token to the owner
+
+        // ensure that the ERC721 token is minted
+        assertEq(verbs.balanceOf(address(this)), 1, "ERC721 token should be minted");
+        // ensure cultureindex currentvotes is correct
+        assertEq(cultureIndex.getCurrentVotes(address(this)), cultureIndex.erc721VotingTokenWeight(), "Vote weight should be correct");
+
+        // burn the 721
+        verbs.burn(0);
+
+        // ensure that the ERC721 token is burned
+        assertEq(verbs.balanceOf(address(this)), 0, "ERC721 token should be burned");
+
+        // ensure cultureindex currentvotes is correct
+        assertEq(cultureIndex.getCurrentVotes(address(this)), 0, "Vote weight should be correct");
+
+        // ensure that the erc20 token balance is reflected for voter
+        uint256 newWeight = cultureIndex.getCurrentVotes(voter);
+        assertEq(newWeight, voteWeight * 2, "Vote weight should reset to zero after transferring all tokens");
+    }
+
+    /// @dev Tests that voting for an invalid piece ID fails
+    function testRejectVoteForInvalidPieceId() public {
+        uint256 invalidPieceId = 99999; // Assume this is an invalid ID
+        address voter = address(0x1);
+        govToken.mint(voter, 100);
+
+        vm.startPrank(voter);
+        vm.roll(block.number + 1);
+        vm.expectRevert("Invalid piece ID");
+        cultureIndex.vote(invalidPieceId);
+        vm.stopPrank();
+    }
+
+    /// @dev Tests vote weight calculation with changing token balances
+    function testVoteWeightWithChangingTokenBalances() public {
+        cultureIndex.transferOwnership(address(verbs));
+
+        uint256 pieceId = createDefaultArtPiece();
+        createDefaultArtPiece();
+        address voter = address(this);
+        uint256 initialErc20Weight = 50;
+
+        // Set initial token balances
+        govToken.mint(voter, initialErc20Weight);
+        verbs.mint();
+
+        uint256 initialWeight = cultureIndex.getCurrentVotes(voter);
+        uint256 expectedInitialWeight = initialErc20Weight + (1 * cultureIndex.erc721VotingTokenWeight());
+        assertEq(initialWeight, expectedInitialWeight);
+
+        // Change token balances
+        uint256 updateErc20Weight = 100;  // Increased ERC20 weight
+
+        govToken.mint(voter, updateErc20Weight);
+        verbs.mint();
+
+        uint256 updatedWeight = cultureIndex.getCurrentVotes(voter);
+        uint256 expectedUpdatedWeight = updateErc20Weight + initialErc20Weight + (2 * cultureIndex.erc721VotingTokenWeight());
+        assertEq(updatedWeight, expectedUpdatedWeight);
+
+        //burn the first 2 verbs
+        verbs.burn(0);
+        verbs.burn(1);
+
+        // ensure that the ERC721 token is burned
+        assertEq(verbs.balanceOf(address(this)), 0, "ERC721 token should be burned");
+
+        // ensure cultureindex currentvotes is correct
+        assertEq(cultureIndex.getCurrentVotes(address(this)), updateErc20Weight + initialErc20Weight, "Vote weight should be correct");
+    }
+
 
     /**
      * @dev Test case to validate voting functionality

@@ -6,17 +6,30 @@ import { MaxHeap } from "./MaxHeap.sol";
 import { ICultureIndex } from "./interfaces/ICultureIndex.sol";
 import { Ownable } from "@openzeppelin/contracts/access/Ownable.sol";
 import { ReentrancyGuard } from "@openzeppelin/contracts/utils/ReentrancyGuard.sol";
+import { ERC721Checkpointable } from "./base/ERC721Checkpointable.sol";
 
 contract CultureIndex is ICultureIndex, Ownable, ReentrancyGuard {
     // The MaxHeap data structure used to keep track of the top-voted piece
     MaxHeap public maxHeap;
 
     // The ERC20 token used for voting
-    ERC20Votes public votingToken20;
+    ERC20Votes public erc20VotingToken;
+
+    // The ERC721 token used for voting
+    ERC721Checkpointable public erc721VotingToken;
+
+    // Whether the 721 voting token can be updated
+    bool public isERC721VotingTokenLocked;
+
+    // The weight of the 721 voting token
+    uint256 public erc721VotingTokenWeight;
 
     // Initialize ERC20 Token in the constructor
-    constructor(address _erc20VotingToken, address _initialOwner) Ownable(_initialOwner) {
-        votingToken20 = ERC20Votes(_erc20VotingToken);
+    constructor(address _erc20VotingToken, address _erc721VotingToken, address _initialOwner, uint256 _erc721VotingTokenWeight) Ownable(_initialOwner) {
+        erc20VotingToken = ERC20Votes(_erc20VotingToken);
+        erc721VotingToken = ERC721Checkpointable(_erc721VotingToken);
+        erc721VotingTokenWeight = _erc721VotingTokenWeight;
+
         maxHeap = new MaxHeap(address(this));
     }
 
@@ -31,6 +44,34 @@ contract CultureIndex is ICultureIndex, Ownable, ReentrancyGuard {
 
     // The total voting weight for a piece
     mapping(uint256 => uint256) public totalVoteWeights;
+
+    /**
+     * @notice Require that the 721VotingToken has not been locked.
+     */
+    modifier whenERC721VotingTokenNotLocked() {
+        require(!isERC721VotingTokenLocked, "ERC721VotingToken is locked");
+        _;
+    }
+
+    /**
+     * @notice Set the ERC721 voting token.
+     * @dev Only callable by the owner when not locked.
+     */
+    function setERC721VotingToken(ERC721Checkpointable _ERC721VotingToken) external override onlyOwner nonReentrant whenERC721VotingTokenNotLocked {
+        erc721VotingToken = _ERC721VotingToken;
+
+        emit ERC721VotingTokenUpdated(_ERC721VotingToken);
+    }
+
+    /**
+     * @notice Lock the ERC721 voting token.
+     * @dev This cannot be reversed and is only callable by the owner when not locked.
+     */
+    function lockERC721VotingToken() external override onlyOwner whenERC721VotingTokenNotLocked {
+        isERC721VotingTokenLocked = true;
+
+        emit ERC721VotingTokenLocked();
+    }
 
     /**
      *  Validates the media type and associated data.
@@ -130,17 +171,40 @@ contract CultureIndex is ICultureIndex, Ownable, ReentrancyGuard {
     }
 
     /**
-     * @notice Returns a voters weight for voting.
+    * @notice Returns the voting power of a voter at the current block.
+    * @param account The address of the voter.
+    * @return The voting power of the voter.
+    */
+    function getCurrentVotes(address account) external view override returns (uint256) {
+        return _getCurrentVotes(account);
+    }
+
+    /**
+    * @notice Returns the voting power of a voter at the current block.
+    * @param account The address of the voter.
+    * @return The voting power of the voter.
+    */
+    function getPriorVotes(address account, uint256 blockNumber) external view override returns (uint256) {
+        return _getPriorVotes(account, blockNumber);
+    }
+
+
+    /**
+     * @notice Calculates the vote weight of a voter.
+     * @param erc20VoteWeight The ERC20 vote weight of the voter.
+     * @param erc721VoteWeight The ERC721 vote weight of the voter.
      * @return The vote weight of the voter.
      */
-    function getVoterWeight(address voter, uint256 timepoint) public view returns (uint256) {
-        require(votingToken20 != ERC20Votes(address(0)), "Voting token must be set");
+    function _calculateVoteWeight(uint256 erc20VoteWeight, uint256 erc721VoteWeight) internal view returns (uint256) {
+        return erc20VoteWeight + (erc721VoteWeight * erc721VotingTokenWeight);
+    }
 
-        try votingToken20.getPastVotes(voter, timepoint) returns (uint256 balance) {
-            return balance;
-        } catch {
-            revert("Failed to get balance, voting not possible");
-        }
+    function _getCurrentVotes(address account) internal view returns (uint256) {
+        return _calculateVoteWeight(erc20VotingToken.getVotes(account), erc721VotingToken.getCurrentVotes(account));
+    }
+
+    function _getPriorVotes(address account, uint256 blockNumber) internal view returns (uint256) {
+        return _calculateVoteWeight(erc20VotingToken.getPastVotes(account, blockNumber), erc721VotingToken.getPriorVotes(account, blockNumber));
     }
 
     /**
@@ -173,7 +237,7 @@ contract CultureIndex is ICultureIndex, Ownable, ReentrancyGuard {
      */
     function vote(uint256 pieceId) public nonReentrant {
         require(pieceId < _currentPieceId, "Invalid piece ID");
-        uint256 weight = getVoterWeight(msg.sender, pieces[pieceId].creationBlock);
+        uint256 weight = _getPriorVotes(msg.sender, pieces[pieceId].creationBlock);
 
         _vote(pieceId, msg.sender, weight);
     }
@@ -187,7 +251,7 @@ contract CultureIndex is ICultureIndex, Ownable, ReentrancyGuard {
     function batchVote(uint256[] memory pieceIds) public nonReentrant {
         for (uint256 i = 0; i < pieceIds.length; ++i) {
             require(pieceIds[i] < _currentPieceId, "Invalid piece ID");
-            _vote(pieceIds[i], msg.sender, getVoterWeight(msg.sender, pieces[pieceIds[i]].creationBlock));
+            _vote(pieceIds[i], msg.sender, _getPriorVotes(msg.sender, pieces[pieceIds[i]].creationBlock));
         }
     }
 

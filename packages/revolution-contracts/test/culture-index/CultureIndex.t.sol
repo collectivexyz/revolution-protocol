@@ -6,6 +6,9 @@ import { CultureIndex } from "../../src/CultureIndex.sol";
 import { MockERC20 } from "../mock/MockERC20.sol";
 import { ICultureIndex } from "../../src/interfaces/ICultureIndex.sol";
 import { NontransferableERC20Votes } from "../../src/NontransferableERC20Votes.sol";
+import { VerbsToken } from "../../src/VerbsToken.sol";
+import { IVerbsDescriptorMinimal } from "../../src/interfaces/IVerbsDescriptorMinimal.sol";
+import { IProxyRegistry } from "../../src/external/opensea/IProxyRegistry.sol";
 
 /**
  * @title CultureIndexTest
@@ -16,15 +19,30 @@ contract CultureIndexTestSuite is Test {
     NontransferableERC20Votes public govToken;
     CultureIndexVotingTest public voter1Test;
     CultureIndexVotingTest public voter2Test;
+    VerbsToken public verbs;
 
     /**
      * @dev Setup function for each test case
      */
     function setUp() public {
         govToken = new NontransferableERC20Votes(address(this), "Revolution Governance", "GOV", 4);
+        ProxyRegistry _proxyRegistry = new ProxyRegistry();
+
+        // Initialize VerbsToken with additional parameters
+        verbs = new VerbsToken(
+            address(this), // Address of the minter (and initial owner)
+            address(this), // Address of the owner
+            IVerbsDescriptorMinimal(address(0)),
+            _proxyRegistry,
+            ICultureIndex(address(0)),
+            "Vrbs",
+            "VRBS"
+        );
 
         // Initialize your CultureIndex contract
-        cultureIndex = new CultureIndex(address(govToken), address(this));
+        cultureIndex = new CultureIndex(address(govToken), address(verbs), address(this), 10);
+
+        verbs.setCultureIndex(cultureIndex);
 
         // Create new test instances acting as different voters
         voter1Test = new CultureIndexVotingTest(address(cultureIndex), address(govToken));
@@ -156,4 +174,8 @@ contract CultureIndexVotingTest is Test {
     function voteForPiece(uint256 pieceId) public {
         cultureIndex.vote(pieceId);
     }
+}
+
+contract ProxyRegistry is IProxyRegistry {
+    mapping(address => address) public proxies;
 }
