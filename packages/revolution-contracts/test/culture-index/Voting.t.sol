@@ -121,6 +121,58 @@ contract CultureIndexVotingBasicTest is CultureIndexTestSuite {
         assertEq(newWeight, voteWeight * 2, "Vote weight should reset to zero after transferring all tokens");
     }
 
+    /// @dev Tests that voting for an invalid piece ID fails
+    function testRejectVoteForInvalidPieceId() public {
+        uint256 invalidPieceId = 99999; // Assume this is an invalid ID
+        address voter = address(0x1);
+        govToken.mint(voter, 100);
+
+        vm.startPrank(voter);
+        vm.roll(block.number + 1);
+        vm.expectRevert("Invalid piece ID");
+        cultureIndex.vote(invalidPieceId);
+        vm.stopPrank();
+    }
+
+    /// @dev Tests vote weight calculation with changing token balances
+    function testVoteWeightWithChangingTokenBalances() public {
+        cultureIndex.transferOwnership(address(verbs));
+
+        uint256 pieceId = createDefaultArtPiece();
+        createDefaultArtPiece();
+        address voter = address(this);
+        uint256 initialErc20Weight = 50;
+
+        // Set initial token balances
+        govToken.mint(voter, initialErc20Weight);
+        verbs.mint();
+
+        uint256 initialWeight = cultureIndex.getCurrentVotes(voter);
+        uint256 expectedInitialWeight = initialErc20Weight + (1 * cultureIndex.erc721VotingTokenWeight());
+        assertEq(initialWeight, expectedInitialWeight);
+
+        // Change token balances
+        uint256 updateErc20Weight = 100;  // Increased ERC20 weight
+
+        govToken.mint(voter, updateErc20Weight);
+        verbs.mint();
+
+        uint256 updatedWeight = cultureIndex.getCurrentVotes(voter);
+        uint256 expectedUpdatedWeight = updateErc20Weight + initialErc20Weight + (2 * cultureIndex.erc721VotingTokenWeight());
+        assertEq(updatedWeight, expectedUpdatedWeight);
+
+        //burn the first 2 verbs
+        verbs.burn(0);
+        verbs.burn(1);
+
+        // ensure that the ERC721 token is burned
+        assertEq(verbs.balanceOf(address(this)), 0, "ERC721 token should be burned");
+
+        // ensure cultureindex currentvotes is correct
+        assertEq(cultureIndex.getCurrentVotes(address(this)), updateErc20Weight + initialErc20Weight, "Vote weight should be correct");
+    }
+
+
     /**
      * @dev Test case to validate voting functionality
      *
