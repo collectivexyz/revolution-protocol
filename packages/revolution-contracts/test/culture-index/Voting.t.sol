@@ -71,7 +71,7 @@ contract CultureIndexVotingBasicTest is CultureIndexTestSuite {
 
         // Voter2 votes for piece2 with higher weight
         govToken.mint(voter2, 200);
-        vm.roll(block.number + 1); // Roll forward to ensure votes are snapshotted
+        vm.roll(block.number + 2); // Roll forward to ensure votes are snapshotted
 
         vm.startPrank(voter2);
         cultureIndex.vote(pieceId2);
