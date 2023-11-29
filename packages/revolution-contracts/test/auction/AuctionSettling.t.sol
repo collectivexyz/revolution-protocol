@@ -263,8 +263,8 @@ contract VerbsAuctionHouseSettleTest is VerbsAuctionHouseTest {
 
         auctionHouse.unpause();
 
-        vm.deal(address(1), bidAmount);
-        vm.startPrank(address(1));
+        vm.deal(address(21_000), bidAmount);
+        vm.startPrank(address(21_000));
         auctionHouse.createBid{ value: bidAmount }(verbId);
         vm.stopPrank();
 
@@ -306,7 +306,9 @@ contract VerbsAuctionHouseSettleTest is VerbsAuctionHouseTest {
         10);
 
         // Checking ownership of the verb
-        assertEq(verbs.ownerOf(verbId), address(1), "Verb should be transferred to the highest bidder");
+        assertEq(verbs.ownerOf(verbId), address(21_000), "Verb should be transferred to the highest bidder");
+        // Checking voting weight on culture index is 721 vote weight for winning bidder
+        assertEq(cultureIndex.getCurrentVotes(address(21_000)), cultureIndex.erc721VotingTokenWeight(), "Highest bidder should have 10 votes");
 
         assertEq(
             governanceToken.balanceOf(address(0x1)) - governanceTokenBalanceBeforeCreator,
