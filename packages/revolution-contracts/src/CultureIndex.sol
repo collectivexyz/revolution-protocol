@@ -176,7 +176,7 @@ contract CultureIndex is ICultureIndex, Ownable, ReentrancyGuard {
     * @return The voting power of the voter.
     */
     function getCurrentVotes(address account) external view override returns (uint256) {
-        return _getVotingWeight(account, block.number);
+        return _getCurrentVotes(account);
     }
 
     /**
@@ -185,32 +185,26 @@ contract CultureIndex is ICultureIndex, Ownable, ReentrancyGuard {
     * @return The voting power of the voter.
     */
     function getPriorVotes(address account, uint256 blockNumber) external view override returns (uint256) {
-        return _getVotingWeight(account, blockNumber);
+        return _getPriorVotes(account, blockNumber);
     }
 
+
     /**
-     * @notice Returns a voters weight for voting.
+     * @notice Calculates the vote weight of a voter.
+     * @param erc20VoteWeight The ERC20 vote weight of the voter.
+     * @param erc721VoteWeight The ERC721 vote weight of the voter.
      * @return The vote weight of the voter.
      */
-    function _getVotingWeight(address voter, uint256 blockNumber) internal view returns (uint256) {
-        require(erc20VotingToken != ERC20Votes(address(0)), "ERC20Voting token must be set");
-        require(erc721VotingToken != ERC721Checkpointable(address(0)), "ERC721Voting token must be set");
+    function _calculateVoteWeight(uint256 erc20VoteWeight, uint256 erc721VoteWeight) internal view returns (uint256) {
+        return erc20VoteWeight + (erc721VoteWeight * erc721VotingTokenWeight);
+    }
 
-        uint256 votingWeight = 0;
+    function _getCurrentVotes(address account) internal view returns (uint256) {
+        return _calculateVoteWeight(erc20VotingToken.getVotes(account), erc721VotingToken.getCurrentVotes(account));
+    }
 
-        try erc721VotingToken.getPriorVotes(voter, blockNumber) returns (uint96 balance) {
-            votingWeight += balance;
-        } catch {
-            revert("Failed to get balance, voting not possible");
-        }
-
-        try erc20VotingToken.getPastVotes(voter, blockNumber) returns (uint256 balance) {
-            votingWeight += balance;
-        } catch {
-            revert("Failed to get balance, voting not possible");
-        }
-
-        return votingWeight;
+    function _getPriorVotes(address account, uint256 blockNumber) internal view returns (uint256) {
+        return _calculateVoteWeight(erc20VotingToken.getPastVotes(account, blockNumber), erc721VotingToken.getPriorVotes(account, blockNumber));
     }
 
     /**
@@ -243,7 +237,7 @@ contract CultureIndex is ICultureIndex, Ownable, ReentrancyGuard {
      */
     function vote(uint256 pieceId) public nonReentrant {
         require(pieceId < _currentPieceId, "Invalid piece ID");
-        uint256 weight = _getVotingWeight(msg.sender, pieces[pieceId].creationBlock);
+        uint256 weight = _getPriorVotes(msg.sender, pieces[pieceId].creationBlock);
 
         _vote(pieceId, msg.sender, weight);
     }
@@ -257,7 +251,7 @@ contract CultureIndex is ICultureIndex, Ownable, ReentrancyGuard {
     function batchVote(uint256[] memory pieceIds) public nonReentrant {
         for (uint256 i = 0; i < pieceIds.length; ++i) {
             require(pieceIds[i] < _currentPieceId, "Invalid piece ID");
-            _vote(pieceIds[i], msg.sender, _getVotingWeight(msg.sender, pieces[pieceIds[i]].creationBlock));
+            _vote(pieceIds[i], msg.sender, _getPriorVotes(msg.sender, pieces[pieceIds[i]].creationBlock));
         }
     }
 

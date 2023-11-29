@@ -27,10 +27,13 @@ contract VerbsAuctionHouseSettleTest is VerbsAuctionHouseTest {
 
         createDefaultArtPiece();
         auctionHouse.settleCurrentAndCreateNewAuction();
+        vm.roll(block.number + 1);
 
         uint256 balanceAfter = address(this).balance;
 
         assertEq(verbs.ownerOf(0), address(1), "Verb should be transferred to the highest bidder");
+        // cultureIndex currentVotes of highest bidder should be 10
+        assertEq(cultureIndex.getCurrentVotes(address(1)), cultureIndex.erc721VotingTokenWeight(), "Highest bidder should have 10 votes");
 
         uint256 creatorRate = auctionHouse.creatorRateBps();
         uint256 entropyRate = auctionHouse.entropyRateBps();
