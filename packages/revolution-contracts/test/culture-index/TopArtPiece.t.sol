@@ -184,6 +184,8 @@ contract CultureIndexArtPieceTest is CultureIndexTestSuite {
 
         //vote on all pieces
         for (uint i = 0; i < 5_000; i++) {
+            vm.roll(block.number + 1); // roll block number to enable voting snapshot
+
             govToken.mint(address(voter1Test), i + 1);
 
             if (i == 4_999) {
