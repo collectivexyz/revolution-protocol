@@ -177,14 +177,15 @@ contract CultureIndexArtPieceTest is CultureIndexTestSuite {
         //log gas used for creating the first piece
         uint256 startGas = gasleft();
         voter1Test.createDefaultArtPiece();
+        vm.roll(block.number + 1); // roll block number to enable voting snapshot
+
         uint256 gasUsed = startGas - gasleft();
         emit log_uint(gasUsed);
 
         // Create a set number of pieces and log the gas used for the last creation.
 
         //vote on all pieces
-        for (uint i = 0; i < 5_000; i++) {
-            vm.roll(block.number + 1); // roll block number to enable voting snapshot
+        for (uint i = 1; i < 5_000; i++) {
 
             govToken.mint(address(voter1Test), i + 1);
 
