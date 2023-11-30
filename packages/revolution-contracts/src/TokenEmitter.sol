@@ -8,20 +8,31 @@ import { NontransferableERC20Votes } from "./NontransferableERC20Votes.sol";
 import { ITokenEmitter } from "./interfaces/ITokenEmitter.sol";
 import { ReentrancyGuard } from "@openzeppelin/contracts/utils/ReentrancyGuard.sol";
 import { TokenEmitterRewards } from "@collectivexyz/protocol-rewards/src/abstract/TokenEmitter/TokenEmitterRewards.sol";
+import { Ownable } from "@openzeppelin/contracts/access/Ownable.sol";
 
-contract TokenEmitter is VRGDAC, ITokenEmitter, ReentrancyGuard, TokenEmitterRewards {
-    // Vars
+contract TokenEmitter is VRGDAC, ITokenEmitter, ReentrancyGuard, TokenEmitterRewards, Ownable {
+    // treasury address to pay funds to
     address private treasury;
 
+    // The token that is being emitted.
     NontransferableERC20Votes public token;
 
     // solhint-disable-next-line not-rely-on-time
     uint public immutable startTime = block.timestamp;
 
+    // The amount of tokens that have been emitted in wad units.
     int256 emittedTokenWad;
+
+    // The split of the purchase that is reserved for the creator of the Verb in basis points
+    uint256 public creatorRateBps;
+
+    // The split of (purchase proceeds * creatorRate) that is sent to the creator as ether in basis points
+    uint256 public entropyRateBps;
+
 
     // approved contracts, owner, and a token contract address
     constructor(
+        address _initialOwner,
         NontransferableERC20Votes _token,
         address _protocolRewards,
         address _protocolFeeRecipient,
@@ -29,7 +40,7 @@ contract TokenEmitter is VRGDAC, ITokenEmitter, ReentrancyGuard, TokenEmitterRew
         int _targetPrice, // The target price for a token if sold on pace, scaled by 1e18.
         int _priceDecayPercent, // The percent price decays per unit of time with no sales, scaled by 1e18.
         int _tokensPerTimeUnit // The number of tokens to target selling in 1 full unit of time, scaled by 1e18.
-    ) TokenEmitterRewards(_protocolRewards, _protocolFeeRecipient) VRGDAC(_targetPrice, _priceDecayPercent, _tokensPerTimeUnit) {
+    ) TokenEmitterRewards(_protocolRewards, _protocolFeeRecipient) VRGDAC(_targetPrice, _priceDecayPercent, _tokensPerTimeUnit) Ownable(_initialOwner) {
         treasury = _treasury;
 
         token = _token;
@@ -98,5 +109,31 @@ contract TokenEmitter is VRGDAC, ITokenEmitter, ReentrancyGuard, TokenEmitterRew
 
     function getTokenQuoteForPayment(uint paymentWei) public view returns (int gainedX) {
         return wadDiv(getTokenQuoteForPaymentWad(paymentWei), 1e36);
+    }
+
+    /**
+     * @notice Set the split of (purchase * creatorRate) that is sent to the creator as ether in basis points.
+     * @dev Only callable by the owner.
+     * @param _entropyRateBps New entropy rate in basis points.
+     */
+    function setEntropyRateBps(uint256 _entropyRateBps) external onlyOwner {
+        require(_entropyRateBps <= 10_000, "Entropy rate must be less than or equal to 10_000");
+        require(_entropyRateBps >= 0, "Entropy rate must be greater than or equal to 0");
+
+        entropyRateBps = _entropyRateBps;
+        emit EntropyRateBpsUpdated(_entropyRateBps);
+    }
+
+    /**
+     * @notice Set the split of the payment that is reserved for creators in basis points.
+     * @dev Only callable by the owner.
+     * @param _creatorRateBps New creator rate in basis points.
+     */
+    function setCreatorRateBps(uint256 _creatorRateBps) external onlyOwner {
+        require(_creatorRateBps <= 10_000, "Creator rate must be less than or equal to 10_000");
+        require(_creatorRateBps >= 0, "Creator rate must be greater than or equal to 0");
+        creatorRateBps = _creatorRateBps;
+
+        emit CreatorRateBpsUpdated(_creatorRateBps);
     }
 }
