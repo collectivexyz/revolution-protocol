@@ -12,6 +12,10 @@ interface ITokenEmitter {
 
     function setEntropyRateBps(uint256 _entropyRateBps) external;
 
+    function setCreatorsAddress(address creators) external;
+
+    event CreatorsUpdated(address creators);
+
     event CreatorRateBpsUpdated(uint256 rateBps);
 
     event EntropyRateBpsUpdated(uint256 rateBps);

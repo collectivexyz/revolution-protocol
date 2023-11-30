@@ -29,6 +29,11 @@ contract TokenEmitter is VRGDAC, ITokenEmitter, ReentrancyGuard, TokenEmitterRew
     // The split of (purchase proceeds * creatorRate) that is sent to the creator as ether in basis points
     uint256 public entropyRateBps;
 
+    // The account or contract to pay the creator reward to
+    address creatorsAddress;
+
+    // Whether the creators can be updated
+    bool public isCreatorsLocked;
 
     // approved contracts, owner, and a token contract address
     constructor(
@@ -137,5 +142,23 @@ contract TokenEmitter is VRGDAC, ITokenEmitter, ReentrancyGuard, TokenEmitterRew
         creatorRateBps = _creatorRateBps;
 
         emit CreatorRateBpsUpdated(_creatorRateBps);
+    }
+
+    /**
+     * @notice Require that the creators address has not been locked.
+     */
+    modifier whenCreatorsNotLocked() {
+        require(!isCreatorsLocked, "Creators address is locked");
+        _;
+    }
+
+    /**
+     * @notice Set the creators address to pay the creatorRate to. Can be a contract.
+     * @dev Only callable by the owner when not locked.
+     */
+    function setCreatorsAddress(address _creatorsAddress) external override onlyOwner whenCreatorsNotLocked nonReentrant {
+        creatorsAddress = _creatorsAddress;
+
+        emit CreatorsUpdated(_creatorsAddress);
     }
 }
