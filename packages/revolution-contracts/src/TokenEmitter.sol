@@ -96,7 +96,7 @@ contract TokenEmitter is VRGDAC, ITokenEmitter, ReentrancyGuard, TokenEmitterRew
             require(success, "Transfer failed.");
         }
 
-        if(totalTokensForCreators > 0) {
+        if(totalTokensForCreators > 0 && creatorsAddress != address(0)) {
             _mint(creatorsAddress, uint(totalTokensForCreators));
             emittedTokenWad += totalTokensForCreators;
         }
