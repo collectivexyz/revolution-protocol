@@ -14,7 +14,7 @@ interface ITokenEmitter {
 
     function setCreatorsAddress(address creators) external;
 
-    event CreatorsUpdated(address creators);
+    event CreatorsAddressUpdated(address creators);
 
     event CreatorRateBpsUpdated(uint256 rateBps);
 

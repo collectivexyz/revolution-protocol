@@ -32,9 +32,6 @@ contract TokenEmitter is VRGDAC, ITokenEmitter, ReentrancyGuard, TokenEmitterRew
     // The account or contract to pay the creator reward to
     address creatorsAddress;
 
-    // Whether the creators can be updated
-    bool public isCreatorsLocked;
-
     // approved contracts, owner, and a token contract address
     constructor(
         address _initialOwner,
@@ -145,20 +142,12 @@ contract TokenEmitter is VRGDAC, ITokenEmitter, ReentrancyGuard, TokenEmitterRew
     }
 
     /**
-     * @notice Require that the creators address has not been locked.
-     */
-    modifier whenCreatorsNotLocked() {
-        require(!isCreatorsLocked, "Creators address is locked");
-        _;
-    }
-
-    /**
      * @notice Set the creators address to pay the creatorRate to. Can be a contract.
      * @dev Only callable by the owner when not locked.
      */
-    function setCreatorsAddress(address _creatorsAddress) external override onlyOwner whenCreatorsNotLocked nonReentrant {
+    function setCreatorsAddress(address _creatorsAddress) external override onlyOwner nonReentrant {
         creatorsAddress = _creatorsAddress;
 
-        emit CreatorsUpdated(_creatorsAddress);
+        emit CreatorsAddressUpdated(_creatorsAddress);
     }
 }
