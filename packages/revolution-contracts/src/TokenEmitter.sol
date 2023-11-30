@@ -73,20 +73,41 @@ contract TokenEmitter is VRGDAC, ITokenEmitter, ReentrancyGuard, TokenEmitterRew
         // ensure the same number of addresses and _bps
         require(_addresses.length == _bps.length, "Parallel arrays required");
 
-        // Get value to send to treasury and handle mint fee
-        uint toPayTreasury = _handleRewardsAndGetValueToSend(msg.value, builder, purchaseReferral, deployer);
+        // Get value left after protocol rewards
+        uint msgValueRemaining = _handleRewardsAndGetValueToSend(msg.value, builder, purchaseReferral, deployer);
+        
+        //Share of purchase amount to send to treasury
+        uint256 toPayTreasury = (msgValueRemaining * (10_000 - creatorRateBps)) / 10_000;
 
-        int totalTokensWad = getTokenQuoteForPaymentWad(toPayTreasury);
+        //Share of purchase amount to pay creators with
+        uint256 toPayCreators = msgValueRemaining - toPayTreasury;
+        //Ether directly sent to creators
+        uint256 creatorDirectPayment = (toPayCreators * entropyRateBps) / 10_000;
+        //Ether reserved to buy creator governance
+        uint256 creatorGovernancePayment = toPayCreators - creatorDirectPayment;
+        //Tokens to emit to creators
+        int totalTokensForCreators = getTokenQuoteForPaymentWad(creatorGovernancePayment);
+
+        int totalTokensForBuyers = getTokenQuoteForPaymentWad(toPayTreasury);
         (bool success, ) = treasury.call{ value: toPayTreasury }(new bytes(0));
         require(success, "Transfer failed.");
+        emittedTokenWad += totalTokensForBuyers;
+
+        if (creatorDirectPayment > 0) {
+            (success, ) = creatorsAddress.call{ value: creatorDirectPayment }(new bytes(0));
+            require(success, "Transfer failed.");
+        }
+
+        if(totalTokensForCreators > 0) {
+            _mint(creatorsAddress, uint(totalTokensForCreators));
+        }
 
         uint sum = 0;
-        emittedTokenWad += totalTokensWad;
 
         // calculates how many tokens to give each address
         for (uint i = 0; i < _addresses.length; i++) {
             //todo seems dangerous with rouding, fix it up
-            int tokens = wadDiv(wadMul(totalTokensWad, int(_bps[i] * 1e18)), 10_000 * 1e18 * 1e18);
+            int tokens = wadDiv(wadMul(totalTokensForBuyers, int(_bps[i] * 1e18)), 10_000 * 1e18 * 1e18);
             // transfer tokens to address
             _mint(_addresses[i], uint(tokens));
             sum += _bps[i];
@@ -94,9 +115,9 @@ contract TokenEmitter is VRGDAC, ITokenEmitter, ReentrancyGuard, TokenEmitterRew
 
         require(sum == 10_000, "bps must add up to 10_000");
 
-        emit PurchaseFinalized(msg.sender, msg.value, uint(totalTokensWad), 0, 0, toPayTreasury, msg.value - toPayTreasury);
+        emit PurchaseFinalized(msg.sender, msg.value, toPayTreasury, msg.value - msgValueRemaining, uint(totalTokensForBuyers), uint(totalTokensForCreators), creatorDirectPayment);
 
-        return uint(totalTokensWad);
+        return uint(totalTokensForBuyers);
     }
 
     function buyTokenQuote(uint amount) public view returns (int spentY) {
