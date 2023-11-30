@@ -98,6 +98,7 @@ contract TokenEmitter is VRGDAC, ITokenEmitter, ReentrancyGuard, TokenEmitterRew
 
         if(totalTokensForCreators > 0) {
             _mint(creatorsAddress, uint(totalTokensForCreators));
+            emittedTokenWad += totalTokensForCreators;
         }
 
         uint sum = 0;
