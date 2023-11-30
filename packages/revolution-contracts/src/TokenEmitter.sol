@@ -71,11 +71,11 @@ contract TokenEmitter is VRGDAC, ITokenEmitter, ReentrancyGuard, TokenEmitterRew
         // ensure the same number of addresses and _bps
         require(_addresses.length == _bps.length, "Parallel arrays required");
 
-        // Get value to send and handle mint fee
-        uint msgValueRemaining = _handleRewardsAndGetValueToSend(msg.value, builder, purchaseReferral, deployer);
+        // Get value to send to treasury and handle mint fee
+        uint toPayTreasury = _handleRewardsAndGetValueToSend(msg.value, builder, purchaseReferral, deployer);
 
-        int totalTokensWad = getTokenQuoteForPaymentWad(msgValueRemaining);
-        (bool success, ) = treasury.call{ value: msgValueRemaining }(new bytes(0));
+        int totalTokensWad = getTokenQuoteForPaymentWad(toPayTreasury);
+        (bool success, ) = treasury.call{ value: toPayTreasury }(new bytes(0));
         require(success, "Transfer failed.");
 
         uint sum = 0;
@@ -91,6 +91,8 @@ contract TokenEmitter is VRGDAC, ITokenEmitter, ReentrancyGuard, TokenEmitterRew
         }
 
         require(sum == 10_000, "bps must add up to 10_000");
+
+        emit PurchaseFinalized(msg.sender, msg.value, uint(totalTokensWad), 0, 0, toPayTreasury, msg.value - toPayTreasury);
 
         return uint(totalTokensWad);
     }
