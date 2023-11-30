@@ -21,7 +21,7 @@ contract TokenEmitter is VRGDAC, ITokenEmitter, ReentrancyGuard, TokenEmitterRew
     uint public immutable startTime = block.timestamp;
 
     // The amount of tokens that have been emitted in wad units.
-    int256 emittedTokenWad;
+    int256 public emittedTokenWad;
 
     // The split of the purchase that is reserved for the creator of the Verb in basis points
     uint256 public creatorRateBps;
