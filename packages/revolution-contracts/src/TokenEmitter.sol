@@ -30,7 +30,7 @@ contract TokenEmitter is VRGDAC, ITokenEmitter, ReentrancyGuard, TokenEmitterRew
     uint256 public entropyRateBps;
 
     // The account or contract to pay the creator reward to
-    address creatorsAddress;
+    address public creatorsAddress;
 
     // approved contracts, owner, and a token contract address
     constructor(

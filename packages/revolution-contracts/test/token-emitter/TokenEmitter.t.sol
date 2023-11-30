@@ -187,6 +187,21 @@ contract TokenEmitterTest is Test {
         vm.stopPrank();
     }
 
+    function testSetCreatorsAddress() public {
+        // Setting Creators Address by Owner
+        address newCreatorsAddress = address(0x123);
+        emitter.setCreatorsAddress(newCreatorsAddress);
+        assertEq(emitter.creatorsAddress(), newCreatorsAddress, "Owner should be able to set creators address");
+
+        // Attempting to set Creators Address by Non-Owner
+        address nonOwner = address(0x4156);
+        vm.startPrank(nonOwner);
+        try emitter.setCreatorsAddress(nonOwner) {
+            fail("Non-owner should not be able to set creators address");
+        } catch {}
+        vm.stopPrank();
+    }
+
     // // // TODO: test scamming creator fails with percentage low
     // function testFailLowPercentage() public {
     //     vm.startPrank(address(0));
