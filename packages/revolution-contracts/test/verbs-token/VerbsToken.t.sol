@@ -30,7 +30,7 @@ contract VerbsTokenTestSuite is Test {
     /// @dev Sets up a new VerbsToken instance before each test
     function setUp() public {
         // Create a new mock ERC20 token for voting
-        govToken = new NontransferableERC20Votes(address(this), "Revolution Governance", "GOV", 4);
+        govToken = new NontransferableERC20Votes(address(this), "Revolution Governance", "GOV");
 
         // Deploy a new proxy registry for OpenSea
         ProxyRegistry _proxyRegistry = new ProxyRegistry();

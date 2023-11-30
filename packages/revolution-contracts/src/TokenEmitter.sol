@@ -2,7 +2,7 @@
 pragma solidity ^0.8.22;
 
 import { VRGDAC } from "./libs/VRGDAC.sol";
-import { toDaysWadUnsafe, wadDiv, wadMul } from "./libs/SignedWadMath.sol";
+import { toDaysWadUnsafe } from "./libs/SignedWadMath.sol";
 import { Strings } from "@openzeppelin/contracts/utils/Strings.sol";
 import { NontransferableERC20Votes } from "./NontransferableERC20Votes.sol";
 import { ITokenEmitter } from "./interfaces/ITokenEmitter.sol";
@@ -12,7 +12,9 @@ import { Ownable } from "@openzeppelin/contracts/access/Ownable.sol";
 
 contract TokenEmitter is VRGDAC, ITokenEmitter, ReentrancyGuard, TokenEmitterRewards, Ownable {
     // treasury address to pay funds to
-    address private treasury;
+    address public treasury;
+
+    event Log(string message, int value);
 
     // The token that is being emitted.
     NontransferableERC20Votes public token;
@@ -79,14 +81,13 @@ contract TokenEmitter is VRGDAC, ITokenEmitter, ReentrancyGuard, TokenEmitterRew
         //Share of purchase amount to send to treasury
         uint256 toPayTreasury = (msgValueRemaining * (10_000 - creatorRateBps)) / 10_000;
 
-        //Share of purchase amount to pay creators with
-        uint256 toPayCreators = msgValueRemaining - toPayTreasury;
         //Ether directly sent to creators
-        uint256 creatorDirectPayment = (toPayCreators * entropyRateBps) / 10_000;
+        uint256 creatorDirectPayment = ((msgValueRemaining - toPayTreasury) * entropyRateBps) / 10_000;
         //Tokens to emit to creators
-        int totalTokensForCreators = getTokenQuoteForPaymentWad(toPayCreators - creatorDirectPayment);
+        int totalTokensForCreators = getTokenQuoteForPayment(msgValueRemaining - toPayTreasury - creatorDirectPayment);
 
-        int totalTokensForBuyers = getTokenQuoteForPaymentWad(toPayTreasury);
+        int totalTokensForBuyers = getTokenQuoteForPayment(toPayTreasury);
+        emit Log("totalTokensForBuyers", totalTokensForBuyers);
         (bool success, ) = treasury.call{ value: toPayTreasury }(new bytes(0));
         require(success, "Transfer failed.");
         emittedTokenWad += totalTokensForBuyers;
@@ -105,8 +106,7 @@ contract TokenEmitter is VRGDAC, ITokenEmitter, ReentrancyGuard, TokenEmitterRew
 
         // calculates how many tokens to give each address
         for (uint i = 0; i < _addresses.length; i++) {
-            //todo seems dangerous with rouding, fix it up
-            int tokens = wadDiv(wadMul(totalTokensForBuyers, int(_bps[i] * 1e18)), 10_000 * 1e18 * 1e18);
+            int tokens = totalTokensForBuyers * int(_bps[i]) / 10_000;
             // transfer tokens to address
             _mint(_addresses[i], uint(tokens));
             sum += _bps[i];
@@ -125,14 +125,10 @@ contract TokenEmitter is VRGDAC, ITokenEmitter, ReentrancyGuard, TokenEmitterRew
         return xToY({ timeSinceStart: toDaysWadUnsafe(block.timestamp - startTime), sold: emittedTokenWad, amount: int(amount) });
     }
 
-    function getTokenQuoteForPaymentWad(uint paymentWei) public view returns (int gainedX) {
+    function getTokenQuoteForPayment(uint paymentWei) public view returns (int gainedX) {
         // Note: By using toDaysWadUnsafe(block.timestamp - startTime) we are establishing that 1 "unit of time" is 1 day.
         // solhint-disable-next-line not-rely-on-time
         return yToX({ timeSinceStart: toDaysWadUnsafe(block.timestamp - startTime), sold: emittedTokenWad, amount: int(paymentWei) });
-    }
-
-    function getTokenQuoteForPayment(uint paymentWei) public view returns (int gainedX) {
-        return wadDiv(getTokenQuoteForPaymentWad(paymentWei), 1e36);
     }
 
     /**

@@ -12,7 +12,7 @@ contract TokenEmitterRewardsTest is ProtocolRewardsTest {
     function setUp() public override {
         super.setUp();
 
-        govToken = new NontransferableERC20Votes(address(this), "Revolution Governance", "GOV", 4);
+        govToken = new NontransferableERC20Votes(address(this), "Revolution Governance", "GOV");
 
         mockTokenEmitter = new MockTokenEmitter(govToken, treasury, address(protocolRewards), revolution);
 
@@ -57,7 +57,7 @@ contract TokenEmitterRewardsTest is ProtocolRewardsTest {
     function testNullReferralRecipient(uint256 msgValue) public {
         bool shouldExpectRevert = msgValue <= mockTokenEmitter.minPurchaseAmount() || msgValue >= mockTokenEmitter.maxPurchaseAmount();
 
-        NontransferableERC20Votes govToken2 = new NontransferableERC20Votes(address(this), "Revolution Governance", "GOV", 4);
+        NontransferableERC20Votes govToken2 = new NontransferableERC20Votes(address(this), "Revolution Governance", "GOV");
 
         mockTokenEmitter = new MockTokenEmitter(govToken2, treasury, address(protocolRewards), revolution);
 

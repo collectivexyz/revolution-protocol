@@ -16,32 +16,34 @@ contract TokenEmitterTest is Test {
     // 1,000 tokens per day is the target emission
     uint256 tokensPerTimeUnit = 1_000;
 
+    uint256 expectedVolume = tokensPerTimeUnit * 1e18;
+
     function setUp() public {
         vm.startPrank(address(0));
         RevolutionProtocolRewards protocolRewards = new RevolutionProtocolRewards();
 
-        address treasury = address(0);
+        address treasury = address(21);
         vm.deal(address(0), 100000 ether);
         vm.stopPrank();
 
         //20% - how much the price decays per unit of time with no sales
         int256 priceDecayPercent = 1e18 / 10;
 
-        NontransferableERC20Votes governanceToken = new NontransferableERC20Votes(address(this), "Revolution Governance", "GOV", 4);
+        NontransferableERC20Votes governanceToken = new NontransferableERC20Votes(address(this), "Revolution Governance", "GOV");
 
-        // 1e11 or 0.0000001 is 2 cents per token even at $200k eth price
-        int256 tokenTargetPrice = 1e11;
+        int256 oneFullTokenTargetPrice = 1 ether;
 
-        //this setup assumes an ideal of 1e18 or 1 ETH (1k (1e3) * 1e11 * 4 decimals) coming into the system per day, token prices will increaase if more ETH comes in
+        //this setup assumes an ideal of 1e21 or 1_000 ETH (1_000 * 1e18) coming into the system per day, token prices will increaase if more ETH comes in
         emitter = new TokenEmitter(
             address(this),
             governanceToken,
             address(protocolRewards),
             address(this),
             treasury,
-            tokenTargetPrice,
+            oneFullTokenTargetPrice,
             priceDecayPercent,
-            int256(1e18 * 1e4 * tokensPerTimeUnit)
+            //scale by 1e18 the tokens per time unit
+            int256(1e18 * tokensPerTimeUnit)
         );
 
         address emitterAddress = address(emitter);
@@ -59,7 +61,7 @@ contract TokenEmitterTest is Test {
         address treasury = address(0);
 
         // // 0.1 per governance, 10% price decay per day, 100 governance sale target per day
-        NontransferableERC20Votes governanceToken = new NontransferableERC20Votes(address(this), "Revolution Governance", "GOV", 4);
+        NontransferableERC20Votes governanceToken = new NontransferableERC20Votes(address(this), "Revolution Governance", "GOV");
         RevolutionProtocolRewards protocolRewards = new RevolutionProtocolRewards();
 
         TokenEmitter emitter1 = new TokenEmitter(address(this), governanceToken, address(protocolRewards), address(this), treasury, 1e14, 1e17, 1e22);
@@ -142,7 +144,9 @@ contract TokenEmitterTest is Test {
     }
 
     // test multiple payouts
-    function testPercentagePayouts() public {
+    function testPercentagePayouts(uint firstBps) public {
+        vm.assume(firstBps < 10000);
+        vm.assume(firstBps > 0);
         vm.startPrank(address(0));
 
         address[] memory recipients = new address[](2);
@@ -150,11 +154,20 @@ contract TokenEmitterTest is Test {
         recipients[1] = address(2);
 
         uint256[] memory bps = new uint256[](2);
-        bps[0] = 5_000;
-        bps[1] = 5_000;
+        bps[0] = firstBps;
+        bps[1] = 10_000 - firstBps;
+
+        // estimate tokens to be emitted
+        int256 expectedAmount = emitter.getTokenQuoteForPayment(1e18 - emitter.computeTotalReward(1e18));
 
         emitter.buyToken{ value: 1e18 }(recipients, bps, address(0), address(0), address(0));
-        assert(emitter.balanceOf(address(1)) == emitter.balanceOf(address(2)));
+        //assert address balances are correct
+        //multiply bps by expectedAmount and assert
+        assertEq(emitter.balanceOf(address(1)), firstBps * uint256(expectedAmount) / 10_000, "First recipient should have correct balance");
+        assertEq(emitter.balanceOf(address(2)), (10_000 - firstBps) * uint256(expectedAmount) / 10_000, "Second recipient should have correct balance");
+
+        //assert treasury balance is correct
+        assertEq(address(emitter.treasury()).balance, 1e18 - emitter.computeTotalReward(1e18), "Treasury should have payment - totalReward in balance");
     }
 
     // Test to ensure the total basis points add up to 100%
@@ -178,9 +191,12 @@ contract TokenEmitterTest is Test {
         int totalSupplyAfterValidPurchase = int(emitter.totalSupply());
         assertEq(totalSupplyAfterValidPurchase, expectedAmount, "Supply should match the expected amount");
         //emitted should match expected
-        assertEq(int(emittedWad / 1e18), expectedAmount, "Emitted amount should match expected amount");
+        assertEq(int(emittedWad), expectedAmount, "Emitted amount should match expected amount");
         //emitted should match supply
-        assertEq(int(emittedWad / 1e18), totalSupplyAfterValidPurchase, "Emitted amount should match total supply");
+        assertEq(int(emittedWad), totalSupplyAfterValidPurchase, "Emitted amount should match total supply");
+
+        //expect treasury to have payment - totalReward in balance
+        assertEq(address(emitter.treasury()).balance, 1e18 - emitter.computeTotalReward(1e18), "Treasury should have payment - totalReward in balance");
 
         // Test case with incorrect total of basis points
         uint256[] memory incorrectBps = new uint256[](2);
@@ -247,8 +263,8 @@ contract TokenEmitterTest is Test {
         MaliciousTreasury maliciousTreasury = new MaliciousTreasury(address(emitter));
 
         // Initialize TokenEmitter with the address of the malicious treasury
-        NontransferableERC20Votes governanceToken = new NontransferableERC20Votes(address(this), "Revolution Governance", "GOV", 4);
-        uint256 toScale = 1e18 * 1e4;
+        NontransferableERC20Votes governanceToken = new NontransferableERC20Votes(address(this), "Revolution Governance", "GOV");
+        uint256 toScale = 1e18 * 1e18;
         uint256 tokensPerTimeUnit_ = 10_000;
         RevolutionProtocolRewards protocolRewards = new RevolutionProtocolRewards();
 
@@ -279,11 +295,11 @@ contract TokenEmitterTest is Test {
     }
 
     function testGetTokenAmountForMultiPurchaseGeneral(uint256 payment) public {
-        vm.assume(payment > emitter.minPurchaseAmount() * 1e4);
+        vm.assume(payment > emitter.minPurchaseAmount());
         vm.assume(payment < emitter.maxPurchaseAmount());
         vm.startPrank(address(0));
 
-        uint256 SOME_MAX_EXPECTED_VALUE = uint256(wadDiv(int256(payment), 1 ether)) * 1e4 * tokensPerTimeUnit;
+        uint256 SOME_MAX_EXPECTED_VALUE = uint256(wadDiv(int256(payment), 1 ether)) * 1e18 * tokensPerTimeUnit;
 
         int256 slightlyMore = emitter.getTokenQuoteForPayment((payment * 101) / 100);
 
@@ -302,6 +318,9 @@ contract TokenEmitterTest is Test {
         recipients[0] = address(1);
         uint256[] memory bps = new uint256[](1);
         bps[0] = 10_000;
+
+        //ensure that enough volume was bought for the day, so purchase expectedVolume amount first
+        emitter.buyToken{ value: expectedVolume }(recipients, bps, address(0), address(0), address(0));
 
         emitter.buyToken{ value: payment }(recipients, bps, address(0), address(0), address(0));
 
@@ -323,24 +342,24 @@ contract TokenEmitterTest is Test {
         emit log_int(smallPaymentTokenAmount);
 
         // A days worth of payment amount
-        int256 dailyPaymentTokenAmount = emitter.getTokenQuoteForPayment(1 ether);
-        assertLt(uint256(dailyPaymentTokenAmount), tokensPerTimeUnit * 1e4, "Token amount for daily payment should be less than tokens per day");
+        int256 dailyPaymentTokenAmount = emitter.getTokenQuoteForPayment(expectedVolume);
+        assertLt(uint256(dailyPaymentTokenAmount), tokensPerTimeUnit * 1e18, "Token amount for daily payment should be less than tokens per day");
         emit log_string("Daily Payment Token Amount: ");
         emit log_int(dailyPaymentTokenAmount);
 
         // Edge Case 2: Very Large Payment
         // An unusually large payment amount
-        int256 largePaymentTokenAmount = emitter.getTokenQuoteForPayment(100 ether);
+        int256 largePaymentTokenAmount = emitter.getTokenQuoteForPayment(expectedVolume * 100);
         //spending 100x the expected amount per day should get you < 25x the tokens
-        uint256 SOME_REALISTIC_UPPER_BOUND = 25 * tokensPerTimeUnit * 1e4;
+        uint256 SOME_REALISTIC_UPPER_BOUND = 25 * tokensPerTimeUnit * 1e18;
         assertLt(uint256(largePaymentTokenAmount), SOME_REALISTIC_UPPER_BOUND, "Token amount for large payment should be less than some realistic upper bound");
         emit log_string("Large Payment Token Amount: ");
         emit log_int(largePaymentTokenAmount);
 
-        uint256 largestPayment = 1_000 ether; // An unusually large payment amount
+        uint256 largestPayment = expectedVolume * 1_000; // An unusually large payment amount
         int256 largestPaymentTokenAmount = emitter.getTokenQuoteForPayment(largestPayment);
         //spending 1000x the daily amount should get you less than 50x the tokens
-        assertLt(uint256(largestPaymentTokenAmount), 50 * tokensPerTimeUnit * 1e4, "Token amount for largest payment should be less than some realistic upper bound");
+        assertLt(uint256(largestPaymentTokenAmount), 50 * tokensPerTimeUnit * 1e18, "Token amount for largest payment should be less than some realistic upper bound");
 
         emit log_string("Largest Payment Token Amount: ");
         emit log_int(largestPaymentTokenAmount);
