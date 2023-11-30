@@ -12,10 +12,7 @@ import { CultureIndexTestSuite } from "./CultureIndex.t.sol";
  * @dev Test contract for CultureIndex art piece creation
  */
 contract CultureIndexArtPieceTest is CultureIndexTestSuite {
-
     function testVoteAndVerifyTopVotedPiece() public {
-        
-
         uint256 firstPieceId = voter1Test.createDefaultArtPiece();
         uint256 secondPieceId = voter2Test.createDefaultArtPiece();
 
@@ -47,8 +44,6 @@ contract CultureIndexArtPieceTest is CultureIndexTestSuite {
     }
 
     function testFetchTopVotedPiece() public {
-        
-
         uint256 firstPieceId = voter1Test.createDefaultArtPiece();
 
         // Mint tokens to voter1
@@ -64,8 +59,6 @@ contract CultureIndexArtPieceTest is CultureIndexTestSuite {
     }
 
     function testCorrectTopVotedPiece() public {
-        
-
         uint256 firstPieceId = voter1Test.createDefaultArtPiece();
         uint256 secondPieceId = voter2Test.createDefaultArtPiece();
 
@@ -86,8 +79,6 @@ contract CultureIndexArtPieceTest is CultureIndexTestSuite {
     }
 
     function testPopTopVotedPiece() public {
-        
-
         uint256 firstPieceId = voter1Test.createDefaultArtPiece();
         govToken.mint(address(voter1Test), 100);
 
@@ -100,8 +91,6 @@ contract CultureIndexArtPieceTest is CultureIndexTestSuite {
     }
 
     function testRemovedPieceShouldBeReplaced() public {
-        
-
         uint256 firstPieceId = voter1Test.createDefaultArtPiece();
         uint256 secondPieceId = voter2Test.createDefaultArtPiece();
 
@@ -186,7 +175,6 @@ contract CultureIndexArtPieceTest is CultureIndexTestSuite {
 
         //vote on all pieces
         for (uint i = 1; i < 5_000; i++) {
-
             govToken.mint(address(voter1Test), i + 1);
 
             if (i == 4_999) {
@@ -208,8 +196,6 @@ contract CultureIndexArtPieceTest is CultureIndexTestSuite {
 
     /// @dev Tests the gas used for popping the top voted piece to ensure somewhat constant time
     function testGasForPopTopVotedPiece() public {
-        
-
         // Create and vote on a set number of pieces.
         for (uint i = 0; i < 5_000; i++) {
             uint256 pieceId = voter1Test.createDefaultArtPiece();
@@ -244,8 +230,6 @@ contract CultureIndexArtPieceTest is CultureIndexTestSuite {
     }
 
     function testDropTopVotedPieceSequentialOrder() public {
-        
-
         // Create some pieces and vote on them
         uint256 pieceId1 = voter1Test.createDefaultArtPiece();
         govToken.mint(address(voter1Test), 10);
@@ -274,8 +258,6 @@ contract CultureIndexArtPieceTest is CultureIndexTestSuite {
 
     /// @dev Ensure that the dropTopVotedPiece function behaves correctly when there are no more pieces to drop
     function testDropTopVotedPieceWithNoMorePieces() public {
-        
-
         // Create and vote on a single piece
         uint256 pieceId = voter1Test.createDefaultArtPiece();
         govToken.mint(address(voter1Test), 10);

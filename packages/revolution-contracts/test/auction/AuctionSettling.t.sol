@@ -96,7 +96,7 @@ contract VerbsAuctionHouseSettleTest is VerbsAuctionHouseTest {
 
         // Check if the recipient received WETH instead of Ether
         uint256 creatorRate = auctionHouse.creatorRateBps();
-        assertEq(IERC20(address(mockWETH)).balanceOf(recipient), amount * (10_000 - creatorRate) / 10_000);
+        assertEq(IERC20(address(mockWETH)).balanceOf(recipient), (amount * (10_000 - creatorRate)) / 10_000);
         assertEq(recipient.balance, 0); // Ether balance should still be 0
         //make sure voting weight on culture index is 721 vote weight for winning bidder
         assertEq(cultureIndex.getCurrentVotes(address(this)), cultureIndex.erc721VotingTokenWeight(), "Highest bidder should have 10 votes");
@@ -125,7 +125,7 @@ contract VerbsAuctionHouseSettleTest is VerbsAuctionHouseTest {
 
         // Check if the recipient received Ether
         uint256 creatorRate = auctionHouse.creatorRateBps();
-        assertEq(recipient.balance, amount * (10_000 - creatorRate) / 10_000);
+        assertEq(recipient.balance, (amount * (10_000 - creatorRate)) / 10_000);
         //make sure voting weight on culture index is 721 vote weight for winning bidder
         assertEq(cultureIndex.getCurrentVotes(address(this)), cultureIndex.erc721VotingTokenWeight(), "Highest bidder should have 10 votes");
     }
@@ -157,7 +157,7 @@ contract VerbsAuctionHouseSettleTest is VerbsAuctionHouseTest {
         // Check if the recipient received WETH instead of Ether
         uint256 creatorRate = auctionHouse.creatorRateBps();
 
-        assertEq(IERC20(address(mockWETH)).balanceOf(recipient), amount * (10_000 - creatorRate) / 10_000);
+        assertEq(IERC20(address(mockWETH)).balanceOf(recipient), (amount * (10_000 - creatorRate)) / 10_000);
         assertEq(recipient.balance, 0); // Ether balance should still be 0
         //make sure voting weight on culture index is 721 vote weight for winning bidder
         assertEq(cultureIndex.getCurrentVotes(address(this)), cultureIndex.erc721VotingTokenWeight(), "Highest bidder should have 10 votes");
@@ -178,7 +178,7 @@ contract VerbsAuctionHouseSettleTest is VerbsAuctionHouseTest {
         // Assume n creators with equal share
         for (uint256 i = 0; i < nCreators; i++) {
             creatorAddresses[i] = address(uint160(i + 1)); // Example creator addresses
-            if(i == nCreators - 1) {
+            if (i == nCreators - 1) {
                 creatorBps[i] = 10_000 - totalBps;
             } else {
                 creatorBps[i] = (10_000) / (nCreators - 1);
@@ -235,7 +235,13 @@ contract VerbsAuctionHouseSettleTest is VerbsAuctionHouseTest {
             uint256 expectedEtherShare = uint256(((bidAmount) * creatorBps[i] * creatorRate) / 10_000 / 10_000);
 
             //either the creator gets ETH or WETH
-            assertEq(address(creatorAddresses[i]).balance - balancesBefore[i] > 0 ? address(creatorAddresses[i]).balance - balancesBefore[i] : mockWETH.balanceOf(creatorAddresses[i]) - mockWETHBalancesBefore[i], (expectedEtherShare * entropyRate) / 10_000, "Incorrect ETH payout for creator");
+            assertEq(
+                address(creatorAddresses[i]).balance - balancesBefore[i] > 0
+                    ? address(creatorAddresses[i]).balance - balancesBefore[i]
+                    : mockWETH.balanceOf(creatorAddresses[i]) - mockWETHBalancesBefore[i],
+                (expectedEtherShare * entropyRate) / 10_000,
+                "Incorrect ETH payout for creator"
+            );
 
             assertApproxEqAbs(
                 governanceToken.balanceOf(creatorAddresses[i]) - governanceTokenBalancesBefore[i],
@@ -269,13 +275,13 @@ contract VerbsAuctionHouseSettleTest is VerbsAuctionHouseTest {
         vm.stopPrank();
 
         // Ether going to owner of the auction
-        uint256 auctioneerPayment = bidAmount * (10_000 - creatorRate) / 10_000;
+        uint256 auctioneerPayment = (bidAmount * (10_000 - creatorRate)) / 10_000;
 
         //Total amount of ether going to creator
         uint256 creatorPayment = bidAmount - auctioneerPayment;
 
         //Ether reserved to pay the creator directly
-        uint256 creatorDirectPayment = creatorPayment * entropyRate / 10_000;
+        uint256 creatorDirectPayment = (creatorPayment * entropyRate) / 10_000;
 
         //Ether reserved to buy creator governance
         uint256 creatorGovernancePayment = creatorPayment - creatorDirectPayment;
@@ -301,9 +307,12 @@ contract VerbsAuctionHouseSettleTest is VerbsAuctionHouseTest {
 
         // Checking if the contract received the correct amount
         uint256 expectedContractShare = bidAmount - creatorDirectPayment - feeAmount;
-        assertApproxEqAbs(address(this).balance - balanceBeforeTreasury, expectedContractShare, 
-        // "Contract did not receive the correct amount of ETH"
-        10);
+        assertApproxEqAbs(
+            address(this).balance - balanceBeforeTreasury,
+            expectedContractShare,
+            // "Contract did not receive the correct amount of ETH"
+            10
+        );
 
         // Checking ownership of the verb
         assertEq(verbs.ownerOf(verbId), address(21_000), "Verb should be transferred to the highest bidder");

@@ -80,7 +80,7 @@ contract TokenEmitter is VRGDAC, ITokenEmitter, ReentrancyGuard, TokenEmitterRew
         }
 
         require(sum == 10_000, "bps must add up to 10_000");
-        
+
         return uint(totalTokensWad);
     }
 

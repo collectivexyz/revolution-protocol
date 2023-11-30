@@ -124,7 +124,7 @@ contract TokenMintingTest is VerbsTokenTestSuite {
         uint256 newTotalSupply = verbsToken.totalSupply();
         assertEq(newTotalSupply, initialTotalSupply - 1, "Total supply should decrease by 1 after burning");
     }
-    
+
     /// @dev Ensures _currentVerbId increments correctly after each mint
     function testMintingIncrement() public {
         setUp();
@@ -143,7 +143,7 @@ contract TokenMintingTest is VerbsTokenTestSuite {
         setUp();
         createDefaultArtPiece();
 
-        (uint256 pieceId, ICultureIndex.ArtPieceMetadata memory metadata, , ,) = cultureIndex.pieces(0);
+        (uint256 pieceId, ICultureIndex.ArtPieceMetadata memory metadata, , , ) = cultureIndex.pieces(0);
 
         emit log_uint(pieceId);
 
@@ -187,7 +187,7 @@ contract TokenMintingTest is VerbsTokenTestSuite {
         setUp();
         uint256 artPieceId = createDefaultArtPiece();
         uint256 tokenId = verbsToken.mint();
-        (, ICultureIndex.ArtPieceMetadata memory metadata, , ,) = cultureIndex.pieces(artPieceId);
+        (, ICultureIndex.ArtPieceMetadata memory metadata, , , ) = cultureIndex.pieces(artPieceId);
         // Assuming the descriptor returns a fixed URI for the given tokenId
         string memory expectedTokenURI = descriptor.tokenURI(tokenId, metadata);
         assertEq(verbsToken.tokenURI(tokenId), expectedTokenURI, "Token URI should be correctly set and retrieved");
@@ -199,10 +199,10 @@ contract TokenMintingTest is VerbsTokenTestSuite {
 
         // Create a new piece and simulate it being the top voted piece
         uint256 pieceId = createDefaultArtPiece(); // This function should exist within the test contract
-        
+
         govToken.mint(address(this), 10);
 
-        // ensure vote snapshot is taken    
+        // ensure vote snapshot is taken
         vm.roll(block.number + 1);
 
         cultureIndex.vote(pieceId); // Assuming vote function exists and we cast 10 votes
@@ -211,7 +211,7 @@ contract TokenMintingTest is VerbsTokenTestSuite {
         uint256 tokenId = verbsToken.mint();
 
         // Validate the token is associated with the top voted piece
-        (uint256 mintedPieceId, , , ,) = verbsToken.artPieces(tokenId);
+        (uint256 mintedPieceId, , , , ) = verbsToken.artPieces(tokenId);
         assertEq(mintedPieceId, pieceId, "Minted token should be associated with the top voted piece");
     }
 }

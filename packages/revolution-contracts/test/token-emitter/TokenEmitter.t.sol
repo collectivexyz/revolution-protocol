@@ -261,7 +261,7 @@ contract TokenEmitterTest is Test {
 
         uint256 SOME_MAX_EXPECTED_VALUE = uint256(wadDiv(int256(payment), 1 ether)) * 1e4 * tokensPerTimeUnit;
 
-        int256 slightlyMore = emitter.getTokenQuoteForPayment(payment * 101 / 100);
+        int256 slightlyMore = emitter.getTokenQuoteForPayment((payment * 101) / 100);
 
         // Call the function with the typical payment amount
         int256 tokenAmount = emitter.getTokenQuoteForPayment(payment);
@@ -334,7 +334,7 @@ contract TokenEmitterTest is Test {
         emit log_int(priceAfterManyPurchases);
 
         // Simulate the passage of time
-        uint256 daysElapsed = 221; 
+        uint256 daysElapsed = 221;
         vm.warp(block.timestamp + daysElapsed * 1 days);
 
         int256 priceAfterManyDays = emitter.buyTokenQuote(1e18);

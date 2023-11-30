@@ -26,7 +26,7 @@ contract VerbsTokenTestSuite is Test {
     string public tokenNamePrefix = "Vrb";
     string public tokenName = "Vrbs";
     string public tokenSymbol = "VRBS";
-    
+
     /// @dev Sets up a new VerbsToken instance before each test
     function setUp() public {
         // Create a new mock ERC20 token for voting
@@ -52,7 +52,6 @@ contract VerbsTokenTestSuite is Test {
         // Now that VerbsDescriptor is deployed, set it in VerbsToken
         verbsToken.setDescriptor(_descriptor);
     }
-
 
     // Utility function to create a new art piece and return its ID
     function createArtPiece(

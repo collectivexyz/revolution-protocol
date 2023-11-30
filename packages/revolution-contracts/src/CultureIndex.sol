@@ -171,23 +171,22 @@ contract CultureIndex is ICultureIndex, Ownable, ReentrancyGuard {
     }
 
     /**
-    * @notice Returns the voting power of a voter at the current block.
-    * @param account The address of the voter.
-    * @return The voting power of the voter.
-    */
+     * @notice Returns the voting power of a voter at the current block.
+     * @param account The address of the voter.
+     * @return The voting power of the voter.
+     */
     function getCurrentVotes(address account) external view override returns (uint256) {
         return _getCurrentVotes(account);
     }
 
     /**
-    * @notice Returns the voting power of a voter at the current block.
-    * @param account The address of the voter.
-    * @return The voting power of the voter.
-    */
+     * @notice Returns the voting power of a voter at the current block.
+     * @param account The address of the voter.
+     * @return The voting power of the voter.
+     */
     function getPriorVotes(address account, uint256 blockNumber) external view override returns (uint256) {
         return _getPriorVotes(account, blockNumber);
     }
-
 
     /**
      * @notice Calculates the vote weight of a voter.
@@ -289,7 +288,7 @@ contract CultureIndex is ICultureIndex, Ownable, ReentrancyGuard {
      * @return The number of pieces
      */
     function pieceCount() external view returns (uint256) {
-        return _currentPieceId; 
+        return _currentPieceId;
     }
 
     /**

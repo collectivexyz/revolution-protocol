@@ -11,7 +11,6 @@ import { CultureIndexTestSuite } from "./CultureIndex.t.sol";
  * @dev Test contract for CultureIndex art piece creation
  */
 contract CultureIndexArtPieceTest is CultureIndexTestSuite {
-
     //test that creating the first piece the pieceId is 0
     function testFirstPieceId() public {
         uint256 newPieceId = createArtPiece("Mona Lisa", "A masterpiece", ICultureIndex.MediaType.IMAGE, "ipfs://legends", "", "", address(0x1), 10000);

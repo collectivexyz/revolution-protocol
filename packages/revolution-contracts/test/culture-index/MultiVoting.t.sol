@@ -7,7 +7,6 @@ import { MockERC20 } from "../mock/MockERC20.sol";
 import { CultureIndexTestSuite } from "./CultureIndex.t.sol";
 
 contract CultureIndexVotingTestManager is CultureIndexTestSuite {
-
     function testVotingWithDifferentWeights() public {
         uint256 newPieceId = voter1Test.createDefaultArtPiece();
 

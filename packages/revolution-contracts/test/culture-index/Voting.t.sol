@@ -39,7 +39,11 @@ contract CultureIndexVotingBasicTest is CultureIndexTestSuite {
         uint256 erc721Weight = 3; // Number of ERC721 tokens held by the voter
 
         // Mock ERC721 token balance
-        vm.mockCall(address(cultureIndex.erc721VotingToken()), abi.encodeWithSelector(ERC721Checkpointable.getPriorVotes.selector, voter, block.number), abi.encode(erc721Weight));
+        vm.mockCall(
+            address(cultureIndex.erc721VotingToken()),
+            abi.encodeWithSelector(ERC721Checkpointable.getPriorVotes.selector, voter, block.number),
+            abi.encode(erc721Weight)
+        );
 
         // Cast vote
         vm.startPrank(voter);
@@ -85,13 +89,13 @@ contract CultureIndexVotingBasicTest is CultureIndexTestSuite {
     function testNoDoubleVotingAfterERC721Transfer() public {
         //make culture index owned by verbs
         cultureIndex.transferOwnership(address(verbs));
-        
+
         // create 2 art pieces
         createDefaultArtPiece();
         uint256 artPieceId = createDefaultArtPiece();
         address voter = address(0x1);
         address recipient = address(0x2);
-        uint256 tokenId = 0; 
+        uint256 tokenId = 0;
 
         // Mint an ERC721 token to the voter
         verbs.mint();
@@ -122,7 +126,6 @@ contract CultureIndexVotingBasicTest is CultureIndexTestSuite {
         cultureIndex.vote(artPieceId);
         vm.stopPrank();
     }
-
 
     /// @dev Tests reset of vote weight after transferring all tokens
     function testVoteWeightResetAfterTokenTransfer() public {
@@ -194,7 +197,7 @@ contract CultureIndexVotingBasicTest is CultureIndexTestSuite {
         assertEq(initialWeight, expectedInitialWeight);
 
         // Change token balances
-        uint256 updateErc20Weight = 100;  // Increased ERC20 weight
+        uint256 updateErc20Weight = 100; // Increased ERC20 weight
 
         govToken.mint(voter, updateErc20Weight);
         verbs.mint();
@@ -213,7 +216,6 @@ contract CultureIndexVotingBasicTest is CultureIndexTestSuite {
         // ensure cultureindex currentvotes is correct
         assertEq(cultureIndex.getCurrentVotes(address(this)), updateErc20Weight + initialErc20Weight, "Vote weight should be correct");
     }
-
 
     /**
      * @dev Test case to validate voting functionality
@@ -540,5 +542,3 @@ contract CultureIndexVotingBasicTest is CultureIndexTestSuite {
         }
     }
 }
-
-

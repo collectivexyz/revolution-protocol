@@ -10,7 +10,6 @@ import { ERC721Checkpointable } from "../base/ERC721Checkpointable.sol";
  * @dev This interface defines the events for the CultureIndex contract.
  */
 interface ICultureIndexEvents {
-
     event ERC721VotingTokenUpdated(ERC721Checkpointable ERC721VotingToken);
 
     event ERC721VotingTokenLocked();

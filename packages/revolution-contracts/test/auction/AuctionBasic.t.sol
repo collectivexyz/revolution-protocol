@@ -67,7 +67,7 @@ contract VerbsAuctionHouseBasicTest is VerbsAuctionHouseTest {
     }
 
     function testSetMinCreatorRateBps(uint256 newMinCreatorRateBps, uint256 creatorRateBps) public {
-        if(creatorRateBps > 10_000) {
+        if (creatorRateBps > 10_000) {
             vm.expectRevert("Creator rate must be less than or equal to 10_000");
         } else if (creatorRateBps < auctionHouse.minCreatorRateBps()) {
             vm.expectRevert("Creator rate must be greater than or equal to minCreatorRateBps");
@@ -111,7 +111,7 @@ contract VerbsAuctionHouseBasicTest is VerbsAuctionHouseTest {
         vm.assume(uint256(invalidMinCreatorRateBps) < auctionHouse.creatorRateBps());
 
         // Attempt to set an invalid minimum creator rate
-        if(uint256(invalidMinCreatorRateBps) <= auctionHouse.minCreatorRateBps()) {
+        if (uint256(invalidMinCreatorRateBps) <= auctionHouse.minCreatorRateBps()) {
             vm.expectRevert("Min creator rate must be greater than previous minCreatorRateBps");
         } else if (uint256(invalidMinCreatorRateBps) > 10_000) {
             vm.expectRevert("Min creator rate must be less than or equal to 10_000");
@@ -225,7 +225,7 @@ contract VerbsAuctionHouseBasicTest is VerbsAuctionHouseTest {
         }
         auctionHouse.settleCurrentAndCreateNewAuction(); // This will settle the current auction and create a new one
 
-        if(shouldExpectRevert) {
+        if (shouldExpectRevert) {
             (, , , , , bool settled) = auctionHouse.auction();
             assertEq(settled, false, "Auction should not be settled because new one created");
         } else {
