@@ -170,10 +170,17 @@ contract TokenEmitterTest is Test {
         correctBps[0] = 5000; // 50%
         correctBps[1] = 5000; // 50%
 
+        int expectedAmount = emitter.getTokenQuoteForPayment(1e18 - emitter.computeTotalReward(1e18));
+        assertGt(expectedAmount, 0, "Token purchase should have a positive amount");
+
         // Attempting a valid token purchase
-        emitter.buyToken{ value: 1e18 }(recipients, correctBps, address(0), address(0), address(0));
-        uint totalSupplyAfterValidPurchase = emitter.totalSupply();
-        assertGt(totalSupplyAfterValidPurchase, 0, "Token purchase should have increased total supply");
+        uint emittedWad = emitter.buyToken{ value: 1e18 }(recipients, correctBps, address(0), address(0), address(0));
+        int totalSupplyAfterValidPurchase = int(emitter.totalSupply());
+        assertEq(totalSupplyAfterValidPurchase, expectedAmount, "Supply should match the expected amount");
+        //emitted should match expected
+        assertEq(int(emittedWad / 1e18), expectedAmount, "Emitted amount should match expected amount");
+        //emitted should match supply
+        assertEq(int(emittedWad / 1e18), totalSupplyAfterValidPurchase, "Emitted amount should match total supply");
 
         // Test case with incorrect total of basis points
         uint256[] memory incorrectBps = new uint256[](2);
