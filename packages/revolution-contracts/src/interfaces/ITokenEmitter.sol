@@ -20,5 +20,13 @@ interface ITokenEmitter {
 
     event EntropyRateBpsUpdated(uint256 rateBps);
 
-    event PurchaseFinalized(address indexed buyer, uint256 payment, uint256 tokensEmittedWad, uint256 creatorAmount, uint256 entropyAmount, uint256 treasuryAmount, uint256 protocolRewardsAmount);
+    event PurchaseFinalized(
+        address indexed buyer,
+        uint256 payment,
+        uint256 tokensEmittedWad,
+        uint256 creatorAmount,
+        uint256 entropyAmount,
+        uint256 treasuryAmount,
+        uint256 protocolRewardsAmount
+    );
 }

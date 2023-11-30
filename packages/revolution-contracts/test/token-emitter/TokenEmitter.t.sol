@@ -34,6 +34,7 @@ contract TokenEmitterTest is Test {
 
         //this setup assumes an ideal of 1e18 or 1 ETH (1k (1e3) * 1e11 * 4 decimals) coming into the system per day, token prices will increaase if more ETH comes in
         emitter = new TokenEmitter(
+            address(this),
             governanceToken,
             address(protocolRewards),
             address(this),
@@ -61,9 +62,9 @@ contract TokenEmitterTest is Test {
         NontransferableERC20Votes governanceToken = new NontransferableERC20Votes(address(this), "Revolution Governance", "GOV", 4);
         RevolutionProtocolRewards protocolRewards = new RevolutionProtocolRewards();
 
-        TokenEmitter emitter1 = new TokenEmitter(governanceToken, address(protocolRewards), address(this), treasury, 1e14, 1e17, 1e22);
+        TokenEmitter emitter1 = new TokenEmitter(address(this), governanceToken, address(protocolRewards), address(this), treasury, 1e14, 1e17, 1e22);
 
-        TokenEmitter emitter2 = new TokenEmitter(governanceToken, address(protocolRewards), address(this), treasury, 1e14, 1e17, 1e22);
+        TokenEmitter emitter2 = new TokenEmitter(address(this), governanceToken, address(protocolRewards), address(this), treasury, 1e14, 1e17, 1e22);
 
         governanceToken.transferOwnership(address(emitter1));
 
@@ -230,6 +231,7 @@ contract TokenEmitterTest is Test {
         RevolutionProtocolRewards protocolRewards = new RevolutionProtocolRewards();
 
         TokenEmitter emitter2 = new TokenEmitter(
+            address(this),
             governanceToken,
             address(protocolRewards),
             address(this),

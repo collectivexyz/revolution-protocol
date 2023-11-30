@@ -52,6 +52,7 @@ contract VerbsAuctionHouseTest is Test {
         address protocolFeeRecipient = address(0x42069);
 
         tokenEmitter = new TokenEmitter(
+            address(this),
             governanceToken,
             address(protocolRewards),
             protocolFeeRecipient,
