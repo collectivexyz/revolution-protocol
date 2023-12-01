@@ -12,6 +12,8 @@ interface ITokenEmitter {
 
     function setEntropyRateBps(uint256 _entropyRateBps) external;
 
+    function getTokenQuoteForPayment(uint256 paymentAmount) external returns (int);
+
     function setCreatorsAddress(address creators) external;
 
     event CreatorsAddressUpdated(address creators);

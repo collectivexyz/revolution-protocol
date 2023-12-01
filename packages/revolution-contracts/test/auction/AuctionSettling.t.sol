@@ -222,7 +222,7 @@ contract VerbsAuctionHouseSettleTest is VerbsAuctionHouseTest {
         uint256 etherToSpendOnGovernanceTotal = uint256((bidAmount * creatorRate) / 10_000 - (bidAmount * (entropyRate * creatorRate)) / 10_000 / 10_000);
 
         uint256 expectedGovernanceTokenPayout = uint256(
-            tokenEmitter.getTokenQuoteForPayment(etherToSpendOnGovernanceTotal - tokenEmitter.computeTotalReward(etherToSpendOnGovernanceTotal))
+            tokenEmitter.getTokenQuoteForEther(etherToSpendOnGovernanceTotal - tokenEmitter.computeTotalReward(etherToSpendOnGovernanceTotal))
         );
 
         auctionHouse.settleCurrentAndCreateNewAuction();
@@ -291,14 +291,20 @@ contract VerbsAuctionHouseSettleTest is VerbsAuctionHouseTest {
 
         vm.warp(block.timestamp + auctionHouse.duration() + 1); // Fast forward time to end the auction
 
-        uint256 expectedGovernanceTokens = uint256(tokenEmitter.getTokenQuoteForPayment(creatorGovernancePayment - feeAmount));
+        uint256 expectedGovernanceTokens = uint256(tokenEmitter.getTokenQuoteForEther(creatorGovernancePayment - feeAmount));
+
+        emit log_string("creatorGovernancePayment");
+        emit log_uint(creatorGovernancePayment);
+
+        emit log_string("gov minus fee");
+        emit log_uint(creatorGovernancePayment - feeAmount);
+
+        emit log_string("expectedGovernanceTokens");
+        emit log_uint(expectedGovernanceTokens);
 
         // Track ETH balances
         uint256 balanceBeforeCreator = address(0x1).balance;
         uint256 balanceBeforeTreasury = address(this).balance;
-
-        // Track governance token balances
-        uint256 governanceTokenBalanceBeforeCreator = governanceToken.balanceOf(address(0x1));
 
         auctionHouse.settleCurrentAndCreateNewAuction();
 
@@ -320,7 +326,7 @@ contract VerbsAuctionHouseSettleTest is VerbsAuctionHouseTest {
         assertEq(cultureIndex.getCurrentVotes(address(21_000)), cultureIndex.erc721VotingTokenWeight(), "Highest bidder should have 10 votes");
 
         assertEq(
-            governanceToken.balanceOf(address(0x1)) - governanceTokenBalanceBeforeCreator,
+            governanceToken.balanceOf(address(0x1)),
             expectedGovernanceTokens,
             "Creator did not receive the correct amount of governance tokens"
         );

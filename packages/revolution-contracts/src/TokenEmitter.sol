@@ -14,8 +14,6 @@ contract TokenEmitter is VRGDAC, ITokenEmitter, ReentrancyGuard, TokenEmitterRew
     // treasury address to pay funds to
     address public treasury;
 
-    event Log(string message, int value);
-
     // The token that is being emitted.
     NontransferableERC20Votes public token;
 
@@ -84,19 +82,21 @@ contract TokenEmitter is VRGDAC, ITokenEmitter, ReentrancyGuard, TokenEmitterRew
         //Ether directly sent to creators
         uint256 creatorDirectPayment = ((msgValueRemaining - toPayTreasury) * entropyRateBps) / 10_000;
         //Tokens to emit to creators
-        int totalTokensForCreators = getTokenQuoteForPayment(msgValueRemaining - toPayTreasury - creatorDirectPayment);
+        int totalTokensForCreators = getTokenQuoteForEther(msgValueRemaining - toPayTreasury - creatorDirectPayment);
 
-        int totalTokensForBuyers = getTokenQuoteForPayment(toPayTreasury);
-        emit Log("totalTokensForBuyers", totalTokensForBuyers);
+        int totalTokensForBuyers = getTokenQuoteForEther(toPayTreasury);
+
+        //Transfer ETH to treasury
         (bool success, ) = treasury.call{ value: toPayTreasury }(new bytes(0));
         require(success, "Transfer failed.");
-        emittedTokenWad += totalTokensForBuyers;
 
+        //Transfer ETH to creators
         if (creatorDirectPayment > 0) {
             (success, ) = creatorsAddress.call{ value: creatorDirectPayment }(new bytes(0));
             require(success, "Transfer failed.");
         }
 
+        //Mint tokens for creators
         if(totalTokensForCreators > 0 && creatorsAddress != address(0)) {
             _mint(creatorsAddress, uint(totalTokensForCreators));
             emittedTokenWad += totalTokensForCreators;
@@ -104,12 +104,15 @@ contract TokenEmitter is VRGDAC, ITokenEmitter, ReentrancyGuard, TokenEmitterRew
 
         uint sum = 0;
 
-        // calculates how many tokens to give each address
-        for (uint i = 0; i < _addresses.length; i++) {
-            int tokens = totalTokensForBuyers * int(_bps[i]) / 10_000;
-            // transfer tokens to address
-            _mint(_addresses[i], uint(tokens));
-            sum += _bps[i];
+        //Mint tokens to buyers
+        if(totalTokensForBuyers > 0) {
+            for (uint i = 0; i < _addresses.length; i++) {
+                int tokens = totalTokensForBuyers * int(_bps[i]) / 10_000;
+                emittedTokenWad += tokens;
+                // transfer tokens to address
+                _mint(_addresses[i], uint(tokens));
+                sum += _bps[i];
+            }
         }
 
         require(sum == 10_000, "bps must add up to 10_000");
@@ -125,10 +128,16 @@ contract TokenEmitter is VRGDAC, ITokenEmitter, ReentrancyGuard, TokenEmitterRew
         return xToY({ timeSinceStart: toDaysWadUnsafe(block.timestamp - startTime), sold: emittedTokenWad, amount: int(amount) });
     }
 
-    function getTokenQuoteForPayment(uint paymentWei) public view returns (int gainedX) {
+    function getTokenQuoteForEther(uint etherAmount) public view returns (int gainedX) {
         // Note: By using toDaysWadUnsafe(block.timestamp - startTime) we are establishing that 1 "unit of time" is 1 day.
         // solhint-disable-next-line not-rely-on-time
-        return yToX({ timeSinceStart: toDaysWadUnsafe(block.timestamp - startTime), sold: emittedTokenWad, amount: int(paymentWei) });
+        return yToX({ timeSinceStart: toDaysWadUnsafe(block.timestamp - startTime), sold: emittedTokenWad, amount: int(etherAmount) });
+    }
+
+    function getTokenQuoteForPayment(uint paymentAmount) external view returns (int gainedX) {
+        // Note: By using toDaysWadUnsafe(block.timestamp - startTime) we are establishing that 1 "unit of time" is 1 day.
+        // solhint-disable-next-line not-rely-on-time
+        return yToX({ timeSinceStart: toDaysWadUnsafe(block.timestamp - startTime), sold: emittedTokenWad, amount: int((paymentAmount - computeTotalReward(paymentAmount)) * (10_000 - creatorRateBps) / 10_000) });
     }
 
     /**

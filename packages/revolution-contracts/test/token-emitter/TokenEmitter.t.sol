@@ -91,7 +91,7 @@ contract TokenEmitterTest is Test {
     function testBuyingLaterIsBetter() public {
         vm.startPrank(address(0));
 
-        int256 initAmount = emitter.getTokenQuoteForPayment(1e18);
+        int256 initAmount = emitter.getTokenQuoteForEther(1e18);
 
         int256 firstPrice = emitter.buyTokenQuote(1e19);
 
@@ -103,7 +103,7 @@ contract TokenEmitterTest is Test {
         emit log_int(firstPrice);
         emit log_int(secondPrice);
 
-        int256 laterAmount = emitter.getTokenQuoteForPayment(1e18);
+        int256 laterAmount = emitter.getTokenQuoteForEther(1e18);
 
         assertGt(laterAmount, initAmount, "Later amount should be greater than initial amount");
 
@@ -158,7 +158,7 @@ contract TokenEmitterTest is Test {
         bps[1] = 10_000 - firstBps;
 
         // estimate tokens to be emitted
-        int256 expectedAmount = emitter.getTokenQuoteForPayment(1e18 - emitter.computeTotalReward(1e18));
+        int256 expectedAmount = emitter.getTokenQuoteForEther(1e18 - emitter.computeTotalReward(1e18));
 
         emitter.buyToken{ value: 1e18 }(recipients, bps, address(0), address(0), address(0));
         //assert address balances are correct
@@ -183,7 +183,7 @@ contract TokenEmitterTest is Test {
         correctBps[0] = 5000; // 50%
         correctBps[1] = 5000; // 50%
 
-        int expectedAmount = emitter.getTokenQuoteForPayment(1e18 - emitter.computeTotalReward(1e18));
+        int expectedAmount = emitter.getTokenQuoteForEther(1e18 - emitter.computeTotalReward(1e18));
         assertGt(expectedAmount, 0, "Token purchase should have a positive amount");
 
         // Attempting a valid token purchase
@@ -301,10 +301,10 @@ contract TokenEmitterTest is Test {
 
         uint256 SOME_MAX_EXPECTED_VALUE = uint256(wadDiv(int256(payment), 1 ether)) * 1e18 * tokensPerTimeUnit;
 
-        int256 slightlyMore = emitter.getTokenQuoteForPayment((payment * 101) / 100);
+        int256 slightlyMore = emitter.getTokenQuoteForEther((payment * 101) / 100);
 
         // Call the function with the typical payment amount
-        int256 tokenAmount = emitter.getTokenQuoteForPayment(payment);
+        int256 tokenAmount = emitter.getTokenQuoteForEther(payment);
 
         emit log_int(tokenAmount);
 
@@ -324,7 +324,7 @@ contract TokenEmitterTest is Test {
 
         emitter.buyToken{ value: payment }(recipients, bps, address(0), address(0), address(0));
 
-        int256 newTokenAmount = emitter.getTokenQuoteForPayment(payment);
+        int256 newTokenAmount = emitter.getTokenQuoteForEther(payment);
 
         // Assert that the new token amount is less than the previous tokenAmount
         assertLt(newTokenAmount, tokenAmount, "Token amount should be less than previous token amount");
@@ -337,19 +337,19 @@ contract TokenEmitterTest is Test {
 
         // Edge Case 1: Very Small Payment
         uint256 smallPayment = 0.00001 ether;
-        int256 smallPaymentTokenAmount = emitter.getTokenQuoteForPayment(smallPayment);
+        int256 smallPaymentTokenAmount = emitter.getTokenQuoteForEther(smallPayment);
         assertGt(smallPaymentTokenAmount, 0, "Token amount for small payment should be greater than zero");
         emit log_int(smallPaymentTokenAmount);
 
         // A days worth of payment amount
-        int256 dailyPaymentTokenAmount = emitter.getTokenQuoteForPayment(expectedVolume);
+        int256 dailyPaymentTokenAmount = emitter.getTokenQuoteForEther(expectedVolume);
         assertLt(uint256(dailyPaymentTokenAmount), tokensPerTimeUnit * 1e18, "Token amount for daily payment should be less than tokens per day");
         emit log_string("Daily Payment Token Amount: ");
         emit log_int(dailyPaymentTokenAmount);
 
         // Edge Case 2: Very Large Payment
         // An unusually large payment amount
-        int256 largePaymentTokenAmount = emitter.getTokenQuoteForPayment(expectedVolume * 100);
+        int256 largePaymentTokenAmount = emitter.getTokenQuoteForEther(expectedVolume * 100);
         //spending 100x the expected amount per day should get you < 25x the tokens
         uint256 SOME_REALISTIC_UPPER_BOUND = 25 * tokensPerTimeUnit * 1e18;
         assertLt(uint256(largePaymentTokenAmount), SOME_REALISTIC_UPPER_BOUND, "Token amount for large payment should be less than some realistic upper bound");
@@ -357,7 +357,7 @@ contract TokenEmitterTest is Test {
         emit log_int(largePaymentTokenAmount);
 
         uint256 largestPayment = expectedVolume * 1_000; // An unusually large payment amount
-        int256 largestPaymentTokenAmount = emitter.getTokenQuoteForPayment(largestPayment);
+        int256 largestPaymentTokenAmount = emitter.getTokenQuoteForEther(largestPayment);
         //spending 1000x the daily amount should get you less than 50x the tokens
         assertLt(uint256(largestPaymentTokenAmount), 50 * tokensPerTimeUnit * 1e18, "Token amount for largest payment should be less than some realistic upper bound");
 
