@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: MIT
-pragma solidity ^0.8.20;
+pragma solidity ^0.8.22;
 
 import { VRGDAC } from "./libs/VRGDAC.sol";
 import { toDaysWadUnsafe } from "./libs/SignedWadMath.sol";
@@ -101,7 +101,7 @@ contract TokenEmitter is VRGDAC, ITokenEmitter, ReentrancyGuard, TokenEmitterRew
         //Transfer ETH to creators
         if (creatorDirectPayment > 0) {
             if(totalTokensForCreators > 0) emittedTokenWad += totalTokensForCreators;
-            
+
             (success, ) = creatorsAddress.call{ value: creatorDirectPayment }(new bytes(0));
             require(success, "Transfer failed.");
         }

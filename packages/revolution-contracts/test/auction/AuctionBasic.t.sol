@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: MIT
-pragma solidity ^0.8.20;
+pragma solidity ^0.8.22;
 
 import { VerbsAuctionHouseTest } from "./AuctionHouse.t.sol";
 import { IVerbsAuctionHouse } from "../../src/interfaces/IVerbsAuctionHouse.sol";
@@ -13,7 +13,7 @@ contract VerbsAuctionHouseBasicTest is VerbsAuctionHouseTest {
 
         // Expect events when changing creatorRateBps
         vm.expectEmit(true, true, true, true);
-        emit IVerbsAuctionHouse.CreatorRateBpsUpdated(newCreatorRateBps);
+        emit CreatorRateBpsUpdated(newCreatorRateBps);
         auctionHouse.setCreatorRateBps(newCreatorRateBps);
 
         // Expect events when changing entropyRateBps
