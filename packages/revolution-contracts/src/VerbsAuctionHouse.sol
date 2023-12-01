@@ -256,7 +256,7 @@ contract VerbsAuctionHouse is IVerbsAuctionHouse, PausableUpgradeable, Reentranc
      * If the mint reverts, the minter was updated without pausing this contract first. To remedy this,
      * catch the revert and pause this contract.
      */
-    function _createAuction() nonReentrant internal {
+    function _createAuction() internal {
         try verbs.mint() returns (uint256 verbId) {
             uint256 startTime = block.timestamp;
             uint256 endTime = startTime + duration;
@@ -273,7 +273,7 @@ contract VerbsAuctionHouse is IVerbsAuctionHouse, PausableUpgradeable, Reentranc
      * @notice Settle an auction, finalizing the bid and paying out to the owner.
      * @dev If there are no bids, the Verb is burned.
      */
-    function _settleAuction() nonReentrant internal {
+    function _settleAuction() internal {
         IVerbsAuctionHouse.Auction memory _auction = auction;
 
         require(_auction.startTime != 0, "Auction hasn't begun");
@@ -333,7 +333,7 @@ contract VerbsAuctionHouse is IVerbsAuctionHouse, PausableUpgradeable, Reentranc
     /// @notice Transfer ETH/WETH from the contract
     /// @param _to The recipient address
     /// @param _amount The amount transferring
-    function _safeTransferETHWithFallback(address _to, uint256 _amount) nonReentrant private {
+    function _safeTransferETHWithFallback(address _to, uint256 _amount) private {
         // Ensure the contract has enough ETH to transfer
         if (address(this).balance < _amount) revert("Insufficient balance");
 
