@@ -160,7 +160,6 @@ contract TokenEmitter is VRGDAC, ITokenEmitter, ReentrancyGuard, TokenEmitterRew
      */
     function setEntropyRateBps(uint256 _entropyRateBps) external onlyOwner {
         require(_entropyRateBps <= 10_000, "Entropy rate must be less than or equal to 10_000");
-        require(_entropyRateBps >= 0, "Entropy rate must be greater than or equal to 0");
 
         entropyRateBps = _entropyRateBps;
         emit EntropyRateBpsUpdated(_entropyRateBps);
@@ -173,7 +172,6 @@ contract TokenEmitter is VRGDAC, ITokenEmitter, ReentrancyGuard, TokenEmitterRew
      */
     function setCreatorRateBps(uint256 _creatorRateBps) external onlyOwner {
         require(_creatorRateBps <= 10_000, "Creator rate must be less than or equal to 10_000");
-        require(_creatorRateBps >= 0, "Creator rate must be greater than or equal to 0");
         creatorRateBps = _creatorRateBps;
 
         emit CreatorRateBpsUpdated(_creatorRateBps);

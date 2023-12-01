@@ -23,10 +23,6 @@ import { ERC20 } from "./base/erc20/ERC20.sol";
 import { EIP712 } from "@openzeppelin/contracts/utils/cryptography/EIP712.sol";
 
 contract NontransferableERC20Votes is Ownable, ERC20Votes {
-    mapping(address account => uint256) private _balances;
-
-    uint256 private _totalSupply;
-
     /**
      * @dev Sets the values for {name} and {symbol}.
      *

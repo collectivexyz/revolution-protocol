@@ -82,9 +82,4 @@ contract VRGDAC {
                 decayConstant
             );
     }
-
-    // given # of tokens sold, returns price p(x) = p0 * (1 - k)^(t - (x/r)) - (x/r) makes it a linearvrgda issuance
-    function p(int256 timeSinceStart, int256 sold) internal view returns (int256) {
-        return wadMul(targetPrice, wadPow(1e18 - priceDecayPercent, timeSinceStart - unsafeWadDiv(sold, perTimeUnit)));
-    }
 }
