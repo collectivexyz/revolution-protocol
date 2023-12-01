@@ -16,6 +16,15 @@ function toDaysWadUnsafe(uint256 x) pure returns (int256 r) {
     }
 }
 
+/// @dev Will return 0 instead of reverting if y is zero and will
+/// not revert on overflow, only use where overflow is not possible.
+function unsafeWadDiv(int256 x, int256 y) pure returns (int256 r) {
+    /// @solidity memory-safe-assembly
+    assembly {
+        // Multiply x by 1e18 and divide it by y.
+        r := sdiv(mul(x, 1000000000000000000), y)
+    }
+}
 
 function wadMul(int256 x, int256 y) pure returns (int256 r) {
     /// @solidity memory-safe-assembly

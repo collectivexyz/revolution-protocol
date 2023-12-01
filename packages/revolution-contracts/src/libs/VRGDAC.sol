@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: MIT
 pragma solidity 0.8.22;
 
-import { wadExp, wadLn, wadMul, wadDiv, unsafeWadMul, unsafeWadDiv, toWadUnsafe, wadPow } from "./SignedWadMath.sol";
+import { wadExp, wadLn, wadMul, wadDiv, unsafeWadDiv, wadPow } from "./SignedWadMath.sol";
 
 /// @title Continuous Variable Rate Gradual Dutch Auction
 /// @author transmissions11 <t11s@paradigm.xyz>
