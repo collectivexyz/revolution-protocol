@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: MIT
 // OpenZeppelin Contracts (last updated v5.0.0) (governance/utils/Votes.sol)
-pragma solidity ^0.8.22;
+pragma solidity ^0.8.18;
 
 import { IERC5805 } from "@openzeppelin/contracts/interfaces/IERC5805.sol";
 import { Context } from "@openzeppelin/contracts/utils/Context.sol";

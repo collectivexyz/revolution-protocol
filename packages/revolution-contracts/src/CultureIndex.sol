@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: GPL-3.0
-pragma solidity ^0.8.22;
+pragma solidity ^0.8.18;
 
 import { ERC20Votes } from "./base/erc20/ERC20Votes.sol";
 import { MaxHeap } from "./MaxHeap.sol";

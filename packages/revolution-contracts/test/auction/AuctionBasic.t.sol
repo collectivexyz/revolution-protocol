@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: MIT
-pragma solidity ^0.8.22;
+pragma solidity ^0.8.18;
 
 import { VerbsAuctionHouseTest } from "./AuctionHouse.t.sol";
 import { IVerbsAuctionHouse } from "../../src/interfaces/IVerbsAuctionHouse.sol";

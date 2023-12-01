@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: MIT
-pragma solidity 0.8.22;
+pragma solidity 0.8.18;
 
 import { TokenEmitterRewards } from "../../src/abstract/TokenEmitter/TokenEmitterRewards.sol";
 import { TokenEmitter, NontransferableERC20Votes } from "./TokenEmitterLibrary.sol";

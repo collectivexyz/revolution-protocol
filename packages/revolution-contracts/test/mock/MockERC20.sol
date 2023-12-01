@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: MIT
-pragma solidity ^0.8.22;
+pragma solidity ^0.8.18;
 
 contract MockERC20 {
     string public name = "Mock ERC20 Token";
