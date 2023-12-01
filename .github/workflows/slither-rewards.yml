@@ -1,4 +1,4 @@
-name: Protocol Rewards Slither Analysis
+name: Protocol Rewards Slither
 
 on:
   workflow_dispatch:
@@ -21,9 +21,6 @@ jobs:
           key: ${{ runner.os }}-pnpm-${{ hashFiles('**/pnpm-lock.yaml') }}
           restore-keys: |
             ${{ runner.os }}-pnpm-
-
-      - name: Install Foundry
-        uses: foundry-rs/foundry-toolchain@v1
 
       - name: Install pnpm
         run: |
