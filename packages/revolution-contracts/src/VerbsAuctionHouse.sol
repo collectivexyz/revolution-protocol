@@ -261,6 +261,7 @@ contract VerbsAuctionHouse is IVerbsAuctionHouse, PausableUpgradeable, Reentranc
             uint256 startTime = block.timestamp;
             uint256 endTime = startTime + duration;
 
+            //slither-disable-next-line reentrancy-eth
             auction = Auction({ verbId: verbId, amount: 0, startTime: startTime, endTime: endTime, bidder: payable(0), settled: false });
 
             emit AuctionCreated(verbId, startTime, endTime);
@@ -284,11 +285,11 @@ contract VerbsAuctionHouse is IVerbsAuctionHouse, PausableUpgradeable, Reentranc
 
         uint256 creatorTokensEmitted = 0;
 
-        if (_auction.bidder == address(0)) {
-            verbs.burn(_auction.verbId);
-        } else {
-            verbs.transferFrom(address(this), _auction.bidder, _auction.verbId);
-        }
+        //If no one has bid, burn the Verb
+        if (_auction.bidder == address(0)) verbs.burn(_auction.verbId);
+        //If someone has bid, transfer the Verb to the winning bidder
+        else verbs.transferFrom(address(this), _auction.bidder, _auction.verbId);
+
 
         if (_auction.amount > 0) {
             // Ether going to owner of the auction
