@@ -12,10 +12,10 @@ import { Ownable } from "@openzeppelin/contracts/access/Ownable.sol";
 
 contract TokenEmitter is VRGDAC, ITokenEmitter, ReentrancyGuard, TokenEmitterRewards, Ownable {
     // treasury address to pay funds to
-    address public treasury;
+    address public immutable treasury;
 
     // The token that is being emitted.
-    NontransferableERC20Votes public token;
+    NontransferableERC20Votes public immutable token;
 
     // solhint-disable-next-line not-rely-on-time
     uint public immutable startTime = block.timestamp;

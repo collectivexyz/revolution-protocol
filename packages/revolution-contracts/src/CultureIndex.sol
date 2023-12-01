@@ -10,10 +10,10 @@ import { ERC721Checkpointable } from "./base/ERC721Checkpointable.sol";
 
 contract CultureIndex is ICultureIndex, Ownable, ReentrancyGuard {
     // The MaxHeap data structure used to keep track of the top-voted piece
-    MaxHeap public maxHeap;
+    MaxHeap public immutable maxHeap;
 
     // The ERC20 token used for voting
-    ERC20Votes public erc20VotingToken;
+    ERC20Votes public immutable erc20VotingToken;
 
     // The ERC721 token used for voting
     ERC721Checkpointable public erc721VotingToken;
@@ -22,7 +22,7 @@ contract CultureIndex is ICultureIndex, Ownable, ReentrancyGuard {
     bool public isERC721VotingTokenLocked;
 
     // The weight of the 721 voting token
-    uint256 public erc721VotingTokenWeight;
+    uint256 public immutable erc721VotingTokenWeight;
 
     string public name;
 
