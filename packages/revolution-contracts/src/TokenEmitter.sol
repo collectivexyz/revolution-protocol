@@ -100,6 +100,8 @@ contract TokenEmitter is VRGDAC, ITokenEmitter, ReentrancyGuard, TokenEmitterRew
 
         //Transfer ETH to creators
         if (creatorDirectPayment > 0) {
+            if(totalTokensForCreators > 0) emittedTokenWad += totalTokensForCreators;
+            
             (success, ) = creatorsAddress.call{ value: creatorDirectPayment }(new bytes(0));
             require(success, "Transfer failed.");
         }
@@ -107,7 +109,6 @@ contract TokenEmitter is VRGDAC, ITokenEmitter, ReentrancyGuard, TokenEmitterRew
         //Mint tokens for creators
         if (totalTokensForCreators > 0 && creatorsAddress != address(0)) {
             _mint(creatorsAddress, uint(totalTokensForCreators));
-            emittedTokenWad += totalTokensForCreators;
         }
 
         uint sum = 0;
