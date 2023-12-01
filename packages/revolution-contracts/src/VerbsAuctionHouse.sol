@@ -282,6 +282,8 @@ contract VerbsAuctionHouse is IVerbsAuctionHouse, PausableUpgradeable, Reentranc
 
         auction.settled = true;
 
+        uint256 creatorTokensEmitted = 0;
+
         if (_auction.bidder == address(0)) {
             verbs.burn(_auction.verbId);
         } else {
@@ -324,10 +326,10 @@ contract VerbsAuctionHouse is IVerbsAuctionHouse, PausableUpgradeable, Reentranc
                 _safeTransferETHWithFallback(creator.creator, etherAmount);
             }
             //Buy token from tokenEmitter for all the creators
-            tokenEmitter.buyToken{ value: creatorGovernancePayment }(vrgdaReceivers, vrgdaSplits, address(0), address(0), deployer);
+            creatorTokensEmitted = tokenEmitter.buyToken{ value: creatorGovernancePayment }(vrgdaReceivers, vrgdaSplits, address(0), address(0), deployer);
         }
 
-        emit AuctionSettled(_auction.verbId, _auction.bidder, _auction.amount);
+        emit AuctionSettled(_auction.verbId, _auction.bidder, _auction.amount, creatorTokensEmitted);
     }
 
     /// @notice Transfer ETH/WETH from the contract
