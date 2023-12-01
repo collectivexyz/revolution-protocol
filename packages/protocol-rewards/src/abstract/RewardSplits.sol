@@ -36,15 +36,23 @@ abstract contract RewardSplits {
     }
 
     /*
-    * @notice Sometimes has rounding errors vs. compute purchase rewards, use externally.
-    * @param _paymentAmountWei The amount of ETH being paid for the purchase
-    */
+     * @notice Sometimes has rounding errors vs. compute purchase rewards, use externally.
+     * @param _paymentAmountWei The amount of ETH being paid for the purchase
+     */
     function computeTotalReward(uint256 paymentAmountWei) public view returns (uint256) {
         if (paymentAmountWei <= minPurchaseAmount || paymentAmountWei >= maxPurchaseAmount) {
             revert INVALID_ETH_AMOUNT();
         }
 
-        return (paymentAmountWei * BUILDER_REWARD_BPS) / 10_000 + (paymentAmountWei * PURCHASE_REFERRAL_BPS) / 10_000 + (paymentAmountWei * DEPLOYER_REWARD_BPS) / 10_000 + (paymentAmountWei * REVOLUTION_REWARD_BPS) / 10_000;
+        return
+            (paymentAmountWei * BUILDER_REWARD_BPS) /
+            10_000 +
+            (paymentAmountWei * PURCHASE_REFERRAL_BPS) /
+            10_000 +
+            (paymentAmountWei * DEPLOYER_REWARD_BPS) /
+            10_000 +
+            (paymentAmountWei * REVOLUTION_REWARD_BPS) /
+            10_000;
     }
 
     function computePurchaseRewards(uint256 paymentAmountWei) public view returns (RewardsSettings memory, uint256) {
@@ -62,9 +70,11 @@ abstract contract RewardSplits {
     function _depositPurchaseRewards(uint256 paymentAmountWei, address builderReferral, address purchaseReferral, address deployer) internal returns (uint256) {
         (RewardsSettings memory settings, uint256 totalReward) = computePurchaseRewards(paymentAmountWei);
 
-        builderReferral = builderReferral == address(0) ? revolutionRewardRecipient : builderReferral;
-        purchaseReferral = purchaseReferral == address(0) ? revolutionRewardRecipient : purchaseReferral;
-        deployer = deployer == address(0) ? revolutionRewardRecipient : deployer;
+        if(builderReferral == address(0)) builderReferral = revolutionRewardRecipient;
+
+        if(deployer == address(0)) deployer = revolutionRewardRecipient;
+
+        if(purchaseReferral == address(0)) purchaseReferral = revolutionRewardRecipient;
 
         protocolRewards.depositRewards{ value: totalReward }(
             builderReferral,
@@ -79,5 +89,4 @@ abstract contract RewardSplits {
 
         return totalReward;
     }
-
 }

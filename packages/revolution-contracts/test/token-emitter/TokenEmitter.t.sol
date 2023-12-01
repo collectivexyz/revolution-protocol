@@ -113,8 +113,8 @@ contract TokenEmitterTest is Test {
         uint256 feeAmount = emitter.computeTotalReward(valueToSend);
 
         // Calculate expected ETH sent to creator
-        uint256 totalPaymentForCreator = (valueToSend - feeAmount) * creatorRate / 10000;
-        uint256 expectedCreatorEth = totalPaymentForCreator * entropyRate / 10000;
+        uint256 totalPaymentForCreator = ((valueToSend - feeAmount) * creatorRate) / 10000;
+        uint256 expectedCreatorEth = (totalPaymentForCreator * entropyRate) / 10000;
 
         uint256 expectedCreatorTokens = uint(emitter.getTokenQuoteForEther(totalPaymentForCreator - expectedCreatorEth));
 
@@ -124,7 +124,7 @@ contract TokenEmitterTest is Test {
         // Verify tokens distributed to creator
         uint256 creatorTokenBalance = emitter.balanceOf(creatorsAddress);
         assertEq(creatorTokenBalance, expectedCreatorTokens, "Creator did not receive correct amount of tokens");
-        
+
         // Verify ETH sent to creator
         uint256 creatorsNewEthBalance = address(creatorsAddress).balance;
         assertEq(creatorsNewEthBalance - creatorsInitialEthBalance, expectedCreatorEth, "Incorrect ETH amount sent to creator");
@@ -133,7 +133,6 @@ contract TokenEmitterTest is Test {
         uint256 recipientTokenBalance = emitter.balanceOf(address(1));
         assertEq(recipientTokenBalance, tokensSold, "Recipient did not receive correct amount of tokens");
     }
-
 
     function testBuyingLaterIsBetter() public {
         vm.startPrank(address(0));
@@ -210,8 +209,8 @@ contract TokenEmitterTest is Test {
         emitter.buyToken{ value: 1e18 }(recipients, bps, address(0), address(0), address(0));
         //assert address balances are correct
         //multiply bps by expectedAmount and assert
-        assertEq(emitter.balanceOf(address(1)), firstBps * uint256(expectedAmount) / 10_000, "First recipient should have correct balance");
-        assertEq(emitter.balanceOf(address(2)), (10_000 - firstBps) * uint256(expectedAmount) / 10_000, "Second recipient should have correct balance");
+        assertEq(emitter.balanceOf(address(1)), (firstBps * uint256(expectedAmount)) / 10_000, "First recipient should have correct balance");
+        assertEq(emitter.balanceOf(address(2)), ((10_000 - firstBps) * uint256(expectedAmount)) / 10_000, "Second recipient should have correct balance");
 
         //assert treasury balance is correct
         assertEq(address(emitter.treasury()).balance, 1e18 - emitter.computeTotalReward(1e18), "Treasury should have payment - totalReward in balance");

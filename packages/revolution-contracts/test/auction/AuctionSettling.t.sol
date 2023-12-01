@@ -325,11 +325,7 @@ contract VerbsAuctionHouseSettleTest is VerbsAuctionHouseTest {
         // Checking voting weight on culture index is 721 vote weight for winning bidder
         assertEq(cultureIndex.getCurrentVotes(address(21_000)), cultureIndex.erc721VotingTokenWeight(), "Highest bidder should have 10 votes");
 
-        assertEq(
-            governanceToken.balanceOf(address(0x1)),
-            expectedGovernanceTokens,
-            "Creator did not receive the correct amount of governance tokens"
-        );
+        assertEq(governanceToken.balanceOf(address(0x1)), expectedGovernanceTokens, "Creator did not receive the correct amount of governance tokens");
     }
 }
 

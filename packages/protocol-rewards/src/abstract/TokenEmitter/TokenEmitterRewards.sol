@@ -11,8 +11,6 @@ abstract contract TokenEmitterRewards is RewardSplits {
             revert INVALID_ETH_AMOUNT();
         }
 
-        uint256 totalReward = _depositPurchaseRewards(msgValue, builderReferral, purchaseReferral, deployer);
-
-        return msgValue - totalReward;
+        return msgValue - _depositPurchaseRewards(msgValue, builderReferral, purchaseReferral, deployer);
     }
 }

@@ -887,8 +887,7 @@ contract NontransferableERC20Votes is Ownable, ERC20Votes {
      * All two of these values are immutable: they can only be set once during
      * construction.
      */
-    constructor(address _initialOwner, string memory name_, string memory symbol_) Ownable(_initialOwner) ERC20(name_, symbol_) EIP712(name_, "1") {
-    }
+    constructor(address _initialOwner, string memory name_, string memory symbol_) Ownable(_initialOwner) ERC20(name_, symbol_) EIP712(name_, "1") {}
 
     /**
      * @dev Returns the number of decimals used to get its user representation.
@@ -1073,7 +1072,7 @@ contract TokenEmitter is VRGDAC, ITokenEmitter, ReentrancyGuard, TokenEmitterRew
 
         // Get value left after protocol rewards
         uint msgValueRemaining = _handleRewardsAndGetValueToSend(msg.value, builder, purchaseReferral, deployer);
-        
+
         //Share of purchase amount to send to treasury
         uint256 toPayTreasury = (msgValueRemaining * (10_000 - creatorRateBps)) / 10_000;
 
@@ -1095,7 +1094,7 @@ contract TokenEmitter is VRGDAC, ITokenEmitter, ReentrancyGuard, TokenEmitterRew
         }
 
         //Mint tokens for creators
-        if(totalTokensForCreators > 0 && creatorsAddress != address(0)) {
+        if (totalTokensForCreators > 0 && creatorsAddress != address(0)) {
             _mint(creatorsAddress, uint(totalTokensForCreators));
             emittedTokenWad += totalTokensForCreators;
         }
@@ -1103,9 +1102,9 @@ contract TokenEmitter is VRGDAC, ITokenEmitter, ReentrancyGuard, TokenEmitterRew
         uint sum = 0;
 
         //Mint tokens to buyers
-        if(totalTokensForBuyers > 0) {
+        if (totalTokensForBuyers > 0) {
             for (uint i = 0; i < _addresses.length; i++) {
-                int tokens = totalTokensForBuyers * int(_bps[i]) / 10_000;
+                int tokens = (totalTokensForBuyers * int(_bps[i])) / 10_000;
                 emittedTokenWad += tokens;
                 // transfer tokens to address
                 _mint(_addresses[i], uint(tokens));
@@ -1115,7 +1114,15 @@ contract TokenEmitter is VRGDAC, ITokenEmitter, ReentrancyGuard, TokenEmitterRew
 
         require(sum == 10_000, "bps must add up to 10_000");
 
-        emit PurchaseFinalized(msg.sender, msg.value, toPayTreasury, msg.value - msgValueRemaining, uint(totalTokensForBuyers), uint(totalTokensForCreators), creatorDirectPayment);
+        emit PurchaseFinalized(
+            msg.sender,
+            msg.value,
+            toPayTreasury,
+            msg.value - msgValueRemaining,
+            uint(totalTokensForBuyers),
+            uint(totalTokensForCreators),
+            creatorDirectPayment
+        );
 
         return uint(totalTokensForBuyers);
     }
@@ -1135,7 +1142,12 @@ contract TokenEmitter is VRGDAC, ITokenEmitter, ReentrancyGuard, TokenEmitterRew
     function getTokenQuoteForPayment(uint paymentAmount) external view returns (int gainedX) {
         // Note: By using toDaysWadUnsafe(block.timestamp - startTime) we are establishing that 1 "unit of time" is 1 day.
         // solhint-disable-next-line not-rely-on-time
-        return yToX({ timeSinceStart: toDaysWadUnsafe(block.timestamp - startTime), sold: emittedTokenWad, amount: int((paymentAmount - computeTotalReward(paymentAmount)) * (10_000 - creatorRateBps) / 10_000) });
+        return
+            yToX({
+                timeSinceStart: toDaysWadUnsafe(block.timestamp - startTime),
+                sold: emittedTokenWad,
+                amount: int(((paymentAmount - computeTotalReward(paymentAmount)) * (10_000 - creatorRateBps)) / 10_000)
+            });
     }
 
     /**
@@ -1174,4 +1186,3 @@ contract TokenEmitter is VRGDAC, ITokenEmitter, ReentrancyGuard, TokenEmitterRew
         emit CreatorsAddressUpdated(_creatorsAddress);
     }
 }
-
