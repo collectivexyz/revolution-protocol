@@ -58,7 +58,7 @@ contract TokenEmitterTest is Test {
         // transfers ownership to the second
         // ensures that the second can mint and calling buyGovernance succeeds
 
-        address treasury = address(0);
+        address treasury = address(0x36);
 
         // // 0.1 per governance, 10% price decay per day, 100 governance sale target per day
         NontransferableERC20Votes governanceToken = new NontransferableERC20Votes(address(this), "Revolution Governance", "GOV");

@@ -20,8 +20,8 @@ abstract contract RewardSplits {
     uint256 internal constant BUILDER_REWARD_BPS = 100;
     uint256 internal constant PURCHASE_REFERRAL_BPS = 50;
 
-    uint256 public minPurchaseAmount = 0.0000001 ether;
-    uint256 public maxPurchaseAmount = 50_000 ether;
+    uint256 public constant minPurchaseAmount = 0.0000001 ether;
+    uint256 public constant maxPurchaseAmount = 50_000 ether;
 
     address internal immutable revolutionRewardRecipient;
     IRevolutionProtocolRewards internal immutable protocolRewards;

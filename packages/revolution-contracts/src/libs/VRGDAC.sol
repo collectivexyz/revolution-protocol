@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: MIT
 pragma solidity 0.8.22;
 
-import { wadExp, wadLn, wadMul, wadDiv, unsafeWadMul, unsafeWadDiv, toWadUnsafe, wadPow } from "./SignedWadMath.sol";
+import { wadExp, wadLn, wadMul, wadDiv, unsafeWadDiv, wadPow } from "./SignedWadMath.sol";
 
 /// @title Continuous Variable Rate Gradual Dutch Auction
 /// @author transmissions11 <t11s@paradigm.xyz>
@@ -81,10 +81,5 @@ contract VRGDAC {
                 ),
                 decayConstant
             );
-    }
-
-    // given # of tokens sold, returns price p(x) = p0 * (1 - k)^(t - (x/r)) - (x/r) makes it a linearvrgda issuance
-    function p(int256 timeSinceStart, int256 sold) internal view returns (int256) {
-        return wadMul(targetPrice, wadPow(1e18 - priceDecayPercent, timeSinceStart - unsafeWadDiv(sold, perTimeUnit)));
     }
 }

@@ -99,6 +99,7 @@ contract VerbsToken is IVerbsToken, Ownable, ERC721Checkpointable, ReentrancyGua
         string memory _tokenName,
         string memory _tokenSymbol
     ) ERC721(_tokenName, _tokenSymbol) Ownable(_initialOwner) {
+        require (_minter != address(0), "Minter cannot be zero address");
         minter = _minter;
         descriptor = _descriptor;
         cultureIndex = _cultureIndex;
@@ -170,6 +171,7 @@ contract VerbsToken is IVerbsToken, Ownable, ERC721Checkpointable, ReentrancyGua
      * @dev Only callable by the owner when not locked.
      */
     function setMinter(address _minter) external override onlyOwner nonReentrant whenMinterNotLocked {
+        require(_minter != address(0), "Minter cannot be zero address");
         minter = _minter;
 
         emit MinterUpdated(_minter);
@@ -239,7 +241,6 @@ contract VerbsToken is IVerbsToken, Ownable, ERC721Checkpointable, ReentrancyGua
      * @notice Mint a Verb with `verbId` to the provided `to` address.
      */
     function _mintTo(address to) internal returns (uint256) {
-        uint256 verbId;
         ICultureIndex.ArtPiece memory artPiece = cultureIndex.getTopVotedPiece();
 
         // Check-Effects-Interactions Pattern
@@ -249,27 +250,27 @@ contract VerbsToken is IVerbsToken, Ownable, ERC721Checkpointable, ReentrancyGua
         // Use try/catch to handle potential failure
         try cultureIndex.dropTopVotedPiece() returns (ICultureIndex.ArtPiece memory _artPiece) {
             artPiece = _artPiece;
-            verbId = _currentVerbId++;
+            uint256 verbId = _currentVerbId++;
+
+            ICultureIndex.ArtPiece storage newPiece = artPieces[verbId];
+
+            newPiece.pieceId = artPiece.pieceId;
+            newPiece.metadata = artPiece.metadata;
+            newPiece.isDropped = artPiece.isDropped;
+            newPiece.dropper = artPiece.dropper;
+
+            for (uint i = 0; i < artPiece.creators.length; i++) {
+                newPiece.creators.push(artPiece.creators[i]);
+            }
+
+            _mint(owner(), to, verbId);
+
+            emit VerbCreated(verbId, artPiece);
+
+            return verbId;
         } catch {
             // Handle failure (e.g., revert, emit an event, set a flag, etc.)
             revert("dropTopVotedPiece failed");
         }
-
-        ICultureIndex.ArtPiece storage newPiece = artPieces[verbId];
-
-        newPiece.pieceId = artPiece.pieceId;
-        newPiece.metadata = artPiece.metadata;
-        newPiece.isDropped = artPiece.isDropped;
-        newPiece.dropper = artPiece.dropper;
-
-        for (uint i = 0; i < artPiece.creators.length; i++) {
-            newPiece.creators.push(artPiece.creators[i]);
-        }
-
-        _mint(owner(), to, verbId);
-
-        emit VerbCreated(verbId, artPiece);
-
-        return verbId;
     }
 }

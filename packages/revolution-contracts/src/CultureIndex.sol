@@ -10,10 +10,10 @@ import { ERC721Checkpointable } from "./base/ERC721Checkpointable.sol";
 
 contract CultureIndex is ICultureIndex, Ownable, ReentrancyGuard {
     // The MaxHeap data structure used to keep track of the top-voted piece
-    MaxHeap public maxHeap;
+    MaxHeap public immutable maxHeap;
 
     // The ERC20 token used for voting
-    ERC20Votes public erc20VotingToken;
+    ERC20Votes public immutable erc20VotingToken;
 
     // The ERC721 token used for voting
     ERC721Checkpointable public erc721VotingToken;
@@ -22,7 +22,7 @@ contract CultureIndex is ICultureIndex, Ownable, ReentrancyGuard {
     bool public isERC721VotingTokenLocked;
 
     // The weight of the 721 voting token
-    uint256 public erc721VotingTokenWeight;
+    uint256 public immutable erc721VotingTokenWeight;
 
     string public name;
 
@@ -292,6 +292,7 @@ contract CultureIndex is ICultureIndex, Ownable, ReentrancyGuard {
      * @return The ArtPiece struct of the top-voted art piece.
      */
     function getTopVotedPiece() public view returns (ArtPiece memory) {
+        //slither-disable-next-line unused-return
         (uint256 pieceId, ) = maxHeap.getMax();
         return pieces[pieceId];
     }
@@ -309,6 +310,7 @@ contract CultureIndex is ICultureIndex, Ownable, ReentrancyGuard {
      * @return The top-voted pieceId
      */
     function topVotedPieceId() external view returns (uint256) {
+        //slither-disable-next-line unused-return
         (uint256 pieceId, ) = maxHeap.getMax();
         return pieceId;
     }
@@ -318,9 +320,18 @@ contract CultureIndex is ICultureIndex, Ownable, ReentrancyGuard {
      * @return The top voted piece
      */
     function dropTopVotedPiece() public nonReentrant onlyOwner returns (ArtPiece memory) {
-        uint256 pieceId;
-        try maxHeap.extractMax() returns (uint256 _pieceId, uint256) {
-            pieceId = _pieceId;
+        //slither-disable-next-line unused-return
+        try maxHeap.extractMax() returns (uint256 pieceId, uint256) {
+            pieces[pieceId].isDropped = true;
+
+            emit PieceDropped(pieceId, msg.sender);
+
+            //for each creator, emit an event
+            for (uint i = 0; i < pieces[pieceId].creators.length; i++) {
+                emit PieceDroppedCreator(pieceId, pieces[pieceId].creators[i].creator, pieces[pieceId].dropper, pieces[pieceId].creators[i].bps);
+            }
+
+            return pieces[pieceId];
         } catch Error(
             string memory reason // Catch known revert reason
         ) {
@@ -333,16 +344,5 @@ contract CultureIndex is ICultureIndex, Ownable, ReentrancyGuard {
         ) {
             revert("Unknown error extracting top piece");
         }
-
-        pieces[pieceId].isDropped = true;
-
-        emit PieceDropped(pieceId, msg.sender);
-
-        //for each creator, emit an event
-        for (uint i = 0; i < pieces[pieceId].creators.length; i++) {
-            emit PieceDroppedCreator(pieceId, pieces[pieceId].creators[i].creator, pieces[pieceId].dropper, pieces[pieceId].creators[i].bps);
-        }
-
-        return pieces[pieceId];
     }
 }

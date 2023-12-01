@@ -41,7 +41,7 @@ contract VerbsAuctionHouse is IVerbsAuctionHouse, PausableUpgradeable, Reentranc
     ITokenEmitter public tokenEmitter;
 
     // The address of the WETH contract
-    address public weth;
+    address public WETH;
 
     // The minimum amount of time left in an auction after a new bid is created
     uint256 public timeBuffer;
@@ -75,7 +75,7 @@ contract VerbsAuctionHouse is IVerbsAuctionHouse, PausableUpgradeable, Reentranc
     function initialize(
         IVerbsToken _verbs,
         ITokenEmitter _tokenEmitter,
-        address _weth,
+        address _WETH,
         address _founder,
         uint256 _timeBuffer,
         uint256 _reservePrice,
@@ -92,10 +92,11 @@ contract VerbsAuctionHouse is IVerbsAuctionHouse, PausableUpgradeable, Reentranc
         _pause();
 
         require(_creatorRateBps >= _minCreatorRateBps, "Creator rate must be greater than or equal to the creator rate");
+        require(_WETH != address(0), "WETH cannot be zero address");
 
         verbs = _verbs;
         tokenEmitter = _tokenEmitter;
-        weth = _weth;
+        WETH = _WETH;
         timeBuffer = _timeBuffer;
         reservePrice = _reservePrice;
         minBidIncrementPercentage = _minBidIncrementPercentage;
@@ -108,6 +109,8 @@ contract VerbsAuctionHouse is IVerbsAuctionHouse, PausableUpgradeable, Reentranc
     /**
      * @notice Settle the current auction, mint a new Verb, and put it up for auction.
      */
+     //Can technically reenter via cross function reentrancies in _createAuction, auction, and pause, but those are only callable by the owner
+     //slither-disable-next-line reentrancy-eth
     function settleCurrentAndCreateNewAuction() external override nonReentrant whenNotPaused {
         _settleAuction();
         _createAuction();
@@ -129,31 +132,27 @@ contract VerbsAuctionHouse is IVerbsAuctionHouse, PausableUpgradeable, Reentranc
         IVerbsAuctionHouse.Auction memory _auction = auction;
 
         require(_auction.verbId == verbId, "Verb not up for auction");
+        //slither-disable-next-line timestamp
         require(block.timestamp < _auction.endTime, "Auction expired");
         require(msg.value >= reservePrice, "Must send at least reservePrice");
         require(msg.value >= _auction.amount + ((_auction.amount * minBidIncrementPercentage) / 100), "Must send more than last bid by minBidIncrementPercentage amount");
 
         address payable lastBidder = _auction.bidder;
 
-        // Refund the last bidder, if applicable
-        if (lastBidder != address(0)) {
-            _safeTransferETHWithFallback(lastBidder, _auction.amount);
-        }
-
         auction.amount = msg.value;
         auction.bidder = payable(msg.sender);
 
         // Extend the auction if the bid was received within `timeBuffer` of the auction end time
         bool extended = _auction.endTime - block.timestamp < timeBuffer;
-        if (extended) {
-            auction.endTime = _auction.endTime = block.timestamp + timeBuffer;
-        }
+        if (extended) auction.endTime = _auction.endTime = block.timestamp + timeBuffer;
+
+        // Refund the last bidder, if applicable
+        if (lastBidder != address(0)) _safeTransferETHWithFallback(lastBidder, _auction.amount);
 
         emit AuctionBid(_auction.verbId, msg.sender, msg.value, extended);
 
-        if (extended) {
-            emit AuctionExtended(_auction.verbId, _auction.endTime);
-        }
+        if (extended) emit AuctionExtended(_auction.verbId, _auction.endTime);
+
     }
 
     /**
@@ -174,7 +173,6 @@ contract VerbsAuctionHouse is IVerbsAuctionHouse, PausableUpgradeable, Reentranc
     function setCreatorRateBps(uint256 _creatorRateBps) external onlyOwner {
         require(_creatorRateBps >= minCreatorRateBps, "Creator rate must be greater than or equal to minCreatorRateBps");
         require(_creatorRateBps <= 10_000, "Creator rate must be less than or equal to 10_000");
-        require(_creatorRateBps >= 0, "Creator rate must be greater than or equal to 0");
         creatorRateBps = _creatorRateBps;
 
         emit CreatorRateBpsUpdated(_creatorRateBps);
@@ -188,7 +186,6 @@ contract VerbsAuctionHouse is IVerbsAuctionHouse, PausableUpgradeable, Reentranc
     function setMinCreatorRateBps(uint256 _minCreatorRateBps) external onlyOwner {
         require(_minCreatorRateBps <= creatorRateBps, "Min creator rate must be less than or equal to creator rate");
         require(_minCreatorRateBps <= 10_000, "Min creator rate must be less than or equal to 10_000");
-        require(_minCreatorRateBps >= 0, "Min creator rate must be greater than or equal to 0");
 
         //ensure new min rate cannot be lower than previous min rate
         require(_minCreatorRateBps > minCreatorRateBps, "Min creator rate must be greater than previous minCreatorRateBps");
@@ -205,7 +202,6 @@ contract VerbsAuctionHouse is IVerbsAuctionHouse, PausableUpgradeable, Reentranc
      */
     function setEntropyRateBps(uint256 _entropyRateBps) external onlyOwner {
         require(_entropyRateBps <= 10_000, "Entropy rate must be less than or equal to 10_000");
-        require(_entropyRateBps >= 0, "Entropy rate must be greater than or equal to 0");
 
         entropyRateBps = _entropyRateBps;
         emit EntropyRateBpsUpdated(_entropyRateBps);
@@ -282,15 +278,18 @@ contract VerbsAuctionHouse is IVerbsAuctionHouse, PausableUpgradeable, Reentranc
 
         require(_auction.startTime != 0, "Auction hasn't begun");
         require(!_auction.settled, "Auction has already been settled");
+        //slither-disable-next-line timestamp
         require(block.timestamp >= _auction.endTime, "Auction hasn't completed");
 
         auction.settled = true;
 
-        if (_auction.bidder == address(0)) {
-            verbs.burn(_auction.verbId);
-        } else {
-            verbs.transferFrom(address(this), _auction.bidder, _auction.verbId);
-        }
+        uint256 creatorTokensEmitted = 0;
+
+        //If no one has bid, burn the Verb
+        if (_auction.bidder == address(0)) verbs.burn(_auction.verbId);
+        //If someone has bid, transfer the Verb to the winning bidder
+        else verbs.transferFrom(address(this), _auction.bidder, _auction.verbId);
+
 
         if (_auction.amount > 0) {
             // Ether going to owner of the auction
@@ -321,35 +320,45 @@ contract VerbsAuctionHouse is IVerbsAuctionHouse, PausableUpgradeable, Reentranc
                 vrgdaReceivers[i] = creator.creator;
                 vrgdaSplits[i] = creator.bps;
 
-                //Calculate etherAmount for specific creator based on BPS splits
-                uint256 etherAmount = (creatorDirectPayment * creator.bps) / 10_000;
+                //Calculate etherAmount for specific creator based on BPS splits - same as multiplying by creatorDirectPayment
+                uint256 etherAmount = (creatorPayment * entropyRateBps * creator.bps) / (10_000 * 10_000);
 
                 //Transfer creator's share to the creator
                 _safeTransferETHWithFallback(creator.creator, etherAmount);
             }
             //Buy token from tokenEmitter for all the creators
-            tokenEmitter.buyToken{ value: creatorGovernancePayment }(vrgdaReceivers, vrgdaSplits, address(0), address(0), deployer);
+            creatorTokensEmitted = tokenEmitter.buyToken{ value: creatorGovernancePayment }(vrgdaReceivers, vrgdaSplits, address(0), address(0), deployer);
         }
 
-        emit AuctionSettled(_auction.verbId, _auction.bidder, _auction.amount);
+        emit AuctionSettled(_auction.verbId, _auction.bidder, _auction.amount, creatorTokensEmitted);
     }
 
-    /**
-     * @notice Transfer ETH. If the ETH transfer fails, wrap the ETH and try send it as WETH.
-     */
-    function _safeTransferETHWithFallback(address to, uint256 amount) internal {
-        if (!_safeTransferETH(to, amount)) {
-            IWETH(weth).deposit{ value: amount }();
-            IERC20(weth).transfer(to, amount);
+    /// @notice Transfer ETH/WETH from the contract
+    /// @param _to The recipient address
+    /// @param _amount The amount transferring
+    function _safeTransferETHWithFallback(address _to, uint256 _amount) private {
+        // Ensure the contract has enough ETH to transfer
+        if (address(this).balance < _amount) revert("Insufficient balance");
+
+        // Used to store if the transfer succeeded
+        bool success;
+
+        assembly {
+            // Transfer ETH to the recipient
+            // Limit the call to 50,000 gas
+            success := call(50000, _to, _amount, 0, 0, 0, 0)
         }
-    }
 
-    /**
-     * @notice Transfer ETH and return the success status.
-     * @dev This function only forwards 30,000 gas to the callee.
-     */
-    function _safeTransferETH(address to, uint256 value) internal returns (bool) {
-        (bool success, ) = to.call{ value: value, gas: 30_000 }(new bytes(0));
-        return success;
+        // If the transfer failed:
+        if (!success) {
+            // Wrap as WETH
+            IWETH(WETH).deposit{ value: _amount }();
+
+            // Transfer WETH instead
+            bool wethSuccess = IWETH(WETH).transfer(_to, _amount);
+
+            // Ensure successful transfer
+            if (!wethSuccess) revert("WETH transfer failed");
+        }
     }
 }
