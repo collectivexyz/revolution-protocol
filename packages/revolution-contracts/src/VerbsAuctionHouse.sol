@@ -41,7 +41,7 @@ contract VerbsAuctionHouse is IVerbsAuctionHouse, PausableUpgradeable, Reentranc
     ITokenEmitter public tokenEmitter;
 
     // The address of the WETH contract
-    address public weth;
+    address public WETH;
 
     // The minimum amount of time left in an auction after a new bid is created
     uint256 public timeBuffer;
@@ -75,7 +75,7 @@ contract VerbsAuctionHouse is IVerbsAuctionHouse, PausableUpgradeable, Reentranc
     function initialize(
         IVerbsToken _verbs,
         ITokenEmitter _tokenEmitter,
-        address _weth,
+        address _WETH,
         address _founder,
         uint256 _timeBuffer,
         uint256 _reservePrice,
@@ -92,11 +92,11 @@ contract VerbsAuctionHouse is IVerbsAuctionHouse, PausableUpgradeable, Reentranc
         _pause();
 
         require(_creatorRateBps >= _minCreatorRateBps, "Creator rate must be greater than or equal to the creator rate");
-        require(_weth != address(0), "WETH cannot be zero address");
+        require(_WETH != address(0), "WETH cannot be zero address");
 
         verbs = _verbs;
         tokenEmitter = _tokenEmitter;
-        weth = _weth;
+        WETH = _WETH;
         timeBuffer = _timeBuffer;
         reservePrice = _reservePrice;
         minBidIncrementPercentage = _minBidIncrementPercentage;
@@ -332,22 +332,32 @@ contract VerbsAuctionHouse is IVerbsAuctionHouse, PausableUpgradeable, Reentranc
         emit AuctionSettled(_auction.verbId, _auction.bidder, _auction.amount);
     }
 
-    /**
-     * @notice Transfer ETH. If the ETH transfer fails, wrap the ETH and try send it as WETH.
-     */
-    function _safeTransferETHWithFallback(address to, uint256 amount) internal {
-        if (!_safeTransferETH(to, amount)) {
-            IWETH(weth).deposit{ value: amount }();
-            IERC20(weth).transfer(to, amount);
-        }
-    }
+    /// @notice Transfer ETH/WETH from the contract
+    /// @param _to The recipient address
+    /// @param _amount The amount transferring
+    function _safeTransferETHWithFallback(address _to, uint256 _amount) private {
+        // Ensure the contract has enough ETH to transfer
+        if (address(this).balance < _amount) revert("Insufficient balance");
 
-    /**
-     * @notice Transfer ETH and return the success status.
-     * @dev This function only forwards 30,000 gas to the callee.
-     */
-    function _safeTransferETH(address to, uint256 value) internal returns (bool) {
-        (bool success, ) = to.call{ value: value, gas: 30_000 }(new bytes(0));
-        return success;
+        // Used to store if the transfer succeeded
+        bool success;
+
+        assembly {
+            // Transfer ETH to the recipient
+            // Limit the call to 50,000 gas
+            success := call(50000, _to, _amount, 0, 0, 0, 0)
+        }
+
+        // If the transfer failed:
+        if (!success) {
+            // Wrap as WETH
+            IWETH(WETH).deposit{ value: _amount }();
+
+            // Transfer WETH instead
+            bool wethSuccess = IWETH(WETH).transfer(_to, _amount);
+
+            // Ensure successful transfer
+            if (!wethSuccess) revert("WETH transfer failed");
+        }
     }
 }
