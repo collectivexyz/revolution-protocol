@@ -3,16 +3,7 @@ pragma solidity >=0.8.22;
 
 /// @notice Signed 18 decimal fixed point (wad) arithmetic library.
 /// @author Solmate (https://github.com/transmissions11/solmate/blob/main/src/utils/SignedWadMath.sol)
-/// @author Modified from Remco Bloemen (https://xn--2-umb.com/22/exp-ln/index.html)
-
-/// @dev Will not revert on overflow, only use where overflow is not possible.
-function toWadUnsafe(uint256 x) pure returns (int256 r) {
-    /// @solidity memory-safe-assembly
-    assembly {
-        // Multiply x by 1e18.
-        r := mul(x, 1000000000000000000)
-    }
-}
+/// @author Modified from Remco Bloemen (https://xn--2-umb.com/22/exp-ln/index.html) and transmissions11
 
 /// @dev Takes an integer amount of seconds and converts it to a wad amount of days.
 /// @dev Will not revert on overflow, only use where overflow is not possible.
@@ -25,35 +16,6 @@ function toDaysWadUnsafe(uint256 x) pure returns (int256 r) {
     }
 }
 
-/// @dev Takes a wad amount of days and converts it to an integer amount of seconds.
-/// @dev Will not revert on overflow, only use where overflow is not possible.
-/// @dev Not meant for negative day amounts, it assumes x is positive.
-function fromDaysWadUnsafe(int256 x) pure returns (uint256 r) {
-    /// @solidity memory-safe-assembly
-    assembly {
-        // Multiply x by 86400 and then divide it by 1e18.
-        r := div(mul(x, 86400), 1000000000000000000)
-    }
-}
-
-/// @dev Will not revert on overflow, only use where overflow is not possible.
-function unsafeWadMul(int256 x, int256 y) pure returns (int256 r) {
-    /// @solidity memory-safe-assembly
-    assembly {
-        // Multiply x by y and divide by 1e18.
-        r := sdiv(mul(x, y), 1000000000000000000)
-    }
-}
-
-/// @dev Will return 0 instead of reverting if y is zero and will
-/// not revert on overflow, only use where overflow is not possible.
-function unsafeWadDiv(int256 x, int256 y) pure returns (int256 r) {
-    /// @solidity memory-safe-assembly
-    assembly {
-        // Multiply x by 1e18 and divide it by y.
-        r := sdiv(mul(x, 1000000000000000000), y)
-    }
-}
 
 function wadMul(int256 x, int256 y) pure returns (int256 r) {
     /// @solidity memory-safe-assembly
@@ -227,14 +189,5 @@ function wadLn(int256 x) pure returns (int256 r) {
         r += 600920179829731861736702779321621459595472258049074101567377883020018308;
         // base conversion: mul 2**18 / 2**192
         r >>= 174;
-    }
-}
-
-/// @dev Will return 0 instead of reverting if y is zero.
-function unsafeDiv(int256 x, int256 y) pure returns (int256 r) {
-    /// @solidity memory-safe-assembly
-    assembly {
-        // Divide x by y.
-        r := sdiv(x, y)
     }
 }
