@@ -1,4 +1,4 @@
-name: Build Contract CI
+name: forge tests
 
 on:
   workflow_dispatch:

@@ -1,4 +1,4 @@
-name: Revolution Slither
+name: slither revolution
 
 on:
   workflow_dispatch:
