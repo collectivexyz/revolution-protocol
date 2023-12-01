@@ -170,6 +170,7 @@ contract VerbsToken is IVerbsToken, Ownable, ERC721Checkpointable, ReentrancyGua
      * @dev Only callable by the owner when not locked.
      */
     function setMinter(address _minter) external override onlyOwner nonReentrant whenMinterNotLocked {
+        require(_minter != address(0), "Minter cannot be zero address");
         minter = _minter;
 
         emit MinterUpdated(_minter);
