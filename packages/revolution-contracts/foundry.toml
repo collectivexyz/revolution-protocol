@@ -7,7 +7,7 @@ allow_paths = ["node_modules/@collectivexyz/protocol-rewards", "../../node_modul
 optimizer = true
 optimizer_runs = 50
 via_ir = true
-solc_version = '0.8.18'
+solc_version = '0.8.20'
 out = 'out'
 src = 'src'
 

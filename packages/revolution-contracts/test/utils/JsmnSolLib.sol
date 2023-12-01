@@ -19,7 +19,7 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 */
 
-pragma solidity ^0.8.18;
+pragma solidity ^0.8.20;
 
 library JsmnSolLib {
     enum JsmnType {

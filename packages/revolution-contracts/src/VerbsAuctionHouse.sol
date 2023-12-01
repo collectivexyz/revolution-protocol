@@ -21,7 +21,7 @@
 //
 // AuctionHouse.sol source code Copyright Zora licensed under the GPL-3.0 license.
 
-pragma solidity ^0.8.18;
+pragma solidity ^0.8.20;
 
 import { PausableUpgradeable } from "@openzeppelin/contracts-upgradeable/utils/PausableUpgradeable.sol";
 import { ReentrancyGuardUpgradeable } from "@openzeppelin/contracts-upgradeable/utils/ReentrancyGuardUpgradeable.sol";

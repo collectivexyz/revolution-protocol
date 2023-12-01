@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: MIT
 // OpenZeppelin Contracts (last updated v4.8.0) (token/ERC20/ERC20.sol)
 
-pragma solidity ^0.8.18;
+pragma solidity ^0.8.20;
 
 /**
  * @dev Extension of ERC-20 to support Compound-like voting and delegation. This version is more generic than Compound's,
