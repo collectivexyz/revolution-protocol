@@ -91,17 +91,17 @@ contract TokenEmitter is VRGDAC, ITokenEmitter, ReentrancyGuard, TokenEmitterRew
         //Tokens to emit to creators
         int totalTokensForCreators = getTokenQuoteForEther(msgValueRemaining - toPayTreasury - creatorDirectPayment);
 
+        // Tokens to emit to buyers
         int totalTokensForBuyers = getTokenQuoteForEther(toPayTreasury);
 
         //Transfer ETH to treasury and update emitted
         emittedTokenWad += totalTokensForBuyers;
+        if(totalTokensForCreators > 0) emittedTokenWad += totalTokensForCreators;
         (bool success, ) = treasury.call{ value: toPayTreasury }(new bytes(0));
         require(success, "Transfer failed.");
 
         //Transfer ETH to creators
         if (creatorDirectPayment > 0) {
-            if(totalTokensForCreators > 0) emittedTokenWad += totalTokensForCreators;
-
             (success, ) = creatorsAddress.call{ value: creatorDirectPayment }(new bytes(0));
             require(success, "Transfer failed.");
         }
