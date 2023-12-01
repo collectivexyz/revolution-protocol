@@ -109,6 +109,7 @@ contract VerbsAuctionHouse is IVerbsAuctionHouse, PausableUpgradeable, Reentranc
     /**
      * @notice Settle the current auction, mint a new Verb, and put it up for auction.
      */
+     // slither-disable-next-line reentrancy-eth
     function settleCurrentAndCreateNewAuction() external override nonReentrant whenNotPaused {
         _settleAuction();
         _createAuction();
@@ -261,7 +262,6 @@ contract VerbsAuctionHouse is IVerbsAuctionHouse, PausableUpgradeable, Reentranc
             uint256 startTime = block.timestamp;
             uint256 endTime = startTime + duration;
 
-            //slither-disable-next-line reentrancy-eth
             auction = Auction({ verbId: verbId, amount: 0, startTime: startTime, endTime: endTime, bidder: payable(0), settled: false });
 
             emit AuctionCreated(verbId, startTime, endTime);
