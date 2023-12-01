@@ -3,7 +3,7 @@ pragma solidity 0.8.22;
 
 import "../ProtocolRewardsTest.sol";
 import { RewardsSettings } from "../../src/abstract/RewardSplits.sol";
-import { NontransferableERC20Votes } from "../utils/TokenEmitter.sol";
+import { NontransferableERC20Votes } from "../utils/TokenEmitterLibrary.sol";
 
 contract TokenEmitterRewardsTest is ProtocolRewardsTest {
     MockTokenEmitter internal mockTokenEmitter;
@@ -14,7 +14,7 @@ contract TokenEmitterRewardsTest is ProtocolRewardsTest {
 
         govToken = new NontransferableERC20Votes(address(this), "Revolution Governance", "GOV");
 
-        mockTokenEmitter = new MockTokenEmitter(govToken, treasury, address(protocolRewards), revolution);
+        mockTokenEmitter = new MockTokenEmitter(address(this), govToken, treasury, address(protocolRewards), revolution);
 
         govToken.transferOwnership(address(mockTokenEmitter));
 
@@ -59,7 +59,7 @@ contract TokenEmitterRewardsTest is ProtocolRewardsTest {
 
         NontransferableERC20Votes govToken2 = new NontransferableERC20Votes(address(this), "Revolution Governance", "GOV");
 
-        mockTokenEmitter = new MockTokenEmitter(govToken2, treasury, address(protocolRewards), revolution);
+        mockTokenEmitter = new MockTokenEmitter(address(this), govToken2, treasury, address(protocolRewards), revolution);
 
         govToken2.transferOwnership(address(mockTokenEmitter));
 
