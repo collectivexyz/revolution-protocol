@@ -40,7 +40,7 @@ contract CultureIndexTestSuite is Test {
         );
 
         // Initialize your CultureIndex contract
-        cultureIndex = new CultureIndex(address(govToken), address(verbs), address(this), 10);
+        cultureIndex = new CultureIndex("Vrbs", "Our community Vrbs. Must be 32x32.", address(govToken), address(verbs), address(this), 10);
 
         verbs.setCultureIndex(cultureIndex);
 

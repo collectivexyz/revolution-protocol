@@ -24,11 +24,24 @@ contract CultureIndex is ICultureIndex, Ownable, ReentrancyGuard {
     // The weight of the 721 voting token
     uint256 public erc721VotingTokenWeight;
 
+    string public name;
+
+    string public description;
+
     // Initialize ERC20 Token in the constructor
-    constructor(address _erc20VotingToken, address _erc721VotingToken, address _initialOwner, uint256 _erc721VotingTokenWeight) Ownable(_initialOwner) {
+    constructor(
+        string memory _name,
+        string memory _description,
+        address _erc20VotingToken,
+        address _erc721VotingToken,
+        address _initialOwner,
+        uint256 _erc721VotingTokenWeight
+    ) Ownable(_initialOwner) {
         erc20VotingToken = ERC20Votes(_erc20VotingToken);
         erc721VotingToken = ERC721Checkpointable(_erc721VotingToken);
         erc721VotingTokenWeight = _erc721VotingTokenWeight;
+        name = _name;
+        description = _description;
 
         maxHeap = new MaxHeap(address(this));
     }

@@ -34,9 +34,7 @@ contract RevolutionProtocolRewards is IRevolutionProtocolRewards, EIP712 {
     /// @param to Reason system reason for deposit (used for indexing)
     /// @param comment Optional comment as reason for deposit
     function deposit(address to, bytes4 reason, string calldata comment) external payable {
-        if (to == address(0)) {
-            revert ADDRESS_ZERO();
-        }
+        if (to == address(0)) revert ADDRESS_ZERO();
 
         balanceOf[to] += msg.value;
 
@@ -51,9 +49,7 @@ contract RevolutionProtocolRewards is IRevolutionProtocolRewards, EIP712 {
     function depositBatch(address[] calldata recipients, uint256[] calldata amounts, bytes4[] calldata reasons, string calldata comment) external payable {
         uint256 numRecipients = recipients.length;
 
-        if (numRecipients != amounts.length || numRecipients != reasons.length) {
-            revert ARRAY_LENGTH_MISMATCH();
-        }
+        if (numRecipients != amounts.length || numRecipients != reasons.length) revert ARRAY_LENGTH_MISMATCH();
 
         uint256 expectedTotalValue;
 
@@ -65,9 +61,7 @@ contract RevolutionProtocolRewards is IRevolutionProtocolRewards, EIP712 {
             }
         }
 
-        if (msg.value != expectedTotalValue) {
-            revert INVALID_DEPOSIT();
-        }
+        if (msg.value != expectedTotalValue) revert INVALID_DEPOSIT();
 
         address currentRecipient;
         uint256 currentAmount;
@@ -76,9 +70,7 @@ contract RevolutionProtocolRewards is IRevolutionProtocolRewards, EIP712 {
             currentRecipient = recipients[i];
             currentAmount = amounts[i];
 
-            if (currentRecipient == address(0)) {
-                revert ADDRESS_ZERO();
-            }
+            if (currentRecipient == address(0)) revert ADDRESS_ZERO();
 
             balanceOf[currentRecipient] += currentAmount;
 
@@ -109,23 +101,16 @@ contract RevolutionProtocolRewards is IRevolutionProtocolRewards, EIP712 {
         address revolution,
         uint256 revolutionReward
     ) external payable {
-        if (msg.value != (builderReferralReward + purchaseReferralReward + deployerReward + revolutionReward)) {
-            revert INVALID_DEPOSIT();
-        }
+        if (msg.value != (builderReferralReward + purchaseReferralReward + deployerReward + revolutionReward)) revert INVALID_DEPOSIT();
 
         unchecked {
-            if (builderReferral != address(0)) {
-                balanceOf[builderReferral] += builderReferralReward;
-            }
-            if (purchaseReferral != address(0)) {
-                balanceOf[purchaseReferral] += purchaseReferralReward;
-            }
-            if (deployer != address(0)) {
-                balanceOf[deployer] += deployerReward;
-            }
-            if (revolution != address(0)) {
-                balanceOf[revolution] += revolutionReward;
-            }
+            if (builderReferral != address(0)) balanceOf[builderReferral] += builderReferralReward;
+
+            if (purchaseReferral != address(0)) balanceOf[purchaseReferral] += purchaseReferralReward;
+
+            if (deployer != address(0)) balanceOf[deployer] += deployerReward;
+
+            if (revolution != address(0)) balanceOf[revolution] += revolutionReward;
         }
 
         emit RewardsDeposit(
@@ -145,19 +130,13 @@ contract RevolutionProtocolRewards is IRevolutionProtocolRewards, EIP712 {
     /// @param to Withdraws from msg.sender to this address
     /// @param amount Amount to withdraw (0 for total balance)
     function withdraw(address to, uint256 amount) external {
-        if (to == address(0)) {
-            revert ADDRESS_ZERO();
-        }
+        if (to == address(0)) revert ADDRESS_ZERO();
 
         address owner = msg.sender;
 
-        if (amount > balanceOf[owner]) {
-            revert INVALID_WITHDRAW();
-        }
+        if (amount > balanceOf[owner]) revert INVALID_WITHDRAW();
 
-        if (amount == 0) {
-            amount = balanceOf[owner];
-        }
+        if (amount == 0) amount = balanceOf[owner];
 
         balanceOf[owner] -= amount;
 
@@ -165,26 +144,18 @@ contract RevolutionProtocolRewards is IRevolutionProtocolRewards, EIP712 {
 
         (bool success, ) = to.call{ value: amount }("");
 
-        if (!success) {
-            revert TRANSFER_FAILED();
-        }
+        if (!success) revert TRANSFER_FAILED();
     }
 
     /// @notice Withdraw rewards on behalf of an address
     /// @param to The address to withdraw for
     /// @param amount The amount to withdraw (0 for total balance)
     function withdrawFor(address to, uint256 amount) external {
-        if (to == address(0)) {
-            revert ADDRESS_ZERO();
-        }
+        if (to == address(0)) revert ADDRESS_ZERO();
 
-        if (amount > balanceOf[to]) {
-            revert INVALID_WITHDRAW();
-        }
+        if (amount > balanceOf[to]) revert INVALID_WITHDRAW();
 
-        if (amount == 0) {
-            amount = balanceOf[to];
-        }
+        if (amount == 0) amount = balanceOf[to];
 
         balanceOf[to] -= amount;
 
@@ -192,9 +163,7 @@ contract RevolutionProtocolRewards is IRevolutionProtocolRewards, EIP712 {
 
         (bool success, ) = to.call{ value: amount }("");
 
-        if (!success) {
-            revert TRANSFER_FAILED();
-        }
+        if (!success) revert TRANSFER_FAILED();
     }
 
     /// @notice Execute a withdraw of protocol rewards via signature
@@ -206,9 +175,7 @@ contract RevolutionProtocolRewards is IRevolutionProtocolRewards, EIP712 {
     /// @param r R component of signature
     /// @param s S component of signature
     function withdrawWithSig(address from, address to, uint256 amount, uint256 deadline, uint8 v, bytes32 r, bytes32 s) external {
-        if (block.timestamp > deadline) {
-            revert SIGNATURE_DEADLINE_EXPIRED();
-        }
+        if (block.timestamp > deadline) revert SIGNATURE_DEADLINE_EXPIRED();
 
         bytes32 withdrawHash;
 
@@ -220,21 +187,17 @@ contract RevolutionProtocolRewards is IRevolutionProtocolRewards, EIP712 {
 
         address recoveredAddress = ecrecover(digest, v, r, s);
 
-        if (recoveredAddress == address(0) || recoveredAddress != from) {
-            revert INVALID_SIGNATURE();
-        }
+        // Ensure signature is valid
+        if (recoveredAddress == address(0) || recoveredAddress != from) revert INVALID_SIGNATURE();
 
-        if (to == address(0)) {
-            revert ADDRESS_ZERO();
-        }
+        // Ensure to address is not 0
+        if (to == address(0)) revert ADDRESS_ZERO();
 
-        if (amount > balanceOf[from]) {
-            revert INVALID_WITHDRAW();
-        }
+        // Ensure amount is not greater than balance
+        if (amount > balanceOf[from]) revert INVALID_WITHDRAW();
 
-        if (amount == 0) {
-            amount = balanceOf[from];
-        }
+        // Set amount to balance if 0
+        if (amount == 0) amount = balanceOf[from];
 
         balanceOf[from] -= amount;
 

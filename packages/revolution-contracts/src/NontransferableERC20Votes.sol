@@ -33,8 +33,7 @@ contract NontransferableERC20Votes is Ownable, ERC20Votes {
      * All two of these values are immutable: they can only be set once during
      * construction.
      */
-    constructor(address _initialOwner, string memory name_, string memory symbol_) Ownable(_initialOwner) ERC20(name_, symbol_) EIP712(name_, "1") {
-    }
+    constructor(address _initialOwner, string memory name_, string memory symbol_) Ownable(_initialOwner) ERC20(name_, symbol_) EIP712(name_, "1") {}
 
     /**
      * @dev Returns the number of decimals used to get its user representation.

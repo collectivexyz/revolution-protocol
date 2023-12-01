@@ -12,10 +12,7 @@ struct RewardsSettings {
 
 /// @notice Common logic for Revolution TokenEmitter contracts for protocol reward splits & deposits
 abstract contract RewardSplits {
-    error CREATOR_FUNDS_RECIPIENT_NOT_SET();
-    error INVALID_ADDRESS_ZERO();
     error INVALID_ETH_AMOUNT();
-    error ONLY_CREATE_REFERRAL();
 
     // 2.5% total
     uint256 internal constant DEPLOYER_REWARD_BPS = 25;
@@ -31,7 +28,7 @@ abstract contract RewardSplits {
 
     constructor(address _protocolRewards, address _revolutionRewardRecipient) payable {
         if (_protocolRewards == address(0) || _revolutionRewardRecipient == address(0)) {
-            revert INVALID_ADDRESS_ZERO();
+            revert("Invalid Address Zero");
         }
 
         protocolRewards = IRevolutionProtocolRewards(_protocolRewards);
@@ -39,19 +36,23 @@ abstract contract RewardSplits {
     }
 
     /*
-    * @notice Sometimes has rounding errors vs. compute purchase rewards, use externally.
-    * @param _paymentAmountWei The amount of ETH being paid for the purchase
-    */
+     * @notice Sometimes has rounding errors vs. compute purchase rewards, use externally.
+     * @param _paymentAmountWei The amount of ETH being paid for the purchase
+     */
     function computeTotalReward(uint256 paymentAmountWei) public view returns (uint256) {
-        if (paymentAmountWei <= minPurchaseAmount) {
+        if (paymentAmountWei <= minPurchaseAmount || paymentAmountWei >= maxPurchaseAmount) {
             revert INVALID_ETH_AMOUNT();
         }
 
-        if (paymentAmountWei >= maxPurchaseAmount) {
-            revert INVALID_ETH_AMOUNT();
-        }
-
-        return (paymentAmountWei * BUILDER_REWARD_BPS) / 10_000 + (paymentAmountWei * PURCHASE_REFERRAL_BPS) / 10_000 + (paymentAmountWei * DEPLOYER_REWARD_BPS) / 10_000 + (paymentAmountWei * REVOLUTION_REWARD_BPS) / 10_000;
+        return
+            (paymentAmountWei * BUILDER_REWARD_BPS) /
+            10_000 +
+            (paymentAmountWei * PURCHASE_REFERRAL_BPS) /
+            10_000 +
+            (paymentAmountWei * DEPLOYER_REWARD_BPS) /
+            10_000 +
+            (paymentAmountWei * REVOLUTION_REWARD_BPS) /
+            10_000;
     }
 
     function computePurchaseRewards(uint256 paymentAmountWei) public view returns (RewardsSettings memory, uint256) {
@@ -69,17 +70,11 @@ abstract contract RewardSplits {
     function _depositPurchaseRewards(uint256 paymentAmountWei, address builderReferral, address purchaseReferral, address deployer) internal returns (uint256) {
         (RewardsSettings memory settings, uint256 totalReward) = computePurchaseRewards(paymentAmountWei);
 
-        if (builderReferral == address(0)) {
-            builderReferral = revolutionRewardRecipient;
-        }
+        if(builderReferral == address(0)) builderReferral = revolutionRewardRecipient;
 
-        if (purchaseReferral == address(0)) {
-            purchaseReferral = revolutionRewardRecipient;
-        }
+        if(deployer == address(0)) deployer = revolutionRewardRecipient;
 
-        if (deployer == address(0)) {
-            deployer = revolutionRewardRecipient;
-        }
+        if(purchaseReferral == address(0)) purchaseReferral = revolutionRewardRecipient;
 
         protocolRewards.depositRewards{ value: totalReward }(
             builderReferral,
