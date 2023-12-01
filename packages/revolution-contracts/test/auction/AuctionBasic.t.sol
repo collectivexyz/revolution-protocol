@@ -13,7 +13,7 @@ contract VerbsAuctionHouseBasicTest is VerbsAuctionHouseTest {
 
         // Expect events when changing creatorRateBps
         vm.expectEmit(true, true, true, true);
-        emit CreatorRateBpsUpdated(newCreatorRateBps);
+        emit IVerbsAuctionHouse.CreatorRateBpsUpdated(newCreatorRateBps);
         auctionHouse.setCreatorRateBps(newCreatorRateBps);
 
         // Expect events when changing entropyRateBps
