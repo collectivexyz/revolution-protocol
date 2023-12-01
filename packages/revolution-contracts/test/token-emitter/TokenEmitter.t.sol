@@ -88,6 +88,53 @@ contract TokenEmitterTest is Test {
         emitter2.buyToken{ value: 1e18 }(recipients, bps, address(0), address(0), address(0));
     }
 
+    function testBuyTokenWithDifferentRates(uint256 creatorRate, uint256 entropyRate) public {
+        // Assume valid rates
+        vm.assume(creatorRate <= 10000 && entropyRate <= 10000);
+
+        // Set creator and entropy rates
+        emitter.setCreatorRateBps(creatorRate);
+        emitter.setEntropyRateBps(entropyRate);
+        assertEq(emitter.creatorRateBps(), creatorRate, "Creator rate not set correctly");
+        assertEq(emitter.entropyRateBps(), entropyRate, "Entropy rate not set correctly");
+
+        // Setup for buying token
+        address[] memory recipients = new address[](1);
+        recipients[0] = address(1); // recipient address
+
+        uint256[] memory bps = new uint256[](1);
+        bps[0] = 10000; // 100% of the tokens to the recipient
+
+        uint256 valueToSend = 1 ether;
+        emitter.setCreatorsAddress(address(80));
+        address creatorsAddress = emitter.creatorsAddress();
+        uint256 creatorsInitialEthBalance = address(creatorsAddress).balance;
+
+        uint256 feeAmount = emitter.computeTotalReward(valueToSend);
+
+        // Calculate expected ETH sent to creator
+        uint256 totalPaymentForCreator = (valueToSend - feeAmount) * creatorRate / 10000;
+        uint256 expectedCreatorEth = totalPaymentForCreator * entropyRate / 10000;
+
+        uint256 expectedCreatorTokens = uint(emitter.getTokenQuoteForEther(totalPaymentForCreator - expectedCreatorEth));
+
+        // Perform token purchase
+        uint256 tokensSold = emitter.buyToken{ value: valueToSend }(recipients, bps, address(0), address(0), address(0));
+
+        // Verify tokens distributed to creator
+        uint256 creatorTokenBalance = emitter.balanceOf(creatorsAddress);
+        assertEq(creatorTokenBalance, expectedCreatorTokens, "Creator did not receive correct amount of tokens");
+        
+        // Verify ETH sent to creator
+        uint256 creatorsNewEthBalance = address(creatorsAddress).balance;
+        assertEq(creatorsNewEthBalance - creatorsInitialEthBalance, expectedCreatorEth, "Incorrect ETH amount sent to creator");
+
+        // Verify tokens distributed to recipient
+        uint256 recipientTokenBalance = emitter.balanceOf(address(1));
+        assertEq(recipientTokenBalance, tokensSold, "Recipient did not receive correct amount of tokens");
+    }
+
+
     function testBuyingLaterIsBetter() public {
         vm.startPrank(address(0));
 
