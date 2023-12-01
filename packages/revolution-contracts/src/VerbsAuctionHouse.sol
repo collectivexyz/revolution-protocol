@@ -139,15 +139,13 @@ contract VerbsAuctionHouse is IVerbsAuctionHouse, PausableUpgradeable, Reentranc
         auction.amount = msg.value;
         auction.bidder = payable(msg.sender);
 
+        // Extend the auction if the bid was received within `timeBuffer` of the auction end time
+        bool extended = _auction.endTime - block.timestamp < timeBuffer;
+        if (extended) auction.endTime = _auction.endTime = block.timestamp + timeBuffer;
+
         // Refund the last bidder, if applicable
         if (lastBidder != address(0)) {
             _safeTransferETHWithFallback(lastBidder, _auction.amount);
-        }
-
-        // Extend the auction if the bid was received within `timeBuffer` of the auction end time
-        bool extended = _auction.endTime - block.timestamp < timeBuffer;
-        if (extended) {
-            auction.endTime = _auction.endTime = block.timestamp + timeBuffer;
         }
 
         emit AuctionBid(_auction.verbId, msg.sender, msg.value, extended);
