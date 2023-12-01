@@ -109,6 +109,8 @@ contract VerbsAuctionHouse is IVerbsAuctionHouse, PausableUpgradeable, Reentranc
     /**
      * @notice Settle the current auction, mint a new Verb, and put it up for auction.
      */
+     //Can technically reenter via cross function reentrancies in _createAuction, auction, and pause, but those are only callable by the owner
+     //slither-disable-next-line reentrancy-eth
     function settleCurrentAndCreateNewAuction() external override nonReentrant whenNotPaused {
         _settleAuction();
         _createAuction();
@@ -130,6 +132,7 @@ contract VerbsAuctionHouse is IVerbsAuctionHouse, PausableUpgradeable, Reentranc
         IVerbsAuctionHouse.Auction memory _auction = auction;
 
         require(_auction.verbId == verbId, "Verb not up for auction");
+        //slither-disable-next-line timestamp
         require(block.timestamp < _auction.endTime, "Auction expired");
         require(msg.value >= reservePrice, "Must send at least reservePrice");
         require(msg.value >= _auction.amount + ((_auction.amount * minBidIncrementPercentage) / 100), "Must send more than last bid by minBidIncrementPercentage amount");
@@ -278,6 +281,7 @@ contract VerbsAuctionHouse is IVerbsAuctionHouse, PausableUpgradeable, Reentranc
 
         require(_auction.startTime != 0, "Auction hasn't begun");
         require(!_auction.settled, "Auction has already been settled");
+        //slither-disable-next-line timestamp
         require(block.timestamp >= _auction.endTime, "Auction hasn't completed");
 
         auction.settled = true;
