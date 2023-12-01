@@ -1,0 +1,43 @@
+name: Slither Analysis
+
+on:
+  workflow_dispatch:
+  pull_request:
+    branches:
+      - main
+  push:
+    branches:
+      - "*"
+
+jobs:
+  analyze_protocol_rewards:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+        with:
+          submodules: recursive
+
+      - name: Cache pnpm modules
+        uses: actions/cache@v2
+        with:
+          path: ~/.pnpm-store
+          key: ${{ runner.os }}-pnpm-${{ hashFiles('**/pnpm-lock.yaml') }}
+          restore-keys: |
+            ${{ runner.os }}-pnpm-
+
+      - name: Install Foundry
+        uses: foundry-rs/foundry-toolchain@v1
+
+      - name: Install pnpm
+        run: |
+          npm install -g pnpm
+
+      - name: Update Dependencies
+        run: |
+          pnpm install
+
+      - uses: crytic/slither-action@v0.3.0
+        with:
+          fail-on: "medium"
+          target: "packages/protocol-rewards/src"
+          slither-args: --solc-remaps "ds-test=../../node_modules/ds-test/src/,forge-std=../../node_modules/forge-std/src/,@openzeppelin/contracts=../../node_modules/@openzeppelin/contracts/,@openzeppelin/contracts-upgradeable=../../node_modules/@openzeppelin/contracts-upgradeable,solmate=../../node_modules/solmate/src" --checklist --show-ignored-findings --filter-paths "@openzeppelin"
