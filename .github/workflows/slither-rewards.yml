@@ -11,8 +11,6 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
-        with:
-          submodules: recursive
 
       - name: Cache pnpm modules
         uses: actions/cache@v2
@@ -36,5 +34,5 @@ jobs:
       - uses: crytic/slither-action@v0.3.0
         with:
           fail-on: "medium"
-          target: "packages/protocol-rewards"
-          slither-args: --solc-remaps "ds-test=../../node_modules/ds-test/src/,forge-std=../../node_modules/forge-std/src/,@openzeppelin/contracts=../../node_modules/@openzeppelin/contracts/,@openzeppelin/contracts-upgradeable=../../node_modules/@openzeppelin/contracts-upgradeable,solmate=../../node_modules/solmate/src" --checklist --show-ignored-findings --filter-paths "@openzeppelin"
+          target: "packages/protocol-rewards/src"
+          slither-args: --solc-remaps "ds-test=packages/revolution-contracts/node_modules/ds-test/src forge-std=packages/revolution-contracts/node_modules/forge-std/src @openzeppelin/contracts=packages/revolution-contracts/node_modules/@openzeppelin/contracts @openzeppelin/contracts-upgradeable=packages/revolution-contracts/node_modules/@openzeppelin/contracts-upgradeable solmate=packages/revolution-contracts/node_modules/solmate/src" --checklist --show-ignored-findings --filter-paths "@openzeppelin|ERC721|Votes.sol"
