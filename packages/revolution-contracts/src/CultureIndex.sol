@@ -292,6 +292,7 @@ contract CultureIndex is ICultureIndex, Ownable, ReentrancyGuard {
      * @return The ArtPiece struct of the top-voted art piece.
      */
     function getTopVotedPiece() public view returns (ArtPiece memory) {
+        //slither-disable-next-line unused-return
         (uint256 pieceId, ) = maxHeap.getMax();
         return pieces[pieceId];
     }
@@ -309,6 +310,7 @@ contract CultureIndex is ICultureIndex, Ownable, ReentrancyGuard {
      * @return The top-voted pieceId
      */
     function topVotedPieceId() external view returns (uint256) {
+        //slither-disable-next-line unused-return
         (uint256 pieceId, ) = maxHeap.getMax();
         return pieceId;
     }
