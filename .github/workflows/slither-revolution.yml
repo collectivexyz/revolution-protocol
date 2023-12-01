@@ -10,10 +10,6 @@ jobs:
   analyze_revolution_contracts:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v3
-        with:
-          submodules: recursive
-
       - name: Cache pnpm modules
         uses: actions/cache@v2
         with:
