@@ -318,8 +318,8 @@ contract VerbsAuctionHouse is IVerbsAuctionHouse, PausableUpgradeable, Reentranc
                 vrgdaReceivers[i] = creator.creator;
                 vrgdaSplits[i] = creator.bps;
 
-                //Calculate etherAmount for specific creator based on BPS splits
-                uint256 etherAmount = (creatorDirectPayment * creator.bps) / 10_000;
+                //Calculate etherAmount for specific creator based on BPS splits - same as multiplying by creatorDirectPayment
+                uint256 etherAmount = (creatorPayment * entropyRateBps * creator.bps) / (10_000 * 10_000);
 
                 //Transfer creator's share to the creator
                 _safeTransferETHWithFallback(creator.creator, etherAmount);
