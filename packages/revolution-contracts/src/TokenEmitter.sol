@@ -57,6 +57,11 @@ contract TokenEmitter is VRGDAC, ITokenEmitter, ReentrancyGuard, TokenEmitterRew
         return token.totalSupply();
     }
 
+    function decimals() public view returns (uint8) {
+        // returns decimals
+        return token.decimals();
+    }
+
     function balanceOf(address _owner) public view returns (uint) {
         // returns balance of address
         return token.balanceOf(_owner);
