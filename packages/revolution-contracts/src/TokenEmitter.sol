@@ -43,6 +43,8 @@ contract TokenEmitter is VRGDAC, ITokenEmitter, ReentrancyGuard, TokenEmitterRew
         int _priceDecayPercent, // The percent price decays per unit of time with no sales, scaled by 1e18.
         int _tokensPerTimeUnit // The number of tokens to target selling in 1 full unit of time, scaled by 1e18.
     ) TokenEmitterRewards(_protocolRewards, _protocolFeeRecipient) VRGDAC(_targetPrice, _priceDecayPercent, _tokensPerTimeUnit) Ownable(_initialOwner) {
+        require(_treasury != address(0), "Invalid treasury address");
+
         treasury = _treasury;
 
         token = _token;
@@ -91,7 +93,8 @@ contract TokenEmitter is VRGDAC, ITokenEmitter, ReentrancyGuard, TokenEmitterRew
 
         int totalTokensForBuyers = getTokenQuoteForEther(toPayTreasury);
 
-        //Transfer ETH to treasury
+        //Transfer ETH to treasury and update emitted
+        emittedTokenWad += totalTokensForBuyers;
         (bool success, ) = treasury.call{ value: toPayTreasury }(new bytes(0));
         require(success, "Transfer failed.");
 
@@ -113,7 +116,6 @@ contract TokenEmitter is VRGDAC, ITokenEmitter, ReentrancyGuard, TokenEmitterRew
         if (totalTokensForBuyers > 0) {
             for (uint i = 0; i < _addresses.length; i++) {
                 int tokens = (totalTokensForBuyers * int(_bps[i])) / 10_000;
-                emittedTokenWad += tokens;
                 // transfer tokens to address
                 _mint(_addresses[i], uint(tokens));
                 sum += _bps[i];
@@ -187,6 +189,7 @@ contract TokenEmitter is VRGDAC, ITokenEmitter, ReentrancyGuard, TokenEmitterRew
      * @dev Only callable by the owner when not locked.
      */
     function setCreatorsAddress(address _creatorsAddress) external override onlyOwner nonReentrant {
+        require(_creatorsAddress != address(0), "Invalid address");
         creatorsAddress = _creatorsAddress;
 
         emit CreatorsAddressUpdated(_creatorsAddress);
