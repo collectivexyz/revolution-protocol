@@ -27,16 +27,13 @@ contract NontransferableERC20Votes is Ownable, ERC20Votes {
 
     uint256 private _totalSupply;
 
-    uint8 private immutable _decimals;
-
     /**
      * @dev Sets the values for {name} and {symbol}.
      *
      * All two of these values are immutable: they can only be set once during
      * construction.
      */
-    constructor(address _initialOwner, string memory name_, string memory symbol_, uint8 decimals_) Ownable(_initialOwner) ERC20(name_, symbol_) EIP712(name_, "1") {
-        _decimals = decimals_;
+    constructor(address _initialOwner, string memory name_, string memory symbol_) Ownable(_initialOwner) ERC20(name_, symbol_) EIP712(name_, "1") {
     }
 
     /**
@@ -53,7 +50,7 @@ contract NontransferableERC20Votes is Ownable, ERC20Votes {
      * {IERC20-balanceOf} and {IERC20-transfer}.
      */
     function decimals() public view virtual override returns (uint8) {
-        return _decimals;
+        return 18;
     }
 
     /**

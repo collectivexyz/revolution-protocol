@@ -17,16 +17,14 @@ abstract contract RewardSplits {
     error INVALID_ETH_AMOUNT();
     error ONLY_CREATE_REFERRAL();
 
-    // 2.5%
-    uint256 internal constant TOTAL_REWARD_PER_PURCHASE_BPS = 250;
-
+    // 2.5% total
     uint256 internal constant DEPLOYER_REWARD_BPS = 25;
     uint256 internal constant REVOLUTION_REWARD_BPS = 75;
     uint256 internal constant BUILDER_REWARD_BPS = 100;
     uint256 internal constant PURCHASE_REFERRAL_BPS = 50;
 
     uint256 public minPurchaseAmount = 0.0000001 ether;
-    uint256 public maxPurchaseAmount = 5_000 ether;
+    uint256 public maxPurchaseAmount = 50_000 ether;
 
     address internal immutable revolutionRewardRecipient;
     IRevolutionProtocolRewards internal immutable protocolRewards;
@@ -40,6 +38,10 @@ abstract contract RewardSplits {
         revolutionRewardRecipient = _revolutionRewardRecipient;
     }
 
+    /*
+    * @notice Sometimes has rounding errors vs. compute purchase rewards, use externally.
+    * @param _paymentAmountWei The amount of ETH being paid for the purchase
+    */
     function computeTotalReward(uint256 paymentAmountWei) public view returns (uint256) {
         if (paymentAmountWei <= minPurchaseAmount) {
             revert INVALID_ETH_AMOUNT();
@@ -49,18 +51,10 @@ abstract contract RewardSplits {
             revert INVALID_ETH_AMOUNT();
         }
 
-        return (paymentAmountWei * TOTAL_REWARD_PER_PURCHASE_BPS) / 10_000;
+        return (paymentAmountWei * BUILDER_REWARD_BPS) / 10_000 + (paymentAmountWei * PURCHASE_REFERRAL_BPS) / 10_000 + (paymentAmountWei * DEPLOYER_REWARD_BPS) / 10_000 + (paymentAmountWei * REVOLUTION_REWARD_BPS) / 10_000;
     }
 
     function computePurchaseRewards(uint256 paymentAmountWei) public view returns (RewardsSettings memory, uint256) {
-        if (paymentAmountWei <= minPurchaseAmount) {
-            revert INVALID_ETH_AMOUNT();
-        }
-
-        if (paymentAmountWei >= maxPurchaseAmount) {
-            revert INVALID_ETH_AMOUNT();
-        }
-
         return (
             RewardsSettings({
                 builderReferralReward: (paymentAmountWei * BUILDER_REWARD_BPS) / 10_000,
@@ -68,14 +62,7 @@ abstract contract RewardSplits {
                 deployerReward: (paymentAmountWei * DEPLOYER_REWARD_BPS) / 10_000,
                 revolutionReward: (paymentAmountWei * REVOLUTION_REWARD_BPS) / 10_000
             }),
-            (paymentAmountWei * BUILDER_REWARD_BPS) /
-                10_000 +
-                (paymentAmountWei * PURCHASE_REFERRAL_BPS) /
-                10_000 +
-                (paymentAmountWei * DEPLOYER_REWARD_BPS) /
-                10_000 +
-                (paymentAmountWei * REVOLUTION_REWARD_BPS) /
-                10_000
+            computeTotalReward(paymentAmountWei)
         );
     }
 

@@ -35,7 +35,7 @@ contract VerbsAuctionHouseTest is Test {
 
     function setUp() public {
         mockWETH = new MockERC20();
-        governanceToken = new NontransferableERC20Votes(address(this), "Revolution Governance", "GOV", 4);
+        governanceToken = new NontransferableERC20Votes(address(this), "Revolution Governance", "GOV");
         RevolutionProtocolRewards protocolRewards = new RevolutionProtocolRewards();
 
         // Additional setup for VerbsToken similar to VerbsTokenTest
@@ -52,6 +52,7 @@ contract VerbsAuctionHouseTest is Test {
         address protocolFeeRecipient = address(0x42069);
 
         tokenEmitter = new TokenEmitter(
+            address(this),
             governanceToken,
             address(protocolRewards),
             protocolFeeRecipient,

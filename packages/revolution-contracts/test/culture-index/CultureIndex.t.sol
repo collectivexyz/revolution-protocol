@@ -25,7 +25,7 @@ contract CultureIndexTestSuite is Test {
      * @dev Setup function for each test case
      */
     function setUp() public {
-        govToken = new NontransferableERC20Votes(address(this), "Revolution Governance", "GOV", 4);
+        govToken = new NontransferableERC20Votes(address(this), "Revolution Governance", "GOV");
         ProxyRegistry _proxyRegistry = new ProxyRegistry();
 
         // Initialize VerbsToken with additional parameters
@@ -49,7 +49,7 @@ contract CultureIndexTestSuite is Test {
         voter2Test = new CultureIndexVotingTest(address(cultureIndex), address(govToken));
     }
 
-        //returns metadata and creators in a tuple
+    //returns metadata and creators in a tuple
     function createArtPieceTuple(
         string memory name,
         string memory description,
@@ -65,7 +65,6 @@ contract CultureIndexTestSuite is Test {
         ICultureIndex.CreatorBps[] memory creators = createArtPieceCreators(creatorAddress, creatorBps);
         return (metadata, creators);
     }
-
 
     // Utility function to create a new art piece and return its ID
     function createArtPiece(
@@ -93,7 +92,7 @@ contract CultureIndexTestSuite is Test {
         return cultureIndex.createPiece(metadata, creators);
     }
 
-        // Function to create ArtPieceMetadata
+    // Function to create ArtPieceMetadata
     function createArtPieceMetadata(
         string memory name,
         string memory description,
@@ -113,6 +112,7 @@ contract CultureIndexTestSuite is Test {
         });
         return metadata;
     }
+
     // Function to create CreatorBps array
     function createArtPieceCreators(address creatorAddress, uint256 creatorBps) public pure returns (CultureIndex.CreatorBps[] memory) {
         // <-- Change visibility and mutability as needed

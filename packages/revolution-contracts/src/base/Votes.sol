@@ -2,14 +2,14 @@
 // OpenZeppelin Contracts (last updated v5.0.0) (governance/utils/Votes.sol)
 pragma solidity ^0.8.22;
 
-import {IERC5805} from "@openzeppelin/contracts/interfaces/IERC5805.sol";
-import {Context} from "@openzeppelin/contracts/utils/Context.sol";
-import {Nonces} from "@openzeppelin/contracts/utils/Nonces.sol";
-import {EIP712} from "@openzeppelin/contracts/utils/cryptography/EIP712.sol";
-import {Checkpoints} from "@openzeppelin/contracts/utils/structs/Checkpoints.sol";
-import {SafeCast} from "@openzeppelin/contracts/utils/math/SafeCast.sol";
-import {ECDSA} from "@openzeppelin/contracts/utils/cryptography/ECDSA.sol";
-import {Time} from "@openzeppelin/contracts/utils/types/Time.sol";
+import { IERC5805 } from "@openzeppelin/contracts/interfaces/IERC5805.sol";
+import { Context } from "@openzeppelin/contracts/utils/Context.sol";
+import { Nonces } from "@openzeppelin/contracts/utils/Nonces.sol";
+import { EIP712 } from "@openzeppelin/contracts/utils/cryptography/EIP712.sol";
+import { Checkpoints } from "@openzeppelin/contracts/utils/structs/Checkpoints.sol";
+import { SafeCast } from "@openzeppelin/contracts/utils/math/SafeCast.sol";
+import { ECDSA } from "@openzeppelin/contracts/utils/cryptography/ECDSA.sol";
+import { Time } from "@openzeppelin/contracts/utils/types/Time.sol";
 
 /**
  * @dev This is a base abstract contract that tracks voting units, which are a measure of voting power that can be
@@ -32,8 +32,7 @@ import {Time} from "@openzeppelin/contracts/utils/types/Time.sol";
 abstract contract Votes is Context, EIP712, Nonces, IERC5805 {
     using Checkpoints for Checkpoints.Trace208;
 
-    bytes32 private constant DELEGATION_TYPEHASH =
-        keccak256("Delegation(address delegatee,uint256 nonce,uint256 expiry)");
+    bytes32 private constant DELEGATION_TYPEHASH = keccak256("Delegation(address delegatee,uint256 nonce,uint256 expiry)");
 
     mapping(address account => address) private _delegatee;
 
@@ -142,23 +141,11 @@ abstract contract Votes is Context, EIP712, Nonces, IERC5805 {
     /**
      * @dev Delegates votes from signer to `delegatee`.
      */
-    function delegateBySig(
-        address delegatee,
-        uint256 nonce,
-        uint256 expiry,
-        uint8 v,
-        bytes32 r,
-        bytes32 s
-    ) public virtual {
+    function delegateBySig(address delegatee, uint256 nonce, uint256 expiry, uint8 v, bytes32 r, bytes32 s) public virtual {
         if (block.timestamp > expiry) {
             revert VotesExpiredSignature(expiry);
         }
-        address signer = ECDSA.recover(
-            _hashTypedDataV4(keccak256(abi.encode(DELEGATION_TYPEHASH, delegatee, nonce, expiry))),
-            v,
-            r,
-            s
-        );
+        address signer = ECDSA.recover(_hashTypedDataV4(keccak256(abi.encode(DELEGATION_TYPEHASH, delegatee, nonce, expiry))), v, r, s);
         _useCheckedNonce(signer, nonce);
         _delegate(signer, delegatee);
     }
@@ -196,19 +183,11 @@ abstract contract Votes is Context, EIP712, Nonces, IERC5805 {
     function _moveDelegateVotes(address from, address to, uint256 amount) private {
         if (from != to && amount > 0) {
             if (from != address(0)) {
-                (uint256 oldValue, uint256 newValue) = _push(
-                    _delegateCheckpoints[from],
-                    _subtract,
-                    SafeCast.toUint208(amount)
-                );
+                (uint256 oldValue, uint256 newValue) = _push(_delegateCheckpoints[from], _subtract, SafeCast.toUint208(amount));
                 emit DelegateVotesChanged(from, oldValue, newValue);
             }
             if (to != address(0)) {
-                (uint256 oldValue, uint256 newValue) = _push(
-                    _delegateCheckpoints[to],
-                    _add,
-                    SafeCast.toUint208(amount)
-                );
+                (uint256 oldValue, uint256 newValue) = _push(_delegateCheckpoints[to], _add, SafeCast.toUint208(amount));
                 emit DelegateVotesChanged(to, oldValue, newValue);
             }
         }
@@ -224,18 +203,11 @@ abstract contract Votes is Context, EIP712, Nonces, IERC5805 {
     /**
      * @dev Get the `pos`-th checkpoint for `account`.
      */
-    function _checkpoints(
-        address account,
-        uint32 pos
-    ) internal view virtual returns (Checkpoints.Checkpoint208 memory) {
+    function _checkpoints(address account, uint32 pos) internal view virtual returns (Checkpoints.Checkpoint208 memory) {
         return _delegateCheckpoints[account].at(pos);
     }
 
-    function _push(
-        Checkpoints.Trace208 storage store,
-        function(uint208, uint208) view returns (uint208) op,
-        uint208 delta
-    ) private returns (uint208, uint208) {
+    function _push(Checkpoints.Trace208 storage store, function(uint208, uint208) view returns (uint208) op, uint208 delta) private returns (uint208, uint208) {
         return store.push(clock(), op(store.latest(), delta));
     }
 

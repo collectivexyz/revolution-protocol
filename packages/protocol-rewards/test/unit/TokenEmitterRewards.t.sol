@@ -3,7 +3,7 @@ pragma solidity 0.8.22;
 
 import "../ProtocolRewardsTest.sol";
 import { RewardsSettings } from "../../src/abstract/RewardSplits.sol";
-import { NontransferableERC20Votes } from "../utils/TokenEmitter.sol";
+import { NontransferableERC20Votes } from "../utils/TokenEmitterLibrary.sol";
 
 contract TokenEmitterRewardsTest is ProtocolRewardsTest {
     MockTokenEmitter internal mockTokenEmitter;
@@ -12,9 +12,9 @@ contract TokenEmitterRewardsTest is ProtocolRewardsTest {
     function setUp() public override {
         super.setUp();
 
-        govToken = new NontransferableERC20Votes(address(this), "Revolution Governance", "GOV", 4);
+        govToken = new NontransferableERC20Votes(address(this), "Revolution Governance", "GOV");
 
-        mockTokenEmitter = new MockTokenEmitter(govToken, treasury, address(protocolRewards), revolution);
+        mockTokenEmitter = new MockTokenEmitter(address(this), govToken, treasury, address(protocolRewards), revolution);
 
         govToken.transferOwnership(address(mockTokenEmitter));
 
@@ -57,9 +57,9 @@ contract TokenEmitterRewardsTest is ProtocolRewardsTest {
     function testNullReferralRecipient(uint256 msgValue) public {
         bool shouldExpectRevert = msgValue <= mockTokenEmitter.minPurchaseAmount() || msgValue >= mockTokenEmitter.maxPurchaseAmount();
 
-        NontransferableERC20Votes govToken2 = new NontransferableERC20Votes(address(this), "Revolution Governance", "GOV", 4);
+        NontransferableERC20Votes govToken2 = new NontransferableERC20Votes(address(this), "Revolution Governance", "GOV");
 
-        mockTokenEmitter = new MockTokenEmitter(govToken2, treasury, address(protocolRewards), revolution);
+        mockTokenEmitter = new MockTokenEmitter(address(this), govToken2, treasury, address(protocolRewards), revolution);
 
         govToken2.transferOwnership(address(mockTokenEmitter));
 

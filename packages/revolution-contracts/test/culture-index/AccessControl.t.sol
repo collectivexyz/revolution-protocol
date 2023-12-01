@@ -32,7 +32,6 @@ contract CultureIndexAccessControlTest is CultureIndexTestSuite {
         vm.stopPrank();
     }
 
-
     /// @dev Tests the locking of admin functions
     function testLockAdminFunctions() public {
         setUp();
@@ -44,8 +43,7 @@ contract CultureIndexAccessControlTest is CultureIndexTestSuite {
 
         try cultureIndex.setERC721VotingToken(verbs) {
             fail("Should fail: ERC721VotingToken is locked");
-        } catch {
-        }
+        } catch {}
 
         assertTrue(cultureIndex.isERC721VotingTokenLocked(), "ERC721VotingToken should be locked");
     }
@@ -89,8 +87,6 @@ contract CultureIndexAccessControlTest is CultureIndexTestSuite {
         assertEq(address(cultureIndex.erc721VotingToken()), newTokenAddress);
         vm.stopPrank();
     }
-
-
 }
 
 contract ProxyRegistry is IProxyRegistry {
