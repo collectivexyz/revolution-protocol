@@ -318,9 +318,17 @@ contract CultureIndex is ICultureIndex, Ownable, ReentrancyGuard {
      * @return The top voted piece
      */
     function dropTopVotedPiece() public nonReentrant onlyOwner returns (ArtPiece memory) {
-        uint256 pieceId;
-        try maxHeap.extractMax() returns (uint256 _pieceId, uint256) {
-            pieceId = _pieceId;
+        try maxHeap.extractMax() returns (uint256 pieceId, uint256) {
+            pieces[pieceId].isDropped = true;
+
+            emit PieceDropped(pieceId, msg.sender);
+
+            //for each creator, emit an event
+            for (uint i = 0; i < pieces[pieceId].creators.length; i++) {
+                emit PieceDroppedCreator(pieceId, pieces[pieceId].creators[i].creator, pieces[pieceId].dropper, pieces[pieceId].creators[i].bps);
+            }
+
+            return pieces[pieceId];
         } catch Error(
             string memory reason // Catch known revert reason
         ) {
@@ -333,16 +341,5 @@ contract CultureIndex is ICultureIndex, Ownable, ReentrancyGuard {
         ) {
             revert("Unknown error extracting top piece");
         }
-
-        pieces[pieceId].isDropped = true;
-
-        emit PieceDropped(pieceId, msg.sender);
-
-        //for each creator, emit an event
-        for (uint i = 0; i < pieces[pieceId].creators.length; i++) {
-            emit PieceDroppedCreator(pieceId, pieces[pieceId].creators[i].creator, pieces[pieceId].dropper, pieces[pieceId].creators[i].bps);
-        }
-
-        return pieces[pieceId];
     }
 }

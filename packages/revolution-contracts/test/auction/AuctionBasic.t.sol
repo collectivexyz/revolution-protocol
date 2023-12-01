@@ -162,7 +162,7 @@ contract VerbsAuctionHouseBasicTest is VerbsAuctionHouseTest {
     receive() external payable {}
 
     function testInitializationParameters() public {
-        assertEq(auctionHouse.weth(), address(mockWETH), "WETH address should be set correctly");
+        assertEq(auctionHouse.WETH(), address(mockWETH), "WETH address should be set correctly");
         assertEq(auctionHouse.timeBuffer(), 15 minutes, "Time buffer should be set correctly");
         assertEq(auctionHouse.reservePrice(), 1 ether, "Reserve price should be set correctly");
         assertEq(auctionHouse.minBidIncrementPercentage(), 5, "Min bid increment percentage should be set correctly");
