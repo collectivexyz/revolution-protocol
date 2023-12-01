@@ -320,6 +320,7 @@ contract CultureIndex is ICultureIndex, Ownable, ReentrancyGuard {
      * @return The top voted piece
      */
     function dropTopVotedPiece() public nonReentrant onlyOwner returns (ArtPiece memory) {
+        //slither-disable-next-line unused-return
         try maxHeap.extractMax() returns (uint256 pieceId, uint256) {
             pieces[pieceId].isDropped = true;
 
