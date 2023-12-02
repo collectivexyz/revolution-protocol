@@ -135,6 +135,7 @@ contract VerbsDAOLogicV1 is VerbsDAOStorageV1, VerbsDAOEvents {
     function initialize(
         address timelock_,
         address verbs_,
+        address verbsPoints_,
         address vetoer_,
         uint256 votingPeriod_,
         uint256 votingDelay_,
@@ -147,6 +148,7 @@ contract VerbsDAOLogicV1 is VerbsDAOStorageV1, VerbsDAOEvents {
         }
         require(timelock_ != address(0), 'VerbsDAO::initialize: invalid timelock address');
         require(verbs_ != address(0), 'VerbsDAO::initialize: invalid verbs address');
+        require(verbsPoints_ != address(0), 'VerbsDAO::initialize: invalid verbs points address');
         require(
             votingPeriod_ >= MIN_VOTING_PERIOD && votingPeriod_ <= MAX_VOTING_PERIOD,
             'VerbsDAO::initialize: invalid voting period'
@@ -166,6 +168,7 @@ contract VerbsDAOLogicV1 is VerbsDAOStorageV1, VerbsDAOEvents {
 
         timelock = IVerbsDAOExecutor(timelock_);
         verbs = VerbsTokenLike(verbs_);
+        verbsPoints = VerbsPointsLike(verbsPoints_);
         vetoer = vetoer_;
         votingPeriod = votingPeriod_;
         votingDelay = votingDelay_;

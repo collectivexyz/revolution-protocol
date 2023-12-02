@@ -161,8 +161,11 @@ contract VerbsDAOStorageV1 is VerbsDAOProxyStorage {
     /// @notice The address of the Verbs DAO Executor VerbsDAOExecutor
     IVerbsDAOExecutor public timelock;
 
-    /// @notice The address of the Verbs tokens
+    /// @notice The address of the Verbs ERC721 tokens
     VerbsTokenLike public verbs;
+
+    /// @notice The address of the Verbs ERC20 points
+    VerbsPointsLike public verbsPoints;
 
     /// @notice The official record of all proposals ever proposed
     mapping(uint256 => Proposal) internal _proposals;
