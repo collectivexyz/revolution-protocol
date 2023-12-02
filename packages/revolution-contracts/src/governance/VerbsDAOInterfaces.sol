@@ -27,10 +27,6 @@
 // MODIFICATIONS
 // VerbsDAOEvents, VerbsDAOProxyStorage, VerbsDAOStorageV1 add support for changes made by Verbs DAO to GovernorBravo.sol
 // See VerbsDAOLogicV1.sol for more details.
-// VerbsDAOStorageV1Adjusted and VerbsDAOStorageV2 add support for a dynamic vote quorum.
-// See VerbsDAOLogicV2.sol for more details.
-// VerbsDAOStorageV3
-// See VerbsDAOLogicV3.sol for more details.
 
 pragma solidity ^0.8.6;
 

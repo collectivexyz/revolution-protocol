@@ -47,7 +47,7 @@
 // quorum for a specific proposal.
 // - `proposals(uint256 proposalId)` instead of the implicit getter, to avoid stack-too-deep error
 //
-// VerbsDAOLogicV2 removes:
+// VerbsDAOLogicV1 removes:
 // - `quorumVotes()` has been replaced by `quorumVotes(uint256 proposalId)`.
 
 pragma solidity ^0.8.22;
