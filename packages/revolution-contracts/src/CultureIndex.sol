@@ -237,6 +237,8 @@ contract CultureIndex is ICultureIndex, Ownable, ReentrancyGuard {
         totalVoteWeights[pieceId] += weight;
 
         uint256 totalWeight = totalVoteWeights[pieceId];
+
+        // TODO add security consideration here based on block created to prevent flash attacks on drops?
         maxHeap.updateValue(pieceId, totalWeight);
         emit VoteCast(pieceId, voter, weight, totalWeight);
     }
