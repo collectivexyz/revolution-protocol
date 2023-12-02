@@ -332,8 +332,10 @@ interface VerbsTokenLike {
     function getPriorVotes(address account, uint256 blockNumber) external view returns (uint96);
 
     function totalSupply() external view returns (uint256);
+}
 
-    function balanceOf(address owner) external view returns (uint256 balance);
+interface VerbsPointsLike {
+    function getPastVotes(address account, uint256 blockNumber) external view returns (uint96);
 
-    function ownerOf(uint256 tokenId) external view returns (address owner);
+    function totalSupply() external view returns (uint256);
 }
