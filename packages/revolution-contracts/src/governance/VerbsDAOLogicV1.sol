@@ -50,13 +50,13 @@
 // VerbsDAOLogicV2 removes:
 // - `quorumVotes()` has been replaced by `quorumVotes(uint256 proposalId)`.
 
-pragma solidity ^0.8.6;
+pragma solidity ^0.8.22;
 
 import './VerbsDAOInterfaces.sol';
 
-contract VerbsDAOLogicV1 is VerbsDAOStorageV2, VerbsDAOEvents {
+contract VerbsDAOLogicV1 is VerbsDAOStorageV1, VerbsDAOEvents {
     /// @notice The name of this contract
-    string public constant name = 'Vrb DAO';
+    string public constant name = 'Vrbs DAO';
 
     /// @notice The minimum setable proposal threshold
     uint256 public constant MIN_PROPOSAL_THRESHOLD_BPS = 1; // 1 basis point or 0.01%

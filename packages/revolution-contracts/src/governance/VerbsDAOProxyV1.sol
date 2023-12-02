@@ -36,11 +36,11 @@
 // MODIFICATIONS
 // The fallback() and receive() functions of Proxy.sol have been used to allow Solidity > 0.6.0 compatibility
 
-pragma solidity ^0.8.6;
+pragma solidity ^0.8.22;
 
 import './VerbsDAOInterfaces.sol';
 
-contract VerbsDAOProxyV1 is VerbsDAOStorageV2, VerbsDAOEvents {
+contract VerbsDAOProxyV1 is VerbsDAOStorageV1, VerbsDAOEvents {
     constructor(
         address timelock_,
         address verbs_,
