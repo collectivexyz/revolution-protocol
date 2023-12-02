@@ -178,6 +178,9 @@ contract VerbsDAOStorageV1 is VerbsDAOProxyStorage {
     /// @notice Pending new vetoer
     address public pendingVetoer;
 
+    /// @notice The voting weight of the verbs token eg: owning (2) tokens gets you (2 * verbsTokenVotingWeight) votes
+    uint256 public verbsTokenVotingWeight;
+
     struct Proposal {
         /// @notice Unique id for looking up a proposal
         uint256 id;

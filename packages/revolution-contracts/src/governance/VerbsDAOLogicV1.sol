@@ -140,6 +140,7 @@ contract VerbsDAOLogicV1 is VerbsDAOStorageV1, VerbsDAOEvents {
         uint256 votingPeriod_,
         uint256 votingDelay_,
         uint256 proposalThresholdBPS_,
+        uint256 verbsTokenVotingWeight_,
         DynamicQuorumParams calldata dynamicQuorumParams_
     ) public virtual {
         require(address(timelock) == address(0), 'VerbsDAO::initialize: can only initialize once');
@@ -161,6 +162,7 @@ contract VerbsDAOLogicV1 is VerbsDAOStorageV1, VerbsDAOEvents {
             proposalThresholdBPS_ >= MIN_PROPOSAL_THRESHOLD_BPS && proposalThresholdBPS_ <= MAX_PROPOSAL_THRESHOLD_BPS,
             'VerbsDAO::initialize: invalid proposal threshold bps'
         );
+        require(verbsTokenVotingWeight_ > 0, 'VerbsDAO::initialize: invalid verbs token voting weight');
 
         emit VotingPeriodSet(votingPeriod, votingPeriod_);
         emit VotingDelaySet(votingDelay, votingDelay_);
@@ -173,6 +175,7 @@ contract VerbsDAOLogicV1 is VerbsDAOStorageV1, VerbsDAOEvents {
         votingPeriod = votingPeriod_;
         votingDelay = votingDelay_;
         proposalThresholdBPS = proposalThresholdBPS_;
+        verbsTokenVotingWeight = verbsTokenVotingWeight_;
         _setDynamicQuorumParams(
             dynamicQuorumParams_.minQuorumVotesBPS,
             dynamicQuorumParams_.maxQuorumVotesBPS,
@@ -355,14 +358,30 @@ contract VerbsDAOLogicV1 is VerbsDAOStorageV1, VerbsDAOEvents {
         emit ProposalExecuted(proposalId);
     }
 
+    /**
+     * @notice Calculates the total number of votes given an account at a specific block
+     * @param account The address of the account to check
+    * @param blockNumber The block number to get the votes at
+     */
     function getTotalVotes(address account, uint256 blockNumber) public view returns (uint256) {
         uint256 tokenVotes = verbs.getPriorVotes(account, blockNumber);
         
         uint256 pointsVotesWad = verbsPoints.getPastVotes(account, blockNumber);
         
-        // return tokenVotes + pointsVotesWad;
+        return (tokenVotes * 1e18 * verbsTokenVotingWeight) + pointsVotesWad;
+    }
 
-        return tokenVotes;
+    /**
+     * @notice Returns the number of decimals used to get its user representation.
+     * For example, if `decimals` equals `2`, a balance of `505` votes should
+     * be displayed to a user as `5.05` (`505 / 10 ** 2`).
+     *
+     * NOTE: This information is only used for _display_ purposes: it in
+     * no way affects any of the arithmetic of the contract, including
+     * {IVerbsDAOLogicV1-getTotalVotes}.
+     */
+    function voteDecimals() public pure returns (uint256) {
+        return 18;
     }
 
     /**
