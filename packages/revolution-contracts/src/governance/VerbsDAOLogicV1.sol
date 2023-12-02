@@ -211,7 +211,7 @@ contract VerbsDAOLogicV1 is VerbsDAOStorageV1, VerbsDAOEvents {
         temp.proposalThreshold = bps2Uint(proposalThresholdBPS, temp.totalSupply);
 
         require(
-            verbs.getPriorVotes(msg.sender, block.number - 1) > temp.proposalThreshold,
+            getTotalVotes(msg.sender, block.number - 1) > temp.proposalThreshold,
             'VerbsDAO::propose: proposer votes below proposal threshold'
         );
         require(
@@ -355,6 +355,10 @@ contract VerbsDAOLogicV1 is VerbsDAOStorageV1, VerbsDAOEvents {
         emit ProposalExecuted(proposalId);
     }
 
+    function getTotalVotes(address account, uint256 blockNumber) public view returns (uint96) {
+        return verbs.getPriorVotes(account, blockNumber);
+    }
+
     /**
      * @notice Cancels a proposal only if sender is the proposer, or proposer delegates dropped below proposal threshold
      * @param proposalId The id of the proposal to cancel
@@ -367,7 +371,7 @@ contract VerbsDAOLogicV1 is VerbsDAOStorageV1, VerbsDAOEvents {
         Proposal storage proposal = _proposals[proposalId];
         require(
             msg.sender == proposal.proposer ||
-                verbs.getPriorVotes(proposal.proposer, block.number - 1) <= proposal.proposalThreshold,
+                getTotalVotes(proposal.proposer, block.number - 1) <= proposal.proposalThreshold,
             'VerbsDAO::cancel: proposer above threshold'
         );
 
@@ -623,7 +627,7 @@ contract VerbsDAOLogicV1 is VerbsDAOStorageV1, VerbsDAOEvents {
         require(receipt.hasVoted == false, 'VerbsDAO::castVoteInternal: voter already voted');
 
         /// @notice: Unlike GovernerBravo, votes are considered from the block the proposal was created in order to normalize quorumVotes and proposalThreshold metrics
-        uint96 votes = verbs.getPriorVotes(voter, proposalCreationBlock(proposal));
+        uint96 votes = getTotalVotes(voter, proposalCreationBlock(proposal));
 
         if (support == 0) {
             proposal.againstVotes = proposal.againstVotes + votes;
