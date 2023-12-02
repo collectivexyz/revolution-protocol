@@ -106,9 +106,7 @@ contract VerbsDAOEvents {
 
     /// @notice Emitted when vetoer is changed
     event NewVetoer(address oldVetoer, address newVetoer);
-}
 
-contract VerbsDAOEventsV2 is VerbsDAOEvents {
     /// @notice Emitted when minQuorumVotesBPS is set
     event MinQuorumVotesBPSSet(uint16 oldMinQuorumVotesBPS, uint16 newMinQuorumVotesBPS);
 
