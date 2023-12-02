@@ -355,8 +355,14 @@ contract VerbsDAOLogicV1 is VerbsDAOStorageV1, VerbsDAOEvents {
         emit ProposalExecuted(proposalId);
     }
 
-    function getTotalVotes(address account, uint256 blockNumber) public view returns (uint96) {
-        return verbs.getPriorVotes(account, blockNumber);
+    function getTotalVotes(address account, uint256 blockNumber) public view returns (uint256) {
+        uint256 tokenVotes = verbs.getPriorVotes(account, blockNumber);
+        
+        uint256 pointsVotesWad = verbsPoints.getPastVotes(account, blockNumber);
+        
+        // return tokenVotes + pointsVotesWad;
+
+        return tokenVotes;
     }
 
     /**
@@ -566,7 +572,7 @@ contract VerbsDAOLogicV1 is VerbsDAOStorageV1, VerbsDAOEvents {
         string memory reason
     ) internal {
         uint256 startGas = gasleft();
-        uint96 votes = castVoteInternal(msg.sender, proposalId, support);
+        uint256 votes = castVoteInternal(msg.sender, proposalId, support);
         emit VoteCast(msg.sender, proposalId, support, votes, reason);
         if (votes > 0) {
             _refundGas(startGas);
@@ -619,7 +625,7 @@ contract VerbsDAOLogicV1 is VerbsDAOStorageV1, VerbsDAOEvents {
         address voter,
         uint256 proposalId,
         uint8 support
-    ) internal returns (uint96) {
+    ) internal returns (uint256) {
         require(state(proposalId) == ProposalState.Active, 'VerbsDAO::castVoteInternal: voting is closed');
         require(support <= 2, 'VerbsDAO::castVoteInternal: invalid vote type');
         Proposal storage proposal = _proposals[proposalId];
@@ -627,7 +633,7 @@ contract VerbsDAOLogicV1 is VerbsDAOStorageV1, VerbsDAOEvents {
         require(receipt.hasVoted == false, 'VerbsDAO::castVoteInternal: voter already voted');
 
         /// @notice: Unlike GovernerBravo, votes are considered from the block the proposal was created in order to normalize quorumVotes and proposalThreshold metrics
-        uint96 votes = getTotalVotes(voter, proposalCreationBlock(proposal));
+        uint256 votes = getTotalVotes(voter, proposalCreationBlock(proposal));
 
         if (support == 0) {
             proposal.againstVotes = proposal.againstVotes + votes;
