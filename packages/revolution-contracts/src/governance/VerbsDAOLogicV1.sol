@@ -131,6 +131,7 @@ contract VerbsDAOLogicV1 is VerbsDAOStorageV1, VerbsDAOEvents {
      * @param votingDelay_ The initial voting delay
      * @param proposalThresholdBPS_ The initial proposal threshold in basis points
      * @param dynamicQuorumParams_ The initial dynamic quorum parameters
+     * @param verbsTokenVotingWeight_ The vote weight coefficient of the verbs token
      */
     function initialize(
         address timelock_,
@@ -364,11 +365,11 @@ contract VerbsDAOLogicV1 is VerbsDAOStorageV1, VerbsDAOEvents {
     * @param blockNumber The block number to get the votes at
      */
     function getTotalVotes(address account, uint256 blockNumber) public view returns (uint256) {
-        uint256 tokenVotes = verbs.getPriorVotes(account, blockNumber);
+        uint256 erc721TokenVotes = verbs.getPriorVotes(account, blockNumber);
         
-        uint256 pointsVotesWad = verbsPoints.getPastVotes(account, blockNumber);
+        uint256 erc20PointsVotesWad = verbsPoints.getPastVotes(account, blockNumber);
         
-        return (tokenVotes * 1e18 * verbsTokenVotingWeight) + pointsVotesWad;
+        return (erc721TokenVotes * 1e18 * verbsTokenVotingWeight) + erc20PointsVotesWad;
     }
 
     /**

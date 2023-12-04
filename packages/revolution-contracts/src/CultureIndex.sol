@@ -24,24 +24,51 @@ contract CultureIndex is ICultureIndex, Ownable, ReentrancyGuard {
     // The weight of the 721 voting token
     uint256 public immutable erc721VotingTokenWeight;
 
+    /// @notice The minimum setable quorum votes basis points
+    uint256 public constant MIN_QUORUM_VOTES_BPS = 200; // 200 basis points or 2%
+
+    /// @notice The maximum setable quorum votes basis points
+    uint256 public constant MAX_QUORUM_VOTES_BPS = 4_000; // 4,000 basis points or 40%
+
+    /// @notice The basis point number of votes in support of a art piece required in order for a quorum to be reached and for an art piece to be dropped. 
+    uint256 public quorumVotesBPS;
+
     string public name;
 
     string public description;
 
-    // Initialize ERC20 Token in the constructor
+    /**
+     * @notice Constructor
+     * @param name_ The name of the culture index
+     * @param description_ A description for the culture index, can include rules for uploads etc.
+     * @param erc20VotingToken_ The address of the ERC20 voting token, commonly referred to as "points"
+     * @param erc721VotingToken_ The address of the ERC721 voting token, commonly the dropped art pieces
+     * @param initialOwner_ The owner of the contract, allowed to drop pieces. Commonly updated to the AuctionHouse
+     * @param erc721VotingTokenWeight_ The voting weight of the individual ERC721 tokens. Normally a large multiple to match up with daily emission of ERC20 points
+     * @param quorumVotesBPS_ The initial quorum votes threshold in basis points
+     */
     constructor(
-        string memory _name,
-        string memory _description,
-        address _erc20VotingToken,
-        address _erc721VotingToken,
-        address _initialOwner,
-        uint256 _erc721VotingTokenWeight
-    ) Ownable(_initialOwner) {
-        erc20VotingToken = ERC20Votes(_erc20VotingToken);
-        erc721VotingToken = ERC721Checkpointable(_erc721VotingToken);
-        erc721VotingTokenWeight = _erc721VotingTokenWeight;
-        name = _name;
-        description = _description;
+        string memory name_,
+        string memory description_,
+        address erc20VotingToken_,
+        address erc721VotingToken_,
+        address initialOwner_,
+        uint256 erc721VotingTokenWeight_,
+        uint256 quorumVotesBPS_
+    ) Ownable(initialOwner_) {
+        require(quorumVotesBPS_ >= MIN_QUORUM_VOTES_BPS && quorumVotesBPS_ <= MAX_QUORUM_VOTES_BPS,'CultureIndex::constructor: invalid proposal threshold');
+        require(erc721VotingTokenWeight_ > 0, 'CultureIndex::constructor: invalid erc721 voting token weight');
+        require(erc721VotingToken_ != address(0),'CultureIndex::constructor: invalid erc721 voting token');
+        require(erc20VotingToken_ != address(0),'CultureIndex::constructor: invalid erc20 voting token');
+        
+        erc20VotingToken = ERC20Votes(erc20VotingToken_);
+        erc721VotingToken = ERC721Checkpointable(erc721VotingToken_);
+        erc721VotingTokenWeight = erc721VotingTokenWeight_;
+        name = name_;
+        description = description_;
+        quorumVotesBPS = quorumVotesBPS_;
+
+        emit QuorumVotesBPSSet(quorumVotesBPS, quorumVotesBPS_);
 
         maxHeap = new MaxHeap(address(this));
     }
@@ -203,12 +230,12 @@ contract CultureIndex is ICultureIndex, Ownable, ReentrancyGuard {
 
     /**
      * @notice Calculates the vote weight of a voter.
-     * @param erc20VoteWeight The ERC20 vote weight of the voter.
-     * @param erc721VoteWeight The ERC721 vote weight of the voter.
+     * @param erc20Balance The ERC20 balance of the voter.
+     * @param erc721Balance The ERC721 balance of the voter.
      * @return The vote weight of the voter.
      */
-    function _calculateVoteWeight(uint256 erc20VoteWeight, uint256 erc721VoteWeight) internal view returns (uint256) {
-        return erc20VoteWeight + (erc721VoteWeight * erc721VotingTokenWeight);
+    function _calculateVoteWeight(uint256 erc20Balance, uint256 erc721Balance) internal view returns (uint256) {
+        return erc20Balance + (erc721Balance * erc721VotingTokenWeight * 1e18);
     }
 
     function _getCurrentVotes(address account) internal view returns (uint256) {
@@ -311,10 +338,35 @@ contract CultureIndex is ICultureIndex, Ownable, ReentrancyGuard {
      * @notice Fetch the top-voted pieceId
      * @return The top-voted pieceId
      */
-    function topVotedPieceId() external view returns (uint256) {
+    function topVotedPieceId() public view returns (uint256) {
         //slither-disable-next-line unused-return
         (uint256 pieceId, ) = maxHeap.getMax();
         return pieceId;
+    }
+
+        /**
+     * @notice Admin function for setting the quorum votes basis points
+     * @dev newQuorumVotesBPS must be greater than the hardcoded min
+     * @param newQuorumVotesBPS new art piece drop threshold
+     */
+    function _setQuorumVotesBPS(uint256 newQuorumVotesBPS) external {
+        require(msg.sender == owner(), 'NounsDAO::_setQuorumVotesBPS: owner only');
+        require(
+            newQuorumVotesBPS >= MIN_QUORUM_VOTES_BPS && newQuorumVotesBPS <= MAX_QUORUM_VOTES_BPS,
+            'NounsDAO::_setProposalThreshold: invalid proposal threshold'
+        );
+        uint256 oldQuorumVotesBPS = quorumVotesBPS;
+        quorumVotesBPS = newQuorumVotesBPS;
+
+        emit QuorumVotesBPSSet(oldQuorumVotesBPS, quorumVotesBPS);
+    }
+
+    /**
+     * @notice Current quorum votes using ERC721 Total Supply, ERC721 Vote Weight, and ERC20 Total Supply
+     * Differs from `GovernerBravo` which uses fixed amount
+     */
+    function quorumVotes() public view returns (uint256) {
+        return (quorumVotesBPS * _calculateVoteWeight(erc20VotingToken.totalSupply(), erc721VotingToken.totalSupply())) / 10_000;
     }
 
     /**
@@ -322,6 +374,8 @@ contract CultureIndex is ICultureIndex, Ownable, ReentrancyGuard {
      * @return The top voted piece
      */
     function dropTopVotedPiece() public nonReentrant onlyOwner returns (ArtPiece memory) {
+        require(totalVoteWeights[topVotedPieceId()] >= quorumVotes(), "Piece must have quorum votes in order to be dropped.");
+
         //slither-disable-next-line unused-return
         try maxHeap.extractMax() returns (uint256 pieceId, uint256) {
             pieces[pieceId].isDropped = true;
