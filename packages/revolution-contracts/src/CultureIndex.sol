@@ -38,7 +38,7 @@ contract CultureIndex is ICultureIndex, Ownable, ReentrancyGuard {
     string public description;
 
     // The list of all pieces
-    mapping(uint256 => ArtPiece) internal pieces;
+    mapping(uint256 => ArtPiece) public pieces;
 
     // The internal piece ID tracker
     uint256 public _currentPieceId;
