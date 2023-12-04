@@ -345,6 +345,7 @@ contract CultureIndexVotingBasicTest is CultureIndexTestSuite {
             cultureIndex.vote(pieceIds[i]);
         }
         uint256 gasUsedIndividual = startGasIndividual - gasleft();
+        emit log_string("Gas used for individual votes");
         emit log_uint(gasUsedIndividual); // Log gas used for individual votes
 
         // Resetting state for a fair comparison
@@ -361,10 +362,12 @@ contract CultureIndexVotingBasicTest is CultureIndexTestSuite {
         uint256 startGasBatch = gasleft();
         cultureIndex.batchVote(batchPieceIds);
         uint256 gasUsedBatch = startGasBatch - gasleft();
+        emit log_string("Gas used for batch votes");
         emit log_uint(gasUsedBatch); // Log gas used for batch votes
 
         // Log the difference in gas usage
-        emit log_uint(gasUsedIndividual - gasUsedBatch); // This will log the saved gas
+        emit log_string("Gas saved");
+        emit log_int(int(gasUsedIndividual) - int(gasUsedBatch)); // This will log the saved gas
     }
 
     /**
