@@ -363,9 +363,8 @@ contract CultureIndex is ICultureIndex, Ownable, ReentrancyGuard {
      * @dev newQuorumVotesBPS must be greater than the hardcoded min
      * @param newQuorumVotesBPS new art piece drop threshold
      */
-    function _setQuorumVotesBPS(uint256 newQuorumVotesBPS) external {
-        require(msg.sender == owner(), "NounsDAO::_setQuorumVotesBPS: owner only");
-        require(newQuorumVotesBPS >= MIN_QUORUM_VOTES_BPS && newQuorumVotesBPS <= MAX_QUORUM_VOTES_BPS, "NounsDAO::_setProposalThreshold: invalid proposal threshold");
+    function _setQuorumVotesBPS(uint256 newQuorumVotesBPS) external onlyOwner {
+        require(newQuorumVotesBPS >= MIN_QUORUM_VOTES_BPS && newQuorumVotesBPS <= MAX_QUORUM_VOTES_BPS, "CultureIndex::_setProposalThreshold: invalid proposal threshold");
         uint256 oldQuorumVotesBPS = quorumVotesBPS;
         quorumVotesBPS = newQuorumVotesBPS;
 

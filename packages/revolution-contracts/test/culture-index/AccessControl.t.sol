@@ -81,6 +81,32 @@ contract CultureIndexAccessControlTest is CultureIndexTestSuite {
         assertEq(address(cultureIndex.erc721VotingToken()), newTokenAddress);
         vm.stopPrank();
     }
+
+    function testSetQuorumVotesBPSWithinRange(uint104 newQuorumBPS) public {
+        vm.assume(newQuorumBPS >= cultureIndex.MIN_QUORUM_VOTES_BPS() && newQuorumBPS <= cultureIndex.MAX_QUORUM_VOTES_BPS());
+
+        // Set new quorum BPS by owner
+        vm.startPrank(address(this));
+        cultureIndex._setQuorumVotesBPS(newQuorumBPS);
+        vm.stopPrank();
+
+        // Check if the quorum BPS is updated correctly
+        uint256 currentQuorumBPS = cultureIndex.quorumVotesBPS();
+        assertEq(currentQuorumBPS, newQuorumBPS, "Quorum BPS should be updated within valid range");
+    }
+    function testSetQuorumVotesBPSOutsideRange(uint104 newQuorumBPS) public {
+        uint256 currentQuorumBPS = cultureIndex.quorumVotesBPS();
+        vm.assume(newQuorumBPS < cultureIndex.MIN_QUORUM_VOTES_BPS() || newQuorumBPS > cultureIndex.MAX_QUORUM_VOTES_BPS());
+
+        // Set new quorum BPS by owner
+        vm.startPrank(address(this));
+        vm.expectRevert("CultureIndex::_setProposalThreshold: invalid proposal threshold");
+        cultureIndex._setQuorumVotesBPS(newQuorumBPS);
+        vm.stopPrank();
+
+        // Check if the quorum BPS is updated correctly
+        assertEq(cultureIndex.quorumVotesBPS(), currentQuorumBPS, "Quorum BPS should be updated within valid range");
+    }
 }
 
 contract ProxyRegistry is IProxyRegistry {
