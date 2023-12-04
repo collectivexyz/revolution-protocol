@@ -107,6 +107,10 @@ interface ICultureIndex is ICultureIndexEvents {
         address dropper;
         bool isDropped;
         uint256 creationBlock;
+        uint256 quorumVotes;
+        uint256 totalERC721Supply;
+        uint256 totalERC20Supply;
+        uint256 totalVotesSupply;
     }
 
     // Struct representing a voter and their weight for a specific art piece.

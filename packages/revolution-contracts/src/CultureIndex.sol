@@ -183,9 +183,13 @@ contract CultureIndex is ICultureIndex, Ownable, ReentrancyGuard {
         ArtPiece storage newPiece = pieces[pieceId];
 
         newPiece.pieceId = pieceId;
+        newPiece.totalVotesSupply = _calculateVoteWeight(erc20VotingToken.totalSupply(), erc721VotingToken.totalSupply());
+        newPiece.totalERC20Supply = erc20VotingToken.totalSupply();
+        newPiece.totalERC721Supply = erc721VotingToken.totalSupply();
         newPiece.metadata = metadata;
         newPiece.dropper = msg.sender;
         newPiece.creationBlock = block.number;
+        newPiece.quorumVotes = (quorumVotesBPS * newPiece.totalVotesSupply) / 10_000;
 
         for (uint i = 0; i < creatorArray.length; i++) {
             newPiece.creators.push(creatorArray[i]);
@@ -371,7 +375,7 @@ contract CultureIndex is ICultureIndex, Ownable, ReentrancyGuard {
      * @return The top voted piece
      */
     function dropTopVotedPiece() public nonReentrant onlyOwner returns (ArtPiece memory) {
-        require(totalVoteWeights[topVotedPieceId()] >= quorumVotes(), "Piece must have quorum votes in order to be dropped.");
+        require(totalVoteWeights[topVotedPieceId()] >= pieces[topVotedPieceId()].quorumVotes, "Piece must have quorum votes in order to be dropped.");
 
         //slither-disable-next-line unused-return
         try maxHeap.extractMax() returns (uint256 pieceId, uint256) {
