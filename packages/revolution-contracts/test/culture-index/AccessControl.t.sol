@@ -107,6 +107,16 @@ contract CultureIndexAccessControlTest is CultureIndexTestSuite {
         // Check if the quorum BPS is updated correctly
         assertEq(cultureIndex.quorumVotesBPS(), currentQuorumBPS, "Quorum BPS should be updated within valid range");
     }
+    function testRevertNonOwnerSetQuorumVotesBPS() public {
+        address nonOwner = address(0x123); // An arbitrary non-owner address
+        uint256 newQuorumBPS = 3000; // A valid quorum BPS value
+
+        // Attempt to set new quorum BPS by non-owner and expect revert
+        vm.startPrank(nonOwner);
+        vm.expectRevert();
+        cultureIndex._setQuorumVotesBPS(newQuorumBPS);
+        vm.stopPrank();
+    }
 }
 
 contract ProxyRegistry is IProxyRegistry {
