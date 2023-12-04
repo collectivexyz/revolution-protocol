@@ -108,7 +108,6 @@ interface ICultureIndex is ICultureIndexEvents {
         bool isDropped;
         uint256 creationBlock;
         uint256 quorumVotes;
-        uint256 totalERC721Supply;
         uint256 totalERC20Supply;
         uint256 totalVotesSupply;
     }

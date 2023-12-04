@@ -185,7 +185,6 @@ contract CultureIndex is ICultureIndex, Ownable, ReentrancyGuard {
         newPiece.pieceId = pieceId;
         newPiece.totalVotesSupply = _calculateVoteWeight(erc20VotingToken.totalSupply(), erc721VotingToken.totalSupply());
         newPiece.totalERC20Supply = erc20VotingToken.totalSupply();
-        newPiece.totalERC721Supply = erc721VotingToken.totalSupply();
         newPiece.metadata = metadata;
         newPiece.dropper = msg.sender;
         newPiece.creationBlock = block.number;
