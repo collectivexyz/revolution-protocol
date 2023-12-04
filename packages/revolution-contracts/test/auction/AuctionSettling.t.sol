@@ -32,7 +32,7 @@ contract VerbsAuctionHouseSettleTest is VerbsAuctionHouseTest {
 
         assertEq(verbs.ownerOf(0), address(11), "Verb should be transferred to the highest bidder");
         // cultureIndex currentVotes of highest bidder should be 10
-        assertEq(cultureIndex.getCurrentVotes(address(11)), cultureIndex.erc721VotingTokenWeight(), "Highest bidder should have 10 votes");
+        assertEq(cultureIndex.getCurrentVotes(address(11)), cultureIndex.erc721VotingTokenWeight() * 1e18, "Highest bidder should have 10 votes");
 
         uint256 creatorRate = auctionHouse.creatorRateBps();
         uint256 entropyRate = auctionHouse.entropyRateBps();
@@ -99,7 +99,7 @@ contract VerbsAuctionHouseSettleTest is VerbsAuctionHouseTest {
         assertEq(IERC20(address(mockWETH)).balanceOf(recipient), (amount * (10_000 - creatorRate)) / 10_000);
         assertEq(recipient.balance, 0); // Ether balance should still be 0
         //make sure voting weight on culture index is 721 vote weight for winning bidder
-        assertEq(cultureIndex.getCurrentVotes(address(this)), cultureIndex.erc721VotingTokenWeight(), "Highest bidder should have 10 votes");
+        assertEq(cultureIndex.getCurrentVotes(address(this)), cultureIndex.erc721VotingTokenWeight() * 1e18, "Highest bidder should have 10 votes");
     }
 
     function testTransferToEOA() public {
@@ -127,7 +127,7 @@ contract VerbsAuctionHouseSettleTest is VerbsAuctionHouseTest {
         uint256 creatorRate = auctionHouse.creatorRateBps();
         assertEq(recipient.balance, (amount * (10_000 - creatorRate)) / 10_000);
         //make sure voting weight on culture index is 721 vote weight for winning bidder
-        assertEq(cultureIndex.getCurrentVotes(address(this)), cultureIndex.erc721VotingTokenWeight(), "Highest bidder should have 10 votes");
+        assertEq(cultureIndex.getCurrentVotes(address(this)), cultureIndex.erc721VotingTokenWeight() * 1e18, "Highest bidder should have 10 votes");
     }
 
     function testTransferToContractWithoutReceiveOrFallback(uint256 amount) public {
@@ -160,7 +160,7 @@ contract VerbsAuctionHouseSettleTest is VerbsAuctionHouseTest {
         assertEq(IERC20(address(mockWETH)).balanceOf(recipient), (amount * (10_000 - creatorRate)) / 10_000);
         assertEq(recipient.balance, 0); // Ether balance should still be 0
         //make sure voting weight on culture index is 721 vote weight for winning bidder
-        assertEq(cultureIndex.getCurrentVotes(address(this)), cultureIndex.erc721VotingTokenWeight(), "Highest bidder should have 10 votes");
+        assertEq(cultureIndex.getCurrentVotes(address(this)), cultureIndex.erc721VotingTokenWeight() * 1e18, "Highest bidder should have 10 votes");
     }
 
     function testSettlingAuctionWithMultipleCreators(uint8 nCreators) public {
@@ -254,7 +254,7 @@ contract VerbsAuctionHouseSettleTest is VerbsAuctionHouseTest {
         // Verify ownership of the verb
         assertEq(verbs.ownerOf(verbId), address(21_000), "Verb should be transferred to the highest bidder");
         // Verify voting weight on culture index is 721 vote weight for winning bidder
-        assertEq(cultureIndex.getCurrentVotes(address(21_000)), cultureIndex.erc721VotingTokenWeight(), "Highest bidder should have 10 votes");
+        assertEq(cultureIndex.getCurrentVotes(address(21_000)), cultureIndex.erc721VotingTokenWeight() * 1e18, "Highest bidder should have 10 votes");
     }
 
     function testSettlingAuctionWithWinningBidAndCreatorPayout(uint256 bidAmount) public {
@@ -323,7 +323,7 @@ contract VerbsAuctionHouseSettleTest is VerbsAuctionHouseTest {
         // Checking ownership of the verb
         assertEq(verbs.ownerOf(verbId), address(21_000), "Verb should be transferred to the highest bidder");
         // Checking voting weight on culture index is 721 vote weight for winning bidder
-        assertEq(cultureIndex.getCurrentVotes(address(21_000)), cultureIndex.erc721VotingTokenWeight(), "Highest bidder should have 10 votes");
+        assertEq(cultureIndex.getCurrentVotes(address(21_000)), cultureIndex.erc721VotingTokenWeight() * 1e18, "Highest bidder should have 10 votes");
 
         assertEq(governanceToken.balanceOf(address(0x1)), expectedGovernanceTokens, "Creator did not receive the correct amount of governance tokens");
     }
