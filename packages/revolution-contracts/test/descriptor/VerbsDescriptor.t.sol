@@ -21,8 +21,6 @@ contract VerbsDescriptorTest is Test {
 
     /// @notice Test that toggling `isDataURIEnabled` changes state correctly
     function testToggleDataURIEnabled() public {
-        
-
         bool originalState = descriptor.isDataURIEnabled();
         descriptor.toggleDataURIEnabled();
         bool newState = descriptor.isDataURIEnabled();
@@ -32,8 +30,6 @@ contract VerbsDescriptorTest is Test {
 
     /// @notice Test that only owner can toggle `isDataURIEnabled`
     function testToggleDataURIEnabledAccessControl() public {
-        
-
         address nonOwner = address(0x123);
         vm.startPrank(nonOwner);
         vm.expectRevert();
@@ -43,8 +39,6 @@ contract VerbsDescriptorTest is Test {
 
     /// @notice Test `setBaseURI` updates `baseURI` correctly
     function testSetBaseURI() public {
-        
-
         string memory newBaseURI = "https://example.com/";
         descriptor.setBaseURI(newBaseURI);
         string memory currentBaseURI = descriptor.baseURI();
@@ -54,8 +48,6 @@ contract VerbsDescriptorTest is Test {
 
     /// @notice Test that only the owner can update `baseURI`
     function testSetBaseURI_AccessControl() public {
-        
-
         string memory newBaseURI = "https://newexample.com/";
         address nonOwner = address(0x456);
 
@@ -71,8 +63,6 @@ contract VerbsDescriptorTest is Test {
 
     /// @notice Test `tokenURI` returns correct data URI when `isDataURIEnabled` is true
     function testTokenURIWithDataURIEnabled() public {
-        
-
         // Enable data URI
         descriptor.toggleDataURIEnabled();
         assertFalse(descriptor.isDataURIEnabled(), "Data URI should be enabled");
@@ -100,8 +90,6 @@ contract VerbsDescriptorTest is Test {
 
     /// @notice Test `tokenURI` returns correct HTTP URL when `isDataURIEnabled` is false
     function testTokenURIWithHTTPURL() public {
-        
-
         // Make sure data URI is disabled
         descriptor.toggleDataURIEnabled();
         assertFalse(descriptor.isDataURIEnabled(), "Data URI should be disabled");
@@ -131,8 +119,6 @@ contract VerbsDescriptorTest is Test {
 
     /// @notice Test `dataURI` returns valid base64 encoded data URI
     function testDataURI() public {
-        
-
         uint256 tokenId = 1;
         ICultureIndex.ArtPieceMetadata memory metadata = ICultureIndex.ArtPieceMetadata({
             name: "Test Art",
@@ -151,8 +137,6 @@ contract VerbsDescriptorTest is Test {
 
     /// @notice Test `genericDataURI` returns valid base64 encoded data URI
     function testGenericDataURI() public {
-        
-
         ICultureIndex.ArtPieceMetadata memory metadata = ICultureIndex.ArtPieceMetadata({
             name: "Test Art",
             description: "A generic art piece",
@@ -169,8 +153,6 @@ contract VerbsDescriptorTest is Test {
 
     /// @notice Test `toggleDataURIEnabled` emits `DataURIToggled` event
     function testToggleDataURIEnabledEvent() public {
-        
-
         bool expectedNewState = !descriptor.isDataURIEnabled();
         vm.expectEmit(true, true, false, true);
         emit IVerbsDescriptor.DataURIToggled(expectedNewState);
@@ -179,8 +161,6 @@ contract VerbsDescriptorTest is Test {
 
     /// @notice Test `setBaseURI` emits `BaseURIUpdated` event
     function testSetBaseURIEvent() public {
-        
-
         string memory newBaseURI = "https://example.com/newbase";
         vm.expectEmit(true, true, false, true);
         emit IVerbsDescriptor.BaseURIUpdated(newBaseURI);
@@ -189,8 +169,6 @@ contract VerbsDescriptorTest is Test {
 
     /// @notice Test baseline `tokenURI` with `isDataURIEnabled` true by default
     function testBaselineTokenURIWithDataURIEnabled() public {
-        
-
         // Since isDataURIEnabled is true by default, we don't need to toggle it
         assertTrue(descriptor.isDataURIEnabled(), "isDataURIEnabled should be true by default");
 
@@ -211,8 +189,6 @@ contract VerbsDescriptorTest is Test {
 
     /// @notice Test owner can transfer ownership using `transferOwnership`
     function testTransferOwnership() public {
-        
-
         address newOwner = address(0x456);
 
         // The current owner transfers ownership to the newOwner
@@ -224,8 +200,6 @@ contract VerbsDescriptorTest is Test {
 
     /// @notice Ensure `transferOwnership` access control
     function testTransferOwnershipAccessControl() public {
-        
-
         address nonOwner = address(0x789);
         address newOwner = address(0x456);
 
@@ -241,8 +215,6 @@ contract VerbsDescriptorTest is Test {
 
     /// @notice Test `tokenURI` with only image metadata set
     function testTokenURIWithOnlyImageMetadata() public {
-        
-
         uint256 tokenId = 1;
         ICultureIndex.ArtPieceMetadata memory metadata = ICultureIndex.ArtPieceMetadata({
             name: "",
@@ -261,8 +233,6 @@ contract VerbsDescriptorTest is Test {
 
     /// @notice Test `tokenURI` with mixed media types in metadata
     function testTokenURIWithMixedMediaMetadata() public {
-        
-
         uint256 tokenId = 3;
         ICultureIndex.ArtPieceMetadata memory metadata = ICultureIndex.ArtPieceMetadata({
             name: "Mixed Media Art",
@@ -281,8 +251,6 @@ contract VerbsDescriptorTest is Test {
 
     /// @notice Test `tokenURI` with full metadata set
     function testTokenURIWithFullMetadata() public {
-        
-
         uint256 tokenId = 2;
         ICultureIndex.ArtPieceMetadata memory metadata = ICultureIndex.ArtPieceMetadata({
             name: "Full Metadata Art",

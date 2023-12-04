@@ -21,8 +21,6 @@ import { ERC721Checkpointable } from "../../src/base/ERC721Checkpointable.sol";
 contract CultureIndexAccessControlTest is CultureIndexTestSuite {
     /// @dev Tests minting by non-minter should revert
     function testRevertOnNonOwnerUpdateVotingToken() public {
-        
-
         address nonMinter = address(0xABC); // This is an arbitrary address
         vm.startPrank(nonMinter);
 
@@ -34,8 +32,6 @@ contract CultureIndexAccessControlTest is CultureIndexTestSuite {
 
     /// @dev Tests the locking of admin functions
     function testLockAdminFunctions() public {
-        
-
         // Lock the ERC721VotingToken
         cultureIndex.lockERC721VotingToken();
 
@@ -50,7 +46,6 @@ contract CultureIndexAccessControlTest is CultureIndexTestSuite {
 
     /// @dev Tests that only the owner can lock the ERC721 voting token
     function testOnlyOwnerCanLockERC721VotingToken() public {
-        
         address nonOwner = address(0x123); // This is an arbitrary address
         vm.startPrank(nonOwner);
 
@@ -70,7 +65,6 @@ contract CultureIndexAccessControlTest is CultureIndexTestSuite {
 
     /// @dev Tests only the owner can update the ERC721 voting token
     function testSetERC721VotingToken() public {
-        
         address newTokenAddress = address(0x123); // New ERC721 token address
         ERC721Checkpointable newToken = ERC721Checkpointable(newTokenAddress);
 

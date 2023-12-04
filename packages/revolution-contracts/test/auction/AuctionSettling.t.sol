@@ -48,7 +48,6 @@ contract VerbsAuctionHouseSettleTest is VerbsAuctionHouseTest {
     }
 
     function testSettlingAuctionWithNoBids(uint8 nDays) public {
-        
         uint256 verbId = createDefaultArtPiece();
         auctionHouse.unpause();
 
@@ -62,7 +61,6 @@ contract VerbsAuctionHouseSettleTest is VerbsAuctionHouseTest {
     }
 
     function testSettlingAuctionPrematurely() public {
-        
         createDefaultArtPiece();
         auctionHouse.unpause();
 
@@ -74,7 +72,7 @@ contract VerbsAuctionHouseSettleTest is VerbsAuctionHouseTest {
         vm.assume(amount > tokenEmitter.minPurchaseAmount());
         vm.assume(amount > auctionHouse.reservePrice());
         vm.assume(amount < tokenEmitter.maxPurchaseAmount());
-        
+
         createDefaultArtPiece();
         auctionHouse.unpause();
 
@@ -103,7 +101,6 @@ contract VerbsAuctionHouseSettleTest is VerbsAuctionHouseTest {
     }
 
     function testTransferToEOA() public {
-        
         createDefaultArtPiece();
         auctionHouse.unpause();
 
@@ -134,7 +131,7 @@ contract VerbsAuctionHouseSettleTest is VerbsAuctionHouseTest {
         vm.assume(amount > tokenEmitter.minPurchaseAmount());
         vm.assume(amount > auctionHouse.reservePrice());
         vm.assume(amount < tokenEmitter.maxPurchaseAmount());
-        
+
         createDefaultArtPiece();
         auctionHouse.unpause();
 
@@ -167,7 +164,6 @@ contract VerbsAuctionHouseSettleTest is VerbsAuctionHouseTest {
         vm.assume(nCreators > 2);
         vm.assume(nCreators < 100);
 
-        
         uint256 creatorRate = (auctionHouse.creatorRateBps());
         uint256 entropyRate = (auctionHouse.entropyRateBps());
 
@@ -261,7 +257,7 @@ contract VerbsAuctionHouseSettleTest is VerbsAuctionHouseTest {
         vm.assume(bidAmount > tokenEmitter.minPurchaseAmount());
         vm.assume(bidAmount > auctionHouse.reservePrice());
         vm.assume(bidAmount < tokenEmitter.maxPurchaseAmount());
-        
+
         uint256 verbId = createArtPiece("Art Piece", "A new art piece", ICultureIndex.MediaType.IMAGE, "ipfs://image", "", "", address(0x1), 10_000);
 
         uint256 creatorRate = auctionHouse.creatorRateBps();

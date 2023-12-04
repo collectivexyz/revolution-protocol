@@ -21,8 +21,6 @@ import { VerbsTokenTestSuite } from "./VerbsToken.t.sol";
 contract TokenMintingTest is VerbsTokenTestSuite {
     /// @dev Ensures the dropped art piece is equivalent to the top-voted piece
     function testDroppedArtPieceMatchesTopVoted() public {
-        
-
         govToken.mint(address(this), 10);
 
         // Create a new art piece and simulate it being the top voted piece
@@ -86,8 +84,6 @@ contract TokenMintingTest is VerbsTokenTestSuite {
 
     /// @dev Tests basic minting
     function testMint() public {
-        
-
         // Add a piece to the CultureIndex
         createDefaultArtPiece();
 
@@ -103,7 +99,6 @@ contract TokenMintingTest is VerbsTokenTestSuite {
 
     /// @dev Tests minting a verb token to itself
     function testMintToItself() public {
-        
         createDefaultArtPiece();
 
         uint256 initialTotalSupply = verbsToken.totalSupply();
@@ -114,8 +109,6 @@ contract TokenMintingTest is VerbsTokenTestSuite {
 
     /// @dev Tests burning a verb token
     function testBurn() public {
-        
-
         createDefaultArtPiece();
 
         uint256 tokenId = verbsToken.mint();
@@ -156,10 +149,9 @@ contract TokenMintingTest is VerbsTokenTestSuite {
 
     /// @dev Checks if the VerbCreated event is emitted with correct parameters on minting
     function testMintingEvent() public {
-        
         createDefaultArtPiece();
 
-        (uint256 pieceId, ICultureIndex.ArtPieceMetadata memory metadata, , , , , ,) = cultureIndex.pieces(0);
+        (uint256 pieceId, ICultureIndex.ArtPieceMetadata memory metadata, , , , , , ) = cultureIndex.pieces(0);
 
         emit log_uint(pieceId);
 
@@ -187,8 +179,6 @@ contract TokenMintingTest is VerbsTokenTestSuite {
 
     /// @dev Tests the burn function.
     function testBurnFunction() public {
-        
-
         //create piece
         createDefaultArtPiece();
         uint256 tokenId = verbsToken.mint();
@@ -203,10 +193,9 @@ contract TokenMintingTest is VerbsTokenTestSuite {
 
     /// @dev Validates that the token URI is correctly set and retrieved
     function testTokenURI() public {
-        
         uint256 artPieceId = createDefaultArtPiece();
         uint256 tokenId = verbsToken.mint();
-        (, ICultureIndex.ArtPieceMetadata memory metadata, , , , , ,) = cultureIndex.pieces(artPieceId);
+        (, ICultureIndex.ArtPieceMetadata memory metadata, , , , , , ) = cultureIndex.pieces(artPieceId);
         // Assuming the descriptor returns a fixed URI for the given tokenId
         string memory expectedTokenURI = descriptor.tokenURI(tokenId, metadata);
         assertEq(verbsToken.tokenURI(tokenId), expectedTokenURI, "Token URI should be correctly set and retrieved");
@@ -214,8 +203,6 @@ contract TokenMintingTest is VerbsTokenTestSuite {
 
     /// @dev Ensures minting fetches and associates the top-voted piece from CultureIndex
     function testTopVotedPieceMinting() public {
-        
-
         // Create a new piece and simulate it being the top voted piece
         uint256 pieceId = createDefaultArtPiece(); // This function should exist within the test contract
 
@@ -230,7 +217,7 @@ contract TokenMintingTest is VerbsTokenTestSuite {
         uint256 tokenId = verbsToken.mint();
 
         // Validate the token is associated with the top voted piece
-        (uint256 mintedPieceId, , , , , , ,) = verbsToken.artPieces(tokenId);
+        (uint256 mintedPieceId, , , , , , , ) = verbsToken.artPieces(tokenId);
         assertEq(mintedPieceId, pieceId, "Minted token should be associated with the top voted piece");
     }
 }

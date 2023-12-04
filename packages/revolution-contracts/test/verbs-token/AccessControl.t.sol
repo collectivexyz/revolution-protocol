@@ -20,8 +20,6 @@ import { VerbsTokenTestSuite } from "./VerbsToken.t.sol";
 contract TokenAccessControlTest is VerbsTokenTestSuite {
     /// @dev Tests that non-owners cannot call dropTopVotedPiece on CultureIndex
     function testNonOwnerCannotCallDropTopVotedPiece() public {
-        
-
         // Assuming the CultureIndex is already set up and there are some pieces with votes
         createDefaultArtPiece();
 
@@ -45,8 +43,6 @@ contract TokenAccessControlTest is VerbsTokenTestSuite {
 
     /// @dev Tests minting by non-minter should revert
     function testRevertOnNonMinterMint() public {
-        
-
         address nonMinter = address(0xABC); // This is an arbitrary address
         vm.startPrank(nonMinter);
 
@@ -61,15 +57,12 @@ contract TokenAccessControlTest is VerbsTokenTestSuite {
 
     /// @dev Tests that only the owner can set the contract URI
     function testSetContractURIByOwner() public {
-        
         verbsToken.setContractURIHash("NewHashHere");
         assertEq(verbsToken.contractURI(), "ipfs://NewHashHere", "Contract URI should be updated");
     }
 
     /// @dev Tests that non-owners cannot set the contract URI
     function testRevertOnNonOwnerSettingContractURI() public {
-        
-
         address nonOwner = address(0x1); // Non-owner address
         vm.startPrank(nonOwner);
 
@@ -87,8 +80,6 @@ contract TokenAccessControlTest is VerbsTokenTestSuite {
 
     /// @dev Tests the locking of admin functions
     function testLockAdminFunctions() public {
-        
-
         // Lock the minter, descriptor, and cultureIndex to prevent changes
         verbsToken.lockMinter();
         verbsToken.lockDescriptor();
@@ -128,8 +119,6 @@ contract TokenAccessControlTest is VerbsTokenTestSuite {
 
     /// @dev Tests that only the owner can call owner-specific functions
     function testOwnerPrivileges() public {
-        
-
         // Test only owner can change contract URI
         verbsToken.setContractURIHash("NewHashHere");
         assertEq(verbsToken.contractURI(), "ipfs://NewHashHere", "Owner should be able to change contract URI");
@@ -150,8 +139,6 @@ contract TokenAccessControlTest is VerbsTokenTestSuite {
 
     /// @dev Tests setting and updating the minter address
     function testMinterAssignment() public {
-        
-
         // Test only owner can change minter
         address newMinter = address(0xABC);
         verbsToken.setMinter(newMinter);
@@ -173,7 +160,6 @@ contract TokenAccessControlTest is VerbsTokenTestSuite {
 
     /// @dev Tests that only the minter can burn tokens
     function testBurningPermission() public {
-        
         createDefaultArtPiece();
         uint256 tokenId = verbsToken.mint();
 
@@ -193,7 +179,6 @@ contract TokenAccessControlTest is VerbsTokenTestSuite {
 
     /// @dev Tests setting a new minter.
     function testSetMinter() public {
-        
         address newMinter = address(0x123);
         vm.expectEmit(true, true, true, true);
         emit IVerbsToken.MinterUpdated(newMinter);
@@ -203,7 +188,6 @@ contract TokenAccessControlTest is VerbsTokenTestSuite {
 
     /// @dev Tests locking the minter and ensuring it cannot be changed afterwards.
     function testLockMinter() public {
-        
         verbsToken.lockMinter();
         assertTrue(verbsToken.isMinterLocked(), "Minter should be locked");
         vm.expectRevert("Minter is locked");
@@ -212,7 +196,6 @@ contract TokenAccessControlTest is VerbsTokenTestSuite {
 
     /// @dev Tests that the minter can be set and locked appropriately
     function testMinterAssignmentAndLocking() public {
-        
         createDefaultArtPiece();
         // Test setting the minter and minting a token
         verbsToken.setMinter(address(0x2));
@@ -227,8 +210,6 @@ contract TokenAccessControlTest is VerbsTokenTestSuite {
 
     /// @dev Tests that the descriptor can be set and locked appropriately
     function testDescriptorLocking() public {
-        
-
         // Test setting the descriptor
         IVerbsDescriptorMinimal newDescriptor = new VerbsDescriptor(address(this), "Verb");
         verbsToken.setDescriptor(newDescriptor);
@@ -241,8 +222,6 @@ contract TokenAccessControlTest is VerbsTokenTestSuite {
 
     /// @dev Tests that the CultureIndex can be set and locked appropriately
     function testCultureIndexLocking() public {
-        
-
         // Test setting the CultureIndex
         CultureIndex newCultureIndex = new CultureIndex("Vrbs", "Our community Vrbs. Must be 32x32.", address(govToken), address(verbsToken), address(this), 10, 200);
         verbsToken.setCultureIndex(ICultureIndex(address(newCultureIndex)));
@@ -257,7 +236,6 @@ contract TokenAccessControlTest is VerbsTokenTestSuite {
 
     /// @dev Tests updating and locking the descriptor.
     function testDescriptorUpdateAndLock() public {
-        
         IVerbsDescriptorMinimal newDescriptor = IVerbsDescriptorMinimal(address(0x789));
         verbsToken.setDescriptor(newDescriptor);
         assertEq(address(verbsToken.descriptor()), address(newDescriptor), "Descriptor should be updated");
@@ -270,7 +248,6 @@ contract TokenAccessControlTest is VerbsTokenTestSuite {
 
     /// @dev Tests updating and locking the CultureIndex.
     function testCultureIndexUpdateAndLock() public {
-        
         ICultureIndex newCultureIndex = ICultureIndex(address(0xDEF));
         verbsToken.setCultureIndex(newCultureIndex);
         assertEq(address(verbsToken.cultureIndex()), address(newCultureIndex), "CultureIndex should be updated");
@@ -283,7 +260,6 @@ contract TokenAccessControlTest is VerbsTokenTestSuite {
 
     /// @dev Tests the `isApprovedForAll` function override for OpenSea proxy.
     function testIsApprovedForAllOverride() public {
-        
         address owner = address(this);
         emit log_address(owner);
 

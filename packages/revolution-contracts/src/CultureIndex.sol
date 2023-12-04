@@ -194,7 +194,18 @@ contract CultureIndex is ICultureIndex, Ownable, ReentrancyGuard {
             newPiece.creators.push(creatorArray[i]);
         }
 
-        emit PieceCreated(pieceId, msg.sender, metadata.name, metadata.description, metadata.image, metadata.animationUrl, metadata.text, uint8(metadata.mediaType), newPiece.quorumVotes, newPiece.totalVotesSupply);
+        emit PieceCreated(
+            pieceId,
+            msg.sender,
+            metadata.name,
+            metadata.description,
+            metadata.image,
+            metadata.animationUrl,
+            metadata.text,
+            uint8(metadata.mediaType),
+            newPiece.quorumVotes,
+            newPiece.totalVotesSupply
+        );
 
         // Emit an event for each creator
         for (uint i = 0; i < creatorArray.length; i++) {

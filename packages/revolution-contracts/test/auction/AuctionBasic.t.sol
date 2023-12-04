@@ -170,7 +170,6 @@ contract VerbsAuctionHouseBasicTest is VerbsAuctionHouseTest {
     }
 
     function testAuctionCreation() public {
-        
         createDefaultArtPiece();
 
         auctionHouse.unpause();
@@ -188,7 +187,7 @@ contract VerbsAuctionHouseBasicTest is VerbsAuctionHouseTest {
     function testBiddingProcess(uint256 bidAmount) public {
         vm.assume(bidAmount > auctionHouse.reservePrice());
         vm.assume(bidAmount < 10_000_000 ether);
-        
+
         createDefaultArtPiece();
 
         auctionHouse.unpause();
@@ -242,7 +241,7 @@ contract VerbsAuctionHouseBasicTest is VerbsAuctionHouseTest {
 
         vm.warp(endTime + 1);
         uint256 pieceId = createDefaultArtPiece();
-        
+
         //vote for pieceId
         vm.startPrank(address(auctionHouse));
         vm.roll(block.number + 1);

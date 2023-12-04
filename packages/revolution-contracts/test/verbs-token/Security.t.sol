@@ -21,8 +21,6 @@ import { VerbsTokenTestSuite } from "./VerbsToken.t.sol";
 contract TokenSecurityTest is VerbsTokenTestSuite {
     /// @dev Tests the creator array limit for minting
     function testCreatorArrayLimit() public {
-        
-
         // Create an art piece with creators more than the limit (assuming the limit is 100)
         ICultureIndex.CreatorBps[] memory creators = new ICultureIndex.CreatorBps[](101);
         for (uint i = 0; i < 101; i++) {
@@ -54,8 +52,6 @@ contract TokenSecurityTest is VerbsTokenTestSuite {
 
     /// @dev Tests the reentrancy guard on the mint function
     function testReentrancyOnMint() public {
-        
-
         createDefaultArtPiece();
 
         // Simulate a reentrancy attack by calling mint within a call to mint
@@ -76,8 +72,6 @@ contract TokenSecurityTest is VerbsTokenTestSuite {
 
     /// @dev Tests approval checks for transfer functions
     function testApprovalChecks() public {
-        
-
         createDefaultArtPiece();
 
         uint256 tokenId = verbsToken.mint();
@@ -108,7 +102,6 @@ contract TokenSecurityTest is VerbsTokenTestSuite {
     }
 
     function testPrivilegeEscalation() public {
-        
         address unauthorizedAddress = address(0xDead);
         vm.startPrank(unauthorizedAddress);
 
@@ -133,7 +126,6 @@ contract TokenSecurityTest is VerbsTokenTestSuite {
     }
 
     function testReentrancyOtherFunctions() public {
-        
         createDefaultArtPiece();
         address attacker = address(new ReentrancyAttackContractGeneral(address(verbsToken)));
 
@@ -143,7 +135,6 @@ contract TokenSecurityTest is VerbsTokenTestSuite {
     }
 
     function testBasisPointsSum() public {
-        
         bool reverted = false;
 
         // Total basis points not equal to 10000 should revert
@@ -160,7 +151,6 @@ contract TokenSecurityTest is VerbsTokenTestSuite {
     }
 
     function testZeroAddressInCreatorArray() public {
-        
         bool reverted = false;
 
         // Creator array containing a zero address should revert
@@ -176,7 +166,6 @@ contract TokenSecurityTest is VerbsTokenTestSuite {
     }
 
     function testEventEmission() public {
-        
         // Check that the PieceCreated event was emitted with correct parameters
         vm.expectEmit(true, true, true, true);
         emit ICultureIndexEvents.PieceCreated(0, address(this), "Mona Lisa", "A masterpiece", "ipfs://legends", "", "", uint8(ICultureIndex.MediaType.IMAGE), 0, 0);
@@ -189,7 +178,6 @@ contract TokenSecurityTest is VerbsTokenTestSuite {
     }
 
     function testFunctionalityUnderMaximumLoad() public {
-        
         bool reverted = false;
 
         // Create an art piece with the maximum allowed number of creators
@@ -209,8 +197,6 @@ contract TokenSecurityTest is VerbsTokenTestSuite {
 
     /// @dev Tests the _mintTo function for failure in dropTopVotedPiece and ensures verbId is not incremented
     function testMintToDropTopVotedPieceFailure() public {
-        
-
         // Create a default art piece to have something to mint
         createDefaultArtPiece();
 

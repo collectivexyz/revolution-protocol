@@ -20,26 +20,21 @@ import { VerbsTokenTestSuite } from "./VerbsToken.t.sol";
 contract TokenBasicTest is VerbsTokenTestSuite {
     /// @dev Tests the symbol of the VerbsToken
     function testSymbol() public {
-        
         assertEq(verbsToken.symbol(), tokenSymbol, "Symbol should be VRBS");
     }
 
     /// @dev Tests the name of the VerbsToken
     function testName() public {
-        
         assertEq(verbsToken.name(), tokenName, "Name should be Vrbs");
     }
 
     /// @dev Tests the contract URI of the VerbsToken
     function testContractURI() public {
-        
         assertEq(verbsToken.contractURI(), "ipfs://QmQzDwaZ7yQxHHs7sQQenJVB89riTSacSGcJRv9jtHPuz5", "Contract URI should match");
     }
 
     /// @dev Tests the initial state of the contract variables
     function testInitialVariablesState() public {
-        
-
         address minter = verbsToken.minter();
         address descriptorAddress = address(verbsToken.descriptor());
         address cultureIndexAddress = address(verbsToken.cultureIndex());
@@ -51,11 +46,10 @@ contract TokenBasicTest is VerbsTokenTestSuite {
 
     /// @dev Tests that minted tokens are correctly associated with the art piece from CultureIndex
     function testCorrectArtAssociation() public {
-        
         uint256 artPieceId = createDefaultArtPiece();
         uint256 tokenId = verbsToken.mint();
 
-        (uint256 recordedPieceId, , , , , , ,) = verbsToken.artPieces(tokenId);
+        (uint256 recordedPieceId, , , , , , , ) = verbsToken.artPieces(tokenId);
 
         // Validate the token's associated art piece
         assertEq(recordedPieceId, artPieceId, "Minted token should be associated with the correct art piece");
@@ -79,7 +73,7 @@ contract TokenBasicTest is VerbsTokenTestSuite {
         uint256 artPieceId = createArtPiece(name, description, mediaType, image, text, animationUrl, creatorAddress, 10_000);
 
         // Act
-        (, ICultureIndex.ArtPieceMetadata memory metadata, , , , , ,) = cultureIndex.pieces(artPieceId);
+        (, ICultureIndex.ArtPieceMetadata memory metadata, , , , , , ) = cultureIndex.pieces(artPieceId);
 
         // Assert
         assertEq(metadata.name, "Mona Lisa", "The name of the art piece should match the provided name.");
@@ -340,8 +334,6 @@ contract TokenBasicTest is VerbsTokenTestSuite {
 
     /// @dev Tests token metadata integrity after minting
     function testTokenMetadataIntegrity() public {
-        
-
         // Create an art piece and mint a token
         uint256 artPieceId = createDefaultArtPiece();
         uint256 tokenId = verbsToken.mint();
@@ -433,14 +425,12 @@ contract TokenBasicTest is VerbsTokenTestSuite {
 
     /// @dev Tests the interaction with the CultureIndex during minting
     function testCultureIndexInteraction() public {
-        
-
         //create piece
         createDefaultArtPiece();
 
         uint256 preMintPieceId = cultureIndex.topVotedPieceId();
         uint256 tokenId = verbsToken.mint();
-        (uint256 pieceId, , , , , , ,) = verbsToken.artPieces(tokenId);
+        (uint256 pieceId, , , , , , , ) = verbsToken.artPieces(tokenId);
 
         assertTrue(pieceId == preMintPieceId, "Art piece ID should match top voted piece ID before minting");
     }
