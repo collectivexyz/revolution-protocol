@@ -234,7 +234,6 @@ contract VerbsAuctionHouseBasicTest is VerbsAuctionHouseTest {
     }
 
     function testSettlingAuctions() public {
-        
         createDefaultArtPiece();
         auctionHouse.unpause();
 
@@ -242,7 +241,12 @@ contract VerbsAuctionHouseBasicTest is VerbsAuctionHouseTest {
         assertEq(verbs.ownerOf(verbId), address(auctionHouse), "Verb should be transferred to the auction house");
 
         vm.warp(endTime + 1);
-        createDefaultArtPiece();
+        uint256 pieceId = createDefaultArtPiece();
+        
+        //vote for pieceId
+        vm.startPrank(address(auctionHouse));
+        vm.roll(block.number + 1);
+        cultureIndex.vote(pieceId);
 
         auctionHouse.settleCurrentAndCreateNewAuction(); // This will settle the current auction and create a new one
 
