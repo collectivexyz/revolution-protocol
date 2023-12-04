@@ -26,7 +26,7 @@ contract CultureIndexVotingBasicTest is CultureIndexTestSuite {
         vm.mockCall(address(cultureIndex.erc20VotingToken()), abi.encodeWithSelector(Votes.getVotes.selector, voter), abi.encode(erc20Weight));
         vm.mockCall(address(cultureIndex.erc721VotingToken()), abi.encodeWithSelector(ERC721Checkpointable.getCurrentVotes.selector, voter), abi.encode(erc721Weight));
 
-        uint256 expectedWeight = erc20Weight + (erc721Weight * cultureIndex.erc721VotingTokenWeight());
+        uint256 expectedWeight = erc20Weight + (erc721Weight * cultureIndex.erc721VotingTokenWeight() * 1e18);
         uint256 actualWeight = cultureIndex.getCurrentVotes(voter);
         assertEq(expectedWeight, actualWeight);
     }
@@ -52,7 +52,7 @@ contract CultureIndexVotingBasicTest is CultureIndexTestSuite {
         vm.stopPrank();
 
         // Check vote is recorded with correct weight
-        uint256 expectedWeight = erc721Weight * cultureIndex.erc721VotingTokenWeight();
+        uint256 expectedWeight = erc721Weight * cultureIndex.erc721VotingTokenWeight() * 1e18;
         ICultureIndex.Vote memory vote = cultureIndex.getVote(pieceId, voter);
         assertEq(vote.weight, expectedWeight);
     }
@@ -150,7 +150,7 @@ contract CultureIndexVotingBasicTest is CultureIndexTestSuite {
         // ensure that the ERC721 token is minted
         assertEq(verbs.balanceOf(address(this)), 1, "ERC721 token should be minted");
         // ensure cultureindex currentvotes is correct
-        assertEq(cultureIndex.getCurrentVotes(address(this)), cultureIndex.erc721VotingTokenWeight(), "Vote weight should be correct");
+        assertEq(cultureIndex.getCurrentVotes(address(this)), cultureIndex.erc721VotingTokenWeight() * 1e18, "Vote weight should be correct");
 
         // burn the 721
         verbs.burn(0);
@@ -193,7 +193,7 @@ contract CultureIndexVotingBasicTest is CultureIndexTestSuite {
         verbs.mint();
 
         uint256 initialWeight = cultureIndex.getCurrentVotes(voter);
-        uint256 expectedInitialWeight = initialErc20Weight + (1 * cultureIndex.erc721VotingTokenWeight());
+        uint256 expectedInitialWeight = initialErc20Weight + (1 * cultureIndex.erc721VotingTokenWeight() * 1e18);
         assertEq(initialWeight, expectedInitialWeight);
 
         // Change token balances
@@ -203,7 +203,7 @@ contract CultureIndexVotingBasicTest is CultureIndexTestSuite {
         verbs.mint();
 
         uint256 updatedWeight = cultureIndex.getCurrentVotes(voter);
-        uint256 expectedUpdatedWeight = updateErc20Weight + initialErc20Weight + (2 * cultureIndex.erc721VotingTokenWeight());
+        uint256 expectedUpdatedWeight = updateErc20Weight + initialErc20Weight + (2 * cultureIndex.erc721VotingTokenWeight() * 1e18);
         assertEq(updatedWeight, expectedUpdatedWeight);
 
         //burn the first 2 verbs
