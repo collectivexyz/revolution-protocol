@@ -126,16 +126,31 @@ contract TokenMintingTest is VerbsTokenTestSuite {
     }
 
     /// @dev Ensures _currentVerbId increments correctly after each mint
-    function testMintingIncrement() public {
+    function testMintingIncrement(uint208 voteWeight) public {
+        govToken.mint(address(1), 10);
+        
         setUp();
-        createDefaultArtPiece();
-        createDefaultArtPiece();
+        govToken.mint(address(this), voteWeight);
 
+        uint256 pieceId1 = createDefaultArtPiece();
+        uint256 pieceId2 = createDefaultArtPiece();
+
+        // ensure vote snapshot is taken
+        vm.roll(block.number + 1);
+
+        if (voteWeight == 0) vm.expectRevert("Weight must be greater than zero");
+        cultureIndex.vote(pieceId1);
+
+        if (voteWeight == 0) vm.expectRevert("Piece must have quorum votes in order to be dropped.");
         uint256 tokenId1 = verbsToken.mint();
-        assertEq(verbsToken.totalSupply(), tokenId1 + 1, "CurrentVerbId should increment after first mint");
+        if (voteWeight > 0) assertEq(verbsToken.totalSupply(), tokenId1 + 1, "CurrentVerbId should increment after first mint");
 
+        if (voteWeight == 0) vm.expectRevert("Weight must be greater than zero");
+        cultureIndex.vote(pieceId2);
+
+        if (voteWeight == 0) vm.expectRevert("Piece must have quorum votes in order to be dropped.");
         uint256 tokenId2 = verbsToken.mint();
-        assertEq(verbsToken.totalSupply(), tokenId2 + 1, "CurrentVerbId should increment after second mint");
+        if (voteWeight > 0) assertEq(verbsToken.totalSupply(), tokenId2 + 1, "CurrentVerbId should increment after second mint");
     }
 
     /// @dev Checks if the VerbCreated event is emitted with correct parameters on minting

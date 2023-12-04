@@ -70,11 +70,11 @@ abstract contract RewardSplits {
     function _depositPurchaseRewards(uint256 paymentAmountWei, address builderReferral, address purchaseReferral, address deployer) internal returns (uint256) {
         (RewardsSettings memory settings, uint256 totalReward) = computePurchaseRewards(paymentAmountWei);
 
-        if(builderReferral == address(0)) builderReferral = revolutionRewardRecipient;
+        if (builderReferral == address(0)) builderReferral = revolutionRewardRecipient;
 
-        if(deployer == address(0)) deployer = revolutionRewardRecipient;
+        if (deployer == address(0)) deployer = revolutionRewardRecipient;
 
-        if(purchaseReferral == address(0)) purchaseReferral = revolutionRewardRecipient;
+        if (purchaseReferral == address(0)) purchaseReferral = revolutionRewardRecipient;
 
         protocolRewards.depositRewards{ value: totalReward }(
             builderReferral,

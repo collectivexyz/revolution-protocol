@@ -30,7 +30,7 @@ contract CultureIndex is ICultureIndex, Ownable, ReentrancyGuard {
     /// @notice The maximum setable quorum votes basis points
     uint256 public constant MAX_QUORUM_VOTES_BPS = 4_000; // 4,000 basis points or 40%
 
-    /// @notice The basis point number of votes in support of a art piece required in order for a quorum to be reached and for an art piece to be dropped. 
+    /// @notice The basis point number of votes in support of a art piece required in order for a quorum to be reached and for an art piece to be dropped.
     uint256 public quorumVotesBPS;
 
     string public name;
@@ -68,11 +68,11 @@ contract CultureIndex is ICultureIndex, Ownable, ReentrancyGuard {
         uint256 erc721VotingTokenWeight_,
         uint256 quorumVotesBPS_
     ) Ownable(initialOwner_) {
-        require(quorumVotesBPS_ >= MIN_QUORUM_VOTES_BPS && quorumVotesBPS_ <= MAX_QUORUM_VOTES_BPS,'CultureIndex::constructor: invalid proposal threshold');
-        require(erc721VotingTokenWeight_ > 0, 'CultureIndex::constructor: invalid erc721 voting token weight');
-        require(erc721VotingToken_ != address(0),'CultureIndex::constructor: invalid erc721 voting token');
-        require(erc20VotingToken_ != address(0),'CultureIndex::constructor: invalid erc20 voting token');
-        
+        require(quorumVotesBPS_ >= MIN_QUORUM_VOTES_BPS && quorumVotesBPS_ <= MAX_QUORUM_VOTES_BPS, "CultureIndex::constructor: invalid proposal threshold");
+        require(erc721VotingTokenWeight_ > 0, "CultureIndex::constructor: invalid erc721 voting token weight");
+        require(erc721VotingToken_ != address(0), "CultureIndex::constructor: invalid erc721 voting token");
+        require(erc20VotingToken_ != address(0), "CultureIndex::constructor: invalid erc20 voting token");
+
         erc20VotingToken = ERC20Votes(erc20VotingToken_);
         erc721VotingToken = ERC721Checkpointable(erc721VotingToken_);
         erc721VotingTokenWeight = erc721VotingTokenWeight_;
@@ -344,17 +344,14 @@ contract CultureIndex is ICultureIndex, Ownable, ReentrancyGuard {
         return pieceId;
     }
 
-        /**
+    /**
      * @notice Admin function for setting the quorum votes basis points
      * @dev newQuorumVotesBPS must be greater than the hardcoded min
      * @param newQuorumVotesBPS new art piece drop threshold
      */
     function _setQuorumVotesBPS(uint256 newQuorumVotesBPS) external {
-        require(msg.sender == owner(), 'NounsDAO::_setQuorumVotesBPS: owner only');
-        require(
-            newQuorumVotesBPS >= MIN_QUORUM_VOTES_BPS && newQuorumVotesBPS <= MAX_QUORUM_VOTES_BPS,
-            'NounsDAO::_setProposalThreshold: invalid proposal threshold'
-        );
+        require(msg.sender == owner(), "NounsDAO::_setQuorumVotesBPS: owner only");
+        require(newQuorumVotesBPS >= MIN_QUORUM_VOTES_BPS && newQuorumVotesBPS <= MAX_QUORUM_VOTES_BPS, "NounsDAO::_setProposalThreshold: invalid proposal threshold");
         uint256 oldQuorumVotesBPS = quorumVotesBPS;
         quorumVotesBPS = newQuorumVotesBPS;
 
