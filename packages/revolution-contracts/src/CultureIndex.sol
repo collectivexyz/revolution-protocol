@@ -37,6 +37,18 @@ contract CultureIndex is ICultureIndex, Ownable, ReentrancyGuard {
 
     string public description;
 
+    // The list of all pieces
+    mapping(uint256 => ArtPiece) internal pieces;
+
+    // The internal piece ID tracker
+    uint256 public _currentPieceId;
+
+    // The mapping of all votes for a piece
+    mapping(uint256 => mapping(address => Vote)) public votes;
+
+    // The total voting weight for a piece
+    mapping(uint256 => uint256) public totalVoteWeights;
+
     /**
      * @notice Constructor
      * @param name_ The name of the culture index
@@ -72,18 +84,6 @@ contract CultureIndex is ICultureIndex, Ownable, ReentrancyGuard {
 
         maxHeap = new MaxHeap(address(this));
     }
-
-    // The list of all pieces
-    mapping(uint256 => ArtPiece) public pieces;
-
-    // The internal piece ID tracker
-    uint256 public _currentPieceId;
-
-    // The mapping of all votes for a piece
-    mapping(uint256 => mapping(address => Vote)) public votes;
-
-    // The total voting weight for a piece
-    mapping(uint256 => uint256) public totalVoteWeights;
 
     /**
      * @notice Require that the 721VotingToken has not been locked.
