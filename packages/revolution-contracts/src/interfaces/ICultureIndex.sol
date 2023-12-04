@@ -33,7 +33,9 @@ interface ICultureIndexEvents {
         string image,
         string animationUrl,
         string text,
-        uint8 mediaType
+        uint8 mediaType,
+        uint256 quorumVotes,
+        uint256 totalVotesSupply
     );
 
     /**

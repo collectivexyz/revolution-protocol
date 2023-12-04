@@ -16,7 +16,7 @@ contract MaxHeapTestSuite is Test {
 
     /// @dev Tests that only the owner can call updateValue
     function testUpdateValueOnlyOwner() public {
-        setUp();
+        
         maxHeap.insert(1, 10); // Setup a state with an element
 
         address nonOwner = address(2);
@@ -35,7 +35,7 @@ contract MaxHeapTestSuite is Test {
 
     /// @dev Tests that only the owner can call insert
     function testInsertOnlyOwner() public {
-        setUp();
+        
 
         address nonOwner = address(3);
         vm.prank(nonOwner);
@@ -53,7 +53,7 @@ contract MaxHeapTestSuite is Test {
 
     /// @dev Tests that only the owner can call extractMax
     function testExtractMaxOnlyOwner() public {
-        setUp();
+        
 
         // Insert an element to ensure the heap is not empty
         maxHeap.insert(1, 10);
@@ -77,7 +77,7 @@ contract MaxHeapTestSuite is Test {
 
     /// @dev Tests the insert and getMax functions
     function testInsert() public {
-        setUp();
+        
 
         // Insert values into the max heap
         maxHeap.insert(1, 5);
@@ -92,7 +92,7 @@ contract MaxHeapTestSuite is Test {
 
     /// @dev Tests the extractMax function and validates the new max value
     function testRemoveMax() public {
-        setUp();
+        
 
         // Insert and then remove max
         maxHeap.insert(1, 5);
@@ -108,7 +108,7 @@ contract MaxHeapTestSuite is Test {
 
     /// @dev Tests the maxHeapify function to ensure it corrects the heap property
     function testHeapify() public {
-        setUp();
+        
 
         // Insert values and manually violate the heap property
         maxHeap.insert(1, 5);
@@ -129,7 +129,7 @@ contract MaxHeapTestSuite is Test {
 
     /// @dev Tests inserting duplicate values into the heap
     function testInsertDuplicateValues() public {
-        setUp();
+        
         maxHeap.insert(1, 5);
         maxHeap.insert(2, 5);
         maxHeap.insert(3, 5);
@@ -141,7 +141,7 @@ contract MaxHeapTestSuite is Test {
 
     /// @dev Tests that the heap is empty after all elements are removed
     function testHeapEmptyAfterAllRemoved() public {
-        setUp();
+        
         maxHeap.insert(1, 5);
         maxHeap.insert(2, 7);
         maxHeap.extractMax();
@@ -151,7 +151,7 @@ contract MaxHeapTestSuite is Test {
 
     /// @dev Tests that the heap maintains its properties after multiple insertions and removals
     function testHeapProperty() public {
-        setUp();
+        
         uint256[] memory values = new uint256[](6);
         values[0] = 4;
         values[1] = 7;
@@ -173,7 +173,7 @@ contract MaxHeapTestSuite is Test {
 
     /// @dev Tests the maxHeapify function on a non-root node
     function testHeapifyOnNonRoot() public {
-        setUp();
+        
         maxHeap.insert(1, 10);
         maxHeap.insert(2, 15);
         maxHeap.insert(3, 5);
@@ -188,7 +188,7 @@ contract MaxHeapTestSuite is Test {
 
     /// @dev Tests that the heap does not allow removal of max element when it's empty
     function testCannotRemoveMaxWhenEmpty() public {
-        setUp();
+        
 
         // Try to remove max and expect to fail
         try maxHeap.extractMax() {

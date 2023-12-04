@@ -17,7 +17,7 @@ import { ERC721Checkpointable } from "../../src/base/ERC721Checkpointable.sol";
 contract CultureIndexVotingBasicTest is CultureIndexTestSuite {
     /// @dev Tests the vote weight calculation with ERC721 token
     function testCalculateVoteWeight() public {
-        setUp();
+        
         address voter = address(0x1);
         uint256 erc20Weight = 100;
         uint256 erc721Weight = 2; // Number of ERC721 tokens held by the voter
@@ -224,7 +224,7 @@ contract CultureIndexVotingBasicTest is CultureIndexTestSuite {
      * Then we validate the recorded vote and total voting weight.
      */
     function testVoting() public {
-        setUp();
+        
         uint256 newPieceId = createArtPiece("Mona Lisa", "A masterpiece", ICultureIndex.MediaType.IMAGE, "ipfs://legends", "", "", address(0x1), 10000);
 
         // Mint some tokens to the voter
@@ -348,7 +348,7 @@ contract CultureIndexVotingBasicTest is CultureIndexTestSuite {
         emit log_uint(gasUsedIndividual); // Log gas used for individual votes
 
         // Resetting state for a fair comparison
-        setUp(); // Reset contract state (this would need to be implemented to revert to initial state)
+         // Reset contract state (this would need to be implemented to revert to initial state)
         uint256[] memory batchPieceIds = new uint256[](100);
         for (uint256 i = 0; i < 100; i++) {
             batchPieceIds[i] = createDefaultArtPiece(); // Setup each art piece
@@ -374,7 +374,7 @@ contract CultureIndexVotingBasicTest is CultureIndexTestSuite {
      * Then we try to vote again and expect it to fail.
      */
     function testCannotVoteTwice() public {
-        setUp();
+        
         uint256 newPieceId = createArtPiece("Mona Lisa", "A masterpiece", ICultureIndex.MediaType.IMAGE, "ipfs://legends", "", "", address(0x1), 10000);
 
         // Mint some tokens to the voter
@@ -399,7 +399,7 @@ contract CultureIndexVotingBasicTest is CultureIndexTestSuite {
      * We expect the vote to fail.
      */
     function testCannotVoteWithoutTokens() public {
-        setUp();
+        
         uint256 newPieceId = createArtPiece("Starry Night", "A masterpiece", ICultureIndex.MediaType.IMAGE, "ipfs://legends", "", "", address(0x1), 10000);
 
         vm.roll(block.number + 1); // Roll forward to ensure votes are snapshotted
@@ -419,7 +419,7 @@ contract CultureIndexVotingBasicTest is CultureIndexTestSuite {
      * Then we try to vote again for both and expect both to fail.
      */
     function testCannotVoteOnMultiplePiecesTwice() public {
-        setUp();
+        
         uint256 firstPieceId = createArtPiece("Mona Lisa", "A masterpiece", ICultureIndex.MediaType.IMAGE, "ipfs://legends", "", "", address(0x1), 10000);
 
         uint256 secondPieceId = createArtPiece("Starry Night", "Another masterpiece", ICultureIndex.MediaType.IMAGE, "ipfs://starrynight", "", "", address(0x2), 10000);
@@ -456,7 +456,7 @@ contract CultureIndexVotingBasicTest is CultureIndexTestSuite {
      * We expect both votes to fail.
      */
     function testCannotVoteWithoutTokensMultiplePieces() public {
-        setUp();
+        
         uint256 firstPieceId = createArtPiece("Mona Lisa", "A masterpiece", ICultureIndex.MediaType.IMAGE, "ipfs://legends", "", "", address(0x1), 10000);
 
         uint256 secondPieceId = createArtPiece("Starry Night", "Another masterpiece", ICultureIndex.MediaType.IMAGE, "ipfs://starrynight", "", "", address(0x2), 10000);
@@ -478,7 +478,7 @@ contract CultureIndexVotingBasicTest is CultureIndexTestSuite {
     }
 
     function testVoteAfterTransferringTokens() public {
-        setUp();
+        
         uint256 newPieceId = createDefaultArtPiece();
 
         // Mint tokens and vote
@@ -503,7 +503,7 @@ contract CultureIndexVotingBasicTest is CultureIndexTestSuite {
     }
 
     function testInvalidPieceID() public {
-        setUp();
+        
 
         // Mint some tokens to the voter
         govToken.mint(address(this), 100);
@@ -525,7 +525,7 @@ contract CultureIndexVotingBasicTest is CultureIndexTestSuite {
      * We expect the vote to fail since the piece has been dropped.
      */
     function testCannotVoteOnDroppedPiece() public {
-        setUp();
+        
 
         uint256 newPieceId = createDefaultArtPiece();
         govToken.mint(address(this), 100);

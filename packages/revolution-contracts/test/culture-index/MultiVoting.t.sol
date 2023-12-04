@@ -34,7 +34,7 @@ contract CultureIndexVotingTestManager is CultureIndexTestSuite {
     }
 
     function testVoteOnMultiplePieces() public {
-        setUp();
+        
         uint256 firstPieceId = voter1Test.createDefaultArtPiece();
         uint256 secondPieceId = voter2Test.createDefaultArtPiece();
 

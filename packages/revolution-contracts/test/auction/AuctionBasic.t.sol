@@ -170,7 +170,7 @@ contract VerbsAuctionHouseBasicTest is VerbsAuctionHouseTest {
     }
 
     function testAuctionCreation() public {
-        setUp();
+        
         createDefaultArtPiece();
 
         auctionHouse.unpause();
@@ -188,7 +188,7 @@ contract VerbsAuctionHouseBasicTest is VerbsAuctionHouseTest {
     function testBiddingProcess(uint256 bidAmount) public {
         vm.assume(bidAmount > auctionHouse.reservePrice());
         vm.assume(bidAmount < 10_000_000 ether);
-        setUp();
+        
         createDefaultArtPiece();
 
         auctionHouse.unpause();
@@ -234,7 +234,7 @@ contract VerbsAuctionHouseBasicTest is VerbsAuctionHouseTest {
     }
 
     function testSettlingAuctions() public {
-        setUp();
+        
         createDefaultArtPiece();
         auctionHouse.unpause();
 

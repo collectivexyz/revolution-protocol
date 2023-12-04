@@ -26,7 +26,7 @@ contract CultureIndexArtPieceTest is CultureIndexTestSuite {
      * its properties to ensure they match what was set.
      */
     function testCreatePiece() public {
-        setUp();
+        
 
         uint256 newPieceId = createArtPiece("Mona Lisa", "A masterpiece", ICultureIndex.MediaType.IMAGE, "ipfs://legends", "", "", address(0x1), 10000);
 
@@ -45,7 +45,7 @@ contract CultureIndexArtPieceTest is CultureIndexTestSuite {
      * @dev Test case to validate art piece creation with multiple creators
      */
     function testCreatePieceWithMultipleCreators() public {
-        setUp();
+        
 
         ICultureIndex.ArtPieceMetadata memory metadata = ICultureIndex.ArtPieceMetadata({
             name: "Collaborative Work",
@@ -77,7 +77,7 @@ contract CultureIndexArtPieceTest is CultureIndexTestSuite {
      * @dev Test case to validate art piece creation with multiple creators
      */
     function testCreatePieceWithMultipleCreatorsInvalidBPS() public {
-        setUp();
+        
 
         ICultureIndex.ArtPieceMetadata memory metadata = ICultureIndex.ArtPieceMetadata({
             name: "Collaborative Work",
@@ -104,7 +104,7 @@ contract CultureIndexArtPieceTest is CultureIndexTestSuite {
     //  * @dev Test case to validate the art piece creation with an invalid zero address for the creator
     //  */
     function testInvalidCreatorAddress() public {
-        setUp();
+        
 
         (CultureIndex.ArtPieceMetadata memory metadata, ICultureIndex.CreatorBps[] memory creators) = createArtPieceTuple(
             "Invalid Creator",
@@ -128,7 +128,7 @@ contract CultureIndexArtPieceTest is CultureIndexTestSuite {
     //  * @dev Test case to validate the art piece creation with incorrect total basis points
     //  */
     function testExcessiveTotalBasisPoints() public {
-        setUp();
+        
         (CultureIndex.ArtPieceMetadata memory metadata, ICultureIndex.CreatorBps[] memory creators) = createArtPieceTuple(
             "Invalid Creator",
             "Invalid Piece",
@@ -151,7 +151,7 @@ contract CultureIndexArtPieceTest is CultureIndexTestSuite {
     //  * @dev Test case to validate the art piece creation with incorrect total basis points
     //  */
     function testTooFewTotalBasisPoints() public {
-        setUp();
+        
         (CultureIndex.ArtPieceMetadata memory metadata, ICultureIndex.CreatorBps[] memory creators) = createArtPieceTuple(
             "Invalid Creator",
             "Invalid Piece",
@@ -174,7 +174,7 @@ contract CultureIndexArtPieceTest is CultureIndexTestSuite {
      * @dev Test case to validate art piece creation with an invalid media type
      */
     function testInvalidMediaType() public {
-        setUp();
+        
         ICultureIndex.ArtPieceMetadata memory metadata = ICultureIndex.ArtPieceMetadata({
             name: "Invalid Media Type",
             description: "Invalid Piece",
@@ -198,7 +198,7 @@ contract CultureIndexArtPieceTest is CultureIndexTestSuite {
      * @dev Test case to validate art piece creation with missing media data
      */
     function testMissingMediaDataImage() public {
-        setUp();
+        
 
         (CultureIndex.ArtPieceMetadata memory metadata, ICultureIndex.CreatorBps[] memory creators) = createArtPieceTuple(
             "Missing Media Data",
@@ -222,7 +222,7 @@ contract CultureIndexArtPieceTest is CultureIndexTestSuite {
      * @dev Test case to validate art piece creation with missing media data
      */
     function testMissingMediaDataAnimation() public {
-        setUp();
+        
 
         (CultureIndex.ArtPieceMetadata memory metadata, ICultureIndex.CreatorBps[] memory creators) = createArtPieceTuple(
             "Missing Media Data",
@@ -246,7 +246,7 @@ contract CultureIndexArtPieceTest is CultureIndexTestSuite {
      * @dev Test case to validate art piece creation with missing media data
      */
     function testMissingMediaDataText() public {
-        setUp();
+        
 
         (CultureIndex.ArtPieceMetadata memory metadata, ICultureIndex.CreatorBps[] memory creators) = createArtPieceTuple(
             "Missing Media Data",
@@ -270,7 +270,7 @@ contract CultureIndexArtPieceTest is CultureIndexTestSuite {
      * @dev Test case to validate that piece IDs are incremented correctly
      */
     function testPieceIDIncrement() public {
-        setUp();
+        
         uint256 firstPieceId = createArtPiece("First Piece", "Valid Piece", ICultureIndex.MediaType.IMAGE, "ipfs://first", "", "", address(0x1), 10000);
 
         uint256 secondPieceId = createArtPiece("Second Piece", "Valid Piece", ICultureIndex.MediaType.IMAGE, "ipfs://second", "", "", address(0x1), 10000);
@@ -282,7 +282,7 @@ contract CultureIndexArtPieceTest is CultureIndexTestSuite {
      * @dev Test case to validate that creatorArray does not exceed 50 in length
      */
     function testCreatorArrayLengthConstraint() public {
-        setUp();
+        
 
         ICultureIndex.ArtPieceMetadata memory metadata = ICultureIndex.ArtPieceMetadata({
             name: "Constraint Test",

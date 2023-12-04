@@ -6,7 +6,7 @@ import { PausableUpgradeable } from "@openzeppelin/contracts-upgradeable/utils/P
 
 contract VerbsAuctionHouseMintTest is VerbsAuctionHouseTest {
     function testMintFailureDueToEmptyNFTList() public {
-        setUp();
+        
 
         // Pre-conditions setup to ensure the CultureIndex is empty
         vm.expectEmit(true, true, true, true);
