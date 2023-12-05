@@ -101,7 +101,7 @@ contract CultureIndexAccessControlTest is CultureIndexTestSuite {
 
         // Set new quorum BPS by owner
         vm.startPrank(address(this));
-        vm.expectRevert("CultureIndex::_setQuorumVotesBPS: invalid proposal threshold");
+        vm.expectRevert("CultureIndex::_setQuorumVotesBPS: invalid quorum bps");
         cultureIndex._setQuorumVotesBPS(newQuorumBPS);
         vm.stopPrank();
 
