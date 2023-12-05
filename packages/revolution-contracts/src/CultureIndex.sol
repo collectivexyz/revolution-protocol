@@ -68,10 +68,10 @@ contract CultureIndex is ICultureIndex, Ownable, ReentrancyGuard {
         uint256 erc721VotingTokenWeight_,
         uint256 quorumVotesBPS_
     ) Ownable(initialOwner_) {
-        require(quorumVotesBPS_ >= MIN_QUORUM_VOTES_BPS && quorumVotesBPS_ <= MAX_QUORUM_VOTES_BPS, "CultureIndex::constructor: invalid quorum bps");
-        require(erc721VotingTokenWeight_ > 0, "CultureIndex::constructor: invalid erc721 voting token weight");
-        require(erc721VotingToken_ != address(0), "CultureIndex::constructor: invalid erc721 voting token");
-        require(erc20VotingToken_ != address(0), "CultureIndex::constructor: invalid erc20 voting token");
+        require(quorumVotesBPS_ >= MIN_QUORUM_VOTES_BPS && quorumVotesBPS_ <= MAX_QUORUM_VOTES_BPS, "invalid quorum bps");
+        require(erc721VotingTokenWeight_ > 0, "invalid erc721 voting token weight");
+        require(erc721VotingToken_ != address(0), "invalid erc721 voting token");
+        require(erc20VotingToken_ != address(0), "invalid erc20 voting token");
 
         erc20VotingToken = ERC20Votes(erc20VotingToken_);
         erc721VotingToken = ERC721Checkpointable(erc721VotingToken_);
@@ -388,31 +388,20 @@ contract CultureIndex is ICultureIndex, Ownable, ReentrancyGuard {
      */
     function dropTopVotedPiece() public nonReentrant onlyOwner returns (ArtPiece memory) {
         uint256 pieceId = topVotedPieceId();
-        require(totalVoteWeights[pieceId] >= pieces[pieceId].quorumVotes, "Piece must have quorum votes in order to be dropped.");
+        require(totalVoteWeights[pieceId] >= pieces[pieceId].quorumVotes, "Does not meet quorum votes to be dropped.");
         pieces[pieceId].isDropped = true;
 
         //slither-disable-next-line unused-return
-        try maxHeap.extractMax() {
-            emit PieceDropped(pieceId, msg.sender);
+        maxHeap.extractMax();
 
-            uint256 numCreators = pieces[pieceId].creators.length;
-            //for each creator, emit an event
-            for (uint i; i < numCreators; i++) {
-                emit PieceDroppedCreator(pieceId, pieces[pieceId].creators[i].creator, pieces[pieceId].dropper, pieces[pieceId].creators[i].bps);
-            }
+        emit PieceDropped(pieceId, msg.sender);
 
-            return pieces[pieceId];
-        } catch Error(
-            string memory reason // Catch known revert reason
-        ) {
-            if (keccak256(abi.encodePacked(reason)) == keccak256(abi.encodePacked("Heap is empty"))) {
-                revert("No pieces available to drop");
-            }
-            revert(reason); // Revert with the original error if not matched
-        } catch (
-            bytes memory /*lowLevelData*/ // Catch any other low-level failures
-        ) {
-            revert("Unknown error extracting top piece");
+        uint256 numCreators = pieces[pieceId].creators.length;
+        //for each creator, emit an event
+        for (uint i; i < numCreators; i++) {
+            emit PieceDroppedCreator(pieceId, pieces[pieceId].creators[i].creator, pieces[pieceId].dropper, pieces[pieceId].creators[i].bps);
         }
+
+        return pieces[pieceId];
     }
 }

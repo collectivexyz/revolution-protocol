@@ -542,7 +542,7 @@ contract CultureIndexVotingBasicTest is CultureIndexTestSuite {
         cultureIndex.transferOwnership(address(verbs));
 
         // Create art pieces and drop them
-        for (uint256 i = 0; i < erc721Balance; i++) {
+        for (uint256 i; i < erc721Balance; i++) {
             createDefaultArtPiece();
             vm.roll(block.number + (i + 1) * 2);
             cultureIndex.vote(i);
