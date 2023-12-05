@@ -551,6 +551,8 @@ contract CultureIndexVotingBasicTest is CultureIndexTestSuite {
             verbs.mint();
         }
 
+        vm.roll(block.number + 1);
+
         // Calculate expected vote weight
         uint256 expectedVoteWeight = erc20Balance + (erc721Balance * cultureIndex.erc721VotingTokenWeight() * 1e18);
 
