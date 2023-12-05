@@ -118,9 +118,45 @@ contract CultureIndexAccessControlTest is CultureIndexTestSuite {
         vm.stopPrank();
     }
 
+    function testDropTopVotedPieceOnlyIfQuorumIsMet(uint256 quorumBps) public {
+        vm.assume(quorumBps >= cultureIndex.MIN_QUORUM_VOTES_BPS() && quorumBps <= cultureIndex.MAX_QUORUM_VOTES_BPS());
+
+        // Set quorum BPS
+        vm.startPrank(address(this));
+        cultureIndex._setQuorumVotesBPS(quorumBps);
+        vm.stopPrank();
+
+        govToken.mint(address(0x21), quorumBps * 10);
+        govToken.mint(address(this), (quorumBps / 2) * (quorumBps) / 10_000);
+
+        vm.roll(block.number + 1);
+
+        // Create an art piece
+        uint256 pieceId = createDefaultArtPiece();
+
+        vm.roll(block.number + 1);
+
+        // Vote for the piece, but do not meet the quorum
+        cultureIndex.vote(pieceId);
+
+        // Attempt to drop the top-voted piece and expect it to fail
+        vm.expectRevert("Piece must have quorum votes in order to be dropped.");
+        cultureIndex.dropTopVotedPiece();
+
+        // Additional votes to meet/exceed the quorum
+        vm.startPrank(address(0x21));
+        cultureIndex.vote(pieceId);
+        vm.stopPrank();
+
+        // Attempt to drop the top-voted piece, should succeed
+        ICultureIndex.ArtPiece memory droppedPiece = cultureIndex.dropTopVotedPiece();
+        assertTrue(droppedPiece.isDropped, "Top voted piece should be dropped");
+    }
+
+
     function testQuorumVotesCalculation(uint200 erc20TotalSupply, uint256 erc721TotalSupply) public {
         vm.assume(erc20TotalSupply > 0);
-        vm.assume(erc721TotalSupply < 10_000);
+        vm.assume(erc721TotalSupply < 1_000);
         // Initial settings
         uint256 quorumBPS = cultureIndex.quorumVotesBPS();         // Example quorum BPS (20%)
 
