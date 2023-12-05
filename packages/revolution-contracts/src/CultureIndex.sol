@@ -68,7 +68,7 @@ contract CultureIndex is ICultureIndex, Ownable, ReentrancyGuard {
         uint256 erc721VotingTokenWeight_,
         uint256 quorumVotesBPS_
     ) Ownable(initialOwner_) {
-        require(quorumVotesBPS_ >= MIN_QUORUM_VOTES_BPS && quorumVotesBPS_ <= MAX_QUORUM_VOTES_BPS, "CultureIndex::constructor: invalid proposal threshold");
+        require(quorumVotesBPS_ >= MIN_QUORUM_VOTES_BPS && quorumVotesBPS_ <= MAX_QUORUM_VOTES_BPS, "CultureIndex::constructor: invalid quorum bps");
         require(erc721VotingTokenWeight_ > 0, "CultureIndex::constructor: invalid erc721 voting token weight");
         require(erc721VotingToken_ != address(0), "CultureIndex::constructor: invalid erc721 voting token");
         require(erc20VotingToken_ != address(0), "CultureIndex::constructor: invalid erc20 voting token");
@@ -364,7 +364,10 @@ contract CultureIndex is ICultureIndex, Ownable, ReentrancyGuard {
      * @param newQuorumVotesBPS new art piece drop threshold
      */
     function _setQuorumVotesBPS(uint256 newQuorumVotesBPS) external onlyOwner {
-        require(newQuorumVotesBPS >= MIN_QUORUM_VOTES_BPS && newQuorumVotesBPS <= MAX_QUORUM_VOTES_BPS, "CultureIndex::_setProposalThreshold: invalid proposal threshold");
+        require(
+            newQuorumVotesBPS >= MIN_QUORUM_VOTES_BPS && newQuorumVotesBPS <= MAX_QUORUM_VOTES_BPS,
+            "CultureIndex::_setQuorumVotesBPS: invalid quorum bps"
+        );
         uint256 oldQuorumVotesBPS = quorumVotesBPS;
         quorumVotesBPS = newQuorumVotesBPS;
 
@@ -387,7 +390,7 @@ contract CultureIndex is ICultureIndex, Ownable, ReentrancyGuard {
         uint256 pieceId = topVotedPieceId();
         require(totalVoteWeights[pieceId] >= pieces[pieceId].quorumVotes, "Piece must have quorum votes in order to be dropped.");
         pieces[pieceId].isDropped = true;
-        
+
         //slither-disable-next-line unused-return
         try maxHeap.extractMax() {
             emit PieceDropped(pieceId, msg.sender);

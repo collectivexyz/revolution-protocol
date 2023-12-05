@@ -94,19 +94,21 @@ contract CultureIndexAccessControlTest is CultureIndexTestSuite {
         uint256 currentQuorumBPS = cultureIndex.quorumVotesBPS();
         assertEq(currentQuorumBPS, newQuorumBPS, "Quorum BPS should be updated within valid range");
     }
+
     function testSetQuorumVotesBPSOutsideRange(uint104 newQuorumBPS) public {
         uint256 currentQuorumBPS = cultureIndex.quorumVotesBPS();
         vm.assume(newQuorumBPS < cultureIndex.MIN_QUORUM_VOTES_BPS() || newQuorumBPS > cultureIndex.MAX_QUORUM_VOTES_BPS());
 
         // Set new quorum BPS by owner
         vm.startPrank(address(this));
-        vm.expectRevert("CultureIndex::_setProposalThreshold: invalid proposal threshold");
+        vm.expectRevert("CultureIndex::_setQuorumVotesBPS: invalid proposal threshold");
         cultureIndex._setQuorumVotesBPS(newQuorumBPS);
         vm.stopPrank();
 
         // Check if the quorum BPS is updated correctly
         assertEq(cultureIndex.quorumVotesBPS(), currentQuorumBPS, "Quorum BPS should be updated within valid range");
     }
+
     function testRevertNonOwnerSetQuorumVotesBPS() public {
         address nonOwner = address(0x123); // An arbitrary non-owner address
         uint256 newQuorumBPS = 3000; // A valid quorum BPS value
@@ -127,7 +129,7 @@ contract CultureIndexAccessControlTest is CultureIndexTestSuite {
         vm.stopPrank();
 
         govToken.mint(address(0x21), quorumBps * 10);
-        govToken.mint(address(this), (quorumBps / 2) * (quorumBps) / 10_000);
+        govToken.mint(address(this), ((quorumBps / 2) * (quorumBps)) / 10_000);
 
         vm.roll(block.number + 1);
 
@@ -151,71 +153,6 @@ contract CultureIndexAccessControlTest is CultureIndexTestSuite {
         // Attempt to drop the top-voted piece, should succeed
         ICultureIndex.ArtPiece memory droppedPiece = cultureIndex.dropTopVotedPiece();
         assertTrue(droppedPiece.isDropped, "Top voted piece should be dropped");
-    }
-
-    function testCalculateVoteWeight(uint200 erc20Balance, uint40 erc721Balance) public {
-        vm.assume(erc20Balance > 0);
-        vm.assume(erc721Balance < 1_000);
-        govToken.mint(address(this), erc20Balance);
-
-        vm.roll(block.number + 1);
-
-        cultureIndex.transferOwnership(address(verbs));
-
-        // Create art pieces and drop them
-        for (uint256 i = 0; i < erc721Balance; i++) {
-            createDefaultArtPiece();
-            vm.roll(block.number + 1);
-            cultureIndex.vote(i);
-            verbs.mint();
-        }
-
-        // Calculate expected vote weight
-        uint256 expectedVoteWeight = erc20Balance + (erc721Balance * cultureIndex.erc721VotingTokenWeight() * 1e18);
-
-        // Get the actual vote weight from the contract
-        uint256 actualVoteWeight = cultureIndex.getCurrentVotes(address(this));
-
-        // Assert that the actual vote weight matches the expected value
-        assertEq(actualVoteWeight, expectedVoteWeight, "Vote weight calculation does not match expected value");
-    }
-
-
-    function testQuorumVotesCalculation(uint200 erc20TotalSupply, uint256 erc721TotalSupply) public {
-        vm.assume(erc20TotalSupply > 0);
-        vm.assume(erc721TotalSupply < 1_000);
-        // Initial settings
-        uint256 quorumBPS = cultureIndex.quorumVotesBPS();         // Example quorum BPS (20%)
-
-        // Set the quorum BPS
-        vm.startPrank(address(this));
-        cultureIndex._setQuorumVotesBPS(quorumBPS);
-        vm.stopPrank();
-
-
-        cultureIndex.transferOwnership(address(verbs));
-
-        // Set the ERC20 and ERC721 total supplies
-        govToken.mint(address(this), erc20TotalSupply);
-
-        vm.roll(block.number + 1);
-
-        //for desired erc721 supply, loop create art pieces and drop them
-        for (uint256 i = 0; i < erc721TotalSupply; i++) {
-            createDefaultArtPiece();
-            vm.roll(block.number + 1);
-            cultureIndex.vote(i);
-            verbs.mint();
-        }
-
-        // Calculate expected quorum votes
-        uint256 expectedQuorumVotes = (quorumBPS * (erc20TotalSupply + erc721TotalSupply * 1e18 * cultureIndex.erc721VotingTokenWeight())) / 10_000;
-
-        // Get the quorum votes from the contract
-        uint256 actualQuorumVotes = cultureIndex.quorumVotes();
-
-        // Assert that the actual quorum votes match the expected value
-        assertEq(actualQuorumVotes, expectedQuorumVotes, "Quorum votes calculation does not match expected value");
     }
 }
 

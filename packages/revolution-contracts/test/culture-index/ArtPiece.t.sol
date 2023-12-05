@@ -288,4 +288,49 @@ contract CultureIndexArtPieceTest is CultureIndexTestSuite {
             assertEq(reason, "Creator array must not be > 100");
         }
     }
+
+    function testArtPieceCreationAndVoting(uint256 erc20Supply, uint256 quorumVotesBPS) public {
+        vm.assume(erc20Supply > 0 && erc20Supply < 2**200);
+        vm.assume(quorumVotesBPS >= cultureIndex.MIN_QUORUM_VOTES_BPS() && quorumVotesBPS <= cultureIndex.MAX_QUORUM_VOTES_BPS());
+        
+        // Set the quorum BPS
+        cultureIndex._setQuorumVotesBPS(quorumVotesBPS);
+
+        cultureIndex.transferOwnership(address(verbs));
+
+        govToken.mint(address(this), erc20Supply);
+
+        // Create an art piece
+        uint256 pieceId = createDefaultArtPiece();
+        CultureIndex.ArtPiece memory piece = cultureIndex.getPieceById(pieceId);
+
+        // Check initial values
+        uint256 expectedTotalVotesSupply = erc20Supply;
+        uint256 expectedQuorumVotes = (quorumVotesBPS * expectedTotalVotesSupply) / 10_000;
+        assertEq(piece.quorumVotes, expectedQuorumVotes, "Quorum votes should be set correctly on creation");
+        assertEq(piece.totalVotesSupply, expectedTotalVotesSupply, "Total votes supply should be set correctly on creation");
+        assertEq(piece.totalERC20Supply, erc20Supply, "Total ERC20 supply should be set correctly on creation");
+
+        vm.roll(block.number + 1);
+        // Cast votes
+        voteForPiece(pieceId);
+
+        // Mint token and govTokens, create a new piece and check fields
+        verbs.mint();
+        govToken.mint(address(this), erc20Supply);
+
+        vm.roll(block.number + 1);
+
+        CultureIndex.ArtPiece memory newPiece = cultureIndex.getPieceById(createDefaultArtPiece());
+        emit log_named_uint("newPiece.quorumVotes", newPiece.quorumVotes);
+        emit log_named_uint("erc20Supply", erc20Supply);
+        emit log_named_uint("1e18 * cultureIndex.erc721VotingTokenWeight()", 1e18 * cultureIndex.erc721VotingTokenWeight());
+
+        uint256 expectedTotalVotesSupply2 = erc20Supply * 2 + 1e18 * cultureIndex.erc721VotingTokenWeight();
+        emit log_named_uint("expectedTotalVotesSupply2", expectedTotalVotesSupply2);
+        uint256 expectedQuorumVotes2 = (quorumVotesBPS * (expectedTotalVotesSupply2)) / 10_000;
+        assertEq(newPiece.quorumVotes, expectedQuorumVotes2, "Quorum votes should be set correctly on second creation");
+        assertEq(newPiece.totalVotesSupply, expectedTotalVotesSupply2, "Total votes supply should be set correctly on second creation");
+        assertEq(newPiece.totalERC20Supply, erc20Supply * 2, "Total ERC20 supply should be set correctly on second creation");
+    }
 }
