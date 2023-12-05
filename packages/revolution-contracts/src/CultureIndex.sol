@@ -142,7 +142,7 @@ contract CultureIndex is ICultureIndex, Ownable, ReentrancyGuard {
      * - The `creatorArray` must not contain any zero addresses.
      * - The function will return the total basis points which must be checked to be exactly 10,000.
      */
-    function getTotalBpsFromCreators(CreatorBps[] memory creatorArray) internal pure returns (uint256) {
+    function getTotalBpsFromCreators(CreatorBps[] memory creatorArray) internal pure returns (uint256, uint256) {
         uint256 creatorArrayLength = creatorArray.length;
         //Require that creatorArray is not more than 100 to prevent gas limit issues
         require(creatorArrayLength <= 100, "Creator array must not be > 100");
@@ -152,7 +152,7 @@ contract CultureIndex is ICultureIndex, Ownable, ReentrancyGuard {
             require(creatorArray[i].creator != address(0), "Invalid creator address");
             totalBps += creatorArray[i].bps;
         }
-        return totalBps;
+        return (totalBps, creatorArrayLength);
     }
 
     /**
@@ -170,7 +170,7 @@ contract CultureIndex is ICultureIndex, Ownable, ReentrancyGuard {
      * - The sum of basis points in `creatorArray` must be exactly 10,000.
      */
     function createPiece(ArtPieceMetadata memory metadata, CreatorBps[] memory creatorArray) public returns (uint256) {
-        uint256 totalBps = getTotalBpsFromCreators(creatorArray);
+        (uint256 totalBps, uint256 creatorArrayLength) = getTotalBpsFromCreators(creatorArray);
         require(totalBps == 10_000, "Total BPS must sum up to 10,000");
 
         // Validate the media type and associated data
@@ -191,7 +191,7 @@ contract CultureIndex is ICultureIndex, Ownable, ReentrancyGuard {
         newPiece.creationBlock = block.number;
         newPiece.quorumVotes = (quorumVotesBPS * newPiece.totalVotesSupply) / 10_000;
 
-        for (uint i = 0; i < creatorArray.length; i++) {
+        for (uint i = 0; i < creatorArrayLength; i++) {
             newPiece.creators.push(creatorArray[i]);
         }
 
@@ -209,7 +209,7 @@ contract CultureIndex is ICultureIndex, Ownable, ReentrancyGuard {
         );
 
         // Emit an event for each creator
-        for (uint i = 0; i < creatorArray.length; i++) {
+        for (uint i = 0; i < creatorArrayLength; i++) {
             emit PieceCreatorAdded(pieceId, creatorArray[i].creator, msg.sender, creatorArray[i].bps);
         }
         return newPiece.pieceId;
