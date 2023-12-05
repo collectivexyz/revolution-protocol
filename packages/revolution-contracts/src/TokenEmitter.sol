@@ -77,6 +77,7 @@ contract TokenEmitter is VRGDAC, ITokenEmitter, ReentrancyGuard, TokenEmitterRew
         address purchaseReferral,
         address deployer
     ) public payable nonReentrant returns (uint tokensSoldWad) {
+        require(msg.value > 0, "Must send ether");
         // ensure the same number of addresses and _bps
         require(_addresses.length == _bps.length, "Parallel arrays required");
 
@@ -86,13 +87,14 @@ contract TokenEmitter is VRGDAC, ITokenEmitter, ReentrancyGuard, TokenEmitterRew
         //Share of purchase amount to send to treasury
         uint256 toPayTreasury = (msgValueRemaining * (10_000 - creatorRateBps)) / 10_000;
 
+        //Share of purchase amount to reserve for creators
         //Ether directly sent to creators
         uint256 creatorDirectPayment = ((msgValueRemaining - toPayTreasury) * entropyRateBps) / 10_000;
         //Tokens to emit to creators
-        int totalTokensForCreators = getTokenQuoteForEther(msgValueRemaining - toPayTreasury - creatorDirectPayment);
+        int totalTokensForCreators = ((msgValueRemaining - toPayTreasury) - creatorDirectPayment) > 0 ? getTokenQuoteForEther((msgValueRemaining - toPayTreasury) - creatorDirectPayment) : int(0);
 
         // Tokens to emit to buyers
-        int totalTokensForBuyers = getTokenQuoteForEther(toPayTreasury);
+        int totalTokensForBuyers = toPayTreasury > 0 ? getTokenQuoteForEther(toPayTreasury) : int(0);
 
         //Transfer ETH to treasury and update emitted
         emittedTokenWad += totalTokensForBuyers;
@@ -138,18 +140,21 @@ contract TokenEmitter is VRGDAC, ITokenEmitter, ReentrancyGuard, TokenEmitterRew
     }
 
     function buyTokenQuote(uint amount) public view returns (int spentY) {
+        require(amount > 0, "Amount must be greater than 0");
         // Note: By using toDaysWadUnsafe(block.timestamp - startTime) we are establishing that 1 "unit of time" is 1 day.
         // solhint-disable-next-line not-rely-on-time
         return xToY({ timeSinceStart: toDaysWadUnsafe(block.timestamp - startTime), sold: emittedTokenWad, amount: int(amount) });
     }
 
     function getTokenQuoteForEther(uint etherAmount) public view returns (int gainedX) {
+        require(etherAmount > 0, "Ether amount must be greater than 0");
         // Note: By using toDaysWadUnsafe(block.timestamp - startTime) we are establishing that 1 "unit of time" is 1 day.
         // solhint-disable-next-line not-rely-on-time
         return yToX({ timeSinceStart: toDaysWadUnsafe(block.timestamp - startTime), sold: emittedTokenWad, amount: int(etherAmount) });
     }
 
     function getTokenQuoteForPayment(uint paymentAmount) external view returns (int gainedX) {
+        require(paymentAmount > 0, "Payment amount must be greater than 0");
         // Note: By using toDaysWadUnsafe(block.timestamp - startTime) we are establishing that 1 "unit of time" is 1 day.
         // solhint-disable-next-line not-rely-on-time
         return

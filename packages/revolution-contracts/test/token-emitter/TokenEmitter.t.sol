@@ -116,6 +116,7 @@ contract TokenEmitterTest is Test {
         uint256 totalPaymentForCreator = ((valueToSend - feeAmount) * creatorRate) / 10000;
         uint256 expectedCreatorEth = (totalPaymentForCreator * entropyRate) / 10000;
 
+        if(creatorRate == 0) vm.expectRevert("Ether amount must be greater than 0");
         uint256 expectedCreatorTokens = uint(emitter.getTokenQuoteForEther(totalPaymentForCreator - expectedCreatorEth));
 
         // Perform token purchase
