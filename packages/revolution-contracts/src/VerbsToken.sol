@@ -258,6 +258,9 @@ contract VerbsToken is IVerbsToken, Ownable, ERC721Checkpointable, ReentrancyGua
             newPiece.metadata = artPiece.metadata;
             newPiece.isDropped = artPiece.isDropped;
             newPiece.dropper = artPiece.dropper;
+            newPiece.totalERC20Supply = artPiece.totalERC20Supply;
+            newPiece.quorumVotes = artPiece.quorumVotes;
+            newPiece.totalVotesSupply = artPiece.totalVotesSupply;
 
             for (uint i = 0; i < artPiece.creators.length; i++) {
                 newPiece.creators.push(artPiece.creators[i]);

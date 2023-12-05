@@ -292,9 +292,7 @@ contract CultureIndex is ICultureIndex, Ownable, ReentrancyGuard {
      */
     function vote(uint256 pieceId) public nonReentrant {
         require(pieceId < _currentPieceId, "Invalid piece ID");
-        uint256 weight = _getPriorVotes(msg.sender, pieces[pieceId].creationBlock);
-
-        _vote(pieceId, msg.sender, weight);
+        _vote(pieceId, msg.sender, _getPriorVotes(msg.sender, pieces[pieceId].creationBlock));
     }
 
     /**

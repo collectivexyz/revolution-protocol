@@ -98,10 +98,7 @@ contract MaxHeap is Ownable, ReentrancyGuard {
                 swap(position, parent(position));
                 position = parent(position);
             }
-        } else if (newValue < oldValue) {
-            // Downwards heapify
-            maxHeapify(position);
-        }
+        } else if (newValue < oldValue) maxHeapify(position); // Downwards heapify  
     }
 
     /// @notice Extract the maximum element from the heap
