@@ -539,19 +539,17 @@ contract CultureIndexVotingBasicTest is CultureIndexTestSuite {
         vm.assume(erc721Balance < 1_000);
         govToken.mint(address(this), erc20Balance);
 
-        vm.roll(block.number + 1);
-
         cultureIndex.transferOwnership(address(verbs));
 
         // Create art pieces and drop them
         for (uint256 i = 0; i < erc721Balance; i++) {
             createDefaultArtPiece();
-            vm.roll(block.number + 1);
+            vm.roll(block.number + (i + 1) * 2);
             cultureIndex.vote(i);
             verbs.mint();
         }
 
-        vm.roll(block.number + 1);
+        vm.roll(block.number + 3);
 
         // Calculate expected vote weight
         uint256 expectedVoteWeight = erc20Balance + (erc721Balance * cultureIndex.erc721VotingTokenWeight() * 1e18);
