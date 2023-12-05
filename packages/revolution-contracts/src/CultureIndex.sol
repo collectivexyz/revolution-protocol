@@ -147,8 +147,8 @@ contract CultureIndex is ICultureIndex, Ownable, ReentrancyGuard {
         //Require that creatorArray is not more than 100 to prevent gas limit issues
         require(creatorArrayLength <= 100, "Creator array must not be > 100");
 
-        uint256 totalBps = 0;
-        for (uint i = 0; i < creatorArrayLength; i++) {
+        uint256 totalBps;
+        for (uint i; i < creatorArrayLength; i++) {
             require(creatorArray[i].creator != address(0), "Invalid creator address");
             totalBps += creatorArray[i].bps;
         }
@@ -191,7 +191,7 @@ contract CultureIndex is ICultureIndex, Ownable, ReentrancyGuard {
         newPiece.creationBlock = block.number;
         newPiece.quorumVotes = (quorumVotesBPS * newPiece.totalVotesSupply) / 10_000;
 
-        for (uint i = 0; i < creatorArrayLength; i++) {
+        for (uint i; i < creatorArrayLength; i++) {
             newPiece.creators.push(creatorArray[i]);
         }
 
@@ -209,7 +209,7 @@ contract CultureIndex is ICultureIndex, Ownable, ReentrancyGuard {
         );
 
         // Emit an event for each creator
-        for (uint i = 0; i < creatorArrayLength; i++) {
+        for (uint i; i < creatorArrayLength; i++) {
             emit PieceCreatorAdded(pieceId, creatorArray[i].creator, msg.sender, creatorArray[i].bps);
         }
         return newPiece.pieceId;
@@ -304,7 +304,7 @@ contract CultureIndex is ICultureIndex, Ownable, ReentrancyGuard {
      */
     function batchVote(uint256[] memory pieceIds) public nonReentrant {
         uint256 len = pieceIds.length;
-        for (uint256 i = 0; i < len; ++i) {
+        for (uint256 i; i < len; ++i) {
             require(pieceIds[i] < _currentPieceId, "Invalid piece ID");
             _vote(pieceIds[i], msg.sender, _getPriorVotes(msg.sender, pieces[pieceIds[i]].creationBlock));
         }
@@ -397,7 +397,7 @@ contract CultureIndex is ICultureIndex, Ownable, ReentrancyGuard {
 
             uint256 numCreators = pieces[pieceId].creators.length;
             //for each creator, emit an event
-            for (uint i = 0; i < numCreators; i++) {
+            for (uint i; i < numCreators; i++) {
                 emit PieceDroppedCreator(pieceId, pieces[pieceId].creators[i].creator, pieces[pieceId].dropper, pieces[pieceId].creators[i].bps);
             }
 
