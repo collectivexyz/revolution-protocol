@@ -88,16 +88,13 @@ contract TokenEmitter is VRGDAC, ITokenEmitter, ReentrancyGuard, TokenEmitterRew
         uint256 toPayTreasury = (msgValueRemaining * (10_000 - creatorRateBps)) / 10_000;
 
         //Share of purchase amount to reserve for creators
-        uint256 toPayCreator = msgValueRemaining - toPayTreasury;
         //Ether directly sent to creators
-        uint256 creatorDirectPayment = (toPayCreator * entropyRateBps) / 10_000;
-        //Ether to spend on governance for creators
-        uint256 creatorGovernancePayment = toPayCreator - creatorDirectPayment;
+        uint256 creatorDirectPayment = ((msgValueRemaining - toPayTreasury) * entropyRateBps) / 10_000;
         //Tokens to emit to creators
-        int totalTokensForCreators = creatorGovernancePayment > 0 ? getTokenQuoteForEther(creatorGovernancePayment) : int(0);
+        int totalTokensForCreators = ((msgValueRemaining - toPayTreasury) - creatorDirectPayment) > 0 ? getTokenQuoteForEther((msgValueRemaining - toPayTreasury) - creatorDirectPayment) : int(0);
 
         // Tokens to emit to buyers
-        int totalTokensForBuyers = getTokenQuoteForEther(toPayTreasury);
+        int totalTokensForBuyers = toPayTreasury > 0 ? getTokenQuoteForEther(toPayTreasury) : int(0);
 
         //Transfer ETH to treasury and update emitted
         emittedTokenWad += totalTokensForBuyers;
