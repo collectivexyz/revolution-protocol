@@ -101,9 +101,8 @@ contract VerbsDescriptor is IVerbsDescriptor, Ownable {
      */
     //slither-disable-next-line encode-packed-collision
     function tokenURI(uint256 tokenId, ICultureIndex.ArtPieceMetadata memory metadata) external view returns (string memory) {
-        if (isDataURIEnabled) {
-            return dataURI(tokenId, metadata);
-        }
+        if (isDataURIEnabled) return dataURI(tokenId, metadata);
+
         return string(abi.encodePacked(baseURI, tokenId.toString()));
     }
 
@@ -111,10 +110,7 @@ contract VerbsDescriptor is IVerbsDescriptor, Ownable {
      * @notice Given a token ID, construct a base64 encoded data URI for an official Vrbs DAO verb.
      */
     function dataURI(uint256 tokenId, ICultureIndex.ArtPieceMetadata memory metadata) public view returns (string memory) {
-        string memory verbId = tokenId.toString();
-        string memory name = string(abi.encodePacked(tokenNamePrefix, " ", verbId));
-
-        return genericDataURI(name, metadata);
+        return genericDataURI(string(abi.encodePacked(tokenNamePrefix, " ", tokenId.toString())), metadata);
     }
 
     /**

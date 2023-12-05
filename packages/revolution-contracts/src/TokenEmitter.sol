@@ -191,7 +191,7 @@ contract TokenEmitter is VRGDAC, ITokenEmitter, ReentrancyGuard, TokenEmitterRew
 
     /**
      * @notice Set the creators address to pay the creatorRate to. Can be a contract.
-     * @dev Only callable by the owner when not locked.
+     * @dev Only callable by the owner.
      */
     function setCreatorsAddress(address _creatorsAddress) external override onlyOwner nonReentrant {
         require(_creatorsAddress != address(0), "Invalid address");

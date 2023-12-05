@@ -126,9 +126,8 @@ contract VerbsToken is IVerbsToken, Ownable, ERC721Checkpointable, ReentrancyGua
      */
     function isApprovedForAll(address owner, address operator) public view override(IERC721, ERC721) returns (bool) {
         // Whitelist OpenSea proxy contract for easy trading.
-        if (proxyRegistry.proxies(owner) == operator) {
-            return true;
-        }
+        if (proxyRegistry.proxies(owner) == operator) return true;
+
         return super.isApprovedForAll(owner, operator);
     }
 
