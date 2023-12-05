@@ -78,8 +78,9 @@ contract TokenEmitter is VRGDAC, ITokenEmitter, ReentrancyGuard, TokenEmitterRew
         address deployer
     ) public payable nonReentrant returns (uint tokensSoldWad) {
         require(msg.value > 0, "Must send ether");
+        uint256 numAddresses = _addresses.length;
         // ensure the same number of addresses and _bps
-        require(_addresses.length == _bps.length, "Parallel arrays required");
+        require(numAddresses == _bps.length, "Parallel arrays required");
 
         // Get value left after protocol rewards
         uint msgValueRemaining = _handleRewardsAndGetValueToSend(msg.value, builder, purchaseReferral, deployer);
@@ -117,7 +118,7 @@ contract TokenEmitter is VRGDAC, ITokenEmitter, ReentrancyGuard, TokenEmitterRew
 
         //Mint tokens to buyers
         if (totalTokensForBuyers > 0) {
-            for (uint i = 0; i < _addresses.length; i++) {
+            for (uint i = 0; i < numAddresses; i++) {
                 // transfer tokens to address
                 _mint(_addresses[i], uint((totalTokensForBuyers * int(_bps[i])) / 10_000));
                 sum += _bps[i];
