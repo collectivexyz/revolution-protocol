@@ -39,7 +39,7 @@ abstract contract RewardSplits {
      * @notice Sometimes has rounding errors vs. compute purchase rewards, use externally.
      * @param _paymentAmountWei The amount of ETH being paid for the purchase
      */
-    function computeTotalReward(uint256 paymentAmountWei) public view returns (uint256) {
+    function computeTotalReward(uint256 paymentAmountWei) public pure returns (uint256) {
         if (paymentAmountWei <= minPurchaseAmount || paymentAmountWei >= maxPurchaseAmount) {
             revert INVALID_ETH_AMOUNT();
         }
@@ -55,7 +55,7 @@ abstract contract RewardSplits {
             10_000;
     }
 
-    function computePurchaseRewards(uint256 paymentAmountWei) public view returns (RewardsSettings memory, uint256) {
+    function computePurchaseRewards(uint256 paymentAmountWei) public pure returns (RewardsSettings memory, uint256) {
         return (
             RewardsSettings({
                 builderReferralReward: (paymentAmountWei * BUILDER_REWARD_BPS) / 10_000,
