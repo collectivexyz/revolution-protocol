@@ -153,6 +153,33 @@ contract CultureIndexAccessControlTest is CultureIndexTestSuite {
         assertTrue(droppedPiece.isDropped, "Top voted piece should be dropped");
     }
 
+    function testCalculateVoteWeight(uint200 erc20Balance, uint40 erc721Balance) public {
+        vm.assume(erc20Balance > 0);
+        vm.assume(erc721Balance < 1_000);
+        govToken.mint(address(this), erc20Balance);
+
+        vm.roll(block.number + 1);
+
+        cultureIndex.transferOwnership(address(verbs));
+
+        // Create art pieces and drop them
+        for (uint256 i = 0; i < erc721Balance; i++) {
+            createDefaultArtPiece();
+            vm.roll(block.number + 1);
+            cultureIndex.vote(i);
+            verbs.mint();
+        }
+
+        // Calculate expected vote weight
+        uint256 expectedVoteWeight = erc20Balance + (erc721Balance * cultureIndex.erc721VotingTokenWeight() * 1e18);
+
+        // Get the actual vote weight from the contract
+        uint256 actualVoteWeight = cultureIndex.getCurrentVotes(address(this));
+
+        // Assert that the actual vote weight matches the expected value
+        assertEq(actualVoteWeight, expectedVoteWeight, "Vote weight calculation does not match expected value");
+    }
+
 
     function testQuorumVotesCalculation(uint200 erc20TotalSupply, uint256 erc721TotalSupply) public {
         vm.assume(erc20TotalSupply > 0);
