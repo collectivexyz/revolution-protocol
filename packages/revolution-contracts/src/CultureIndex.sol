@@ -395,8 +395,9 @@ contract CultureIndex is ICultureIndex, Ownable, ReentrancyGuard {
         try maxHeap.extractMax() {
             emit PieceDropped(pieceId, msg.sender);
 
+            uint256 numCreators = pieces[pieceId].creators.length;
             //for each creator, emit an event
-            for (uint i = 0; i < pieces[pieceId].creators.length; i++) {
+            for (uint i = 0; i < numCreators; i++) {
                 emit PieceDroppedCreator(pieceId, pieces[pieceId].creators[i].creator, pieces[pieceId].dropper, pieces[pieceId].creators[i].bps);
             }
 
