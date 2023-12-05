@@ -303,7 +303,8 @@ contract CultureIndex is ICultureIndex, Ownable, ReentrancyGuard {
      * Emits a series of VoteCast event upon successful execution.
      */
     function batchVote(uint256[] memory pieceIds) public nonReentrant {
-        for (uint256 i = 0; i < pieceIds.length; ++i) {
+        uint256 len = pieceIds.length;
+        for (uint256 i = 0; i < len; ++i) {
             require(pieceIds[i] < _currentPieceId, "Invalid piece ID");
             _vote(pieceIds[i], msg.sender, _getPriorVotes(msg.sender, pieces[pieceIds[i]].creationBlock));
         }
