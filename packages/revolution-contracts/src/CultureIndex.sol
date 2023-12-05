@@ -143,11 +143,12 @@ contract CultureIndex is ICultureIndex, Ownable, ReentrancyGuard {
      * - The function will return the total basis points which must be checked to be exactly 10,000.
      */
     function getTotalBpsFromCreators(CreatorBps[] memory creatorArray) internal pure returns (uint256) {
+        uint256 creatorArrayLength = creatorArray.length;
         //Require that creatorArray is not more than 100 to prevent gas limit issues
-        require(creatorArray.length <= 100, "Creator array must not be > 100");
+        require(creatorArrayLength <= 100, "Creator array must not be > 100");
 
         uint256 totalBps = 0;
-        for (uint i = 0; i < creatorArray.length; i++) {
+        for (uint i = 0; i < creatorArrayLength; i++) {
             require(creatorArray[i].creator != address(0), "Invalid creator address");
             totalBps += creatorArray[i].bps;
         }
