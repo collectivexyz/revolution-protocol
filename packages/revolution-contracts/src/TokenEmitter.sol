@@ -96,7 +96,7 @@ contract TokenEmitter is VRGDAC, ITokenEmitter, ReentrancyGuard, TokenEmitterRew
 
         //Transfer ETH to treasury and update emitted
         emittedTokenWad += totalTokensForBuyers;
-        if(totalTokensForCreators > 0) emittedTokenWad += totalTokensForCreators;
+        if (totalTokensForCreators > 0) emittedTokenWad += totalTokensForCreators;
         (bool success, ) = treasury.call{ value: toPayTreasury }(new bytes(0));
         require(success, "Transfer failed.");
 

@@ -99,7 +99,7 @@ contract VerbsToken is IVerbsToken, Ownable, ERC721Checkpointable, ReentrancyGua
         string memory _tokenName,
         string memory _tokenSymbol
     ) ERC721(_tokenName, _tokenSymbol) Ownable(_initialOwner) {
-        require (_minter != address(0), "Minter cannot be zero address");
+        require(_minter != address(0), "Minter cannot be zero address");
         minter = _minter;
         descriptor = _descriptor;
         cultureIndex = _cultureIndex;

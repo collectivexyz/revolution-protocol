@@ -21,8 +21,6 @@ import { VerbsTokenTestSuite } from "./VerbsToken.t.sol";
 contract TokenMintingTest is VerbsTokenTestSuite {
     /// @dev Ensures the dropped art piece is equivalent to the top-voted piece
     function testDroppedArtPieceMatchesTopVoted() public {
-        setUp();
-
         govToken.mint(address(this), 10);
 
         // Create a new art piece and simulate it being the top voted piece
@@ -86,8 +84,6 @@ contract TokenMintingTest is VerbsTokenTestSuite {
 
     /// @dev Tests basic minting
     function testMint() public {
-        setUp();
-
         // Add a piece to the CultureIndex
         createDefaultArtPiece();
 
@@ -103,7 +99,6 @@ contract TokenMintingTest is VerbsTokenTestSuite {
 
     /// @dev Tests minting a verb token to itself
     function testMintToItself() public {
-        setUp();
         createDefaultArtPiece();
 
         uint256 initialTotalSupply = verbsToken.totalSupply();
@@ -114,8 +109,6 @@ contract TokenMintingTest is VerbsTokenTestSuite {
 
     /// @dev Tests burning a verb token
     function testBurn() public {
-        setUp();
-
         createDefaultArtPiece();
 
         uint256 tokenId = verbsToken.mint();
@@ -126,24 +119,39 @@ contract TokenMintingTest is VerbsTokenTestSuite {
     }
 
     /// @dev Ensures _currentVerbId increments correctly after each mint
-    function testMintingIncrement() public {
-        setUp();
-        createDefaultArtPiece();
-        createDefaultArtPiece();
+    function testMintingIncrement(uint200 voteWeight) public {
+        govToken.mint(address(1), 10000);
 
+        govToken.mint(address(this), voteWeight);
+
+        uint256 pieceId1 = createDefaultArtPiece();
+        uint256 pieceId2 = createDefaultArtPiece();
+
+        // ensure vote snapshot is taken
+        vm.roll(block.number + 1);
+
+        if (voteWeight == 0) vm.expectRevert("Weight must be greater than zero");
+        cultureIndex.vote(pieceId1);
+
+        bool shouldRevertMint = voteWeight <= (10_000 * cultureIndex.quorumVotesBPS()) / 10_000;
+
+        if (shouldRevertMint) vm.expectRevert("dropTopVotedPiece failed");
         uint256 tokenId1 = verbsToken.mint();
-        assertEq(verbsToken.totalSupply(), tokenId1 + 1, "CurrentVerbId should increment after first mint");
+        if (!shouldRevertMint) assertEq(verbsToken.totalSupply(), tokenId1 + 1, "CurrentVerbId should increment after first mint");
 
+        if (voteWeight == 0) vm.expectRevert("Weight must be greater than zero");
+        cultureIndex.vote(pieceId2);
+
+        if (shouldRevertMint) vm.expectRevert("dropTopVotedPiece failed");
         uint256 tokenId2 = verbsToken.mint();
-        assertEq(verbsToken.totalSupply(), tokenId2 + 1, "CurrentVerbId should increment after second mint");
+        if (!shouldRevertMint) assertEq(verbsToken.totalSupply(), tokenId2 + 1, "CurrentVerbId should increment after second mint");
     }
 
     /// @dev Checks if the VerbCreated event is emitted with correct parameters on minting
     function testMintingEvent() public {
-        setUp();
         createDefaultArtPiece();
 
-        (uint256 pieceId, ICultureIndex.ArtPieceMetadata memory metadata, , , ) = cultureIndex.pieces(0);
+        (uint256 pieceId, ICultureIndex.ArtPieceMetadata memory metadata, , , , , , ) = cultureIndex.pieces(0);
 
         emit log_uint(pieceId);
 
@@ -156,7 +164,10 @@ contract TokenMintingTest is VerbsTokenTestSuite {
             creators: creators,
             dropper: address(this),
             isDropped: true,
-            creationBlock: block.number
+            creationBlock: block.number,
+            quorumVotes: 0,
+            totalERC20Supply: 0,
+            totalVotesSupply: 0
         });
 
         vm.expectEmit(true, true, true, true);
@@ -168,8 +179,6 @@ contract TokenMintingTest is VerbsTokenTestSuite {
 
     /// @dev Tests the burn function.
     function testBurnFunction() public {
-        setUp();
-
         //create piece
         createDefaultArtPiece();
         uint256 tokenId = verbsToken.mint();
@@ -184,10 +193,9 @@ contract TokenMintingTest is VerbsTokenTestSuite {
 
     /// @dev Validates that the token URI is correctly set and retrieved
     function testTokenURI() public {
-        setUp();
         uint256 artPieceId = createDefaultArtPiece();
         uint256 tokenId = verbsToken.mint();
-        (, ICultureIndex.ArtPieceMetadata memory metadata, , , ) = cultureIndex.pieces(artPieceId);
+        (, ICultureIndex.ArtPieceMetadata memory metadata, , , , , , ) = cultureIndex.pieces(artPieceId);
         // Assuming the descriptor returns a fixed URI for the given tokenId
         string memory expectedTokenURI = descriptor.tokenURI(tokenId, metadata);
         assertEq(verbsToken.tokenURI(tokenId), expectedTokenURI, "Token URI should be correctly set and retrieved");
@@ -195,8 +203,6 @@ contract TokenMintingTest is VerbsTokenTestSuite {
 
     /// @dev Ensures minting fetches and associates the top-voted piece from CultureIndex
     function testTopVotedPieceMinting() public {
-        setUp();
-
         // Create a new piece and simulate it being the top voted piece
         uint256 pieceId = createDefaultArtPiece(); // This function should exist within the test contract
 
@@ -211,7 +217,7 @@ contract TokenMintingTest is VerbsTokenTestSuite {
         uint256 tokenId = verbsToken.mint();
 
         // Validate the token is associated with the top voted piece
-        (uint256 mintedPieceId, , , , ) = verbsToken.artPieces(tokenId);
+        (uint256 mintedPieceId, , , , , , , ) = verbsToken.artPieces(tokenId);
         assertEq(mintedPieceId, pieceId, "Minted token should be associated with the top voted piece");
     }
 }

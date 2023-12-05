@@ -21,8 +21,6 @@ import { VerbsTokenTestSuite } from "./VerbsToken.t.sol";
 contract TokenSecurityTest is VerbsTokenTestSuite {
     /// @dev Tests the creator array limit for minting
     function testCreatorArrayLimit() public {
-        setUp();
-
         // Create an art piece with creators more than the limit (assuming the limit is 100)
         ICultureIndex.CreatorBps[] memory creators = new ICultureIndex.CreatorBps[](101);
         for (uint i = 0; i < 101; i++) {
@@ -54,8 +52,6 @@ contract TokenSecurityTest is VerbsTokenTestSuite {
 
     /// @dev Tests the reentrancy guard on the mint function
     function testReentrancyOnMint() public {
-        setUp();
-
         createDefaultArtPiece();
 
         // Simulate a reentrancy attack by calling mint within a call to mint
@@ -76,8 +72,6 @@ contract TokenSecurityTest is VerbsTokenTestSuite {
 
     /// @dev Tests approval checks for transfer functions
     function testApprovalChecks() public {
-        setUp();
-
         createDefaultArtPiece();
 
         uint256 tokenId = verbsToken.mint();
@@ -108,7 +102,6 @@ contract TokenSecurityTest is VerbsTokenTestSuite {
     }
 
     function testPrivilegeEscalation() public {
-        setUp();
         address unauthorizedAddress = address(0xDead);
         vm.startPrank(unauthorizedAddress);
 
@@ -133,7 +126,6 @@ contract TokenSecurityTest is VerbsTokenTestSuite {
     }
 
     function testReentrancyOtherFunctions() public {
-        setUp();
         createDefaultArtPiece();
         address attacker = address(new ReentrancyAttackContractGeneral(address(verbsToken)));
 
@@ -143,7 +135,6 @@ contract TokenSecurityTest is VerbsTokenTestSuite {
     }
 
     function testBasisPointsSum() public {
-        setUp();
         bool reverted = false;
 
         // Total basis points not equal to 10000 should revert
@@ -160,7 +151,6 @@ contract TokenSecurityTest is VerbsTokenTestSuite {
     }
 
     function testZeroAddressInCreatorArray() public {
-        setUp();
         bool reverted = false;
 
         // Creator array containing a zero address should revert
@@ -176,10 +166,9 @@ contract TokenSecurityTest is VerbsTokenTestSuite {
     }
 
     function testEventEmission() public {
-        setUp();
         // Check that the PieceCreated event was emitted with correct parameters
         vm.expectEmit(true, true, true, true);
-        emit ICultureIndexEvents.PieceCreated(0, address(this), "Mona Lisa", "A masterpiece", "ipfs://legends", "", "", uint8(ICultureIndex.MediaType.IMAGE));
+        emit ICultureIndexEvents.PieceCreated(0, address(this), "Mona Lisa", "A masterpiece", "ipfs://legends", "", "", uint8(ICultureIndex.MediaType.IMAGE), 0, 0);
 
         // Check that the PieceCreatorAdded event was emitted with correct parameters
         vm.expectEmit(true, true, true, true);
@@ -189,7 +178,6 @@ contract TokenSecurityTest is VerbsTokenTestSuite {
     }
 
     function testFunctionalityUnderMaximumLoad() public {
-        setUp();
         bool reverted = false;
 
         // Create an art piece with the maximum allowed number of creators
@@ -209,8 +197,6 @@ contract TokenSecurityTest is VerbsTokenTestSuite {
 
     /// @dev Tests the _mintTo function for failure in dropTopVotedPiece and ensures verbId is not incremented
     function testMintToDropTopVotedPieceFailure() public {
-        setUp();
-
         // Create a default art piece to have something to mint
         createDefaultArtPiece();
 

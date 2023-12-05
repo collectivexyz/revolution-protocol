@@ -34,30 +34,9 @@ contract VerbsDAOExecutor {
     event NewAdmin(address indexed newAdmin);
     event NewPendingAdmin(address indexed newPendingAdmin);
     event NewDelay(uint256 indexed newDelay);
-    event CancelTransaction(
-        bytes32 indexed txHash,
-        address indexed target,
-        uint256 value,
-        string signature,
-        bytes data,
-        uint256 eta
-    );
-    event ExecuteTransaction(
-        bytes32 indexed txHash,
-        address indexed target,
-        uint256 value,
-        string signature,
-        bytes data,
-        uint256 eta
-    );
-    event QueueTransaction(
-        bytes32 indexed txHash,
-        address indexed target,
-        uint256 value,
-        string signature,
-        bytes data,
-        uint256 eta
-    );
+    event CancelTransaction(bytes32 indexed txHash, address indexed target, uint256 value, string signature, bytes data, uint256 eta);
+    event ExecuteTransaction(bytes32 indexed txHash, address indexed target, uint256 value, string signature, bytes data, uint256 eta);
+    event QueueTransaction(bytes32 indexed txHash, address indexed target, uint256 value, string signature, bytes data, uint256 eta);
 
     uint256 public constant GRACE_PERIOD = 14 days;
     uint256 public constant MINIMUM_DELAY = 2 days;
@@ -70,24 +49,24 @@ contract VerbsDAOExecutor {
     mapping(bytes32 => bool) public queuedTransactions;
 
     constructor(address admin_, uint256 delay_) {
-        require(delay_ >= MINIMUM_DELAY, 'VerbsDAOExecutor::constructor: Delay must exceed minimum delay.');
-        require(delay_ <= MAXIMUM_DELAY, 'VerbsDAOExecutor::setDelay: Delay must not exceed maximum delay.');
+        require(delay_ >= MINIMUM_DELAY, "VerbsDAOExecutor::constructor: Delay must exceed minimum delay.");
+        require(delay_ <= MAXIMUM_DELAY, "VerbsDAOExecutor::setDelay: Delay must not exceed maximum delay.");
 
         admin = admin_;
         delay = delay_;
     }
 
     function setDelay(uint256 delay_) public {
-        require(msg.sender == address(this), 'VerbsDAOExecutor::setDelay: Call must come from VerbsDAOExecutor.');
-        require(delay_ >= MINIMUM_DELAY, 'VerbsDAOExecutor::setDelay: Delay must exceed minimum delay.');
-        require(delay_ <= MAXIMUM_DELAY, 'VerbsDAOExecutor::setDelay: Delay must not exceed maximum delay.');
+        require(msg.sender == address(this), "VerbsDAOExecutor::setDelay: Call must come from VerbsDAOExecutor.");
+        require(delay_ >= MINIMUM_DELAY, "VerbsDAOExecutor::setDelay: Delay must exceed minimum delay.");
+        require(delay_ <= MAXIMUM_DELAY, "VerbsDAOExecutor::setDelay: Delay must not exceed maximum delay.");
         delay = delay_;
 
         emit NewDelay(delay);
     }
 
     function acceptAdmin() public {
-        require(msg.sender == pendingAdmin, 'VerbsDAOExecutor::acceptAdmin: Call must come from pendingAdmin.');
+        require(msg.sender == pendingAdmin, "VerbsDAOExecutor::acceptAdmin: Call must come from pendingAdmin.");
         admin = msg.sender;
         pendingAdmin = address(0);
 
@@ -95,27 +74,15 @@ contract VerbsDAOExecutor {
     }
 
     function setPendingAdmin(address pendingAdmin_) public {
-        require(
-            msg.sender == address(this),
-            'VerbsDAOExecutor::setPendingAdmin: Call must come from VerbsDAOExecutor.'
-        );
+        require(msg.sender == address(this), "VerbsDAOExecutor::setPendingAdmin: Call must come from VerbsDAOExecutor.");
         pendingAdmin = pendingAdmin_;
 
         emit NewPendingAdmin(pendingAdmin);
     }
 
-    function queueTransaction(
-        address target,
-        uint256 value,
-        string memory signature,
-        bytes memory data,
-        uint256 eta
-    ) public returns (bytes32) {
-        require(msg.sender == admin, 'VerbsDAOExecutor::queueTransaction: Call must come from admin.');
-        require(
-            eta >= getBlockTimestamp() + delay,
-            'VerbsDAOExecutor::queueTransaction: Estimated execution block must satisfy delay.'
-        );
+    function queueTransaction(address target, uint256 value, string memory signature, bytes memory data, uint256 eta) public returns (bytes32) {
+        require(msg.sender == admin, "VerbsDAOExecutor::queueTransaction: Call must come from admin.");
+        require(eta >= getBlockTimestamp() + delay, "VerbsDAOExecutor::queueTransaction: Estimated execution block must satisfy delay.");
 
         bytes32 txHash = keccak256(abi.encode(target, value, signature, data, eta));
         queuedTransactions[txHash] = true;
@@ -124,14 +91,8 @@ contract VerbsDAOExecutor {
         return txHash;
     }
 
-    function cancelTransaction(
-        address target,
-        uint256 value,
-        string memory signature,
-        bytes memory data,
-        uint256 eta
-    ) public {
-        require(msg.sender == admin, 'VerbsDAOExecutor::cancelTransaction: Call must come from admin.');
+    function cancelTransaction(address target, uint256 value, string memory signature, bytes memory data, uint256 eta) public {
+        require(msg.sender == admin, "VerbsDAOExecutor::cancelTransaction: Call must come from admin.");
 
         bytes32 txHash = keccak256(abi.encode(target, value, signature, data, eta));
         queuedTransactions[txHash] = false;
@@ -139,25 +100,13 @@ contract VerbsDAOExecutor {
         emit CancelTransaction(txHash, target, value, signature, data, eta);
     }
 
-    function executeTransaction(
-        address target,
-        uint256 value,
-        string memory signature,
-        bytes memory data,
-        uint256 eta
-    ) public returns (bytes memory) {
-        require(msg.sender == admin, 'VerbsDAOExecutor::executeTransaction: Call must come from admin.');
+    function executeTransaction(address target, uint256 value, string memory signature, bytes memory data, uint256 eta) public returns (bytes memory) {
+        require(msg.sender == admin, "VerbsDAOExecutor::executeTransaction: Call must come from admin.");
 
         bytes32 txHash = keccak256(abi.encode(target, value, signature, data, eta));
         require(queuedTransactions[txHash], "VerbsDAOExecutor::executeTransaction: Transaction hasn't been queued.");
-        require(
-            getBlockTimestamp() >= eta,
-            "VerbsDAOExecutor::executeTransaction: Transaction hasn't surpassed time lock."
-        );
-        require(
-            getBlockTimestamp() <= eta + GRACE_PERIOD,
-            'VerbsDAOExecutor::executeTransaction: Transaction is stale.'
-        );
+        require(getBlockTimestamp() >= eta, "VerbsDAOExecutor::executeTransaction: Transaction hasn't surpassed time lock.");
+        require(getBlockTimestamp() <= eta + GRACE_PERIOD, "VerbsDAOExecutor::executeTransaction: Transaction is stale.");
 
         queuedTransactions[txHash] = false;
 
@@ -171,7 +120,7 @@ contract VerbsDAOExecutor {
 
         // solium-disable-next-line security/no-call-value
         (bool success, bytes memory returnData) = target.call{ value: value }(callData);
-        require(success, 'VerbsDAOExecutor::executeTransaction: Transaction execution reverted.');
+        require(success, "VerbsDAOExecutor::executeTransaction: Transaction execution reverted.");
 
         emit ExecuteTransaction(txHash, target, value, signature, data, eta);
 

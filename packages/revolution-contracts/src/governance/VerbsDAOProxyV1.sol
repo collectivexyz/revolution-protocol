@@ -38,7 +38,7 @@
 
 pragma solidity ^0.8.22;
 
-import './VerbsDAOInterfaces.sol';
+import "./VerbsDAOInterfaces.sol";
 
 contract VerbsDAOProxyV1 is VerbsDAOStorageV1, VerbsDAOEvents {
     constructor(
@@ -58,7 +58,7 @@ contract VerbsDAOProxyV1 is VerbsDAOStorageV1, VerbsDAOEvents {
         delegateTo(
             implementation_,
             abi.encodeWithSignature(
-                'initialize(address,address,address,uint256,uint256,uint256,(uint16,uint16,uint32))',
+                "initialize(address,address,address,uint256,uint256,uint256,(uint16,uint16,uint32))",
                 timelock_,
                 verbs_,
                 vetoer_,
@@ -79,8 +79,8 @@ contract VerbsDAOProxyV1 is VerbsDAOStorageV1, VerbsDAOEvents {
      * @param implementation_ The address of the new implementation for delegation
      */
     function _setImplementation(address implementation_) public {
-        require(msg.sender == admin, 'VerbsDAOProxy::_setImplementation: admin only');
-        require(implementation_ != address(0), 'VerbsDAOProxy::_setImplementation: invalid implementation address');
+        require(msg.sender == admin, "VerbsDAOProxy::_setImplementation: admin only");
+        require(implementation_ != address(0), "VerbsDAOProxy::_setImplementation: invalid implementation address");
 
         address oldImplementation = implementation;
         implementation = implementation_;

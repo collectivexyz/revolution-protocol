@@ -109,8 +109,8 @@ contract VerbsAuctionHouse is IVerbsAuctionHouse, PausableUpgradeable, Reentranc
     /**
      * @notice Settle the current auction, mint a new Verb, and put it up for auction.
      */
-     //Can technically reenter via cross function reentrancies in _createAuction, auction, and pause, but those are only callable by the owner
-     //slither-disable-next-line reentrancy-eth
+    //Can technically reenter via cross function reentrancies in _createAuction, auction, and pause, but those are only callable by the owner
+    //slither-disable-next-line reentrancy-eth
     function settleCurrentAndCreateNewAuction() external override nonReentrant whenNotPaused {
         _settleAuction();
         _createAuction();
@@ -152,7 +152,6 @@ contract VerbsAuctionHouse is IVerbsAuctionHouse, PausableUpgradeable, Reentranc
         emit AuctionBid(_auction.verbId, msg.sender, msg.value, extended);
 
         if (extended) emit AuctionExtended(_auction.verbId, _auction.endTime);
-
     }
 
     /**
@@ -286,10 +285,10 @@ contract VerbsAuctionHouse is IVerbsAuctionHouse, PausableUpgradeable, Reentranc
         uint256 creatorTokensEmitted = 0;
 
         //If no one has bid, burn the Verb
-        if (_auction.bidder == address(0)) verbs.burn(_auction.verbId);
-        //If someone has bid, transfer the Verb to the winning bidder
+        if (_auction.bidder == address(0))
+            verbs.burn(_auction.verbId);
+            //If someone has bid, transfer the Verb to the winning bidder
         else verbs.transferFrom(address(this), _auction.bidder, _auction.verbId);
-
 
         if (_auction.amount > 0) {
             // Ether going to owner of the auction

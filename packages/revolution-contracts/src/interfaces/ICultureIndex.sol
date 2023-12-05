@@ -33,7 +33,9 @@ interface ICultureIndexEvents {
         string image,
         string animationUrl,
         string text,
-        uint8 mediaType
+        uint8 mediaType,
+        uint256 quorumVotes,
+        uint256 totalVotesSupply
     );
 
     /**
@@ -63,6 +65,9 @@ interface ICultureIndexEvents {
 
     // The events emitted for the respective creators of a piece
     event PieceCreatorAdded(uint256 indexed pieceId, address indexed creatorAddress, address indexed dropper, uint256 bps);
+
+    // @notice Emitted when quorum votes basis points is set
+    event QuorumVotesBPSSet(uint256 oldQuorumVotesBPS, uint256 newQuorumVotesBPS);
 }
 
 /**
@@ -104,6 +109,9 @@ interface ICultureIndex is ICultureIndexEvents {
         address dropper;
         bool isDropped;
         uint256 creationBlock;
+        uint256 quorumVotes;
+        uint256 totalERC20Supply;
+        uint256 totalVotesSupply;
     }
 
     // Struct representing a voter and their weight for a specific art piece.

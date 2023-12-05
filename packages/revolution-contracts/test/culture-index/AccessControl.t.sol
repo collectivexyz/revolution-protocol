@@ -21,8 +21,6 @@ import { ERC721Checkpointable } from "../../src/base/ERC721Checkpointable.sol";
 contract CultureIndexAccessControlTest is CultureIndexTestSuite {
     /// @dev Tests minting by non-minter should revert
     function testRevertOnNonOwnerUpdateVotingToken() public {
-        setUp();
-
         address nonMinter = address(0xABC); // This is an arbitrary address
         vm.startPrank(nonMinter);
 
@@ -34,8 +32,6 @@ contract CultureIndexAccessControlTest is CultureIndexTestSuite {
 
     /// @dev Tests the locking of admin functions
     function testLockAdminFunctions() public {
-        setUp();
-
         // Lock the ERC721VotingToken
         cultureIndex.lockERC721VotingToken();
 
@@ -50,7 +46,6 @@ contract CultureIndexAccessControlTest is CultureIndexTestSuite {
 
     /// @dev Tests that only the owner can lock the ERC721 voting token
     function testOnlyOwnerCanLockERC721VotingToken() public {
-        setUp();
         address nonOwner = address(0x123); // This is an arbitrary address
         vm.startPrank(nonOwner);
 
@@ -70,7 +65,6 @@ contract CultureIndexAccessControlTest is CultureIndexTestSuite {
 
     /// @dev Tests only the owner can update the ERC721 voting token
     function testSetERC721VotingToken() public {
-        setUp();
         address newTokenAddress = address(0x123); // New ERC721 token address
         ERC721Checkpointable newToken = ERC721Checkpointable(newTokenAddress);
 
@@ -86,6 +80,77 @@ contract CultureIndexAccessControlTest is CultureIndexTestSuite {
         cultureIndex.setERC721VotingToken(newToken);
         assertEq(address(cultureIndex.erc721VotingToken()), newTokenAddress);
         vm.stopPrank();
+    }
+
+    function testSetQuorumVotesBPSWithinRange(uint104 newQuorumBPS) public {
+        vm.assume(newQuorumBPS >= cultureIndex.MIN_QUORUM_VOTES_BPS() && newQuorumBPS <= cultureIndex.MAX_QUORUM_VOTES_BPS());
+
+        // Set new quorum BPS by owner
+        vm.startPrank(address(this));
+        cultureIndex._setQuorumVotesBPS(newQuorumBPS);
+        vm.stopPrank();
+
+        // Check if the quorum BPS is updated correctly
+        uint256 currentQuorumBPS = cultureIndex.quorumVotesBPS();
+        assertEq(currentQuorumBPS, newQuorumBPS, "Quorum BPS should be updated within valid range");
+    }
+
+    function testSetQuorumVotesBPSOutsideRange(uint104 newQuorumBPS) public {
+        uint256 currentQuorumBPS = cultureIndex.quorumVotesBPS();
+        vm.assume(newQuorumBPS < cultureIndex.MIN_QUORUM_VOTES_BPS() || newQuorumBPS > cultureIndex.MAX_QUORUM_VOTES_BPS());
+
+        // Set new quorum BPS by owner
+        vm.startPrank(address(this));
+        vm.expectRevert("CultureIndex::_setQuorumVotesBPS: invalid quorum bps");
+        cultureIndex._setQuorumVotesBPS(newQuorumBPS);
+        vm.stopPrank();
+
+        // Check if the quorum BPS is updated correctly
+        assertEq(cultureIndex.quorumVotesBPS(), currentQuorumBPS, "Quorum BPS should be updated within valid range");
+    }
+
+    function testRevertNonOwnerSetQuorumVotesBPS() public {
+        address nonOwner = address(0x123); // An arbitrary non-owner address
+        uint256 newQuorumBPS = 3000; // A valid quorum BPS value
+
+        // Attempt to set new quorum BPS by non-owner and expect revert
+        vm.startPrank(nonOwner);
+        vm.expectRevert();
+        cultureIndex._setQuorumVotesBPS(newQuorumBPS);
+        vm.stopPrank();
+    }
+
+    function testDropTopVotedPieceOnlyIfQuorumIsMet(uint256 quorumBps) public {
+        vm.assume(quorumBps >= cultureIndex.MIN_QUORUM_VOTES_BPS() && quorumBps <= cultureIndex.MAX_QUORUM_VOTES_BPS());
+
+        // Set quorum BPS
+        vm.startPrank(address(this));
+        cultureIndex._setQuorumVotesBPS(quorumBps);
+        vm.stopPrank();
+
+        govToken.mint(address(0x21), quorumBps * 10);
+        govToken.mint(address(this), ((quorumBps / 2) * (quorumBps)) / 10_000);
+
+        // Create an art piece
+        uint256 pieceId = createDefaultArtPiece();
+
+        vm.roll(block.number + 2);
+
+        // Vote for the piece, but do not meet the quorum
+        cultureIndex.vote(pieceId);
+
+        // Attempt to drop the top-voted piece and expect it to fail
+        vm.expectRevert("Piece must have quorum votes in order to be dropped.");
+        cultureIndex.dropTopVotedPiece();
+
+        // Additional votes to meet/exceed the quorum
+        vm.startPrank(address(0x21));
+        cultureIndex.vote(pieceId);
+        vm.stopPrank();
+
+        // Attempt to drop the top-voted piece, should succeed
+        ICultureIndex.ArtPiece memory droppedPiece = cultureIndex.dropTopVotedPiece();
+        assertTrue(droppedPiece.isDropped, "Top voted piece should be dropped");
     }
 }
 
