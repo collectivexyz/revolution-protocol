@@ -534,7 +534,7 @@ contract CultureIndexVotingBasicTest is CultureIndexTestSuite {
         }
     }
 
-    function testCalculateVoteWeight(uint200 erc20Balance, uint40 erc721Balance) public {
+    function testCalculateVoteWeights(uint200 erc20Balance, uint40 erc721Balance) public {
         vm.assume(erc20Balance > 0);
         vm.assume(erc721Balance < 1_000);
         govToken.mint(address(this), erc20Balance);

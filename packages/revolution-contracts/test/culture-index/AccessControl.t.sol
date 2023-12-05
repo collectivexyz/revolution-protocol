@@ -131,12 +131,10 @@ contract CultureIndexAccessControlTest is CultureIndexTestSuite {
         govToken.mint(address(0x21), quorumBps * 10);
         govToken.mint(address(this), ((quorumBps / 2) * (quorumBps)) / 10_000);
 
-        vm.roll(block.number + 1);
-
         // Create an art piece
         uint256 pieceId = createDefaultArtPiece();
 
-        vm.roll(block.number + 1);
+        vm.roll(block.number + 2);
 
         // Vote for the piece, but do not meet the quorum
         cultureIndex.vote(pieceId);
