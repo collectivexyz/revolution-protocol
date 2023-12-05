@@ -117,6 +117,43 @@ contract CultureIndexAccessControlTest is CultureIndexTestSuite {
         cultureIndex._setQuorumVotesBPS(newQuorumBPS);
         vm.stopPrank();
     }
+
+    function testQuorumVotesCalculation(uint200 erc20TotalSupply, uint256 erc721TotalSupply) public {
+        vm.assume(erc20TotalSupply > 0);
+        vm.assume(erc721TotalSupply < 10_000);
+        // Initial settings
+        uint256 quorumBPS = cultureIndex.quorumVotesBPS();         // Example quorum BPS (20%)
+
+        // Set the quorum BPS
+        vm.startPrank(address(this));
+        cultureIndex._setQuorumVotesBPS(quorumBPS);
+        vm.stopPrank();
+
+
+        cultureIndex.transferOwnership(address(verbs));
+
+        // Set the ERC20 and ERC721 total supplies
+        govToken.mint(address(this), erc20TotalSupply);
+
+        vm.roll(block.number + 1);
+
+        //for desired erc721 supply, loop create art pieces and drop them
+        for (uint256 i = 0; i < erc721TotalSupply; i++) {
+            createDefaultArtPiece();
+            vm.roll(block.number + 1);
+            cultureIndex.vote(i);
+            verbs.mint();
+        }
+
+        // Calculate expected quorum votes
+        uint256 expectedQuorumVotes = (quorumBPS * (erc20TotalSupply + erc721TotalSupply * 1e18 * cultureIndex.erc721VotingTokenWeight())) / 10_000;
+
+        // Get the quorum votes from the contract
+        uint256 actualQuorumVotes = cultureIndex.quorumVotes();
+
+        // Assert that the actual quorum votes match the expected value
+        assertEq(actualQuorumVotes, expectedQuorumVotes, "Quorum votes calculation does not match expected value");
+    }
 }
 
 contract ProxyRegistry is IProxyRegistry {
