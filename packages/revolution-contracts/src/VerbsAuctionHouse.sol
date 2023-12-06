@@ -329,7 +329,13 @@ contract VerbsAuctionHouse is IVerbsAuctionHouse, PausableUpgradeable, Reentranc
                 _safeTransferETHWithFallback(creator.creator, etherAmount);
             }
             //Buy token from tokenEmitter for all the creators
-            creatorTokensEmitted = tokenEmitter.buyToken{ value: creatorGovernancePayment }(vrgdaReceivers, vrgdaSplits, address(0), address(0), deployer);
+            creatorTokensEmitted = tokenEmitter.buyToken{ value: creatorGovernancePayment }(
+                vrgdaReceivers,
+                vrgdaSplits,
+                address(0),
+                address(0),
+                deployer
+            );
         }
 
         emit AuctionSettled(_auction.verbId, _auction.bidder, _auction.amount, creatorTokensEmitted);

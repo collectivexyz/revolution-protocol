@@ -44,7 +44,11 @@ contract VerbsAuctionHouseSettleTest is VerbsAuctionHouseTest {
         uint256 etherToSpendOnGovernanceTotal = (bidAmount * creatorRate) / 10_000 - (bidAmount * (entropyRate * creatorRate)) / 10_000 / 10_000;
         uint256 feeAmount = tokenEmitter.computeTotalReward(etherToSpendOnGovernanceTotal);
 
-        assertEq(balanceAfter - balanceBefore, amountToOwner - feeAmount, "Bid amount minus entropy should be transferred to the auction house owner");
+        assertEq(
+            balanceAfter - balanceBefore,
+            amountToOwner - feeAmount,
+            "Bid amount minus entropy should be transferred to the auction house owner"
+        );
     }
 
     function testSettlingAuctionWithNoBids(uint8 nDays) public {
@@ -215,7 +219,9 @@ contract VerbsAuctionHouseSettleTest is VerbsAuctionHouseTest {
         }
 
         // Track expected governance token payout
-        uint256 etherToSpendOnGovernanceTotal = uint256((bidAmount * creatorRate) / 10_000 - (bidAmount * (entropyRate * creatorRate)) / 10_000 / 10_000);
+        uint256 etherToSpendOnGovernanceTotal = uint256(
+            (bidAmount * creatorRate) / 10_000 - (bidAmount * (entropyRate * creatorRate)) / 10_000 / 10_000
+        );
 
         uint256 expectedGovernanceTokenPayout = uint256(
             tokenEmitter.getTokenQuoteForEther(etherToSpendOnGovernanceTotal - tokenEmitter.computeTotalReward(etherToSpendOnGovernanceTotal))
@@ -321,7 +327,11 @@ contract VerbsAuctionHouseSettleTest is VerbsAuctionHouseTest {
         // Checking voting weight on culture index is 721 vote weight for winning bidder
         assertEq(cultureIndex.getCurrentVotes(address(21_000)), cultureIndex.erc721VotingTokenWeight() * 1e18, "Highest bidder should have 10 votes");
 
-        assertEq(governanceToken.balanceOf(address(0x1)), expectedGovernanceTokens, "Creator did not receive the correct amount of governance tokens");
+        assertEq(
+            governanceToken.balanceOf(address(0x1)),
+            expectedGovernanceTokens,
+            "Creator did not receive the correct amount of governance tokens"
+        );
     }
 }
 

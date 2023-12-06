@@ -309,7 +309,9 @@ contract VerbsDescriptorTest is Test {
     }
 
     // Helper function to parse JSON strings into components
-    function parseJson(string memory _json) internal returns (string memory name, string memory description, string memory image, string memory animationUrl) {
+    function parseJson(
+        string memory _json
+    ) internal returns (string memory name, string memory description, string memory image, string memory animationUrl) {
         uint returnValue;
         JsmnSolLib.Token[] memory tokens;
         uint actualNum;

@@ -77,7 +77,8 @@ contract VRGDAC {
             wadDiv(
                 -wadMul(
                     wadMul(targetPrice, perTimeUnit),
-                    wadPow(1e18 - priceDecayPercent, timeSinceStart - unsafeWadDiv(sold, perTimeUnit)) - wadPow(1e18 - priceDecayPercent, timeSinceStart)
+                    wadPow(1e18 - priceDecayPercent, timeSinceStart - unsafeWadDiv(sold, perTimeUnit)) -
+                        wadPow(1e18 - priceDecayPercent, timeSinceStart)
                 ),
                 decayConstant
             );

@@ -359,7 +359,10 @@ contract CultureIndex is ICultureIndex, Ownable, ReentrancyGuard {
      * @param newQuorumVotesBPS new art piece drop threshold
      */
     function _setQuorumVotesBPS(uint256 newQuorumVotesBPS) external onlyOwner {
-        require(newQuorumVotesBPS >= MIN_QUORUM_VOTES_BPS && newQuorumVotesBPS <= MAX_QUORUM_VOTES_BPS, "CultureIndex::_setQuorumVotesBPS: invalid quorum bps");
+        require(
+            newQuorumVotesBPS >= MIN_QUORUM_VOTES_BPS && newQuorumVotesBPS <= MAX_QUORUM_VOTES_BPS,
+            "CultureIndex::_setQuorumVotesBPS: invalid quorum bps"
+        );
         emit QuorumVotesBPSSet(quorumVotesBPS, newQuorumVotesBPS);
 
         quorumVotesBPS = newQuorumVotesBPS;

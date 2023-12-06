@@ -211,10 +211,18 @@ contract TokenEmitterTest is Test {
         //assert address balances are correct
         //multiply bps by expectedAmount and assert
         assertEq(emitter.balanceOf(address(1)), (firstBps * uint256(expectedAmount)) / 10_000, "First recipient should have correct balance");
-        assertEq(emitter.balanceOf(address(2)), ((10_000 - firstBps) * uint256(expectedAmount)) / 10_000, "Second recipient should have correct balance");
+        assertEq(
+            emitter.balanceOf(address(2)),
+            ((10_000 - firstBps) * uint256(expectedAmount)) / 10_000,
+            "Second recipient should have correct balance"
+        );
 
         //assert treasury balance is correct
-        assertEq(address(emitter.treasury()).balance, 1e18 - emitter.computeTotalReward(1e18), "Treasury should have payment - totalReward in balance");
+        assertEq(
+            address(emitter.treasury()).balance,
+            1e18 - emitter.computeTotalReward(1e18),
+            "Treasury should have payment - totalReward in balance"
+        );
     }
 
     // Test to ensure the total basis points add up to 100%
@@ -243,7 +251,11 @@ contract TokenEmitterTest is Test {
         assertEq(int(emittedWad), totalSupplyAfterValidPurchase, "Emitted amount should match total supply");
 
         //expect treasury to have payment - totalReward in balance
-        assertEq(address(emitter.treasury()).balance, 1e18 - emitter.computeTotalReward(1e18), "Treasury should have payment - totalReward in balance");
+        assertEq(
+            address(emitter.treasury()).balance,
+            1e18 - emitter.computeTotalReward(1e18),
+            "Treasury should have payment - totalReward in balance"
+        );
 
         // Test case with incorrect total of basis points
         uint256[] memory incorrectBps = new uint256[](2);
@@ -399,7 +411,11 @@ contract TokenEmitterTest is Test {
         int256 largePaymentTokenAmount = emitter.getTokenQuoteForEther(expectedVolume * 100);
         //spending 100x the expected amount per day should get you < 25x the tokens
         uint256 SOME_REALISTIC_UPPER_BOUND = 25 * tokensPerTimeUnit * 1e18;
-        assertLt(uint256(largePaymentTokenAmount), SOME_REALISTIC_UPPER_BOUND, "Token amount for large payment should be less than some realistic upper bound");
+        assertLt(
+            uint256(largePaymentTokenAmount),
+            SOME_REALISTIC_UPPER_BOUND,
+            "Token amount for large payment should be less than some realistic upper bound"
+        );
         emit log_string("Large Payment Token Amount: ");
         emit log_int(largePaymentTokenAmount);
 

@@ -170,7 +170,11 @@ contract VerbsDAOLogicV1 is VerbsDAOStorageV1, VerbsDAOEvents {
         votingDelay = votingDelay_;
         proposalThresholdBPS = proposalThresholdBPS_;
         verbsTokenVotingWeight = verbsTokenVotingWeight_;
-        _setDynamicQuorumParams(dynamicQuorumParams_.minQuorumVotesBPS, dynamicQuorumParams_.maxQuorumVotesBPS, dynamicQuorumParams_.quorumCoefficient);
+        _setDynamicQuorumParams(
+            dynamicQuorumParams_.minQuorumVotesBPS,
+            dynamicQuorumParams_.maxQuorumVotesBPS,
+            dynamicQuorumParams_.quorumCoefficient
+        );
     }
 
     struct ProposalTemp {
@@ -251,7 +255,17 @@ contract VerbsDAOLogicV1 is VerbsDAOStorageV1, VerbsDAOEvents {
         latestProposalIds[newProposal.proposer] = newProposal.id;
 
         /// @notice Maintains backwards compatibility with GovernorBravo events
-        emit ProposalCreated(newProposal.id, msg.sender, targets, values, signatures, calldatas, newProposal.startBlock, newProposal.endBlock, description);
+        emit ProposalCreated(
+            newProposal.id,
+            msg.sender,
+            targets,
+            values,
+            signatures,
+            calldatas,
+            newProposal.startBlock,
+            newProposal.endBlock,
+            description
+        );
 
         /// @notice Updated event with `proposalThreshold` and `minQuorumVotes`
         /// @notice `minQuorumVotes` is always zero since V2 introduces dynamic quorum with checkpoints
@@ -889,7 +903,8 @@ contract VerbsDAOLogicV1 is VerbsDAOStorageV1, VerbsDAOEvents {
         uint256 len = quorumParamsCheckpoints.length;
 
         if (len == 0) {
-            return DynamicQuorumParams({ minQuorumVotesBPS: safe16(quorumVotesBPS), maxQuorumVotesBPS: safe16(quorumVotesBPS), quorumCoefficient: 0 });
+            return
+                DynamicQuorumParams({ minQuorumVotesBPS: safe16(quorumVotesBPS), maxQuorumVotesBPS: safe16(quorumVotesBPS), quorumCoefficient: 0 });
         }
 
         if (quorumParamsCheckpoints[len - 1].fromBlock <= blockNumber) {
@@ -897,7 +912,8 @@ contract VerbsDAOLogicV1 is VerbsDAOStorageV1, VerbsDAOEvents {
         }
 
         if (quorumParamsCheckpoints[0].fromBlock > blockNumber) {
-            return DynamicQuorumParams({ minQuorumVotesBPS: safe16(quorumVotesBPS), maxQuorumVotesBPS: safe16(quorumVotesBPS), quorumCoefficient: 0 });
+            return
+                DynamicQuorumParams({ minQuorumVotesBPS: safe16(quorumVotesBPS), maxQuorumVotesBPS: safe16(quorumVotesBPS), quorumCoefficient: 0 });
         }
 
         uint256 lower = 0;

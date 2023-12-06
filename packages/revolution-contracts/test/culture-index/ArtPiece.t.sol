@@ -13,7 +13,16 @@ import { CultureIndexTestSuite } from "./CultureIndex.t.sol";
 contract CultureIndexArtPieceTest is CultureIndexTestSuite {
     //test that creating the first piece the pieceId is 0
     function testFirstPieceId() public {
-        uint256 newPieceId = createArtPiece("Mona Lisa", "A masterpiece", ICultureIndex.MediaType.IMAGE, "ipfs://legends", "", "", address(0x1), 10000);
+        uint256 newPieceId = createArtPiece(
+            "Mona Lisa",
+            "A masterpiece",
+            ICultureIndex.MediaType.IMAGE,
+            "ipfs://legends",
+            "",
+            "",
+            address(0x1),
+            10000
+        );
 
         assertEq(newPieceId, 0);
     }
@@ -26,7 +35,16 @@ contract CultureIndexArtPieceTest is CultureIndexTestSuite {
      * its properties to ensure they match what was set.
      */
     function testCreatePiece() public {
-        uint256 newPieceId = createArtPiece("Mona Lisa", "A masterpiece", ICultureIndex.MediaType.IMAGE, "ipfs://legends", "", "", address(0x1), 10000);
+        uint256 newPieceId = createArtPiece(
+            "Mona Lisa",
+            "A masterpiece",
+            ICultureIndex.MediaType.IMAGE,
+            "ipfs://legends",
+            "",
+            "",
+            address(0x1),
+            10000
+        );
 
         // Validate that the piece was created with correct data
         ICultureIndex.ArtPiece memory createdPiece = cultureIndex.getPieceById(newPieceId);
@@ -253,9 +271,27 @@ contract CultureIndexArtPieceTest is CultureIndexTestSuite {
      * @dev Test case to validate that piece IDs are incremented correctly
      */
     function testPieceIDIncrement() public {
-        uint256 firstPieceId = createArtPiece("First Piece", "Valid Piece", ICultureIndex.MediaType.IMAGE, "ipfs://first", "", "", address(0x1), 10000);
+        uint256 firstPieceId = createArtPiece(
+            "First Piece",
+            "Valid Piece",
+            ICultureIndex.MediaType.IMAGE,
+            "ipfs://first",
+            "",
+            "",
+            address(0x1),
+            10000
+        );
 
-        uint256 secondPieceId = createArtPiece("Second Piece", "Valid Piece", ICultureIndex.MediaType.IMAGE, "ipfs://second", "", "", address(0x1), 10000);
+        uint256 secondPieceId = createArtPiece(
+            "Second Piece",
+            "Valid Piece",
+            ICultureIndex.MediaType.IMAGE,
+            "ipfs://second",
+            "",
+            "",
+            address(0x1),
+            10000
+        );
 
         assertEq(firstPieceId + 1, secondPieceId, "Piece IDs should be incremented correctly");
     }

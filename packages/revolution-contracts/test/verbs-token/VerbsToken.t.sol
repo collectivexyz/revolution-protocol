@@ -47,7 +47,15 @@ contract VerbsTokenTestSuite is Test {
         );
 
         // Deploy CultureIndex with the VerbsToken's address as the initial owner
-        cultureIndex = new CultureIndex("Vrbs", "Our community Vrbs. Must be 32x32.", address(govToken), address(verbsToken), address(verbsToken), 10, 200);
+        cultureIndex = new CultureIndex(
+            "Vrbs",
+            "Our community Vrbs. Must be 32x32.",
+            address(govToken),
+            address(verbsToken),
+            address(verbsToken),
+            10,
+            200
+        );
         ICultureIndex _cultureIndex = cultureIndex;
 
         // Now that CultureIndex is deployed, set it in VerbsToken

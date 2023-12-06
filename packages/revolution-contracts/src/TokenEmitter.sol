@@ -42,7 +42,11 @@ contract TokenEmitter is VRGDAC, ITokenEmitter, ReentrancyGuard, TokenEmitterRew
         int _targetPrice, // The target price for a token if sold on pace, scaled by 1e18.
         int _priceDecayPercent, // The percent price decays per unit of time with no sales, scaled by 1e18.
         int _tokensPerTimeUnit // The number of tokens to target selling in 1 full unit of time, scaled by 1e18.
-    ) TokenEmitterRewards(_protocolRewards, _protocolFeeRecipient) VRGDAC(_targetPrice, _priceDecayPercent, _tokensPerTimeUnit) Ownable(_initialOwner) {
+    )
+        TokenEmitterRewards(_protocolRewards, _protocolFeeRecipient)
+        VRGDAC(_targetPrice, _priceDecayPercent, _tokensPerTimeUnit)
+        Ownable(_initialOwner)
+    {
         require(_treasury != address(0), "Invalid treasury address");
 
         treasury = _treasury;

@@ -227,7 +227,16 @@ contract CultureIndexVotingBasicTest is CultureIndexTestSuite {
      * Then we validate the recorded vote and total voting weight.
      */
     function testVoting() public {
-        uint256 newPieceId = createArtPiece("Mona Lisa", "A masterpiece", ICultureIndex.MediaType.IMAGE, "ipfs://legends", "", "", address(0x1), 10000);
+        uint256 newPieceId = createArtPiece(
+            "Mona Lisa",
+            "A masterpiece",
+            ICultureIndex.MediaType.IMAGE,
+            "ipfs://legends",
+            "",
+            "",
+            address(0x1),
+            10000
+        );
 
         // Mint some tokens to the voter
         govToken.mint(address(this), 100);
@@ -383,7 +392,16 @@ contract CultureIndexVotingBasicTest is CultureIndexTestSuite {
      * Then we try to vote again and expect it to fail.
      */
     function testCannotVoteTwice() public {
-        uint256 newPieceId = createArtPiece("Mona Lisa", "A masterpiece", ICultureIndex.MediaType.IMAGE, "ipfs://legends", "", "", address(0x1), 10000);
+        uint256 newPieceId = createArtPiece(
+            "Mona Lisa",
+            "A masterpiece",
+            ICultureIndex.MediaType.IMAGE,
+            "ipfs://legends",
+            "",
+            "",
+            address(0x1),
+            10000
+        );
 
         // Mint some tokens to the voter
         govToken.mint(address(this), 100);
@@ -407,7 +425,16 @@ contract CultureIndexVotingBasicTest is CultureIndexTestSuite {
      * We expect the vote to fail.
      */
     function testCannotVoteWithoutTokens() public {
-        uint256 newPieceId = createArtPiece("Starry Night", "A masterpiece", ICultureIndex.MediaType.IMAGE, "ipfs://legends", "", "", address(0x1), 10000);
+        uint256 newPieceId = createArtPiece(
+            "Starry Night",
+            "A masterpiece",
+            ICultureIndex.MediaType.IMAGE,
+            "ipfs://legends",
+            "",
+            "",
+            address(0x1),
+            10000
+        );
 
         vm.roll(block.number + 1); // Roll forward to ensure votes are snapshotted
 
@@ -426,7 +453,16 @@ contract CultureIndexVotingBasicTest is CultureIndexTestSuite {
      * Then we try to vote again for both and expect both to fail.
      */
     function testCannotVoteOnMultiplePiecesTwice() public {
-        uint256 firstPieceId = createArtPiece("Mona Lisa", "A masterpiece", ICultureIndex.MediaType.IMAGE, "ipfs://legends", "", "", address(0x1), 10000);
+        uint256 firstPieceId = createArtPiece(
+            "Mona Lisa",
+            "A masterpiece",
+            ICultureIndex.MediaType.IMAGE,
+            "ipfs://legends",
+            "",
+            "",
+            address(0x1),
+            10000
+        );
 
         uint256 secondPieceId = createArtPiece(
             "Starry Night",
@@ -471,7 +507,16 @@ contract CultureIndexVotingBasicTest is CultureIndexTestSuite {
      * We expect both votes to fail.
      */
     function testCannotVoteWithoutTokensMultiplePieces() public {
-        uint256 firstPieceId = createArtPiece("Mona Lisa", "A masterpiece", ICultureIndex.MediaType.IMAGE, "ipfs://legends", "", "", address(0x1), 10000);
+        uint256 firstPieceId = createArtPiece(
+            "Mona Lisa",
+            "A masterpiece",
+            ICultureIndex.MediaType.IMAGE,
+            "ipfs://legends",
+            "",
+            "",
+            address(0x1),
+            10000
+        );
 
         uint256 secondPieceId = createArtPiece(
             "Starry Night",
