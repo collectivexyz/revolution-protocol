@@ -170,11 +170,7 @@ contract VerbsDAOLogicV1 is VerbsDAOStorageV1, VerbsDAOEvents {
         votingDelay = votingDelay_;
         proposalThresholdBPS = proposalThresholdBPS_;
         verbsTokenVotingWeight = verbsTokenVotingWeight_;
-        _setDynamicQuorumParams(
-            dynamicQuorumParams_.minQuorumVotesBPS,
-            dynamicQuorumParams_.maxQuorumVotesBPS,
-            dynamicQuorumParams_.quorumCoefficient
-        );
+        _setDynamicQuorumParams(dynamicQuorumParams_.minQuorumVotesBPS, dynamicQuorumParams_.maxQuorumVotesBPS, dynamicQuorumParams_.quorumCoefficient);
     }
 
     struct ProposalTemp {
@@ -207,10 +203,7 @@ contract VerbsDAOLogicV1 is VerbsDAOStorageV1, VerbsDAOEvents {
 
         temp.proposalThreshold = bps2Uint(proposalThresholdBPS, temp.totalSupply);
 
-        require(
-            getTotalVotes(msg.sender, block.number - 1) > temp.proposalThreshold,
-            "VerbsDAO::propose: proposer votes below proposal threshold"
-        );
+        require(getTotalVotes(msg.sender, block.number - 1) > temp.proposalThreshold, "VerbsDAO::propose: proposer votes below proposal threshold");
         require(
             targets.length == values.length && targets.length == signatures.length && targets.length == calldatas.length,
             "VerbsDAO::propose: proposal function information arity mismatch"
@@ -221,14 +214,8 @@ contract VerbsDAOLogicV1 is VerbsDAOStorageV1, VerbsDAOEvents {
         temp.latestProposalId = latestProposalIds[msg.sender];
         if (temp.latestProposalId != 0) {
             ProposalState proposersLatestProposalState = state(temp.latestProposalId);
-            require(
-                proposersLatestProposalState != ProposalState.Active,
-                "VerbsDAO::propose: one live proposal per proposer, found an already active proposal"
-            );
-            require(
-                proposersLatestProposalState != ProposalState.Pending,
-                "VerbsDAO::propose: one live proposal per proposer, found an already pending proposal"
-            );
+            require(proposersLatestProposalState != ProposalState.Active, "VerbsDAO::propose: one live proposal per proposer, found an already active proposal");
+            require(proposersLatestProposalState != ProposalState.Pending, "VerbsDAO::propose: one live proposal per proposer, found an already pending proposal");
         }
 
         temp.startBlock = block.number + votingDelay;
@@ -258,17 +245,7 @@ contract VerbsDAOLogicV1 is VerbsDAOStorageV1, VerbsDAOEvents {
         latestProposalIds[newProposal.proposer] = newProposal.id;
 
         /// @notice Maintains backwards compatibility with GovernorBravo events
-        emit ProposalCreated(
-            newProposal.id,
-            msg.sender,
-            targets,
-            values,
-            signatures,
-            calldatas,
-            newProposal.startBlock,
-            newProposal.endBlock,
-            description
-        );
+        emit ProposalCreated(newProposal.id, msg.sender, targets, values, signatures, calldatas, newProposal.startBlock, newProposal.endBlock, description);
 
         /// @notice Updated event with `proposalThreshold` and `minQuorumVotes`
         /// @notice `minQuorumVotes` is always zero since V2 introduces dynamic quorum with checkpoints
@@ -321,13 +298,7 @@ contract VerbsDAOLogicV1 is VerbsDAOStorageV1, VerbsDAOEvents {
         Proposal storage proposal = _proposals[proposalId];
         proposal.executed = true;
         for (uint256 i = 0; i < proposal.targets.length; i++) {
-            timelock.executeTransaction(
-                proposal.targets[i],
-                proposal.values[i],
-                proposal.signatures[i],
-                proposal.calldatas[i],
-                proposal.eta
-            );
+            timelock.executeTransaction(proposal.targets[i], proposal.values[i], proposal.signatures[i], proposal.calldatas[i], proposal.eta);
         }
         emit ProposalExecuted(proposalId);
     }
@@ -375,13 +346,7 @@ contract VerbsDAOLogicV1 is VerbsDAOStorageV1, VerbsDAOEvents {
 
         proposal.canceled = true;
         for (uint256 i = 0; i < proposal.targets.length; i++) {
-            timelock.cancelTransaction(
-                proposal.targets[i],
-                proposal.values[i],
-                proposal.signatures[i],
-                proposal.calldatas[i],
-                proposal.eta
-            );
+            timelock.cancelTransaction(proposal.targets[i], proposal.values[i], proposal.signatures[i], proposal.calldatas[i], proposal.eta);
         }
 
         emit ProposalCanceled(proposalId);
@@ -408,13 +373,7 @@ contract VerbsDAOLogicV1 is VerbsDAOStorageV1, VerbsDAOEvents {
 
         proposal.vetoed = true;
         for (uint256 i = 0; i < proposal.targets.length; i++) {
-            timelock.cancelTransaction(
-                proposal.targets[i],
-                proposal.values[i],
-                proposal.signatures[i],
-                proposal.calldatas[i],
-                proposal.eta
-            );
+            timelock.cancelTransaction(proposal.targets[i], proposal.values[i], proposal.signatures[i], proposal.calldatas[i], proposal.eta);
         }
 
         emit ProposalVetoed(proposalId);
@@ -619,10 +578,7 @@ contract VerbsDAOLogicV1 is VerbsDAOStorageV1, VerbsDAOEvents {
         if (msg.sender != admin) {
             revert AdminOnly();
         }
-        require(
-            newVotingDelay >= MIN_VOTING_DELAY && newVotingDelay <= MAX_VOTING_DELAY,
-            "VerbsDAO::_setVotingDelay: invalid voting delay"
-        );
+        require(newVotingDelay >= MIN_VOTING_DELAY && newVotingDelay <= MAX_VOTING_DELAY, "VerbsDAO::_setVotingDelay: invalid voting delay");
         uint256 oldVotingDelay = votingDelay;
         votingDelay = newVotingDelay;
 
@@ -637,10 +593,7 @@ contract VerbsDAOLogicV1 is VerbsDAOStorageV1, VerbsDAOEvents {
         if (msg.sender != admin) {
             revert AdminOnly();
         }
-        require(
-            newVotingPeriod >= MIN_VOTING_PERIOD && newVotingPeriod <= MAX_VOTING_PERIOD,
-            "VerbsDAO::_setVotingPeriod: invalid voting period"
-        );
+        require(newVotingPeriod >= MIN_VOTING_PERIOD && newVotingPeriod <= MAX_VOTING_PERIOD, "VerbsDAO::_setVotingPeriod: invalid voting period");
         uint256 oldVotingPeriod = votingPeriod;
         votingPeriod = newVotingPeriod;
 
@@ -910,11 +863,7 @@ contract VerbsDAOLogicV1 is VerbsDAOStorageV1, VerbsDAOEvents {
      * @param params Configurable parameters for calculating the quorum based on againstVotes. See `DynamicQuorumParams` definition for additional details.
      * @return quorumVotes The required quorum
      */
-    function dynamicQuorumVotes(
-        uint256 againstVotes,
-        uint256 totalSupply,
-        DynamicQuorumParams memory params
-    ) public pure returns (uint256) {
+    function dynamicQuorumVotes(uint256 againstVotes, uint256 totalSupply, DynamicQuorumParams memory params) public pure returns (uint256) {
         uint256 againstVotesBPS = (10000 * againstVotes) / totalSupply;
         uint256 quorumAdjustmentBPS = (params.quorumCoefficient * againstVotesBPS) / 1e6;
         uint256 adjustedQuorumBPS = params.minQuorumVotesBPS + quorumAdjustmentBPS;
@@ -934,12 +883,7 @@ contract VerbsDAOLogicV1 is VerbsDAOStorageV1, VerbsDAOEvents {
         uint256 len = quorumParamsCheckpoints.length;
 
         if (len == 0) {
-            return
-                DynamicQuorumParams({
-                    minQuorumVotesBPS: safe16(quorumVotesBPS),
-                    maxQuorumVotesBPS: safe16(quorumVotesBPS),
-                    quorumCoefficient: 0
-                });
+            return DynamicQuorumParams({ minQuorumVotesBPS: safe16(quorumVotesBPS), maxQuorumVotesBPS: safe16(quorumVotesBPS), quorumCoefficient: 0 });
         }
 
         if (quorumParamsCheckpoints[len - 1].fromBlock <= blockNumber) {
@@ -947,12 +891,7 @@ contract VerbsDAOLogicV1 is VerbsDAOStorageV1, VerbsDAOEvents {
         }
 
         if (quorumParamsCheckpoints[0].fromBlock > blockNumber) {
-            return
-                DynamicQuorumParams({
-                    minQuorumVotesBPS: safe16(quorumVotesBPS),
-                    maxQuorumVotesBPS: safe16(quorumVotesBPS),
-                    quorumCoefficient: 0
-                });
+            return DynamicQuorumParams({ minQuorumVotesBPS: safe16(quorumVotesBPS), maxQuorumVotesBPS: safe16(quorumVotesBPS), quorumCoefficient: 0 });
         }
 
         uint256 lower = 0;

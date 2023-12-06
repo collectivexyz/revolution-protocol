@@ -50,10 +50,7 @@ contract TokenMintingTest is VerbsTokenTestSuite {
     }
 
     // Helper function to compare ArtPieceMetadata structs
-    function areArtPieceMetadataEqual(
-        ICultureIndex.ArtPieceMetadata memory metadata1,
-        ICultureIndex.ArtPieceMetadata memory metadata2
-    ) internal pure returns (bool) {
+    function areArtPieceMetadataEqual(ICultureIndex.ArtPieceMetadata memory metadata1, ICultureIndex.ArtPieceMetadata memory metadata2) internal pure returns (bool) {
         return (keccak256(bytes(metadata1.name)) == keccak256(bytes(metadata2.name)) &&
             keccak256(bytes(metadata1.description)) == keccak256(bytes(metadata2.description)) &&
             metadata1.mediaType == metadata2.mediaType &&

@@ -134,14 +134,7 @@ contract TokenBasicTest is VerbsTokenTestSuite {
         // Act & Assert
         vm.expectRevert("Creator array must not be > 100");
         cultureIndex.createPiece(
-            ICultureIndex.ArtPieceMetadata({
-                name: name,
-                description: description,
-                mediaType: mediaType,
-                image: image,
-                text: text,
-                animationUrl: animationUrl
-            }),
+            ICultureIndex.ArtPieceMetadata({ name: name, description: description, mediaType: mediaType, image: image, text: text, animationUrl: animationUrl }),
             creators
         );
     }
@@ -369,11 +362,7 @@ contract TokenBasicTest is VerbsTokenTestSuite {
 
         // Assert that the token metadata matches the expected metadata from the art piece
         assertEq(name, expectedName, "Token name does not match expected name");
-        assertEq(
-            description,
-            string(abi.encodePacked(metadata.name, ". ", metadata.description)),
-            "Token description does not match expected description"
-        );
+        assertEq(description, string(abi.encodePacked(metadata.name, ". ", metadata.description)), "Token description does not match expected description");
         assertEq(image, metadata.image, "Token image does not match expected image URL");
     }
 
