@@ -384,21 +384,21 @@ contract CultureIndex is ICultureIndex, Ownable, ReentrancyGuard {
      * @return The top voted piece
      */
     function dropTopVotedPiece() public nonReentrant onlyOwner returns (ArtPiece memory) {
-        uint256 pieceId = topVotedPieceId();
-        require(totalVoteWeights[pieceId] >= pieces[pieceId].quorumVotes, "Does not meet quorum votes to be dropped.");
-        pieces[pieceId].isDropped = true;
+        ICultureIndex.ArtPiece memory piece = getTopVotedPiece();
+        require(totalVoteWeights[piece.pieceId] >= piece.quorumVotes, "Does not meet quorum votes to be dropped.");
+        piece.isDropped = true;
 
         //slither-disable-next-line unused-return
         maxHeap.extractMax();
 
-        emit PieceDropped(pieceId, msg.sender);
+        emit PieceDropped(piece.pieceId, msg.sender);
 
-        uint256 numCreators = pieces[pieceId].creators.length;
+        uint256 numCreators = piece.creators.length;
         //for each creator, emit an event
         for (uint i; i < numCreators; i++) {
-            emit PieceDroppedCreator(pieceId, pieces[pieceId].creators[i].creator, pieces[pieceId].dropper, pieces[pieceId].creators[i].bps);
+            emit PieceDroppedCreator(piece.pieceId, piece.creators[i].creator, piece.dropper, piece.creators[i].bps);
         }
 
-        return pieces[pieceId];
+        return piece;
     }
 }
