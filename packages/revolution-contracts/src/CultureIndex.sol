@@ -360,10 +360,9 @@ contract CultureIndex is ICultureIndex, Ownable, ReentrancyGuard {
      */
     function _setQuorumVotesBPS(uint256 newQuorumVotesBPS) external onlyOwner {
         require(newQuorumVotesBPS >= MIN_QUORUM_VOTES_BPS && newQuorumVotesBPS <= MAX_QUORUM_VOTES_BPS, "CultureIndex::_setQuorumVotesBPS: invalid quorum bps");
-        uint256 oldQuorumVotesBPS = quorumVotesBPS;
-        quorumVotesBPS = newQuorumVotesBPS;
+        emit QuorumVotesBPSSet(quorumVotesBPS, newQuorumVotesBPS);
 
-        emit QuorumVotesBPSSet(oldQuorumVotesBPS, quorumVotesBPS);
+        quorumVotesBPS = newQuorumVotesBPS;
     }
 
     /**
