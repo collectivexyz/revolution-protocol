@@ -249,7 +249,11 @@ library JsmnSolLib {
             }
 
             if (c == ",") {
-                if (parser.toksuper != -1 && tokens[uint(parser.toksuper)].jsmnType != JsmnType.ARRAY && tokens[uint(parser.toksuper)].jsmnType != JsmnType.OBJECT) {
+                if (
+                    parser.toksuper != -1 &&
+                    tokens[uint(parser.toksuper)].jsmnType != JsmnType.ARRAY &&
+                    tokens[uint(parser.toksuper)].jsmnType != JsmnType.OBJECT
+                ) {
                     for (i = parser.toknext - 1; i >= 0; i--) {
                         if (tokens[i].jsmnType == JsmnType.ARRAY || tokens[i].jsmnType == JsmnType.OBJECT) {
                             if (tokens[i].startSet && !tokens[i].endSet) {

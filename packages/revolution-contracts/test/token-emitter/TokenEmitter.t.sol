@@ -406,7 +406,11 @@ contract TokenEmitterTest is Test {
         uint256 largestPayment = expectedVolume * 1_000; // An unusually large payment amount
         int256 largestPaymentTokenAmount = emitter.getTokenQuoteForEther(largestPayment);
         //spending 1000x the daily amount should get you less than 50x the tokens
-        assertLt(uint256(largestPaymentTokenAmount), 50 * tokensPerTimeUnit * 1e18, "Token amount for largest payment should be less than some realistic upper bound");
+        assertLt(
+            uint256(largestPaymentTokenAmount),
+            50 * tokensPerTimeUnit * 1e18,
+            "Token amount for largest payment should be less than some realistic upper bound"
+        );
 
         emit log_string("Largest Payment Token Amount: ");
         emit log_int(largestPaymentTokenAmount);

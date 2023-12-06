@@ -168,7 +168,18 @@ contract TokenSecurityTest is VerbsTokenTestSuite {
     function testEventEmission() public {
         // Check that the PieceCreated event was emitted with correct parameters
         vm.expectEmit(true, true, true, true);
-        emit ICultureIndexEvents.PieceCreated(0, address(this), "Mona Lisa", "A masterpiece", "ipfs://legends", "", "", uint8(ICultureIndex.MediaType.IMAGE), 0, 0);
+        emit ICultureIndexEvents.PieceCreated(
+            0,
+            address(this),
+            "Mona Lisa",
+            "A masterpiece",
+            "ipfs://legends",
+            "",
+            "",
+            uint8(ICultureIndex.MediaType.IMAGE),
+            0,
+            0
+        );
 
         // Check that the PieceCreatorAdded event was emitted with correct parameters
         vm.expectEmit(true, true, true, true);

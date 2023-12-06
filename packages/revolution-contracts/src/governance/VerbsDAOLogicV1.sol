@@ -214,8 +214,14 @@ contract VerbsDAOLogicV1 is VerbsDAOStorageV1, VerbsDAOEvents {
         temp.latestProposalId = latestProposalIds[msg.sender];
         if (temp.latestProposalId != 0) {
             ProposalState proposersLatestProposalState = state(temp.latestProposalId);
-            require(proposersLatestProposalState != ProposalState.Active, "VerbsDAO::propose: one live proposal per proposer, found an already active proposal");
-            require(proposersLatestProposalState != ProposalState.Pending, "VerbsDAO::propose: one live proposal per proposer, found an already pending proposal");
+            require(
+                proposersLatestProposalState != ProposalState.Active,
+                "VerbsDAO::propose: one live proposal per proposer, found an already active proposal"
+            );
+            require(
+                proposersLatestProposalState != ProposalState.Pending,
+                "VerbsDAO::propose: one live proposal per proposer, found an already pending proposal"
+            );
         }
 
         temp.startBlock = block.number + votingDelay;

@@ -312,7 +312,13 @@ interface IVerbsDAOExecutor {
 
     function cancelTransaction(address target, uint256 value, string calldata signature, bytes calldata data, uint256 eta) external;
 
-    function executeTransaction(address target, uint256 value, string calldata signature, bytes calldata data, uint256 eta) external payable returns (bytes memory);
+    function executeTransaction(
+        address target,
+        uint256 value,
+        string calldata signature,
+        bytes calldata data,
+        uint256 eta
+    ) external payable returns (bytes memory);
 }
 
 interface VerbsTokenLike {

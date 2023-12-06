@@ -976,7 +976,13 @@ contract NontransferableERC20Votes is Ownable, ERC20Votes {
 }
 
 interface ITokenEmitter {
-    function buyToken(address[] memory _addresses, uint[] memory _bps, address builder, address purchaseReferral, address deployer) external payable returns (uint);
+    function buyToken(
+        address[] memory _addresses,
+        uint[] memory _bps,
+        address builder,
+        address purchaseReferral,
+        address deployer
+    ) external payable returns (uint);
 
     function totalSupply() external view returns (uint);
 

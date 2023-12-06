@@ -135,7 +135,10 @@ contract VerbsAuctionHouse is IVerbsAuctionHouse, PausableUpgradeable, Reentranc
         //slither-disable-next-line timestamp
         require(block.timestamp < _auction.endTime, "Auction expired");
         require(msg.value >= reservePrice, "Must send at least reservePrice");
-        require(msg.value >= _auction.amount + ((_auction.amount * minBidIncrementPercentage) / 100), "Must send more than last bid by minBidIncrementPercentage amount");
+        require(
+            msg.value >= _auction.amount + ((_auction.amount * minBidIncrementPercentage) / 100),
+            "Must send more than last bid by minBidIncrementPercentage amount"
+        );
 
         address payable lastBidder = _auction.bidder;
 
