@@ -91,7 +91,9 @@ contract TokenEmitter is VRGDAC, ITokenEmitter, ReentrancyGuard, TokenEmitterRew
         //Ether directly sent to creators
         uint256 creatorDirectPayment = ((msgValueRemaining - toPayTreasury) * entropyRateBps) / 10_000;
         //Tokens to emit to creators
-        int totalTokensForCreators = ((msgValueRemaining - toPayTreasury) - creatorDirectPayment) > 0 ? getTokenQuoteForEther((msgValueRemaining - toPayTreasury) - creatorDirectPayment) : int(0);
+        int totalTokensForCreators = ((msgValueRemaining - toPayTreasury) - creatorDirectPayment) > 0
+            ? getTokenQuoteForEther((msgValueRemaining - toPayTreasury) - creatorDirectPayment)
+            : int(0);
 
         // Tokens to emit to buyers
         int totalTokensForBuyers = toPayTreasury > 0 ? getTokenQuoteForEther(toPayTreasury) : int(0);
