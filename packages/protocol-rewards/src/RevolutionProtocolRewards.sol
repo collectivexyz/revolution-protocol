@@ -56,9 +56,7 @@ contract RevolutionProtocolRewards is IRevolutionProtocolRewards, EIP712 {
         for (uint256 i; i < numRecipients; ) {
             expectedTotalValue += amounts[i];
 
-            unchecked {
-                ++i;
-            }
+            ++i;
         }
 
         if (msg.value != expectedTotalValue) revert INVALID_DEPOSIT();
@@ -76,9 +74,7 @@ contract RevolutionProtocolRewards is IRevolutionProtocolRewards, EIP712 {
 
             emit Deposit(msg.sender, currentRecipient, reasons[i], currentAmount, comment);
 
-            unchecked {
-                ++i;
-            }
+            ++i;
         }
     }
 
@@ -179,9 +175,7 @@ contract RevolutionProtocolRewards is IRevolutionProtocolRewards, EIP712 {
 
         bytes32 withdrawHash;
 
-        unchecked {
-            withdrawHash = keccak256(abi.encode(WITHDRAW_TYPEHASH, from, to, amount, nonces[from]++, deadline));
-        }
+        withdrawHash = keccak256(abi.encode(WITHDRAW_TYPEHASH, from, to, amount, nonces[from]++, deadline));
 
         bytes32 digest = _hashTypedDataV4(withdrawHash);
 
@@ -205,8 +199,6 @@ contract RevolutionProtocolRewards is IRevolutionProtocolRewards, EIP712 {
 
         (bool success, ) = to.call{ value: amount }("");
 
-        if (!success) {
-            revert TRANSFER_FAILED();
-        }
+        if (!success) revert TRANSFER_FAILED();
     }
 }

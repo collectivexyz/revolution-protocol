@@ -68,10 +68,10 @@ contract CultureIndex is ICultureIndex, Ownable, ReentrancyGuard {
         uint256 erc721VotingTokenWeight_,
         uint256 quorumVotesBPS_
     ) Ownable(initialOwner_) {
-        require(quorumVotesBPS_ >= MIN_QUORUM_VOTES_BPS && quorumVotesBPS_ <= MAX_QUORUM_VOTES_BPS, "CultureIndex::constructor: invalid quorum bps");
-        require(erc721VotingTokenWeight_ > 0, "CultureIndex::constructor: invalid erc721 voting token weight");
-        require(erc721VotingToken_ != address(0), "CultureIndex::constructor: invalid erc721 voting token");
-        require(erc20VotingToken_ != address(0), "CultureIndex::constructor: invalid erc20 voting token");
+        require(quorumVotesBPS_ >= MIN_QUORUM_VOTES_BPS && quorumVotesBPS_ <= MAX_QUORUM_VOTES_BPS, "invalid quorum bps");
+        require(erc721VotingTokenWeight_ > 0, "invalid erc721 voting token weight");
+        require(erc721VotingToken_ != address(0), "invalid erc721 voting token");
+        require(erc20VotingToken_ != address(0), "invalid erc20 voting token");
 
         erc20VotingToken = ERC20Votes(erc20VotingToken_);
         erc721VotingToken = ERC721Checkpointable(erc721VotingToken_);
@@ -124,13 +124,9 @@ contract CultureIndex is ICultureIndex, Ownable, ReentrancyGuard {
     function validateMediaType(ArtPieceMetadata memory metadata) internal pure {
         require(uint8(metadata.mediaType) > 0 && uint8(metadata.mediaType) <= 5, "Invalid media type");
 
-        if (metadata.mediaType == MediaType.IMAGE) {
-            require(bytes(metadata.image).length > 0, "Image URL must be provided");
-        } else if (metadata.mediaType == MediaType.ANIMATION) {
-            require(bytes(metadata.animationUrl).length > 0, "Animation URL must be provided");
-        } else if (metadata.mediaType == MediaType.TEXT) {
-            require(bytes(metadata.text).length > 0, "Text must be provided");
-        }
+        if (metadata.mediaType == MediaType.IMAGE) require(bytes(metadata.image).length > 0, "Image URL must be provided");
+        else if (metadata.mediaType == MediaType.ANIMATION) require(bytes(metadata.animationUrl).length > 0, "Animation URL must be provided");
+        else if (metadata.mediaType == MediaType.TEXT) require(bytes(metadata.text).length > 0, "Text must be provided");
     }
 
     /**
@@ -142,16 +138,17 @@ contract CultureIndex is ICultureIndex, Ownable, ReentrancyGuard {
      * - The `creatorArray` must not contain any zero addresses.
      * - The function will return the total basis points which must be checked to be exactly 10,000.
      */
-    function getTotalBpsFromCreators(CreatorBps[] memory creatorArray) internal pure returns (uint256) {
+    function getTotalBpsFromCreators(CreatorBps[] memory creatorArray) internal pure returns (uint256, uint256) {
+        uint256 creatorArrayLength = creatorArray.length;
         //Require that creatorArray is not more than 100 to prevent gas limit issues
-        require(creatorArray.length <= 100, "Creator array must not be > 100");
+        require(creatorArrayLength <= 100, "Creator array must not be > 100");
 
-        uint256 totalBps = 0;
-        for (uint i = 0; i < creatorArray.length; i++) {
+        uint256 totalBps;
+        for (uint i; i < creatorArrayLength; i++) {
             require(creatorArray[i].creator != address(0), "Invalid creator address");
             totalBps += creatorArray[i].bps;
         }
-        return totalBps;
+        return (totalBps, creatorArrayLength);
     }
 
     /**
@@ -169,7 +166,7 @@ contract CultureIndex is ICultureIndex, Ownable, ReentrancyGuard {
      * - The sum of basis points in `creatorArray` must be exactly 10,000.
      */
     function createPiece(ArtPieceMetadata memory metadata, CreatorBps[] memory creatorArray) public returns (uint256) {
-        uint256 totalBps = getTotalBpsFromCreators(creatorArray);
+        (uint256 totalBps, uint256 creatorArrayLength) = getTotalBpsFromCreators(creatorArray);
         require(totalBps == 10_000, "Total BPS must sum up to 10,000");
 
         // Validate the media type and associated data
@@ -190,7 +187,7 @@ contract CultureIndex is ICultureIndex, Ownable, ReentrancyGuard {
         newPiece.creationBlock = block.number;
         newPiece.quorumVotes = (quorumVotesBPS * newPiece.totalVotesSupply) / 10_000;
 
-        for (uint i = 0; i < creatorArray.length; i++) {
+        for (uint i; i < creatorArrayLength; i++) {
             newPiece.creators.push(creatorArray[i]);
         }
 
@@ -208,7 +205,7 @@ contract CultureIndex is ICultureIndex, Ownable, ReentrancyGuard {
         );
 
         // Emit an event for each creator
-        for (uint i = 0; i < creatorArray.length; i++) {
+        for (uint i; i < creatorArrayLength; i++) {
             emit PieceCreatorAdded(pieceId, creatorArray[i].creator, msg.sender, creatorArray[i].bps);
         }
         return newPiece.pieceId;
@@ -302,7 +299,8 @@ contract CultureIndex is ICultureIndex, Ownable, ReentrancyGuard {
      * Emits a series of VoteCast event upon successful execution.
      */
     function batchVote(uint256[] memory pieceIds) public nonReentrant {
-        for (uint256 i = 0; i < pieceIds.length; ++i) {
+        uint256 len = pieceIds.length;
+        for (uint256 i; i < len; ++i) {
             require(pieceIds[i] < _currentPieceId, "Invalid piece ID");
             _vote(pieceIds[i], msg.sender, _getPriorVotes(msg.sender, pieces[pieceIds[i]].creationBlock));
         }
@@ -333,9 +331,7 @@ contract CultureIndex is ICultureIndex, Ownable, ReentrancyGuard {
      * @return The ArtPiece struct of the top-voted art piece.
      */
     function getTopVotedPiece() public view returns (ArtPiece memory) {
-        //slither-disable-next-line unused-return
-        (uint256 pieceId, ) = maxHeap.getMax();
-        return pieces[pieceId];
+        return pieces[topVotedPieceId()];
     }
 
     /**
@@ -351,6 +347,7 @@ contract CultureIndex is ICultureIndex, Ownable, ReentrancyGuard {
      * @return The top-voted pieceId
      */
     function topVotedPieceId() public view returns (uint256) {
+        require(maxHeap.size() > 0, "Culture index is empty");
         //slither-disable-next-line unused-return
         (uint256 pieceId, ) = maxHeap.getMax();
         return pieceId;
@@ -362,14 +359,10 @@ contract CultureIndex is ICultureIndex, Ownable, ReentrancyGuard {
      * @param newQuorumVotesBPS new art piece drop threshold
      */
     function _setQuorumVotesBPS(uint256 newQuorumVotesBPS) external onlyOwner {
-        require(
-            newQuorumVotesBPS >= MIN_QUORUM_VOTES_BPS && newQuorumVotesBPS <= MAX_QUORUM_VOTES_BPS,
-            "CultureIndex::_setQuorumVotesBPS: invalid quorum bps"
-        );
-        uint256 oldQuorumVotesBPS = quorumVotesBPS;
-        quorumVotesBPS = newQuorumVotesBPS;
+        require(newQuorumVotesBPS >= MIN_QUORUM_VOTES_BPS && newQuorumVotesBPS <= MAX_QUORUM_VOTES_BPS, "CultureIndex::_setQuorumVotesBPS: invalid quorum bps");
+        emit QuorumVotesBPSSet(quorumVotesBPS, newQuorumVotesBPS);
 
-        emit QuorumVotesBPSSet(oldQuorumVotesBPS, quorumVotesBPS);
+        quorumVotesBPS = newQuorumVotesBPS;
     }
 
     /**
@@ -385,31 +378,23 @@ contract CultureIndex is ICultureIndex, Ownable, ReentrancyGuard {
      * @return The top voted piece
      */
     function dropTopVotedPiece() public nonReentrant onlyOwner returns (ArtPiece memory) {
-        uint256 pieceId = topVotedPieceId();
-        require(totalVoteWeights[pieceId] >= pieces[pieceId].quorumVotes, "Piece must have quorum votes in order to be dropped.");
-        pieces[pieceId].isDropped = true;
+        ICultureIndex.ArtPiece memory piece = getTopVotedPiece();
+        require(totalVoteWeights[piece.pieceId] >= piece.quorumVotes, "Does not meet quorum votes to be dropped.");
+        
+        //set the piece as dropped
+        pieces[piece.pieceId].isDropped = true;
 
         //slither-disable-next-line unused-return
-        try maxHeap.extractMax() {
-            emit PieceDropped(pieceId, msg.sender);
+        maxHeap.extractMax();
 
-            //for each creator, emit an event
-            for (uint i = 0; i < pieces[pieceId].creators.length; i++) {
-                emit PieceDroppedCreator(pieceId, pieces[pieceId].creators[i].creator, pieces[pieceId].dropper, pieces[pieceId].creators[i].bps);
-            }
+        emit PieceDropped(piece.pieceId, msg.sender);
 
-            return pieces[pieceId];
-        } catch Error(
-            string memory reason // Catch known revert reason
-        ) {
-            if (keccak256(abi.encodePacked(reason)) == keccak256(abi.encodePacked("Heap is empty"))) {
-                revert("No pieces available to drop");
-            }
-            revert(reason); // Revert with the original error if not matched
-        } catch (
-            bytes memory /*lowLevelData*/ // Catch any other low-level failures
-        ) {
-            revert("Unknown error extracting top piece");
+        uint256 numCreators = piece.creators.length;
+        //for each creator, emit an event
+        for (uint i; i < numCreators; i++) {
+            emit PieceDroppedCreator(piece.pieceId, piece.creators[i].creator, piece.dropper, piece.creators[i].bps);
         }
+
+        return pieces[piece.pieceId];
     }
 }

@@ -302,7 +302,7 @@ contract TokenBasicTest is VerbsTokenTestSuite {
         // Ensure no art pieces have been created or all created pieces are already dropped
 
         // Act & Assert
-        vm.expectRevert("Heap is empty");
+        vm.expectRevert("Culture index is empty");
         verbsToken.mint();
     }
 

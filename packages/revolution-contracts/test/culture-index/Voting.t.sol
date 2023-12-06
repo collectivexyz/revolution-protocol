@@ -346,6 +346,7 @@ contract CultureIndexVotingBasicTest is CultureIndexTestSuite {
         emit log_string("Gas used for individual votes");
         emit log_uint(gasUsedIndividual); // Log gas used for individual votes
 
+        setUp();
         // Resetting state for a fair comparison
         // Reset contract state (this would need to be implemented to revert to initial state)
         uint256[] memory batchPieceIds = new uint256[](100);
@@ -366,6 +367,9 @@ contract CultureIndexVotingBasicTest is CultureIndexTestSuite {
         // Log the difference in gas usage
         emit log_string("Gas saved");
         emit log_int(int(gasUsedIndividual) - int(gasUsedBatch)); // This will log the saved gas
+
+        //assert that batch voting is cheaper
+        assertTrue(gasUsedBatch < gasUsedIndividual, "Batch voting should be cheaper");
     }
 
     /**
@@ -542,7 +546,7 @@ contract CultureIndexVotingBasicTest is CultureIndexTestSuite {
         cultureIndex.transferOwnership(address(verbs));
 
         // Create art pieces and drop them
-        for (uint256 i = 0; i < erc721Balance; i++) {
+        for (uint256 i; i < erc721Balance; i++) {
             createDefaultArtPiece();
             vm.roll(block.number + (i + 1) * 2);
             cultureIndex.vote(i);
