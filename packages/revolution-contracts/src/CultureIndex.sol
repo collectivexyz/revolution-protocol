@@ -124,13 +124,9 @@ contract CultureIndex is ICultureIndex, Ownable, ReentrancyGuard {
     function validateMediaType(ArtPieceMetadata memory metadata) internal pure {
         require(uint8(metadata.mediaType) > 0 && uint8(metadata.mediaType) <= 5, "Invalid media type");
 
-        if (metadata.mediaType == MediaType.IMAGE) {
-            require(bytes(metadata.image).length > 0, "Image URL must be provided");
-        } else if (metadata.mediaType == MediaType.ANIMATION) {
-            require(bytes(metadata.animationUrl).length > 0, "Animation URL must be provided");
-        } else if (metadata.mediaType == MediaType.TEXT) {
-            require(bytes(metadata.text).length > 0, "Text must be provided");
-        }
+        if (metadata.mediaType == MediaType.IMAGE) require(bytes(metadata.image).length > 0, "Image URL must be provided");
+        else if (metadata.mediaType == MediaType.ANIMATION) require(bytes(metadata.animationUrl).length > 0, "Animation URL must be provided");
+        else if (metadata.mediaType == MediaType.TEXT) require(bytes(metadata.text).length > 0, "Text must be provided");
     }
 
     /**
