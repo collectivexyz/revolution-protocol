@@ -78,7 +78,7 @@ contract TokenMintingTest is VerbsTokenTestSuite {
         try verbsToken.mint() {
             fail("Should revert on removing max from empty heap");
         } catch Error(string memory reason) {
-            assertEq(reason, "Heap is empty");
+            assertEq(reason, "Culture index is empty");
         }
     }
 
