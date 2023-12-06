@@ -132,7 +132,11 @@ contract VerbsDescriptorTest is Test {
         string memory uri = descriptor.dataURI(tokenId, metadata);
         assertTrue(bytes(uri).length > 0, "dataURI should not be empty");
         // Check if the string contains the base64 identifier which indicates a base64 encoded data URI
-        assertEq(substring(bytes(uri), 0, 29), "data:application/json;base64,", "dataURI should start with 'data:application/json;base64,'");
+        assertEq(
+            substring(bytes(uri), 0, 29),
+            "data:application/json;base64,",
+            "dataURI should start with 'data:application/json;base64,'"
+        );
     }
 
     /// @notice Test `genericDataURI` returns valid base64 encoded data URI
@@ -148,7 +152,11 @@ contract VerbsDescriptorTest is Test {
 
         string memory uri = descriptor.genericDataURI(metadata.name, metadata);
         assertTrue(bytes(uri).length > 0, "genericDataURI should not be empty");
-        assertEq(substring(bytes(uri), 0, 29), "data:application/json;base64,", "dataURI should start with 'data:application/json;base64,'");
+        assertEq(
+            substring(bytes(uri), 0, 29),
+            "data:application/json;base64,",
+            "dataURI should start with 'data:application/json;base64,'"
+        );
     }
 
     /// @notice Test `toggleDataURIEnabled` emits `DataURIToggled` event
@@ -184,7 +192,11 @@ contract VerbsDescriptorTest is Test {
 
         string memory uri = descriptor.tokenURI(tokenId, metadata);
         assertTrue(bytes(uri).length > 0, "URI should not be empty");
-        assertEq(substring(bytes(uri), 0, 29), "data:application/json;base64,", "dataURI should start with 'data:application/json;base64,'");
+        assertEq(
+            substring(bytes(uri), 0, 29),
+            "data:application/json;base64,",
+            "dataURI should start with 'data:application/json;base64,'"
+        );
     }
 
     /// @notice Test owner can transfer ownership using `transferOwnership`
@@ -309,7 +321,9 @@ contract VerbsDescriptorTest is Test {
     }
 
     // Helper function to parse JSON strings into components
-    function parseJson(string memory _json) internal returns (string memory name, string memory description, string memory image, string memory animationUrl) {
+    function parseJson(
+        string memory _json
+    ) internal returns (string memory name, string memory description, string memory image, string memory animationUrl) {
         uint returnValue;
         JsmnSolLib.Token[] memory tokens;
         uint actualNum;

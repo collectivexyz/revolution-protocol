@@ -207,7 +207,11 @@ abstract contract Votes is Context, EIP712, Nonces, IERC5805 {
         return _delegateCheckpoints[account].at(pos);
     }
 
-    function _push(Checkpoints.Trace208 storage store, function(uint208, uint208) view returns (uint208) op, uint208 delta) private returns (uint208, uint208) {
+    function _push(
+        Checkpoints.Trace208 storage store,
+        function(uint208, uint208) view returns (uint208) op,
+        uint208 delta
+    ) private returns (uint208, uint208) {
         return store.push(clock(), op(store.latest(), delta));
     }
 

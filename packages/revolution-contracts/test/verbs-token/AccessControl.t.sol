@@ -223,7 +223,15 @@ contract TokenAccessControlTest is VerbsTokenTestSuite {
     /// @dev Tests that the CultureIndex can be set and locked appropriately
     function testCultureIndexLocking() public {
         // Test setting the CultureIndex
-        CultureIndex newCultureIndex = new CultureIndex("Vrbs", "Our community Vrbs. Must be 32x32.", address(govToken), address(verbsToken), address(this), 10, 200);
+        CultureIndex newCultureIndex = new CultureIndex(
+            "Vrbs",
+            "Our community Vrbs. Must be 32x32.",
+            address(govToken),
+            address(verbsToken),
+            address(this),
+            10,
+            200
+        );
         verbsToken.setCultureIndex(ICultureIndex(address(newCultureIndex)));
 
         newCultureIndex.setERC721VotingToken(verbsToken);

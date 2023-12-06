@@ -64,9 +64,27 @@ contract TokenEmitterTest is Test {
         NontransferableERC20Votes governanceToken = new NontransferableERC20Votes(address(this), "Revolution Governance", "GOV");
         RevolutionProtocolRewards protocolRewards = new RevolutionProtocolRewards();
 
-        TokenEmitter emitter1 = new TokenEmitter(address(this), governanceToken, address(protocolRewards), address(this), treasury, 1e14, 1e17, 1e22);
+        TokenEmitter emitter1 = new TokenEmitter(
+            address(this),
+            governanceToken,
+            address(protocolRewards),
+            address(this),
+            treasury,
+            1e14,
+            1e17,
+            1e22
+        );
 
-        TokenEmitter emitter2 = new TokenEmitter(address(this), governanceToken, address(protocolRewards), address(this), treasury, 1e14, 1e17, 1e22);
+        TokenEmitter emitter2 = new TokenEmitter(
+            address(this),
+            governanceToken,
+            address(protocolRewards),
+            address(this),
+            treasury,
+            1e14,
+            1e17,
+            1e22
+        );
 
         governanceToken.transferOwnership(address(emitter1));
 
@@ -210,11 +228,23 @@ contract TokenEmitterTest is Test {
         emitter.buyToken{ value: 1e18 }(recipients, bps, address(0), address(0), address(0));
         //assert address balances are correct
         //multiply bps by expectedAmount and assert
-        assertEq(emitter.balanceOf(address(1)), (firstBps * uint256(expectedAmount)) / 10_000, "First recipient should have correct balance");
-        assertEq(emitter.balanceOf(address(2)), ((10_000 - firstBps) * uint256(expectedAmount)) / 10_000, "Second recipient should have correct balance");
+        assertEq(
+            emitter.balanceOf(address(1)),
+            (firstBps * uint256(expectedAmount)) / 10_000,
+            "First recipient should have correct balance"
+        );
+        assertEq(
+            emitter.balanceOf(address(2)),
+            ((10_000 - firstBps) * uint256(expectedAmount)) / 10_000,
+            "Second recipient should have correct balance"
+        );
 
         //assert treasury balance is correct
-        assertEq(address(emitter.treasury()).balance, 1e18 - emitter.computeTotalReward(1e18), "Treasury should have payment - totalReward in balance");
+        assertEq(
+            address(emitter.treasury()).balance,
+            1e18 - emitter.computeTotalReward(1e18),
+            "Treasury should have payment - totalReward in balance"
+        );
     }
 
     // Test to ensure the total basis points add up to 100%
@@ -243,7 +273,11 @@ contract TokenEmitterTest is Test {
         assertEq(int(emittedWad), totalSupplyAfterValidPurchase, "Emitted amount should match total supply");
 
         //expect treasury to have payment - totalReward in balance
-        assertEq(address(emitter.treasury()).balance, 1e18 - emitter.computeTotalReward(1e18), "Treasury should have payment - totalReward in balance");
+        assertEq(
+            address(emitter.treasury()).balance,
+            1e18 - emitter.computeTotalReward(1e18),
+            "Treasury should have payment - totalReward in balance"
+        );
 
         // Test case with incorrect total of basis points
         uint256[] memory incorrectBps = new uint256[](2);
@@ -390,7 +424,11 @@ contract TokenEmitterTest is Test {
 
         // A days worth of payment amount
         int256 dailyPaymentTokenAmount = emitter.getTokenQuoteForEther(expectedVolume);
-        assertLt(uint256(dailyPaymentTokenAmount), tokensPerTimeUnit * 1e18, "Token amount for daily payment should be less than tokens per day");
+        assertLt(
+            uint256(dailyPaymentTokenAmount),
+            tokensPerTimeUnit * 1e18,
+            "Token amount for daily payment should be less than tokens per day"
+        );
         emit log_string("Daily Payment Token Amount: ");
         emit log_int(dailyPaymentTokenAmount);
 
@@ -399,14 +437,22 @@ contract TokenEmitterTest is Test {
         int256 largePaymentTokenAmount = emitter.getTokenQuoteForEther(expectedVolume * 100);
         //spending 100x the expected amount per day should get you < 25x the tokens
         uint256 SOME_REALISTIC_UPPER_BOUND = 25 * tokensPerTimeUnit * 1e18;
-        assertLt(uint256(largePaymentTokenAmount), SOME_REALISTIC_UPPER_BOUND, "Token amount for large payment should be less than some realistic upper bound");
+        assertLt(
+            uint256(largePaymentTokenAmount),
+            SOME_REALISTIC_UPPER_BOUND,
+            "Token amount for large payment should be less than some realistic upper bound"
+        );
         emit log_string("Large Payment Token Amount: ");
         emit log_int(largePaymentTokenAmount);
 
         uint256 largestPayment = expectedVolume * 1_000; // An unusually large payment amount
         int256 largestPaymentTokenAmount = emitter.getTokenQuoteForEther(largestPayment);
         //spending 1000x the daily amount should get you less than 50x the tokens
-        assertLt(uint256(largestPaymentTokenAmount), 50 * tokensPerTimeUnit * 1e18, "Token amount for largest payment should be less than some realistic upper bound");
+        assertLt(
+            uint256(largestPaymentTokenAmount),
+            50 * tokensPerTimeUnit * 1e18,
+            "Token amount for largest payment should be less than some realistic upper bound"
+        );
 
         emit log_string("Largest Payment Token Amount: ");
         emit log_int(largestPaymentTokenAmount);

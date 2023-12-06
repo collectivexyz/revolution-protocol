@@ -175,7 +175,14 @@ contract VerbsAuctionHouseBasicTest is VerbsAuctionHouseTest {
         auctionHouse.unpause();
         uint256 startTime = block.timestamp;
 
-        (uint256 verbId, uint256 amount, uint256 auctionStartTime, uint256 auctionEndTime, address payable bidder, bool settled) = auctionHouse.auction();
+        (
+            uint256 verbId,
+            uint256 amount,
+            uint256 auctionStartTime,
+            uint256 auctionEndTime,
+            address payable bidder,
+            bool settled
+        ) = auctionHouse.auction();
         assertEq(auctionStartTime, startTime, "Auction start time should be set correctly");
         assertEq(auctionEndTime, startTime + auctionHouse.duration(), "Auction end time should be set correctly");
         assertEq(verbId, 0, "Auction should be for the zeroth verb");
@@ -215,7 +222,8 @@ contract VerbsAuctionHouseBasicTest is VerbsAuctionHouseTest {
         //Ether reserved to buy creator governance
         uint256 creatorGovernancePayment = creatorPayment - creatorDirectPayment;
 
-        bool shouldExpectRevert = creatorGovernancePayment <= tokenEmitter.minPurchaseAmount() || creatorGovernancePayment >= tokenEmitter.maxPurchaseAmount();
+        bool shouldExpectRevert = creatorGovernancePayment <= tokenEmitter.minPurchaseAmount() ||
+            creatorGovernancePayment >= tokenEmitter.maxPurchaseAmount();
 
         // // BPS too small to issue rewards
         if (shouldExpectRevert) {
@@ -262,7 +270,11 @@ contract VerbsAuctionHouseBasicTest is VerbsAuctionHouseTest {
         assertEq(auctionHouse.reservePrice(), newReservePrice, "Reserve price should be updated correctly");
 
         auctionHouse.setMinBidIncrementPercentage(newMinBidIncrementPercentage);
-        assertEq(auctionHouse.minBidIncrementPercentage(), newMinBidIncrementPercentage, "Min bid increment percentage should be updated correctly");
+        assertEq(
+            auctionHouse.minBidIncrementPercentage(),
+            newMinBidIncrementPercentage,
+            "Min bid increment percentage should be updated correctly"
+        );
     }
 
     function testAccessControl() public {
