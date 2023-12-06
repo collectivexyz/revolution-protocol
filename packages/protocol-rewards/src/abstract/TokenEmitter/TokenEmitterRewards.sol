@@ -9,7 +9,6 @@ abstract contract TokenEmitterRewards is RewardSplits {
     function _handleRewardsAndGetValueToSend(uint256 msgValue, address builderReferral, address purchaseReferral, address deployer) internal returns (uint256) {
         if (msgValue < computeTotalReward(msgValue)) revert INVALID_ETH_AMOUNT();
 
-
         return msgValue - _depositPurchaseRewards(msgValue, builderReferral, purchaseReferral, deployer);
     }
 }
