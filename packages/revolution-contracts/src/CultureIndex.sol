@@ -97,7 +97,9 @@ contract CultureIndex is ICultureIndex, Ownable, ReentrancyGuard {
      * @notice Set the ERC721 voting token.
      * @dev Only callable by the owner when not locked.
      */
-    function setERC721VotingToken(ERC721Checkpointable _ERC721VotingToken) external override onlyOwner nonReentrant whenERC721VotingTokenNotLocked {
+    function setERC721VotingToken(
+        ERC721Checkpointable _ERC721VotingToken
+    ) external override onlyOwner nonReentrant whenERC721VotingTokenNotLocked {
         erc721VotingToken = _ERC721VotingToken;
 
         emit ERC721VotingTokenUpdated(_ERC721VotingToken);
@@ -125,7 +127,8 @@ contract CultureIndex is ICultureIndex, Ownable, ReentrancyGuard {
         require(uint8(metadata.mediaType) > 0 && uint8(metadata.mediaType) <= 5, "Invalid media type");
 
         if (metadata.mediaType == MediaType.IMAGE) require(bytes(metadata.image).length > 0, "Image URL must be provided");
-        else if (metadata.mediaType == MediaType.ANIMATION) require(bytes(metadata.animationUrl).length > 0, "Animation URL must be provided");
+        else if (metadata.mediaType == MediaType.ANIMATION)
+            require(bytes(metadata.animationUrl).length > 0, "Animation URL must be provided");
         else if (metadata.mediaType == MediaType.TEXT) require(bytes(metadata.text).length > 0, "Text must be provided");
     }
 
@@ -254,7 +257,11 @@ contract CultureIndex is ICultureIndex, Ownable, ReentrancyGuard {
     }
 
     function _getPriorVotes(address account, uint256 blockNumber) internal view returns (uint256) {
-        return _calculateVoteWeight(erc20VotingToken.getPastVotes(account, blockNumber), erc721VotingToken.getPriorVotes(account, blockNumber));
+        return
+            _calculateVoteWeight(
+                erc20VotingToken.getPastVotes(account, blockNumber),
+                erc721VotingToken.getPriorVotes(account, blockNumber)
+            );
     }
 
     /**

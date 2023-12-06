@@ -60,9 +60,14 @@ contract VRGDAC {
                     wadDiv(
                         wadLn(
                             wadDiv(
-                                wadMul(targetPrice, wadMul(perTimeUnit, wadExp(wadMul(soldDifference, wadDiv(decayConstant, perTimeUnit))))),
-                                wadMul(targetPrice, wadMul(perTimeUnit, wadPow(1e18 - priceDecayPercent, wadDiv(soldDifference, perTimeUnit)))) -
-                                    wadMul(amount, decayConstant)
+                                wadMul(
+                                    targetPrice,
+                                    wadMul(perTimeUnit, wadExp(wadMul(soldDifference, wadDiv(decayConstant, perTimeUnit))))
+                                ),
+                                wadMul(
+                                    targetPrice,
+                                    wadMul(perTimeUnit, wadPow(1e18 - priceDecayPercent, wadDiv(soldDifference, perTimeUnit)))
+                                ) - wadMul(amount, decayConstant)
                             )
                         ),
                         decayConstant

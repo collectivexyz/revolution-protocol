@@ -22,7 +22,11 @@ contract CultureIndexVotingBasicTest is CultureIndexTestSuite {
         uint256 erc721Weight = 2; // Number of ERC721 tokens held by the voter
 
         // Mock the ERC20 and ERC721 token balances
-        vm.mockCall(address(cultureIndex.erc20VotingToken()), abi.encodeWithSelector(Votes.getVotes.selector, voter), abi.encode(erc20Weight));
+        vm.mockCall(
+            address(cultureIndex.erc20VotingToken()),
+            abi.encodeWithSelector(Votes.getVotes.selector, voter),
+            abi.encode(erc20Weight)
+        );
         vm.mockCall(
             address(cultureIndex.erc721VotingToken()),
             abi.encodeWithSelector(ERC721Checkpointable.getCurrentVotes.selector, voter),
@@ -153,7 +157,11 @@ contract CultureIndexVotingBasicTest is CultureIndexTestSuite {
         // ensure that the ERC721 token is minted
         assertEq(verbs.balanceOf(address(this)), 1, "ERC721 token should be minted");
         // ensure cultureindex currentvotes is correct
-        assertEq(cultureIndex.getCurrentVotes(address(this)), cultureIndex.erc721VotingTokenWeight() * 1e18, "Vote weight should be correct");
+        assertEq(
+            cultureIndex.getCurrentVotes(address(this)),
+            cultureIndex.erc721VotingTokenWeight() * 1e18,
+            "Vote weight should be correct"
+        );
 
         // burn the 721
         verbs.burn(0);
@@ -659,7 +667,8 @@ contract CultureIndexVotingBasicTest is CultureIndexTestSuite {
         }
 
         // Calculate expected quorum votes
-        uint256 expectedQuorumVotes = (quorumBPS * (erc20TotalSupply + erc721TotalSupply * 1e18 * cultureIndex.erc721VotingTokenWeight())) / 10_000;
+        uint256 expectedQuorumVotes = (quorumBPS * (erc20TotalSupply + erc721TotalSupply * 1e18 * cultureIndex.erc721VotingTokenWeight())) /
+            10_000;
 
         // Get the quorum votes from the contract
         uint256 actualQuorumVotes = cultureIndex.quorumVotes();

@@ -80,7 +80,13 @@ contract VerbsDAOExecutor {
         emit NewPendingAdmin(pendingAdmin);
     }
 
-    function queueTransaction(address target, uint256 value, string memory signature, bytes memory data, uint256 eta) public returns (bytes32) {
+    function queueTransaction(
+        address target,
+        uint256 value,
+        string memory signature,
+        bytes memory data,
+        uint256 eta
+    ) public returns (bytes32) {
         require(msg.sender == admin, "VerbsDAOExecutor::queueTransaction: Call must come from admin.");
         require(eta >= getBlockTimestamp() + delay, "VerbsDAOExecutor::queueTransaction: Estimated execution block must satisfy delay.");
 

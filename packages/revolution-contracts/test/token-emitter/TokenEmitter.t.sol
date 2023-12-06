@@ -64,9 +64,27 @@ contract TokenEmitterTest is Test {
         NontransferableERC20Votes governanceToken = new NontransferableERC20Votes(address(this), "Revolution Governance", "GOV");
         RevolutionProtocolRewards protocolRewards = new RevolutionProtocolRewards();
 
-        TokenEmitter emitter1 = new TokenEmitter(address(this), governanceToken, address(protocolRewards), address(this), treasury, 1e14, 1e17, 1e22);
+        TokenEmitter emitter1 = new TokenEmitter(
+            address(this),
+            governanceToken,
+            address(protocolRewards),
+            address(this),
+            treasury,
+            1e14,
+            1e17,
+            1e22
+        );
 
-        TokenEmitter emitter2 = new TokenEmitter(address(this), governanceToken, address(protocolRewards), address(this), treasury, 1e14, 1e17, 1e22);
+        TokenEmitter emitter2 = new TokenEmitter(
+            address(this),
+            governanceToken,
+            address(protocolRewards),
+            address(this),
+            treasury,
+            1e14,
+            1e17,
+            1e22
+        );
 
         governanceToken.transferOwnership(address(emitter1));
 
@@ -210,7 +228,11 @@ contract TokenEmitterTest is Test {
         emitter.buyToken{ value: 1e18 }(recipients, bps, address(0), address(0), address(0));
         //assert address balances are correct
         //multiply bps by expectedAmount and assert
-        assertEq(emitter.balanceOf(address(1)), (firstBps * uint256(expectedAmount)) / 10_000, "First recipient should have correct balance");
+        assertEq(
+            emitter.balanceOf(address(1)),
+            (firstBps * uint256(expectedAmount)) / 10_000,
+            "First recipient should have correct balance"
+        );
         assertEq(
             emitter.balanceOf(address(2)),
             ((10_000 - firstBps) * uint256(expectedAmount)) / 10_000,
@@ -402,7 +424,11 @@ contract TokenEmitterTest is Test {
 
         // A days worth of payment amount
         int256 dailyPaymentTokenAmount = emitter.getTokenQuoteForEther(expectedVolume);
-        assertLt(uint256(dailyPaymentTokenAmount), tokensPerTimeUnit * 1e18, "Token amount for daily payment should be less than tokens per day");
+        assertLt(
+            uint256(dailyPaymentTokenAmount),
+            tokensPerTimeUnit * 1e18,
+            "Token amount for daily payment should be less than tokens per day"
+        );
         emit log_string("Daily Payment Token Amount: ");
         emit log_int(dailyPaymentTokenAmount);
 

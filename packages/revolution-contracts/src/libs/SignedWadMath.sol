@@ -39,7 +39,10 @@ function wadMul(int256 x, int256 y) pure returns (int256 r) {
         // Combining into 1 expression saves gas as resulting bytecode will only have 1 `JUMPI`
         // rather than 2.
         if iszero(
-            and(or(iszero(x), eq(sdiv(r, x), y)), or(lt(x, not(0)), sgt(y, 0x8000000000000000000000000000000000000000000000000000000000000000)))
+            and(
+                or(iszero(x), eq(sdiv(r, x), y)),
+                or(lt(x, not(0)), sgt(y, 0x8000000000000000000000000000000000000000000000000000000000000000))
+            )
         ) {
             revert(0, 0)
         }

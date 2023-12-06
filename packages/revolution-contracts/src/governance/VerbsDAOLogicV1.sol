@@ -207,7 +207,10 @@ contract VerbsDAOLogicV1 is VerbsDAOStorageV1, VerbsDAOEvents {
 
         temp.proposalThreshold = bps2Uint(proposalThresholdBPS, temp.totalSupply);
 
-        require(getTotalVotes(msg.sender, block.number - 1) > temp.proposalThreshold, "VerbsDAO::propose: proposer votes below proposal threshold");
+        require(
+            getTotalVotes(msg.sender, block.number - 1) > temp.proposalThreshold,
+            "VerbsDAO::propose: proposer votes below proposal threshold"
+        );
         require(
             targets.length == values.length && targets.length == signatures.length && targets.length == calldatas.length,
             "VerbsDAO::propose: proposal function information arity mismatch"
@@ -318,7 +321,13 @@ contract VerbsDAOLogicV1 is VerbsDAOStorageV1, VerbsDAOEvents {
         Proposal storage proposal = _proposals[proposalId];
         proposal.executed = true;
         for (uint256 i = 0; i < proposal.targets.length; i++) {
-            timelock.executeTransaction(proposal.targets[i], proposal.values[i], proposal.signatures[i], proposal.calldatas[i], proposal.eta);
+            timelock.executeTransaction(
+                proposal.targets[i],
+                proposal.values[i],
+                proposal.signatures[i],
+                proposal.calldatas[i],
+                proposal.eta
+            );
         }
         emit ProposalExecuted(proposalId);
     }
@@ -366,7 +375,13 @@ contract VerbsDAOLogicV1 is VerbsDAOStorageV1, VerbsDAOEvents {
 
         proposal.canceled = true;
         for (uint256 i = 0; i < proposal.targets.length; i++) {
-            timelock.cancelTransaction(proposal.targets[i], proposal.values[i], proposal.signatures[i], proposal.calldatas[i], proposal.eta);
+            timelock.cancelTransaction(
+                proposal.targets[i],
+                proposal.values[i],
+                proposal.signatures[i],
+                proposal.calldatas[i],
+                proposal.eta
+            );
         }
 
         emit ProposalCanceled(proposalId);
@@ -393,7 +408,13 @@ contract VerbsDAOLogicV1 is VerbsDAOStorageV1, VerbsDAOEvents {
 
         proposal.vetoed = true;
         for (uint256 i = 0; i < proposal.targets.length; i++) {
-            timelock.cancelTransaction(proposal.targets[i], proposal.values[i], proposal.signatures[i], proposal.calldatas[i], proposal.eta);
+            timelock.cancelTransaction(
+                proposal.targets[i],
+                proposal.values[i],
+                proposal.signatures[i],
+                proposal.calldatas[i],
+                proposal.eta
+            );
         }
 
         emit ProposalVetoed(proposalId);
@@ -598,7 +619,10 @@ contract VerbsDAOLogicV1 is VerbsDAOStorageV1, VerbsDAOEvents {
         if (msg.sender != admin) {
             revert AdminOnly();
         }
-        require(newVotingDelay >= MIN_VOTING_DELAY && newVotingDelay <= MAX_VOTING_DELAY, "VerbsDAO::_setVotingDelay: invalid voting delay");
+        require(
+            newVotingDelay >= MIN_VOTING_DELAY && newVotingDelay <= MAX_VOTING_DELAY,
+            "VerbsDAO::_setVotingDelay: invalid voting delay"
+        );
         uint256 oldVotingDelay = votingDelay;
         votingDelay = newVotingDelay;
 
@@ -613,7 +637,10 @@ contract VerbsDAOLogicV1 is VerbsDAOStorageV1, VerbsDAOEvents {
         if (msg.sender != admin) {
             revert AdminOnly();
         }
-        require(newVotingPeriod >= MIN_VOTING_PERIOD && newVotingPeriod <= MAX_VOTING_PERIOD, "VerbsDAO::_setVotingPeriod: invalid voting period");
+        require(
+            newVotingPeriod >= MIN_VOTING_PERIOD && newVotingPeriod <= MAX_VOTING_PERIOD,
+            "VerbsDAO::_setVotingPeriod: invalid voting period"
+        );
         uint256 oldVotingPeriod = votingPeriod;
         votingPeriod = newVotingPeriod;
 
@@ -883,7 +910,11 @@ contract VerbsDAOLogicV1 is VerbsDAOStorageV1, VerbsDAOEvents {
      * @param params Configurable parameters for calculating the quorum based on againstVotes. See `DynamicQuorumParams` definition for additional details.
      * @return quorumVotes The required quorum
      */
-    function dynamicQuorumVotes(uint256 againstVotes, uint256 totalSupply, DynamicQuorumParams memory params) public pure returns (uint256) {
+    function dynamicQuorumVotes(
+        uint256 againstVotes,
+        uint256 totalSupply,
+        DynamicQuorumParams memory params
+    ) public pure returns (uint256) {
         uint256 againstVotesBPS = (10000 * againstVotes) / totalSupply;
         uint256 quorumAdjustmentBPS = (params.quorumCoefficient * againstVotesBPS) / 1e6;
         uint256 adjustedQuorumBPS = params.minQuorumVotesBPS + quorumAdjustmentBPS;
@@ -904,7 +935,11 @@ contract VerbsDAOLogicV1 is VerbsDAOStorageV1, VerbsDAOEvents {
 
         if (len == 0) {
             return
-                DynamicQuorumParams({ minQuorumVotesBPS: safe16(quorumVotesBPS), maxQuorumVotesBPS: safe16(quorumVotesBPS), quorumCoefficient: 0 });
+                DynamicQuorumParams({
+                    minQuorumVotesBPS: safe16(quorumVotesBPS),
+                    maxQuorumVotesBPS: safe16(quorumVotesBPS),
+                    quorumCoefficient: 0
+                });
         }
 
         if (quorumParamsCheckpoints[len - 1].fromBlock <= blockNumber) {
@@ -913,7 +948,11 @@ contract VerbsDAOLogicV1 is VerbsDAOStorageV1, VerbsDAOEvents {
 
         if (quorumParamsCheckpoints[0].fromBlock > blockNumber) {
             return
-                DynamicQuorumParams({ minQuorumVotesBPS: safe16(quorumVotesBPS), maxQuorumVotesBPS: safe16(quorumVotesBPS), quorumCoefficient: 0 });
+                DynamicQuorumParams({
+                    minQuorumVotesBPS: safe16(quorumVotesBPS),
+                    maxQuorumVotesBPS: safe16(quorumVotesBPS),
+                    quorumCoefficient: 0
+                });
         }
 
         uint256 lower = 0;
