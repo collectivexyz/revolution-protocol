@@ -331,9 +331,7 @@ contract CultureIndex is ICultureIndex, Ownable, ReentrancyGuard {
      * @return The ArtPiece struct of the top-voted art piece.
      */
     function getTopVotedPiece() public view returns (ArtPiece memory) {
-        //slither-disable-next-line unused-return
-        (uint256 pieceId, ) = maxHeap.getMax();
-        return pieces[pieceId];
+        return pieces[topVotedPieceId()];
     }
 
     /**
@@ -349,6 +347,7 @@ contract CultureIndex is ICultureIndex, Ownable, ReentrancyGuard {
      * @return The top-voted pieceId
      */
     function topVotedPieceId() public view returns (uint256) {
+        require(maxHeap.size() > 0, "Culture index is empty");
         //slither-disable-next-line unused-return
         (uint256 pieceId, ) = maxHeap.getMax();
         return pieceId;
