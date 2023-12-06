@@ -140,7 +140,7 @@ contract CultureIndexAccessControlTest is CultureIndexTestSuite {
         cultureIndex.vote(pieceId);
 
         // Attempt to drop the top-voted piece and expect it to fail
-        vm.expectRevert("Piece must have quorum votes in order to be dropped.");
+        vm.expectRevert("Does not meet quorum votes to be dropped.");
         cultureIndex.dropTopVotedPiece();
 
         // Additional votes to meet/exceed the quorum
