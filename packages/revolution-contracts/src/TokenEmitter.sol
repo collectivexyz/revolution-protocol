@@ -77,6 +77,9 @@ contract TokenEmitter is VRGDAC, ITokenEmitter, ReentrancyGuard, TokenEmitterRew
         address purchaseReferral,
         address deployer
     ) public payable nonReentrant returns (uint tokensSoldWad) {
+        //prevent treasury from paying itself
+        require(msg.sender != treasury, "Treasury cannot buy tokens");
+
         require(msg.value > 0, "Must send ether");
         // ensure the same number of addresses and _bps
         require(_addresses.length == _bps.length, "Parallel arrays required");
