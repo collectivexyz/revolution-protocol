@@ -101,6 +101,8 @@ contract TokenEmitter is VRGDAC, ITokenEmitter, ReentrancyGuard, TokenEmitterRew
         //Transfer ETH to treasury and update emitted
         emittedTokenWad += totalTokensForBuyers;
         if (totalTokensForCreators > 0) emittedTokenWad += totalTokensForCreators;
+
+        //Deposit funds to treasury
         (bool success, ) = treasury.call{ value: toPayTreasury }(new bytes(0));
         require(success, "Transfer failed.");
 
@@ -115,18 +117,18 @@ contract TokenEmitter is VRGDAC, ITokenEmitter, ReentrancyGuard, TokenEmitterRew
             _mint(creatorsAddress, uint(totalTokensForCreators));
         }
 
-        uint sum = 0;
+        uint bpsSum = 0;
 
         //Mint tokens to buyers
         if (totalTokensForBuyers > 0) {
             for (uint i = 0; i < _addresses.length; i++) {
                 // transfer tokens to address
                 _mint(_addresses[i], uint((totalTokensForBuyers * int(_bps[i])) / 10_000));
-                sum += _bps[i];
+                bpsSum += _bps[i];
             }
         }
 
-        require(sum == 10_000, "bps must add up to 10_000");
+        require(bpsSum == 10_000, "bps must add up to 10_000");
 
         emit PurchaseFinalized(
             msg.sender,
