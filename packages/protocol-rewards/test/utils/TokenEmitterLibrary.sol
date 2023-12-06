@@ -547,7 +547,10 @@ abstract contract ERC20Votes is ERC20, Votes {
     /**
      * @dev Get the `pos`-th checkpoint for `account`.
      */
-    function checkpoints(address account, uint32 pos) public view virtual returns (Checkpoints.Checkpoint208 memory) {
+    function checkpoints(
+        address account,
+        uint32 pos
+    ) public view virtual returns (Checkpoints.Checkpoint208 memory) {
         return _checkpoints(account, pos);
     }
 }
@@ -618,7 +621,12 @@ function wadMul(int256 x, int256 y) pure returns (int256 r) {
         // See: https://secure-contracts.com/learn_evm/arithmetic-checks.html#arithmetic-checks-for-int256-multiplication
         // Combining into 1 expression saves gas as resulting bytecode will only have 1 `JUMPI`
         // rather than 2.
-        if iszero(and(or(iszero(x), eq(sdiv(r, x), y)), or(lt(x, not(0)), sgt(y, 0x8000000000000000000000000000000000000000000000000000000000000000)))) {
+        if iszero(
+            and(
+                or(iszero(x), eq(sdiv(r, x), y)),
+                or(lt(x, not(0)), sgt(y, 0x8000000000000000000000000000000000000000000000000000000000000000))
+            )
+        ) {
             revert(0, 0)
         }
 
@@ -847,9 +855,20 @@ contract VRGDAC {
                     wadDiv(
                         wadLn(
                             wadDiv(
-                                wadMul(targetPrice, wadMul(perTimeUnit, wadExp(wadMul(soldDifference, wadDiv(decayConstant, perTimeUnit))))),
-                                wadMul(targetPrice, wadMul(perTimeUnit, wadPow(1e18 - priceDecayPercent, wadDiv(soldDifference, perTimeUnit)))) -
-                                    wadMul(amount, decayConstant)
+                                wadMul(
+                                    targetPrice,
+                                    wadMul(
+                                        perTimeUnit,
+                                        wadExp(wadMul(soldDifference, wadDiv(decayConstant, perTimeUnit)))
+                                    )
+                                ),
+                                wadMul(
+                                    targetPrice,
+                                    wadMul(
+                                        perTimeUnit,
+                                        wadPow(1e18 - priceDecayPercent, wadDiv(soldDifference, perTimeUnit))
+                                    )
+                                ) - wadMul(amount, decayConstant)
                             )
                         ),
                         decayConstant
@@ -864,7 +883,8 @@ contract VRGDAC {
             wadDiv(
                 -wadMul(
                     wadMul(targetPrice, perTimeUnit),
-                    wadPow(1e18 - priceDecayPercent, timeSinceStart - unsafeWadDiv(sold, perTimeUnit)) - wadPow(1e18 - priceDecayPercent, timeSinceStart)
+                    wadPow(1e18 - priceDecayPercent, timeSinceStart - unsafeWadDiv(sold, perTimeUnit)) -
+                        wadPow(1e18 - priceDecayPercent, timeSinceStart)
                 ),
                 decayConstant
             );
@@ -872,7 +892,11 @@ contract VRGDAC {
 
     // given # of tokens sold, returns price p(x) = p0 * (1 - k)^(t - (x/r)) - (x/r) makes it a linearvrgda issuance
     function p(int256 timeSinceStart, int256 sold) internal view returns (int256) {
-        return wadMul(targetPrice, wadPow(1e18 - priceDecayPercent, timeSinceStart - unsafeWadDiv(sold, perTimeUnit)));
+        return
+            wadMul(
+                targetPrice,
+                wadPow(1e18 - priceDecayPercent, timeSinceStart - unsafeWadDiv(sold, perTimeUnit))
+            );
     }
 }
 
@@ -887,7 +911,11 @@ contract NontransferableERC20Votes is Ownable, ERC20Votes {
      * All two of these values are immutable: they can only be set once during
      * construction.
      */
-    constructor(address _initialOwner, string memory name_, string memory symbol_) Ownable(_initialOwner) ERC20(name_, symbol_) EIP712(name_, "1") {}
+    constructor(
+        address _initialOwner,
+        string memory name_,
+        string memory symbol_
+    ) Ownable(_initialOwner) ERC20(name_, symbol_) EIP712(name_, "1") {}
 
     /**
      * @dev Returns the number of decimals used to get its user representation.
@@ -963,7 +991,12 @@ contract NontransferableERC20Votes is Ownable, ERC20Votes {
     /**
      * @dev Not allowed
      */
-    function _approve(address owner, address spender, uint256 value, bool emitEvent) internal virtual override {
+    function _approve(
+        address owner,
+        address spender,
+        uint256 value,
+        bool emitEvent
+    ) internal virtual override {
         return;
     }
 
@@ -1045,7 +1078,11 @@ contract TokenEmitter is VRGDAC, ITokenEmitter, ReentrancyGuard, TokenEmitterRew
         int _targetPrice, // The target price for a token if sold on pace, scaled by 1e18.
         int _priceDecayPercent, // The percent price decays per unit of time with no sales, scaled by 1e18.
         int _tokensPerTimeUnit // The number of tokens to target selling in 1 full unit of time, scaled by 1e18.
-    ) TokenEmitterRewards(_protocolRewards, _protocolFeeRecipient) VRGDAC(_targetPrice, _priceDecayPercent, _tokensPerTimeUnit) Ownable(_initialOwner) {
+    )
+        TokenEmitterRewards(_protocolRewards, _protocolFeeRecipient)
+        VRGDAC(_targetPrice, _priceDecayPercent, _tokensPerTimeUnit)
+        Ownable(_initialOwner)
+    {
         treasury = _treasury;
 
         token = _token;
@@ -1077,7 +1114,12 @@ contract TokenEmitter is VRGDAC, ITokenEmitter, ReentrancyGuard, TokenEmitterRew
         require(_addresses.length == _bps.length, "Parallel arrays required");
 
         // Get value left after protocol rewards
-        uint msgValueRemaining = _handleRewardsAndGetValueToSend(msg.value, builder, purchaseReferral, deployer);
+        uint msgValueRemaining = _handleRewardsAndGetValueToSend(
+            msg.value,
+            builder,
+            purchaseReferral,
+            deployer
+        );
 
         //Share of purchase amount to send to treasury
         uint256 toPayTreasury = (msgValueRemaining * (10_000 - creatorRateBps)) / 10_000;
@@ -1085,7 +1127,9 @@ contract TokenEmitter is VRGDAC, ITokenEmitter, ReentrancyGuard, TokenEmitterRew
         //Ether directly sent to creators
         uint256 creatorDirectPayment = ((msgValueRemaining - toPayTreasury) * entropyRateBps) / 10_000;
         //Tokens to emit to creators
-        int totalTokensForCreators = getTokenQuoteForEther(msgValueRemaining - toPayTreasury - creatorDirectPayment);
+        int totalTokensForCreators = getTokenQuoteForEther(
+            msgValueRemaining - toPayTreasury - creatorDirectPayment
+        );
 
         int totalTokensForBuyers = getTokenQuoteForEther(toPayTreasury);
 
@@ -1136,13 +1180,23 @@ contract TokenEmitter is VRGDAC, ITokenEmitter, ReentrancyGuard, TokenEmitterRew
     function buyTokenQuote(uint amount) public view returns (int spentY) {
         // Note: By using toDaysWadUnsafe(block.timestamp - startTime) we are establishing that 1 "unit of time" is 1 day.
         // solhint-disable-next-line not-rely-on-time
-        return xToY({ timeSinceStart: toDaysWadUnsafe(block.timestamp - startTime), sold: emittedTokenWad, amount: int(amount) });
+        return
+            xToY({
+                timeSinceStart: toDaysWadUnsafe(block.timestamp - startTime),
+                sold: emittedTokenWad,
+                amount: int(amount)
+            });
     }
 
     function getTokenQuoteForEther(uint etherAmount) public view returns (int gainedX) {
         // Note: By using toDaysWadUnsafe(block.timestamp - startTime) we are establishing that 1 "unit of time" is 1 day.
         // solhint-disable-next-line not-rely-on-time
-        return yToX({ timeSinceStart: toDaysWadUnsafe(block.timestamp - startTime), sold: emittedTokenWad, amount: int(etherAmount) });
+        return
+            yToX({
+                timeSinceStart: toDaysWadUnsafe(block.timestamp - startTime),
+                sold: emittedTokenWad,
+                amount: int(etherAmount)
+            });
     }
 
     function getTokenQuoteForPayment(uint paymentAmount) external view returns (int gainedX) {
@@ -1152,7 +1206,9 @@ contract TokenEmitter is VRGDAC, ITokenEmitter, ReentrancyGuard, TokenEmitterRew
             yToX({
                 timeSinceStart: toDaysWadUnsafe(block.timestamp - startTime),
                 sold: emittedTokenWad,
-                amount: int(((paymentAmount - computeTotalReward(paymentAmount)) * (10_000 - creatorRateBps)) / 10_000)
+                amount: int(
+                    ((paymentAmount - computeTotalReward(paymentAmount)) * (10_000 - creatorRateBps)) / 10_000
+                )
             });
     }
 

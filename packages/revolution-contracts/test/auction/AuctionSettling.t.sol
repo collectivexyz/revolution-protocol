@@ -256,7 +256,9 @@ contract VerbsAuctionHouseSettleTest is VerbsAuctionHouseTest {
 
         // Verify each creator's payout
         for (uint256 i = 0; i < creatorAddresses.length; i++) {
-            uint256 expectedEtherShare = uint256(((bidAmount) * creatorBps[i] * creatorRate) / 10_000 / 10_000);
+            uint256 expectedEtherShare = uint256(
+                ((bidAmount) * creatorBps[i] * creatorRate) / 10_000 / 10_000
+            );
 
             //either the creator gets ETH or WETH
             assertEq(
@@ -328,7 +330,9 @@ contract VerbsAuctionHouseSettleTest is VerbsAuctionHouseTest {
 
         vm.warp(block.timestamp + auctionHouse.duration() + 1); // Fast forward time to end the auction
 
-        uint256 expectedGovernanceTokens = uint256(tokenEmitter.getTokenQuoteForEther(creatorGovernancePayment - feeAmount));
+        uint256 expectedGovernanceTokens = uint256(
+            tokenEmitter.getTokenQuoteForEther(creatorGovernancePayment - feeAmount)
+        );
 
         emit log_string("creatorGovernancePayment");
         emit log_uint(creatorGovernancePayment);
@@ -346,7 +350,11 @@ contract VerbsAuctionHouseSettleTest is VerbsAuctionHouseTest {
         auctionHouse.settleCurrentAndCreateNewAuction();
 
         // Checking if the creator received their share
-        assertEq(address(0x1).balance - balanceBeforeCreator, creatorDirectPayment, "Creator did not receive the correct amount of ETH");
+        assertEq(
+            address(0x1).balance - balanceBeforeCreator,
+            creatorDirectPayment,
+            "Creator did not receive the correct amount of ETH"
+        );
 
         // Checking if the contract received the correct amount
         uint256 expectedContractShare = bidAmount - creatorDirectPayment - feeAmount;

@@ -121,7 +121,11 @@ contract TokenAccessControlTest is VerbsTokenTestSuite {
     function testOwnerPrivileges() public {
         // Test only owner can change contract URI
         verbsToken.setContractURIHash("NewHashHere");
-        assertEq(verbsToken.contractURI(), "ipfs://NewHashHere", "Owner should be able to change contract URI");
+        assertEq(
+            verbsToken.contractURI(),
+            "ipfs://NewHashHere",
+            "Owner should be able to change contract URI"
+        );
 
         // Test that non-owner cannot change contract URI
         address nonOwner = address(0x1);
@@ -258,7 +262,11 @@ contract TokenAccessControlTest is VerbsTokenTestSuite {
     function testCultureIndexUpdateAndLock() public {
         ICultureIndex newCultureIndex = ICultureIndex(address(0xDEF));
         verbsToken.setCultureIndex(newCultureIndex);
-        assertEq(address(verbsToken.cultureIndex()), address(newCultureIndex), "CultureIndex should be updated");
+        assertEq(
+            address(verbsToken.cultureIndex()),
+            address(newCultureIndex),
+            "CultureIndex should be updated"
+        );
 
         verbsToken.lockCultureIndex();
         assertTrue(verbsToken.isCultureIndexLocked(), "CultureIndex should be locked");

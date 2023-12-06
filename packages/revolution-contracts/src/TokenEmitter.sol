@@ -89,7 +89,12 @@ contract TokenEmitter is VRGDAC, ITokenEmitter, ReentrancyGuard, TokenEmitterRew
         require(_addresses.length == _bps.length, "Parallel arrays required");
 
         // Get value left after protocol rewards
-        uint msgValueRemaining = _handleRewardsAndGetValueToSend(msg.value, builder, purchaseReferral, deployer);
+        uint msgValueRemaining = _handleRewardsAndGetValueToSend(
+            msg.value,
+            builder,
+            purchaseReferral,
+            deployer
+        );
 
         //Share of purchase amount to send to treasury
         uint256 toPayTreasury = (msgValueRemaining * (10_000 - creatorRateBps)) / 10_000;
@@ -154,14 +159,24 @@ contract TokenEmitter is VRGDAC, ITokenEmitter, ReentrancyGuard, TokenEmitterRew
         require(amount > 0, "Amount must be greater than 0");
         // Note: By using toDaysWadUnsafe(block.timestamp - startTime) we are establishing that 1 "unit of time" is 1 day.
         // solhint-disable-next-line not-rely-on-time
-        return xToY({ timeSinceStart: toDaysWadUnsafe(block.timestamp - startTime), sold: emittedTokenWad, amount: int(amount) });
+        return
+            xToY({
+                timeSinceStart: toDaysWadUnsafe(block.timestamp - startTime),
+                sold: emittedTokenWad,
+                amount: int(amount)
+            });
     }
 
     function getTokenQuoteForEther(uint etherAmount) public view returns (int gainedX) {
         require(etherAmount > 0, "Ether amount must be greater than 0");
         // Note: By using toDaysWadUnsafe(block.timestamp - startTime) we are establishing that 1 "unit of time" is 1 day.
         // solhint-disable-next-line not-rely-on-time
-        return yToX({ timeSinceStart: toDaysWadUnsafe(block.timestamp - startTime), sold: emittedTokenWad, amount: int(etherAmount) });
+        return
+            yToX({
+                timeSinceStart: toDaysWadUnsafe(block.timestamp - startTime),
+                sold: emittedTokenWad,
+                amount: int(etherAmount)
+            });
     }
 
     function getTokenQuoteForPayment(uint paymentAmount) external view returns (int gainedX) {
@@ -172,7 +187,9 @@ contract TokenEmitter is VRGDAC, ITokenEmitter, ReentrancyGuard, TokenEmitterRew
             yToX({
                 timeSinceStart: toDaysWadUnsafe(block.timestamp - startTime),
                 sold: emittedTokenWad,
-                amount: int(((paymentAmount - computeTotalReward(paymentAmount)) * (10_000 - creatorRateBps)) / 10_000)
+                amount: int(
+                    ((paymentAmount - computeTotalReward(paymentAmount)) * (10_000 - creatorRateBps)) / 10_000
+                )
             });
     }
 

@@ -104,7 +104,8 @@ contract VerbsDAOLogicV1 is VerbsDAOStorageV1, VerbsDAOEvents {
     uint256 public constant MAX_REFUND_BASE_FEE = 200 gwei;
 
     /// @notice The EIP-712 typehash for the contract's domain
-    bytes32 public constant DOMAIN_TYPEHASH = keccak256("EIP712Domain(string name,uint256 chainId,address verifyingContract)");
+    bytes32 public constant DOMAIN_TYPEHASH =
+        keccak256("EIP712Domain(string name,uint256 chainId,address verifyingContract)");
 
     /// @notice The EIP-712 typehash for the ballot struct used by the contract
     bytes32 public constant BALLOT_TYPEHASH = keccak256("Ballot(uint256 proposalId,uint8 support)");
@@ -150,10 +151,17 @@ contract VerbsDAOLogicV1 is VerbsDAOStorageV1, VerbsDAOEvents {
         require(timelock_ != address(0), "VerbsDAO::initialize: invalid timelock address");
         require(verbs_ != address(0), "VerbsDAO::initialize: invalid verbs address");
         require(verbsPoints_ != address(0), "VerbsDAO::initialize: invalid verbs points address");
-        require(votingPeriod_ >= MIN_VOTING_PERIOD && votingPeriod_ <= MAX_VOTING_PERIOD, "VerbsDAO::initialize: invalid voting period");
-        require(votingDelay_ >= MIN_VOTING_DELAY && votingDelay_ <= MAX_VOTING_DELAY, "VerbsDAO::initialize: invalid voting delay");
         require(
-            proposalThresholdBPS_ >= MIN_PROPOSAL_THRESHOLD_BPS && proposalThresholdBPS_ <= MAX_PROPOSAL_THRESHOLD_BPS,
+            votingPeriod_ >= MIN_VOTING_PERIOD && votingPeriod_ <= MAX_VOTING_PERIOD,
+            "VerbsDAO::initialize: invalid voting period"
+        );
+        require(
+            votingDelay_ >= MIN_VOTING_DELAY && votingDelay_ <= MAX_VOTING_DELAY,
+            "VerbsDAO::initialize: invalid voting delay"
+        );
+        require(
+            proposalThresholdBPS_ >= MIN_PROPOSAL_THRESHOLD_BPS &&
+                proposalThresholdBPS_ <= MAX_PROPOSAL_THRESHOLD_BPS,
             "VerbsDAO::initialize: invalid proposal threshold bps"
         );
         require(verbsTokenVotingWeight_ > 0, "VerbsDAO::initialize: invalid verbs token voting weight");
@@ -212,7 +220,9 @@ contract VerbsDAOLogicV1 is VerbsDAOStorageV1, VerbsDAOEvents {
             "VerbsDAO::propose: proposer votes below proposal threshold"
         );
         require(
-            targets.length == values.length && targets.length == signatures.length && targets.length == calldatas.length,
+            targets.length == values.length &&
+                targets.length == signatures.length &&
+                targets.length == calldatas.length,
             "VerbsDAO::propose: proposal function information arity mismatch"
         );
         require(targets.length != 0, "VerbsDAO::propose: must provide actions");
@@ -294,17 +304,32 @@ contract VerbsDAOLogicV1 is VerbsDAOStorageV1, VerbsDAOEvents {
      * @param proposalId The id of the proposal to queue
      */
     function queue(uint256 proposalId) external {
-        require(state(proposalId) == ProposalState.Succeeded, "VerbsDAO::queue: proposal can only be queued if it is succeeded");
+        require(
+            state(proposalId) == ProposalState.Succeeded,
+            "VerbsDAO::queue: proposal can only be queued if it is succeeded"
+        );
         Proposal storage proposal = _proposals[proposalId];
         uint256 eta = block.timestamp + timelock.delay();
         for (uint256 i = 0; i < proposal.targets.length; i++) {
-            queueOrRevertInternal(proposal.targets[i], proposal.values[i], proposal.signatures[i], proposal.calldatas[i], eta);
+            queueOrRevertInternal(
+                proposal.targets[i],
+                proposal.values[i],
+                proposal.signatures[i],
+                proposal.calldatas[i],
+                eta
+            );
         }
         proposal.eta = eta;
         emit ProposalQueued(proposalId, eta);
     }
 
-    function queueOrRevertInternal(address target, uint256 value, string memory signature, bytes memory data, uint256 eta) internal {
+    function queueOrRevertInternal(
+        address target,
+        uint256 value,
+        string memory signature,
+        bytes memory data,
+        uint256 eta
+    ) internal {
         require(
             !timelock.queuedTransactions(keccak256(abi.encode(target, value, signature, data, eta))),
             "VerbsDAO::queueOrRevertInternal: identical proposal action already queued at eta"
@@ -317,7 +342,10 @@ contract VerbsDAOLogicV1 is VerbsDAOStorageV1, VerbsDAOEvents {
      * @param proposalId The id of the proposal to execute
      */
     function execute(uint256 proposalId) external {
-        require(state(proposalId) == ProposalState.Queued, "VerbsDAO::execute: proposal can only be executed if it is queued");
+        require(
+            state(proposalId) == ProposalState.Queued,
+            "VerbsDAO::execute: proposal can only be executed if it is queued"
+        );
         Proposal storage proposal = _proposals[proposalId];
         proposal.executed = true;
         for (uint256 i = 0; i < proposal.targets.length; i++) {
@@ -369,7 +397,8 @@ contract VerbsDAOLogicV1 is VerbsDAOStorageV1, VerbsDAOEvents {
 
         Proposal storage proposal = _proposals[proposalId];
         require(
-            msg.sender == proposal.proposer || getTotalVotes(proposal.proposer, block.number - 1) <= proposal.proposalThreshold,
+            msg.sender == proposal.proposer ||
+                getTotalVotes(proposal.proposer, block.number - 1) <= proposal.proposalThreshold,
             "VerbsDAO::cancel: proposer above threshold"
         );
 
@@ -430,7 +459,16 @@ contract VerbsDAOLogicV1 is VerbsDAOStorageV1, VerbsDAOEvents {
      */
     function getActions(
         uint256 proposalId
-    ) external view returns (address[] memory targets, uint256[] memory values, string[] memory signatures, bytes[] memory calldatas) {
+    )
+        external
+        view
+        returns (
+            address[] memory targets,
+            uint256[] memory values,
+            string[] memory signatures,
+            bytes[] memory calldatas
+        )
+    {
         Proposal storage p = _proposals[proposalId];
         return (p.targets, p.values, p.signatures, p.calldatas);
     }
@@ -461,7 +499,9 @@ contract VerbsDAOLogicV1 is VerbsDAOStorageV1, VerbsDAOEvents {
             return ProposalState.Pending;
         } else if (block.number <= proposal.endBlock) {
             return ProposalState.Active;
-        } else if (proposal.forVotes <= proposal.againstVotes || proposal.forVotes < quorumVotes(proposal.id)) {
+        } else if (
+            proposal.forVotes <= proposal.againstVotes || proposal.forVotes < quorumVotes(proposal.id)
+        ) {
             return ProposalState.Defeated;
         } else if (proposal.eta == 0) {
             return ProposalState.Succeeded;
@@ -536,7 +576,11 @@ contract VerbsDAOLogicV1 is VerbsDAOStorageV1, VerbsDAOEvents {
      * @param reason The reason given for the vote by the voter
      * @dev Reentrancy is defended against in `castVoteInternal` at the `receipt.hasVoted == false` require statement.
      */
-    function castRefundableVoteWithReason(uint256 proposalId, uint8 support, string calldata reason) external {
+    function castRefundableVoteWithReason(
+        uint256 proposalId,
+        uint8 support,
+        string calldata reason
+    ) external {
         castRefundableVoteInternal(proposalId, support, reason);
     }
 
@@ -563,7 +607,13 @@ contract VerbsDAOLogicV1 is VerbsDAOStorageV1, VerbsDAOEvents {
      * @param reason The reason given for the vote by the voter
      */
     function castVoteWithReason(uint256 proposalId, uint8 support, string calldata reason) external {
-        emit VoteCast(msg.sender, proposalId, support, castVoteInternal(msg.sender, proposalId, support), reason);
+        emit VoteCast(
+            msg.sender,
+            proposalId,
+            support,
+            castVoteInternal(msg.sender, proposalId, support),
+            reason
+        );
     }
 
     /**
@@ -571,7 +621,9 @@ contract VerbsDAOLogicV1 is VerbsDAOStorageV1, VerbsDAOEvents {
      * @dev External function that accepts EIP-712 signatures for voting on proposals.
      */
     function castVoteBySig(uint256 proposalId, uint8 support, uint8 v, bytes32 r, bytes32 s) external {
-        bytes32 domainSeparator = keccak256(abi.encode(DOMAIN_TYPEHASH, keccak256(bytes(name)), getChainIdInternal(), address(this)));
+        bytes32 domainSeparator = keccak256(
+            abi.encode(DOMAIN_TYPEHASH, keccak256(bytes(name)), getChainIdInternal(), address(this))
+        );
         bytes32 structHash = keccak256(abi.encode(BALLOT_TYPEHASH, proposalId, support));
         bytes32 digest = keccak256(abi.encodePacked("\x19\x01", domainSeparator, structHash));
         address signatory = ecrecover(digest, v, r, s);
@@ -657,7 +709,8 @@ contract VerbsDAOLogicV1 is VerbsDAOStorageV1, VerbsDAOEvents {
             revert AdminOnly();
         }
         require(
-            newProposalThresholdBPS >= MIN_PROPOSAL_THRESHOLD_BPS && newProposalThresholdBPS <= MAX_PROPOSAL_THRESHOLD_BPS,
+            newProposalThresholdBPS >= MIN_PROPOSAL_THRESHOLD_BPS &&
+                newProposalThresholdBPS <= MAX_PROPOSAL_THRESHOLD_BPS,
             "VerbsDAO::_setProposalThreshold: invalid proposal threshold bps"
         );
         uint256 oldProposalThresholdBPS = proposalThresholdBPS;
@@ -679,10 +732,14 @@ contract VerbsDAOLogicV1 is VerbsDAOStorageV1, VerbsDAOEvents {
         DynamicQuorumParams memory params = getDynamicQuorumParamsAt(block.number);
 
         require(
-            newMinQuorumVotesBPS >= MIN_QUORUM_VOTES_BPS_LOWER_BOUND && newMinQuorumVotesBPS <= MIN_QUORUM_VOTES_BPS_UPPER_BOUND,
+            newMinQuorumVotesBPS >= MIN_QUORUM_VOTES_BPS_LOWER_BOUND &&
+                newMinQuorumVotesBPS <= MIN_QUORUM_VOTES_BPS_UPPER_BOUND,
             "VerbsDAO::_setMinQuorumVotesBPS: invalid min quorum votes bps"
         );
-        require(newMinQuorumVotesBPS <= params.maxQuorumVotesBPS, "VerbsDAO::_setMinQuorumVotesBPS: min quorum votes bps greater than max");
+        require(
+            newMinQuorumVotesBPS <= params.maxQuorumVotesBPS,
+            "VerbsDAO::_setMinQuorumVotesBPS: min quorum votes bps greater than max"
+        );
 
         uint16 oldMinQuorumVotesBPS = params.minQuorumVotesBPS;
         params.minQuorumVotesBPS = newMinQuorumVotesBPS;
@@ -704,8 +761,14 @@ contract VerbsDAOLogicV1 is VerbsDAOStorageV1, VerbsDAOEvents {
         }
         DynamicQuorumParams memory params = getDynamicQuorumParamsAt(block.number);
 
-        require(newMaxQuorumVotesBPS <= MAX_QUORUM_VOTES_BPS_UPPER_BOUND, "VerbsDAO::_setMaxQuorumVotesBPS: invalid max quorum votes bps");
-        require(params.minQuorumVotesBPS <= newMaxQuorumVotesBPS, "VerbsDAO::_setMaxQuorumVotesBPS: min quorum votes bps greater than max");
+        require(
+            newMaxQuorumVotesBPS <= MAX_QUORUM_VOTES_BPS_UPPER_BOUND,
+            "VerbsDAO::_setMaxQuorumVotesBPS: invalid max quorum votes bps"
+        );
+        require(
+            params.minQuorumVotesBPS <= newMaxQuorumVotesBPS,
+            "VerbsDAO::_setMaxQuorumVotesBPS: min quorum votes bps greater than max"
+        );
 
         uint16 oldMaxQuorumVotesBPS = params.maxQuorumVotesBPS;
         params.maxQuorumVotesBPS = newMaxQuorumVotesBPS;
@@ -743,11 +806,18 @@ contract VerbsDAOLogicV1 is VerbsDAOStorageV1, VerbsDAOEvents {
      *     Must be higher than or equal to minQuorumVotesBPS
      * @param newQuorumCoefficient the new coefficient, as a fixed point integer with 6 decimals
      */
-    function _setDynamicQuorumParams(uint16 newMinQuorumVotesBPS, uint16 newMaxQuorumVotesBPS, uint32 newQuorumCoefficient) public {
+    function _setDynamicQuorumParams(
+        uint16 newMinQuorumVotesBPS,
+        uint16 newMaxQuorumVotesBPS,
+        uint32 newQuorumCoefficient
+    ) public {
         if (msg.sender != admin) {
             revert AdminOnly();
         }
-        if (newMinQuorumVotesBPS < MIN_QUORUM_VOTES_BPS_LOWER_BOUND || newMinQuorumVotesBPS > MIN_QUORUM_VOTES_BPS_UPPER_BOUND) {
+        if (
+            newMinQuorumVotesBPS < MIN_QUORUM_VOTES_BPS_LOWER_BOUND ||
+            newMinQuorumVotesBPS > MIN_QUORUM_VOTES_BPS_UPPER_BOUND
+        ) {
             revert InvalidMinQuorumVotesBPS();
         }
         if (newMaxQuorumVotesBPS > MAX_QUORUM_VOTES_BPS_UPPER_BOUND) {
@@ -809,7 +879,10 @@ contract VerbsDAOLogicV1 is VerbsDAOStorageV1, VerbsDAOEvents {
      */
     function _acceptAdmin() external {
         // Check caller is pendingAdmin and pendingAdmin ≠ address(0)
-        require(msg.sender == pendingAdmin && msg.sender != address(0), "VerbsDAO::_acceptAdmin: pending admin only");
+        require(
+            msg.sender == pendingAdmin && msg.sender != address(0),
+            "VerbsDAO::_acceptAdmin: pending admin only"
+        );
 
         // Save current values for inclusion in log
         address oldAdmin = admin;
@@ -895,7 +968,12 @@ contract VerbsDAOLogicV1 is VerbsDAOStorageV1, VerbsDAOEvents {
             return proposal.quorumVotes;
         }
 
-        return dynamicQuorumVotes(proposal.againstVotes, proposal.totalSupply, getDynamicQuorumParamsAt(proposal.creationBlock));
+        return
+            dynamicQuorumVotes(
+                proposal.againstVotes,
+                proposal.totalSupply,
+                getDynamicQuorumParamsAt(proposal.creationBlock)
+            );
     }
 
     /**
@@ -930,7 +1008,10 @@ contract VerbsDAOLogicV1 is VerbsDAOStorageV1, VerbsDAOEvents {
      * @return The dynamic quorum parameters that were set at the given block number
      */
     function getDynamicQuorumParamsAt(uint256 blockNumber_) public view returns (DynamicQuorumParams memory) {
-        uint32 blockNumber = safe32(blockNumber_, "VerbsDAO::getDynamicQuorumParamsAt: block number exceeds 32 bits");
+        uint32 blockNumber = safe32(
+            blockNumber_,
+            "VerbsDAO::getDynamicQuorumParamsAt: block number exceeds 32 bits"
+        );
         uint256 len = quorumParamsCheckpoints.length;
 
         if (len == 0) {
@@ -977,7 +1058,9 @@ contract VerbsDAOLogicV1 is VerbsDAOStorageV1, VerbsDAOEvents {
         if (pos > 0 && quorumParamsCheckpoints[pos - 1].fromBlock == blockNumber) {
             quorumParamsCheckpoints[pos - 1].params = params;
         } else {
-            quorumParamsCheckpoints.push(DynamicQuorumParamsCheckpoint({ fromBlock: blockNumber, params: params }));
+            quorumParamsCheckpoints.push(
+                DynamicQuorumParamsCheckpoint({ fromBlock: blockNumber, params: params })
+            );
         }
     }
 

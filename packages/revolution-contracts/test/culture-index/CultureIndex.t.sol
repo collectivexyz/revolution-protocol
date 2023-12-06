@@ -69,7 +69,14 @@ contract CultureIndexTestSuite is Test {
         uint256 creatorBps
     ) public pure returns (CultureIndex.ArtPieceMetadata memory, ICultureIndex.CreatorBps[] memory) {
         // <-- Change here
-        ICultureIndex.ArtPieceMetadata memory metadata = createArtPieceMetadata(name, description, mediaType, image, text, animationUrl);
+        ICultureIndex.ArtPieceMetadata memory metadata = createArtPieceMetadata(
+            name,
+            description,
+            mediaType,
+            image,
+            text,
+            animationUrl
+        );
         ICultureIndex.CreatorBps[] memory creators = createArtPieceCreators(creatorAddress, creatorBps);
         return (metadata, creators);
     }
@@ -122,7 +129,10 @@ contract CultureIndexTestSuite is Test {
     }
 
     // Function to create CreatorBps array
-    function createArtPieceCreators(address creatorAddress, uint256 creatorBps) public pure returns (CultureIndex.CreatorBps[] memory) {
+    function createArtPieceCreators(
+        address creatorAddress,
+        uint256 creatorBps
+    ) public pure returns (CultureIndex.CreatorBps[] memory) {
         // <-- Change visibility and mutability as needed
         ICultureIndex.CreatorBps[] memory creators = new ICultureIndex.CreatorBps[](1);
         creators[0] = ICultureIndex.CreatorBps({ creator: creatorAddress, bps: creatorBps });
@@ -131,7 +141,17 @@ contract CultureIndexTestSuite is Test {
 
     //Utility function to create default art piece
     function createDefaultArtPiece() public returns (uint256) {
-        return createArtPiece("Mona Lisa", "A masterpiece", ICultureIndex.MediaType.IMAGE, "ipfs://legends", "", "", address(0x1), 10000);
+        return
+            createArtPiece(
+                "Mona Lisa",
+                "A masterpiece",
+                ICultureIndex.MediaType.IMAGE,
+                "ipfs://legends",
+                "",
+                "",
+                address(0x1),
+                10000
+            );
     }
 
     function voteForPiece(uint256 pieceId) public {
@@ -176,7 +196,17 @@ contract CultureIndexVotingTest is Test {
 
     //Utility function to create default art piece
     function createDefaultArtPiece() public returns (uint256) {
-        return createArtPiece("Mona Lisa", "A masterpiece", ICultureIndex.MediaType.IMAGE, "ipfs://legends", "", "", address(0x1), 10000);
+        return
+            createArtPiece(
+                "Mona Lisa",
+                "A masterpiece",
+                ICultureIndex.MediaType.IMAGE,
+                "ipfs://legends",
+                "",
+                "",
+                address(0x1),
+                10000
+            );
     }
 
     function voteForPiece(uint256 pieceId) public {

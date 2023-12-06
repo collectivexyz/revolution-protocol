@@ -60,7 +60,10 @@ contract CultureIndexAccessControlTest is CultureIndexTestSuite {
         cultureIndex.lockERC721VotingToken();
         vm.stopPrank();
 
-        assertTrue(cultureIndex.isERC721VotingTokenLocked(), "ERC721VotingToken should be locked by owner only");
+        assertTrue(
+            cultureIndex.isERC721VotingTokenLocked(),
+            "ERC721VotingToken should be locked by owner only"
+        );
     }
 
     /// @dev Tests only the owner can update the ERC721 voting token
@@ -83,7 +86,10 @@ contract CultureIndexAccessControlTest is CultureIndexTestSuite {
     }
 
     function testSetQuorumVotesBPSWithinRange(uint104 newQuorumBPS) public {
-        vm.assume(newQuorumBPS >= cultureIndex.MIN_QUORUM_VOTES_BPS() && newQuorumBPS <= cultureIndex.MAX_QUORUM_VOTES_BPS());
+        vm.assume(
+            newQuorumBPS >= cultureIndex.MIN_QUORUM_VOTES_BPS() &&
+                newQuorumBPS <= cultureIndex.MAX_QUORUM_VOTES_BPS()
+        );
 
         // Set new quorum BPS by owner
         vm.startPrank(address(this));
@@ -97,7 +103,10 @@ contract CultureIndexAccessControlTest is CultureIndexTestSuite {
 
     function testSetQuorumVotesBPSOutsideRange(uint104 newQuorumBPS) public {
         uint256 currentQuorumBPS = cultureIndex.quorumVotesBPS();
-        vm.assume(newQuorumBPS < cultureIndex.MIN_QUORUM_VOTES_BPS() || newQuorumBPS > cultureIndex.MAX_QUORUM_VOTES_BPS());
+        vm.assume(
+            newQuorumBPS < cultureIndex.MIN_QUORUM_VOTES_BPS() ||
+                newQuorumBPS > cultureIndex.MAX_QUORUM_VOTES_BPS()
+        );
 
         // Set new quorum BPS by owner
         vm.startPrank(address(this));
@@ -106,7 +115,11 @@ contract CultureIndexAccessControlTest is CultureIndexTestSuite {
         vm.stopPrank();
 
         // Check if the quorum BPS is updated correctly
-        assertEq(cultureIndex.quorumVotesBPS(), currentQuorumBPS, "Quorum BPS should be updated within valid range");
+        assertEq(
+            cultureIndex.quorumVotesBPS(),
+            currentQuorumBPS,
+            "Quorum BPS should be updated within valid range"
+        );
     }
 
     function testRevertNonOwnerSetQuorumVotesBPS() public {
@@ -121,7 +134,10 @@ contract CultureIndexAccessControlTest is CultureIndexTestSuite {
     }
 
     function testDropTopVotedPieceOnlyIfQuorumIsMet(uint256 quorumBps) public {
-        vm.assume(quorumBps >= cultureIndex.MIN_QUORUM_VOTES_BPS() && quorumBps <= cultureIndex.MAX_QUORUM_VOTES_BPS());
+        vm.assume(
+            quorumBps >= cultureIndex.MIN_QUORUM_VOTES_BPS() &&
+                quorumBps <= cultureIndex.MAX_QUORUM_VOTES_BPS()
+        );
 
         // Set quorum BPS
         vm.startPrank(address(this));

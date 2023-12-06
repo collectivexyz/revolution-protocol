@@ -316,7 +316,13 @@ interface IVerbsDAOExecutor {
         uint256 eta
     ) external returns (bytes32);
 
-    function cancelTransaction(address target, uint256 value, string calldata signature, bytes calldata data, uint256 eta) external;
+    function cancelTransaction(
+        address target,
+        uint256 value,
+        string calldata signature,
+        bytes calldata data,
+        uint256 eta
+    ) external;
 
     function executeTransaction(
         address target,

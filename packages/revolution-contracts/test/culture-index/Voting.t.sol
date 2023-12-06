@@ -204,7 +204,8 @@ contract CultureIndexVotingBasicTest is CultureIndexTestSuite {
         verbs.mint();
 
         uint256 initialWeight = cultureIndex.getCurrentVotes(voter);
-        uint256 expectedInitialWeight = initialErc20Weight + (1 * cultureIndex.erc721VotingTokenWeight() * 1e18);
+        uint256 expectedInitialWeight = initialErc20Weight +
+            (1 * cultureIndex.erc721VotingTokenWeight() * 1e18);
         assertEq(initialWeight, expectedInitialWeight);
 
         // Change token balances
@@ -214,7 +215,9 @@ contract CultureIndexVotingBasicTest is CultureIndexTestSuite {
         verbs.mint();
 
         uint256 updatedWeight = cultureIndex.getCurrentVotes(voter);
-        uint256 expectedUpdatedWeight = updateErc20Weight + initialErc20Weight + (2 * cultureIndex.erc721VotingTokenWeight() * 1e18);
+        uint256 expectedUpdatedWeight = updateErc20Weight +
+            initialErc20Weight +
+            (2 * cultureIndex.erc721VotingTokenWeight() * 1e18);
         assertEq(updatedWeight, expectedUpdatedWeight);
 
         //burn the first 2 verbs
@@ -225,7 +228,11 @@ contract CultureIndexVotingBasicTest is CultureIndexTestSuite {
         assertEq(verbs.balanceOf(address(this)), 0, "ERC721 token should be burned");
 
         // ensure cultureindex currentvotes is correct
-        assertEq(cultureIndex.getCurrentVotes(address(this)), updateErc20Weight + initialErc20Weight, "Vote weight should be correct");
+        assertEq(
+            cultureIndex.getCurrentVotes(address(this)),
+            updateErc20Weight + initialErc20Weight,
+            "Vote weight should be correct"
+        );
     }
 
     /**
@@ -631,13 +638,18 @@ contract CultureIndexVotingBasicTest is CultureIndexTestSuite {
         vm.roll(block.number + 3);
 
         // Calculate expected vote weight
-        uint256 expectedVoteWeight = erc20Balance + (erc721Balance * cultureIndex.erc721VotingTokenWeight() * 1e18);
+        uint256 expectedVoteWeight = erc20Balance +
+            (erc721Balance * cultureIndex.erc721VotingTokenWeight() * 1e18);
 
         // Get the actual vote weight from the contract
         uint256 actualVoteWeight = cultureIndex.getCurrentVotes(address(this));
 
         // Assert that the actual vote weight matches the expected value
-        assertEq(actualVoteWeight, expectedVoteWeight, "Vote weight calculation does not match expected value");
+        assertEq(
+            actualVoteWeight,
+            expectedVoteWeight,
+            "Vote weight calculation does not match expected value"
+        );
     }
 
     function testQuorumVotesCalculation(uint200 erc20TotalSupply, uint256 erc721TotalSupply) public {
@@ -667,13 +679,17 @@ contract CultureIndexVotingBasicTest is CultureIndexTestSuite {
         }
 
         // Calculate expected quorum votes
-        uint256 expectedQuorumVotes = (quorumBPS * (erc20TotalSupply + erc721TotalSupply * 1e18 * cultureIndex.erc721VotingTokenWeight())) /
-            10_000;
+        uint256 expectedQuorumVotes = (quorumBPS *
+            (erc20TotalSupply + erc721TotalSupply * 1e18 * cultureIndex.erc721VotingTokenWeight())) / 10_000;
 
         // Get the quorum votes from the contract
         uint256 actualQuorumVotes = cultureIndex.quorumVotes();
 
         // Assert that the actual quorum votes match the expected value
-        assertEq(actualQuorumVotes, expectedQuorumVotes, "Quorum votes calculation does not match expected value");
+        assertEq(
+            actualQuorumVotes,
+            expectedQuorumVotes,
+            "Quorum votes calculation does not match expected value"
+        );
     }
 }

@@ -100,7 +100,10 @@ contract VerbsDescriptor is IVerbsDescriptor, Ownable {
      * @dev The returned value may be a base64 encoded data URI or an API URL.
      */
     //slither-disable-next-line encode-packed-collision
-    function tokenURI(uint256 tokenId, ICultureIndex.ArtPieceMetadata memory metadata) external view returns (string memory) {
+    function tokenURI(
+        uint256 tokenId,
+        ICultureIndex.ArtPieceMetadata memory metadata
+    ) external view returns (string memory) {
         if (isDataURIEnabled) return dataURI(tokenId, metadata);
 
         return string(abi.encodePacked(baseURI, tokenId.toString()));
@@ -109,14 +112,20 @@ contract VerbsDescriptor is IVerbsDescriptor, Ownable {
     /**
      * @notice Given a token ID, construct a base64 encoded data URI for an official Vrbs DAO verb.
      */
-    function dataURI(uint256 tokenId, ICultureIndex.ArtPieceMetadata memory metadata) public view returns (string memory) {
+    function dataURI(
+        uint256 tokenId,
+        ICultureIndex.ArtPieceMetadata memory metadata
+    ) public view returns (string memory) {
         return genericDataURI(string(abi.encodePacked(tokenNamePrefix, " ", tokenId.toString())), metadata);
     }
 
     /**
      * @notice Given a name, and metadata, construct a base64 encoded data URI.
      */
-    function genericDataURI(string memory name, ICultureIndex.ArtPieceMetadata memory metadata) public pure returns (string memory) {
+    function genericDataURI(
+        string memory name,
+        ICultureIndex.ArtPieceMetadata memory metadata
+    ) public pure returns (string memory) {
         /// @dev Get name description image and animation_url from CultureIndex
 
         TokenURIParams memory params = TokenURIParams({

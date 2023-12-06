@@ -97,7 +97,17 @@ contract VerbsTokenTestSuite is Test {
 
     //Utility function to create default art piece
     function createDefaultArtPiece() public returns (uint256) {
-        return createArtPiece("Mona Lisa", "A masterpiece", ICultureIndex.MediaType.IMAGE, "ipfs://legends", "", "", address(0x1), 10000);
+        return
+            createArtPiece(
+                "Mona Lisa",
+                "A masterpiece",
+                ICultureIndex.MediaType.IMAGE,
+                "ipfs://legends",
+                "",
+                "",
+                address(0x1),
+                10000
+            );
     }
 
     //function to create basic metadata

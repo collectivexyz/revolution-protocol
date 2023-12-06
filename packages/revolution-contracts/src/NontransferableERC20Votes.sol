@@ -109,7 +109,12 @@ contract NontransferableERC20Votes is Ownable, ERC20Votes {
     /**
      * @dev Not allowed
      */
-    function _approve(address owner, address spender, uint256 value, bool emitEvent) internal virtual override {
+    function _approve(
+        address owner,
+        address spender,
+        uint256 value,
+        bool emitEvent
+    ) internal virtual override {
         return;
     }
 

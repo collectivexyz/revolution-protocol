@@ -133,12 +133,32 @@ contract VerbsAuctionHouseTest is Test {
         uint256[] memory creatorBpsArray = new uint256[](1);
         creatorBpsArray[0] = creatorBps;
 
-        return createArtPieceMultiCreator(name, description, mediaType, image, text, animationUrl, creatorAddresses, creatorBpsArray);
+        return
+            createArtPieceMultiCreator(
+                name,
+                description,
+                mediaType,
+                image,
+                text,
+                animationUrl,
+                creatorAddresses,
+                creatorBpsArray
+            );
     }
 
     //Utility function to create default art piece
     function createDefaultArtPiece() public returns (uint256) {
-        return createArtPiece("Mona Lisa", "A masterpiece", ICultureIndex.MediaType.IMAGE, "ipfs://legends", "", "", address(0x1), 10000);
+        return
+            createArtPiece(
+                "Mona Lisa",
+                "A masterpiece",
+                ICultureIndex.MediaType.IMAGE,
+                "ipfs://legends",
+                "",
+                "",
+                address(0x1),
+                10000
+            );
     }
 
     // Utility function to create a new art piece with multiple creators and return its ID

@@ -45,8 +45,14 @@ contract TokenMintingTest is VerbsTokenTestSuite {
         assertEq(droppedArtPiece.dropper, topVotedPieceBeforeMint.dropper, "Dropper address should match");
         //ensure isDropped is now true
         assertTrue(droppedArtPiece.isDropped, "isDropped should be true");
-        assertTrue(areArraysEqual(droppedArtPiece.creators, topVotedPieceBeforeMint.creators), "Creators array should match");
-        assertTrue(areArtPieceMetadataEqual(droppedArtPiece.metadata, topVotedPieceBeforeMint.metadata), "Metadata should match");
+        assertTrue(
+            areArraysEqual(droppedArtPiece.creators, topVotedPieceBeforeMint.creators),
+            "Creators array should match"
+        );
+        assertTrue(
+            areArtPieceMetadataEqual(droppedArtPiece.metadata, topVotedPieceBeforeMint.metadata),
+            "Metadata should match"
+        );
     }
 
     // Helper function to compare ArtPieceMetadata structs
@@ -63,7 +69,10 @@ contract TokenMintingTest is VerbsTokenTestSuite {
     }
 
     // Helper function to compare arrays of creators
-    function areArraysEqual(ICultureIndex.CreatorBps[] memory arr1, ICultureIndex.CreatorBps[] memory arr2) internal pure returns (bool) {
+    function areArraysEqual(
+        ICultureIndex.CreatorBps[] memory arr1,
+        ICultureIndex.CreatorBps[] memory arr2
+    ) internal pure returns (bool) {
         if (arr1.length != arr2.length) {
             return false;
         }
@@ -95,7 +104,11 @@ contract TokenMintingTest is VerbsTokenTestSuite {
 
         // Validate the token
         uint256 totalSupply = verbsToken.totalSupply();
-        assertEq(verbsToken.ownerOf(tokenId), address(this), "The contract should own the newly minted token");
+        assertEq(
+            verbsToken.ownerOf(tokenId),
+            address(this),
+            "The contract should own the newly minted token"
+        );
         assertEq(tokenId, 0, "First token ID should be 1");
         assertEq(totalSupply, 1, "Total supply should be 1");
     }
@@ -107,7 +120,11 @@ contract TokenMintingTest is VerbsTokenTestSuite {
         uint256 initialTotalSupply = verbsToken.totalSupply();
         uint256 newTokenId = verbsToken.mint();
         assertEq(verbsToken.totalSupply(), initialTotalSupply + 1, "One new token should have been minted");
-        assertEq(verbsToken.ownerOf(newTokenId), address(this), "The contract should own the newly minted token");
+        assertEq(
+            verbsToken.ownerOf(newTokenId),
+            address(this),
+            "The contract should own the newly minted token"
+        );
     }
 
     /// @dev Tests burning a verb token
@@ -140,21 +157,33 @@ contract TokenMintingTest is VerbsTokenTestSuite {
 
         if (shouldRevertMint) vm.expectRevert("dropTopVotedPiece failed");
         uint256 tokenId1 = verbsToken.mint();
-        if (!shouldRevertMint) assertEq(verbsToken.totalSupply(), tokenId1 + 1, "CurrentVerbId should increment after first mint");
+        if (!shouldRevertMint)
+            assertEq(
+                verbsToken.totalSupply(),
+                tokenId1 + 1,
+                "CurrentVerbId should increment after first mint"
+            );
 
         if (voteWeight == 0) vm.expectRevert("Weight must be greater than zero");
         cultureIndex.vote(pieceId2);
 
         if (shouldRevertMint) vm.expectRevert("dropTopVotedPiece failed");
         uint256 tokenId2 = verbsToken.mint();
-        if (!shouldRevertMint) assertEq(verbsToken.totalSupply(), tokenId2 + 1, "CurrentVerbId should increment after second mint");
+        if (!shouldRevertMint)
+            assertEq(
+                verbsToken.totalSupply(),
+                tokenId2 + 1,
+                "CurrentVerbId should increment after second mint"
+            );
     }
 
     /// @dev Checks if the VerbCreated event is emitted with correct parameters on minting
     function testMintingEvent() public {
         createDefaultArtPiece();
 
-        (uint256 pieceId, ICultureIndex.ArtPieceMetadata memory metadata, , , , , , ) = cultureIndex.pieces(0);
+        (uint256 pieceId, ICultureIndex.ArtPieceMetadata memory metadata, , , , , , ) = cultureIndex.pieces(
+            0
+        );
 
         emit log_uint(pieceId);
 
@@ -201,7 +230,11 @@ contract TokenMintingTest is VerbsTokenTestSuite {
         (, ICultureIndex.ArtPieceMetadata memory metadata, , , , , , ) = cultureIndex.pieces(artPieceId);
         // Assuming the descriptor returns a fixed URI for the given tokenId
         string memory expectedTokenURI = descriptor.tokenURI(tokenId, metadata);
-        assertEq(verbsToken.tokenURI(tokenId), expectedTokenURI, "Token URI should be correctly set and retrieved");
+        assertEq(
+            verbsToken.tokenURI(tokenId),
+            expectedTokenURI,
+            "Token URI should be correctly set and retrieved"
+        );
     }
 
     /// @dev Ensures minting fetches and associates the top-voted piece from CultureIndex

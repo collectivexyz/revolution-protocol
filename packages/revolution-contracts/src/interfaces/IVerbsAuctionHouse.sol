@@ -39,7 +39,12 @@ interface IVerbsAuctionHouse {
 
     event AuctionExtended(uint256 indexed verbId, uint256 endTime);
 
-    event AuctionSettled(uint256 indexed verbId, address winner, uint256 amount, uint256 creatorTokensEmitted);
+    event AuctionSettled(
+        uint256 indexed verbId,
+        address winner,
+        uint256 amount,
+        uint256 creatorTokensEmitted
+    );
 
     event AuctionTimeBufferUpdated(uint256 timeBuffer);
 

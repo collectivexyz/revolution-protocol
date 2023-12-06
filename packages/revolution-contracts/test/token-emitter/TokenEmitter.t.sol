@@ -29,7 +29,11 @@ contract TokenEmitterTest is Test {
         //20% - how much the price decays per unit of time with no sales
         int256 priceDecayPercent = 1e18 / 10;
 
-        NontransferableERC20Votes governanceToken = new NontransferableERC20Votes(address(this), "Revolution Governance", "GOV");
+        NontransferableERC20Votes governanceToken = new NontransferableERC20Votes(
+            address(this),
+            "Revolution Governance",
+            "GOV"
+        );
 
         int256 oneFullTokenTargetPrice = 1 ether;
 
@@ -61,7 +65,11 @@ contract TokenEmitterTest is Test {
         address treasury = address(0x36);
 
         // // 0.1 per governance, 10% price decay per day, 100 governance sale target per day
-        NontransferableERC20Votes governanceToken = new NontransferableERC20Votes(address(this), "Revolution Governance", "GOV");
+        NontransferableERC20Votes governanceToken = new NontransferableERC20Votes(
+            address(this),
+            "Revolution Governance",
+            "GOV"
+        );
         RevolutionProtocolRewards protocolRewards = new RevolutionProtocolRewards();
 
         TokenEmitter emitter1 = new TokenEmitter(
@@ -135,18 +143,34 @@ contract TokenEmitterTest is Test {
         uint256 expectedCreatorEth = (totalPaymentForCreator * entropyRate) / 10000;
 
         if (creatorRate == 0) vm.expectRevert("Ether amount must be greater than 0");
-        uint256 expectedCreatorTokens = uint(emitter.getTokenQuoteForEther(totalPaymentForCreator - expectedCreatorEth));
+        uint256 expectedCreatorTokens = uint(
+            emitter.getTokenQuoteForEther(totalPaymentForCreator - expectedCreatorEth)
+        );
 
         // Perform token purchase
-        uint256 tokensSold = emitter.buyToken{ value: valueToSend }(recipients, bps, address(0), address(0), address(0));
+        uint256 tokensSold = emitter.buyToken{ value: valueToSend }(
+            recipients,
+            bps,
+            address(0),
+            address(0),
+            address(0)
+        );
 
         // Verify tokens distributed to creator
         uint256 creatorTokenBalance = emitter.balanceOf(creatorsAddress);
-        assertEq(creatorTokenBalance, expectedCreatorTokens, "Creator did not receive correct amount of tokens");
+        assertEq(
+            creatorTokenBalance,
+            expectedCreatorTokens,
+            "Creator did not receive correct amount of tokens"
+        );
 
         // Verify ETH sent to creator
         uint256 creatorsNewEthBalance = address(creatorsAddress).balance;
-        assertEq(creatorsNewEthBalance - creatorsInitialEthBalance, expectedCreatorEth, "Incorrect ETH amount sent to creator");
+        assertEq(
+            creatorsNewEthBalance - creatorsInitialEthBalance,
+            expectedCreatorEth,
+            "Incorrect ETH amount sent to creator"
+        );
 
         // Verify tokens distributed to recipient
         uint256 recipientTokenBalance = emitter.balanceOf(address(1));
@@ -264,7 +288,13 @@ contract TokenEmitterTest is Test {
         assertGt(expectedAmount, 0, "Token purchase should have a positive amount");
 
         // Attempting a valid token purchase
-        uint emittedWad = emitter.buyToken{ value: 1e18 }(recipients, correctBps, address(0), address(0), address(0));
+        uint emittedWad = emitter.buyToken{ value: 1e18 }(
+            recipients,
+            correctBps,
+            address(0),
+            address(0),
+            address(0)
+        );
         int totalSupplyAfterValidPurchase = int(emitter.totalSupply());
         assertEq(totalSupplyAfterValidPurchase, expectedAmount, "Supply should match the expected amount");
         //emitted should match expected
@@ -295,7 +325,11 @@ contract TokenEmitterTest is Test {
         // Setting Creators Address by Owner
         address newCreatorsAddress = address(0x123);
         emitter.setCreatorsAddress(newCreatorsAddress);
-        assertEq(emitter.creatorsAddress(), newCreatorsAddress, "Owner should be able to set creators address");
+        assertEq(
+            emitter.creatorsAddress(),
+            newCreatorsAddress,
+            "Owner should be able to set creators address"
+        );
 
         // Attempting to set Creators Address by Non-Owner
         address nonOwner = address(0x4156);
@@ -344,7 +378,11 @@ contract TokenEmitterTest is Test {
         MaliciousTreasury maliciousTreasury = new MaliciousTreasury(address(emitter));
 
         // Initialize TokenEmitter with the address of the malicious treasury
-        NontransferableERC20Votes governanceToken = new NontransferableERC20Votes(address(this), "Revolution Governance", "GOV");
+        NontransferableERC20Votes governanceToken = new NontransferableERC20Votes(
+            address(this),
+            "Revolution Governance",
+            "GOV"
+        );
         uint256 toScale = 1e18 * 1e18;
         uint256 tokensPerTimeUnit_ = 10_000;
         RevolutionProtocolRewards protocolRewards = new RevolutionProtocolRewards();
@@ -380,7 +418,9 @@ contract TokenEmitterTest is Test {
         vm.assume(payment < emitter.maxPurchaseAmount());
         vm.startPrank(address(0));
 
-        uint256 SOME_MAX_EXPECTED_VALUE = uint256(wadDiv(int256(payment), 1 ether)) * 1e18 * tokensPerTimeUnit;
+        uint256 SOME_MAX_EXPECTED_VALUE = uint256(wadDiv(int256(payment), 1 ether)) *
+            1e18 *
+            tokensPerTimeUnit;
 
         int256 slightlyMore = emitter.getTokenQuoteForEther((payment * 101) / 100);
 
@@ -391,7 +431,11 @@ contract TokenEmitterTest is Test {
 
         // Assert that the token amount is reasonable (not zero or unexpectedly high)
         assertGt(tokenAmount, 0, "Token amount should be greater than zero");
-        assertLt(tokenAmount, int256(SOME_MAX_EXPECTED_VALUE), "Token amount should be less than some max expected value");
+        assertLt(
+            tokenAmount,
+            int256(SOME_MAX_EXPECTED_VALUE),
+            "Token amount should be less than some max expected value"
+        );
         assertLt(tokenAmount, slightlyMore, "Token amount should be less than slightly more");
 
         //buy 10 ether of tokens

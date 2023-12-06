@@ -68,7 +68,10 @@ contract CultureIndex is ICultureIndex, Ownable, ReentrancyGuard {
         uint256 erc721VotingTokenWeight_,
         uint256 quorumVotesBPS_
     ) Ownable(initialOwner_) {
-        require(quorumVotesBPS_ >= MIN_QUORUM_VOTES_BPS && quorumVotesBPS_ <= MAX_QUORUM_VOTES_BPS, "invalid quorum bps");
+        require(
+            quorumVotesBPS_ >= MIN_QUORUM_VOTES_BPS && quorumVotesBPS_ <= MAX_QUORUM_VOTES_BPS,
+            "invalid quorum bps"
+        );
         require(erc721VotingTokenWeight_ > 0, "invalid erc721 voting token weight");
         require(erc721VotingToken_ != address(0), "invalid erc721 voting token");
         require(erc20VotingToken_ != address(0), "invalid erc20 voting token");
@@ -126,10 +129,12 @@ contract CultureIndex is ICultureIndex, Ownable, ReentrancyGuard {
     function validateMediaType(ArtPieceMetadata memory metadata) internal pure {
         require(uint8(metadata.mediaType) > 0 && uint8(metadata.mediaType) <= 5, "Invalid media type");
 
-        if (metadata.mediaType == MediaType.IMAGE) require(bytes(metadata.image).length > 0, "Image URL must be provided");
+        if (metadata.mediaType == MediaType.IMAGE)
+            require(bytes(metadata.image).length > 0, "Image URL must be provided");
         else if (metadata.mediaType == MediaType.ANIMATION)
             require(bytes(metadata.animationUrl).length > 0, "Animation URL must be provided");
-        else if (metadata.mediaType == MediaType.TEXT) require(bytes(metadata.text).length > 0, "Text must be provided");
+        else if (metadata.mediaType == MediaType.TEXT)
+            require(bytes(metadata.text).length > 0, "Text must be provided");
     }
 
     /**
@@ -141,7 +146,9 @@ contract CultureIndex is ICultureIndex, Ownable, ReentrancyGuard {
      * - The `creatorArray` must not contain any zero addresses.
      * - The function will return the total basis points which must be checked to be exactly 10,000.
      */
-    function getTotalBpsFromCreators(CreatorBps[] memory creatorArray) internal pure returns (uint256, uint256) {
+    function getTotalBpsFromCreators(
+        CreatorBps[] memory creatorArray
+    ) internal pure returns (uint256, uint256) {
         uint256 creatorArrayLength = creatorArray.length;
         //Require that creatorArray is not more than 100 to prevent gas limit issues
         require(creatorArrayLength <= 100, "Creator array must not be > 100");
@@ -168,7 +175,10 @@ contract CultureIndex is ICultureIndex, Ownable, ReentrancyGuard {
      * - `creatorArray` must not contain any zero addresses.
      * - The sum of basis points in `creatorArray` must be exactly 10,000.
      */
-    function createPiece(ArtPieceMetadata memory metadata, CreatorBps[] memory creatorArray) public returns (uint256) {
+    function createPiece(
+        ArtPieceMetadata memory metadata,
+        CreatorBps[] memory creatorArray
+    ) public returns (uint256) {
         (uint256 totalBps, uint256 creatorArrayLength) = getTotalBpsFromCreators(creatorArray);
         require(totalBps == 10_000, "Total BPS must sum up to 10,000");
 
@@ -183,7 +193,10 @@ contract CultureIndex is ICultureIndex, Ownable, ReentrancyGuard {
         ArtPiece storage newPiece = pieces[pieceId];
 
         newPiece.pieceId = pieceId;
-        newPiece.totalVotesSupply = _calculateVoteWeight(erc20VotingToken.totalSupply(), erc721VotingToken.totalSupply());
+        newPiece.totalVotesSupply = _calculateVoteWeight(
+            erc20VotingToken.totalSupply(),
+            erc721VotingToken.totalSupply()
+        );
         newPiece.totalERC20Supply = erc20VotingToken.totalSupply();
         newPiece.metadata = metadata;
         newPiece.dropper = msg.sender;
@@ -248,12 +261,19 @@ contract CultureIndex is ICultureIndex, Ownable, ReentrancyGuard {
      * @param erc721Balance The ERC721 balance of the voter.
      * @return The vote weight of the voter.
      */
-    function _calculateVoteWeight(uint256 erc20Balance, uint256 erc721Balance) internal view returns (uint256) {
+    function _calculateVoteWeight(
+        uint256 erc20Balance,
+        uint256 erc721Balance
+    ) internal view returns (uint256) {
         return erc20Balance + (erc721Balance * erc721VotingTokenWeight * 1e18);
     }
 
     function _getCurrentVotes(address account) internal view returns (uint256) {
-        return _calculateVoteWeight(erc20VotingToken.getVotes(account), erc721VotingToken.getCurrentVotes(account));
+        return
+            _calculateVoteWeight(
+                erc20VotingToken.getVotes(account),
+                erc721VotingToken.getCurrentVotes(account)
+            );
     }
 
     function _getPriorVotes(address account, uint256 blockNumber) internal view returns (uint256) {
@@ -380,7 +400,10 @@ contract CultureIndex is ICultureIndex, Ownable, ReentrancyGuard {
      * Differs from `GovernerBravo` which uses fixed amount
      */
     function quorumVotes() public view returns (uint256) {
-        return (quorumVotesBPS * _calculateVoteWeight(erc20VotingToken.totalSupply(), erc721VotingToken.totalSupply())) / 10_000;
+        return
+            (quorumVotesBPS *
+                _calculateVoteWeight(erc20VotingToken.totalSupply(), erc721VotingToken.totalSupply())) /
+            10_000;
     }
 
     /**
@@ -389,7 +412,10 @@ contract CultureIndex is ICultureIndex, Ownable, ReentrancyGuard {
      */
     function dropTopVotedPiece() public nonReentrant onlyOwner returns (ArtPiece memory) {
         ICultureIndex.ArtPiece memory piece = getTopVotedPiece();
-        require(totalVoteWeights[piece.pieceId] >= piece.quorumVotes, "Does not meet quorum votes to be dropped.");
+        require(
+            totalVoteWeights[piece.pieceId] >= piece.quorumVotes,
+            "Does not meet quorum votes to be dropped."
+        );
 
         //set the piece as dropped
         pieces[piece.pieceId].isDropped = true;
@@ -402,7 +428,12 @@ contract CultureIndex is ICultureIndex, Ownable, ReentrancyGuard {
         uint256 numCreators = piece.creators.length;
         //for each creator, emit an event
         for (uint i; i < numCreators; i++) {
-            emit PieceDroppedCreator(piece.pieceId, piece.creators[i].creator, piece.dropper, piece.creators[i].bps);
+            emit PieceDroppedCreator(
+                piece.pieceId,
+                piece.creators[i].creator,
+                piece.dropper,
+                piece.creators[i].bps
+            );
         }
 
         return pieces[piece.pieceId];
