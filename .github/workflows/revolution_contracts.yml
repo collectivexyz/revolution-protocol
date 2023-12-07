@@ -1,0 +1,30 @@
+name: "Protocol Rewards"
+
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - "*"
+
+jobs:
+  build:
+    uses: ./.github/workflows/build.yml
+    with:
+      package_folder: packages/revolution-contracts
+
+  test:
+    needs: build
+    uses: ./.github/workflows/test.yml
+    with:
+      package_folder: packages/revolution-contracts
+
+  contract_sizes:
+    needs: build
+    uses: ./.github/workflows/contract_sizes.yml
+    with:
+      package_folder: packages/revolution-contracts
+#   coverage:
+#     uses: ./.github/workflows/coverage.yml
+#     with:
+#       package: "protocol-rewards"
+#       files_to_ignore: '"*lib*"'

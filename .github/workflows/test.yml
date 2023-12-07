@@ -1,10 +1,9 @@
-name: forge tests
-
 on:
-  workflow_dispatch:
-  push:
-    branches:
-      - "*"
+  workflow_call:
+    inputs:
+      package_folder:
+        required: true
+        type: string
 
 jobs:
   forge_test:
@@ -21,13 +20,14 @@ jobs:
       - name: Install node deps and foundry
         uses: ./.github/actions/setup_deps
 
-      - name: Run protocol-rewards tests
-        run: |
-          cd packages/protocol-rewards && pnpm clean && pnpm test
+      - name: Load foundry cache
+        uses: ./.github/actions/cache_foundry_build
+        with:
+          package_folder: ${{ inputs.package_folder }}
 
-      - name: Run revolution-contracts tests
+      - name: Test
         run: |
-          cd packages/revolution-contracts && pnpm clean && pnpm test
+          cd ${{ inputs.package_folder}} && pnpm clean && pnpm test
 
       - name: Run Geiger Check
         run: |
