@@ -52,6 +52,14 @@ jobs:
           --remove lcov.info \
           --output-file lcov.info "*node_modules*" "*test*" "*script*" ${{ inputs.files_to_ignore }}
 
+      - name: Check if GITHUB_TOKEN is set
+        run: |
+          if [ -z "${{ secrets.GITHUB_TOKEN }}" ]; then
+              echo "GITHUB_TOKEN is not set"
+          else
+              echo "GITHUB_TOKEN is set"
+          fi
+
       - name: Report code coverage
         uses: zgosalvez/github-actions-report-lcov@v2
         with:
