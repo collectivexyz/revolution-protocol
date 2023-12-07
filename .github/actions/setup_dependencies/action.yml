@@ -10,10 +10,12 @@ runs:
         cache: "pnpm"
 
     - name: Install pnpm
+      shell: bash
       run: |
         npm install -g pnpm
 
     - name: Update Dependencies
+      shell: bash
       run: |
         pnpm install
 
