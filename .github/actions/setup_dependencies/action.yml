@@ -9,11 +9,6 @@ runs:
         node-version: 18
         cache: "pnpm"
 
-    - name: Install pnpm
-      shell: bash
-      run: |
-        npm install -g pnpm
-
     - name: Update Dependencies
       shell: bash
       run: |
