@@ -7,8 +7,9 @@ import { ICultureIndex } from "./interfaces/ICultureIndex.sol";
 import { Ownable } from "@openzeppelin/contracts/access/Ownable.sol";
 import { ReentrancyGuard } from "@openzeppelin/contracts/utils/ReentrancyGuard.sol";
 import { ERC721Checkpointable } from "./base/ERC721Checkpointable.sol";
+import { ContractVersionBase } from "./version/ContractVersionBase.sol";
 
-contract CultureIndex is ICultureIndex, Ownable, ReentrancyGuard {
+contract CultureIndex is ICultureIndex, Ownable, ReentrancyGuard, ContractVersionBase {
     // The MaxHeap data structure used to keep track of the top-voted piece
     MaxHeap public immutable maxHeap;
 

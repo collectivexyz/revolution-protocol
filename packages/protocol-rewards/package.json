@@ -6,6 +6,9 @@
   "files": [
     "src/"
   ],
+  "publishConfig": {
+    "access": "public"
+  },
   "scripts": {
     "build:sizes": "forge build --sizes",
     "dev": "FOUNDRY_PROFILE=dev forge test --watch -vvv",
