@@ -1,6 +1,9 @@
 name: "Contracts"
 
-on: "push"
+on:
+  push:
+  pull_request_target:
+    types: [opened, synchronize, reopened]
 
 jobs:
   contracts-protocol-rewards:
