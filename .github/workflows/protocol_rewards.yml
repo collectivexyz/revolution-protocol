@@ -1,10 +1,7 @@
 name: "Protocol rewards"
 
 on:
-  workflow_dispatch:
-  push:
-    branches:
-      - "*"
+  workflow_call:
 
 jobs:
   build:

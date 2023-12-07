@@ -1,10 +1,7 @@
 name: "Revolution contracts"
 
 on:
-  workflow_dispatch:
-  push:
-    branches:
-      - "*"
+  workflow_call:
 
 jobs:
   build:

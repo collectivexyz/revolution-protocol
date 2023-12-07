@@ -1,0 +1,14 @@
+name: "Contracts"
+
+on: "push"
+
+jobs:
+  contracts-protocol-rewards:
+    name: Protocol Rewards
+    uses: ./.github/workflows/protocol_rewards.yml
+    secrets: inherit
+
+  contracts-revolution:
+    name: Revolution Contracts
+    uses: ./.github/workflows/revolution_contracts.yml
+    secrets: inherit
