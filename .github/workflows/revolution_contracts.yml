@@ -15,6 +15,12 @@ jobs:
     with:
       package_folder: packages/revolution
 
+  storage_test:
+    needs: build
+    uses: ./.github/workflows/storage.yml
+    with:
+      package_folder: packages/revolution
+
   contract_sizes:
     needs: build
     uses: ./.github/workflows/contract_sizes.yml
