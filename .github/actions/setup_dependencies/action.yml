@@ -15,6 +15,7 @@ runs:
         cache: "pnpm"
 
     - name: Install turbo
+      shell: bash
       run: |
         pnpm add -g turbo
 
