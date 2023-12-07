@@ -10,11 +10,7 @@ contract NontransferableERC20TestSuite is Test {
     NontransferableERC20Votes token;
 
     function setUp() public {
-        token = new NontransferableERC20Votes(
-            address(this),
-            "Revolution Governance",
-            "GOV"
-        );
+        token = new NontransferableERC20Votes(address(this), "Revolution Governance", "GOV");
     }
 
     function testTransferRestrictions() public {
@@ -111,7 +107,6 @@ contract NontransferableERC20TestSuite is Test {
         address account1 = address(0x7);
         address account2 = address(0x8);
 
-
         // Mint tokens to different accounts
         vm.startPrank(address(this));
         token.mint(account1, mintAmount1);
@@ -157,5 +152,4 @@ contract NontransferableERC20TestSuite is Test {
         token.mint(address(1), excessiveAmount);
         vm.stopPrank();
     }
-
 }

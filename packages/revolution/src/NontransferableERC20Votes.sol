@@ -23,7 +23,6 @@ import { ERC20 } from "./base/erc20/ERC20.sol";
 import { EIP712 } from "@openzeppelin/contracts/utils/cryptography/EIP712.sol";
 
 contract NontransferableERC20Votes is Ownable, ERC20Votes {
-
     error TRANSFER_NOT_ALLOWED();
 
     /**
