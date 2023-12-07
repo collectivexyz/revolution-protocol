@@ -29,6 +29,10 @@ jobs:
         run: |
           cd ${{ inputs.package_folder}} && pnpm clean && pnpm test
 
+      - name: Storage inspection test
+        run: |
+          pnpm storage-inspect:check
+
       - name: Run Geiger Check
         run: |
           forge geiger --check ${{ inputs.package_folder }}*
