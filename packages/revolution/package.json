@@ -14,6 +14,7 @@
     "prettier:check": "prettier --check 'src/**/*.sol' 'test/**/*.sol'",
     "prettier": "prettier --write 'src/**/*.sol' 'test/**/*.sol'",
     "lint": "prettier --check 'src/**/*.sol' 'test/**/*.sol'",
+    "write-gas-report": "forge test --gas-report > ../../gas-reports/revolution.ansi",
     "clean": "forge cache clean && if [ -d out ]; then forge clean; fi"
   },
   "devDependencies": {
