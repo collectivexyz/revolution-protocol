@@ -23,6 +23,12 @@ jobs:
     uses: ./.github/workflows/contract_sizes.yml
     with:
       package_folder: packages/protocol-rewards
+
+  slither:
+    needs: build
+    uses: ./.github/workflows/slither.yml
+    with:
+      package_folder: packages/protocol-rewards
 #   coverage:
 #     uses: ./.github/workflows/coverage.yml
 #     with:
