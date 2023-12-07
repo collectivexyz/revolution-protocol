@@ -1,6 +1,6 @@
 {
-  "name": "@collectivexyz/revolution-contracts",
-  "version": "0.0.1",
+  "name": "@collectivexyz/revolution",
+  "version": "0.0.2",
   "repository": "https://github.com/collectivexyz/revolution-protocol.git",
   "license": "MIT",
   "files": [
