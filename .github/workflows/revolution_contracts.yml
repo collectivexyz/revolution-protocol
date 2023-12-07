@@ -26,8 +26,9 @@ jobs:
     uses: ./.github/workflows/slither.yml
     with:
       package_folder: packages/revolution
-#   coverage:
-#     uses: ./.github/workflows/coverage.yml
-#     with:
-#       package: "protocol-rewards"
-#       files_to_ignore: '"*lib*"'
+
+  coverage:
+    uses: ./.github/workflows/coverage.yml
+    with:
+      package: "revolution"
+      files_to_ignore: '"*lib*"'
