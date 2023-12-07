@@ -1,4 +1,4 @@
-name: "Protocol Rewards"
+name: "Protocol rewards"
 
 on:
   workflow_dispatch:
