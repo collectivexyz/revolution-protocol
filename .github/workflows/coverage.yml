@@ -9,6 +9,11 @@ on:
         type: string
         default: ""
 
+permissions:
+  contents: read
+  issues: write
+  pull-requests: write
+
 env:
   # Setting an environment variable with the value of a configuration variable
   package_folder: packages/${{ inputs.package }}
