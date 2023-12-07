@@ -13,9 +13,9 @@ runs:
       run: |
         npm install -g pnpm
 
-    - name: Install project dependencies
-      shell: bash
-      run: pnpm install
+    - name: Update Dependencies
+      run: |
+        pnpm install
 
     - name: Install Foundry
       uses: foundry-rs/foundry-toolchain@v1
