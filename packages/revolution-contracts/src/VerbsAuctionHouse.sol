@@ -26,14 +26,18 @@ pragma solidity ^0.8.22;
 import { PausableUpgradeable } from "@openzeppelin/contracts-upgradeable/utils/PausableUpgradeable.sol";
 import { ReentrancyGuardUpgradeable } from "@openzeppelin/contracts-upgradeable/utils/ReentrancyGuardUpgradeable.sol";
 import { OwnableUpgradeable } from "@openzeppelin/contracts-upgradeable/access/OwnableUpgradeable.sol";
-import { IERC20 } from "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import { IVerbsAuctionHouse } from "./interfaces/IVerbsAuctionHouse.sol";
 import { IVerbsToken } from "./interfaces/IVerbsToken.sol";
 import { IWETH } from "./interfaces/IWETH.sol";
 import { ITokenEmitter } from "./interfaces/ITokenEmitter.sol";
 import { ICultureIndex } from "./interfaces/ICultureIndex.sol";
 
-contract VerbsAuctionHouse is IVerbsAuctionHouse, PausableUpgradeable, ReentrancyGuardUpgradeable, OwnableUpgradeable {
+contract VerbsAuctionHouse is
+    IVerbsAuctionHouse,
+    PausableUpgradeable,
+    ReentrancyGuardUpgradeable,
+    OwnableUpgradeable
+{
     // The Verbs ERC721 token contract
     IVerbsToken public verbs;
 
@@ -91,7 +95,10 @@ contract VerbsAuctionHouse is IVerbsAuctionHouse, PausableUpgradeable, Reentranc
 
         _pause();
 
-        require(_creatorRateBps >= _minCreatorRateBps, "Creator rate must be greater than or equal to the creator rate");
+        require(
+            _creatorRateBps >= _minCreatorRateBps,
+            "Creator rate must be greater than or equal to the creator rate"
+        );
         require(_WETH != address(0), "WETH cannot be zero address");
 
         verbs = _verbs;
@@ -135,7 +142,10 @@ contract VerbsAuctionHouse is IVerbsAuctionHouse, PausableUpgradeable, Reentranc
         //slither-disable-next-line timestamp
         require(block.timestamp < _auction.endTime, "Auction expired");
         require(msg.value >= reservePrice, "Must send at least reservePrice");
-        require(msg.value >= _auction.amount + ((_auction.amount * minBidIncrementPercentage) / 100), "Must send more than last bid by minBidIncrementPercentage amount");
+        require(
+            msg.value >= _auction.amount + ((_auction.amount * minBidIncrementPercentage) / 100),
+            "Must send more than last bid by minBidIncrementPercentage amount"
+        );
 
         address payable lastBidder = _auction.bidder;
 
@@ -170,7 +180,10 @@ contract VerbsAuctionHouse is IVerbsAuctionHouse, PausableUpgradeable, Reentranc
      * @param _creatorRateBps New creator rate in basis points.
      */
     function setCreatorRateBps(uint256 _creatorRateBps) external onlyOwner {
-        require(_creatorRateBps >= minCreatorRateBps, "Creator rate must be greater than or equal to minCreatorRateBps");
+        require(
+            _creatorRateBps >= minCreatorRateBps,
+            "Creator rate must be greater than or equal to minCreatorRateBps"
+        );
         require(_creatorRateBps <= 10_000, "Creator rate must be less than or equal to 10_000");
         creatorRateBps = _creatorRateBps;
 
@@ -183,11 +196,17 @@ contract VerbsAuctionHouse is IVerbsAuctionHouse, PausableUpgradeable, Reentranc
      * @param _minCreatorRateBps New minimum creator rate in basis points.
      */
     function setMinCreatorRateBps(uint256 _minCreatorRateBps) external onlyOwner {
-        require(_minCreatorRateBps <= creatorRateBps, "Min creator rate must be less than or equal to creator rate");
+        require(
+            _minCreatorRateBps <= creatorRateBps,
+            "Min creator rate must be less than or equal to creator rate"
+        );
         require(_minCreatorRateBps <= 10_000, "Min creator rate must be less than or equal to 10_000");
 
         //ensure new min rate cannot be lower than previous min rate
-        require(_minCreatorRateBps > minCreatorRateBps, "Min creator rate must be greater than previous minCreatorRateBps");
+        require(
+            _minCreatorRateBps > minCreatorRateBps,
+            "Min creator rate must be greater than previous minCreatorRateBps"
+        );
 
         minCreatorRateBps = _minCreatorRateBps;
 
@@ -260,7 +279,14 @@ contract VerbsAuctionHouse is IVerbsAuctionHouse, PausableUpgradeable, Reentranc
             uint256 startTime = block.timestamp;
             uint256 endTime = startTime + duration;
 
-            auction = Auction({ verbId: verbId, amount: 0, startTime: startTime, endTime: endTime, bidder: payable(0), settled: false });
+            auction = Auction({
+                verbId: verbId,
+                amount: 0,
+                startTime: startTime,
+                endTime: endTime,
+                bidder: payable(0),
+                settled: false
+            });
 
             emit AuctionCreated(verbId, startTime, endTime);
         } catch Error(string memory) {
@@ -326,7 +352,13 @@ contract VerbsAuctionHouse is IVerbsAuctionHouse, PausableUpgradeable, Reentranc
                 _safeTransferETHWithFallback(creator.creator, etherAmount);
             }
             //Buy token from tokenEmitter for all the creators
-            creatorTokensEmitted = tokenEmitter.buyToken{ value: creatorGovernancePayment }(vrgdaReceivers, vrgdaSplits, address(0), address(0), deployer);
+            creatorTokensEmitted = tokenEmitter.buyToken{ value: creatorGovernancePayment }(
+                vrgdaReceivers,
+                vrgdaSplits,
+                address(0),
+                address(0),
+                deployer
+            );
         }
 
         emit AuctionSettled(_auction.verbId, _auction.bidder, _auction.amount, creatorTokensEmitted);

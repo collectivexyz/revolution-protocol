@@ -11,7 +11,18 @@ contract MockTokenEmitter is TokenEmitter {
         address _treasury,
         address _protocolRewards,
         address _revolutionRewardRecipient
-    ) TokenEmitter(_initialOwner, _token, _protocolRewards, _revolutionRewardRecipient, _treasury, 1e11, 1e17, 1e22) {
+    )
+        TokenEmitter(
+            _initialOwner,
+            _token,
+            _protocolRewards,
+            _revolutionRewardRecipient,
+            _treasury,
+            1e11,
+            1e17,
+            1e22
+        )
+    {
         treasury = _treasury;
     }
 }

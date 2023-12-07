@@ -132,7 +132,11 @@ contract VerbsDescriptorTest is Test {
         string memory uri = descriptor.dataURI(tokenId, metadata);
         assertTrue(bytes(uri).length > 0, "dataURI should not be empty");
         // Check if the string contains the base64 identifier which indicates a base64 encoded data URI
-        assertEq(substring(bytes(uri), 0, 29), "data:application/json;base64,", "dataURI should start with 'data:application/json;base64,'");
+        assertEq(
+            substring(bytes(uri), 0, 29),
+            "data:application/json;base64,",
+            "dataURI should start with 'data:application/json;base64,'"
+        );
     }
 
     /// @notice Test `genericDataURI` returns valid base64 encoded data URI
@@ -148,7 +152,11 @@ contract VerbsDescriptorTest is Test {
 
         string memory uri = descriptor.genericDataURI(metadata.name, metadata);
         assertTrue(bytes(uri).length > 0, "genericDataURI should not be empty");
-        assertEq(substring(bytes(uri), 0, 29), "data:application/json;base64,", "dataURI should start with 'data:application/json;base64,'");
+        assertEq(
+            substring(bytes(uri), 0, 29),
+            "data:application/json;base64,",
+            "dataURI should start with 'data:application/json;base64,'"
+        );
     }
 
     /// @notice Test `toggleDataURIEnabled` emits `DataURIToggled` event
@@ -184,7 +192,11 @@ contract VerbsDescriptorTest is Test {
 
         string memory uri = descriptor.tokenURI(tokenId, metadata);
         assertTrue(bytes(uri).length > 0, "URI should not be empty");
-        assertEq(substring(bytes(uri), 0, 29), "data:application/json;base64,", "dataURI should start with 'data:application/json;base64,'");
+        assertEq(
+            substring(bytes(uri), 0, 29),
+            "data:application/json;base64,",
+            "dataURI should start with 'data:application/json;base64,'"
+        );
     }
 
     /// @notice Test owner can transfer ownership using `transferOwnership`
@@ -246,7 +258,12 @@ contract VerbsDescriptorTest is Test {
         string memory uri = descriptor.tokenURI(tokenId, metadata);
 
         // The token URI should reflect both image and animation URLs
-        assertFullMetadataIntegrity(uri, metadata, tokenId, "Token URI should reflect mixed media types correctly");
+        assertFullMetadataIntegrity(
+            uri,
+            metadata,
+            tokenId,
+            "Token URI should reflect mixed media types correctly"
+        );
     }
 
     /// @notice Test `tokenURI` with full metadata set
@@ -264,11 +281,20 @@ contract VerbsDescriptorTest is Test {
         string memory uri = descriptor.tokenURI(tokenId, metadata);
 
         // Validate the token URI against the full metadata
-        assertFullMetadataIntegrity(uri, metadata, tokenId, "Token URI should correctly represent the full metadata");
+        assertFullMetadataIntegrity(
+            uri,
+            metadata,
+            tokenId,
+            "Token URI should correctly represent the full metadata"
+        );
     }
 
     // Corrected use of startsWith in assertUriContainsImage function
-    function assertUriContainsImage(string memory uri, string memory expectedImageUrl, string memory errorMessage) internal {
+    function assertUriContainsImage(
+        string memory uri,
+        string memory expectedImageUrl,
+        string memory errorMessage
+    ) internal {
         // Decode the URI if it's a data URI, else use as is
         string memory metadataJson = startsWith(uri, "data:") ? decodeMetadata(uri) : uri;
         (, , string memory imageUrl, ) = parseJson(metadataJson);
@@ -284,10 +310,17 @@ contract VerbsDescriptorTest is Test {
         string memory errorMessage
     ) internal {
         string memory metadataJson = decodeMetadata(uri);
-        (string memory name, string memory description, string memory imageUrl, string memory animationUrl) = parseJson(metadataJson);
+        (
+            string memory name,
+            string memory description,
+            string memory imageUrl,
+            string memory animationUrl
+        ) = parseJson(metadataJson);
 
         //expected name should tokenNamePrefix + space + tokenId
-        string memory expectedName = string(abi.encodePacked(tokenNamePrefix, " ", Strings.toString(tokenId)));
+        string memory expectedName = string(
+            abi.encodePacked(tokenNamePrefix, " ", Strings.toString(tokenId))
+        );
 
         assertEq(name, expectedName, string(abi.encodePacked(errorMessage, " - Name mismatch")));
         assertEq(
@@ -295,8 +328,16 @@ contract VerbsDescriptorTest is Test {
             string(abi.encodePacked(expectedMetadata.name, ". ", expectedMetadata.description)),
             string(abi.encodePacked(errorMessage, " - Description mismatch"))
         );
-        assertEq(imageUrl, expectedMetadata.image, string(abi.encodePacked(errorMessage, " - Image URL mismatch")));
-        assertEq(animationUrl, expectedMetadata.animationUrl, string(abi.encodePacked(errorMessage, " - Animation URL mismatch")));
+        assertEq(
+            imageUrl,
+            expectedMetadata.image,
+            string(abi.encodePacked(errorMessage, " - Image URL mismatch"))
+        );
+        assertEq(
+            animationUrl,
+            expectedMetadata.animationUrl,
+            string(abi.encodePacked(errorMessage, " - Animation URL mismatch"))
+        );
         // Additional assertions for text and animationUrl can be added here if required
     }
 
@@ -309,7 +350,17 @@ contract VerbsDescriptorTest is Test {
     }
 
     // Helper function to parse JSON strings into components
-    function parseJson(string memory _json) internal returns (string memory name, string memory description, string memory image, string memory animationUrl) {
+    function parseJson(
+        string memory _json
+    )
+        internal
+        returns (
+            string memory name,
+            string memory description,
+            string memory image,
+            string memory animationUrl
+        )
+    {
         uint returnValue;
         JsmnSolLib.Token[] memory tokens;
         uint actualNum;
@@ -373,7 +424,9 @@ contract VerbsDescriptorTest is Test {
     /// @param uri The data URI to split.
     /// @return mimeType The MIME type of the data.
     /// @return base64Data The base64 encoded data.
-    function splitDataURI(string memory uri) internal pure returns (string memory mimeType, string memory base64Data) {
+    function splitDataURI(
+        string memory uri
+    ) internal pure returns (string memory mimeType, string memory base64Data) {
         // Find the comma that separates the MIME type from the base64 data
         bytes memory uriBytes = bytes(uri);
         uint256 commaIndex = findComma(uriBytes);
@@ -404,7 +457,11 @@ contract VerbsDescriptorTest is Test {
     /// @param startIndex The start index of the substring.
     /// @param endIndex The end index of the substring.
     /// @return The substring.
-    function substring(bytes memory b, uint256 startIndex, uint256 endIndex) internal pure returns (bytes memory) {
+    function substring(
+        bytes memory b,
+        uint256 startIndex,
+        uint256 endIndex
+    ) internal pure returns (bytes memory) {
         bytes memory result = new bytes(endIndex - startIndex);
         for (uint256 i = startIndex; i < endIndex; i++) {
             result[i - startIndex] = b[i];

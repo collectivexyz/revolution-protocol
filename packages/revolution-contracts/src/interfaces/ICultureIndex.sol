@@ -52,7 +52,12 @@ interface ICultureIndexEvents {
      * @param dropper Address that created the piece.
      * @param bps Basis points associated with the creator for revenue sharing.
      */
-    event PieceDroppedCreator(uint256 indexed pieceId, address indexed creatorAddress, address indexed dropper, uint256 bps);
+    event PieceDroppedCreator(
+        uint256 indexed pieceId,
+        address indexed creatorAddress,
+        address indexed dropper,
+        uint256 bps
+    );
 
     /**
      * @dev Emitted when a vote is cast for a piece.
@@ -64,7 +69,12 @@ interface ICultureIndexEvents {
     event VoteCast(uint256 indexed pieceId, address indexed voter, uint256 weight, uint256 totalWeight);
 
     // The events emitted for the respective creators of a piece
-    event PieceCreatorAdded(uint256 indexed pieceId, address indexed creatorAddress, address indexed dropper, uint256 bps);
+    event PieceCreatorAdded(
+        uint256 indexed pieceId,
+        address indexed creatorAddress,
+        address indexed dropper,
+        uint256 bps
+    );
 
     // @notice Emitted when quorum votes basis points is set
     event QuorumVotesBPSSet(uint256 oldQuorumVotesBPS, uint256 newQuorumVotesBPS);
@@ -147,7 +157,10 @@ interface ICultureIndex is ICultureIndexEvents {
      * @param creatorArray An array of creators and their associated basis points.
      * @return The ID of the newly created art piece.
      */
-    function createPiece(ArtPieceMetadata memory metadata, CreatorBps[] memory creatorArray) external returns (uint256);
+    function createPiece(
+        ArtPieceMetadata memory metadata,
+        CreatorBps[] memory creatorArray
+    ) external returns (uint256);
 
     /**
      * @notice Allows a user to vote for a specific art piece.

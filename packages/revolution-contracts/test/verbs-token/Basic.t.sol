@@ -30,7 +30,11 @@ contract TokenBasicTest is VerbsTokenTestSuite {
 
     /// @dev Tests the contract URI of the VerbsToken
     function testContractURI() public {
-        assertEq(verbsToken.contractURI(), "ipfs://QmQzDwaZ7yQxHHs7sQQenJVB89riTSacSGcJRv9jtHPuz5", "Contract URI should match");
+        assertEq(
+            verbsToken.contractURI(),
+            "ipfs://QmQzDwaZ7yQxHHs7sQQenJVB89riTSacSGcJRv9jtHPuz5",
+            "Contract URI should match"
+        );
     }
 
     /// @dev Tests the initial state of the contract variables
@@ -68,17 +72,45 @@ contract TokenBasicTest is VerbsTokenTestSuite {
 
         // Check for PieceCreated event
         vm.expectEmit(true, true, true, true);
-        emit ICultureIndexEvents.PieceCreated(0, address(this), name, description, image, animationUrl, text, uint8(mediaType), 0, 0);
+        emit ICultureIndexEvents.PieceCreated(
+            0,
+            address(this),
+            name,
+            description,
+            image,
+            animationUrl,
+            text,
+            uint8(mediaType),
+            0,
+            0
+        );
 
-        uint256 artPieceId = createArtPiece(name, description, mediaType, image, text, animationUrl, creatorAddress, 10_000);
+        uint256 artPieceId = createArtPiece(
+            name,
+            description,
+            mediaType,
+            image,
+            text,
+            animationUrl,
+            creatorAddress,
+            10_000
+        );
 
         // Act
         (, ICultureIndex.ArtPieceMetadata memory metadata, , , , , , ) = cultureIndex.pieces(artPieceId);
 
         // Assert
         assertEq(metadata.name, "Mona Lisa", "The name of the art piece should match the provided name.");
-        assertEq(metadata.description, "A masterpiece", "The description of the art piece should match the provided description.");
-        assertEq(metadata.image, "ipfs://legends", "The image URL of the art piece should match the provided URL.");
+        assertEq(
+            metadata.description,
+            "A masterpiece",
+            "The description of the art piece should match the provided description."
+        );
+        assertEq(
+            metadata.image,
+            "ipfs://legends",
+            "The image URL of the art piece should match the provided URL."
+        );
     }
 
     /// @dev Tests creating an art piece with invalid total basis points.
@@ -95,7 +127,16 @@ contract TokenBasicTest is VerbsTokenTestSuite {
 
         // Act & Assert
         vm.expectRevert("Total BPS must sum up to 10,000");
-        createArtPiece(name, description, mediaType, image, text, animationUrl, creatorAddress, invalidCreatorBps);
+        createArtPiece(
+            name,
+            description,
+            mediaType,
+            image,
+            text,
+            animationUrl,
+            creatorAddress,
+            invalidCreatorBps
+        );
     }
 
     /// @dev Tests creating an art piece with a zero address in the creator array.
@@ -112,7 +153,16 @@ contract TokenBasicTest is VerbsTokenTestSuite {
 
         // Act & Assert
         vm.expectRevert("Invalid creator address");
-        createArtPiece(name, description, mediaType, image, text, animationUrl, zeroCreatorAddress, creatorBps);
+        createArtPiece(
+            name,
+            description,
+            mediaType,
+            image,
+            text,
+            animationUrl,
+            zeroCreatorAddress,
+            creatorBps
+        );
     }
 
     /// @dev Tests that creating an art piece with more than 100 creators fails.
@@ -134,7 +184,14 @@ contract TokenBasicTest is VerbsTokenTestSuite {
         // Act & Assert
         vm.expectRevert("Creator array must not be > 100");
         cultureIndex.createPiece(
-            ICultureIndex.ArtPieceMetadata({ name: name, description: description, mediaType: mediaType, image: image, text: text, animationUrl: animationUrl }),
+            ICultureIndex.ArtPieceMetadata({
+                name: name,
+                description: description,
+                mediaType: mediaType,
+                image: image,
+                text: text,
+                animationUrl: animationUrl
+            }),
             creators
         );
     }
@@ -175,7 +232,11 @@ contract TokenBasicTest is VerbsTokenTestSuite {
         // Assert
         uint256 newTotalVoteWeight = cultureIndex.totalVoteWeights(artPieceId);
 
-        assertEq(newTotalVoteWeight, initialTotalVoteWeight + voteWeight, "Total vote weight should be incremented by the vote weight");
+        assertEq(
+            newTotalVoteWeight,
+            initialTotalVoteWeight + voteWeight,
+            "Total vote weight should be incremented by the vote weight"
+        );
     }
 
     /// @dev Tests that a vote from a voter with a zero balance is rejected.
@@ -272,7 +333,11 @@ contract TokenBasicTest is VerbsTokenTestSuite {
         ICultureIndex.ArtPiece memory topPiece = cultureIndex.getTopVotedPiece();
 
         // Assert
-        assertEq(topPiece.pieceId, secondArtPieceId, "The top voted piece should be the second piece with higher votes");
+        assertEq(
+            topPiece.pieceId,
+            secondArtPieceId,
+            "The top voted piece should be the second piece with higher votes"
+        );
     }
 
     /// @dev Tests that dropTopVotedPiece updates the isDropped flag of the art piece.
@@ -358,11 +423,17 @@ contract TokenBasicTest is VerbsTokenTestSuite {
         (, ICultureIndex.ArtPieceMetadata memory metadata, , , , , , ) = cultureIndex.pieces(artPieceId);
 
         //assert name equals Verb + tokenId
-        string memory expectedName = string(abi.encodePacked(tokenNamePrefix, " ", Strings.toString(tokenId)));
+        string memory expectedName = string(
+            abi.encodePacked(tokenNamePrefix, " ", Strings.toString(tokenId))
+        );
 
         // Assert that the token metadata matches the expected metadata from the art piece
         assertEq(name, expectedName, "Token name does not match expected name");
-        assertEq(description, string(abi.encodePacked(metadata.name, ". ", metadata.description)), "Token description does not match expected description");
+        assertEq(
+            description,
+            string(abi.encodePacked(metadata.name, ". ", metadata.description)),
+            "Token description does not match expected description"
+        );
         assertEq(image, metadata.image, "Token image does not match expected image URL");
     }
 
@@ -373,7 +444,11 @@ contract TokenBasicTest is VerbsTokenTestSuite {
     }
 
     // Helper function to extract a substring from a string
-    function substring(string memory str, uint256 startIndex, uint256 endIndex) internal pure returns (string memory) {
+    function substring(
+        string memory str,
+        uint256 startIndex,
+        uint256 endIndex
+    ) internal pure returns (string memory) {
         bytes memory strBytes = bytes(str);
         bytes memory result = new bytes(endIndex - startIndex);
         for (uint256 i = startIndex; i < endIndex; i++) {
@@ -383,7 +458,9 @@ contract TokenBasicTest is VerbsTokenTestSuite {
     }
 
     // Helper function to parse JSON strings into components
-    function parseJson(string memory _json) internal returns (string memory name, string memory description, string memory image) {
+    function parseJson(
+        string memory _json
+    ) internal returns (string memory name, string memory description, string memory image) {
         uint returnValue;
         JsmnSolLib.Token[] memory tokens;
         uint actualNum;

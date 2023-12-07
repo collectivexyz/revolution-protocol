@@ -22,7 +22,14 @@ contract VerbsAuctionHouseMintTest is VerbsAuctionHouseTest {
 
         auctionHouse.unpause();
 
-        (uint256 verbId, uint256 amount, uint256 auctionStartTime, uint256 auctionEndTime, address payable bidder, bool settled) = auctionHouse.auction();
+        (
+            uint256 verbId,
+            uint256 amount,
+            uint256 auctionStartTime,
+            uint256 auctionEndTime,
+            address payable bidder,
+            bool settled
+        ) = auctionHouse.auction();
 
         // Check that auction is not created
         assertEq(verbId, 0);

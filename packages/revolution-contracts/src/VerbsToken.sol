@@ -124,7 +124,10 @@ contract VerbsToken is IVerbsToken, Ownable, ERC721Checkpointable, ReentrancyGua
     /**
      * @notice Override isApprovedForAll to whitelist user's OpenSea proxy accounts to enable gas-less listings.
      */
-    function isApprovedForAll(address owner, address operator) public view override(IERC721, ERC721) returns (bool) {
+    function isApprovedForAll(
+        address owner,
+        address operator
+    ) public view override(IERC721, ERC721) returns (bool) {
         // Whitelist OpenSea proxy contract for easy trading.
         if (proxyRegistry.proxies(owner) == operator) return true;
 
@@ -190,7 +193,9 @@ contract VerbsToken is IVerbsToken, Ownable, ERC721Checkpointable, ReentrancyGua
      * @notice Set the token URI descriptor.
      * @dev Only callable by the owner when not locked.
      */
-    function setDescriptor(IVerbsDescriptorMinimal _descriptor) external override onlyOwner nonReentrant whenDescriptorNotLocked {
+    function setDescriptor(
+        IVerbsDescriptorMinimal _descriptor
+    ) external override onlyOwner nonReentrant whenDescriptorNotLocked {
         descriptor = _descriptor;
 
         emit DescriptorUpdated(_descriptor);
@@ -210,7 +215,9 @@ contract VerbsToken is IVerbsToken, Ownable, ERC721Checkpointable, ReentrancyGua
      * @notice Set the token CultureIndex.
      * @dev Only callable by the owner when not locked.
      */
-    function setCultureIndex(ICultureIndex _cultureIndex) external onlyOwner whenCultureIndexNotLocked nonReentrant {
+    function setCultureIndex(
+        ICultureIndex _cultureIndex
+    ) external onlyOwner whenCultureIndexNotLocked nonReentrant {
         cultureIndex = _cultureIndex;
 
         emit CultureIndexUpdated(_cultureIndex);

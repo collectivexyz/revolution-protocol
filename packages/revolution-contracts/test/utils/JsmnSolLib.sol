@@ -56,7 +56,10 @@ library JsmnSolLib {
         return (p, t);
     }
 
-    function allocateToken(Parser memory parser, Token[] memory tokens) internal pure returns (bool, Token memory) {
+    function allocateToken(
+        Parser memory parser,
+        Token[] memory tokens
+    ) internal pure returns (bool, Token memory) {
         if (parser.toknext >= tokens.length) {
             // no more space in tokens
             return (false, tokens[tokens.length - 1]);
@@ -76,7 +79,11 @@ library JsmnSolLib {
         token.size = 0;
     }
 
-    function parseString(Parser memory parser, Token[] memory tokens, bytes memory s) internal pure returns (uint) {
+    function parseString(
+        Parser memory parser,
+        Token[] memory tokens,
+        bytes memory s
+    ) internal pure returns (uint) {
         uint start = parser.pos;
         bool success;
         Token memory token;
@@ -121,7 +128,11 @@ library JsmnSolLib {
         return RETURN_ERROR_PART;
     }
 
-    function parsePrimitive(Parser memory parser, Token[] memory tokens, bytes memory s) internal pure returns (uint) {
+    function parsePrimitive(
+        Parser memory parser,
+        Token[] memory tokens,
+        bytes memory s
+    ) internal pure returns (uint) {
         bool found = false;
         uint start = parser.pos;
         bytes1 c;
@@ -154,7 +165,10 @@ library JsmnSolLib {
         return RETURN_SUCCESS;
     }
 
-    function parse(string memory json, uint numberElements) internal pure returns (uint, Token[] memory tokens, uint) {
+    function parse(
+        string memory json,
+        uint numberElements
+    ) internal pure returns (uint, Token[] memory tokens, uint) {
         bytes memory s = bytes(json);
         bool success;
         Parser memory parser;
@@ -249,7 +263,11 @@ library JsmnSolLib {
             }
 
             if (c == ",") {
-                if (parser.toksuper != -1 && tokens[uint(parser.toksuper)].jsmnType != JsmnType.ARRAY && tokens[uint(parser.toksuper)].jsmnType != JsmnType.OBJECT) {
+                if (
+                    parser.toksuper != -1 &&
+                    tokens[uint(parser.toksuper)].jsmnType != JsmnType.ARRAY &&
+                    tokens[uint(parser.toksuper)].jsmnType != JsmnType.OBJECT
+                ) {
                     for (i = parser.toknext - 1; i >= 0; i--) {
                         if (tokens[i].jsmnType == JsmnType.ARRAY || tokens[i].jsmnType == JsmnType.OBJECT) {
                             if (tokens[i].startSet && !tokens[i].endSet) {
@@ -266,7 +284,10 @@ library JsmnSolLib {
             if ((c >= "0" && c <= "9") || c == "-" || c == "f" || c == "t" || c == "n") {
                 if (parser.toksuper != -1) {
                     token = tokens[uint(parser.toksuper)];
-                    if (token.jsmnType == JsmnType.OBJECT || (token.jsmnType == JsmnType.STRING && token.size != 0)) {
+                    if (
+                        token.jsmnType == JsmnType.OBJECT ||
+                        (token.jsmnType == JsmnType.STRING && token.size != 0)
+                    ) {
                         return (RETURN_ERROR_INVALID_JSON, tokens, 0);
                     }
                 }

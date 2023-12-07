@@ -92,7 +92,10 @@ contract VerbsAuctionHouseBasicTest is VerbsAuctionHouseTest {
         auctionHouse.setMinCreatorRateBps(newMinCreatorRateBps);
 
         // Assert new minimum rate
-        if (newMinCreatorRateBps <= auctionHouse.creatorRateBps() && newMinCreatorRateBps >= auctionHouse.minCreatorRateBps()) {
+        if (
+            newMinCreatorRateBps <= auctionHouse.creatorRateBps() &&
+            newMinCreatorRateBps >= auctionHouse.minCreatorRateBps()
+        ) {
             assertEq(auctionHouse.minCreatorRateBps(), newMinCreatorRateBps);
         }
     }
@@ -165,7 +168,11 @@ contract VerbsAuctionHouseBasicTest is VerbsAuctionHouseTest {
         assertEq(auctionHouse.WETH(), address(mockWETH), "WETH address should be set correctly");
         assertEq(auctionHouse.timeBuffer(), 15 minutes, "Time buffer should be set correctly");
         assertEq(auctionHouse.reservePrice(), 1 ether, "Reserve price should be set correctly");
-        assertEq(auctionHouse.minBidIncrementPercentage(), 5, "Min bid increment percentage should be set correctly");
+        assertEq(
+            auctionHouse.minBidIncrementPercentage(),
+            5,
+            "Min bid increment percentage should be set correctly"
+        );
         assertEq(auctionHouse.duration(), 24 hours, "Auction duration should be set correctly");
     }
 
@@ -175,9 +182,20 @@ contract VerbsAuctionHouseBasicTest is VerbsAuctionHouseTest {
         auctionHouse.unpause();
         uint256 startTime = block.timestamp;
 
-        (uint256 verbId, uint256 amount, uint256 auctionStartTime, uint256 auctionEndTime, address payable bidder, bool settled) = auctionHouse.auction();
+        (
+            uint256 verbId,
+            uint256 amount,
+            uint256 auctionStartTime,
+            uint256 auctionEndTime,
+            address payable bidder,
+            bool settled
+        ) = auctionHouse.auction();
         assertEq(auctionStartTime, startTime, "Auction start time should be set correctly");
-        assertEq(auctionEndTime, startTime + auctionHouse.duration(), "Auction end time should be set correctly");
+        assertEq(
+            auctionEndTime,
+            startTime + auctionHouse.duration(),
+            "Auction end time should be set correctly"
+        );
         assertEq(verbId, 0, "Auction should be for the zeroth verb");
         assertEq(amount, 0, "Auction amount should be 0");
         assertEq(bidder, address(0), "Auction bidder should be 0");
@@ -195,7 +213,8 @@ contract VerbsAuctionHouseBasicTest is VerbsAuctionHouseTest {
 
         vm.startPrank(address(1));
         auctionHouse.createBid{ value: bidAmount }(0); // Assuming the first auction's verbId is 0
-        (uint256 verbId, uint256 amount, , uint256 endTime, address payable bidder, ) = auctionHouse.auction();
+        (uint256 verbId, uint256 amount, , uint256 endTime, address payable bidder, ) = auctionHouse
+            .auction();
 
         assertEq(amount, bidAmount, "Bid amount should be set correctly");
         assertEq(bidder, address(1), "Bidder address should be set correctly");
@@ -204,18 +223,23 @@ contract VerbsAuctionHouseBasicTest is VerbsAuctionHouseTest {
         vm.warp(endTime + 1);
         createDefaultArtPiece();
         // Ether going to owner of the auction
-        uint256 auctioneerPayment = uint256(wadDiv(wadMul(int256(bidAmount), 10_000 - int256(auctionHouse.creatorRateBps())), 10_000));
+        uint256 auctioneerPayment = uint256(
+            wadDiv(wadMul(int256(bidAmount), 10_000 - int256(auctionHouse.creatorRateBps())), 10_000)
+        );
 
         //Total amount of ether going to creator
         uint256 creatorPayment = bidAmount - auctioneerPayment;
 
         //Ether reserved to pay the creator directly
-        uint256 creatorDirectPayment = uint256(wadDiv(wadMul(int256(creatorPayment), int256(auctionHouse.entropyRateBps())), 10_000));
+        uint256 creatorDirectPayment = uint256(
+            wadDiv(wadMul(int256(creatorPayment), int256(auctionHouse.entropyRateBps())), 10_000)
+        );
 
         //Ether reserved to buy creator governance
         uint256 creatorGovernancePayment = creatorPayment - creatorDirectPayment;
 
-        bool shouldExpectRevert = creatorGovernancePayment <= tokenEmitter.minPurchaseAmount() || creatorGovernancePayment >= tokenEmitter.maxPurchaseAmount();
+        bool shouldExpectRevert = creatorGovernancePayment <= tokenEmitter.minPurchaseAmount() ||
+            creatorGovernancePayment >= tokenEmitter.maxPurchaseAmount();
 
         // // BPS too small to issue rewards
         if (shouldExpectRevert) {
@@ -237,7 +261,11 @@ contract VerbsAuctionHouseBasicTest is VerbsAuctionHouseTest {
         auctionHouse.unpause();
 
         (uint256 verbId, , , uint256 endTime, , ) = auctionHouse.auction();
-        assertEq(verbs.ownerOf(verbId), address(auctionHouse), "Verb should be transferred to the auction house");
+        assertEq(
+            verbs.ownerOf(verbId),
+            address(auctionHouse),
+            "Verb should be transferred to the auction house"
+        );
 
         vm.warp(endTime + 1);
         uint256 pieceId = createDefaultArtPiece();
@@ -254,7 +282,11 @@ contract VerbsAuctionHouseBasicTest is VerbsAuctionHouseTest {
         assertEq(settled, false, "Auction should not be settled because new one created");
     }
 
-    function testAdministrativeFunctions(uint256 newTimeBuffer, uint256 newReservePrice, uint8 newMinBidIncrementPercentage) public {
+    function testAdministrativeFunctions(
+        uint256 newTimeBuffer,
+        uint256 newReservePrice,
+        uint8 newMinBidIncrementPercentage
+    ) public {
         auctionHouse.setTimeBuffer(newTimeBuffer);
         assertEq(auctionHouse.timeBuffer(), newTimeBuffer, "Time buffer should be updated correctly");
 
@@ -262,7 +294,11 @@ contract VerbsAuctionHouseBasicTest is VerbsAuctionHouseTest {
         assertEq(auctionHouse.reservePrice(), newReservePrice, "Reserve price should be updated correctly");
 
         auctionHouse.setMinBidIncrementPercentage(newMinBidIncrementPercentage);
-        assertEq(auctionHouse.minBidIncrementPercentage(), newMinBidIncrementPercentage, "Min bid increment percentage should be updated correctly");
+        assertEq(
+            auctionHouse.minBidIncrementPercentage(),
+            newMinBidIncrementPercentage,
+            "Min bid increment percentage should be updated correctly"
+        );
     }
 
     function testAccessControl() public {

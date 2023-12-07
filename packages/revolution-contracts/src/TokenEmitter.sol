@@ -42,7 +42,11 @@ contract TokenEmitter is VRGDAC, ITokenEmitter, ReentrancyGuard, TokenEmitterRew
         int _targetPrice, // The target price for a token if sold on pace, scaled by 1e18.
         int _priceDecayPercent, // The percent price decays per unit of time with no sales, scaled by 1e18.
         int _tokensPerTimeUnit // The number of tokens to target selling in 1 full unit of time, scaled by 1e18.
-    ) TokenEmitterRewards(_protocolRewards, _protocolFeeRecipient) VRGDAC(_targetPrice, _priceDecayPercent, _tokensPerTimeUnit) Ownable(_initialOwner) {
+    )
+        TokenEmitterRewards(_protocolRewards, _protocolFeeRecipient)
+        VRGDAC(_targetPrice, _priceDecayPercent, _tokensPerTimeUnit)
+        Ownable(_initialOwner)
+    {
         require(_treasury != address(0), "Invalid treasury address");
 
         treasury = _treasury;
@@ -77,12 +81,20 @@ contract TokenEmitter is VRGDAC, ITokenEmitter, ReentrancyGuard, TokenEmitterRew
         address purchaseReferral,
         address deployer
     ) public payable nonReentrant returns (uint tokensSoldWad) {
+        //prevent treasury from paying itself
+        require(msg.sender != treasury && msg.sender != creatorsAddress, "Funds recipient cannot buy tokens");
+
         require(msg.value > 0, "Must send ether");
         // ensure the same number of addresses and _bps
         require(_addresses.length == _bps.length, "Parallel arrays required");
 
         // Get value left after protocol rewards
-        uint msgValueRemaining = _handleRewardsAndGetValueToSend(msg.value, builder, purchaseReferral, deployer);
+        uint msgValueRemaining = _handleRewardsAndGetValueToSend(
+            msg.value,
+            builder,
+            purchaseReferral,
+            deployer
+        );
 
         //Share of purchase amount to send to treasury
         uint256 toPayTreasury = (msgValueRemaining * (10_000 - creatorRateBps)) / 10_000;
@@ -147,14 +159,24 @@ contract TokenEmitter is VRGDAC, ITokenEmitter, ReentrancyGuard, TokenEmitterRew
         require(amount > 0, "Amount must be greater than 0");
         // Note: By using toDaysWadUnsafe(block.timestamp - startTime) we are establishing that 1 "unit of time" is 1 day.
         // solhint-disable-next-line not-rely-on-time
-        return xToY({ timeSinceStart: toDaysWadUnsafe(block.timestamp - startTime), sold: emittedTokenWad, amount: int(amount) });
+        return
+            xToY({
+                timeSinceStart: toDaysWadUnsafe(block.timestamp - startTime),
+                sold: emittedTokenWad,
+                amount: int(amount)
+            });
     }
 
     function getTokenQuoteForEther(uint etherAmount) public view returns (int gainedX) {
         require(etherAmount > 0, "Ether amount must be greater than 0");
         // Note: By using toDaysWadUnsafe(block.timestamp - startTime) we are establishing that 1 "unit of time" is 1 day.
         // solhint-disable-next-line not-rely-on-time
-        return yToX({ timeSinceStart: toDaysWadUnsafe(block.timestamp - startTime), sold: emittedTokenWad, amount: int(etherAmount) });
+        return
+            yToX({
+                timeSinceStart: toDaysWadUnsafe(block.timestamp - startTime),
+                sold: emittedTokenWad,
+                amount: int(etherAmount)
+            });
     }
 
     function getTokenQuoteForPayment(uint paymentAmount) external view returns (int gainedX) {
@@ -165,7 +187,9 @@ contract TokenEmitter is VRGDAC, ITokenEmitter, ReentrancyGuard, TokenEmitterRew
             yToX({
                 timeSinceStart: toDaysWadUnsafe(block.timestamp - startTime),
                 sold: emittedTokenWad,
-                amount: int(((paymentAmount - computeTotalReward(paymentAmount)) * (10_000 - creatorRateBps)) / 10_000)
+                amount: int(
+                    ((paymentAmount - computeTotalReward(paymentAmount)) * (10_000 - creatorRateBps)) / 10_000
+                )
             });
     }
 

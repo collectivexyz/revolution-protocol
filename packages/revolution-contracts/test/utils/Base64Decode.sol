@@ -62,8 +62,14 @@ library Base64Decode {
 
                 // write 3 bytes
                 let output := add(
-                    add(shl(18, and(mload(add(tablePtr, and(shr(24, input), 0xFF))), 0xFF)), shl(12, and(mload(add(tablePtr, and(shr(16, input), 0xFF))), 0xFF))),
-                    add(shl(6, and(mload(add(tablePtr, and(shr(8, input), 0xFF))), 0xFF)), and(mload(add(tablePtr, and(input, 0xFF))), 0xFF))
+                    add(
+                        shl(18, and(mload(add(tablePtr, and(shr(24, input), 0xFF))), 0xFF)),
+                        shl(12, and(mload(add(tablePtr, and(shr(16, input), 0xFF))), 0xFF))
+                    ),
+                    add(
+                        shl(6, and(mload(add(tablePtr, and(shr(8, input), 0xFF))), 0xFF)),
+                        and(mload(add(tablePtr, and(input, 0xFF))), 0xFF)
+                    )
                 )
                 mstore(resultPtr, shl(232, output))
                 resultPtr := add(resultPtr, 3)

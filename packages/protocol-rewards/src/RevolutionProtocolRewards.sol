@@ -14,7 +14,8 @@ import { IRevolutionProtocolRewards } from "./interfaces/IRevolutionProtocolRewa
 /// @notice Manager of deposits & withdrawals for protocol rewards
 contract RevolutionProtocolRewards is IRevolutionProtocolRewards, EIP712 {
     /// @notice The EIP-712 typehash for gasless withdraws
-    bytes32 public constant WITHDRAW_TYPEHASH = keccak256("Withdraw(address from,address to,uint256 amount,uint256 nonce,uint256 deadline)");
+    bytes32 public constant WITHDRAW_TYPEHASH =
+        keccak256("Withdraw(address from,address to,uint256 amount,uint256 nonce,uint256 deadline)");
 
     /// @notice An account's balance
     mapping(address => uint256) public balanceOf;
@@ -46,10 +47,16 @@ contract RevolutionProtocolRewards is IRevolutionProtocolRewards, EIP712 {
     /// @param amounts amounts to send to each recipient, array aligns with recipients
     /// @param reasons optional bytes4 hash for indexing
     /// @param comment Optional comment to include with purchase
-    function depositBatch(address[] calldata recipients, uint256[] calldata amounts, bytes4[] calldata reasons, string calldata comment) external payable {
+    function depositBatch(
+        address[] calldata recipients,
+        uint256[] calldata amounts,
+        bytes4[] calldata reasons,
+        string calldata comment
+    ) external payable {
         uint256 numRecipients = recipients.length;
 
-        if (numRecipients != amounts.length || numRecipients != reasons.length) revert ARRAY_LENGTH_MISMATCH();
+        if (numRecipients != amounts.length || numRecipients != reasons.length)
+            revert ARRAY_LENGTH_MISMATCH();
 
         uint256 expectedTotalValue;
 
@@ -97,7 +104,8 @@ contract RevolutionProtocolRewards is IRevolutionProtocolRewards, EIP712 {
         address revolution,
         uint256 revolutionReward
     ) external payable {
-        if (msg.value != (builderReferralReward + purchaseReferralReward + deployerReward + revolutionReward)) revert INVALID_DEPOSIT();
+        if (msg.value != (builderReferralReward + purchaseReferralReward + deployerReward + revolutionReward))
+            revert INVALID_DEPOSIT();
 
         unchecked {
             if (builderReferral != address(0)) balanceOf[builderReferral] += builderReferralReward;
@@ -170,7 +178,15 @@ contract RevolutionProtocolRewards is IRevolutionProtocolRewards, EIP712 {
     /// @param v V component of signature
     /// @param r R component of signature
     /// @param s S component of signature
-    function withdrawWithSig(address from, address to, uint256 amount, uint256 deadline, uint8 v, bytes32 r, bytes32 s) external {
+    function withdrawWithSig(
+        address from,
+        address to,
+        uint256 amount,
+        uint256 deadline,
+        uint8 v,
+        bytes32 r,
+        bytes32 s
+    ) external {
         if (block.timestamp > deadline) revert SIGNATURE_DEADLINE_EXPIRED();
 
         bytes32 withdrawHash;

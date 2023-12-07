@@ -41,7 +41,15 @@ contract VerbsAuctionHouseTest is Test {
         // Additional setup for VerbsToken similar to VerbsTokenTest
         ProxyRegistry _proxyRegistry = new ProxyRegistry();
 
-        CultureIndex _cultureIndex = new CultureIndex("Vrbs", "Our community Vrbs. Must be 32x32.", address(governanceToken), address(this), address(this), 10, 200);
+        CultureIndex _cultureIndex = new CultureIndex(
+            "Vrbs",
+            "Our community Vrbs. Must be 32x32.",
+            address(governanceToken),
+            address(this),
+            address(this),
+            10,
+            200
+        );
         cultureIndex = _cultureIndex;
 
         //20% - how much the price decays per unit of time with no sales
@@ -125,12 +133,32 @@ contract VerbsAuctionHouseTest is Test {
         uint256[] memory creatorBpsArray = new uint256[](1);
         creatorBpsArray[0] = creatorBps;
 
-        return createArtPieceMultiCreator(name, description, mediaType, image, text, animationUrl, creatorAddresses, creatorBpsArray);
+        return
+            createArtPieceMultiCreator(
+                name,
+                description,
+                mediaType,
+                image,
+                text,
+                animationUrl,
+                creatorAddresses,
+                creatorBpsArray
+            );
     }
 
     //Utility function to create default art piece
     function createDefaultArtPiece() public returns (uint256) {
-        return createArtPiece("Mona Lisa", "A masterpiece", ICultureIndex.MediaType.IMAGE, "ipfs://legends", "", "", address(0x1), 10000);
+        return
+            createArtPiece(
+                "Mona Lisa",
+                "A masterpiece",
+                ICultureIndex.MediaType.IMAGE,
+                "ipfs://legends",
+                "",
+                "",
+                address(0x1),
+                10000
+            );
     }
 
     // Utility function to create a new art piece with multiple creators and return its ID

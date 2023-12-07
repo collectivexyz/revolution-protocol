@@ -80,7 +80,10 @@ contract VerbsDAOProxyV1 is VerbsDAOStorageV1, VerbsDAOEvents {
      */
     function _setImplementation(address implementation_) public {
         require(msg.sender == admin, "VerbsDAOProxy::_setImplementation: admin only");
-        require(implementation_ != address(0), "VerbsDAOProxy::_setImplementation: invalid implementation address");
+        require(
+            implementation_ != address(0),
+            "VerbsDAOProxy::_setImplementation: invalid implementation address"
+        );
 
         address oldImplementation = implementation;
         implementation = implementation_;

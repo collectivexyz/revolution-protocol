@@ -22,8 +22,16 @@ contract CultureIndexVotingBasicTest is CultureIndexTestSuite {
         uint256 erc721Weight = 2; // Number of ERC721 tokens held by the voter
 
         // Mock the ERC20 and ERC721 token balances
-        vm.mockCall(address(cultureIndex.erc20VotingToken()), abi.encodeWithSelector(Votes.getVotes.selector, voter), abi.encode(erc20Weight));
-        vm.mockCall(address(cultureIndex.erc721VotingToken()), abi.encodeWithSelector(ERC721Checkpointable.getCurrentVotes.selector, voter), abi.encode(erc721Weight));
+        vm.mockCall(
+            address(cultureIndex.erc20VotingToken()),
+            abi.encodeWithSelector(Votes.getVotes.selector, voter),
+            abi.encode(erc20Weight)
+        );
+        vm.mockCall(
+            address(cultureIndex.erc721VotingToken()),
+            abi.encodeWithSelector(ERC721Checkpointable.getCurrentVotes.selector, voter),
+            abi.encode(erc721Weight)
+        );
 
         uint256 expectedWeight = erc20Weight + (erc721Weight * cultureIndex.erc721VotingTokenWeight() * 1e18);
         uint256 actualWeight = cultureIndex.getCurrentVotes(voter);
@@ -149,7 +157,11 @@ contract CultureIndexVotingBasicTest is CultureIndexTestSuite {
         // ensure that the ERC721 token is minted
         assertEq(verbs.balanceOf(address(this)), 1, "ERC721 token should be minted");
         // ensure cultureindex currentvotes is correct
-        assertEq(cultureIndex.getCurrentVotes(address(this)), cultureIndex.erc721VotingTokenWeight() * 1e18, "Vote weight should be correct");
+        assertEq(
+            cultureIndex.getCurrentVotes(address(this)),
+            cultureIndex.erc721VotingTokenWeight() * 1e18,
+            "Vote weight should be correct"
+        );
 
         // burn the 721
         verbs.burn(0);
@@ -192,7 +204,8 @@ contract CultureIndexVotingBasicTest is CultureIndexTestSuite {
         verbs.mint();
 
         uint256 initialWeight = cultureIndex.getCurrentVotes(voter);
-        uint256 expectedInitialWeight = initialErc20Weight + (1 * cultureIndex.erc721VotingTokenWeight() * 1e18);
+        uint256 expectedInitialWeight = initialErc20Weight +
+            (1 * cultureIndex.erc721VotingTokenWeight() * 1e18);
         assertEq(initialWeight, expectedInitialWeight);
 
         // Change token balances
@@ -202,7 +215,9 @@ contract CultureIndexVotingBasicTest is CultureIndexTestSuite {
         verbs.mint();
 
         uint256 updatedWeight = cultureIndex.getCurrentVotes(voter);
-        uint256 expectedUpdatedWeight = updateErc20Weight + initialErc20Weight + (2 * cultureIndex.erc721VotingTokenWeight() * 1e18);
+        uint256 expectedUpdatedWeight = updateErc20Weight +
+            initialErc20Weight +
+            (2 * cultureIndex.erc721VotingTokenWeight() * 1e18);
         assertEq(updatedWeight, expectedUpdatedWeight);
 
         //burn the first 2 verbs
@@ -213,7 +228,11 @@ contract CultureIndexVotingBasicTest is CultureIndexTestSuite {
         assertEq(verbs.balanceOf(address(this)), 0, "ERC721 token should be burned");
 
         // ensure cultureindex currentvotes is correct
-        assertEq(cultureIndex.getCurrentVotes(address(this)), updateErc20Weight + initialErc20Weight, "Vote weight should be correct");
+        assertEq(
+            cultureIndex.getCurrentVotes(address(this)),
+            updateErc20Weight + initialErc20Weight,
+            "Vote weight should be correct"
+        );
     }
 
     /**
@@ -223,7 +242,16 @@ contract CultureIndexVotingBasicTest is CultureIndexTestSuite {
      * Then we validate the recorded vote and total voting weight.
      */
     function testVoting() public {
-        uint256 newPieceId = createArtPiece("Mona Lisa", "A masterpiece", ICultureIndex.MediaType.IMAGE, "ipfs://legends", "", "", address(0x1), 10000);
+        uint256 newPieceId = createArtPiece(
+            "Mona Lisa",
+            "A masterpiece",
+            ICultureIndex.MediaType.IMAGE,
+            "ipfs://legends",
+            "",
+            "",
+            address(0x1),
+            10000
+        );
 
         // Mint some tokens to the voter
         govToken.mint(address(this), 100);
@@ -379,7 +407,16 @@ contract CultureIndexVotingBasicTest is CultureIndexTestSuite {
      * Then we try to vote again and expect it to fail.
      */
     function testCannotVoteTwice() public {
-        uint256 newPieceId = createArtPiece("Mona Lisa", "A masterpiece", ICultureIndex.MediaType.IMAGE, "ipfs://legends", "", "", address(0x1), 10000);
+        uint256 newPieceId = createArtPiece(
+            "Mona Lisa",
+            "A masterpiece",
+            ICultureIndex.MediaType.IMAGE,
+            "ipfs://legends",
+            "",
+            "",
+            address(0x1),
+            10000
+        );
 
         // Mint some tokens to the voter
         govToken.mint(address(this), 100);
@@ -403,7 +440,16 @@ contract CultureIndexVotingBasicTest is CultureIndexTestSuite {
      * We expect the vote to fail.
      */
     function testCannotVoteWithoutTokens() public {
-        uint256 newPieceId = createArtPiece("Starry Night", "A masterpiece", ICultureIndex.MediaType.IMAGE, "ipfs://legends", "", "", address(0x1), 10000);
+        uint256 newPieceId = createArtPiece(
+            "Starry Night",
+            "A masterpiece",
+            ICultureIndex.MediaType.IMAGE,
+            "ipfs://legends",
+            "",
+            "",
+            address(0x1),
+            10000
+        );
 
         vm.roll(block.number + 1); // Roll forward to ensure votes are snapshotted
 
@@ -422,9 +468,27 @@ contract CultureIndexVotingBasicTest is CultureIndexTestSuite {
      * Then we try to vote again for both and expect both to fail.
      */
     function testCannotVoteOnMultiplePiecesTwice() public {
-        uint256 firstPieceId = createArtPiece("Mona Lisa", "A masterpiece", ICultureIndex.MediaType.IMAGE, "ipfs://legends", "", "", address(0x1), 10000);
+        uint256 firstPieceId = createArtPiece(
+            "Mona Lisa",
+            "A masterpiece",
+            ICultureIndex.MediaType.IMAGE,
+            "ipfs://legends",
+            "",
+            "",
+            address(0x1),
+            10000
+        );
 
-        uint256 secondPieceId = createArtPiece("Starry Night", "Another masterpiece", ICultureIndex.MediaType.IMAGE, "ipfs://starrynight", "", "", address(0x2), 10000);
+        uint256 secondPieceId = createArtPiece(
+            "Starry Night",
+            "Another masterpiece",
+            ICultureIndex.MediaType.IMAGE,
+            "ipfs://starrynight",
+            "",
+            "",
+            address(0x2),
+            10000
+        );
 
         // Mint some tokens to the voter
         govToken.mint(address(this), 200);
@@ -458,9 +522,27 @@ contract CultureIndexVotingBasicTest is CultureIndexTestSuite {
      * We expect both votes to fail.
      */
     function testCannotVoteWithoutTokensMultiplePieces() public {
-        uint256 firstPieceId = createArtPiece("Mona Lisa", "A masterpiece", ICultureIndex.MediaType.IMAGE, "ipfs://legends", "", "", address(0x1), 10000);
+        uint256 firstPieceId = createArtPiece(
+            "Mona Lisa",
+            "A masterpiece",
+            ICultureIndex.MediaType.IMAGE,
+            "ipfs://legends",
+            "",
+            "",
+            address(0x1),
+            10000
+        );
 
-        uint256 secondPieceId = createArtPiece("Starry Night", "Another masterpiece", ICultureIndex.MediaType.IMAGE, "ipfs://starrynight", "", "", address(0x2), 10000);
+        uint256 secondPieceId = createArtPiece(
+            "Starry Night",
+            "Another masterpiece",
+            ICultureIndex.MediaType.IMAGE,
+            "ipfs://starrynight",
+            "",
+            "",
+            address(0x2),
+            10000
+        );
         vm.roll(block.number + 1); // Roll forward to ensure votes are snapshotted
 
         // Try to vote for the first piece and expect to fail
@@ -556,13 +638,18 @@ contract CultureIndexVotingBasicTest is CultureIndexTestSuite {
         vm.roll(block.number + 3);
 
         // Calculate expected vote weight
-        uint256 expectedVoteWeight = erc20Balance + (erc721Balance * cultureIndex.erc721VotingTokenWeight() * 1e18);
+        uint256 expectedVoteWeight = erc20Balance +
+            (erc721Balance * cultureIndex.erc721VotingTokenWeight() * 1e18);
 
         // Get the actual vote weight from the contract
         uint256 actualVoteWeight = cultureIndex.getCurrentVotes(address(this));
 
         // Assert that the actual vote weight matches the expected value
-        assertEq(actualVoteWeight, expectedVoteWeight, "Vote weight calculation does not match expected value");
+        assertEq(
+            actualVoteWeight,
+            expectedVoteWeight,
+            "Vote weight calculation does not match expected value"
+        );
     }
 
     function testQuorumVotesCalculation(uint200 erc20TotalSupply, uint256 erc721TotalSupply) public {
@@ -592,12 +679,17 @@ contract CultureIndexVotingBasicTest is CultureIndexTestSuite {
         }
 
         // Calculate expected quorum votes
-        uint256 expectedQuorumVotes = (quorumBPS * (erc20TotalSupply + erc721TotalSupply * 1e18 * cultureIndex.erc721VotingTokenWeight())) / 10_000;
+        uint256 expectedQuorumVotes = (quorumBPS *
+            (erc20TotalSupply + erc721TotalSupply * 1e18 * cultureIndex.erc721VotingTokenWeight())) / 10_000;
 
         // Get the quorum votes from the contract
         uint256 actualQuorumVotes = cultureIndex.quorumVotes();
 
         // Assert that the actual quorum votes match the expected value
-        assertEq(actualQuorumVotes, expectedQuorumVotes, "Quorum votes calculation does not match expected value");
+        assertEq(
+            actualQuorumVotes,
+            expectedQuorumVotes,
+            "Quorum votes calculation does not match expected value"
+        );
     }
 }
