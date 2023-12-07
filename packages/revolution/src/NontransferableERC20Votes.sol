@@ -23,6 +23,9 @@ import { ERC20 } from "./base/erc20/ERC20.sol";
 import { EIP712 } from "@openzeppelin/contracts/utils/cryptography/EIP712.sol";
 
 contract NontransferableERC20Votes is Ownable, ERC20Votes {
+
+    error TRANSFER_NOT_ALLOWED();
+
     /**
      * @dev Sets the values for {name} and {symbol}.
      *
@@ -56,28 +59,28 @@ contract NontransferableERC20Votes is Ownable, ERC20Votes {
      * @dev Not allowed
      */
     function transfer(address, uint256) public virtual override returns (bool) {
-        return false;
+        revert TRANSFER_NOT_ALLOWED();
     }
 
     /**
      * @dev Not allowed
      */
     function _transfer(address from, address to, uint256 value) internal override {
-        return;
+        revert TRANSFER_NOT_ALLOWED();
     }
 
     /**
      * @dev Not allowed
      */
     function transferFrom(address, address, uint256) public virtual override returns (bool) {
-        return false;
+        revert TRANSFER_NOT_ALLOWED();
     }
 
     /**
      * @dev Not allowed
      */
     function approve(address, uint256) public virtual override returns (bool) {
-        return false;
+        revert TRANSFER_NOT_ALLOWED();
     }
 
     /**
@@ -103,7 +106,7 @@ contract NontransferableERC20Votes is Ownable, ERC20Votes {
      * @dev Not allowed
      */
     function _approve(address owner, address spender, uint256 value) internal override {
-        return;
+        revert TRANSFER_NOT_ALLOWED();
     }
 
     /**
@@ -115,13 +118,13 @@ contract NontransferableERC20Votes is Ownable, ERC20Votes {
         uint256 value,
         bool emitEvent
     ) internal virtual override {
-        return;
+        revert TRANSFER_NOT_ALLOWED();
     }
 
     /**
      * @dev Not allowed
      */
     function _spendAllowance(address owner, address spender, uint256 value) internal virtual override {
-        return;
+        revert TRANSFER_NOT_ALLOWED();
     }
 }
