@@ -18,11 +18,13 @@ contract TokenEmitterTest is Test {
 
     uint256 expectedVolume = tokensPerTimeUnit * 1e18;
 
+    address treasury = address(21);
+    address creatorsAddress = address(80);
+
     function setUp() public {
         vm.startPrank(address(0));
         RevolutionProtocolRewards protocolRewards = new RevolutionProtocolRewards();
 
-        address treasury = address(21);
         vm.deal(address(0), 100000 ether);
         vm.stopPrank();
 
@@ -50,9 +52,41 @@ contract TokenEmitterTest is Test {
             int256(1e18 * tokensPerTimeUnit)
         );
 
+        emitter.setCreatorsAddress(creatorsAddress);
+
         address emitterAddress = address(emitter);
 
         governanceToken.transferOwnership(emitterAddress);
+    }
+
+    function testCannotBuyAsTreasury() public {
+        vm.startPrank(treasury);
+
+        vm.deal(treasury, 100000 ether);
+
+        address[] memory recipients = new address[](1);
+        recipients[0] = address(1);
+
+        uint256[] memory bps = new uint256[](1);
+        bps[0] = 10_000;
+
+        vm.expectRevert("Funds recipient cannot buy tokens");
+        emitter.buyToken{ value: 1e18 }(recipients, bps, address(0), address(0), address(0));
+    }
+
+    function testCannotBuyAsCreators() public {
+        vm.startPrank(creatorsAddress);
+
+        vm.deal(creatorsAddress, 100000 ether);
+
+        address[] memory recipients = new address[](1);
+        recipients[0] = address(1);
+
+        uint256[] memory bps = new uint256[](1);
+        bps[0] = 10_000;
+
+        vm.expectRevert("Funds recipient cannot buy tokens");
+        emitter.buyToken{ value: 1e18 }(recipients, bps, address(0), address(0), address(0));
     }
 
     function testTransferTokenContractOwnership() public {
@@ -110,7 +144,9 @@ contract TokenEmitterTest is Test {
 
         governanceToken.transferOwnership(address(emitter2));
 
-        vm.prank(address(0));
+        vm.prank(address(48));
+        vm.deal(address(48), 100000 ether);
+
         emitter2.buyToken{ value: 1e18 }(recipients, bps, address(0), address(0), address(0));
     }
 
