@@ -1,0 +1,40 @@
+name: "Protocol rewards"
+
+on:
+  workflow_call:
+
+jobs:
+  build:
+    uses: ./.github/workflows/build.yml
+    with:
+      package_folder: packages/protocol-rewards
+
+  test:
+    needs: build
+    uses: ./.github/workflows/test.yml
+    with:
+      package_folder: packages/protocol-rewards
+
+  storage_test:
+    needs: build
+    uses: ./.github/workflows/storage.yml
+    with:
+      package_folder: packages/protocol-rewards
+
+  contract_sizes:
+    needs: build
+    uses: ./.github/workflows/contract_sizes.yml
+    with:
+      package_folder: packages/protocol-rewards
+
+  slither:
+    needs: build
+    uses: ./.github/workflows/slither.yml
+    with:
+      package_folder: packages/protocol-rewards
+
+  coverage:
+    uses: ./.github/workflows/coverage.yml
+    with:
+      package: "protocol-rewards"
+      files_to_ignore: '"*lib*"'

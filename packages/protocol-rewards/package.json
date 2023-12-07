@@ -14,7 +14,10 @@
     "prettier:check": "prettier --check 'src/**/*.sol' 'test/**/*.sol'",
     "prettier": "prettier --write 'src/**/*.sol' 'test/**/*.sol'",
     "lint": "prettier --check 'src/**/*.sol' 'test/**/*.sol'",
-    "clean": "forge cache clean && if [ -d out ]; then forge clean; fi"
+    "write-gas-report": "forge test --gas-report > ../../gas-reports/protocol-rewards.ansi",
+    "clean": "forge cache clean && if [ -d out ]; then forge clean; fi",
+    "storage-inspect:check": "./script/storage-check.sh check RevolutionProtocolRewards RewardSplits TokenEmitterRewards",
+    "storage-inspect:generate": "./script/storage-check.sh generate RevolutionProtocolRewards RewardSplits TokenEmitterRewards"
   },
   "dependencies": {
     "@openzeppelin/contracts": "5.0.0",

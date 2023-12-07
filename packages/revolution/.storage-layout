@@ -1,0 +1,51 @@
+👁👁 STORAGE LAYOUT snapshot 👁👁
+=======================
+
+=======================
+➡ CultureIndex
+=======================
+
+| Name                      | Type                                                              | Slot | Offset | Bytes | Contract                          |
+|---------------------------|-------------------------------------------------------------------|------|--------|-------|-----------------------------------|
+| _owner                    | address                                                           | 0    | 0      | 20    | src/CultureIndex.sol:CultureIndex |
+| _status                   | uint256                                                           | 1    | 0      | 32    | src/CultureIndex.sol:CultureIndex |
+| erc721VotingToken         | contract ERC721Checkpointable                                     | 2    | 0      | 20    | src/CultureIndex.sol:CultureIndex |
+| isERC721VotingTokenLocked | bool                                                              | 2    | 20     | 1     | src/CultureIndex.sol:CultureIndex |
+| quorumVotesBPS            | uint256                                                           | 3    | 0      | 32    | src/CultureIndex.sol:CultureIndex |
+| name                      | string                                                            | 4    | 0      | 32    | src/CultureIndex.sol:CultureIndex |
+| description               | string                                                            | 5    | 0      | 32    | src/CultureIndex.sol:CultureIndex |
+| pieces                    | mapping(uint256 => struct ICultureIndex.ArtPiece)                 | 6    | 0      | 32    | src/CultureIndex.sol:CultureIndex |
+| _currentPieceId           | uint256                                                           | 7    | 0      | 32    | src/CultureIndex.sol:CultureIndex |
+| votes                     | mapping(uint256 => mapping(address => struct ICultureIndex.Vote)) | 8    | 0      | 32    | src/CultureIndex.sol:CultureIndex |
+| totalVoteWeights          | mapping(uint256 => uint256)                                       | 9    | 0      | 32    | src/CultureIndex.sol:CultureIndex |
+
+=======================
+➡ TokenEmitter
+=======================
+
+| Name            | Type    | Slot | Offset | Bytes | Contract                          |
+|-----------------|---------|------|--------|-------|-----------------------------------|
+| _status         | uint256 | 0    | 0      | 32    | src/TokenEmitter.sol:TokenEmitter |
+| _owner          | address | 1    | 0      | 20    | src/TokenEmitter.sol:TokenEmitter |
+| emittedTokenWad | int256  | 2    | 0      | 32    | src/TokenEmitter.sol:TokenEmitter |
+| creatorRateBps  | uint256 | 3    | 0      | 32    | src/TokenEmitter.sol:TokenEmitter |
+| entropyRateBps  | uint256 | 4    | 0      | 32    | src/TokenEmitter.sol:TokenEmitter |
+| creatorsAddress | address | 5    | 0      | 20    | src/TokenEmitter.sol:TokenEmitter |
+
+=======================
+➡ VerbsAuctionHouse
+=======================
+
+| Name                      | Type                              | Slot | Offset | Bytes | Contract                                    |
+|---------------------------|-----------------------------------|------|--------|-------|---------------------------------------------|
+| verbs                     | contract IVerbsToken              | 0    | 0      | 20    | src/VerbsAuctionHouse.sol:VerbsAuctionHouse |
+| tokenEmitter              | contract ITokenEmitter            | 1    | 0      | 20    | src/VerbsAuctionHouse.sol:VerbsAuctionHouse |
+| WETH                      | address                           | 2    | 0      | 20    | src/VerbsAuctionHouse.sol:VerbsAuctionHouse |
+| timeBuffer                | uint256                           | 3    | 0      | 32    | src/VerbsAuctionHouse.sol:VerbsAuctionHouse |
+| reservePrice              | uint256                           | 4    | 0      | 32    | src/VerbsAuctionHouse.sol:VerbsAuctionHouse |
+| minBidIncrementPercentage | uint8                             | 5    | 0      | 1     | src/VerbsAuctionHouse.sol:VerbsAuctionHouse |
+| creatorRateBps            | uint256                           | 6    | 0      | 32    | src/VerbsAuctionHouse.sol:VerbsAuctionHouse |
+| minCreatorRateBps         | uint256                           | 7    | 0      | 32    | src/VerbsAuctionHouse.sol:VerbsAuctionHouse |
+| entropyRateBps            | uint256                           | 8    | 0      | 32    | src/VerbsAuctionHouse.sol:VerbsAuctionHouse |
+| duration                  | uint256                           | 9    | 0      | 32    | src/VerbsAuctionHouse.sol:VerbsAuctionHouse |
+| auction                   | struct IVerbsAuctionHouse.Auction | 10   | 0      | 160   | src/VerbsAuctionHouse.sol:VerbsAuctionHouse |

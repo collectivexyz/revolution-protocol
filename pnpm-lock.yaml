@@ -43,7 +43,7 @@ importers:
         specifier: 3.4.1
         version: 3.4.1
 
-  packages/revolution-contracts:
+  packages/revolution:
     dependencies:
       '@collectivexyz/protocol-rewards':
         specifier: workspace:*

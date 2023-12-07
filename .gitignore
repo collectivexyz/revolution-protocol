@@ -24,6 +24,9 @@ deploys
 
 bin
 
+# coverage info
+lcov.info
+
 .deps
 
 packages/*/src/artifacts/**/*.json

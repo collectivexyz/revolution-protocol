@@ -571,6 +571,7 @@ contract CultureIndexVotingBasicTest is CultureIndexTestSuite {
 
         // Transfer all tokens to another account
         address anotherAccount = address(0x4);
+        vm.expectRevert(abi.encodeWithSignature("TRANSFER_NOT_ALLOWED()"));
         govToken.transfer(anotherAccount, 100);
 
         vm.prank(anotherAccount);

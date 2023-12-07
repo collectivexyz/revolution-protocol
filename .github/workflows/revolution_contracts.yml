@@ -1,0 +1,40 @@
+name: "Revolution"
+
+on:
+  workflow_call:
+
+jobs:
+  build:
+    uses: ./.github/workflows/build.yml
+    with:
+      package_folder: packages/revolution
+
+  test:
+    needs: build
+    uses: ./.github/workflows/test.yml
+    with:
+      package_folder: packages/revolution
+
+  storage_test:
+    needs: build
+    uses: ./.github/workflows/storage.yml
+    with:
+      package_folder: packages/revolution
+
+  contract_sizes:
+    needs: build
+    uses: ./.github/workflows/contract_sizes.yml
+    with:
+      package_folder: packages/revolution
+
+  slither:
+    needs: build
+    uses: ./.github/workflows/slither.yml
+    with:
+      package_folder: packages/revolution
+
+  coverage:
+    uses: ./.github/workflows/coverage.yml
+    with:
+      package: "revolution"
+      files_to_ignore: '"*lib*" "*base*" "*governance*" "*protocol-rewards*" "*interfaces*"'
