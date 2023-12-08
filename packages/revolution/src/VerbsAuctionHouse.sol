@@ -72,7 +72,7 @@ contract VerbsAuctionHouse is
     IVerbsAuctionHouse.Auction public auction;
 
     // The minimum gas threshold for creating an auction (minting VerbsToken)
-    uint32 public constant MIN_TOKEN_MINT_GAS_THRESHOLD = 1_000_000;
+    uint32 public constant MIN_TOKEN_MINT_GAS_THRESHOLD = 750_000;
 
     /**
      * @notice Initialize the auction house and base contracts,

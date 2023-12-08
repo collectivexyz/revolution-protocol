@@ -429,17 +429,6 @@ contract CultureIndex is ICultureIndex, Ownable, ReentrancyGuard, ContractVersio
 
         emit PieceDropped(piece.pieceId, msg.sender);
 
-        uint256 numCreators = piece.creators.length;
-        //for each creator, emit an event
-        for (uint i; i < numCreators; i++) {
-            emit PieceDroppedCreator(
-                piece.pieceId,
-                piece.creators[i].creator,
-                piece.dropper,
-                piece.creators[i].bps
-            );
-        }
-
         return pieces[piece.pieceId];
     }
 }
