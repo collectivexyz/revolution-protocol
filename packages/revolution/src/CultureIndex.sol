@@ -258,13 +258,7 @@ contract CultureIndex is ICultureIndex, Ownable, ReentrancyGuard, EIP712 {
         uint256 quorum,
         uint256 totalVotesSupply
     ) internal {
-        emit PieceCreated(
-            pieceId,
-            sender,
-            metadata,
-            quorum,
-            totalVotesSupply
-        );
+        emit PieceCreated(pieceId, sender, metadata, quorum, totalVotesSupply);
 
         // Emit an event for each creator
         for (uint i; i < creatorArrayLength; ) {
