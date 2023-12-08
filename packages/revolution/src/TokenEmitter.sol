@@ -133,10 +133,14 @@ contract TokenEmitter is VRGDAC, ITokenEmitter, ReentrancyGuard, TokenEmitterRew
 
         //Mint tokens to buyers
         if (totalTokensForBuyers > 0) {
-            for (uint i = 0; i < _addresses.length; i++) {
+            for (uint i = 0; i < _addresses.length;) {
                 // transfer tokens to address
                 _mint(_addresses[i], uint((totalTokensForBuyers * int(_bps[i])) / 10_000));
                 bpsSum += _bps[i];
+
+                unchecked {
+                    ++i;
+                }
             }
         }
 
