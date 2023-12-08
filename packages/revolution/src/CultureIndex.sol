@@ -9,8 +9,16 @@ import { ReentrancyGuard } from "@openzeppelin/contracts/utils/ReentrancyGuard.s
 import { ERC721Checkpointable } from "./base/ERC721Checkpointable.sol";
 import { ContractVersionBase } from "./version/ContractVersionBase.sol";
 import { EIP712 } from "@openzeppelin/contracts/utils/cryptography/EIP712.sol";
+import { Strings } from "@openzeppelin/contracts/utils/Strings.sol";
 
 contract CultureIndex is ICultureIndex, Ownable, ReentrancyGuard, ContractVersionBase, EIP712 {
+    /// @notice The EIP-712 typehash for gasless votes
+    bytes32 public constant VOTE_TYPEHASH =
+        keccak256("Vote(address from,uint256 pieceId,uint256 nonce,uint256 deadline)");
+
+    /// @notice An account's nonce for gasless votes
+    mapping(address => uint256) public nonces;
+
     // The MaxHeap data structure used to keep track of the top-voted piece
     MaxHeap public immutable maxHeap;
 
@@ -54,6 +62,12 @@ contract CultureIndex is ICultureIndex, Ownable, ReentrancyGuard, ContractVersio
     // Constant for max number of creators
     uint256 public constant MAX_NUM_CREATORS = 100;
 
+    // Generate a new EIP712 domain separator using the unique name, address and name of this contract
+    // to avoid nefarious contracts from being able to replay signatures from this contract
+    function uniqueDomainName(string memory name_) internal view returns (string memory) {
+        return string(abi.encodePacked(name_, "_", abi.encodePacked(address(this)), "_CultureIndex"));
+    }
+
     /**
      * @notice Constructor
      * @param name_ The name of the culture index
@@ -72,7 +86,7 @@ contract CultureIndex is ICultureIndex, Ownable, ReentrancyGuard, ContractVersio
         address initialOwner_,
         uint256 erc721VotingTokenWeight_,
         uint256 quorumVotesBPS_
-    ) Ownable(initialOwner_) EIP712(abi.encodePacked(name_, "_CultureIndex"), "1") {
+    ) Ownable(initialOwner_) EIP712(uniqueDomainName(name_), "1") {
         require(
             quorumVotesBPS_ >= MIN_QUORUM_VOTES_BPS && quorumVotesBPS_ <= MAX_QUORUM_VOTES_BPS,
             "invalid quorum bps"
@@ -348,6 +362,40 @@ contract CultureIndex is ICultureIndex, Ownable, ReentrancyGuard, ContractVersio
         for (uint256 i; i < len; ++i) {
             _vote(pieceIds[i], msg.sender);
         }
+    }
+
+    /// @notice Execute a vote via signature
+    /// @param from Vote from this address
+    /// @param pieceId Vote on this pieceId
+    /// @param deadline Deadline for the signature to be valid
+    /// @param v V component of signature
+    /// @param r R component of signature
+    /// @param s S component of signature
+    function voteWithSig(
+        address from,
+        uint256 pieceId,
+        uint256 deadline,
+        uint8 v,
+        bytes32 r,
+        bytes32 s
+    ) external {
+        require(deadline >= block.timestamp, "Signature expired");
+
+        bytes32 voteHash;
+
+        voteHash = keccak256(abi.encode(VOTE_TYPEHASH, from, pieceId, nonces[from]++, deadline));
+
+        bytes32 digest = _hashTypedDataV4(voteHash);
+
+        address recoveredAddress = ecrecover(digest, v, r, s);
+
+        // Ensure to address is not 0
+        if (from == address(0)) revert ADDRESS_ZERO();
+
+        // Ensure signature is valid
+        if (recoveredAddress == address(0) || recoveredAddress != from) revert INVALID_SIGNATURE();
+
+        _vote(pieceId, from);
     }
 
     /**
