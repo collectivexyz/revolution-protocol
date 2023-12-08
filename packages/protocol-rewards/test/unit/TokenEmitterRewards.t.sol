@@ -3,7 +3,7 @@ pragma solidity 0.8.22;
 
 import "../ProtocolRewardsTest.sol";
 import { RewardsSettings } from "../../src/abstract/RewardSplits.sol";
-import { NontransferableERC20Votes } from "../utils/TokenEmitterLibrary.sol";
+import { NontransferableERC20Votes, ITokenEmitter } from "../utils/TokenEmitterLibrary.sol";
 
 contract TokenEmitterRewardsTest is ProtocolRewardsTest {
     MockTokenEmitter internal mockTokenEmitter;
@@ -45,13 +45,14 @@ contract TokenEmitterRewardsTest is ProtocolRewardsTest {
             //expect INVALID_ETH_AMOUNT()
             vm.expectRevert();
         }
-        mockTokenEmitter.buyToken{ value: msgValue }(
-            addresses,
-            bps,
-            builderReferral,
-            purchaseReferral,
-            deployer
-        );
+
+        ITokenEmitter.ProtocolRewardAddresses memory rewardAddrs = ITokenEmitter.ProtocolRewardAddresses({
+            builder: builderReferral,
+            purchaseReferral: purchaseReferral,
+            deployer: deployer
+        });
+
+        mockTokenEmitter.buyToken{ value: msgValue }(addresses, bps, rewardAddrs);
 
         if (shouldExpectRevert) {
             vm.expectRevert();
@@ -106,7 +107,15 @@ contract TokenEmitterRewardsTest is ProtocolRewardsTest {
             //expect INVALID_ETH_AMOUNT()
             vm.expectRevert();
         }
-        mockTokenEmitter.buyToken{ value: msgValue }(addresses, bps, builderReferral, address(0), deployer);
+        mockTokenEmitter.buyToken{ value: msgValue }(
+            addresses,
+            bps,
+            ITokenEmitter.ProtocolRewardAddresses({
+                builder: builderReferral,
+                purchaseReferral: address(0),
+                deployer: deployer
+            })
+        );
 
         if (shouldExpectRevert) {
             //expect INVALID_ETH_AMOUNT()

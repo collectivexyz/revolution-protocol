@@ -19,7 +19,7 @@ contract VerbsAuctionHouseSettleTest is VerbsAuctionHouseTest {
         uint256 bidAmount = auctionHouse.reservePrice();
         vm.deal(address(11), bidAmount);
         vm.startPrank(address(11));
-        auctionHouse.createBid{ value: bidAmount }(0); // Assuming first auction's verbId is 0
+        auctionHouse.createBid{ value: bidAmount }(0, address(11)); // Assuming first auction's verbId is 0
         vm.stopPrank();
 
         vm.warp(block.timestamp + auctionHouse.duration() + nDays); // Fast forward time to end the auction
@@ -93,7 +93,7 @@ contract VerbsAuctionHouseSettleTest is VerbsAuctionHouseTest {
         auctionHouse.transferOwnership(recipient);
 
         vm.deal(address(auctionHouse), amount);
-        auctionHouse.createBid{ value: amount }(0); // Assuming first auction's verbId is 0
+        auctionHouse.createBid{ value: amount }(0, address(this)); // Assuming first auction's verbId is 0
 
         // Initially, recipient should have 0 ether and 0 WETH
         assertEq(recipient.balance, 0);
@@ -126,7 +126,7 @@ contract VerbsAuctionHouseSettleTest is VerbsAuctionHouseTest {
         auctionHouse.transferOwnership(recipient);
 
         vm.deal(address(auctionHouse), amount);
-        auctionHouse.createBid{ value: amount }(0); // Assuming first auction's verbId is 0
+        auctionHouse.createBid{ value: amount }(0, address(this)); // Assuming first auction's verbId is 0
 
         // Initially, recipient should have 0 ether
         assertEq(recipient.balance, 0);
@@ -160,7 +160,7 @@ contract VerbsAuctionHouseSettleTest is VerbsAuctionHouseTest {
         auctionHouse.transferOwnership(recipient);
 
         vm.deal(address(auctionHouse), amount);
-        auctionHouse.createBid{ value: amount }(0); // Assuming first auction's verbId is 0
+        auctionHouse.createBid{ value: amount }(0, address(this)); // Assuming first auction's verbId is 0
 
         // Initially, recipient should have 0 ether and 0 WETH
         assertEq(recipient.balance, 0);
@@ -223,7 +223,7 @@ contract VerbsAuctionHouseSettleTest is VerbsAuctionHouseTest {
         uint256 bidAmount = auctionHouse.reservePrice();
         vm.deal(address(21_000), bidAmount + 1 ether);
         vm.startPrank(address(21_000));
-        auctionHouse.createBid{ value: bidAmount }(verbId);
+        auctionHouse.createBid{ value: bidAmount }(verbId, address(21_000));
         vm.stopPrank();
 
         vm.warp(block.timestamp + auctionHouse.duration() + 1); // Fast forward time to end the auction
@@ -310,7 +310,7 @@ contract VerbsAuctionHouseSettleTest is VerbsAuctionHouseTest {
 
         vm.deal(address(21_000), bidAmount);
         vm.startPrank(address(21_000));
-        auctionHouse.createBid{ value: bidAmount }(verbId);
+        auctionHouse.createBid{ value: bidAmount }(verbId, address(21_000));
         vm.stopPrank();
 
         // Ether going to owner of the auction

@@ -75,12 +75,14 @@ contract TokenBasicTest is VerbsTokenTestSuite {
         emit ICultureIndexEvents.PieceCreated(
             0,
             address(this),
-            name,
-            description,
-            image,
-            animationUrl,
-            text,
-            uint8(mediaType),
+            ICultureIndex.ArtPieceMetadata({
+                name: name,
+                description: description,
+                image: image,
+                animationUrl: animationUrl,
+                text: text,
+                mediaType: mediaType
+            }),
             0,
             0
         );

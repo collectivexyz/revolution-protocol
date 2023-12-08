@@ -7,9 +7,17 @@ import { ICultureIndex } from "./interfaces/ICultureIndex.sol";
 import { Ownable } from "@openzeppelin/contracts/access/Ownable.sol";
 import { ReentrancyGuard } from "@openzeppelin/contracts/utils/ReentrancyGuard.sol";
 import { ERC721Checkpointable } from "./base/ERC721Checkpointable.sol";
-import { ContractVersionBase } from "./version/ContractVersionBase.sol";
+import { EIP712 } from "@openzeppelin/contracts/utils/cryptography/EIP712.sol";
+import { Strings } from "@openzeppelin/contracts/utils/Strings.sol";
 
-contract CultureIndex is ICultureIndex, Ownable, ReentrancyGuard, ContractVersionBase {
+contract CultureIndex is ICultureIndex, Ownable, ReentrancyGuard, EIP712 {
+    /// @notice The EIP-712 typehash for gasless votes
+    bytes32 public constant VOTE_TYPEHASH =
+        keccak256("Vote(address from,uint256 pieceId,uint256 nonce,uint256 deadline)");
+
+    /// @notice An account's nonce for gasless votes
+    mapping(address => uint256) public nonces;
+
     // The MaxHeap data structure used to keep track of the top-voted piece
     MaxHeap public immutable maxHeap;
 
@@ -71,7 +79,7 @@ contract CultureIndex is ICultureIndex, Ownable, ReentrancyGuard, ContractVersio
         address initialOwner_,
         uint256 erc721VotingTokenWeight_,
         uint256 quorumVotesBPS_
-    ) Ownable(initialOwner_) {
+    ) Ownable(initialOwner_) EIP712("CultureIndex", "1") {
         require(
             quorumVotesBPS_ >= MIN_QUORUM_VOTES_BPS && quorumVotesBPS_ <= MAX_QUORUM_VOTES_BPS,
             "invalid quorum bps"
@@ -130,7 +138,7 @@ contract CultureIndex is ICultureIndex, Ownable, ReentrancyGuard, ContractVersio
      * - The media type must be one of the defined types in the MediaType enum.
      * - The corresponding media data must not be empty.
      */
-    function validateMediaType(ArtPieceMetadata memory metadata) internal pure {
+    function validateMediaType(ArtPieceMetadata calldata metadata) internal pure {
         require(uint8(metadata.mediaType) > 0 && uint8(metadata.mediaType) <= 5, "Invalid media type");
 
         if (metadata.mediaType == MediaType.IMAGE)
@@ -142,17 +150,15 @@ contract CultureIndex is ICultureIndex, Ownable, ReentrancyGuard, ContractVersio
     }
 
     /**
-     * @notice Gets the total basis points from an array of creators.
+     * @notice Checks the total basis points from an array of creators and returns the length
      * @param creatorArray An array of Creator structs containing address and basis points.
      * @return Returns the total basis points calculated from the array of creators.
      *
      * Requirements:
      * - The `creatorArray` must not contain any zero addresses.
-     * - The function will return the total basis points which must be checked to be exactly 10,000.
+     * - The function will return the length of the `creatorArray`.
      */
-    function getTotalBpsFromCreators(
-        CreatorBps[] memory creatorArray
-    ) internal pure returns (uint256, uint256) {
+    function validateCreatorsArray(CreatorBps[] calldata creatorArray) internal pure returns (uint256) {
         uint256 creatorArrayLength = creatorArray.length;
         //Require that creatorArray is not more than MAX_NUM_CREATORS to prevent gas limit issues
         require(creatorArrayLength <= MAX_NUM_CREATORS, "Creator array must not be > MAX_NUM_CREATORS");
@@ -166,7 +172,10 @@ contract CultureIndex is ICultureIndex, Ownable, ReentrancyGuard, ContractVersio
                 ++i;
             }
         }
-        return (totalBps, creatorArrayLength);
+
+        require(totalBps == 10_000, "Total BPS must sum up to 10,000");
+
+        return creatorArrayLength;
     }
 
     /**
@@ -184,11 +193,10 @@ contract CultureIndex is ICultureIndex, Ownable, ReentrancyGuard, ContractVersio
      * - The sum of basis points in `creatorArray` must be exactly 10,000.
      */
     function createPiece(
-        ArtPieceMetadata memory metadata,
-        CreatorBps[] memory creatorArray
+        ArtPieceMetadata calldata metadata,
+        CreatorBps[] calldata creatorArray
     ) public returns (uint256) {
-        (uint256 totalBps, uint256 creatorArrayLength) = getTotalBpsFromCreators(creatorArray);
-        require(totalBps == 10_000, "Total BPS must sum up to 10,000");
+        uint256 creatorArrayLength = validateCreatorsArray(creatorArray);
 
         // Validate the media type and associated data
         validateMediaType(metadata);
@@ -219,18 +227,38 @@ contract CultureIndex is ICultureIndex, Ownable, ReentrancyGuard, ContractVersio
             }
         }
 
-        emit PieceCreated(
+        _emitPieceCreatedEvents(
             pieceId,
             msg.sender,
-            metadata.name,
-            metadata.description,
-            metadata.image,
-            metadata.animationUrl,
-            metadata.text,
-            uint8(metadata.mediaType),
+            metadata,
+            creatorArray,
+            creatorArrayLength,
             newPiece.quorumVotes,
             newPiece.totalVotesSupply
         );
+
+        return newPiece.pieceId;
+    }
+
+    /**
+     * @notice Emits events for created art piece
+     * @param pieceId The ID of the art piece.
+     * @param sender The address of the sender.
+     * @param metadata The metadata associated with the art piece, including name, description, image, and optional animation URL.
+     * @param creatorArray An array of creators who contributed to the piece, along with their respective basis points that must sum up to 10,000.
+     * @param quorum The quorum votes required for the art piece to be dropped.
+     * @param totalVotesSupply The total votes supply at the time of creation.
+     */
+    function _emitPieceCreatedEvents(
+        uint256 pieceId,
+        address sender,
+        ArtPieceMetadata calldata metadata,
+        CreatorBps[] calldata creatorArray,
+        uint256 creatorArrayLength,
+        uint256 quorum,
+        uint256 totalVotesSupply
+    ) internal {
+        emit PieceCreated(pieceId, sender, metadata, quorum, totalVotesSupply);
 
         // Emit an event for each creator
         for (uint i; i < creatorArrayLength; ) {
@@ -240,7 +268,6 @@ contract CultureIndex is ICultureIndex, Ownable, ReentrancyGuard, ContractVersio
                 ++i;
             }
         }
-        return newPiece.pieceId;
     }
 
     /**
@@ -304,15 +331,17 @@ contract CultureIndex is ICultureIndex, Ownable, ReentrancyGuard, ContractVersio
      * @notice Cast a vote for a specific ArtPiece.
      * @param pieceId The ID of the ArtPiece to vote for.
      * @param voter The address of the voter.
-     * @param weight The weight of the vote.
      * @dev Requires that the pieceId is valid, the voter has not already voted on this piece, and the weight is greater than zero.
      * Emits a VoteCast event upon successful execution.
      */
-    function _vote(uint256 pieceId, address voter, uint256 weight) internal {
-        require(weight > 0, "Weight must be greater than zero");
-        require(!(votes[pieceId][msg.sender].voterAddress != address(0)), "Already voted");
-        require(!pieces[pieceId].isDropped, "Piece has already been dropped");
+    function _vote(uint256 pieceId, address voter) internal {
         require(pieceId < _currentPieceId, "Invalid piece ID");
+        require(voter != address(0), "Invalid voter address");
+        require(!pieces[pieceId].isDropped, "Piece has already been dropped");
+        require(!(votes[pieceId][voter].voterAddress != address(0)), "Already voted");
+
+        uint256 weight = _getPriorVotes(voter, pieces[pieceId].creationBlock);
+        require(weight > 0, "Weight must be greater than zero");
 
         votes[pieceId][voter] = Vote(voter, weight);
         totalVoteWeights[pieceId] += weight;
@@ -331,8 +360,7 @@ contract CultureIndex is ICultureIndex, Ownable, ReentrancyGuard, ContractVersio
      * Emits a VoteCast event upon successful execution.
      */
     function vote(uint256 pieceId) public nonReentrant {
-        require(pieceId < _currentPieceId, "Invalid piece ID");
-        _vote(pieceId, msg.sender, _getPriorVotes(msg.sender, pieces[pieceId].creationBlock));
+        _vote(pieceId, msg.sender);
     }
 
     /**
@@ -344,9 +372,108 @@ contract CultureIndex is ICultureIndex, Ownable, ReentrancyGuard, ContractVersio
     function batchVote(uint256[] memory pieceIds) public nonReentrant {
         uint256 len = pieceIds.length;
         for (uint256 i; i < len; ++i) {
-            require(pieceIds[i] < _currentPieceId, "Invalid piece ID");
-            _vote(pieceIds[i], msg.sender, _getPriorVotes(msg.sender, pieces[pieceIds[i]].creationBlock));
+            _vote(pieceIds[i], msg.sender);
         }
+    }
+
+    /// @notice Execute a vote via signature
+    /// @param from Vote from this address
+    /// @param pieceId Vote on this pieceId
+    /// @param deadline Deadline for the signature to be valid
+    /// @param v V component of signature
+    /// @param r R component of signature
+    /// @param s S component of signature
+    function voteWithSig(
+        address from,
+        uint256 pieceId,
+        uint256 deadline,
+        uint8 v,
+        bytes32 r,
+        bytes32 s
+    ) external nonReentrant {
+        bool success = _verifyVoteSignature(from, pieceId, deadline, v, r, s);
+
+        if (!success) revert INVALID_SIGNATURE();
+
+        _vote(pieceId, from);
+    }
+
+    /// @notice Execute a batch of votes via signature
+    /// @param from Vote from these addresses
+    /// @param pieceId Vote on these pieceIds
+    /// @param deadline Deadlines for the signature to be valid
+    /// @param v V component of signatures
+    /// @param r R component of signatures
+    /// @param s S component of signatures
+    function batchVoteWithSig(
+        address[] memory from,
+        uint256[] memory pieceId,
+        uint256[] memory deadline,
+        uint8[] memory v,
+        bytes32[] memory r,
+        bytes32[] memory s
+    ) external nonReentrant {
+        uint256 len = from.length;
+        require(
+            len == pieceId.length &&
+                len == deadline.length &&
+                len == v.length &&
+                len == r.length &&
+                len == s.length,
+            "Array lengths must match"
+        );
+
+        for (uint256 i; i < len; ) {
+            bool success = _verifyVoteSignature(from[i], pieceId[i], deadline[i], v[i], r[i], s[i]);
+
+            if (!success) revert INVALID_SIGNATURE();
+
+            unchecked {
+                ++i;
+            }
+        }
+
+        for (uint256 i; i < len; ) {
+            _vote(pieceId[i], from[i]);
+
+            unchecked {
+                ++i;
+            }
+        }
+    }
+
+    /// @notice Utility function to verify a signature for a specific vote
+    /// @param from Vote from this address
+    /// @param pieceId Vote on this pieceId
+    /// @param deadline Deadline for the signature to be valid
+    /// @param v V component of signature
+    /// @param r R component of signature
+    /// @param s S component of signature
+    function _verifyVoteSignature(
+        address from,
+        uint256 pieceId,
+        uint256 deadline,
+        uint8 v,
+        bytes32 r,
+        bytes32 s
+    ) internal returns (bool success) {
+        require(deadline >= block.timestamp, "Signature expired");
+
+        bytes32 voteHash;
+
+        voteHash = keccak256(abi.encode(VOTE_TYPEHASH, from, pieceId, nonces[from]++, deadline));
+
+        bytes32 digest = _hashTypedDataV4(voteHash);
+
+        address recoveredAddress = ecrecover(digest, v, r, s);
+
+        // Ensure to address is not 0
+        if (from == address(0)) revert ADDRESS_ZERO();
+
+        // Ensure signature is valid
+        if (recoveredAddress == address(0) || recoveredAddress != from) revert INVALID_SIGNATURE();
+
+        return true;
     }
 
     /**

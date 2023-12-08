@@ -35,7 +35,7 @@ interface IVerbsAuctionHouse {
 
     event AuctionCreated(uint256 indexed verbId, uint256 startTime, uint256 endTime);
 
-    event AuctionBid(uint256 indexed verbId, address sender, uint256 value, bool extended);
+    event AuctionBid(uint256 indexed verbId, address bidder, address sender, uint256 value, bool extended);
 
     event AuctionExtended(uint256 indexed verbId, uint256 endTime);
 
@@ -62,7 +62,7 @@ interface IVerbsAuctionHouse {
 
     function settleCurrentAndCreateNewAuction() external;
 
-    function createBid(uint256 verbId) external payable;
+    function createBid(uint256 verbId, address bidder) external payable;
 
     function pause() external;
 

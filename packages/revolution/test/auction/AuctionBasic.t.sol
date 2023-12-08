@@ -22,6 +22,19 @@ contract VerbsAuctionHouseBasicTest is VerbsAuctionHouseTest {
         auctionHouse.setEntropyRateBps(newEntropyRateBps);
     }
 
+    function testBidEventEmission() public {
+        //setup bid
+        uint256 bidAmount = 100 ether;
+        uint256 verbId = createDefaultArtPiece();
+        auctionHouse.unpause();
+        vm.deal(address(1), bidAmount + 2 ether);
+        vm.prank(address(1));
+        // Expect an event emission
+        vm.expectEmit(true, true, true, true);
+        emit IVerbsAuctionHouse.AuctionBid(verbId, address(21), address(1), bidAmount, false);
+        auctionHouse.createBid{ value: bidAmount }(0, address(21)); // Assuming the first auction's verbId is 0
+    }
+
     function testSetEntropyRateBps(uint256 newEntropyRateBps) public {
         vm.assume(newEntropyRateBps <= 10_000);
 
@@ -176,6 +189,59 @@ contract VerbsAuctionHouseBasicTest is VerbsAuctionHouseTest {
         assertEq(auctionHouse.duration(), 24 hours, "Auction duration should be set correctly");
     }
 
+    function testBidForAnotherAccount() public {
+        //setup bid
+        uint256 bidAmount = 100 ether;
+        uint256 verbId = createDefaultArtPiece();
+        auctionHouse.unpause();
+        vm.deal(address(1), bidAmount + 2 ether);
+
+        // try to bid with bidder address(0) first and expect revert
+        vm.expectRevert("Bidder cannot be zero address");
+        auctionHouse.createBid{ value: bidAmount }(0, address(0)); // Assuming the first auction's verbId is 0
+
+        vm.prank(address(1));
+        // Expect an event emission
+        vm.expectEmit(true, true, true, true);
+        emit IVerbsAuctionHouse.AuctionBid(verbId, address(21), address(1), bidAmount, false);
+        auctionHouse.createBid{ value: bidAmount }(0, address(21)); // Assuming the first auction's verbId is 0
+
+        // Expect auction bidder to be 21
+        (, , , , address payable bidder, ) = auctionHouse.auction();
+        assertEq(bidder, address(21), "Bidder address should be set correctly");
+
+        // Expect auction amount to be bidAmount
+        (, uint256 amount, , , , ) = auctionHouse.auction();
+        assertEq(amount, bidAmount, "Bid amount should be set correctly");
+
+        // Expect auction settled to be false
+        (, , , , , bool settled) = auctionHouse.auction();
+        assertEq(settled, false, "Auction should not be settled");
+
+        // Expect auction verbId to be 0
+        (uint256 verbId2, , , , , ) = auctionHouse.auction();
+        assertEq(verbId2, 0, "Auction should be for the zeroth verb");
+
+        // Expect auction startTime to be set correctly
+        (, , uint256 startTime, , , ) = auctionHouse.auction();
+        assertEq(startTime, block.timestamp, "Auction start time should be set correctly");
+
+        // Expect auction endTime to be set correctly
+        (, , , uint256 endTime, , ) = auctionHouse.auction();
+        assertEq(
+            endTime,
+            block.timestamp + auctionHouse.duration(),
+            "Auction end time should be set correctly"
+        );
+
+        // vm warp and then settle auction
+        vm.warp(endTime + 1);
+        auctionHouse.settleCurrentAndCreateNewAuction(); // This will settle the current auction and create a new one
+
+        // Expect 21 to be the owner of the verb
+        assertEq(verbs.ownerOf(verbId), address(21), "Verb should be transferred to bidder param");
+    }
+
     function testAuctionCreation() public {
         createDefaultArtPiece();
 
@@ -212,7 +278,7 @@ contract VerbsAuctionHouseBasicTest is VerbsAuctionHouseTest {
         vm.deal(address(1), bidAmount + 2 ether);
 
         vm.startPrank(address(1));
-        auctionHouse.createBid{ value: bidAmount }(0); // Assuming the first auction's verbId is 0
+        auctionHouse.createBid{ value: bidAmount }(0, address(1)); // Assuming the first auction's verbId is 0
         (uint256 verbId, uint256 amount, , uint256 endTime, address payable bidder, ) = auctionHouse
             .auction();
 

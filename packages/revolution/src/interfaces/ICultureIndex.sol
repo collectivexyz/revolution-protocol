@@ -18,22 +18,14 @@ interface ICultureIndexEvents {
      * @dev Emitted when a new piece is created.
      * @param pieceId Unique identifier for the newly created piece.
      * @param dropper Address that created the piece.
-     * @param name Name of the art piece.
-     * @param description Description of the art piece.
-     * @param image URL for the image associated with the art piece.
-     * @param animationUrl (Optional) URL for the animation associated with the art piece.
-     * @param text Text content for the art piece.
-     * @param mediaType Integer representation of the media type for the art piece.
+     * @param metadata Metadata associated with the art piece.
+     * @param quorumVotes The quorum votes for the piece.
+     * @param totalVotesSupply The total votes supply for the piece.
      */
     event PieceCreated(
         uint256 indexed pieceId,
         address indexed dropper,
-        string name,
-        string description,
-        string image,
-        string animationUrl,
-        string text,
-        uint8 mediaType,
+        ICultureIndex.ArtPieceMetadata metadata,
         uint256 quorumVotes,
         uint256 totalVotesSupply
     );
@@ -71,6 +63,10 @@ interface ICultureIndexEvents {
  * @dev This interface defines the methods for the CultureIndex contract for art piece management and voting.
  */
 interface ICultureIndex is ICultureIndexEvents {
+    error INVALID_SIGNATURE();
+
+    error ADDRESS_ZERO();
+
     // Enum representing different media types for art pieces.
     enum MediaType {
         NONE,
@@ -156,6 +152,42 @@ interface ICultureIndex is ICultureIndexEvents {
      * @param pieceId The ID of the art piece.
      */
     function vote(uint256 pieceId) external;
+
+    /**
+     * @notice Allows a user to vote for a specific art piece using a signature.
+     * @param from The address of the voter.
+     * @param pieceId The ID of the art piece.
+     * @param deadline The deadline for the vote.
+     * @param v The v component of the signature.
+     * @param r The r component of the signature.
+     * @param s The s component of the signature.
+     */
+    function voteWithSig(
+        address from,
+        uint256 pieceId,
+        uint256 deadline,
+        uint8 v,
+        bytes32 r,
+        bytes32 s
+    ) external;
+
+    /**
+     * @notice Allows users to vote for a specific art piece using a signature.
+     * @param from The address of the voter.
+     * @param pieceId The ID of the art piece.
+     * @param deadline The deadline for the vote.
+     * @param v The v component of the signature.
+     * @param r The r component of the signature.
+     * @param s The s component of the signature.
+     */
+    function batchVoteWithSig(
+        address[] memory from,
+        uint256[] memory pieceId,
+        uint256[] memory deadline,
+        uint8[] memory v,
+        bytes32[] memory r,
+        bytes32[] memory s
+    ) external;
 
     /**
      * @notice Fetch an art piece by its ID.

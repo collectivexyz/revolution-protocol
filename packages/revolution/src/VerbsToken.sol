@@ -244,7 +244,7 @@ contract VerbsToken is IVerbsToken, Ownable, ERC721Checkpointable, ReentrancyGua
     }
 
     /**
-     * @notice Mint a Verb with `verbId` to the provided `to` address.
+     * @notice Mint a Verb with `verbId` to the provided `to` address. Pulls the top voted art piece from the CultureIndex.
      */
     function _mintTo(address to) internal returns (uint256) {
         ICultureIndex.ArtPiece memory artPiece = cultureIndex.getTopVotedPiece();
