@@ -336,13 +336,7 @@ contract VerbsAuctionHouse is
                 uint256 auctioneerPayment = (_auction.amount * (10_000 - creatorRateBps)) / 10_000;
 
                 //Total amount of ether going to creator
-                uint256 creatorPayment = _auction.amount - auctioneerPayment;
-
-                //Ether reserved to pay the creator directly
-                uint256 creatorDirectPayment = (creatorPayment * entropyRateBps) / 10_000;
-
-                //Ether reserved to buy creator governance
-                uint256 creatorGovernancePayment = creatorPayment - creatorDirectPayment;
+                uint256 creatorsShare = _auction.amount - auctioneerPayment;
 
                 uint256 numCreators = verbs.getArtPieceById(_auction.verbId).creators.length;
                 address deployer = verbs.getArtPieceById(_auction.verbId).dropper;
@@ -354,28 +348,41 @@ contract VerbsAuctionHouse is
                 //Transfer auction amount to the DAO treasury
                 _safeTransferETHWithFallback(owner(), auctioneerPayment);
 
+                uint256 ethPaidToCreators;
+
                 //Transfer creator's share to the creator, for each creator, and build arrays for tokenEmitter.buyToken
-                for (uint256 i = 0; i < numCreators; i++) {
-                    ICultureIndex.CreatorBps memory creator = verbs.getArtPieceById(_auction.verbId).creators[
-                        i
-                    ];
-                    vrgdaReceivers[i] = creator.creator;
-                    vrgdaSplits[i] = creator.bps;
+                if (creatorsShare > 0 && entropyRateBps > 0) {
+                    for (uint256 i = 0; i < numCreators; ) {
+                        ICultureIndex.CreatorBps memory creator = verbs
+                            .getArtPieceById(_auction.verbId)
+                            .creators[i];
+                        vrgdaReceivers[i] = creator.creator;
+                        vrgdaSplits[i] = creator.bps;
 
-                    //Calculate etherAmount for specific creator based on BPS splits - same as multiplying by creatorDirectPayment
-                    uint256 etherAmount = (creatorPayment * entropyRateBps * creator.bps) / (10_000 * 10_000);
+                        //Calculate paymentAmount for specific creator based on BPS splits - same as multiplying by creatorDirectPayment
+                        uint256 paymentAmount = (creatorsShare * entropyRateBps * creator.bps) /
+                            (10_000 * 10_000);
+                        ethPaidToCreators += paymentAmount;
 
-                    //Transfer creator's share to the creator
-                    _safeTransferETHWithFallback(creator.creator, etherAmount);
+                        //Transfer creator's share to the creator
+                        _safeTransferETHWithFallback(creator.creator, paymentAmount);
+
+                        unchecked {
+                            ++i;
+                        }
+                    }
                 }
+
                 //Buy token from tokenEmitter for all the creators
-                creatorTokensEmitted = tokenEmitter.buyToken{ value: creatorGovernancePayment }(
-                    vrgdaReceivers,
-                    vrgdaSplits,
-                    address(0),
-                    address(0),
-                    deployer
-                );
+                if (creatorsShare > ethPaidToCreators) {
+                    creatorTokensEmitted = tokenEmitter.buyToken{ value: creatorsShare - ethPaidToCreators }(
+                        vrgdaReceivers,
+                        vrgdaSplits,
+                        address(0),
+                        address(0),
+                        deployer
+                    );
+                }
             }
         }
 
