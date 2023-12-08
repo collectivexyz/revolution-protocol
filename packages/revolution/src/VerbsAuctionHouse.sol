@@ -350,12 +350,14 @@ contract VerbsAuctionHouse is
 
                 //Transfer creator's share to the creator, for each creator, and build arrays for tokenEmitter.buyToken
                 for (uint256 i = 0; i < numCreators; i++) {
-                    ICultureIndex.CreatorBps memory creator = verbs.getArtPieceById(_auction.verbId).creators[i];
+                    ICultureIndex.CreatorBps memory creator = verbs.getArtPieceById(_auction.verbId).creators[
+                        i
+                    ];
                     vrgdaReceivers[i] = creator.creator;
                     vrgdaSplits[i] = creator.bps;
 
                     //Calculate etherAmount for specific creator based on BPS splits - same as multiplying by creatorDirectPayment
-                    uint256 etherAmount = (creatorPayment * entropyRateBps * creator.bps) / (10_000 * 10_000);
+                    uint256 etherAmount = (creatorDirectPayment * creator.bps) / (10_000);
 
                     //Transfer creator's share to the creator
                     _safeTransferETHWithFallback(creator.creator, etherAmount);

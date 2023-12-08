@@ -3,7 +3,7 @@
 // SPDX-License-Identifier: MIT
 pragma solidity 0.8.22;
 
-import {IVersionedContract} from "../interfaces/IVersionedContract.sol";
+import { IVersionedContract } from "../interfaces/IVersionedContract.sol";
 
 /// @title ContractVersionBase
 /// @notice Base contract for versioning contracts
