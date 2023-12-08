@@ -137,10 +137,14 @@ contract VerbsAuctionHouse is
     /**
      * @notice Create a bid for a Verb, with a given amount.
      * @dev This contract only accepts payment in ETH.
+     * @param verbId The ID of the Verb to bid on.
+     * @param bidder The address of the bidder.
      */
-    function createBid(uint256 verbId) external payable override nonReentrant {
+    function createBid(uint256 verbId, address bidder) external payable override nonReentrant {
         IVerbsAuctionHouse.Auction memory _auction = auction;
 
+        //require bidder is valid address
+        require(bidder != address(0), "Bidder cannot be zero address");
         require(_auction.verbId == verbId, "Verb not up for auction");
         //slither-disable-next-line timestamp
         require(block.timestamp < _auction.endTime, "Auction expired");
@@ -153,7 +157,7 @@ contract VerbsAuctionHouse is
         address payable lastBidder = _auction.bidder;
 
         auction.amount = msg.value;
-        auction.bidder = payable(msg.sender);
+        auction.bidder = payable(bidder);
 
         // Extend the auction if the bid was received within `timeBuffer` of the auction end time
         bool extended = _auction.endTime - block.timestamp < timeBuffer;
@@ -162,7 +166,7 @@ contract VerbsAuctionHouse is
         // Refund the last bidder, if applicable
         if (lastBidder != address(0)) _safeTransferETHWithFallback(lastBidder, _auction.amount);
 
-        emit AuctionBid(_auction.verbId, msg.sender, msg.value, extended);
+        emit AuctionBid(_auction.verbId, bidder, msg.sender, msg.value, extended);
 
         if (extended) emit AuctionExtended(_auction.verbId, _auction.endTime);
     }

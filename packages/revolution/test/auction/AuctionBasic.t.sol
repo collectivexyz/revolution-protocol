@@ -212,7 +212,7 @@ contract VerbsAuctionHouseBasicTest is VerbsAuctionHouseTest {
         vm.deal(address(1), bidAmount + 2 ether);
 
         vm.startPrank(address(1));
-        auctionHouse.createBid{ value: bidAmount }(0); // Assuming the first auction's verbId is 0
+        auctionHouse.createBid{ value: bidAmount }(0, address(1)); // Assuming the first auction's verbId is 0
         (uint256 verbId, uint256 amount, , uint256 endTime, address payable bidder, ) = auctionHouse
             .auction();
 
