@@ -22,6 +22,19 @@ contract VerbsAuctionHouseBasicTest is VerbsAuctionHouseTest {
         auctionHouse.setEntropyRateBps(newEntropyRateBps);
     }
 
+    function testBidEventEmission() public {
+        //setup bid
+        uint256 bidAmount = 100 ether;
+        uint256 verbId = createDefaultArtPiece();
+        auctionHouse.unpause();
+        vm.deal(address(1), bidAmount + 2 ether);
+        vm.prank(address(1));
+        // Expect an event emission
+        vm.expectEmit(true, true, true, true);
+        emit IVerbsAuctionHouse.AuctionBid(verbId, address(21), address(1), bidAmount, false);
+        auctionHouse.createBid{ value: bidAmount }(0, address(21)); // Assuming the first auction's verbId is 0
+    }
+
     function testSetEntropyRateBps(uint256 newEntropyRateBps) public {
         vm.assume(newEntropyRateBps <= 10_000);
 
