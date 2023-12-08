@@ -318,7 +318,7 @@ contract VerbsAuctionHouse is
 
             // And then burn the Noun
             verbs.burn(_auction.verbId);
-        } else 
+        } else {
             //If no one has bid, burn the Verb
             if (_auction.bidder == address(0))
                 verbs.burn(_auction.verbId);
