@@ -50,6 +50,9 @@ contract CultureIndex is ICultureIndex, Ownable, ReentrancyGuard, ContractVersio
     // The total voting weight for a piece
     mapping(uint256 => uint256) public totalVoteWeights;
 
+    // Constant for max number of creators
+    uint256 public constant MAX_NUM_CREATORS = 100;
+
     /**
      * @notice Constructor
      * @param name_ The name of the culture index
@@ -151,8 +154,8 @@ contract CultureIndex is ICultureIndex, Ownable, ReentrancyGuard, ContractVersio
         CreatorBps[] memory creatorArray
     ) internal pure returns (uint256, uint256) {
         uint256 creatorArrayLength = creatorArray.length;
-        //Require that creatorArray is not more than 100 to prevent gas limit issues
-        require(creatorArrayLength <= 100, "Creator array must not be > 100");
+        //Require that creatorArray is not more than MAX_NUM_CREATORS to prevent gas limit issues
+        require(creatorArrayLength <= MAX_NUM_CREATORS, "Creator array must not be > MAX_NUM_CREATORS");
 
         uint256 totalBps;
         for (uint i; i < creatorArrayLength; i++) {

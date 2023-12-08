@@ -251,7 +251,7 @@ contract VerbsToken is IVerbsToken, Ownable, ERC721Checkpointable, ReentrancyGua
 
         // Check-Effects-Interactions Pattern
         // Perform all checks
-        require(artPiece.creators.length <= 100, "Creator array must not be > 100");
+        require(artPiece.creators.length <= cultureIndex.MAX_NUM_CREATORS(), "Creator array must not be > MAX_NUM_CREATORS");
 
         // Use try/catch to handle potential failure
         try cultureIndex.dropTopVotedPiece() returns (ICultureIndex.ArtPiece memory _artPiece) {
@@ -268,8 +268,12 @@ contract VerbsToken is IVerbsToken, Ownable, ERC721Checkpointable, ReentrancyGua
             newPiece.quorumVotes = artPiece.quorumVotes;
             newPiece.totalVotesSupply = artPiece.totalVotesSupply;
 
-            for (uint i = 0; i < artPiece.creators.length; i++) {
+            for (uint i = 0; i < artPiece.creators.length;) {
                 newPiece.creators.push(artPiece.creators[i]);
+
+                unchecked {
+                    ++i;
+                }
             }
 
             _mint(owner(), to, verbId);

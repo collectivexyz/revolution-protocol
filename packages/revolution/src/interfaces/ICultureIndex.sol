@@ -124,6 +124,9 @@ interface ICultureIndex is ICultureIndexEvents {
         uint256 totalVotesSupply;
     }
 
+    // Constant for max number of creators
+    function MAX_NUM_CREATORS() external view returns (uint256);
+
     // Struct representing a voter and their weight for a specific art piece.
     struct Vote {
         address voterAddress;

@@ -71,6 +71,9 @@ contract VerbsAuctionHouse is
     // The active auction
     IVerbsAuctionHouse.Auction public auction;
 
+    // The minimum gas threshold for creating an auction (minting VerbsToken)
+    uint32 public constant MIN_TOKEN_MINT_GAS_THRESHOLD = 1_000_000;
+
     /**
      * @notice Initialize the auction house and base contracts,
      * populate configuration values, and pause the contract.
@@ -275,6 +278,9 @@ contract VerbsAuctionHouse is
      * catch the revert and pause this contract.
      */
     function _createAuction() internal {
+        // Check if there's enough gas to safely execute token.mint() and subsequent operations
+        require(gasleft() >= MIN_TOKEN_MINT_GAS_THRESHOLD, "Insufficient gas for creating auction");
+
         try verbs.mint() returns (uint256 verbId) {
             uint256 startTime = block.timestamp;
             uint256 endTime = startTime + duration;
