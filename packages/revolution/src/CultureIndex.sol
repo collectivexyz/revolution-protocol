@@ -252,8 +252,8 @@ contract CultureIndex is ICultureIndex, Ownable, ReentrancyGuard, EIP712 {
     function _emitPieceCreatedEvents(
         uint256 pieceId,
         address sender,
-        ArtPieceMetadata memory metadata,
-        CreatorBps[] memory creatorArray,
+        ArtPieceMetadata calldata metadata,
+        CreatorBps[] calldata creatorArray,
         uint256 creatorArrayLength,
         uint256 quorum,
         uint256 totalVotesSupply
@@ -261,12 +261,7 @@ contract CultureIndex is ICultureIndex, Ownable, ReentrancyGuard, EIP712 {
         emit PieceCreated(
             pieceId,
             sender,
-            metadata.name,
-            metadata.description,
-            metadata.image,
-            metadata.animationUrl,
-            metadata.text,
-            uint8(metadata.mediaType),
+            metadata,
             quorum,
             totalVotesSupply
         );

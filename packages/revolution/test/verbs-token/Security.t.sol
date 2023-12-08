@@ -171,12 +171,15 @@ contract TokenSecurityTest is VerbsTokenTestSuite {
         emit ICultureIndexEvents.PieceCreated(
             0,
             address(this),
-            "Mona Lisa",
-            "A masterpiece",
-            "ipfs://legends",
-            "",
-            "",
-            uint8(ICultureIndex.MediaType.IMAGE),
+            // mediaType: mediaType}),
+            ICultureIndex.ArtPieceMetadata({
+                name: "Mona Lisa",
+                description: "A masterpiece",
+                image: "ipfs://legends",
+                animationUrl: "",
+                text: "",
+                mediaType: ICultureIndex.MediaType.IMAGE
+            }),
             0,
             0
         );

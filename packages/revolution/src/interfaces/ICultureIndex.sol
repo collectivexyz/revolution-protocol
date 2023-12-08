@@ -18,22 +18,14 @@ interface ICultureIndexEvents {
      * @dev Emitted when a new piece is created.
      * @param pieceId Unique identifier for the newly created piece.
      * @param dropper Address that created the piece.
-     * @param name Name of the art piece.
-     * @param description Description of the art piece.
-     * @param image URL for the image associated with the art piece.
-     * @param animationUrl (Optional) URL for the animation associated with the art piece.
-     * @param text Text content for the art piece.
-     * @param mediaType Integer representation of the media type for the art piece.
+     * @param metadata Metadata associated with the art piece.
+     * @param quorumVotes The quorum votes for the piece.
+     * @param totalVotesSupply The total votes supply for the piece.
      */
     event PieceCreated(
         uint256 indexed pieceId,
         address indexed dropper,
-        string name,
-        string description,
-        string image,
-        string animationUrl,
-        string text,
-        uint8 mediaType,
+        ICultureIndex.ArtPieceMetadata metadata,
         uint256 quorumVotes,
         uint256 totalVotesSupply
     );
