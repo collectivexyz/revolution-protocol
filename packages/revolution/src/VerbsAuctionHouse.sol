@@ -305,7 +305,7 @@ contract VerbsAuctionHouse is
     }
 
     /**
-     * @notice Settle an auction, finalizing the bid and paying out to the owner.
+     * @notice Settle an auction, finalizing the bid and paying out to the owner. Pays out to the creator and the owner based on the creatorRateBps and entropyRateBps.
      * @dev If there are no bids, the Verb is burned.
      */
     function _settleAuction() internal {
