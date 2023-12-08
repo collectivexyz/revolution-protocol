@@ -138,7 +138,7 @@ contract CultureIndex is ICultureIndex, Ownable, ReentrancyGuard, EIP712 {
      * - The media type must be one of the defined types in the MediaType enum.
      * - The corresponding media data must not be empty.
      */
-    function validateMediaType(ArtPieceMetadata memory metadata) internal pure {
+    function validateMediaType(ArtPieceMetadata calldata metadata) internal pure {
         require(uint8(metadata.mediaType) > 0 && uint8(metadata.mediaType) <= 5, "Invalid media type");
 
         if (metadata.mediaType == MediaType.IMAGE)
@@ -159,7 +159,7 @@ contract CultureIndex is ICultureIndex, Ownable, ReentrancyGuard, EIP712 {
      * - The function will return the length of the `creatorArray`.
      */
     function validateCreatorsArray(
-        CreatorBps[] memory creatorArray
+        CreatorBps[] calldata creatorArray
     ) internal pure returns (uint256) {
         uint256 creatorArrayLength = creatorArray.length;
         //Require that creatorArray is not more than MAX_NUM_CREATORS to prevent gas limit issues
@@ -195,8 +195,8 @@ contract CultureIndex is ICultureIndex, Ownable, ReentrancyGuard, EIP712 {
      * - The sum of basis points in `creatorArray` must be exactly 10,000.
      */
     function createPiece(
-        ArtPieceMetadata memory metadata,
-        CreatorBps[] memory creatorArray
+        ArtPieceMetadata calldata metadata,
+        CreatorBps[] calldata creatorArray
     ) public returns (uint256) {
         uint256 creatorArrayLength = validateCreatorsArray(creatorArray);
 
