@@ -25,10 +25,10 @@ contract CultureIndex is ICultureIndex, Ownable, ReentrancyGuard, ContractVersio
     // The weight of the 721 voting token
     uint256 public immutable erc721VotingTokenWeight;
 
-    /// @notice The minimum setable quorum votes basis points
+    /// @notice The minimum settable quorum votes basis points
     uint256 public constant MIN_QUORUM_VOTES_BPS = 200; // 200 basis points or 2%
 
-    /// @notice The maximum setable quorum votes basis points
+    /// @notice The maximum settable quorum votes basis points
     uint256 public constant MAX_QUORUM_VOTES_BPS = 4_000; // 4,000 basis points or 40%
 
     /// @notice The basis point number of votes in support of a art piece required in order for a quorum to be reached and for an art piece to be dropped.
