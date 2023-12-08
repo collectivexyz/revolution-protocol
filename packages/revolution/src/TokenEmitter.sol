@@ -20,7 +20,9 @@ contract TokenEmitter is VRGDAC, ITokenEmitter, ReentrancyGuard, TokenEmitterRew
     // solhint-disable-next-line not-rely-on-time
     uint public immutable startTime = block.timestamp;
 
-    // The amount of tokens that have been emitted in wad units.
+    /**
+     * @notice A running total of the amount of tokens emitted.
+     */
     int256 public emittedTokenWad;
 
     // The split of the purchase that is reserved for the creator of the Verb in basis points
@@ -73,10 +75,18 @@ contract TokenEmitter is VRGDAC, ITokenEmitter, ReentrancyGuard, TokenEmitterRew
         return token.balanceOf(_owner);
     }
 
-    // takes a list of addresses and a list of payout percentages as basis points
+    /**
+     * @notice A payable function that allows a user to buy tokens for a list of addresses and a list of basis points to split the token purchase between.
+     * @param addresses The addresses to send purchased tokens to.
+     * @param bps The basis points of the purchase to send to each address.
+     * @param builder The address to pay the builder rewards to
+     * @param purchaseReferral The address to pay the purchase referral rewards to
+     * @param deployer The address to pay the deployer rewards to
+     * @return tokensSoldWad The amount of tokens sold in wad units.
+     */
     function buyToken(
-        address[] memory _addresses,
-        uint[] memory _bps,
+        address[] memory addresses,
+        uint[] memory bps,
         address builder,
         address purchaseReferral,
         address deployer
@@ -85,8 +95,8 @@ contract TokenEmitter is VRGDAC, ITokenEmitter, ReentrancyGuard, TokenEmitterRew
         require(msg.sender != treasury && msg.sender != creatorsAddress, "Funds recipient cannot buy tokens");
 
         require(msg.value > 0, "Must send ether");
-        // ensure the same number of addresses and _bps
-        require(_addresses.length == _bps.length, "Parallel arrays required");
+        // ensure the same number of addresses and bps
+        require(addresses.length == bps.length, "Parallel arrays required");
 
         // Get value left after protocol rewards
         uint msgValueRemaining = _handleRewardsAndGetValueToSend(
@@ -133,10 +143,10 @@ contract TokenEmitter is VRGDAC, ITokenEmitter, ReentrancyGuard, TokenEmitterRew
 
         //Mint tokens to buyers
         if (totalTokensForBuyers > 0) {
-            for (uint i = 0; i < _addresses.length; ) {
+            for (uint i = 0; i < addresses.length; ) {
                 // transfer tokens to address
-                _mint(_addresses[i], uint((totalTokensForBuyers * int(_bps[i])) / 10_000));
-                bpsSum += _bps[i];
+                _mint(addresses[i], uint((totalTokensForBuyers * int(bps[i])) / 10_000));
+                bpsSum += bps[i];
 
                 unchecked {
                     ++i;
@@ -159,6 +169,11 @@ contract TokenEmitter is VRGDAC, ITokenEmitter, ReentrancyGuard, TokenEmitterRew
         return uint(totalTokensForBuyers);
     }
 
+    /**
+     * @notice Returns the amount of wei that would be spent to buy an amount of tokens. Does not take into account the protocol rewards.
+     * @param amount the amount of tokens to buy.
+     * @return spentY The cost in wei of the token purchase.
+     */
     function buyTokenQuote(uint amount) public view returns (int spentY) {
         require(amount > 0, "Amount must be greater than 0");
         // Note: By using toDaysWadUnsafe(block.timestamp - startTime) we are establishing that 1 "unit of time" is 1 day.
@@ -171,6 +186,11 @@ contract TokenEmitter is VRGDAC, ITokenEmitter, ReentrancyGuard, TokenEmitterRew
             });
     }
 
+    /**
+     * @notice Returns the amount of tokens that would be emitted for an amount of wei. Does not take into account the protocol rewards.
+     * @param etherAmount the payment amount in wei.
+     * @return gainedX The amount of tokens that would be emitted for the payment amount.
+     */
     function getTokenQuoteForEther(uint etherAmount) public view returns (int gainedX) {
         require(etherAmount > 0, "Ether amount must be greater than 0");
         // Note: By using toDaysWadUnsafe(block.timestamp - startTime) we are establishing that 1 "unit of time" is 1 day.
@@ -183,6 +203,11 @@ contract TokenEmitter is VRGDAC, ITokenEmitter, ReentrancyGuard, TokenEmitterRew
             });
     }
 
+    /**
+     * @notice Returns the amount of tokens that would be emitted for the payment amount, taking into account the protocol rewards.
+     * @param paymentAmount the payment amount in wei.
+     * @return gainedX The amount of tokens that would be emitted for the payment amount.
+     */
     function getTokenQuoteForPayment(uint paymentAmount) external view returns (int gainedX) {
         require(paymentAmount > 0, "Payment amount must be greater than 0");
         // Note: By using toDaysWadUnsafe(block.timestamp - startTime) we are establishing that 1 "unit of time" is 1 day.
