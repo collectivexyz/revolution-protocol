@@ -7,11 +7,10 @@ import { ICultureIndex } from "./interfaces/ICultureIndex.sol";
 import { Ownable } from "@openzeppelin/contracts/access/Ownable.sol";
 import { ReentrancyGuard } from "@openzeppelin/contracts/utils/ReentrancyGuard.sol";
 import { ERC721Checkpointable } from "./base/ERC721Checkpointable.sol";
-import { ContractVersionBase } from "./version/ContractVersionBase.sol";
 import { EIP712 } from "@openzeppelin/contracts/utils/cryptography/EIP712.sol";
 import { Strings } from "@openzeppelin/contracts/utils/Strings.sol";
 
-contract CultureIndex is ICultureIndex, Ownable, ReentrancyGuard, ContractVersionBase, EIP712 {
+contract CultureIndex is ICultureIndex, Ownable, ReentrancyGuard, EIP712 {
     /// @notice The EIP-712 typehash for gasless votes
     bytes32 public constant VOTE_TYPEHASH =
         keccak256("Vote(address from,uint256 pieceId,uint256 nonce,uint256 deadline)");
