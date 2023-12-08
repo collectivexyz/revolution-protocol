@@ -158,9 +158,7 @@ contract CultureIndex is ICultureIndex, Ownable, ReentrancyGuard, EIP712 {
      * - The `creatorArray` must not contain any zero addresses.
      * - The function will return the length of the `creatorArray`.
      */
-    function validateCreatorsArray(
-        CreatorBps[] calldata creatorArray
-    ) internal pure returns (uint256) {
+    function validateCreatorsArray(CreatorBps[] calldata creatorArray) internal pure returns (uint256) {
         uint256 creatorArrayLength = creatorArray.length;
         //Require that creatorArray is not more than MAX_NUM_CREATORS to prevent gas limit issues
         require(creatorArrayLength <= MAX_NUM_CREATORS, "Creator array must not be > MAX_NUM_CREATORS");
@@ -229,8 +227,16 @@ contract CultureIndex is ICultureIndex, Ownable, ReentrancyGuard, EIP712 {
             }
         }
 
-        _emitPieceCreatedEvents(pieceId, msg.sender, metadata, creatorArray, creatorArrayLength, newPiece.quorumVotes, newPiece.totalVotesSupply);
-        
+        _emitPieceCreatedEvents(
+            pieceId,
+            msg.sender,
+            metadata,
+            creatorArray,
+            creatorArrayLength,
+            newPiece.quorumVotes,
+            newPiece.totalVotesSupply
+        );
+
         return newPiece.pieceId;
     }
 
@@ -238,12 +244,12 @@ contract CultureIndex is ICultureIndex, Ownable, ReentrancyGuard, EIP712 {
      * @notice Emits events for created art piece
      * @param pieceId The ID of the art piece.
      * @param sender The address of the sender.
-     * @param metadata The metadata associated with the art piece, including name, description, image, and optional animation URL. 
+     * @param metadata The metadata associated with the art piece, including name, description, image, and optional animation URL.
      * @param creatorArray An array of creators who contributed to the piece, along with their respective basis points that must sum up to 10,000.
      * @param quorum The quorum votes required for the art piece to be dropped.
      * @param totalVotesSupply The total votes supply at the time of creation.
      */
-     function _emitPieceCreatedEvents(
+    function _emitPieceCreatedEvents(
         uint256 pieceId,
         address sender,
         ArtPieceMetadata memory metadata,
