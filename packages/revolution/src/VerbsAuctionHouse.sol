@@ -348,7 +348,7 @@ contract VerbsAuctionHouse is
                 //Transfer auction amount to the DAO treasury
                 _safeTransferETHWithFallback(owner(), auctioneerPayment);
 
-                uint256 ethPaidToCreators;
+                uint256 ethPaidToCreators = 0;
 
                 //Transfer creator's share to the creator, for each creator, and build arrays for tokenEmitter.buyToken
                 if (creatorsShare > 0 && entropyRateBps > 0) {
