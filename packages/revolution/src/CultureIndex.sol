@@ -372,6 +372,28 @@ contract CultureIndex is ICultureIndex, Ownable, ReentrancyGuard, EIP712 {
         bytes32 r,
         bytes32 s
     ) external nonReentrant {
+        bool success = _verifyVoteWithSig(from, pieceId, deadline, v, r, s);
+
+        if (!success) revert INVALID_SIGNATURE();
+
+        _vote(pieceId, from);
+    }
+
+    /// @notice Utility function to verify a signature for a specific vote
+    /// @param from Vote from this address
+    /// @param pieceId Vote on this pieceId
+    /// @param deadline Deadline for the signature to be valid
+    /// @param v V component of signature
+    /// @param r R component of signature
+    /// @param s S component of signature
+    function _verifyVoteWithSig(
+        address from,
+        uint256 pieceId,
+        uint256 deadline,
+        uint8 v,
+        bytes32 r,
+        bytes32 s
+    ) internal returns (bool) {
         require(deadline >= block.timestamp, "Signature expired");
 
         bytes32 voteHash;
@@ -388,7 +410,7 @@ contract CultureIndex is ICultureIndex, Ownable, ReentrancyGuard, EIP712 {
         // Ensure signature is valid
         if (recoveredAddress == address(0) || recoveredAddress != from) revert INVALID_SIGNATURE();
 
-        _vote(pieceId, from);
+        return true;
     }
 
     /**
