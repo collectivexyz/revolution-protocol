@@ -180,6 +180,24 @@ interface ICultureIndex is ICultureIndexEvents {
     ) external;
 
     /**
+     * @notice Allows users to vote for a specific art piece using a signature.
+     * @param from The address of the voter.
+     * @param pieceId The ID of the art piece.
+     * @param deadline The deadline for the vote.
+     * @param v The v component of the signature.
+     * @param r The r component of the signature.
+     * @param s The s component of the signature.
+     */
+    function batchVoteWithSig(
+        address[] memory from,
+        uint256[] memory pieceId,
+        uint256[] memory deadline,
+        uint8[] memory v,
+        bytes32[] memory r,
+        bytes32[] memory s
+    ) external;
+
+    /**
      * @notice Fetch an art piece by its ID.
      * @param pieceId The ID of the art piece.
      * @return The ArtPiece struct associated with the given ID.
