@@ -404,7 +404,7 @@ contract CultureIndex is ICultureIndex, Ownable, ReentrancyGuard, EIP712 {
             "Array lengths must match"
         );
 
-        for (uint256 i; i < len;) {
+        for (uint256 i; i < len; ) {
             bool success = _verifyVoteSignature(from[i], pieceId[i], deadline[i], v[i], r[i], s[i]);
 
             if (!success) revert INVALID_SIGNATURE();
