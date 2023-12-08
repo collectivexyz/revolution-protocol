@@ -182,7 +182,7 @@ contract TokenBasicTest is VerbsTokenTestSuite {
         }
 
         // Act & Assert
-        vm.expectRevert("Creator array must not be > 100");
+        vm.expectRevert("Creator array must not be > MAX_NUM_CREATORS");
         cultureIndex.createPiece(
             ICultureIndex.ArtPieceMetadata({
                 name: name,

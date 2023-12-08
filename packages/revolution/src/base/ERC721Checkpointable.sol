@@ -137,6 +137,7 @@ abstract contract ERC721Checkpointable is ERC721Enumerable {
         bytes32 structHash = keccak256(abi.encode(DELEGATION_TYPEHASH, delegatee, nonce, expiry));
         bytes32 digest = keccak256(abi.encodePacked("\x19\x01", domainSeparator, structHash));
         address signatory = ecrecover(digest, v, r, s);
+        require(delegatee != address(0), "ERC721Checkpointable::delegateBySig: invalid delegatee");
         require(signatory != address(0), "ERC721Checkpointable::delegateBySig: invalid signature");
         require(nonce == nonces[signatory]++, "ERC721Checkpointable::delegateBySig: invalid nonce");
         require(block.timestamp <= expiry, "ERC721Checkpointable::delegateBySig: signature expired");

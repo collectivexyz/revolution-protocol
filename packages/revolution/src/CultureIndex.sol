@@ -25,10 +25,10 @@ contract CultureIndex is ICultureIndex, Ownable, ReentrancyGuard, ContractVersio
     // The weight of the 721 voting token
     uint256 public immutable erc721VotingTokenWeight;
 
-    /// @notice The minimum setable quorum votes basis points
+    /// @notice The minimum settable quorum votes basis points
     uint256 public constant MIN_QUORUM_VOTES_BPS = 200; // 200 basis points or 2%
 
-    /// @notice The maximum setable quorum votes basis points
+    /// @notice The maximum settable quorum votes basis points
     uint256 public constant MAX_QUORUM_VOTES_BPS = 4_000; // 4,000 basis points or 40%
 
     /// @notice The basis point number of votes in support of a art piece required in order for a quorum to be reached and for an art piece to be dropped.
@@ -49,6 +49,9 @@ contract CultureIndex is ICultureIndex, Ownable, ReentrancyGuard, ContractVersio
 
     // The total voting weight for a piece
     mapping(uint256 => uint256) public totalVoteWeights;
+
+    // Constant for max number of creators
+    uint256 public constant MAX_NUM_CREATORS = 100;
 
     /**
      * @notice Constructor
@@ -151,13 +154,17 @@ contract CultureIndex is ICultureIndex, Ownable, ReentrancyGuard, ContractVersio
         CreatorBps[] memory creatorArray
     ) internal pure returns (uint256, uint256) {
         uint256 creatorArrayLength = creatorArray.length;
-        //Require that creatorArray is not more than 100 to prevent gas limit issues
-        require(creatorArrayLength <= 100, "Creator array must not be > 100");
+        //Require that creatorArray is not more than MAX_NUM_CREATORS to prevent gas limit issues
+        require(creatorArrayLength <= MAX_NUM_CREATORS, "Creator array must not be > MAX_NUM_CREATORS");
 
         uint256 totalBps;
-        for (uint i; i < creatorArrayLength; i++) {
+        for (uint i; i < creatorArrayLength; ) {
             require(creatorArray[i].creator != address(0), "Invalid creator address");
             totalBps += creatorArray[i].bps;
+
+            unchecked {
+                ++i;
+            }
         }
         return (totalBps, creatorArrayLength);
     }
@@ -204,8 +211,12 @@ contract CultureIndex is ICultureIndex, Ownable, ReentrancyGuard, ContractVersio
         newPiece.creationBlock = block.number;
         newPiece.quorumVotes = (quorumVotesBPS * newPiece.totalVotesSupply) / 10_000;
 
-        for (uint i; i < creatorArrayLength; i++) {
+        for (uint i; i < creatorArrayLength; ) {
             newPiece.creators.push(creatorArray[i]);
+
+            unchecked {
+                ++i;
+            }
         }
 
         emit PieceCreated(
@@ -222,8 +233,12 @@ contract CultureIndex is ICultureIndex, Ownable, ReentrancyGuard, ContractVersio
         );
 
         // Emit an event for each creator
-        for (uint i; i < creatorArrayLength; i++) {
+        for (uint i; i < creatorArrayLength; ) {
             emit PieceCreatorAdded(pieceId, creatorArray[i].creator, msg.sender, creatorArray[i].bps);
+
+            unchecked {
+                ++i;
+            }
         }
         return newPiece.pieceId;
     }
@@ -425,17 +440,6 @@ contract CultureIndex is ICultureIndex, Ownable, ReentrancyGuard, ContractVersio
         maxHeap.extractMax();
 
         emit PieceDropped(piece.pieceId, msg.sender);
-
-        uint256 numCreators = piece.creators.length;
-        //for each creator, emit an event
-        for (uint i; i < numCreators; i++) {
-            emit PieceDroppedCreator(
-                piece.pieceId,
-                piece.creators[i].creator,
-                piece.dropper,
-                piece.creators[i].bps
-            );
-        }
 
         return pieces[piece.pieceId];
     }

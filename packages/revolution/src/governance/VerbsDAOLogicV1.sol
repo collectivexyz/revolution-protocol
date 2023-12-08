@@ -58,22 +58,22 @@ contract VerbsDAOLogicV1 is VerbsDAOStorageV1, VerbsDAOEvents {
     /// @notice The name of this contract
     string public constant name = "Vrbs DAO";
 
-    /// @notice The minimum setable proposal threshold
+    /// @notice The minimum settable proposal threshold
     uint256 public constant MIN_PROPOSAL_THRESHOLD_BPS = 1; // 1 basis point or 0.01%
 
-    /// @notice The maximum setable proposal threshold
+    /// @notice The maximum settable proposal threshold
     uint256 public constant MAX_PROPOSAL_THRESHOLD_BPS = 1_000; // 1,000 basis points or 10%
 
-    /// @notice The minimum setable voting period
-    uint256 public constant MIN_VOTING_PERIOD = 5_760; // About 24 hours
+    /// @notice The minimum settable voting period
+    uint256 public constant MIN_VOTING_PERIOD = 7_200; // About 24 hours
 
-    /// @notice The max setable voting period
-    uint256 public constant MAX_VOTING_PERIOD = 80_640; // About 2 weeks
+    /// @notice The max settable voting period
+    uint256 public constant MAX_VOTING_PERIOD = 100_800; // About 2 weeks
 
-    /// @notice The min setable voting delay
+    /// @notice The min settable voting delay
     uint256 public constant MIN_VOTING_DELAY = 1;
 
-    /// @notice The max setable voting delay
+    /// @notice The max settable voting delay
     uint256 public constant MAX_VOTING_DELAY = 40_320; // About 1 week
 
     /// @notice The lower bound of minimum quorum votes basis points
@@ -83,9 +83,9 @@ contract VerbsDAOLogicV1 is VerbsDAOStorageV1, VerbsDAOEvents {
     uint256 public constant MIN_QUORUM_VOTES_BPS_UPPER_BOUND = 2_000; // 2,000 basis points or 20%
 
     /// @notice The upper bound of maximum quorum votes basis points
-    uint256 public constant MAX_QUORUM_VOTES_BPS_UPPER_BOUND = 6_000; // 4,000 basis points or 60%
+    uint256 public constant MAX_QUORUM_VOTES_BPS_UPPER_BOUND = 6_000; // 6,000 basis points or 60%
 
-    /// @notice The maximum setable quorum votes basis points
+    /// @notice The maximum settable quorum votes basis points
     uint256 public constant MAX_QUORUM_VOTES_BPS = 2_000; // 2,000 basis points or 20%
 
     /// @notice The maximum number of actions that can be included in a proposal
@@ -223,7 +223,7 @@ contract VerbsDAOLogicV1 is VerbsDAOStorageV1, VerbsDAOEvents {
             targets.length == values.length &&
                 targets.length == signatures.length &&
                 targets.length == calldatas.length,
-            "VerbsDAO::propose: proposal function information arity mismatch"
+            "VerbsDAO::propose: proposal function information parity mismatch"
         );
         require(targets.length != 0, "VerbsDAO::propose: must provide actions");
         require(targets.length <= proposalMaxOperations, "VerbsDAO::propose: too many actions");
@@ -927,7 +927,7 @@ contract VerbsDAOLogicV1 is VerbsDAOStorageV1, VerbsDAOEvents {
     }
 
     /**
-     * @notice Burns veto priviledges
+     * @notice Burns veto privileges
      * @dev Vetoer function destroying veto power forever
      */
     function _burnVetoPower() public {

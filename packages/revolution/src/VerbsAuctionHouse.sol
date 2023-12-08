@@ -71,6 +71,9 @@ contract VerbsAuctionHouse is
     // The active auction
     IVerbsAuctionHouse.Auction public auction;
 
+    // The minimum gas threshold for creating an auction (minting VerbsToken)
+    uint32 public constant MIN_TOKEN_MINT_GAS_THRESHOLD = 750_000;
+
     /**
      * @notice Initialize the auction house and base contracts,
      * populate configuration values, and pause the contract.
@@ -275,6 +278,9 @@ contract VerbsAuctionHouse is
      * catch the revert and pause this contract.
      */
     function _createAuction() internal {
+        // Check if there's enough gas to safely execute token.mint() and subsequent operations
+        require(gasleft() >= MIN_TOKEN_MINT_GAS_THRESHOLD, "Insufficient gas for creating auction");
+
         try verbs.mint() returns (uint256 verbId) {
             uint256 startTime = block.timestamp;
             uint256 endTime = startTime + duration;
@@ -289,7 +295,7 @@ contract VerbsAuctionHouse is
             });
 
             emit AuctionCreated(verbId, startTime, endTime);
-        } catch Error(string memory) {
+        } catch {
             _pause();
         }
     }
@@ -309,56 +315,75 @@ contract VerbsAuctionHouse is
         auction.settled = true;
 
         uint256 creatorTokensEmitted = 0;
-
-        //If no one has bid, burn the Verb
-        if (_auction.bidder == address(0))
-            verbs.burn(_auction.verbId);
-            //If someone has bid, transfer the Verb to the winning bidder
-        else verbs.transferFrom(address(this), _auction.bidder, _auction.verbId);
-
-        if (_auction.amount > 0) {
-            // Ether going to owner of the auction
-            uint256 auctioneerPayment = (_auction.amount * (10_000 - creatorRateBps)) / 10_000;
-
-            //Total amount of ether going to creator
-            uint256 creatorPayment = _auction.amount - auctioneerPayment;
-
-            //Ether reserved to pay the creator directly
-            uint256 creatorDirectPayment = (creatorPayment * entropyRateBps) / 10_000;
-
-            //Ether reserved to buy creator governance
-            uint256 creatorGovernancePayment = creatorPayment - creatorDirectPayment;
-
-            uint256 numCreators = verbs.getArtPieceById(_auction.verbId).creators.length;
-            address deployer = verbs.getArtPieceById(_auction.verbId).dropper;
-
-            //Build arrays for tokenEmitter.buyToken
-            address[] memory vrgdaReceivers = new address[](numCreators);
-            uint256[] memory vrgdaSplits = new uint256[](numCreators);
-
-            //Transfer auction amount to the DAO treasury
-            _safeTransferETHWithFallback(owner(), auctioneerPayment);
-
-            //Transfer creator's share to the creator, for each creator, and build arrays for tokenEmitter.buyToken
-            for (uint256 i = 0; i < numCreators; i++) {
-                ICultureIndex.CreatorBps memory creator = verbs.getArtPieceById(_auction.verbId).creators[i];
-                vrgdaReceivers[i] = creator.creator;
-                vrgdaSplits[i] = creator.bps;
-
-                //Calculate etherAmount for specific creator based on BPS splits - same as multiplying by creatorDirectPayment
-                uint256 etherAmount = (creatorPayment * entropyRateBps * creator.bps) / (10_000 * 10_000);
-
-                //Transfer creator's share to the creator
-                _safeTransferETHWithFallback(creator.creator, etherAmount);
+        // Check if contract balance is greater than reserve price
+        if (address(this).balance < reservePrice) {
+            // If contract balance is less than reserve price, refund to the last bidder
+            if (_auction.bidder != address(0)) {
+                _safeTransferETHWithFallback(_auction.bidder, _auction.amount);
             }
-            //Buy token from tokenEmitter for all the creators
-            creatorTokensEmitted = tokenEmitter.buyToken{ value: creatorGovernancePayment }(
-                vrgdaReceivers,
-                vrgdaSplits,
-                address(0),
-                address(0),
-                deployer
-            );
+
+            // And then burn the Noun
+            verbs.burn(_auction.verbId);
+        } else {
+            //If no one has bid, burn the Verb
+            if (_auction.bidder == address(0))
+                verbs.burn(_auction.verbId);
+                //If someone has bid, transfer the Verb to the winning bidder
+            else verbs.transferFrom(address(this), _auction.bidder, _auction.verbId);
+
+            if (_auction.amount > 0) {
+                // Ether going to owner of the auction
+                uint256 auctioneerPayment = (_auction.amount * (10_000 - creatorRateBps)) / 10_000;
+
+                //Total amount of ether going to creator
+                uint256 creatorsShare = _auction.amount - auctioneerPayment;
+
+                uint256 numCreators = verbs.getArtPieceById(_auction.verbId).creators.length;
+                address deployer = verbs.getArtPieceById(_auction.verbId).dropper;
+
+                //Build arrays for tokenEmitter.buyToken
+                address[] memory vrgdaReceivers = new address[](numCreators);
+                uint256[] memory vrgdaSplits = new uint256[](numCreators);
+
+                //Transfer auction amount to the DAO treasury
+                _safeTransferETHWithFallback(owner(), auctioneerPayment);
+
+                uint256 ethPaidToCreators = 0;
+
+                //Transfer creator's share to the creator, for each creator, and build arrays for tokenEmitter.buyToken
+                if (creatorsShare > 0 && entropyRateBps > 0) {
+                    for (uint256 i = 0; i < numCreators; ) {
+                        ICultureIndex.CreatorBps memory creator = verbs
+                            .getArtPieceById(_auction.verbId)
+                            .creators[i];
+                        vrgdaReceivers[i] = creator.creator;
+                        vrgdaSplits[i] = creator.bps;
+
+                        //Calculate paymentAmount for specific creator based on BPS splits - same as multiplying by creatorDirectPayment
+                        uint256 paymentAmount = (creatorsShare * entropyRateBps * creator.bps) /
+                            (10_000 * 10_000);
+                        ethPaidToCreators += paymentAmount;
+
+                        //Transfer creator's share to the creator
+                        _safeTransferETHWithFallback(creator.creator, paymentAmount);
+
+                        unchecked {
+                            ++i;
+                        }
+                    }
+                }
+
+                //Buy token from tokenEmitter for all the creators
+                if (creatorsShare > ethPaidToCreators) {
+                    creatorTokensEmitted = tokenEmitter.buyToken{ value: creatorsShare - ethPaidToCreators }(
+                        vrgdaReceivers,
+                        vrgdaSplits,
+                        address(0),
+                        address(0),
+                        deployer
+                    );
+                }
+            }
         }
 
         emit AuctionSettled(_auction.verbId, _auction.bidder, _auction.amount, creatorTokensEmitted);

@@ -337,9 +337,9 @@ contract CultureIndexArtPieceTest is CultureIndexTestSuite {
         }
 
         try cultureIndex.createPiece(metadata, creators) {
-            fail("Should not be able to create piece with creatorArray length > 100");
+            fail("Should not be able to create piece with creatorArray length > MAX_NUM_CREATORS");
         } catch Error(string memory reason) {
-            assertEq(reason, "Creator array must not be > 100");
+            assertEq(reason, "Creator array must not be > MAX_NUM_CREATORS");
         }
     }
 

@@ -46,20 +46,6 @@ interface ICultureIndexEvents {
     event PieceDropped(uint256 indexed pieceId, address indexed remover);
 
     /**
-     * @dev Emitted for each creator added to a piece when it is dropped.
-     * @param pieceId Unique identifier for the dropped piece.
-     * @param creatorAddress Address of the creator.
-     * @param dropper Address that created the piece.
-     * @param bps Basis points associated with the creator for revenue sharing.
-     */
-    event PieceDroppedCreator(
-        uint256 indexed pieceId,
-        address indexed creatorAddress,
-        address indexed dropper,
-        uint256 bps
-    );
-
-    /**
      * @dev Emitted when a vote is cast for a piece.
      * @param pieceId Unique identifier for the piece being voted for.
      * @param voter Address of the voter.
@@ -123,6 +109,9 @@ interface ICultureIndex is ICultureIndexEvents {
         uint256 totalERC20Supply;
         uint256 totalVotesSupply;
     }
+
+    // Constant for max number of creators
+    function MAX_NUM_CREATORS() external view returns (uint256);
 
     // Struct representing a voter and their weight for a specific art piece.
     struct Vote {
