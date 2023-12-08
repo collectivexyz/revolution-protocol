@@ -372,11 +372,49 @@ contract CultureIndex is ICultureIndex, Ownable, ReentrancyGuard, EIP712 {
         bytes32 r,
         bytes32 s
     ) external nonReentrant {
-        bool success = _verifyVoteWithSig(from, pieceId, deadline, v, r, s);
+        bool success = _verifyVoteSignature(from, pieceId, deadline, v, r, s);
 
         if (!success) revert INVALID_SIGNATURE();
 
         _vote(pieceId, from);
+    }
+
+    /// @notice Execute a batch of votes via signature
+    /// @param from Vote from these addresses
+    /// @param pieceId Vote on these pieceIds
+    /// @param deadline Deadlines for the signature to be valid
+    /// @param v V component of signatures
+    /// @param r R component of signatures
+    /// @param s S component of signatures
+    function batchVoteWithSig(
+        address[] memory from,
+        uint256[] memory pieceId,
+        uint256[] memory deadline,
+        uint8[] memory v,
+        bytes32[] memory r,
+        bytes32[] memory s
+    ) external nonReentrant {
+        uint256 len = from.length;
+        require(
+            len == pieceId.length &&
+                len == deadline.length &&
+                len == v.length &&
+                len == r.length &&
+                len == s.length,
+            "Array lengths must match"
+        );
+
+        for (uint256 i; i < len;) {
+            bool success = _verifyVoteSignature(from[i], pieceId[i], deadline[i], v[i], r[i], s[i]);
+
+            if (!success) revert INVALID_SIGNATURE();
+
+            _vote(pieceId[i], from[i]);
+
+            unchecked {
+                ++i;
+            }
+        }
     }
 
     /// @notice Utility function to verify a signature for a specific vote
@@ -386,14 +424,14 @@ contract CultureIndex is ICultureIndex, Ownable, ReentrancyGuard, EIP712 {
     /// @param v V component of signature
     /// @param r R component of signature
     /// @param s S component of signature
-    function _verifyVoteWithSig(
+    function _verifyVoteSignature(
         address from,
         uint256 pieceId,
         uint256 deadline,
         uint8 v,
         bytes32 r,
         bytes32 s
-    ) internal returns (bool) {
+    ) internal returns (bool success) {
         require(deadline >= block.timestamp, "Signature expired");
 
         bytes32 voteHash;
