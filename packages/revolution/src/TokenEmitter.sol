@@ -78,32 +78,28 @@ contract TokenEmitter is VRGDAC, ITokenEmitter, ReentrancyGuard, TokenEmitterRew
     /**
      * @notice A payable function that allows a user to buy tokens for a list of addresses and a list of basis points to split the token purchase between.
      * @param addresses The addresses to send purchased tokens to.
-     * @param bps The basis points of the purchase to send to each address.
-     * @param builder The address to pay the builder rewards to
-     * @param purchaseReferral The address to pay the purchase referral rewards to
-     * @param deployer The address to pay the deployer rewards to
+     * @param basisPointSplits The basis points of the purchase to send to each address.
+     * @param protocolRewardsRecipients The addresses to pay the builder, purchaseRefferal, and deployer rewards to
      * @return tokensSoldWad The amount of tokens sold in wad units.
      */
     function buyToken(
-        address[] memory addresses,
-        uint[] memory bps,
-        address builder,
-        address purchaseReferral,
-        address deployer
+        address[] calldata addresses,
+        uint[] calldata basisPointSplits,
+        ProtocolRewardAddresses calldata protocolRewardsRecipients
     ) public payable nonReentrant returns (uint tokensSoldWad) {
         //prevent treasury from paying itself
         require(msg.sender != treasury && msg.sender != creatorsAddress, "Funds recipient cannot buy tokens");
 
         require(msg.value > 0, "Must send ether");
         // ensure the same number of addresses and bps
-        require(addresses.length == bps.length, "Parallel arrays required");
+        require(addresses.length == basisPointSplits.length, "Parallel arrays required");
 
         // Get value left after protocol rewards
         uint msgValueRemaining = _handleRewardsAndGetValueToSend(
             msg.value,
-            builder,
-            purchaseReferral,
-            deployer
+            protocolRewardsRecipients.builder,
+            protocolRewardsRecipients.purchaseReferral,
+            protocolRewardsRecipients.deployer
         );
 
         //Share of purchase amount to send to treasury
@@ -145,8 +141,8 @@ contract TokenEmitter is VRGDAC, ITokenEmitter, ReentrancyGuard, TokenEmitterRew
         if (totalTokensForBuyers > 0) {
             for (uint i = 0; i < addresses.length; ) {
                 // transfer tokens to address
-                _mint(addresses[i], uint((totalTokensForBuyers * int(bps[i])) / 10_000));
-                bpsSum += bps[i];
+                _mint(addresses[i], uint((totalTokensForBuyers * int(basisPointSplits[i])) / 10_000));
+                bpsSum += basisPointSplits[i];
 
                 unchecked {
                     ++i;

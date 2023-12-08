@@ -382,9 +382,11 @@ contract VerbsAuctionHouse is
                     creatorTokensEmitted = tokenEmitter.buyToken{ value: creatorsShare - ethPaidToCreators }(
                         vrgdaReceivers,
                         vrgdaSplits,
-                        address(0),
-                        address(0),
-                        deployer
+                        ITokenEmitter.ProtocolRewardAddresses({
+                            builder: address(0),
+                            purchaseReferral: address(0),
+                            deployer: deployer
+                        })
                     );
                 }
             }

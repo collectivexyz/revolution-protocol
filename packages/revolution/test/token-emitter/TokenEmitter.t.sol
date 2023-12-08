@@ -4,6 +4,7 @@ pragma solidity ^0.8.22;
 import { Test } from "forge-std/Test.sol";
 import { unsafeWadDiv } from "../../src/libs/SignedWadMath.sol";
 import { TokenEmitter } from "../../src/TokenEmitter.sol";
+import { ITokenEmitter } from "../../src/interfaces/ITokenEmitter.sol";
 import { NontransferableERC20Votes } from "../../src/NontransferableERC20Votes.sol";
 import { RevolutionProtocolRewards } from "@collectivexyz/protocol-rewards/src/RevolutionProtocolRewards.sol";
 import { wadDiv } from "../../src/libs/SignedWadMath.sol";
@@ -71,7 +72,15 @@ contract TokenEmitterTest is Test {
         bps[0] = 10_000;
 
         vm.expectRevert("Funds recipient cannot buy tokens");
-        emitter.buyToken{ value: 1e18 }(recipients, bps, address(0), address(0), address(0));
+        emitter.buyToken{ value: 1e18 }(
+            recipients,
+            bps,
+            ITokenEmitter.ProtocolRewardAddresses({
+                builder: address(0),
+                purchaseReferral: address(0),
+                deployer: address(0)
+            })
+        );
     }
 
     function testCannotBuyAsCreators() public {
@@ -86,7 +95,15 @@ contract TokenEmitterTest is Test {
         bps[0] = 10_000;
 
         vm.expectRevert("Funds recipient cannot buy tokens");
-        emitter.buyToken{ value: 1e18 }(recipients, bps, address(0), address(0), address(0));
+        emitter.buyToken{ value: 1e18 }(
+            recipients,
+            bps,
+            ITokenEmitter.ProtocolRewardAddresses({
+                builder: address(0),
+                purchaseReferral: address(0),
+                deployer: address(0)
+            })
+        );
     }
 
     function testTransferTokenContractOwnership() public {
@@ -138,7 +155,15 @@ contract TokenEmitterTest is Test {
         uint256[] memory bps = new uint256[](1);
         bps[0] = 10_000;
 
-        emitter1.buyToken{ value: 1e18 }(recipients, bps, address(0), address(0), address(0));
+        emitter1.buyToken{ value: 1e18 }(
+            recipients,
+            bps,
+            ITokenEmitter.ProtocolRewardAddresses({
+                builder: address(0),
+                purchaseReferral: address(0),
+                deployer: address(0)
+            })
+        );
 
         vm.prank(address(emitter1));
 
@@ -147,7 +172,15 @@ contract TokenEmitterTest is Test {
         vm.prank(address(48));
         vm.deal(address(48), 100000 ether);
 
-        emitter2.buyToken{ value: 1e18 }(recipients, bps, address(0), address(0), address(0));
+        emitter2.buyToken{ value: 1e18 }(
+            recipients,
+            bps,
+            ITokenEmitter.ProtocolRewardAddresses({
+                builder: address(0),
+                purchaseReferral: address(0),
+                deployer: address(0)
+            })
+        );
     }
 
     function testBuyTokenWithDifferentRates(uint256 creatorRate, uint256 entropyRate) public {
@@ -187,9 +220,11 @@ contract TokenEmitterTest is Test {
         uint256 tokensSold = emitter.buyToken{ value: valueToSend }(
             recipients,
             bps,
-            address(0),
-            address(0),
-            address(0)
+            ITokenEmitter.ProtocolRewardAddresses({
+                builder: address(0),
+                purchaseReferral: address(0),
+                deployer: address(0)
+            })
         );
 
         // Verify tokens distributed to creator
@@ -244,7 +279,15 @@ contract TokenEmitterTest is Test {
         uint256[] memory bps = new uint256[](1);
         bps[0] = 10_000;
 
-        emitter.buyToken{ value: 1e18 }(recipients, bps, address(0), address(0), address(0));
+        emitter.buyToken{ value: 1e18 }(
+            recipients,
+            bps,
+            ITokenEmitter.ProtocolRewardAddresses({
+                builder: address(0),
+                purchaseReferral: address(0),
+                deployer: address(0)
+            })
+        );
         emit Log("Balance: ", emitter.balanceOf(address(1)));
     }
 
@@ -260,9 +303,25 @@ contract TokenEmitterTest is Test {
         uint256[] memory bps = new uint256[](1);
         bps[0] = 10_000;
 
-        emitter.buyToken{ value: 1e18 }(firstRecipients, bps, address(0), address(0), address(0));
+        emitter.buyToken{ value: 1e18 }(
+            firstRecipients,
+            bps,
+            ITokenEmitter.ProtocolRewardAddresses({
+                builder: address(0),
+                purchaseReferral: address(0),
+                deployer: address(0)
+            })
+        );
 
-        emitter.buyToken{ value: 1e18 }(secondRecipients, bps, address(0), address(0), address(0));
+        emitter.buyToken{ value: 1e18 }(
+            secondRecipients,
+            bps,
+            ITokenEmitter.ProtocolRewardAddresses({
+                builder: address(0),
+                purchaseReferral: address(0),
+                deployer: address(0)
+            })
+        );
 
         // should get more expensive
         assertGt(emitter.balanceOf(address(1)), emitter.balanceOf(address(2)));
@@ -285,7 +344,15 @@ contract TokenEmitterTest is Test {
         // estimate tokens to be emitted
         int256 expectedAmount = emitter.getTokenQuoteForEther(1e18 - emitter.computeTotalReward(1e18));
 
-        emitter.buyToken{ value: 1e18 }(recipients, bps, address(0), address(0), address(0));
+        emitter.buyToken{ value: 1e18 }(
+            recipients,
+            bps,
+            ITokenEmitter.ProtocolRewardAddresses({
+                builder: address(0),
+                purchaseReferral: address(0),
+                deployer: address(0)
+            })
+        );
         //assert address balances are correct
         //multiply bps by expectedAmount and assert
         assertEq(
@@ -327,9 +394,11 @@ contract TokenEmitterTest is Test {
         uint emittedWad = emitter.buyToken{ value: 1e18 }(
             recipients,
             correctBps,
-            address(0),
-            address(0),
-            address(0)
+            ITokenEmitter.ProtocolRewardAddresses({
+                builder: address(0),
+                purchaseReferral: address(0),
+                deployer: address(0)
+            })
         );
         int totalSupplyAfterValidPurchase = int(emitter.totalSupply());
         assertEq(totalSupplyAfterValidPurchase, expectedAmount, "Supply should match the expected amount");
@@ -352,7 +421,15 @@ contract TokenEmitterTest is Test {
 
         // Expecting the transaction to revert due to incorrect total basis points
         vm.expectRevert("bps must add up to 10_000");
-        emitter.buyToken{ value: 1e18 }(recipients, incorrectBps, address(0), address(0), address(0));
+        emitter.buyToken{ value: 1e18 }(
+            recipients,
+            incorrectBps,
+            ITokenEmitter.ProtocolRewardAddresses({
+                builder: address(0),
+                purchaseReferral: address(0),
+                deployer: address(0)
+            })
+        );
 
         vm.stopPrank();
     }
@@ -400,10 +477,26 @@ contract TokenEmitterTest is Test {
         uint256[] memory bps = new uint256[](1);
         bps[0] = 10_000;
 
-        emitter.buyToken{ value: 1e18 }(recipients, bps, address(0), address(0), address(0));
+        emitter.buyToken{ value: 1e18 }(
+            recipients,
+            bps,
+            ITokenEmitter.ProtocolRewardAddresses({
+                builder: address(0),
+                purchaseReferral: address(0),
+                deployer: address(0)
+            })
+        );
         uint256 firstAmount = emitter.balanceOf(address(1));
 
-        emitter.buyToken{ value: 1e18 }(recipients, bps, address(0), address(0), address(0));
+        emitter.buyToken{ value: 1e18 }(
+            recipients,
+            bps,
+            ITokenEmitter.ProtocolRewardAddresses({
+                builder: address(0),
+                purchaseReferral: address(0),
+                deployer: address(0)
+            })
+        );
         uint256 secondAmountDifference = emitter.balanceOf(address(1)) - firstAmount;
 
         assert(secondAmountDifference <= 2 * emitter.totalSupply());
@@ -443,7 +536,15 @@ contract TokenEmitterTest is Test {
         uint256[] memory bps = new uint256[](1);
         bps[0] = 10_000;
         vm.expectRevert();
-        emitter2.buyToken{ value: 1e18 }(recipients, bps, address(0), address(0), address(0));
+        emitter2.buyToken{ value: 1e18 }(
+            recipients,
+            bps,
+            ITokenEmitter.ProtocolRewardAddresses({
+                builder: address(0),
+                purchaseReferral: address(0),
+                deployer: address(0)
+            })
+        );
 
         emit log_uint(emitter2.totalSupply());
         emit log_uint(emitter2.balanceOf(address(maliciousTreasury)));
@@ -481,9 +582,25 @@ contract TokenEmitterTest is Test {
         bps[0] = 10_000;
 
         //ensure that enough volume was bought for the day, so purchase expectedVolume amount first
-        emitter.buyToken{ value: expectedVolume }(recipients, bps, address(0), address(0), address(0));
+        emitter.buyToken{ value: expectedVolume }(
+            recipients,
+            bps,
+            ITokenEmitter.ProtocolRewardAddresses({
+                builder: address(0),
+                purchaseReferral: address(0),
+                deployer: address(0)
+            })
+        );
 
-        emitter.buyToken{ value: payment }(recipients, bps, address(0), address(0), address(0));
+        emitter.buyToken{ value: payment }(
+            recipients,
+            bps,
+            ITokenEmitter.ProtocolRewardAddresses({
+                builder: address(0),
+                purchaseReferral: address(0),
+                deployer: address(0)
+            })
+        );
 
         int256 newTokenAmount = emitter.getTokenQuoteForEther(payment);
 
@@ -580,6 +697,14 @@ contract MaliciousTreasury {
         bps[0] = 10_000;
 
         // Attempt to re-enter TokenEmitter
-        emitter.buyToken{ value: msg.value }(recipients, bps, address(0), address(0), address(0));
+        emitter.buyToken{ value: msg.value }(
+            recipients,
+            bps,
+            ITokenEmitter.ProtocolRewardAddresses({
+                builder: address(0),
+                purchaseReferral: address(0),
+                deployer: address(0)
+            })
+        );
     }
 }
