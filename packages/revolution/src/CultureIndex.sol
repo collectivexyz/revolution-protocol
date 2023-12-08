@@ -158,7 +158,7 @@ contract CultureIndex is ICultureIndex, Ownable, ReentrancyGuard, ContractVersio
         require(creatorArrayLength <= MAX_NUM_CREATORS, "Creator array must not be > MAX_NUM_CREATORS");
 
         uint256 totalBps;
-        for (uint i; i < creatorArrayLength;) {
+        for (uint i; i < creatorArrayLength; ) {
             require(creatorArray[i].creator != address(0), "Invalid creator address");
             totalBps += creatorArray[i].bps;
 
@@ -211,7 +211,7 @@ contract CultureIndex is ICultureIndex, Ownable, ReentrancyGuard, ContractVersio
         newPiece.creationBlock = block.number;
         newPiece.quorumVotes = (quorumVotesBPS * newPiece.totalVotesSupply) / 10_000;
 
-        for (uint i; i < creatorArrayLength;) {
+        for (uint i; i < creatorArrayLength; ) {
             newPiece.creators.push(creatorArray[i]);
 
             unchecked {
@@ -233,7 +233,7 @@ contract CultureIndex is ICultureIndex, Ownable, ReentrancyGuard, ContractVersio
         );
 
         // Emit an event for each creator
-        for (uint i; i < creatorArrayLength;) {
+        for (uint i; i < creatorArrayLength; ) {
             emit PieceCreatorAdded(pieceId, creatorArray[i].creator, msg.sender, creatorArray[i].bps);
 
             unchecked {
