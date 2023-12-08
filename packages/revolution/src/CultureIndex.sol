@@ -371,7 +371,7 @@ contract CultureIndex is ICultureIndex, Ownable, ReentrancyGuard, EIP712 {
         uint8 v,
         bytes32 r,
         bytes32 s
-    ) external {
+    ) external nonReentrant {
         require(deadline >= block.timestamp, "Signature expired");
 
         bytes32 voteHash;
