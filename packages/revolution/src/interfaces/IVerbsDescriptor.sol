@@ -21,8 +21,6 @@ import { IVerbsDescriptorMinimal } from "./IVerbsDescriptorMinimal.sol";
 import { ICultureIndex } from "./ICultureIndex.sol";
 
 interface IVerbsDescriptor is IVerbsDescriptorMinimal {
-    event PartsLocked();
-
     event DataURIToggled(bool enabled);
 
     event BaseURIUpdated(string baseURI);
