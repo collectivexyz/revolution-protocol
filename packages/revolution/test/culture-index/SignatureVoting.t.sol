@@ -58,13 +58,7 @@ contract CultureIndexVotingSignaturesTest is CultureIndexTestSuite {
         uint256 deadline = block.timestamp + 1 days;
 
         bytes32 voteHash = keccak256(
-            abi.encode(
-                cultureIndex.VOTE_TYPEHASH(),
-                address(0),
-                pieceIds,
-                nonce,
-                deadline
-            )
+            abi.encode(cultureIndex.VOTE_TYPEHASH(), address(0), pieceIds, nonce, deadline)
         );
 
         bytes32 digest = keccak256(abi.encodePacked("\x19\x01", getDomainSeparator(), voteHash));
@@ -238,7 +232,9 @@ contract CultureIndexVotingSignaturesTest is CultureIndexTestSuite {
         nonce = cultureIndex.nonces(funVoterGuy);
         deadline = block.timestamp + 1 days;
 
-        voteHash = keccak256(abi.encode(cultureIndex.VOTE_TYPEHASH(), funVoterGuy, pieceIds, nonce, deadline));
+        voteHash = keccak256(
+            abi.encode(cultureIndex.VOTE_TYPEHASH(), funVoterGuy, pieceIds, nonce, deadline)
+        );
 
         digest = keccak256(abi.encodePacked("\x19\x01", getDomainSeparator(), voteHash));
 
