@@ -8,8 +8,9 @@ import { Ownable } from "@openzeppelin/contracts/access/Ownable.sol";
 import { ReentrancyGuard } from "@openzeppelin/contracts/utils/ReentrancyGuard.sol";
 import { ERC721Checkpointable } from "./base/ERC721Checkpointable.sol";
 import { ContractVersionBase } from "./version/ContractVersionBase.sol";
+import { EIP712 } from "@openzeppelin/contracts/utils/cryptography/EIP712.sol";
 
-contract CultureIndex is ICultureIndex, Ownable, ReentrancyGuard, ContractVersionBase {
+contract CultureIndex is ICultureIndex, Ownable, ReentrancyGuard, ContractVersionBase, EIP712 {
     // The MaxHeap data structure used to keep track of the top-voted piece
     MaxHeap public immutable maxHeap;
 
@@ -71,7 +72,7 @@ contract CultureIndex is ICultureIndex, Ownable, ReentrancyGuard, ContractVersio
         address initialOwner_,
         uint256 erc721VotingTokenWeight_,
         uint256 quorumVotesBPS_
-    ) Ownable(initialOwner_) {
+    ) Ownable(initialOwner_) EIP712(abi.encodePacked(name_, "_CultureIndex"), "1") {
         require(
             quorumVotesBPS_ >= MIN_QUORUM_VOTES_BPS && quorumVotesBPS_ <= MAX_QUORUM_VOTES_BPS,
             "invalid quorum bps"
@@ -304,15 +305,17 @@ contract CultureIndex is ICultureIndex, Ownable, ReentrancyGuard, ContractVersio
      * @notice Cast a vote for a specific ArtPiece.
      * @param pieceId The ID of the ArtPiece to vote for.
      * @param voter The address of the voter.
-     * @param weight The weight of the vote.
      * @dev Requires that the pieceId is valid, the voter has not already voted on this piece, and the weight is greater than zero.
      * Emits a VoteCast event upon successful execution.
      */
-    function _vote(uint256 pieceId, address voter, uint256 weight) internal {
-        require(weight > 0, "Weight must be greater than zero");
-        require(!(votes[pieceId][msg.sender].voterAddress != address(0)), "Already voted");
-        require(!pieces[pieceId].isDropped, "Piece has already been dropped");
+    function _vote(uint256 pieceId, address voter) internal {
         require(pieceId < _currentPieceId, "Invalid piece ID");
+        require(voter != address(0), "Invalid voter address");
+        require(!pieces[pieceId].isDropped, "Piece has already been dropped");
+        require(!(votes[pieceId][voter].voterAddress != address(0)), "Already voted");
+
+        uint256 weight = _getPriorVotes(voter, pieces[pieceId].creationBlock);
+        require(weight > 0, "Weight must be greater than zero");
 
         votes[pieceId][voter] = Vote(voter, weight);
         totalVoteWeights[pieceId] += weight;
@@ -331,8 +334,7 @@ contract CultureIndex is ICultureIndex, Ownable, ReentrancyGuard, ContractVersio
      * Emits a VoteCast event upon successful execution.
      */
     function vote(uint256 pieceId) public nonReentrant {
-        require(pieceId < _currentPieceId, "Invalid piece ID");
-        _vote(pieceId, msg.sender, _getPriorVotes(msg.sender, pieces[pieceId].creationBlock));
+        _vote(pieceId, msg.sender);
     }
 
     /**
@@ -344,8 +346,7 @@ contract CultureIndex is ICultureIndex, Ownable, ReentrancyGuard, ContractVersio
     function batchVote(uint256[] memory pieceIds) public nonReentrant {
         uint256 len = pieceIds.length;
         for (uint256 i; i < len; ++i) {
-            require(pieceIds[i] < _currentPieceId, "Invalid piece ID");
-            _vote(pieceIds[i], msg.sender, _getPriorVotes(msg.sender, pieces[pieceIds[i]].creationBlock));
+            _vote(pieceIds[i], msg.sender);
         }
     }
 

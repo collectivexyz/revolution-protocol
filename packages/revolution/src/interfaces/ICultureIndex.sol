@@ -71,6 +71,11 @@ interface ICultureIndexEvents {
  * @dev This interface defines the methods for the CultureIndex contract for art piece management and voting.
  */
 interface ICultureIndex is ICultureIndexEvents {
+
+    error INVALID_SIGNATURE();
+
+    error ADDRESS_ZERO();
+
     // Enum representing different media types for art pieces.
     enum MediaType {
         NONE,
