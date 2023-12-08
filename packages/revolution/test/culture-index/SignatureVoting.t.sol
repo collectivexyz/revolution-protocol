@@ -118,4 +118,37 @@ contract CultureIndexVotingSignaturesTest is CultureIndexTestSuite {
         assertEq(voteAfter.voterAddress, offchainVoter);
         assertEq(voteAfter.weight, offchainVoterWeight);
     }
+
+    function testRevert_SigExpired() public {
+        uint256 pieceId = createDefaultArtPiece();
+
+        uint256 nonce = cultureIndex.nonces(offchainVoter);
+        uint256 deadline = block.timestamp + 1 days;
+
+        bytes32 withdrawHash = keccak256(
+            abi.encode(
+                cultureIndex.VOTE_TYPEHASH(),
+                offchainVoter,
+                pieceId,
+                nonce,
+                deadline
+            )
+        );
+
+        bytes32 digest = keccak256(abi.encodePacked("\x19\x01", getDomainSeparator(), withdrawHash));
+
+        (uint8 v, bytes32 r, bytes32 s) = vm.sign(offchainVoterPk, digest);
+
+        vm.warp(deadline + 1);
+
+        vm.expectRevert("Signature expired");
+        cultureIndex.voteWithSig(
+            offchainVoter,
+            pieceId,
+            deadline,
+            v,
+            r,
+            s
+        );
+    }
 }
