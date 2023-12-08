@@ -409,6 +409,12 @@ contract CultureIndex is ICultureIndex, Ownable, ReentrancyGuard, EIP712 {
 
             if (!success) revert INVALID_SIGNATURE();
 
+            unchecked {
+                ++i;
+            }
+        }
+
+        for (uint256 i; i < len; ) {
             _vote(pieceId[i], from[i]);
 
             unchecked {
