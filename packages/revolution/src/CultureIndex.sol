@@ -13,7 +13,7 @@ import { Strings } from "@openzeppelin/contracts/utils/Strings.sol";
 contract CultureIndex is ICultureIndex, Ownable, ReentrancyGuard, EIP712 {
     /// @notice The EIP-712 typehash for gasless votes
     bytes32 public constant VOTE_TYPEHASH =
-        keccak256("Vote(address from,uint256[] pieceId,uint256 nonce,uint256 deadline)");
+        keccak256("Vote(address from,uint256[] pieceIds,uint256 nonce,uint256 deadline)");
 
     /// @notice An account's nonce for gasless votes
     mapping(address => uint256) public nonces;
