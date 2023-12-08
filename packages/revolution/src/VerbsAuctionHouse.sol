@@ -289,7 +289,7 @@ contract VerbsAuctionHouse is
             });
 
             emit AuctionCreated(verbId, startTime, endTime);
-        } catch Error(string memory) {
+        } catch {
             _pause();
         }
     }
