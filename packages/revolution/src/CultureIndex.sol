@@ -150,17 +150,17 @@ contract CultureIndex is ICultureIndex, Ownable, ReentrancyGuard, EIP712 {
     }
 
     /**
-     * @notice Gets the total basis points from an array of creators.
+     * @notice Checks the total basis points from an array of creators and returns the length
      * @param creatorArray An array of Creator structs containing address and basis points.
      * @return Returns the total basis points calculated from the array of creators.
      *
      * Requirements:
      * - The `creatorArray` must not contain any zero addresses.
-     * - The function will return the total basis points which must be checked to be exactly 10,000.
+     * - The function will return the length of the `creatorArray`.
      */
-    function getTotalBpsFromCreators(
+    function validateCreatorsArray(
         CreatorBps[] memory creatorArray
-    ) internal pure returns (uint256, uint256) {
+    ) internal pure returns (uint256) {
         uint256 creatorArrayLength = creatorArray.length;
         //Require that creatorArray is not more than MAX_NUM_CREATORS to prevent gas limit issues
         require(creatorArrayLength <= MAX_NUM_CREATORS, "Creator array must not be > MAX_NUM_CREATORS");
@@ -174,7 +174,10 @@ contract CultureIndex is ICultureIndex, Ownable, ReentrancyGuard, EIP712 {
                 ++i;
             }
         }
-        return (totalBps, creatorArrayLength);
+
+        require(totalBps == 10_000, "Total BPS must sum up to 10,000");
+
+        return creatorArrayLength;
     }
 
     /**
@@ -195,8 +198,7 @@ contract CultureIndex is ICultureIndex, Ownable, ReentrancyGuard, EIP712 {
         ArtPieceMetadata memory metadata,
         CreatorBps[] memory creatorArray
     ) public returns (uint256) {
-        (uint256 totalBps, uint256 creatorArrayLength) = getTotalBpsFromCreators(creatorArray);
-        require(totalBps == 10_000, "Total BPS must sum up to 10,000");
+        uint256 creatorArrayLength = validateCreatorsArray(creatorArray);
 
         // Validate the media type and associated data
         validateMediaType(metadata);
@@ -227,17 +229,40 @@ contract CultureIndex is ICultureIndex, Ownable, ReentrancyGuard, EIP712 {
             }
         }
 
+        _emitPieceCreatedEvents(pieceId, msg.sender, metadata, creatorArray, creatorArrayLength, newPiece.quorumVotes, newPiece.totalVotesSupply);
+        
+        return newPiece.pieceId;
+    }
+
+    /**
+     * @notice Emits events for created art piece
+     * @param pieceId The ID of the art piece.
+     * @param sender The address of the sender.
+     * @param metadata The metadata associated with the art piece, including name, description, image, and optional animation URL. 
+     * @param creatorArray An array of creators who contributed to the piece, along with their respective basis points that must sum up to 10,000.
+     * @param quorum The quorum votes required for the art piece to be dropped.
+     * @param totalVotesSupply The total votes supply at the time of creation.
+     */
+     function _emitPieceCreatedEvents(
+        uint256 pieceId,
+        address sender,
+        ArtPieceMetadata memory metadata,
+        CreatorBps[] memory creatorArray,
+        uint256 creatorArrayLength,
+        uint256 quorum,
+        uint256 totalVotesSupply
+    ) internal {
         emit PieceCreated(
             pieceId,
-            msg.sender,
+            sender,
             metadata.name,
             metadata.description,
             metadata.image,
             metadata.animationUrl,
             metadata.text,
             uint8(metadata.mediaType),
-            newPiece.quorumVotes,
-            newPiece.totalVotesSupply
+            quorum,
+            totalVotesSupply
         );
 
         // Emit an event for each creator
@@ -248,7 +273,6 @@ contract CultureIndex is ICultureIndex, Ownable, ReentrancyGuard, EIP712 {
                 ++i;
             }
         }
-        return newPiece.pieceId;
     }
 
     /**
