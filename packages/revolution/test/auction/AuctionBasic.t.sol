@@ -199,7 +199,7 @@ contract VerbsAuctionHouseBasicTest is VerbsAuctionHouseTest {
         // try to bid with bidder address(0) first and expect revert
         vm.expectRevert("Bidder cannot be zero address");
         auctionHouse.createBid{ value: bidAmount }(0, address(0)); // Assuming the first auction's verbId is 0
-        
+
         vm.prank(address(1));
         // Expect an event emission
         vm.expectEmit(true, true, true, true);
@@ -228,7 +228,11 @@ contract VerbsAuctionHouseBasicTest is VerbsAuctionHouseTest {
 
         // Expect auction endTime to be set correctly
         (, , , uint256 endTime, , ) = auctionHouse.auction();
-        assertEq(endTime, block.timestamp + auctionHouse.duration(), "Auction end time should be set correctly");
+        assertEq(
+            endTime,
+            block.timestamp + auctionHouse.duration(),
+            "Auction end time should be set correctly"
+        );
 
         // vm warp and then settle auction
         vm.warp(endTime + 1);
