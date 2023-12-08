@@ -24,7 +24,7 @@ contract CultureIndexTestSuite is Test {
     /**
      * @dev Setup function for each test case
      */
-    function setUp() public {
+    function setUp() public virtual {
         govToken = new NontransferableERC20Votes(address(this), "Revolution Governance", "GOV");
         ProxyRegistry _proxyRegistry = new ProxyRegistry();
 

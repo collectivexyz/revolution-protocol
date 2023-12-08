@@ -62,12 +62,6 @@ contract CultureIndex is ICultureIndex, Ownable, ReentrancyGuard, ContractVersio
     // Constant for max number of creators
     uint256 public constant MAX_NUM_CREATORS = 100;
 
-    // Generate a new EIP712 domain separator using the unique name, address and name of this contract
-    // to avoid nefarious contracts from being able to replay signatures from this contract
-    function uniqueDomainName(string memory name_) internal view returns (string memory) {
-        return string(abi.encodePacked(name_, "_", abi.encodePacked(address(this)), "_CultureIndex"));
-    }
-
     /**
      * @notice Constructor
      * @param name_ The name of the culture index
@@ -86,7 +80,7 @@ contract CultureIndex is ICultureIndex, Ownable, ReentrancyGuard, ContractVersio
         address initialOwner_,
         uint256 erc721VotingTokenWeight_,
         uint256 quorumVotesBPS_
-    ) Ownable(initialOwner_) EIP712(uniqueDomainName(name_), "1") {
+    ) Ownable(initialOwner_) EIP712("CultureIndex", "1") {
         require(
             quorumVotesBPS_ >= MIN_QUORUM_VOTES_BPS && quorumVotesBPS_ <= MAX_QUORUM_VOTES_BPS,
             "invalid quorum bps"
