@@ -13,7 +13,7 @@ import { Strings } from "@openzeppelin/contracts/utils/Strings.sol";
 contract CultureIndex is ICultureIndex, Ownable, ReentrancyGuard, EIP712 {
     /// @notice The EIP-712 typehash for gasless votes
     bytes32 public constant VOTE_TYPEHASH =
-        keccak256("Vote(address from,uint256 pieceId,uint256 nonce,uint256 deadline)");
+        keccak256("Vote(address from,uint256[] pieceIds,uint256 nonce,uint256 deadline)");
 
     /// @notice An account's nonce for gasless votes
     mapping(address => uint256) public nonces;
@@ -369,45 +369,60 @@ contract CultureIndex is ICultureIndex, Ownable, ReentrancyGuard, EIP712 {
      * @dev Requires that the pieceIds are valid, the voter has not already voted on this piece, and the weight is greater than zero.
      * Emits a series of VoteCast event upon successful execution.
      */
-    function batchVote(uint256[] memory pieceIds) public nonReentrant {
+    function voteForMany(uint256[] calldata pieceIds) public nonReentrant {
+        _voteForMany(pieceIds, msg.sender);
+    }
+
+    /**
+     * @notice Cast a vote for a list of ArtPieces pieceIds.
+     * @param pieceIds The IDs of the ArtPieces to vote for.
+     * @param from The address of the voter.
+     * @dev Requires that the pieceIds are valid, the voter has not already voted on this piece, and the weight is greater than zero.
+     * Emits a series of VoteCast event upon successful execution.
+     */
+    function _voteForMany(uint256[] calldata pieceIds, address from) internal {
         uint256 len = pieceIds.length;
-        for (uint256 i; i < len; ++i) {
-            _vote(pieceIds[i], msg.sender);
+        for (uint256 i; i < len; ) {
+            _vote(pieceIds[i], from);
+
+            unchecked {
+                ++i;
+            }
         }
     }
 
     /// @notice Execute a vote via signature
     /// @param from Vote from this address
-    /// @param pieceId Vote on this pieceId
+    /// @param pieceIds Vote on this list of pieceIds
     /// @param deadline Deadline for the signature to be valid
     /// @param v V component of signature
     /// @param r R component of signature
     /// @param s S component of signature
-    function voteWithSig(
+    function voteForManyWithSig(
         address from,
-        uint256 pieceId,
+        uint256[] calldata pieceIds,
         uint256 deadline,
         uint8 v,
         bytes32 r,
         bytes32 s
     ) external nonReentrant {
-        bool success = _verifyVoteSignature(from, pieceId, deadline, v, r, s);
+        bool success = _verifyVoteSignature(from, pieceIds, deadline, v, r, s);
 
         if (!success) revert INVALID_SIGNATURE();
 
-        _vote(pieceId, from);
+        _voteForMany(pieceIds, from);
     }
 
-    /// @notice Execute a batch of votes via signature
+    /// @notice Execute a batch of votes via signature, each with their own signature
     /// @param from Vote from these addresses
-    /// @param pieceId Vote on these pieceIds
+    /// @param pieceIds Vote on these lists of pieceIds
     /// @param deadline Deadlines for the signature to be valid
     /// @param v V component of signatures
     /// @param r R component of signatures
     /// @param s S component of signatures
-    function batchVoteWithSig(
+    function batchVoteForManyWithSig(
         address[] memory from,
-        uint256[] memory pieceId,
+        uint256[][] calldata pieceIds,
         uint256[] memory deadline,
         uint8[] memory v,
         bytes32[] memory r,
@@ -415,7 +430,7 @@ contract CultureIndex is ICultureIndex, Ownable, ReentrancyGuard, EIP712 {
     ) external nonReentrant {
         uint256 len = from.length;
         require(
-            len == pieceId.length &&
+            len == pieceIds.length &&
                 len == deadline.length &&
                 len == v.length &&
                 len == r.length &&
@@ -424,7 +439,7 @@ contract CultureIndex is ICultureIndex, Ownable, ReentrancyGuard, EIP712 {
         );
 
         for (uint256 i; i < len; ) {
-            bool success = _verifyVoteSignature(from[i], pieceId[i], deadline[i], v[i], r[i], s[i]);
+            bool success = _verifyVoteSignature(from[i], pieceIds[i], deadline[i], v[i], r[i], s[i]);
 
             if (!success) revert INVALID_SIGNATURE();
 
@@ -434,7 +449,7 @@ contract CultureIndex is ICultureIndex, Ownable, ReentrancyGuard, EIP712 {
         }
 
         for (uint256 i; i < len; ) {
-            _vote(pieceId[i], from[i]);
+            _voteForMany(pieceIds[i], from[i]);
 
             unchecked {
                 ++i;
@@ -444,14 +459,14 @@ contract CultureIndex is ICultureIndex, Ownable, ReentrancyGuard, EIP712 {
 
     /// @notice Utility function to verify a signature for a specific vote
     /// @param from Vote from this address
-    /// @param pieceId Vote on this pieceId
+    /// @param pieceIds Vote on this pieceId
     /// @param deadline Deadline for the signature to be valid
     /// @param v V component of signature
     /// @param r R component of signature
     /// @param s S component of signature
     function _verifyVoteSignature(
         address from,
-        uint256 pieceId,
+        uint256[] calldata pieceIds,
         uint256 deadline,
         uint8 v,
         bytes32 r,
@@ -461,7 +476,7 @@ contract CultureIndex is ICultureIndex, Ownable, ReentrancyGuard, EIP712 {
 
         bytes32 voteHash;
 
-        voteHash = keccak256(abi.encode(VOTE_TYPEHASH, from, pieceId, nonces[from]++, deadline));
+        voteHash = keccak256(abi.encode(VOTE_TYPEHASH, from, pieceIds, nonces[from]++, deadline));
 
         bytes32 digest = _hashTypedDataV4(voteHash);
 

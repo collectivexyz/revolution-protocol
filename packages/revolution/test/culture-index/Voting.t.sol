@@ -279,7 +279,7 @@ contract CultureIndexVotingBasicTest is CultureIndexTestSuite {
         vm.roll(block.number + 1); // Roll forward to ensure votes are snapshotted
 
         // Perform batch voting
-        cultureIndex.batchVote(pieceIds);
+        cultureIndex.voteForMany(pieceIds);
 
         // Assertions
         for (uint256 i = 0; i < pieceIds.length; i++) {
@@ -297,7 +297,7 @@ contract CultureIndexVotingBasicTest is CultureIndexTestSuite {
         vm.roll(block.number + 1); // Roll forward to ensure votes are snapshotted
 
         // This should revert because one of the pieceIds is invalid
-        try cultureIndex.batchVote(pieceIds) {
+        try cultureIndex.voteForMany(pieceIds) {
             fail("Batch voting with an invalid pieceId should fail");
         } catch Error(string memory reason) {
             assertEq(reason, "Invalid piece ID", "Should revert with invalid piece ID error");
@@ -315,7 +315,7 @@ contract CultureIndexVotingBasicTest is CultureIndexTestSuite {
         pieceIds[0] = pieceId;
 
         // This should revert because the voter has already voted for this pieceId
-        try cultureIndex.batchVote(pieceIds) {
+        try cultureIndex.voteForMany(pieceIds) {
             fail("Batch voting for an already voted pieceId should fail");
         } catch Error(string memory reason) {
             assertEq(reason, "Already voted", "Should revert with already voted error");
@@ -333,7 +333,7 @@ contract CultureIndexVotingBasicTest is CultureIndexTestSuite {
         pieceIds[0] = pieceId;
 
         // This should revert because the piece has been dropped
-        try cultureIndex.batchVote(pieceIds) {
+        try cultureIndex.voteForMany(pieceIds) {
             fail("Batch voting for a dropped pieceId should fail");
         } catch Error(string memory reason) {
             assertEq(reason, "Piece has already been dropped", "Should revert with piece dropped error");
@@ -347,7 +347,7 @@ contract CultureIndexVotingBasicTest is CultureIndexTestSuite {
         // Do not mint any tokens to ensure weight is zero
 
         // This should revert because the voter weight is zero
-        try cultureIndex.batchVote(pieceIds) {
+        try cultureIndex.voteForMany(pieceIds) {
             fail("Batch voting with zero weight should fail");
         } catch Error(string memory reason) {
             assertEq(reason, "Weight must be greater than zero", "Should revert with weight zero error");
@@ -387,7 +387,7 @@ contract CultureIndexVotingBasicTest is CultureIndexTestSuite {
 
         // Measure gas for batch voting
         uint256 startGasBatch = gasleft();
-        cultureIndex.batchVote(batchPieceIds);
+        cultureIndex.voteForMany(batchPieceIds);
         uint256 gasUsedBatch = startGasBatch - gasleft();
         emit log_string("Gas used for batch votes");
         emit log_uint(gasUsedBatch); // Log gas used for batch votes

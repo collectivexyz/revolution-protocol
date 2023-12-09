@@ -154,17 +154,23 @@ interface ICultureIndex is ICultureIndexEvents {
     function vote(uint256 pieceId) external;
 
     /**
+     * @notice Allows a user to vote for many art pieces.
+     * @param pieceIds The ID of the art pieces.
+     */
+    function voteForMany(uint256[] calldata pieceIds) external;
+
+    /**
      * @notice Allows a user to vote for a specific art piece using a signature.
      * @param from The address of the voter.
-     * @param pieceId The ID of the art piece.
+     * @param pieceIds The ID of the art piece.
      * @param deadline The deadline for the vote.
      * @param v The v component of the signature.
      * @param r The r component of the signature.
      * @param s The s component of the signature.
      */
-    function voteWithSig(
+    function voteForManyWithSig(
         address from,
-        uint256 pieceId,
+        uint256[] calldata pieceIds,
         uint256 deadline,
         uint8 v,
         bytes32 r,
@@ -174,15 +180,15 @@ interface ICultureIndex is ICultureIndexEvents {
     /**
      * @notice Allows users to vote for a specific art piece using a signature.
      * @param from The address of the voter.
-     * @param pieceId The ID of the art piece.
+     * @param pieceIds The ID of the art piece.
      * @param deadline The deadline for the vote.
      * @param v The v component of the signature.
      * @param r The r component of the signature.
      * @param s The s component of the signature.
      */
-    function batchVoteWithSig(
+    function batchVoteForManyWithSig(
         address[] memory from,
-        uint256[] memory pieceId,
+        uint256[][] memory pieceIds,
         uint256[] memory deadline,
         uint8[] memory v,
         bytes32[] memory r,
