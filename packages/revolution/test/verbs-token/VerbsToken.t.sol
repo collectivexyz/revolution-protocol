@@ -54,7 +54,8 @@ contract VerbsTokenTestSuite is Test {
             address(verbsToken),
             address(verbsToken),
             10,
-            200
+            200,
+            0
         );
         ICultureIndex _cultureIndex = cultureIndex;
 

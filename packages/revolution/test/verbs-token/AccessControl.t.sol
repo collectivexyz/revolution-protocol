@@ -234,7 +234,8 @@ contract TokenAccessControlTest is VerbsTokenTestSuite {
             address(verbsToken),
             address(this),
             10,
-            200
+            200,
+            0
         );
         verbsToken.setCultureIndex(ICultureIndex(address(newCultureIndex)));
 

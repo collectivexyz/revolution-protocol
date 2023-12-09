@@ -37,13 +37,18 @@ contract CultureIndex is ICultureIndex, Ownable, ReentrancyGuard, EIP712 {
     uint256 public constant MIN_QUORUM_VOTES_BPS = 200; // 200 basis points or 2%
 
     /// @notice The maximum settable quorum votes basis points
-    uint256 public constant MAX_QUORUM_VOTES_BPS = 4_000; // 4,000 basis points or 40%
+    uint256 public constant MAX_QUORUM_VOTES_BPS = 6_000; // 6,000 basis points or 60%
+
+    /// @notice The minimum vote weight required in order to vote
+    uint256 public minVoteWeight;
 
     /// @notice The basis point number of votes in support of a art piece required in order for a quorum to be reached and for an art piece to be dropped.
     uint256 public quorumVotesBPS;
 
+    /// @notice The name of the culture index
     string public name;
 
+    /// @notice A description of the culture index - can include rules or guidelines
     string public description;
 
     // The list of all pieces
@@ -78,7 +83,8 @@ contract CultureIndex is ICultureIndex, Ownable, ReentrancyGuard, EIP712 {
         address erc721VotingToken_,
         address initialOwner_,
         uint256 erc721VotingTokenWeight_,
-        uint256 quorumVotesBPS_
+        uint256 quorumVotesBPS_,
+        uint256 minVoteWeight_
     ) Ownable(initialOwner_) EIP712("CultureIndex", "1") {
         require(
             quorumVotesBPS_ >= MIN_QUORUM_VOTES_BPS && quorumVotesBPS_ <= MAX_QUORUM_VOTES_BPS,
@@ -94,6 +100,7 @@ contract CultureIndex is ICultureIndex, Ownable, ReentrancyGuard, EIP712 {
         name = name_;
         description = description_;
         quorumVotesBPS = quorumVotesBPS_;
+        minVoteWeight = minVoteWeight_;
 
         emit QuorumVotesBPSSet(quorumVotesBPS, quorumVotesBPS_);
 
@@ -341,7 +348,7 @@ contract CultureIndex is ICultureIndex, Ownable, ReentrancyGuard, EIP712 {
         require(!(votes[pieceId][voter].voterAddress != address(0)), "Already voted");
 
         uint256 weight = _getPriorVotes(voter, pieces[pieceId].creationBlock);
-        require(weight > 0, "Weight must be greater than zero");
+        require(weight >= minVoteWeight, "Weight must be greater than zero");
 
         votes[pieceId][voter] = Vote(voter, weight);
         totalVoteWeights[pieceId] += weight;

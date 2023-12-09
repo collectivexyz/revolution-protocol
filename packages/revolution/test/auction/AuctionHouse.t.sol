@@ -48,7 +48,8 @@ contract VerbsAuctionHouseTest is Test {
             address(this),
             address(this),
             10,
-            200
+            200,
+            0
         );
         cultureIndex = _cultureIndex;
 

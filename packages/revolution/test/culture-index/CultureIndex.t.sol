@@ -47,7 +47,8 @@ contract CultureIndexTestSuite is Test {
             address(verbs),
             address(this),
             10,
-            200
+            200,
+            0
         );
 
         verbs.setCultureIndex(cultureIndex);
