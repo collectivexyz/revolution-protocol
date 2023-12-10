@@ -350,7 +350,11 @@ contract CultureIndexVotingBasicTest is CultureIndexTestSuite {
         try cultureIndex.voteForMany(pieceIds) {
             fail("Batch voting with zero weight should fail");
         } catch Error(string memory reason) {
-            assertEq(reason, "Weight must be greater than minVoteWeight", "Should revert with weight zero error");
+            assertEq(
+                reason,
+                "Weight must be greater than minVoteWeight",
+                "Should revert with weight zero error"
+            );
         }
     }
 

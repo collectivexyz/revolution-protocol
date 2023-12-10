@@ -14,13 +14,14 @@
 | nonces                    | mapping(address => uint256)                                       | 4    | 0      | 32    | src/CultureIndex.sol:CultureIndex |
 | erc721VotingToken         | contract ERC721Checkpointable                                     | 5    | 0      | 20    | src/CultureIndex.sol:CultureIndex |
 | isERC721VotingTokenLocked | bool                                                              | 5    | 20     | 1     | src/CultureIndex.sol:CultureIndex |
-| quorumVotesBPS            | uint256                                                           | 6    | 0      | 32    | src/CultureIndex.sol:CultureIndex |
-| name                      | string                                                            | 7    | 0      | 32    | src/CultureIndex.sol:CultureIndex |
-| description               | string                                                            | 8    | 0      | 32    | src/CultureIndex.sol:CultureIndex |
-| pieces                    | mapping(uint256 => struct ICultureIndex.ArtPiece)                 | 9    | 0      | 32    | src/CultureIndex.sol:CultureIndex |
-| _currentPieceId           | uint256                                                           | 10   | 0      | 32    | src/CultureIndex.sol:CultureIndex |
-| votes                     | mapping(uint256 => mapping(address => struct ICultureIndex.Vote)) | 11   | 0      | 32    | src/CultureIndex.sol:CultureIndex |
-| totalVoteWeights          | mapping(uint256 => uint256)                                       | 12   | 0      | 32    | src/CultureIndex.sol:CultureIndex |
+| minVoteWeight             | uint256                                                           | 6    | 0      | 32    | src/CultureIndex.sol:CultureIndex |
+| quorumVotesBPS            | uint256                                                           | 7    | 0      | 32    | src/CultureIndex.sol:CultureIndex |
+| name                      | string                                                            | 8    | 0      | 32    | src/CultureIndex.sol:CultureIndex |
+| description               | string                                                            | 9    | 0      | 32    | src/CultureIndex.sol:CultureIndex |
+| pieces                    | mapping(uint256 => struct ICultureIndex.ArtPiece)                 | 10   | 0      | 32    | src/CultureIndex.sol:CultureIndex |
+| _currentPieceId           | uint256                                                           | 11   | 0      | 32    | src/CultureIndex.sol:CultureIndex |
+| votes                     | mapping(uint256 => mapping(address => struct ICultureIndex.Vote)) | 12   | 0      | 32    | src/CultureIndex.sol:CultureIndex |
+| totalVoteWeights          | mapping(uint256 => uint256)                                       | 13   | 0      | 32    | src/CultureIndex.sol:CultureIndex |
 
 =======================
 ➡ TokenEmitter
