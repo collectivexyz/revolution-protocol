@@ -5,7 +5,7 @@ import { Test } from "forge-std/Test.sol";
 import { VerbsToken } from "../../src/VerbsToken.sol";
 import { IVerbsToken } from "../../src/interfaces/IVerbsToken.sol";
 import { IVerbsDescriptorMinimal } from "../../src/interfaces/IVerbsDescriptorMinimal.sol";
-import { IProxyRegistry } from "../../src/external/opensea/IProxyRegistry.sol";
+
 import { ICultureIndex } from "../../src/interfaces/ICultureIndex.sol";
 import { Strings } from "@openzeppelin/contracts/utils/Strings.sol";
 import { CultureIndex } from "../../src/CultureIndex.sol";
@@ -32,18 +32,15 @@ contract VerbsTokenTestSuite is Test {
         // Create a new mock ERC20 token for voting
         govToken = new NontransferableERC20Votes(address(this), "Revolution Governance", "GOV");
 
-        // Deploy a new proxy registry for OpenSea
-        ProxyRegistry _proxyRegistry = new ProxyRegistry();
-
         // Create a new VerbsToken contract, passing address(this) as both the minter and the initial owner
         verbsToken = new VerbsToken(
             address(this),
             address(this),
             IVerbsDescriptorMinimal(address(0)),
-            _proxyRegistry,
             ICultureIndex(address(0)),
             tokenName,
-            tokenSymbol
+            tokenSymbol,
+            "QmQzDwaZ7yQxHHs7sQQenJVB89riTSacSGcJRv9jtHPuz5"
         );
 
         // Deploy CultureIndex with the VerbsToken's address as the initial owner
@@ -123,8 +120,4 @@ contract VerbsTokenTestSuite is Test {
                 animationUrl: ""
             });
     }
-}
-
-contract ProxyRegistry is IProxyRegistry {
-    mapping(address => address) public proxies;
 }

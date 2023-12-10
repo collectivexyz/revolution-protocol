@@ -20,9 +20,9 @@ pragma solidity 0.8.22;
 
 import {IVersionedContract} from "../interfaces/IVersionedContract.sol";
 
-/// @title ContractVersionBase
+/// @title VersionedContract
 /// @notice Base contract for versioning contracts
-contract ContractVersionBase is IVersionedContract {
+contract VersionedContract is IVersionedContract {
     /// @notice The version of the contract
     function contractVersion() external pure override returns (string memory) {
         return "${version}";
@@ -30,13 +30,13 @@ contract ContractVersionBase is IVersionedContract {
 }
 `;
 
-  // write the file to __dirname__/../src/version/ContractVersionBase.sol:
+  // write the file to __dirname__/../src/version/VersionedContract.sol:
   const filePath = path.join(
     __dirname,
     "..",
     "src",
     "version",
-    "ContractVersionBase.sol"
+    "VersionedContract.sol"
   );
 
   console.log("generated contract version code:", packageVersionCode);

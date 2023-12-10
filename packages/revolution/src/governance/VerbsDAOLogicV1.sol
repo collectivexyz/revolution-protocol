@@ -53,8 +53,9 @@
 pragma solidity ^0.8.22;
 
 import "./VerbsDAOInterfaces.sol";
+import { IVerbsDAO } from "../interfaces/IVerbsDAO.sol";
 
-contract VerbsDAOLogicV1 is VerbsDAOStorageV1, VerbsDAOEvents {
+contract VerbsDAOLogicV1 is IVerbsDAO {
     /// @notice The name of this contract
     string public constant name = "Vrbs DAO";
 

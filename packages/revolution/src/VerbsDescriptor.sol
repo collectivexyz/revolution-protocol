@@ -17,18 +17,19 @@
 
 pragma solidity ^0.8.22;
 
-import { Ownable } from "@openzeppelin/contracts/access/Ownable.sol";
+import { Ownable2StepUpgradeable } from "@openzeppelin/contracts-upgradeable/access/Ownable2StepUpgradeable.sol";
+
+import { UUPS } from "./libs/proxy/UUPS.sol";
+import { VersionedContract } from "./version/VersionedContract.sol";
+
 import { Strings } from "@openzeppelin/contracts/utils/Strings.sol";
 import { IVerbsDescriptor } from "./interfaces/IVerbsDescriptor.sol";
 import { Base64 } from "@openzeppelin/contracts/utils/Base64.sol";
 import { ICultureIndex } from "./interfaces/ICultureIndex.sol";
+import { IRevolutionBuilder } from "./interfaces/IRevolutionBuilder.sol";
 
-contract VerbsDescriptor is IVerbsDescriptor, Ownable {
+contract VerbsDescriptor is IVerbsDescriptor, VersionedContract, UUPS, Ownable2StepUpgradeable {
     using Strings for uint256;
-
-    // prettier-ignore
-    // https://creativecommons.org/publicdomain/zero/1.0/legalcode.txt
-    bytes32 constant COPYRIGHT_CC0_1_0_UNIVERSAL_LICENSE = 0xa2010f343487d3f7618affe54f789f5487602331c0a8d03f49e9a7c547cf0499;
 
     // Whether or not `tokenURI` should be returned as a data URI (Default: true)
     bool public override isDataURIEnabled = true;
@@ -47,7 +48,45 @@ contract VerbsDescriptor is IVerbsDescriptor, Ownable {
         string animation_url;
     }
 
-    constructor(address _initialOwner, string memory _tokenNamePrefix) Ownable(_initialOwner) {
+    ///                                                          ///
+    ///                         IMMUTABLES                       ///
+    ///                                                          ///
+
+    // prettier-ignore
+    // https://creativecommons.org/publicdomain/zero/1.0/legalcode.txt
+    bytes32 constant COPYRIGHT_CC0_1_0_UNIVERSAL_LICENSE = 0xa2010f343487d3f7618affe54f789f5487602331c0a8d03f49e9a7c547cf0499;
+
+    /// @notice The contract upgrade manager
+    IRevolutionBuilder private immutable manager;
+
+    ///                                                          ///
+    ///                         CONSTRUCTOR                      ///
+    ///                                                          ///
+
+    /// @param _manager The contract upgrade manager address
+    constructor(address _manager) payable initializer {
+        manager = IRevolutionBuilder(_manager);
+    }
+
+    ///                                                          ///
+    ///                         INITIALIZER                      ///
+    ///                                                          ///
+
+    /// @notice Initializes a token's metadata descriptor
+    /// @param _initialOwner The address of the initial owner
+    /// @param _tokenNamePrefix The prefix for the token name eg: "Vrb" -> Vrb 1
+    function initialize(
+        address _initialOwner,
+        string calldata _tokenNamePrefix
+    ) external {
+        // Ensure the caller is the contract manager
+        require (msg.sender == address(manager), "Only manager can initialize");
+
+        require(_initialOwner != address(0), "Initial owner cannot be zero address");
+
+        // Setup ownable
+        __Ownable_init(_initialOwner);
+
         tokenNamePrefix = _tokenNamePrefix;
     }
 
@@ -135,5 +174,16 @@ contract VerbsDescriptor is IVerbsDescriptor, Ownable {
             animation_url: metadata.animationUrl
         });
         return constructTokenURI(params);
+    }
+
+    ///                                                          ///
+    ///                      DESCRIPTOR UPGRADE                  ///
+    ///                                                          ///
+
+    /// @notice Ensures the caller is authorized to upgrade the contract to a valid implementation
+    /// @dev This function is called in UUPS `upgradeTo` & `upgradeToAndCall`
+    /// @param _impl The address of the new implementation
+    function _authorizeUpgrade(address _impl) internal view override onlyOwner {
+        if (!manager.isRegisteredUpgrade(_getImplementation(), _impl)) revert INVALID_UPGRADE(_impl);
     }
 }

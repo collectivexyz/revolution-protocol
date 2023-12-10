@@ -8,7 +8,7 @@ import { ICultureIndex } from "../../src/interfaces/ICultureIndex.sol";
 import { NontransferableERC20Votes } from "../../src/NontransferableERC20Votes.sol";
 import { CultureIndexTestSuite } from "./CultureIndex.t.sol";
 import { Votes } from "../../src/base/Votes.sol";
-import { ERC721Checkpointable } from "../../src/base/ERC721Checkpointable.sol";
+import { ERC721CheckpointableUpgradeable } from "../../src/base/ERC721CheckpointableUpgradeable.sol";
 
 /**
  * @title CultureIndexTest
@@ -29,7 +29,7 @@ contract CultureIndexVotingBasicTest is CultureIndexTestSuite {
         );
         vm.mockCall(
             address(cultureIndex.erc721VotingToken()),
-            abi.encodeWithSelector(ERC721Checkpointable.getCurrentVotes.selector, voter),
+            abi.encodeWithSelector(ERC721CheckpointableUpgradeable.getCurrentVotes.selector, voter),
             abi.encode(erc721Weight)
         );
 
@@ -48,7 +48,11 @@ contract CultureIndexVotingBasicTest is CultureIndexTestSuite {
         // Mock ERC721 token balance
         vm.mockCall(
             address(cultureIndex.erc721VotingToken()),
-            abi.encodeWithSelector(ERC721Checkpointable.getPriorVotes.selector, voter, block.number),
+            abi.encodeWithSelector(
+                ERC721CheckpointableUpgradeable.getPriorVotes.selector,
+                voter,
+                block.number
+            ),
             abi.encode(erc721Weight)
         );
 

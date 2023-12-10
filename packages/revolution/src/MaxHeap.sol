@@ -1,13 +1,48 @@
 // SPDX-License-Identifier: GPL-3.0
 pragma solidity ^0.8.22;
 
-import { Ownable } from "@openzeppelin/contracts/access/Ownable.sol";
-import { ReentrancyGuard } from "@openzeppelin/contracts/utils/ReentrancyGuard.sol";
+import { Ownable2StepUpgradeable } from "@openzeppelin/contracts-upgradeable/access/Ownable2StepUpgradeable.sol";
+import { ReentrancyGuardUpgradeable } from "@openzeppelin/contracts-upgradeable/utils/ReentrancyGuardUpgradeable.sol";
+import { IRevolutionBuilder } from "./interfaces/IRevolutionBuilder.sol";
+
+import { UUPS } from "./libs/proxy/UUPS.sol";
+import { VersionedContract } from "./version/VersionedContract.sol";
 
 /// @title MaxHeap implementation in Solidity
 /// @dev This contract implements a Max Heap data structure with basic operations
 /// @author Written by rocketman and gpt4
-contract MaxHeap is Ownable, ReentrancyGuard {
+contract MaxHeap is VersionedContract, UUPS, Ownable2StepUpgradeable, ReentrancyGuardUpgradeable {
+
+    ///                                                          ///
+    ///                         IMMUTABLES                       ///
+    ///                                                          ///
+
+    /// @notice The contract upgrade manager
+    IRevolutionBuilder private immutable manager;
+
+    ///                                                          ///
+    ///                         CONSTRUCTOR                      ///
+    ///                                                          ///
+
+    /// @param _manager The contract upgrade manager address
+    constructor(address _manager) payable initializer {
+        manager = IRevolutionBuilder(_manager);
+    }
+
+    ///                                                          ///
+    ///                         INITIALIZER                      ///
+    ///                                                          ///
+
+    /**
+    * @notice Initializes the maxheap contract
+    * @param _initialOwner The initial owner of the contract
+    */
+    function initialize(
+        address _initialOwner
+    ) external {
+        __Ownable_init(_initialOwner);
+    }
+
     /// @notice Struct to represent an item in the heap by it's ID
     mapping(uint256 => uint256) public heap;
 
@@ -18,10 +53,6 @@ contract MaxHeap is Ownable, ReentrancyGuard {
 
     /// @notice Mapping to keep track of the position of an item in the heap
     mapping(uint256 => uint256) public positionMapping;
-
-    /// @notice Constructor to initialize the MaxHeap
-    /// @param _owner The owner of the contract
-    constructor(address _owner) Ownable(_owner) {}
 
     /// @notice Get the parent index of a given position
     /// @param pos The position for which to find the parent
@@ -120,5 +151,17 @@ contract MaxHeap is Ownable, ReentrancyGuard {
     function getMax() public view returns (uint256, uint256) {
         require(size > 0, "Heap is empty");
         return (heap[0], valueMapping[heap[0]]);
+    }
+
+    ///                                                          ///
+    ///                     MAX HEAP UPGRADE                     ///
+    ///                                                          ///
+
+    /// @notice Ensures the caller is authorized to upgrade the contract and that the new implementation is valid
+    /// @dev This function is called in `upgradeTo` & `upgradeToAndCall`
+    /// @param _newImpl The new implementation address
+    function _authorizeUpgrade(address _newImpl) internal view override onlyOwner {
+        // Ensure the new implementation is a registered upgrade
+        if (!manager.isRegisteredUpgrade(_getImplementation(), _newImpl)) revert INVALID_UPGRADE(_newImpl);
     }
 }

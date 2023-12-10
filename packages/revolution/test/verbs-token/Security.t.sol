@@ -6,7 +6,6 @@ import { VerbsToken } from "../../src/VerbsToken.sol";
 import { ICultureIndex, ICultureIndexEvents } from "../../src/interfaces/ICultureIndex.sol";
 import { IVerbsToken } from "../../src/interfaces/IVerbsToken.sol";
 import { IVerbsDescriptorMinimal } from "../../src/interfaces/IVerbsDescriptorMinimal.sol";
-import { IProxyRegistry } from "../../src/external/opensea/IProxyRegistry.sol";
 import { ICultureIndex } from "../../src/interfaces/ICultureIndex.sol";
 import { Strings } from "@openzeppelin/contracts/utils/Strings.sol";
 import { CultureIndex } from "../../src/CultureIndex.sol";
@@ -273,8 +272,4 @@ contract ReentrancyAttackContract {
         verbsToken.mint();
         verbsToken.mint(); // This should fail if reentrancy guard is in place
     }
-}
-
-contract ProxyRegistry is IProxyRegistry {
-    mapping(address => address) public proxies;
 }

@@ -20,6 +20,7 @@ pragma solidity ^0.8.22;
 import { IERC721 } from "@openzeppelin/contracts/token/ERC721/IERC721.sol";
 import { IVerbsDescriptorMinimal } from "./IVerbsDescriptorMinimal.sol";
 import { ICultureIndex } from "./ICultureIndex.sol";
+import { IRevolutionBuilder } from "./IRevolutionBuilder.sol";
 
 interface IVerbsToken is IERC721 {
     event VerbCreated(uint256 indexed tokenId, ICultureIndex.ArtPiece artPiece);
@@ -55,4 +56,18 @@ interface IVerbsToken is IERC721 {
     function lockCultureIndex() external;
 
     function getArtPieceById(uint256 tokenId) external view returns (ICultureIndex.ArtPiece memory);
+
+    /// @notice Initializes a DAO's ERC-721 token contract
+    /// @param minter The address of the minter
+    /// @param initialOwner The address of the initial owner
+    /// @param descriptor The address of the token URI descriptor
+    /// @param cultureIndex The address of the CultureIndex contract
+    /// @param tokenParams The name, symbol, and contract metadata of the token
+    function initialize(
+        address minter,
+        address initialOwner,
+        address descriptor,
+        address cultureIndex,
+        IRevolutionBuilder.ERC721TokenParams memory tokenParams
+    ) external;
 }

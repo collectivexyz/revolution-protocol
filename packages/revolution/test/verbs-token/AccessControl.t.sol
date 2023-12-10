@@ -5,7 +5,6 @@ import { Test } from "forge-std/Test.sol";
 import { VerbsToken } from "../../src/VerbsToken.sol";
 import { IVerbsToken } from "../../src/interfaces/IVerbsToken.sol";
 import { IVerbsDescriptorMinimal } from "../../src/interfaces/IVerbsDescriptorMinimal.sol";
-import { IProxyRegistry } from "../../src/external/opensea/IProxyRegistry.sol";
 import { ICultureIndex } from "../../src/interfaces/ICultureIndex.sol";
 import { Strings } from "@openzeppelin/contracts/utils/Strings.sol";
 import { CultureIndex } from "../../src/CultureIndex.sol";
@@ -274,20 +273,4 @@ contract TokenAccessControlTest is VerbsTokenTestSuite {
         vm.expectRevert("CultureIndex is locked");
         verbsToken.setCultureIndex(ICultureIndex(address(0x101112)));
     }
-
-    /// @dev Tests the `isApprovedForAll` function override for OpenSea proxy.
-    function testIsApprovedForAllOverride() public {
-        address owner = address(this);
-        emit log_address(owner);
-
-        address operator = address(verbsToken.proxyRegistry().proxies(owner));
-
-        emit log_address(operator);
-
-        assertTrue(verbsToken.isApprovedForAll(owner, operator), "OpenSea proxy should be approved");
-    }
-}
-
-contract ProxyRegistry is IProxyRegistry {
-    mapping(address => address) public proxies;
 }

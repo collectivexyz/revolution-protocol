@@ -8,7 +8,7 @@ import { ICultureIndex, ICultureIndexEvents } from "../../src/interfaces/ICultur
 import { NontransferableERC20Votes } from "../../src/NontransferableERC20Votes.sol";
 import { CultureIndexTestSuite } from "./CultureIndex.t.sol";
 import { Votes } from "../../src/base/Votes.sol";
-import { ERC721Checkpointable } from "../../src/base/ERC721Checkpointable.sol";
+import { ERC721CheckpointableUpgradeable } from "../../src/base/ERC721CheckpointableUpgradeable.sol";
 
 /**
  * @title CultureIndexTest

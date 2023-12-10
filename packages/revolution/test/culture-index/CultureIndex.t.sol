@@ -8,7 +8,6 @@ import { ICultureIndex } from "../../src/interfaces/ICultureIndex.sol";
 import { NontransferableERC20Votes } from "../../src/NontransferableERC20Votes.sol";
 import { VerbsToken } from "../../src/VerbsToken.sol";
 import { IVerbsDescriptorMinimal } from "../../src/interfaces/IVerbsDescriptorMinimal.sol";
-import { IProxyRegistry } from "../../src/external/opensea/IProxyRegistry.sol";
 
 /**
  * @title CultureIndexTest
@@ -26,17 +25,16 @@ contract CultureIndexTestSuite is Test {
      */
     function setUp() public virtual {
         govToken = new NontransferableERC20Votes(address(this), "Revolution Governance", "GOV");
-        ProxyRegistry _proxyRegistry = new ProxyRegistry();
 
         // Initialize VerbsToken with additional parameters
         verbs = new VerbsToken(
             address(this), // Address of the minter (and initial owner)
             address(this), // Address of the owner
             IVerbsDescriptorMinimal(address(0)),
-            _proxyRegistry,
             ICultureIndex(address(0)),
             "Vrbs",
-            "VRBS"
+            "VRBS",
+            "QmQzDwaZ7yQxHHs7sQQenJVB89riTSacSGcJRv9jtHPuz5"
         );
 
         // Initialize your CultureIndex contract
@@ -213,8 +211,4 @@ contract CultureIndexVotingTest is Test {
     function voteForPiece(uint256 pieceId) public {
         cultureIndex.vote(pieceId);
     }
-}
-
-contract ProxyRegistry is IProxyRegistry {
-    mapping(address => address) public proxies;
 }

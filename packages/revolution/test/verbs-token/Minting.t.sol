@@ -5,7 +5,6 @@ import { Test } from "forge-std/Test.sol";
 import { VerbsToken } from "../../src/VerbsToken.sol";
 import { IVerbsToken } from "../../src/interfaces/IVerbsToken.sol";
 import { IVerbsDescriptorMinimal } from "../../src/interfaces/IVerbsDescriptorMinimal.sol";
-import { IProxyRegistry } from "../../src/external/opensea/IProxyRegistry.sol";
 import { ICultureIndex } from "../../src/interfaces/ICultureIndex.sol";
 import { Strings } from "@openzeppelin/contracts/utils/Strings.sol";
 import { CultureIndex } from "../../src/CultureIndex.sol";
@@ -256,8 +255,4 @@ contract TokenMintingTest is VerbsTokenTestSuite {
         (uint256 mintedPieceId, , , , , , , ) = verbsToken.artPieces(tokenId);
         assertEq(mintedPieceId, pieceId, "Minted token should be associated with the top voted piece");
     }
-}
-
-contract ProxyRegistry is IProxyRegistry {
-    mapping(address => address) public proxies;
 }

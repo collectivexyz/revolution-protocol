@@ -6,7 +6,6 @@ import { VerbsAuctionHouse } from "../../src/VerbsAuctionHouse.sol";
 import { MockERC20 } from "../mock/MockERC20.sol";
 import { VerbsToken } from "../../src/VerbsToken.sol";
 import { IVerbsToken } from "../../src/interfaces/IVerbsToken.sol";
-import { IProxyRegistry } from "../../src/external/opensea/IProxyRegistry.sol";
 import { VerbsDescriptor } from "../../src/VerbsDescriptor.sol";
 import { CultureIndex } from "../../src/CultureIndex.sol";
 import { IVerbsDescriptorMinimal } from "../../src/interfaces/IVerbsDescriptorMinimal.sol";
@@ -19,7 +18,7 @@ import { ITokenEmitter } from "../../src/interfaces/ITokenEmitter.sol";
 import { wadMul, wadDiv } from "../../src/libs/SignedWadMath.sol";
 import { RevolutionProtocolRewards } from "@collectivexyz/protocol-rewards/src/RevolutionProtocolRewards.sol";
 import { TokenEmitterRewards } from "@collectivexyz/protocol-rewards/src/abstract/TokenEmitter/TokenEmitterRewards.sol";
-import { ERC721Checkpointable } from "../../src/base/ERC721Checkpointable.sol";
+import { ERC721CheckpointableUpgradeable } from "../../src/base/ERC721CheckpointableUpgradeable.sol";
 
 contract VerbsAuctionHouseTest is Test {
     VerbsAuctionHouse public auctionHouse;
@@ -37,9 +36,6 @@ contract VerbsAuctionHouseTest is Test {
         mockWETH = new MockERC20();
         governanceToken = new NontransferableERC20Votes(address(this), "Revolution Governance", "GOV");
         RevolutionProtocolRewards protocolRewards = new RevolutionProtocolRewards();
-
-        // Additional setup for VerbsToken similar to VerbsTokenTest
-        ProxyRegistry _proxyRegistry = new ProxyRegistry();
 
         CultureIndex _cultureIndex = new CultureIndex(
             "Vrbs",
@@ -77,10 +73,10 @@ contract VerbsAuctionHouseTest is Test {
             address(this), // Address of the minter (and initial owner)
             address(this), // Address of the owner
             IVerbsDescriptorMinimal(address(0)),
-            _proxyRegistry,
             ICultureIndex(address(_cultureIndex)),
             "Vrbs",
-            "VRBS"
+            "VRBS",
+            "QmQzDwaZ7yQxHHs7sQQenJVB89riTSacSGcJRv9jtHPuz5"
         );
 
         _cultureIndex.setERC721VotingToken(verbs);
@@ -189,8 +185,4 @@ contract VerbsAuctionHouseTest is Test {
 
         return cultureIndex.createPiece(metadata, creators);
     }
-}
-
-contract ProxyRegistry is IProxyRegistry {
-    mapping(address => address) public proxies;
 }

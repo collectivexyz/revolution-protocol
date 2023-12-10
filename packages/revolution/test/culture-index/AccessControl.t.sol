@@ -5,7 +5,6 @@ import { Test } from "forge-std/Test.sol";
 import { VerbsToken } from "../../src/VerbsToken.sol";
 import { IVerbsToken } from "../../src/interfaces/IVerbsToken.sol";
 import { IVerbsDescriptorMinimal } from "../../src/interfaces/IVerbsDescriptorMinimal.sol";
-import { IProxyRegistry } from "../../src/external/opensea/IProxyRegistry.sol";
 import { ICultureIndex, ICultureIndexEvents } from "../../src/interfaces/ICultureIndex.sol";
 import { Strings } from "@openzeppelin/contracts/utils/Strings.sol";
 import { CultureIndex } from "../../src/CultureIndex.sol";
@@ -14,7 +13,7 @@ import { VerbsDescriptor } from "../../src/VerbsDescriptor.sol";
 import "../utils/Base64Decode.sol";
 import "../utils/JsmnSolLib.sol";
 import { CultureIndexTestSuite } from "./CultureIndex.t.sol";
-import { ERC721Checkpointable } from "../../src/base/ERC721Checkpointable.sol";
+import { ERC721CheckpointableUpgradeable } from "../../src/base/ERC721CheckpointableUpgradeable.sol";
 
 /// @title VerbsTokenTest
 /// @dev The test suite for the VerbsToken contract
@@ -69,7 +68,7 @@ contract CultureIndexAccessControlTest is CultureIndexTestSuite {
     /// @dev Tests only the owner can update the ERC721 voting token
     function testSetERC721VotingToken() public {
         address newTokenAddress = address(0x123); // New ERC721 token address
-        ERC721Checkpointable newToken = ERC721Checkpointable(newTokenAddress);
+        ERC721CheckpointableUpgradeable newToken = ERC721CheckpointableUpgradeable(newTokenAddress);
 
         // Attempting update by a non-owner should revert
         address nonOwner = address(0xABC);
@@ -159,8 +158,4 @@ contract CultureIndexAccessControlTest is CultureIndexTestSuite {
         ICultureIndex.ArtPiece memory droppedPiece = cultureIndex.dropTopVotedPiece();
         assertTrue(droppedPiece.isDropped, "Top voted piece should be dropped");
     }
-}
-
-contract ProxyRegistry is IProxyRegistry {
-    mapping(address => address) public proxies;
 }

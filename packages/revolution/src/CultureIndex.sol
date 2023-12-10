@@ -1,16 +1,23 @@
 // SPDX-License-Identifier: GPL-3.0
 pragma solidity ^0.8.22;
 
+import { Ownable2StepUpgradeable } from "@openzeppelin/contracts-upgradeable/access/Ownable2StepUpgradeable.sol";
+import { ReentrancyGuardUpgradeable } from "@openzeppelin/contracts-upgradeable/utils/ReentrancyGuardUpgradeable.sol";
+
+import { UUPS } from "./libs/proxy/UUPS.sol";
+import { VersionedContract } from "./version/VersionedContract.sol";
+
+import { IRevolutionBuilder } from "./interfaces/IRevolutionBuilder.sol";
+
 import { ERC20Votes } from "./base/erc20/ERC20Votes.sol";
 import { MaxHeap } from "./MaxHeap.sol";
 import { ICultureIndex } from "./interfaces/ICultureIndex.sol";
-import { Ownable } from "@openzeppelin/contracts/access/Ownable.sol";
-import { ReentrancyGuard } from "@openzeppelin/contracts/utils/ReentrancyGuard.sol";
-import { ERC721Checkpointable } from "./base/ERC721Checkpointable.sol";
-import { EIP712 } from "@openzeppelin/contracts/utils/cryptography/EIP712.sol";
+
+import { ERC721CheckpointableUpgradeable } from "./base/ERC721CheckpointableUpgradeable.sol";
+import { EIP712Upgradeable } from "@openzeppelin/contracts-upgradeable/utils/cryptography/EIP712Upgradeable.sol";
 import { Strings } from "@openzeppelin/contracts/utils/Strings.sol";
 
-contract CultureIndex is ICultureIndex, Ownable, ReentrancyGuard, EIP712 {
+contract CultureIndex is ICultureIndex, VersionedContract, UUPS, Ownable2StepUpgradeable, ReentrancyGuardUpgradeable, EIP712Upgradeable {
     /// @notice The EIP-712 typehash for gasless votes
     bytes32 public constant VOTE_TYPEHASH =
         keccak256("Vote(address from,uint256[] pieceIds,uint256 nonce,uint256 deadline)");
@@ -19,19 +26,19 @@ contract CultureIndex is ICultureIndex, Ownable, ReentrancyGuard, EIP712 {
     mapping(address => uint256) public nonces;
 
     // The MaxHeap data structure used to keep track of the top-voted piece
-    MaxHeap public immutable maxHeap;
+    MaxHeap public maxHeap;
 
     // The ERC20 token used for voting
-    ERC20Votes public immutable erc20VotingToken;
+    ERC20Votes public erc20VotingToken;
 
     // The ERC721 token used for voting
-    ERC721Checkpointable public erc721VotingToken;
+    ERC721CheckpointableUpgradeable public erc721VotingToken;
 
     // Whether the 721 voting token can be updated
     bool public isERC721VotingTokenLocked;
 
     // The weight of the 721 voting token
-    uint256 public immutable erc721VotingTokenWeight;
+    uint256 public erc721VotingTokenWeight;
 
     /// @notice The maximum settable quorum votes basis points
     uint256 public constant MAX_QUORUM_VOTES_BPS = 6_000; // 6,000 basis points or 60%
@@ -63,43 +70,74 @@ contract CultureIndex is ICultureIndex, Ownable, ReentrancyGuard, EIP712 {
     // Constant for max number of creators
     uint256 public constant MAX_NUM_CREATORS = 100;
 
+    ///                                                          ///
+    ///                         IMMUTABLES                       ///
+    ///                                                          ///
+
+    /// @notice The contract upgrade manager
+    IRevolutionBuilder private immutable manager;
+
+    ///                                                          ///
+    ///                         CONSTRUCTOR                      ///
+    ///                                                          ///
+
+    /// @param _manager The contract upgrade manager address
+    constructor(address _manager) payable initializer {
+        manager = IRevolutionBuilder(_manager);
+    }
+
+    ///                                                          ///
+    ///                         INITIALIZER                      ///
+    ///                                                          ///
+
     /**
-     * @notice Constructor
-     * @param name_ The name of the culture index
-     * @param description_ A description for the culture index, can include rules for uploads etc.
-     * @param erc20VotingToken_ The address of the ERC20 voting token, commonly referred to as "points"
-     * @param erc721VotingToken_ The address of the ERC721 voting token, commonly the dropped art pieces
-     * @param initialOwner_ The owner of the contract, allowed to drop pieces. Commonly updated to the AuctionHouse
-     * @param erc721VotingTokenWeight_ The voting weight of the individual ERC721 tokens. Normally a large multiple to match up with daily emission of ERC20 points
-     * @param quorumVotesBPS_ The initial quorum votes threshold in basis points
-     */
-    constructor(
-        string memory name_,
-        string memory description_,
-        address erc20VotingToken_,
-        address erc721VotingToken_,
-        address initialOwner_,
-        uint256 erc721VotingTokenWeight_,
-        uint256 quorumVotesBPS_,
-        uint256 minVoteWeight_
-    ) Ownable(initialOwner_) EIP712("CultureIndex", "1") {
-        require(quorumVotesBPS_ <= MAX_QUORUM_VOTES_BPS, "invalid quorum bps");
-        require(erc721VotingTokenWeight_ > 0, "invalid erc721 voting token weight");
-        require(erc721VotingToken_ != address(0), "invalid erc721 voting token");
-        require(erc20VotingToken_ != address(0), "invalid erc20 voting token");
+    * @notice Initializes a token's metadata descriptor
+    * @param _name The name of the culture index
+    * @param _description A description for the culture index, can include rules for uploads etc.
+    * @param _erc20VotingToken The address of the ERC20 voting token, commonly referred to as "points"
+    * @param _erc721VotingToken The address of the ERC721 voting token, commonly the dropped art pieces
+    * @param _initialOwner The owner of the contract, allowed to drop pieces. Commonly updated to the AuctionHouse
+    * @param _erc721VotingTokenWeight The voting weight of the individual ERC721 tokens. Normally a large multiple to match up with daily emission of ERC20 points
+    * @param _quorumVotesBPS The initial quorum votes threshold in basis points
+    * @param _minVoteWeight The minimum vote weight required in order to vote
+    */
+    function initialize(
+        string memory _name,
+        string memory _description,
+        address _erc20VotingToken,
+        address _erc721VotingToken,
+        address _initialOwner,
+        uint256 _erc721VotingTokenWeight,
+        uint256 _quorumVotesBPS,
+        uint256 _minVoteWeight
+    ) external {
+        require(_quorumVotesBPS <= MAX_QUORUM_VOTES_BPS, "invalid quorum bps");
+        require(_erc721VotingTokenWeight > 0, "invalid erc721 voting token weight");
+        require(_erc721VotingToken != address(0), "invalid erc721 voting token");
+        require(_erc20VotingToken != address(0), "invalid erc20 voting token");
 
-        erc20VotingToken = ERC20Votes(erc20VotingToken_);
-        erc721VotingToken = ERC721Checkpointable(erc721VotingToken_);
-        erc721VotingTokenWeight = erc721VotingTokenWeight_;
-        name = name_;
-        description = description_;
-        quorumVotesBPS = quorumVotesBPS_;
-        minVoteWeight = minVoteWeight_;
+        // Setup ownable
+        __Ownable_init(_initialOwner);
 
-        emit QuorumVotesBPSSet(quorumVotesBPS, quorumVotesBPS_);
+        // Initialize EIP-712 support
+        __EIP712_init(string.concat(_name, " CultureIndex"), "1");
+
+        erc20VotingToken = ERC20Votes(_erc20VotingToken);
+        erc721VotingToken = ERC721CheckpointableUpgradeable(_erc721VotingToken);
+        erc721VotingTokenWeight = _erc721VotingTokenWeight;
+        name = _name;
+        description = _description;
+        quorumVotesBPS = _quorumVotesBPS;
+        minVoteWeight = _minVoteWeight;
+
+        emit QuorumVotesBPSSet(_quorumVotesBPS, _quorumVotesBPS);
 
         maxHeap = new MaxHeap(address(this));
     }
+
+    ///                                                          ///
+    ///                         MODIFIERS                        ///
+    ///                                                          ///
 
     /**
      * @notice Require that the 721VotingToken has not been locked.
@@ -107,28 +145,6 @@ contract CultureIndex is ICultureIndex, Ownable, ReentrancyGuard, EIP712 {
     modifier whenERC721VotingTokenNotLocked() {
         require(!isERC721VotingTokenLocked, "ERC721VotingToken is locked");
         _;
-    }
-
-    /**
-     * @notice Set the ERC721 voting token.
-     * @dev Only callable by the owner when not locked.
-     */
-    function setERC721VotingToken(
-        ERC721Checkpointable _ERC721VotingToken
-    ) external override onlyOwner nonReentrant whenERC721VotingTokenNotLocked {
-        erc721VotingToken = _ERC721VotingToken;
-
-        emit ERC721VotingTokenUpdated(_ERC721VotingToken);
-    }
-
-    /**
-     * @notice Lock the ERC721 voting token.
-     * @dev This cannot be reversed and is only callable by the owner when not locked.
-     */
-    function lockERC721VotingToken() external override onlyOwner whenERC721VotingTokenNotLocked {
-        isERC721VotingTokenLocked = true;
-
-        emit ERC721VotingTokenLocked();
     }
 
     /**
@@ -313,18 +329,14 @@ contract CultureIndex is ICultureIndex, Ownable, ReentrancyGuard, EIP712 {
     }
 
     function _getCurrentVotes(address account) internal view returns (uint256) {
-        return
-            _calculateVoteWeight(
-                erc20VotingToken.getVotes(account),
-                erc721VotingToken.getCurrentVotes(account)
-            );
+        return _calculateVoteWeight(erc20VotingToken.getVotes(account), erc721VotingToken.getVotes(account));
     }
 
     function _getPriorVotes(address account, uint256 blockNumber) internal view returns (uint256) {
         return
             _calculateVoteWeight(
                 erc20VotingToken.getPastVotes(account, blockNumber),
-                erc721VotingToken.getPriorVotes(account, blockNumber)
+                erc721VotingToken.getPastVotes(account, blockNumber)
             );
     }
 
@@ -585,5 +597,17 @@ contract CultureIndex is ICultureIndex, Ownable, ReentrancyGuard, EIP712 {
         emit PieceDropped(piece.pieceId, msg.sender);
 
         return pieces[piece.pieceId];
+    }
+
+    ///                                                          ///
+    ///                   CULTURE INDEX UPGRADE                  ///
+    ///                                                          ///
+
+    /// @notice Ensures the caller is authorized to upgrade the contract and that the new implementation is valid
+    /// @dev This function is called in `upgradeTo` & `upgradeToAndCall`
+    /// @param _newImpl The new implementation address
+    function _authorizeUpgrade(address _newImpl) internal view override onlyOwner {
+        // Ensure the new implementation is a registered upgrade
+        if (!manager.isRegisteredUpgrade(_getImplementation(), _newImpl)) revert INVALID_UPGRADE(_newImpl);
     }
 }
