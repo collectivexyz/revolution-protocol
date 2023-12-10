@@ -47,4 +47,9 @@ interface IVerbsDescriptor is IVerbsDescriptorMinimal {
         string calldata name,
         ICultureIndex.ArtPieceMetadata memory
     ) external view returns (string memory);
+
+    /// @notice Initializes a token's metadata descriptor
+    /// @param initialOwner The address of the initial owner
+    /// @param tokenNamePrefix The prefix for the token name eg: "Vrb" -> Vrb 1
+    function initialize(address initialOwner, string calldata tokenNamePrefix) external;
 }

@@ -6,11 +6,13 @@ import { toDaysWadUnsafe } from "./libs/SignedWadMath.sol";
 import { Strings } from "@openzeppelin/contracts/utils/Strings.sol";
 import { NontransferableERC20Votes } from "./NontransferableERC20Votes.sol";
 import { ITokenEmitter } from "./interfaces/ITokenEmitter.sol";
-import { ReentrancyGuard } from "@openzeppelin/contracts/utils/ReentrancyGuard.sol";
+import { ReentrancyGuardUpgradeable } from "@openzeppelin/contracts-upgradeable/utils/ReentrancyGuardUpgradeable.sol";
 import { TokenEmitterRewards } from "@collectivexyz/protocol-rewards/src/abstract/TokenEmitter/TokenEmitterRewards.sol";
-import { Ownable } from "@openzeppelin/contracts/access/Ownable.sol";
+import { OwnableUpgradeable } from "@openzeppelin/contracts-upgradeable/access/OwnableUpgradeable.sol";
 
-contract TokenEmitter is VRGDAC, ITokenEmitter, ReentrancyGuard, TokenEmitterRewards, Ownable {
+import { IRevolutionBuilder } from "./interfaces/IRevolutionBuilder.sol";
+
+contract ERC20TokenEmitter is VRGDAC, ITokenEmitter, ReentrancyGuardUpgradeable, TokenEmitterRewards, OwnableUpgradeable {
     // treasury address to pay funds to
     address public immutable treasury;
 
@@ -34,25 +36,54 @@ contract TokenEmitter is VRGDAC, ITokenEmitter, ReentrancyGuard, TokenEmitterRew
     // The account or contract to pay the creator reward to
     address public creatorsAddress;
 
-    // approved contracts, owner, and a token contract address
-    constructor(
+    ///                                                          ///
+    ///                         IMMUTABLES                       ///
+    ///                                                          ///
+
+    /// @notice The contract upgrade manager
+    IRevolutionBuilder private immutable manager;
+
+    ///                                                          ///
+    ///                         CONSTRUCTOR                      ///
+    ///                                                          ///
+
+    /// @param _manager The contract upgrade manager address
+    constructor(address _manager) payable initializer {
+        manager = IRevolutionBuilder(_manager);
+    }
+
+    ///                                                          ///
+    ///                         INITIALIZER                      ///
+    ///                                                          ///
+
+    /**
+     * @notice Initialize the token emitter
+     * @param _initialOwner The initial owner of the token emitter
+     * @param _token The token contract address
+     * @param _protocolRewards The protocol rewards contract address
+     * @param _protocolFeeRecipient The protocol fee recipient address
+     * @param _treasury The treasury address to pay funds to
+     * @param _erc20TokenEmitterParams The token emitter settings
+     */
+    function initialize(
         address _initialOwner,
         NontransferableERC20Votes _token,
         address _protocolRewards,
         address _protocolFeeRecipient,
         address _treasury,
-        int _targetPrice, // The target price for a token if sold on pace, scaled by 1e18.
-        int _priceDecayPercent, // The percent price decays per unit of time with no sales, scaled by 1e18.
-        int _tokensPerTimeUnit // The number of tokens to target selling in 1 full unit of time, scaled by 1e18.
-    )
-        TokenEmitterRewards(_protocolRewards, _protocolFeeRecipient)
-        VRGDAC(_targetPrice, _priceDecayPercent, _tokensPerTimeUnit)
-        Ownable(_initialOwner)
-    {
+        IRevolutionBuilder.ERC20TokenEmitterParams calldata _erc20TokenEmitterParams
+    ) external initializer {
         require(_treasury != address(0), "Invalid treasury address");
 
-        treasury = _treasury;
+        // Set up ownable
+        __Ownable_init(_initialOwner);
 
+        // Setup VRGDAC
+        __VRGDAC_init(_erc20TokenEmitterParams.targetPrice, _erc20TokenEmitterParams.priceDecayPercent, _erc20TokenEmitterParams.tokensPerTimeUnit);
+
+        // TokenEmitterRewards(_protocolRewards, _protocolFeeRecipient)
+
+        treasury = _treasury;
         token = _token;
     }
 

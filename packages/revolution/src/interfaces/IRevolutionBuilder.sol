@@ -9,7 +9,7 @@ interface IRevolutionBuilder {
     ///                                                          ///
 
     /// @notice Emitted when a DAO is deployed
-    /// @param token The ERC-721 token address
+    /// @param erc721Token The ERC-721 token address
     /// @param descriptor The descriptor renderer address
     /// @param auction The auction address
     /// @param executor The executor address
@@ -18,7 +18,7 @@ interface IRevolutionBuilder {
     /// @param erc20TokenEmitter The tokenEmitter address
     /// @param erc20Token The dao address
     event DAODeployed(
-        address token,
+        address erc721Token,
         address descriptor,
         address auction,
         address executor,
@@ -44,7 +44,7 @@ interface IRevolutionBuilder {
 
     /// @notice DAO Version Information information struct
     struct DAOVersionInfo {
-        string token;
+        string erc721Token;
         string descriptor;
         string auction;
         string executor;
@@ -62,9 +62,11 @@ interface IRevolutionBuilder {
         string name;
         string symbol;
         string contractURIHash;
+        string tokenNamePrefix;
     }
 
     /// @notice The auction parameters
+    /// @param timeBuffer The time buffer of each auction
     /// @param reservePrice The reserve price of each auction
     /// @param duration The duration of each auction
     /// @param minBidIncrementPercentage The minimum bid increment percentage of each auction
@@ -72,9 +74,10 @@ interface IRevolutionBuilder {
     /// @param entropyRateBps The entropy rate basis points of each auction
     /// @param minCreatorRateBps The minimum creator rate basis points of each auction
     struct AuctionParams {
+        uint256 timeBuffer;
         uint256 reservePrice;
         uint256 duration;
-        uint256 minBidIncrementPercentage;
+        uint8 minBidIncrementPercentage;
         uint256 creatorRateBps;
         uint256 entropyRateBps;
         uint256 minCreatorRateBps;
@@ -97,11 +100,11 @@ interface IRevolutionBuilder {
     }
 
     /// @notice The ERC-20 token parameters
-    /// @param tokenName The token name
-    /// @param tokenSymbol The token symbol
+    /// @param name The token name
+    /// @param symbol The token symbol
     struct ERC20TokenParams {
-        string tokenName;
-        string tokenSymbol;
+        string name;
+        string symbol;
     }
 
     /// @notice The ERC-20 token emitter VRGDA parameters
@@ -109,9 +112,9 @@ interface IRevolutionBuilder {
     /// @param priceDecayPercent // The percent the price decays per unit of time with no sales, scaled by 1e18.
     /// @param tokensPerTimeUnit // The number of tokens to target selling in 1 full unit of time, scaled by 1e18.
     struct ERC20TokenEmitterParams {
-        uint256 targetPrice;
-        uint256 priceDecayPercent;
-        uint256 tokensPerTimeUnit;
+        int256 targetPrice;
+        int256 priceDecayPercent;
+        int256 tokensPerTimeUnit;
     }
 
     /// @notice The CultureIndex parameters
@@ -128,13 +131,12 @@ interface IRevolutionBuilder {
         uint256 minVoteWeight;
     }
 
-
     ///                                                          ///
     ///                           FUNCTIONS                      ///
     ///                                                          ///
 
     /// @notice The token implementation address
-    function tokenImpl() external view returns (address);
+    function erc721TokenImpl() external view returns (address);
 
     /// @notice The descriptor renderer implementation address
     function descriptorImpl() external view returns (address);
@@ -190,7 +192,17 @@ interface IRevolutionBuilder {
     /// @param token The ERC-721 token address
     function getAddresses(
         address token
-    ) external returns (address descriptor, address auction, address executor, address dao, address cultureIndex, address erc20Token, address erc20TokenEmitter);
+    )
+        external
+        returns (
+            address descriptor,
+            address auction,
+            address executor,
+            address dao,
+            address cultureIndex,
+            address erc20Token,
+            address erc20TokenEmitter
+        );
 
     /// @notice If an implementation is registered by the Builder DAO as an optional upgrade
     /// @param baseImpl The base implementation address

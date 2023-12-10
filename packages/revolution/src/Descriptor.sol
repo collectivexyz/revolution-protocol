@@ -75,12 +75,9 @@ contract VerbsDescriptor is IVerbsDescriptor, VersionedContract, UUPS, Ownable2S
     /// @notice Initializes a token's metadata descriptor
     /// @param _initialOwner The address of the initial owner
     /// @param _tokenNamePrefix The prefix for the token name eg: "Vrb" -> Vrb 1
-    function initialize(
-        address _initialOwner,
-        string calldata _tokenNamePrefix
-    ) external {
+    function initialize(address _initialOwner, string calldata _tokenNamePrefix) external initializer {
         // Ensure the caller is the contract manager
-        require (msg.sender == address(manager), "Only manager can initialize");
+        require(msg.sender == address(manager), "Only manager can initialize");
 
         require(_initialOwner != address(0), "Initial owner cannot be zero address");
 

@@ -29,6 +29,9 @@ importers:
       '@openzeppelin/contracts':
         specifier: 5.0.0
         version: 5.0.0
+      '@openzeppelin/contracts-upgradeable':
+        specifier: 5.0.0
+        version: 5.0.0(@openzeppelin/contracts@5.0.0)
       ds-test:
         specifier: https://github.com/dapphub/ds-test#cd98eff28324bfac652e63a239a60632a761790b
         version: github.com/dapphub/ds-test/cd98eff28324bfac652e63a239a60632a761790b

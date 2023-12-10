@@ -4,6 +4,7 @@ pragma solidity ^0.8.22;
 
 import { IERC20 } from "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import { ERC721CheckpointableUpgradeable } from "../base/ERC721CheckpointableUpgradeable.sol";
+import { IRevolutionBuilder } from "./IRevolutionBuilder.sol";
 
 /**
  * @title ICultureIndexEvents
@@ -232,4 +233,18 @@ interface ICultureIndex is ICultureIndexEvents {
     function getCurrentVotes(address account) external view returns (uint256);
 
     function getPriorVotes(address account, uint256 blockNumber) external view returns (uint256);
+
+    /**
+     * @notice Initializes a token's metadata descriptor
+     * @param erc20VotingToken The address of the ERC20 voting token, commonly referred to as "points"
+     * @param erc721VotingToken The address of the ERC721 voting token, commonly the dropped art pieces
+     * @param initialOwner The owner of the contract, allowed to drop pieces. Commonly updated to the AuctionHouse
+     * @param cultureIndexParams The CultureIndex settings
+     */
+    function initialize(
+        address erc20VotingToken,
+        address erc721VotingToken,
+        address initialOwner,
+        IRevolutionBuilder.CultureIndexParams calldata cultureIndexParams
+    ) external;
 }

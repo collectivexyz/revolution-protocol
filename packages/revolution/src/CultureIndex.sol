@@ -17,7 +17,14 @@ import { ERC721CheckpointableUpgradeable } from "./base/ERC721CheckpointableUpgr
 import { EIP712Upgradeable } from "@openzeppelin/contracts-upgradeable/utils/cryptography/EIP712Upgradeable.sol";
 import { Strings } from "@openzeppelin/contracts/utils/Strings.sol";
 
-contract CultureIndex is ICultureIndex, VersionedContract, UUPS, Ownable2StepUpgradeable, ReentrancyGuardUpgradeable, EIP712Upgradeable {
+contract CultureIndex is
+    ICultureIndex,
+    VersionedContract,
+    UUPS,
+    Ownable2StepUpgradeable,
+    ReentrancyGuardUpgradeable,
+    EIP712Upgradeable
+{
     /// @notice The EIP-712 typehash for gasless votes
     bytes32 public constant VOTE_TYPEHASH =
         keccak256("Vote(address from,uint256[] pieceIds,uint256 nonce,uint256 deadline)");
@@ -91,28 +98,20 @@ contract CultureIndex is ICultureIndex, VersionedContract, UUPS, Ownable2StepUpg
     ///                                                          ///
 
     /**
-    * @notice Initializes a token's metadata descriptor
-    * @param _name The name of the culture index
-    * @param _description A description for the culture index, can include rules for uploads etc.
-    * @param _erc20VotingToken The address of the ERC20 voting token, commonly referred to as "points"
-    * @param _erc721VotingToken The address of the ERC721 voting token, commonly the dropped art pieces
-    * @param _initialOwner The owner of the contract, allowed to drop pieces. Commonly updated to the AuctionHouse
-    * @param _erc721VotingTokenWeight The voting weight of the individual ERC721 tokens. Normally a large multiple to match up with daily emission of ERC20 points
-    * @param _quorumVotesBPS The initial quorum votes threshold in basis points
-    * @param _minVoteWeight The minimum vote weight required in order to vote
-    */
+     * @notice Initializes a token's metadata descriptor
+     * @param _erc20VotingToken The address of the ERC20 voting token, commonly referred to as "points"
+     * @param _erc721VotingToken The address of the ERC721 voting token, commonly the dropped art pieces
+     * @param _initialOwner The owner of the contract, allowed to drop pieces. Commonly updated to the AuctionHouse
+     * @param _cultureIndexParams The CultureIndex settings
+     */
     function initialize(
-        string memory _name,
-        string memory _description,
         address _erc20VotingToken,
         address _erc721VotingToken,
         address _initialOwner,
-        uint256 _erc721VotingTokenWeight,
-        uint256 _quorumVotesBPS,
-        uint256 _minVoteWeight
-    ) external {
-        require(_quorumVotesBPS <= MAX_QUORUM_VOTES_BPS, "invalid quorum bps");
-        require(_erc721VotingTokenWeight > 0, "invalid erc721 voting token weight");
+        IRevolutionBuilder.CultureIndexParams memory _cultureIndexParams
+    ) external initializer {
+        require(_cultureIndexParams.quorumVotesBPS <= MAX_QUORUM_VOTES_BPS, "invalid quorum bps");
+        require(_cultureIndexParams.erc721VotingTokenWeight > 0, "invalid erc721 voting token weight");
         require(_erc721VotingToken != address(0), "invalid erc721 voting token");
         require(_erc20VotingToken != address(0), "invalid erc20 voting token");
 
@@ -120,17 +119,17 @@ contract CultureIndex is ICultureIndex, VersionedContract, UUPS, Ownable2StepUpg
         __Ownable_init(_initialOwner);
 
         // Initialize EIP-712 support
-        __EIP712_init(string.concat(_name, " CultureIndex"), "1");
+        __EIP712_init(string.concat(_cultureIndexParams.name, " CultureIndex"), "1");
 
         erc20VotingToken = ERC20Votes(_erc20VotingToken);
         erc721VotingToken = ERC721CheckpointableUpgradeable(_erc721VotingToken);
-        erc721VotingTokenWeight = _erc721VotingTokenWeight;
-        name = _name;
-        description = _description;
-        quorumVotesBPS = _quorumVotesBPS;
-        minVoteWeight = _minVoteWeight;
+        erc721VotingTokenWeight = _cultureIndexParams.erc721VotingTokenWeight;
+        name = _cultureIndexParams.name;
+        description = _cultureIndexParams.description;
+        quorumVotesBPS = _cultureIndexParams.quorumVotesBPS;
+        minVoteWeight = _cultureIndexParams.minVoteWeight;
 
-        emit QuorumVotesBPSSet(_quorumVotesBPS, _quorumVotesBPS);
+        emit QuorumVotesBPSSet(quorumVotesBPS, _cultureIndexParams.quorumVotesBPS);
 
         maxHeap = new MaxHeap(address(this));
     }

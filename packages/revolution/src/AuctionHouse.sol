@@ -25,18 +25,19 @@ pragma solidity ^0.8.22;
 
 import { PausableUpgradeable } from "@openzeppelin/contracts-upgradeable/utils/PausableUpgradeable.sol";
 import { ReentrancyGuardUpgradeable } from "@openzeppelin/contracts-upgradeable/utils/ReentrancyGuardUpgradeable.sol";
-import { OwnableUpgradeable } from "@openzeppelin/contracts-upgradeable/access/OwnableUpgradeable.sol";
-import { IVerbsAuctionHouse } from "./interfaces/IVerbsAuctionHouse.sol";
+import { IAuctionHouse } from "./interfaces/IAuctionHouse.sol";
 import { IVerbsToken } from "./interfaces/IVerbsToken.sol";
 import { IWETH } from "./interfaces/IWETH.sol";
 import { ITokenEmitter } from "./interfaces/ITokenEmitter.sol";
 import { ICultureIndex } from "./interfaces/ICultureIndex.sol";
+import { IRevolutionBuilder } from "./interfaces/IRevolutionBuilder.sol";
+import { Ownable2StepUpgradeable } from "@openzeppelin/contracts-upgradeable/access/Ownable2StepUpgradeable.sol";
 
 contract VerbsAuctionHouse is
-    IVerbsAuctionHouse,
+    IAuctionHouse,
     PausableUpgradeable,
     ReentrancyGuardUpgradeable,
-    OwnableUpgradeable
+    Ownable2StepUpgradeable
 {
     // The Verbs ERC721 token contract
     IVerbsToken public verbs;
@@ -69,51 +70,71 @@ contract VerbsAuctionHouse is
     uint256 public duration;
 
     // The active auction
-    IVerbsAuctionHouse.Auction public auction;
+    IAuctionHouse.Auction public auction;
 
-    // The minimum gas threshold for creating an auction (minting VerbsToken)
+    ///                                                          ///
+    ///                         IMMUTABLES                       ///
+    ///                                                          ///
+
+    /// @notice The contract upgrade manager
+    IRevolutionBuilder private immutable manager;
+
+    // TODO investigate this - The minimum gas threshold for creating an auction (minting VerbsToken)
     uint32 public constant MIN_TOKEN_MINT_GAS_THRESHOLD = 750_000;
+
+
+    ///                                                          ///
+    ///                         CONSTRUCTOR                      ///
+    ///                                                          ///
+
+    /// @param _manager The contract upgrade manager address
+    /// @param _weth The address of the WETH contract
+    constructor(address _manager, address _weth) payable initializer {
+        require(_weth != address(0), "WETH cannot be zero address");
+
+        manager = IRevolutionBuilder(_manager);
+        WETH = _weth;
+    }
+
+    ///                                                          ///
+    ///                         INITIALIZER                      ///
+    ///                                                          ///
 
     /**
      * @notice Initialize the auction house and base contracts,
      * populate configuration values, and pause the contract.
      * @dev This function can only be called once.
+     * @param _erc721Token The address of the Verbs ERC721 token contract.
+     * @param _erc20TokenEmitter The address of the ERC-20 token emitter contract.
+     * @param _initialOwner The address of the owner.
+     * @param _auctionParams The auction params for auctions.
      */
     function initialize(
-        IVerbsToken _verbs,
-        ITokenEmitter _tokenEmitter,
-        address _WETH,
-        address _founder,
-        uint256 _timeBuffer,
-        uint256 _reservePrice,
-        uint8 _minBidIncrementPercentage,
-        uint256 _duration,
-        uint256 _creatorRateBps,
-        uint256 _entropyRateBps,
-        uint256 _minCreatorRateBps
+        address _erc721Token,
+        address _erc20TokenEmitter,
+        address _initialOwner,
+        IRevolutionBuilder.AuctionParams calldata _auctionParams
     ) external initializer {
         __Pausable_init();
         __ReentrancyGuard_init();
-        __Ownable_init(_founder);
+        __Ownable_init(_initialOwner);
 
         _pause();
 
         require(
-            _creatorRateBps >= _minCreatorRateBps,
+            _auctionParams.creatorRateBps >= _auctionParams.minCreatorRateBps,
             "Creator rate must be greater than or equal to the creator rate"
         );
-        require(_WETH != address(0), "WETH cannot be zero address");
 
-        verbs = _verbs;
-        tokenEmitter = _tokenEmitter;
-        WETH = _WETH;
-        timeBuffer = _timeBuffer;
-        reservePrice = _reservePrice;
-        minBidIncrementPercentage = _minBidIncrementPercentage;
-        duration = _duration;
-        creatorRateBps = _creatorRateBps;
-        entropyRateBps = _entropyRateBps;
-        minCreatorRateBps = _minCreatorRateBps;
+        verbs = IVerbsToken(_erc721Token);
+        tokenEmitter = ITokenEmitter(_erc20TokenEmitter);
+        timeBuffer = _auctionParams.timeBuffer;
+        reservePrice = _auctionParams.reservePrice;
+        minBidIncrementPercentage = _auctionParams.minBidIncrementPercentage;
+        duration = _auctionParams.duration;
+        creatorRateBps = _auctionParams.creatorRateBps;
+        entropyRateBps = _auctionParams.entropyRateBps;
+        minCreatorRateBps = _auctionParams.minCreatorRateBps;
     }
 
     /**
@@ -141,7 +162,7 @@ contract VerbsAuctionHouse is
      * @param bidder The address of the bidder.
      */
     function createBid(uint256 verbId, address bidder) external payable override nonReentrant {
-        IVerbsAuctionHouse.Auction memory _auction = auction;
+        IAuctionHouse.Auction memory _auction = auction;
 
         //require bidder is valid address
         require(bidder != address(0), "Bidder cannot be zero address");
@@ -309,7 +330,7 @@ contract VerbsAuctionHouse is
      * @dev If there are no bids, the Verb is burned.
      */
     function _settleAuction() internal {
-        IVerbsAuctionHouse.Auction memory _auction = auction;
+        IAuctionHouse.Auction memory _auction = auction;
 
         require(_auction.startTime != 0, "Auction hasn't begun");
         require(!_auction.settled, "Auction has already been settled");

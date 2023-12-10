@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: GPL-3.0
 
-/// @title Interface for Verb Auction Houses
+/// @title Interface for Revolution Auction Houses
 
 /*********************************
  * ░░░░░░░░░░░░░░░░░░░░░░░░░░░░░ *
@@ -17,7 +17,9 @@
 
 pragma solidity ^0.8.22;
 
-interface IVerbsAuctionHouse {
+import { IRevolutionBuilder } from "./IRevolutionBuilder.sol";
+
+interface IAuctionHouse {
     struct Auction {
         // ID for the Verb (ERC721 token ID)
         uint256 verbId;
@@ -79,4 +81,18 @@ interface IVerbsAuctionHouse {
     function setMinCreatorRateBps(uint256 _minCreatorRateBps) external;
 
     function setEntropyRateBps(uint256 _entropyRateBps) external;
+
+    /**
+     * @notice Initialize the auction house and base contracts.
+     * @param erc721Token The address of the Verbs ERC721 token contract.
+     * @param erc20TokenEmitter The address of the ERC-20 token emitter contract.
+     * @param initialOwner The address of the owner.
+     * @param auctionParams The auction params for auctions.
+     */
+    function initialize(
+        address erc721Token,
+        address erc20TokenEmitter,
+        address initialOwner,
+        IRevolutionBuilder.AuctionParams calldata auctionParams
+    ) external;
 }

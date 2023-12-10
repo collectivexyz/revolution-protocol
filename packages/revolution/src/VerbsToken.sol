@@ -133,9 +133,9 @@ contract VerbsToken is
         address _descriptor,
         address _cultureIndex,
         IRevolutionBuilder.ERC721TokenParams memory _tokenParams
-    ) external {
+    ) external initializer {
         // Ensure the caller is the contract manager
-        require (msg.sender == address(manager), "Only manager can initialize");
+        require(msg.sender == address(manager), "Only manager can initialize");
 
         require(_minter != address(0), "Minter cannot be zero address");
         require(_initialOwner != address(0), "Initial owner cannot be zero address");
@@ -332,7 +332,7 @@ contract VerbsToken is
     // /// @notice Ensures the caller is authorized to upgrade the contract and that the new implementation is valid
     // /// @dev This function is called in `upgradeTo` & `upgradeToAndCall`
     // /// @param _newImpl The new implementation address
-    function _authorizeUpgrade(address _newImpl) internal view onlyOwner override {
+    function _authorizeUpgrade(address _newImpl) internal view override onlyOwner {
         // Ensure the implementation is valid
         require(manager.isRegisteredUpgrade(_getImplementation(), _newImpl), "Invalid upgrade");
     }

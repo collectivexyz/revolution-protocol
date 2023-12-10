@@ -61,8 +61,21 @@ contract RevolutionBuilderTest is Test {
         vm.label(founder, "FOUNDER");
         vm.label(founder2, "FOUNDER_2");
 
-        managerImpl0 = address(new RevolutionBuilder(address(0), address(0), address(0), address(0), address(0), address(0), address(0), address(0)));
-        manager = RevolutionBuilder(address(new ERC1967Proxy(managerImpl0, abi.encodeWithSignature("initialize(address)", zoraDAO))));
+        managerImpl0 = address(
+            new RevolutionBuilder(
+                address(0),
+                address(0),
+                address(0),
+                address(0),
+                address(0),
+                address(0),
+                address(0),
+                address(0)
+            )
+        );
+        manager = RevolutionBuilder(
+            address(new ERC1967Proxy(managerImpl0, abi.encodeWithSignature("initialize(address)", zoraDAO)))
+        );
 
         tokenImpl = address(new VerbsToken(address(manager)));
         descriptorImpl = address(new VerbsDescriptor(address(manager)));
@@ -87,13 +100,8 @@ contract RevolutionBuilderTest is Test {
     IRevolutionBuilder.ERC20TokenParams internal erc20TokenParams;
     IRevolutionBuilder.ERC20TokenEmitterParams internal erc20TokenEmitterParams;
 
-
     function setMockERC721TokenParams() internal virtual {
-        setERC721TokenParams(
-            "Mock Token",
-            "MOCK",
-            "Qmew7TdyGnj6YRUjQR68sUJN3239MYXRD8uxowxF6rGK8j"
-        );
+        setERC721TokenParams("Mock Token", "MOCK", "Qmew7TdyGnj6YRUjQR68sUJN3239MYXRD8uxowxF6rGK8j");
     }
 
     function setERC721TokenParams(
@@ -101,15 +109,33 @@ contract RevolutionBuilderTest is Test {
         string memory _symbol,
         string memory _contractURI
     ) internal virtual {
-        erc721TokenParams = IRevolutionBuilder.ERC721TokenParams({ name: _name, symbol: _symbol, contractURIHash: _contractURI });
+        erc721TokenParams = IRevolutionBuilder.ERC721TokenParams({
+            name: _name,
+            symbol: _symbol,
+            contractURIHash: _contractURI
+        });
     }
 
     function setMockAuctionParams() internal virtual {
         setAuctionParams(0.01 ether, 10 minutes, 2, 1000, 1000, 1000);
     }
 
-    function setAuctionParams(uint256 _reservePrice, uint256 _duration, uint256 _minBidIncrementPercentage, uint256 _creatorRateBps, uint256 _entropyRateBps, uint256 _minCreatorRateBps) internal virtual {
-        auctionParams = IRevolutionBuilder.AuctionParams({ reservePrice: _reservePrice, duration: _duration, minBidIncrementPercentage: _minBidIncrementPercentage, creatorRateBps: _creatorRateBps, entropyRateBps: _entropyRateBps, minCreatorRateBps: _minCreatorRateBps });
+    function setAuctionParams(
+        uint256 _reservePrice,
+        uint256 _duration,
+        uint256 _minBidIncrementPercentage,
+        uint256 _creatorRateBps,
+        uint256 _entropyRateBps,
+        uint256 _minCreatorRateBps
+    ) internal virtual {
+        auctionParams = IRevolutionBuilder.AuctionParams({
+            reservePrice: _reservePrice,
+            duration: _duration,
+            minBidIncrementPercentage: _minBidIncrementPercentage,
+            creatorRateBps: _creatorRateBps,
+            entropyRateBps: _entropyRateBps,
+            minCreatorRateBps: _minCreatorRateBps
+        });
     }
 
     function setMockGovParams() internal virtual {
@@ -135,13 +161,7 @@ contract RevolutionBuilderTest is Test {
     }
 
     function setMockCultureIndexParams() internal virtual {
-        setCultureIndexParams(
-            "Vrbs",
-            "Our community Vrbs. Must be 32x32.",
-            100,
-            1000,
-            0
-        );
+        setCultureIndexParams("Vrbs", "Our community Vrbs. Must be 32x32.", 100, 1000, 0);
     }
 
     function setCultureIndexParams(
@@ -164,10 +184,7 @@ contract RevolutionBuilderTest is Test {
         setERC20TokenParams("Mock Token", "MOCK");
     }
 
-    function setERC20TokenParams(
-        string memory _tokenName,
-        string memory _tokenSymbol
-    ) internal virtual {
+    function setERC20TokenParams(string memory _tokenName, string memory _tokenSymbol) internal virtual {
         erc20TokenParams = IRevolutionBuilder.ERC20TokenParams({
             tokenName: _tokenName,
             tokenSymbol: _tokenSymbol
@@ -221,7 +238,6 @@ contract RevolutionBuilderTest is Test {
         );
     }
 
-
     function deploy(
         address _initialOwner,
         IRevolutionBuilder.ERC721TokenParams memory _ERC721TokenParams,
@@ -231,15 +247,24 @@ contract RevolutionBuilderTest is Test {
         IRevolutionBuilder.ERC20TokenParams memory _ERC20TokenParams,
         IRevolutionBuilder.ERC20TokenEmitterParams memory _ERC20TokenEmitterParams
     ) internal virtual {
-        (address _token, address _descriptor, address _auction, address _executor, address _dao, address _cultureIndex, address _erc20Token, address _erc20TokenEmitter) = manager.deploy(
-            _initialOwner,
-            _ERC721TokenParams,
-            _auctionParams,
-            _govParams,
-            _cultureIndexParams,
-            _ERC20TokenParams,
-            _ERC20TokenEmitterParams
-        );
+        (
+            address _token,
+            address _descriptor,
+            address _auction,
+            address _executor,
+            address _dao,
+            address _cultureIndex,
+            address _erc20Token,
+            address _erc20TokenEmitter
+        ) = manager.deploy(
+                _initialOwner,
+                _ERC721TokenParams,
+                _auctionParams,
+                _govParams,
+                _cultureIndexParams,
+                _ERC20TokenParams,
+                _ERC20TokenEmitterParams
+            );
 
         token = VerbsToken(_token);
         descriptor = VerbsDescriptor(_descriptor);

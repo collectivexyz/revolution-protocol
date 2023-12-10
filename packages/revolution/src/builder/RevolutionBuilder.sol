@@ -29,10 +29,10 @@ import { RevolutionBuilderStorageV1 } from "./storage/RevolutionBuilderStorageV1
 import { IRevolutionBuilder } from "../interfaces/IRevolutionBuilder.sol";
 import { IVerbsToken } from "../interfaces/IVerbsToken.sol";
 import { IVerbsDescriptor } from "../interfaces/IVerbsDescriptor.sol";
-import { IVerbsAuctionHouse } from "../interfaces/IVerbsAuctionHouse.sol";
+import { IAuctionHouse } from "../interfaces/IAuctionHouse.sol";
 import { IVerbsDAOExecutor } from "../interfaces/IVerbsDAOExecutor.sol";
 import { IVerbsDAO } from "../interfaces/IVerbsDAO.sol";
-
+import { ICultureIndex } from "../interfaces/ICultureIndex.sol";
 
 import { ERC1967Proxy } from "../libs/proxy/ERC1967Proxy.sol";
 
@@ -53,7 +53,7 @@ contract RevolutionBuilder is
     ///                                                          ///
 
     /// @notice The token implementation address
-    address public immutable tokenImpl;
+    address public immutable erc721TokenImpl;
 
     /// @notice The descriptor implementation address
     address public immutable descriptorImpl;
@@ -81,7 +81,7 @@ contract RevolutionBuilder is
     ///                                                          ///
 
     constructor(
-        address _tokenImpl,
+        address _erc721TokenImpl,
         address _descriptorImpl,
         address _auctionImpl,
         address _executorImpl,
@@ -90,7 +90,7 @@ contract RevolutionBuilder is
         address _cultureIndexImpl,
         address _erc20TokenImpl
     ) payable initializer {
-        tokenImpl = _tokenImpl;
+        erc721TokenImpl = _erc721TokenImpl;
         descriptorImpl = _descriptorImpl;
         auctionImpl = _auctionImpl;
         executorImpl = _executorImpl;
@@ -134,7 +134,7 @@ contract RevolutionBuilder is
     )
         external
         returns (
-            address token,
+            address erc721Token,
             address descriptor,
             address auction,
             address executor,
@@ -152,10 +152,10 @@ contract RevolutionBuilder is
         require((founder = _initialOwner) != address(0), "Initial owner cannot be 0x0");
 
         // Deploy the DAO's ERC-721 governance token
-        token = address(new ERC1967Proxy(tokenImpl, ""));
+        erc721Token = address(new ERC1967Proxy(erc721TokenImpl, ""));
 
         // Use the token address to precompute the DAO's remaining addresses
-        bytes32 salt = bytes32(uint256(uint160(token)) << 96);
+        bytes32 salt = bytes32(uint256(uint160(erc721Token)) << 96);
 
         // Deploy the remaining DAO contracts
         descriptor = address(new ERC1967Proxy{ salt: salt }(descriptorImpl, ""));
@@ -166,7 +166,7 @@ contract RevolutionBuilder is
         erc20Token = address(new ERC1967Proxy{ salt: salt }(erc20TokenImpl, ""));
         erc20TokenEmitter = address(new ERC1967Proxy{ salt: salt }(erc20TokenEmitter, ""));
 
-        daoAddressesByToken[token] = DAOAddresses({
+        daoAddressesByToken[erc721Token] = DAOAddresses({
             descriptor: descriptor,
             auction: auction,
             executor: executor,
@@ -177,21 +177,32 @@ contract RevolutionBuilder is
         });
 
         // Initialize each instance with the provided settings
-        IVerbsToken(token).initialize({
+        IVerbsToken(erc721Token).initialize({
             minter: auction,
             descriptor: descriptor,
             initialOwner: founder,
             cultureIndex: cultureIndex,
             tokenParams: _tokenParams
         });
-        // IVerbsDescriptor(descriptor).initialize({ initStrings: _tokenParams.initStrings, token: token });
-        // IVerbsAuctionHouse(auction).initialize({
-        //     token: token,
-        //     founder: founder,
-        //     executor: executor,
-        //     duration: _auctionParams.duration,
-        //     reservePrice: _auctionParams.reservePrice
-        // });
+        IVerbsDescriptor(descriptor).initialize({
+            initialOwner: founder,
+            tokenNamePrefix: _tokenParams.tokenNamePrefix
+        });
+
+        ICultureIndex(cultureIndex).initialize({
+            erc20VotingToken: erc20Token,
+            erc721VotingToken: erc721Token,
+            initialOwner: founder,
+            cultureIndexParams: _cultureIndexParams
+        });
+
+        IAuctionHouse(auction).initialize({
+            erc721Token: erc721Token,
+            erc20TokenEmitter: erc20TokenEmitter,
+            initialOwner: founder,
+            auctionParams: _auctionParams
+        });
+
         // IVerbsDAOExecutor(executor).initialize({ dao: dao, timelockDelay: _govParams.timelockDelay });
         // IVerbsDAO(dao).initialize({
         //     executor: executor,
@@ -204,7 +215,7 @@ contract RevolutionBuilder is
         // });
 
         emit DAODeployed({
-            token: token,
+            erc721Token: erc721Token,
             descriptor: descriptor,
             auction: auction,
             executor: executor,
@@ -296,10 +307,18 @@ contract RevolutionBuilder is
     }
 
     function getDAOVersions(address token) external view returns (DAOVersionInfo memory) {
-        (address descriptor, address auction, address executor, address dao, address cultureIndex, address erc20Token, address erc20TokenEmitter) = getAddresses(token);
+        (
+            address descriptor,
+            address auction,
+            address executor,
+            address dao,
+            address cultureIndex,
+            address erc20Token,
+            address erc20TokenEmitter
+        ) = getAddresses(token);
         return
             DAOVersionInfo({
-                token: _safeGetVersion(token),
+                erc721Token: _safeGetVersion(token),
                 descriptor: _safeGetVersion(descriptor),
                 auction: _safeGetVersion(auction),
                 executor: _safeGetVersion(executor),
@@ -313,7 +332,7 @@ contract RevolutionBuilder is
     function getLatestVersions() external view returns (DAOVersionInfo memory) {
         return
             DAOVersionInfo({
-                token: _safeGetVersion(tokenImpl),
+                erc721Token: _safeGetVersion(erc721TokenImpl),
                 descriptor: _safeGetVersion(descriptorImpl),
                 auction: _safeGetVersion(auctionImpl),
                 executor: _safeGetVersion(executorImpl),

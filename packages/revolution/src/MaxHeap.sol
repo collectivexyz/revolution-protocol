@@ -12,7 +12,6 @@ import { VersionedContract } from "./version/VersionedContract.sol";
 /// @dev This contract implements a Max Heap data structure with basic operations
 /// @author Written by rocketman and gpt4
 contract MaxHeap is VersionedContract, UUPS, Ownable2StepUpgradeable, ReentrancyGuardUpgradeable {
-
     ///                                                          ///
     ///                         IMMUTABLES                       ///
     ///                                                          ///
@@ -34,12 +33,10 @@ contract MaxHeap is VersionedContract, UUPS, Ownable2StepUpgradeable, Reentrancy
     ///                                                          ///
 
     /**
-    * @notice Initializes the maxheap contract
-    * @param _initialOwner The initial owner of the contract
-    */
-    function initialize(
-        address _initialOwner
-    ) external {
+     * @notice Initializes the maxheap contract
+     * @param _initialOwner The initial owner of the contract
+     */
+    function initialize(address _initialOwner) external initializer {
         __Ownable_init(_initialOwner);
     }
 
