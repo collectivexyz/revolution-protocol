@@ -228,7 +228,7 @@ contract CultureIndexVotingSignaturesTest is CultureIndexTestSuite {
 
         vm.roll(block.number + 1);
 
-        // vote correctly but expect "Weight must be greater than zero"
+        // vote correctly but expect "Weight must be greater than minVoteWeight"
         nonce = cultureIndex.nonces(funVoterGuy);
         deadline = block.timestamp + 1 days;
 
@@ -240,7 +240,7 @@ contract CultureIndexVotingSignaturesTest is CultureIndexTestSuite {
 
         (v, r, s) = vm.sign(funVoterGuyPk, digest);
 
-        vm.expectRevert("Weight must be greater than zero");
+        vm.expectRevert("Weight must be greater than minVoteWeight");
         cultureIndex.voteForManyWithSig(funVoterGuy, pieceIds, deadline, v, r, s);
 
         //vote with offchainVoter

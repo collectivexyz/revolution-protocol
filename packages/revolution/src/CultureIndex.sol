@@ -342,7 +342,7 @@ contract CultureIndex is ICultureIndex, Ownable, ReentrancyGuard, EIP712 {
         require(!(votes[pieceId][voter].voterAddress != address(0)), "Already voted");
 
         uint256 weight = _getPriorVotes(voter, pieces[pieceId].creationBlock);
-        require(weight >= minVoteWeight, "Weight must be greater than minVoteWeight");
+        require(weight > minVoteWeight, "Weight must be greater than minVoteWeight");
 
         votes[pieceId][voter] = Vote(voter, weight);
         totalVoteWeights[pieceId] += weight;

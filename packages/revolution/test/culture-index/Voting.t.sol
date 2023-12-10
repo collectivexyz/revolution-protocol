@@ -129,7 +129,7 @@ contract CultureIndexVotingBasicTest is CultureIndexTestSuite {
 
         // Attempt to have recipient cast a vote
         vm.startPrank(recipient);
-        vm.expectRevert("Weight must be greater than zero");
+        vm.expectRevert("Weight must be greater than minVoteWeight");
         cultureIndex.vote(artPieceId);
         vm.stopPrank();
     }
@@ -350,7 +350,7 @@ contract CultureIndexVotingBasicTest is CultureIndexTestSuite {
         try cultureIndex.voteForMany(pieceIds) {
             fail("Batch voting with zero weight should fail");
         } catch Error(string memory reason) {
-            assertEq(reason, "Weight must be greater than zero", "Should revert with weight zero error");
+            assertEq(reason, "Weight must be greater than minVoteWeight", "Should revert with weight zero error");
         }
     }
 
@@ -393,7 +393,7 @@ contract CultureIndexVotingBasicTest is CultureIndexTestSuite {
         emit log_uint(gasUsedBatch); // Log gas used for batch votes
 
         // Log the difference in gas usage
-        emit log_string("Gas saved");
+        emit log_string("gas saved");
         emit log_int(int(gasUsedIndividual) - int(gasUsedBatch)); // This will log the saved gas
 
         //assert that batch voting is cheaper
@@ -457,7 +457,7 @@ contract CultureIndexVotingBasicTest is CultureIndexTestSuite {
         try cultureIndex.vote(newPieceId) {
             fail("Should not be able to vote without tokens");
         } catch Error(string memory reason) {
-            assertEq(reason, "Weight must be greater than zero");
+            assertEq(reason, "Weight must be greater than minVoteWeight");
         }
     }
 
@@ -549,14 +549,14 @@ contract CultureIndexVotingBasicTest is CultureIndexTestSuite {
         try cultureIndex.vote(firstPieceId) {
             fail("Should not be able to vote without tokens on the first piece");
         } catch Error(string memory reason) {
-            assertEq(reason, "Weight must be greater than zero");
+            assertEq(reason, "Weight must be greater than minVoteWeight");
         }
 
         // Try to vote for the second piece and expect to fail
         try cultureIndex.vote(secondPieceId) {
             fail("Should not be able to vote without tokens on the second piece");
         } catch Error(string memory reason) {
-            assertEq(reason, "Weight must be greater than zero");
+            assertEq(reason, "Weight must be greater than minVoteWeight");
         }
     }
 
@@ -581,7 +581,7 @@ contract CultureIndexVotingBasicTest is CultureIndexTestSuite {
             fail("Should not be able to vote without tokens");
         } catch Error(string memory reason) {
             emit log_string(reason);
-            assertEq(reason, "Weight must be greater than zero");
+            assertEq(reason, "Weight must be greater than minVoteWeight");
         }
     }
 

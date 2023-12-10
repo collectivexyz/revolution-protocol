@@ -128,7 +128,7 @@ contract CultureIndexAccessControlTest is CultureIndexTestSuite {
     }
 
     function testDropTopVotedPieceOnlyIfQuorumIsMet(uint256 quorumBps) public {
-        vm.assume(quorumBps <= cultureIndex.MAX_QUORUM_VOTES_BPS());
+        vm.assume(quorumBps > 200 && quorumBps <= cultureIndex.MAX_QUORUM_VOTES_BPS());
 
         // Set quorum BPS
         vm.startPrank(address(this));

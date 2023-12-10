@@ -150,7 +150,7 @@ contract TokenMintingTest is VerbsTokenTestSuite {
         // ensure vote snapshot is taken
         vm.roll(block.number + 1);
 
-        if (voteWeight == 0) vm.expectRevert("Weight must be greater than zero");
+        if (voteWeight == 0) vm.expectRevert("Weight must be greater than minVoteWeight");
         cultureIndex.vote(pieceId1);
 
         bool shouldRevertMint = voteWeight <= (10_000 * cultureIndex.quorumVotesBPS()) / 10_000;
@@ -164,7 +164,7 @@ contract TokenMintingTest is VerbsTokenTestSuite {
                 "CurrentVerbId should increment after first mint"
             );
 
-        if (voteWeight == 0) vm.expectRevert("Weight must be greater than zero");
+        if (voteWeight == 0) vm.expectRevert("Weight must be greater than minVoteWeight");
         cultureIndex.vote(pieceId2);
 
         if (shouldRevertMint) vm.expectRevert("dropTopVotedPiece failed");

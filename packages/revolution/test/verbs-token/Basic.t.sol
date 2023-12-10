@@ -250,7 +250,7 @@ contract TokenBasicTest is VerbsTokenTestSuite {
 
         // Act & Assert
         vm.prank(voter); // Set the next message sender to the voter address
-        vm.expectRevert("Weight must be greater than zero"); // This assumes your contract reverts with this message for zero balance
+        vm.expectRevert("Weight must be greater than minVoteWeight"); // This assumes your contract reverts with this message for zero balance
         cultureIndex.vote(artPieceId); // Trying to vote
     }
 
