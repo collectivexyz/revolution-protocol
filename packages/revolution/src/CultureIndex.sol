@@ -33,9 +33,6 @@ contract CultureIndex is ICultureIndex, Ownable, ReentrancyGuard, EIP712 {
     // The weight of the 721 voting token
     uint256 public immutable erc721VotingTokenWeight;
 
-    /// @notice The minimum settable quorum votes basis points
-    uint256 public constant MIN_QUORUM_VOTES_BPS = 200; // 200 basis points or 2%
-
     /// @notice The maximum settable quorum votes basis points
     uint256 public constant MAX_QUORUM_VOTES_BPS = 6_000; // 6,000 basis points or 60%
 
@@ -86,10 +83,7 @@ contract CultureIndex is ICultureIndex, Ownable, ReentrancyGuard, EIP712 {
         uint256 quorumVotesBPS_,
         uint256 minVoteWeight_
     ) Ownable(initialOwner_) EIP712("CultureIndex", "1") {
-        require(
-            quorumVotesBPS_ >= MIN_QUORUM_VOTES_BPS && quorumVotesBPS_ <= MAX_QUORUM_VOTES_BPS,
-            "invalid quorum bps"
-        );
+        require(quorumVotesBPS_ <= MAX_QUORUM_VOTES_BPS, "invalid quorum bps");
         require(erc721VotingTokenWeight_ > 0, "invalid erc721 voting token weight");
         require(erc721VotingToken_ != address(0), "invalid erc721 voting token");
         require(erc20VotingToken_ != address(0), "invalid erc20 voting token");
@@ -338,7 +332,7 @@ contract CultureIndex is ICultureIndex, Ownable, ReentrancyGuard, EIP712 {
      * @notice Cast a vote for a specific ArtPiece.
      * @param pieceId The ID of the ArtPiece to vote for.
      * @param voter The address of the voter.
-     * @dev Requires that the pieceId is valid, the voter has not already voted on this piece, and the weight is greater than zero.
+     * @dev Requires that the pieceId is valid, the voter has not already voted on this piece, and the weight is greater than the minimum vote weight.
      * Emits a VoteCast event upon successful execution.
      */
     function _vote(uint256 pieceId, address voter) internal {
@@ -348,7 +342,7 @@ contract CultureIndex is ICultureIndex, Ownable, ReentrancyGuard, EIP712 {
         require(!(votes[pieceId][voter].voterAddress != address(0)), "Already voted");
 
         uint256 weight = _getPriorVotes(voter, pieces[pieceId].creationBlock);
-        require(weight >= minVoteWeight, "Weight must be greater than zero");
+        require(weight >= minVoteWeight, "Weight must be greater than minVoteWeight");
 
         votes[pieceId][voter] = Vote(voter, weight);
         totalVoteWeights[pieceId] += weight;
@@ -363,7 +357,7 @@ contract CultureIndex is ICultureIndex, Ownable, ReentrancyGuard, EIP712 {
     /**
      * @notice Cast a vote for a specific ArtPiece.
      * @param pieceId The ID of the ArtPiece to vote for.
-     * @dev Requires that the pieceId is valid, the voter has not already voted on this piece, and the weight is greater than zero.
+     * @dev Requires that the pieceId is valid, the voter has not already voted on this piece, and the weight is greater than the minimum vote weight.
      * Emits a VoteCast event upon successful execution.
      */
     function vote(uint256 pieceId) public nonReentrant {
@@ -373,7 +367,7 @@ contract CultureIndex is ICultureIndex, Ownable, ReentrancyGuard, EIP712 {
     /**
      * @notice Cast a vote for a list of ArtPieces.
      * @param pieceIds The IDs of the ArtPieces to vote for.
-     * @dev Requires that the pieceIds are valid, the voter has not already voted on this piece, and the weight is greater than zero.
+     * @dev Requires that the pieceIds are valid, the voter has not already voted on this piece, and the weight is greater than the minimum vote weight.
      * Emits a series of VoteCast event upon successful execution.
      */
     function voteForMany(uint256[] calldata pieceIds) public nonReentrant {
@@ -384,7 +378,7 @@ contract CultureIndex is ICultureIndex, Ownable, ReentrancyGuard, EIP712 {
      * @notice Cast a vote for a list of ArtPieces pieceIds.
      * @param pieceIds The IDs of the ArtPieces to vote for.
      * @param from The address of the voter.
-     * @dev Requires that the pieceIds are valid, the voter has not already voted on this piece, and the weight is greater than zero.
+     * @dev Requires that the pieceIds are valid, the voter has not already voted on this piece, and the weight is greater than the minimum vote weight.
      * Emits a series of VoteCast event upon successful execution.
      */
     function _voteForMany(uint256[] calldata pieceIds, address from) internal {
@@ -552,7 +546,7 @@ contract CultureIndex is ICultureIndex, Ownable, ReentrancyGuard, EIP712 {
      */
     function _setQuorumVotesBPS(uint256 newQuorumVotesBPS) external onlyOwner {
         require(
-            newQuorumVotesBPS >= MIN_QUORUM_VOTES_BPS && newQuorumVotesBPS <= MAX_QUORUM_VOTES_BPS,
+            newQuorumVotesBPS <= MAX_QUORUM_VOTES_BPS,
             "CultureIndex::_setQuorumVotesBPS: invalid quorum bps"
         );
         emit QuorumVotesBPSSet(quorumVotesBPS, newQuorumVotesBPS);

@@ -86,10 +86,7 @@ contract CultureIndexAccessControlTest is CultureIndexTestSuite {
     }
 
     function testSetQuorumVotesBPSWithinRange(uint104 newQuorumBPS) public {
-        vm.assume(
-            newQuorumBPS >= cultureIndex.MIN_QUORUM_VOTES_BPS() &&
-                newQuorumBPS <= cultureIndex.MAX_QUORUM_VOTES_BPS()
-        );
+        vm.assume(newQuorumBPS <= cultureIndex.MAX_QUORUM_VOTES_BPS());
 
         // Set new quorum BPS by owner
         vm.startPrank(address(this));
@@ -103,10 +100,7 @@ contract CultureIndexAccessControlTest is CultureIndexTestSuite {
 
     function testSetQuorumVotesBPSOutsideRange(uint104 newQuorumBPS) public {
         uint256 currentQuorumBPS = cultureIndex.quorumVotesBPS();
-        vm.assume(
-            newQuorumBPS < cultureIndex.MIN_QUORUM_VOTES_BPS() ||
-                newQuorumBPS > cultureIndex.MAX_QUORUM_VOTES_BPS()
-        );
+        vm.assume(newQuorumBPS > cultureIndex.MAX_QUORUM_VOTES_BPS());
 
         // Set new quorum BPS by owner
         vm.startPrank(address(this));
@@ -134,10 +128,7 @@ contract CultureIndexAccessControlTest is CultureIndexTestSuite {
     }
 
     function testDropTopVotedPieceOnlyIfQuorumIsMet(uint256 quorumBps) public {
-        vm.assume(
-            quorumBps >= cultureIndex.MIN_QUORUM_VOTES_BPS() &&
-                quorumBps <= cultureIndex.MAX_QUORUM_VOTES_BPS()
-        );
+        vm.assume(quorumBps <= cultureIndex.MAX_QUORUM_VOTES_BPS());
 
         // Set quorum BPS
         vm.startPrank(address(this));

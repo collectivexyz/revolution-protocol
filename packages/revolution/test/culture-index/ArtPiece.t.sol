@@ -345,10 +345,7 @@ contract CultureIndexArtPieceTest is CultureIndexTestSuite {
 
     function testArtPieceCreationAndVoting(uint256 erc20Supply, uint256 quorumVotesBPS) public {
         vm.assume(erc20Supply > 0 && erc20Supply < 2 ** 200);
-        vm.assume(
-            quorumVotesBPS >= cultureIndex.MIN_QUORUM_VOTES_BPS() &&
-                quorumVotesBPS <= cultureIndex.MAX_QUORUM_VOTES_BPS()
-        );
+        vm.assume(quorumVotesBPS <= cultureIndex.MAX_QUORUM_VOTES_BPS());
 
         // Set the quorum BPS
         cultureIndex._setQuorumVotesBPS(quorumVotesBPS);
