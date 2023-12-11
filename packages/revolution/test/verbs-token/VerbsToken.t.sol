@@ -4,67 +4,72 @@ pragma solidity ^0.8.22;
 import { Test } from "forge-std/Test.sol";
 import { VerbsToken } from "../../src/VerbsToken.sol";
 import { IVerbsToken } from "../../src/interfaces/IVerbsToken.sol";
-import { IVerbsDescriptorMinimal } from "../../src/interfaces/IVerbsDescriptorMinimal.sol";
+import { IDescriptorMinimal } from "../../src/interfaces/IDescriptorMinimal.sol";
 
 import { ICultureIndex } from "../../src/interfaces/ICultureIndex.sol";
 import { Strings } from "@openzeppelin/contracts/utils/Strings.sol";
 import { CultureIndex } from "../../src/CultureIndex.sol";
 import { MockERC20 } from "../mock/MockERC20.sol";
-import { VerbsDescriptor } from "../../src/VerbsDescriptor.sol";
+import { Descriptor } from "../../src/Descriptor.sol";
 import "../utils/Base64Decode.sol";
 import "../utils/JsmnSolLib.sol";
 import { NontransferableERC20Votes } from "../../src/NontransferableERC20Votes.sol";
+import { RevolutionBuilderTest } from "../RevolutionBuilder.t.sol";
 
 /// @title VerbsTokenTestSuite
 /// @dev The base test suite for the VerbsToken contract
-contract VerbsTokenTestSuite is Test {
-    VerbsToken public verbsToken;
-    CultureIndex public cultureIndex;
-    NontransferableERC20Votes public govToken;
-    VerbsDescriptor public descriptor;
-
+contract VerbsTokenTestSuite is RevolutionBuilderTest {
     string public tokenNamePrefix = "Vrb";
     string public tokenName = "Vrbs";
     string public tokenSymbol = "VRBS";
 
     /// @dev Sets up a new VerbsToken instance before each test
-    function setUp() public {
-        // Create a new mock ERC20 token for voting
-        govToken = new NontransferableERC20Votes(address(this), "Revolution Governance", "GOV");
+    function setUp() public override {
+        super.setUp();
+        super.setMockParams();
 
-        // Create a new VerbsToken contract, passing address(this) as both the minter and the initial owner
-        verbsToken = new VerbsToken(
-            address(this),
-            address(this),
-            IVerbsDescriptorMinimal(address(0)),
-            ICultureIndex(address(0)),
-            tokenName,
-            tokenSymbol,
-            "QmQzDwaZ7yQxHHs7sQQenJVB89riTSacSGcJRv9jtHPuz5"
-        );
+        super.setERC721TokenParams(tokenName, tokenSymbol, "https://example.com/token/", tokenNamePrefix);
 
-        // Deploy CultureIndex with the VerbsToken's address as the initial owner
-        cultureIndex = new CultureIndex(
-            "Vrbs",
-            "Our community Vrbs. Must be 32x32.",
-            address(govToken),
-            address(verbsToken),
-            address(verbsToken),
-            10,
-            200,
-            0
-        );
-        ICultureIndex _cultureIndex = cultureIndex;
+        super.deployMock();
 
-        // Now that CultureIndex is deployed, set it in VerbsToken
-        verbsToken.setCultureIndex(_cultureIndex);
+        vm.startPrank(address(auction));
 
-        // Deploy a new VerbsDescriptor, which will be used by VerbsToken
-        descriptor = new VerbsDescriptor(address(verbsToken), tokenNamePrefix);
-        IVerbsDescriptorMinimal _descriptor = descriptor;
+        // // Create a new mock ERC20 token for voting
+        // govToken = new NontransferableERC20Votes(address(this), "Revolution Governance", "GOV");
 
-        // Now that VerbsDescriptor is deployed, set it in VerbsToken
-        verbsToken.setDescriptor(_descriptor);
+        // // Create a new VerbsToken contract, passing address(this) as both the minter and the initial owner
+        // verbsToken = new VerbsToken(
+        //     address(this),
+        //     address(this),
+        //     IDescriptorMinimal(address(0)),
+        //     ICultureIndex(address(0)),
+        //     tokenName,
+        //     tokenSymbol,
+        //     "QmQzDwaZ7yQxHHs7sQQenJVB89riTSacSGcJRv9jtHPuz5"
+        // );
+
+        // // Deploy CultureIndex with the VerbsToken's address as the initial owner
+        // cultureIndex = new CultureIndex(
+        //     "Vrbs",
+        //     "Our community Vrbs. Must be 32x32.",
+        //     address(erc20Token),
+        //     address(erc721Token),
+        //     address(erc721Token),
+        //     10,
+        //     200,
+        //     0
+        // );
+        // ICultureIndex _cultureIndex = cultureIndex;
+
+        // // Now that CultureIndex is deployed, set it in VerbsToken
+        // erc721Token.setCultureIndex(_cultureIndex);
+
+        // // Deploy a new Descriptor, which will be used by VerbsToken
+        // descriptor = new Descriptor(address(erc721Token), tokenNamePrefix);
+        // IDescriptorMinimal _descriptor = descriptor;
+
+        // // Now that Descriptor is deployed, set it in VerbsToken
+        // erc721Token.setDescriptor(_descriptor);
     }
 
     // Utility function to create a new art piece and return its ID

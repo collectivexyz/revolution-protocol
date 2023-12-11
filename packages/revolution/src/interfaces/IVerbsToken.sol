@@ -18,7 +18,7 @@
 pragma solidity ^0.8.22;
 
 import { IERC721 } from "@openzeppelin/contracts/token/ERC721/IERC721.sol";
-import { IVerbsDescriptorMinimal } from "./IVerbsDescriptorMinimal.sol";
+import { IDescriptorMinimal } from "./IDescriptorMinimal.sol";
 import { ICultureIndex } from "./ICultureIndex.sol";
 import { IRevolutionBuilder } from "./IRevolutionBuilder.sol";
 
@@ -31,7 +31,7 @@ interface IVerbsToken is IERC721 {
 
     event MinterLocked();
 
-    event DescriptorUpdated(IVerbsDescriptorMinimal descriptor);
+    event DescriptorUpdated(IDescriptorMinimal descriptor);
 
     event DescriptorLocked();
 
@@ -49,7 +49,7 @@ interface IVerbsToken is IERC721 {
 
     function lockMinter() external;
 
-    function setDescriptor(IVerbsDescriptorMinimal descriptor) external;
+    function setDescriptor(IDescriptorMinimal descriptor) external;
 
     function lockDescriptor() external;
 
@@ -62,12 +62,12 @@ interface IVerbsToken is IERC721 {
     /// @param initialOwner The address of the initial owner
     /// @param descriptor The address of the token URI descriptor
     /// @param cultureIndex The address of the CultureIndex contract
-    /// @param tokenParams The name, symbol, and contract metadata of the token
+    /// @param erc721TokenParams The name, symbol, and contract metadata of the token
     function initialize(
         address minter,
         address initialOwner,
         address descriptor,
         address cultureIndex,
-        IRevolutionBuilder.ERC721TokenParams memory tokenParams
+        IRevolutionBuilder.ERC721TokenParams memory erc721TokenParams
     ) external;
 }

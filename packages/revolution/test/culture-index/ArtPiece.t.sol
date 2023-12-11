@@ -350,9 +350,9 @@ contract CultureIndexArtPieceTest is CultureIndexTestSuite {
         // Set the quorum BPS
         cultureIndex._setQuorumVotesBPS(quorumVotesBPS);
 
-        cultureIndex.transferOwnership(address(verbs));
+        cultureIndex.transferOwnership(address(erc721Token));
 
-        govToken.mint(address(this), erc20Supply);
+        erc20Token.mint(address(this), erc20Supply);
 
         // Create an art piece
         uint256 pieceId = createDefaultArtPiece();
@@ -378,8 +378,8 @@ contract CultureIndexArtPieceTest is CultureIndexTestSuite {
         voteForPiece(pieceId);
 
         // Mint token and govTokens, create a new piece and check fields
-        verbs.mint();
-        govToken.mint(address(this), erc20Supply);
+        erc721Token.mint();
+        erc20Token.mint(address(this), erc20Supply);
 
         vm.roll(block.number + 1);
 

@@ -82,17 +82,23 @@ interface IAuctionHouse {
 
     function setEntropyRateBps(uint256 _entropyRateBps) external;
 
+    function WETH() external view returns (address);
+
+    function manager() external returns (IRevolutionBuilder);
+
     /**
      * @notice Initialize the auction house and base contracts.
      * @param erc721Token The address of the Verbs ERC721 token contract.
      * @param erc20TokenEmitter The address of the ERC-20 token emitter contract.
      * @param initialOwner The address of the owner.
+     * @param weth The address of the WETH contract.
      * @param auctionParams The auction params for auctions.
      */
     function initialize(
         address erc721Token,
         address erc20TokenEmitter,
         address initialOwner,
+        address weth,
         IRevolutionBuilder.AuctionParams calldata auctionParams
     ) external;
 }

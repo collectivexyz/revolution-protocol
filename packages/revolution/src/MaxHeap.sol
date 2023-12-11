@@ -36,7 +36,9 @@ contract MaxHeap is VersionedContract, UUPS, Ownable2StepUpgradeable, Reentrancy
      * @notice Initializes the maxheap contract
      * @param _initialOwner The initial owner of the contract
      */
-    function initialize(address _initialOwner) external initializer {
+    function initialize(address _initialOwner) public initializer {
+        require(msg.sender == address(manager), "Only manager can initialize");
+
         __Ownable_init(_initialOwner);
     }
 

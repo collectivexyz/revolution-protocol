@@ -11,8 +11,8 @@ contract CultureIndexVotingTestManager is CultureIndexTestSuite {
         uint256 newPieceId = voter1Test.createDefaultArtPiece();
 
         // Mint tokens to the test contracts (acting as voters)
-        govToken.mint(address(voter1Test), 100);
-        govToken.mint(address(voter2Test), 200);
+        erc20Token.mint(address(voter1Test), 100);
+        erc20Token.mint(address(voter2Test), 200);
 
         vm.roll(block.number + 1); // advance block for vote snapshotting
 
@@ -38,7 +38,7 @@ contract CultureIndexVotingTestManager is CultureIndexTestSuite {
         uint256 secondPieceId = voter2Test.createDefaultArtPiece();
 
         // Mint tokens to a test contract (acting as a voter)
-        govToken.mint(address(voter1Test), 100);
+        erc20Token.mint(address(voter1Test), 100);
         vm.roll(block.number + 1); // advance block for vote snapshotting
 
         // Call vote from the same test instance for both pieces

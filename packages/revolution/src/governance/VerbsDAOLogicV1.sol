@@ -52,10 +52,32 @@
 
 pragma solidity ^0.8.22;
 
+import { Ownable2StepUpgradeable } from "@openzeppelin/contracts-upgradeable/access/Ownable2StepUpgradeable.sol";
+
+import { UUPS } from "../libs/proxy/UUPS.sol";
+import { VersionedContract } from "../version/VersionedContract.sol";
+
 import "./VerbsDAOInterfaces.sol";
 import { IVerbsDAO } from "../interfaces/IVerbsDAO.sol";
+import { IRevolutionBuilder } from "../interfaces/IRevolutionBuilder.sol";
+import { EIP712Upgradeable } from "@openzeppelin/contracts-upgradeable/utils/cryptography/EIP712Upgradeable.sol";
 
-contract VerbsDAOLogicV1 is IVerbsDAO {
+contract VerbsDAOLogicV1 is
+    IVerbsDAO,
+    VersionedContract,
+    Ownable2StepUpgradeable,
+    UUPS,
+    EIP712Upgradeable,
+    VerbsDAOEvents,
+    VerbsDAOStorageV1
+{
+    ///                                                          ///
+    ///                         IMMUTABLES                       ///
+    ///                                                          ///
+
+    /// @notice The contract upgrade manager
+    IRevolutionBuilder private immutable manager;
+
     /// @notice The name of this contract
     string public constant name = "Vrbs DAO";
 
@@ -65,17 +87,17 @@ contract VerbsDAOLogicV1 is IVerbsDAO {
     /// @notice The maximum settable proposal threshold
     uint256 public constant MAX_PROPOSAL_THRESHOLD_BPS = 1_000; // 1,000 basis points or 10%
 
-    /// @notice The minimum settable voting period
-    uint256 public constant MIN_VOTING_PERIOD = 7_200; // About 24 hours
+    /// @notice The minimum voting delay setting
+    uint256 public immutable MIN_VOTING_DELAY = 1 seconds;
 
-    /// @notice The max settable voting period
-    uint256 public constant MAX_VOTING_PERIOD = 100_800; // About 2 weeks
+    /// @notice The maximum voting delay setting
+    uint256 public immutable MAX_VOTING_DELAY = 12 weeks;
 
-    /// @notice The min settable voting delay
-    uint256 public constant MIN_VOTING_DELAY = 1;
+    /// @notice The minimum voting period setting
+    uint256 public immutable MIN_VOTING_PERIOD = 10 minutes;
 
-    /// @notice The max settable voting delay
-    uint256 public constant MAX_VOTING_DELAY = 40_320; // About 1 week
+    /// @notice The maximum voting period setting
+    uint256 public immutable MAX_VOTING_PERIOD = 24 weeks;
 
     /// @notice The lower bound of minimum quorum votes basis points
     uint256 public constant MIN_QUORUM_VOTES_BPS_LOWER_BOUND = 200; // 200 basis points or 2%
@@ -111,6 +133,10 @@ contract VerbsDAOLogicV1 is IVerbsDAO {
     /// @notice The EIP-712 typehash for the ballot struct used by the contract
     bytes32 public constant BALLOT_TYPEHASH = keccak256("Ballot(uint256 proposalId,uint8 support)");
 
+    ///                                                          ///
+    ///                           ERRORS                         ///
+    ///                                                          ///
+
     /// @dev Introduced these errors to reduce contract size, to avoid deployment failure
     error AdminOnly();
     error InvalidMinQuorumVotesBPS();
@@ -123,67 +149,79 @@ contract VerbsDAOLogicV1 is IVerbsDAO {
     error CantVetoExecutedProposal();
     error CantCancelExecutedProposal();
 
+    ///                                                          ///
+    ///                         CONSTRUCTOR                      ///
+    ///                                                          ///
+
+    /// @param _manager The contract upgrade manager address
+    constructor(address _manager) payable initializer {
+        manager = IRevolutionBuilder(_manager);
+    }
+
+    ///                                                          ///
+    ///                         INITIALIZER                      ///
+    ///                                                          ///
+
     /**
      * @notice Used to initialize the contract during delegator contructor
-     * @param timelock_ The address of the VerbsDAOExecutor
-     * @param verbs_ The address of the NOUN tokens
-     * @param vetoer_ The address allowed to unilaterally veto proposals
-     * @param votingPeriod_ The initial voting period
-     * @param votingDelay_ The initial voting delay
-     * @param proposalThresholdBPS_ The initial proposal threshold in basis points
-     * @param dynamicQuorumParams_ The initial dynamic quorum parameters
-     * @param verbsTokenVotingWeight_ The vote weight coefficient of the verbs token
+     * @param executor_ The address of the DAOExecutor
+     * @param erc721Token_ The address of the ERC-721 token
+     * @param erc20Token_ The address of the ERC-20 token
+     * @param govParams_ The initial governance parameters
      */
     function initialize(
-        address timelock_,
-        address verbs_,
-        address verbsPoints_,
-        address vetoer_,
-        uint256 votingPeriod_,
-        uint256 votingDelay_,
-        uint256 proposalThresholdBPS_,
-        uint256 verbsTokenVotingWeight_,
-        DynamicQuorumParams calldata dynamicQuorumParams_
-    ) public virtual {
-        require(address(timelock) == address(0), "VerbsDAO::initialize: can only initialize once");
-        if (msg.sender != admin) {
-            revert AdminOnly();
-        }
-        require(timelock_ != address(0), "VerbsDAO::initialize: invalid timelock address");
-        require(verbs_ != address(0), "VerbsDAO::initialize: invalid verbs address");
-        require(verbsPoints_ != address(0), "VerbsDAO::initialize: invalid verbs points address");
+        address executor_,
+        address erc721Token_,
+        address erc20Token_,
+        IRevolutionBuilder.GovParams calldata govParams_
+    ) public virtual initializer {
+        require(msg.sender == address(manager), "VerbsDAO::initialize: only the manager can initialize");
+        require(executor_ != address(0), "VerbsDAO::initialize: invalid executor address");
+        require(erc721Token_ != address(0), "VerbsDAO::initialize: invalid erc721 address");
+        require(erc20Token_ != address(0), "VerbsDAO::initialize: invalid erc20 address");
         require(
-            votingPeriod_ >= MIN_VOTING_PERIOD && votingPeriod_ <= MAX_VOTING_PERIOD,
+            govParams_.votingPeriod >= MIN_VOTING_PERIOD && govParams_.votingPeriod <= MAX_VOTING_PERIOD,
             "VerbsDAO::initialize: invalid voting period"
         );
         require(
-            votingDelay_ >= MIN_VOTING_DELAY && votingDelay_ <= MAX_VOTING_DELAY,
+            govParams_.votingDelay >= MIN_VOTING_DELAY && govParams_.votingDelay <= MAX_VOTING_DELAY,
             "VerbsDAO::initialize: invalid voting delay"
         );
         require(
-            proposalThresholdBPS_ >= MIN_PROPOSAL_THRESHOLD_BPS &&
-                proposalThresholdBPS_ <= MAX_PROPOSAL_THRESHOLD_BPS,
+            govParams_.proposalThresholdBPS >= MIN_PROPOSAL_THRESHOLD_BPS &&
+                govParams_.proposalThresholdBPS <= MAX_PROPOSAL_THRESHOLD_BPS,
             "VerbsDAO::initialize: invalid proposal threshold bps"
         );
-        require(verbsTokenVotingWeight_ > 0, "VerbsDAO::initialize: invalid verbs token voting weight");
-
-        emit VotingPeriodSet(votingPeriod, votingPeriod_);
-        emit VotingDelaySet(votingDelay, votingDelay_);
-        emit ProposalThresholdBPSSet(proposalThresholdBPS, proposalThresholdBPS_);
-
-        timelock = IVerbsDAOExecutor(timelock_);
-        verbs = VerbsTokenLike(verbs_);
-        verbsPoints = VerbsPointsLike(verbsPoints_);
-        vetoer = vetoer_;
-        votingPeriod = votingPeriod_;
-        votingDelay = votingDelay_;
-        proposalThresholdBPS = proposalThresholdBPS_;
-        verbsTokenVotingWeight = verbsTokenVotingWeight_;
-        _setDynamicQuorumParams(
-            dynamicQuorumParams_.minQuorumVotesBPS,
-            dynamicQuorumParams_.maxQuorumVotesBPS,
-            dynamicQuorumParams_.quorumCoefficient
+        require(
+            govParams_.erc721TokenVotingWeight > 0,
+            "VerbsDAO::initialize: invalid verbs token voting weight"
         );
+
+        // Initialize EIP-712 support
+        __EIP712_init(govParams_.daoName, "1");
+
+        // Grant ownership to the treasury
+        __Ownable_init(executor_);
+
+        emit VotingPeriodSet(votingPeriod, govParams_.votingPeriod);
+        emit VotingDelaySet(votingDelay, govParams_.votingDelay);
+        emit ProposalThresholdBPSSet(proposalThresholdBPS, govParams_.proposalThresholdBPS);
+
+        timelock = IDAOExecutor(executor_);
+        verbs = VerbsTokenLike(erc721Token_);
+        verbsPoints = VerbsPointsLike(erc20Token_);
+        vetoer = govParams_.vetoer;
+        votingPeriod = govParams_.votingPeriod;
+        votingDelay = govParams_.votingDelay;
+        proposalThresholdBPS = govParams_.proposalThresholdBPS;
+        erc721TokenVotingWeight = govParams_.erc721TokenVotingWeight;
+
+        // TODO set these dynamic quorum params
+        // _setDynamicQuorumParams(
+        //     govParams_.dynamicQuorumParams.minQuorumVotesBPS,
+        //     govParams_.dynamicQuorumParams.maxQuorumVotesBPS,
+        //     govParams_.dynamicQuorumParams.quorumCoefficient
+        // );
     }
 
     struct ProposalTemp {
@@ -371,7 +409,7 @@ contract VerbsDAOLogicV1 is IVerbsDAO {
 
         uint256 erc20PointsVotesWad = verbsPoints.getPastVotes(account, blockNumber);
 
-        return (erc721TokenVotes * 1e18 * verbsTokenVotingWeight) + erc20PointsVotesWad;
+        return (erc721TokenVotes * 1e18 * erc721TokenVotingWeight) + erc20PointsVotesWad;
     }
 
     /**
@@ -1123,4 +1161,16 @@ contract VerbsDAOLogicV1 is IVerbsDAO {
     }
 
     receive() external payable {}
+
+    ///                                                          ///
+    ///                          DAO UPGRADE                     ///
+    ///                                                          ///
+
+    /// @notice Ensures the caller is authorized to upgrade the contract and that the new implementation is valid
+    /// @dev This function is called in `upgradeTo` & `upgradeToAndCall`
+    /// @param _newImpl The new implementation address
+    function _authorizeUpgrade(address _newImpl) internal view override onlyOwner {
+        // Ensure the new implementation is a registered upgrade
+        if (!manager.isRegisteredUpgrade(_getImplementation(), _newImpl)) revert INVALID_UPGRADE(_newImpl);
+    }
 }

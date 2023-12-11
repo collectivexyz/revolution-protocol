@@ -16,7 +16,7 @@
  *********************************/
 
 // LICENSE
-// VerbsAuctionHouse.sol is a modified version of Zora's AuctionHouse.sol:
+// AuctionHouse.sol is a modified version of Zora's AuctionHouse.sol:
 // https://github.com/ourzora/auction-house/blob/54a12ec1a6cf562e49f0a4917990474b11350a2d/contracts/AuctionHouse.sol
 //
 // AuctionHouse.sol source code Copyright Zora licensed under the GPL-3.0 license.
@@ -28,12 +28,12 @@ import { ReentrancyGuardUpgradeable } from "@openzeppelin/contracts-upgradeable/
 import { IAuctionHouse } from "./interfaces/IAuctionHouse.sol";
 import { IVerbsToken } from "./interfaces/IVerbsToken.sol";
 import { IWETH } from "./interfaces/IWETH.sol";
-import { ITokenEmitter } from "./interfaces/ITokenEmitter.sol";
+import { IERC20TokenEmitter } from "./interfaces/IERC20TokenEmitter.sol";
 import { ICultureIndex } from "./interfaces/ICultureIndex.sol";
 import { IRevolutionBuilder } from "./interfaces/IRevolutionBuilder.sol";
 import { Ownable2StepUpgradeable } from "@openzeppelin/contracts-upgradeable/access/Ownable2StepUpgradeable.sol";
 
-contract VerbsAuctionHouse is
+contract AuctionHouse is
     IAuctionHouse,
     PausableUpgradeable,
     ReentrancyGuardUpgradeable,
@@ -43,7 +43,7 @@ contract VerbsAuctionHouse is
     IVerbsToken public verbs;
 
     // The ERC20 governance token
-    ITokenEmitter public tokenEmitter;
+    IERC20TokenEmitter public erc20TokenEmitter;
 
     // The address of the WETH contract
     address public WETH;
@@ -77,23 +77,18 @@ contract VerbsAuctionHouse is
     ///                                                          ///
 
     /// @notice The contract upgrade manager
-    IRevolutionBuilder private immutable manager;
+    IRevolutionBuilder public immutable manager;
 
     // TODO investigate this - The minimum gas threshold for creating an auction (minting VerbsToken)
     uint32 public constant MIN_TOKEN_MINT_GAS_THRESHOLD = 750_000;
-
 
     ///                                                          ///
     ///                         CONSTRUCTOR                      ///
     ///                                                          ///
 
     /// @param _manager The contract upgrade manager address
-    /// @param _weth The address of the WETH contract
-    constructor(address _manager, address _weth) payable initializer {
-        require(_weth != address(0), "WETH cannot be zero address");
-
+    constructor(address _manager) payable initializer {
         manager = IRevolutionBuilder(_manager);
-        WETH = _weth;
     }
 
     ///                                                          ///
@@ -107,14 +102,19 @@ contract VerbsAuctionHouse is
      * @param _erc721Token The address of the Verbs ERC721 token contract.
      * @param _erc20TokenEmitter The address of the ERC-20 token emitter contract.
      * @param _initialOwner The address of the owner.
+     * @param _weth The address of the WETH contract
      * @param _auctionParams The auction params for auctions.
      */
     function initialize(
         address _erc721Token,
         address _erc20TokenEmitter,
         address _initialOwner,
+        address _weth,
         IRevolutionBuilder.AuctionParams calldata _auctionParams
     ) external initializer {
+        require(msg.sender == address(manager), "Only manager can initialize");
+        require(_weth != address(0), "WETH cannot be zero address");
+
         __Pausable_init();
         __ReentrancyGuard_init();
         __Ownable_init(_initialOwner);
@@ -127,7 +127,7 @@ contract VerbsAuctionHouse is
         );
 
         verbs = IVerbsToken(_erc721Token);
-        tokenEmitter = ITokenEmitter(_erc20TokenEmitter);
+        erc20TokenEmitter = IERC20TokenEmitter(_erc20TokenEmitter);
         timeBuffer = _auctionParams.timeBuffer;
         reservePrice = _auctionParams.reservePrice;
         minBidIncrementPercentage = _auctionParams.minBidIncrementPercentage;
@@ -135,6 +135,7 @@ contract VerbsAuctionHouse is
         creatorRateBps = _auctionParams.creatorRateBps;
         entropyRateBps = _auctionParams.entropyRateBps;
         minCreatorRateBps = _auctionParams.minCreatorRateBps;
+        WETH = _weth;
     }
 
     /**
@@ -366,7 +367,7 @@ contract VerbsAuctionHouse is
                 uint256 numCreators = verbs.getArtPieceById(_auction.verbId).creators.length;
                 address deployer = verbs.getArtPieceById(_auction.verbId).dropper;
 
-                //Build arrays for tokenEmitter.buyToken
+                //Build arrays for erc20TokenEmitter.buyToken
                 address[] memory vrgdaReceivers = new address[](numCreators);
                 uint256[] memory vrgdaSplits = new uint256[](numCreators);
 
@@ -375,7 +376,7 @@ contract VerbsAuctionHouse is
 
                 uint256 ethPaidToCreators = 0;
 
-                //Transfer creator's share to the creator, for each creator, and build arrays for tokenEmitter.buyToken
+                //Transfer creator's share to the creator, for each creator, and build arrays for erc20TokenEmitter.buyToken
                 if (creatorsShare > 0 && entropyRateBps > 0) {
                     for (uint256 i = 0; i < numCreators; ) {
                         ICultureIndex.CreatorBps memory creator = verbs
@@ -398,12 +399,14 @@ contract VerbsAuctionHouse is
                     }
                 }
 
-                //Buy token from tokenEmitter for all the creators
+                //Buy token from ERC20TokenEmitter for all the creators
                 if (creatorsShare > ethPaidToCreators) {
-                    creatorTokensEmitted = tokenEmitter.buyToken{ value: creatorsShare - ethPaidToCreators }(
+                    creatorTokensEmitted = erc20TokenEmitter.buyToken{
+                        value: creatorsShare - ethPaidToCreators
+                    }(
                         vrgdaReceivers,
                         vrgdaSplits,
-                        ITokenEmitter.ProtocolRewardAddresses({
+                        IERC20TokenEmitter.ProtocolRewardAddresses({
                             builder: address(0),
                             purchaseReferral: address(0),
                             deployer: deployer

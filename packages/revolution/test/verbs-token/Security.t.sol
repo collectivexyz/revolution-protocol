@@ -5,12 +5,12 @@ import { Test } from "forge-std/Test.sol";
 import { VerbsToken } from "../../src/VerbsToken.sol";
 import { ICultureIndex, ICultureIndexEvents } from "../../src/interfaces/ICultureIndex.sol";
 import { IVerbsToken } from "../../src/interfaces/IVerbsToken.sol";
-import { IVerbsDescriptorMinimal } from "../../src/interfaces/IVerbsDescriptorMinimal.sol";
+import { IDescriptorMinimal } from "../../src/interfaces/IDescriptorMinimal.sol";
 import { ICultureIndex } from "../../src/interfaces/ICultureIndex.sol";
 import { Strings } from "@openzeppelin/contracts/utils/Strings.sol";
 import { CultureIndex } from "../../src/CultureIndex.sol";
 import { MockERC20 } from "../mock/MockERC20.sol";
-import { VerbsDescriptor } from "../../src/VerbsDescriptor.sol";
+import { Descriptor } from "../../src/Descriptor.sol";
 import "../utils/Base64Decode.sol";
 import "../utils/JsmnSolLib.sol";
 import { VerbsTokenTestSuite } from "./VerbsToken.t.sol";
@@ -54,7 +54,7 @@ contract TokenSecurityTest is VerbsTokenTestSuite {
         createDefaultArtPiece();
 
         // Simulate a reentrancy attack by calling mint within a call to mint
-        address attacker = address(new ReentrancyAttackContract(address(verbsToken)));
+        address attacker = address(new ReentrancyAttackContract(address(erc721Token)));
         vm.startPrank(attacker);
 
         bool reentrancyOccurred = false;
@@ -73,24 +73,24 @@ contract TokenSecurityTest is VerbsTokenTestSuite {
     function testApprovalChecks() public {
         createDefaultArtPiece();
 
-        uint256 tokenId = verbsToken.mint();
+        uint256 tokenId = erc721Token.mint();
 
         address spender = address(0xABC);
         address to = address(0xDEF);
 
         // Attempt to transfer without approval as owner
-        verbsToken.transferFrom(address(this), to, tokenId);
+        erc721Token.transferFrom(address(this), to, tokenId);
 
         vm.startPrank(to);
 
         // Approve spender and attempt to transfer as spender
-        verbsToken.approve(spender, tokenId);
+        erc721Token.approve(spender, tokenId);
         vm.stopPrank();
 
         vm.startPrank(spender);
 
         bool transferWithApprovalFailed = false;
-        try verbsToken.transferFrom(to, address(this), tokenId) {
+        try erc721Token.transferFrom(to, address(this), tokenId) {
             // Transfer should succeed
         } catch {
             transferWithApprovalFailed = true;
@@ -106,27 +106,27 @@ contract TokenSecurityTest is VerbsTokenTestSuite {
 
         // These should all fail when called by an unauthorized address
         vm.expectRevert();
-        verbsToken.setMinter(unauthorizedAddress);
+        erc721Token.setMinter(unauthorizedAddress);
 
         vm.expectRevert();
-        verbsToken.lockMinter();
+        erc721Token.lockMinter();
 
         vm.expectRevert();
-        verbsToken.setDescriptor(IVerbsDescriptorMinimal(unauthorizedAddress));
+        erc721Token.setDescriptor(IDescriptorMinimal(unauthorizedAddress));
 
         vm.expectRevert();
-        verbsToken.lockDescriptor();
+        erc721Token.lockDescriptor();
 
         vm.expectRevert();
-        verbsToken.setCultureIndex(ICultureIndex(unauthorizedAddress));
+        erc721Token.setCultureIndex(ICultureIndex(unauthorizedAddress));
 
         vm.expectRevert();
-        verbsToken.lockCultureIndex();
+        erc721Token.lockCultureIndex();
     }
 
     function testReentrancyOtherFunctions() public {
         createDefaultArtPiece();
-        address attacker = address(new ReentrancyAttackContractGeneral(address(verbsToken)));
+        address attacker = address(new ReentrancyAttackContractGeneral(address(erc721Token)));
 
         // Simulate a reentrancy attack for burn
         vm.expectRevert("Sender is not the minter");
@@ -215,20 +215,20 @@ contract TokenSecurityTest is VerbsTokenTestSuite {
 
         // Mock the CultureIndex to simulate dropTopVotedPiece failure
         address cultureIndexMock = address(new CultureIndexMock());
-        verbsToken.setCultureIndex(ICultureIndex(cultureIndexMock));
+        erc721Token.setCultureIndex(ICultureIndex(cultureIndexMock));
 
         // Store current verbId before test
         uint256 supplyBefore = 0;
 
         bool dropTopVotedPieceFailed = false;
-        try verbsToken.mint() {
+        try erc721Token.mint() {
             fail("dropTopVotedPiece failure should have caused _mintTo to revert");
         } catch {
             dropTopVotedPieceFailed = true;
         }
 
         // Verify verbId has not incremented after failure
-        uint256 totalSupply = verbsToken.totalSupply();
+        uint256 totalSupply = erc721Token.totalSupply();
         assertEq(supplyBefore, totalSupply, "verbId should not increment after failure");
 
         assertTrue(dropTopVotedPieceFailed, "_mintTo should revert if dropTopVotedPiece fails");

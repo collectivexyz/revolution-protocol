@@ -7,7 +7,6 @@ import { MockERC20 } from "../mock/MockERC20.sol";
 import { ICultureIndex, ICultureIndexEvents } from "../../src/interfaces/ICultureIndex.sol";
 import { NontransferableERC20Votes } from "../../src/NontransferableERC20Votes.sol";
 import { CultureIndexTestSuite } from "./CultureIndex.t.sol";
-import { Votes } from "../../src/base/Votes.sol";
 import { ERC721CheckpointableUpgradeable } from "../../src/base/ERC721CheckpointableUpgradeable.sol";
 
 /**
@@ -78,7 +77,7 @@ contract CultureIndexVotingSignaturesTest is CultureIndexTestSuite {
 
         //mint offchainVoterWeight to offchainVoter
         uint256 offchainVoterWeight = 100;
-        govToken.mint(offchainVoter, offchainVoterWeight);
+        erc20Token.mint(offchainVoter, offchainVoterWeight);
 
         vm.roll(block.number + 1);
 
@@ -163,7 +162,7 @@ contract CultureIndexVotingSignaturesTest is CultureIndexTestSuite {
 
         // mint offchainVoterWeight to offchainVoter
         uint256 offchainVoterWeight = 100;
-        govToken.mint(offchainVoter, offchainVoterWeight);
+        erc20Token.mint(offchainVoter, offchainVoterWeight);
 
         vm.roll(block.number + 1);
 
@@ -224,7 +223,7 @@ contract CultureIndexVotingSignaturesTest is CultureIndexTestSuite {
         cultureIndex.voteForManyWithSig(offchainVoter, invalidPieceIds, deadline, v, r, s);
 
         //mint tokens finally
-        govToken.mint(offchainVoter, 100);
+        erc20Token.mint(offchainVoter, 100);
 
         vm.roll(block.number + 1);
 

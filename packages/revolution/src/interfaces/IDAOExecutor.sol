@@ -2,7 +2,7 @@
 
 pragma solidity 0.8.22;
 
-interface IVerbsDAOExecutor {
+interface IDAOExecutor {
     function delay() external view returns (uint256);
 
     function GRACE_PERIOD() external view returns (uint256);
@@ -34,4 +34,9 @@ interface IVerbsDAOExecutor {
         bytes calldata data,
         uint256 eta
     ) external payable returns (bytes memory);
+
+    /// @notice Initializes an instance of a DAO's treasury
+    /// @param admin The DAO's address
+    /// @param timelockDelay The time delay to execute a queued transaction
+    function initialize(address admin, uint256 timelockDelay) external;
 }

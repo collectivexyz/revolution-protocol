@@ -2,13 +2,13 @@
 pragma solidity ^0.8.22;
 
 import { Test } from "forge-std/Test.sol";
-import { MaxHeapTest } from "./MaxHeap.t.sol"; // Assuming MaxHeap is in a separate file
+import { MaxHeapTester } from "./MaxHeap.t.sol"; // Assuming MaxHeap is in a separate file
 
 contract MaxHeapUpdateTestSuite is Test {
-    MaxHeapTest public heap;
+    MaxHeapTester public heap;
 
     constructor() {
-        heap = new MaxHeapTest(address(this)); // Create a heap with a max size of 10 for testing
+        heap = new MaxHeapTester(address(this)); // Create a heap with a max size of 10 for testing
     }
 
     function testInitialInsertAndMax() public {

@@ -1,23 +1,34 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.22;
 
+import { ReentrancyGuardUpgradeable } from "@openzeppelin/contracts-upgradeable/utils/ReentrancyGuardUpgradeable.sol";
+import { TokenEmitterRewards } from "@collectivexyz/protocol-rewards/src/abstract/TokenEmitter/TokenEmitterRewards.sol";
+import { Ownable2StepUpgradeable } from "@openzeppelin/contracts-upgradeable/access/Ownable2StepUpgradeable.sol";
+import { PausableUpgradeable } from "@openzeppelin/contracts-upgradeable/utils/PausableUpgradeable.sol";
+
 import { VRGDAC } from "./libs/VRGDAC.sol";
 import { toDaysWadUnsafe } from "./libs/SignedWadMath.sol";
 import { Strings } from "@openzeppelin/contracts/utils/Strings.sol";
 import { NontransferableERC20Votes } from "./NontransferableERC20Votes.sol";
-import { ITokenEmitter } from "./interfaces/ITokenEmitter.sol";
-import { ReentrancyGuardUpgradeable } from "@openzeppelin/contracts-upgradeable/utils/ReentrancyGuardUpgradeable.sol";
-import { TokenEmitterRewards } from "@collectivexyz/protocol-rewards/src/abstract/TokenEmitter/TokenEmitterRewards.sol";
-import { OwnableUpgradeable } from "@openzeppelin/contracts-upgradeable/access/OwnableUpgradeable.sol";
+import { IERC20TokenEmitter } from "./interfaces/IERC20TokenEmitter.sol";
 
 import { IRevolutionBuilder } from "./interfaces/IRevolutionBuilder.sol";
 
-contract ERC20TokenEmitter is VRGDAC, ITokenEmitter, ReentrancyGuardUpgradeable, TokenEmitterRewards, OwnableUpgradeable {
+contract ERC20TokenEmitter is
+    IERC20TokenEmitter,
+    ReentrancyGuardUpgradeable,
+    TokenEmitterRewards,
+    Ownable2StepUpgradeable,
+    PausableUpgradeable
+{
     // treasury address to pay funds to
-    address public immutable treasury;
+    address public treasury;
 
-    // The token that is being emitted.
-    NontransferableERC20Votes public immutable token;
+    // The token that is being minted.
+    NontransferableERC20Votes public token;
+
+    // The VRGDA contract
+    VRGDAC public vrgdac;
 
     // solhint-disable-next-line not-rely-on-time
     uint public immutable startTime = block.timestamp;
@@ -48,7 +59,13 @@ contract ERC20TokenEmitter is VRGDAC, ITokenEmitter, ReentrancyGuardUpgradeable,
     ///                                                          ///
 
     /// @param _manager The contract upgrade manager address
-    constructor(address _manager) payable initializer {
+    /// @param _protocolRewards The protocol rewards contract address
+    /// @param _protocolFeeRecipient The protocol fee recipient address
+    constructor(
+        address _manager,
+        address _protocolRewards,
+        address _protocolFeeRecipient
+    ) payable TokenEmitterRewards(_protocolRewards, _protocolFeeRecipient) initializer {
         manager = IRevolutionBuilder(_manager);
     }
 
@@ -59,32 +76,32 @@ contract ERC20TokenEmitter is VRGDAC, ITokenEmitter, ReentrancyGuardUpgradeable,
     /**
      * @notice Initialize the token emitter
      * @param _initialOwner The initial owner of the token emitter
-     * @param _token The token contract address
-     * @param _protocolRewards The protocol rewards contract address
-     * @param _protocolFeeRecipient The protocol fee recipient address
+     * @param _erc20Token The ERC-20 token contract address
+     * @param _vrgdac The VRGDA contract address
      * @param _treasury The treasury address to pay funds to
-     * @param _erc20TokenEmitterParams The token emitter settings
+     * @param _creatorsAddress The address to pay the creator reward to
      */
     function initialize(
         address _initialOwner,
-        NontransferableERC20Votes _token,
-        address _protocolRewards,
-        address _protocolFeeRecipient,
+        address _erc20Token,
         address _treasury,
-        IRevolutionBuilder.ERC20TokenEmitterParams calldata _erc20TokenEmitterParams
+        address _vrgdac,
+        address _creatorsAddress
     ) external initializer {
+        require(msg.sender == address(manager), "Only manager can initialize");
+
+        __Pausable_init();
+        __ReentrancyGuard_init();
+
         require(_treasury != address(0), "Invalid treasury address");
 
         // Set up ownable
         __Ownable_init(_initialOwner);
 
-        // Setup VRGDAC
-        __VRGDAC_init(_erc20TokenEmitterParams.targetPrice, _erc20TokenEmitterParams.priceDecayPercent, _erc20TokenEmitterParams.tokensPerTimeUnit);
-
-        // TokenEmitterRewards(_protocolRewards, _protocolFeeRecipient)
-
         treasury = _treasury;
-        token = _token;
+        creatorsAddress = _creatorsAddress;
+        vrgdac = VRGDAC(_vrgdac);
+        token = NontransferableERC20Votes(_erc20Token);
     }
 
     function _mint(address _to, uint _amount) private {
@@ -107,6 +124,24 @@ contract ERC20TokenEmitter is VRGDAC, ITokenEmitter, ReentrancyGuardUpgradeable,
     }
 
     /**
+     * @notice Pause the contract.
+     * @dev This function can only be called by the owner when the
+     * contract is unpaused.
+     */
+    function pause() external override onlyOwner {
+        _pause();
+    }
+
+    /**
+     * @notice Unpause the token emitter.
+     * @dev This function can only be called by the owner when the
+     * contract is paused.
+     */
+    function unpause() external override onlyOwner {
+        _unpause();
+    }
+
+    /**
      * @notice A payable function that allows a user to buy tokens for a list of addresses and a list of basis points to split the token purchase between.
      * @param addresses The addresses to send purchased tokens to.
      * @param basisPointSplits The basis points of the purchase to send to each address.
@@ -117,7 +152,7 @@ contract ERC20TokenEmitter is VRGDAC, ITokenEmitter, ReentrancyGuardUpgradeable,
         address[] calldata addresses,
         uint[] calldata basisPointSplits,
         ProtocolRewardAddresses calldata protocolRewardsRecipients
-    ) public payable nonReentrant returns (uint tokensSoldWad) {
+    ) public payable nonReentrant whenNotPaused returns (uint tokensSoldWad) {
         //prevent treasury from paying itself
         require(msg.sender != treasury && msg.sender != creatorsAddress, "Funds recipient cannot buy tokens");
 
@@ -206,7 +241,7 @@ contract ERC20TokenEmitter is VRGDAC, ITokenEmitter, ReentrancyGuardUpgradeable,
         // Note: By using toDaysWadUnsafe(block.timestamp - startTime) we are establishing that 1 "unit of time" is 1 day.
         // solhint-disable-next-line not-rely-on-time
         return
-            xToY({
+            vrgdac.xToY({
                 timeSinceStart: toDaysWadUnsafe(block.timestamp - startTime),
                 sold: emittedTokenWad,
                 amount: int(amount)
@@ -223,7 +258,7 @@ contract ERC20TokenEmitter is VRGDAC, ITokenEmitter, ReentrancyGuardUpgradeable,
         // Note: By using toDaysWadUnsafe(block.timestamp - startTime) we are establishing that 1 "unit of time" is 1 day.
         // solhint-disable-next-line not-rely-on-time
         return
-            yToX({
+            vrgdac.yToX({
                 timeSinceStart: toDaysWadUnsafe(block.timestamp - startTime),
                 sold: emittedTokenWad,
                 amount: int(etherAmount)
@@ -240,7 +275,7 @@ contract ERC20TokenEmitter is VRGDAC, ITokenEmitter, ReentrancyGuardUpgradeable,
         // Note: By using toDaysWadUnsafe(block.timestamp - startTime) we are establishing that 1 "unit of time" is 1 day.
         // solhint-disable-next-line not-rely-on-time
         return
-            yToX({
+            vrgdac.yToX({
                 timeSinceStart: toDaysWadUnsafe(block.timestamp - startTime),
                 sold: emittedTokenWad,
                 amount: int(

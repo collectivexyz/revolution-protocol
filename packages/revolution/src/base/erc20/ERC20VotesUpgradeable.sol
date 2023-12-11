@@ -1,11 +1,12 @@
 // SPDX-License-Identifier: MIT
 // OpenZeppelin Contracts (last updated v5.0.0) (token/ERC20/extensions/ERC20Votes.sol)
 
-pragma solidity ^0.8.22;
+pragma solidity ^0.8.20;
 
-import { ERC20 } from "./ERC20.sol";
-import { Votes } from "../Votes.sol";
+import { ERC20Upgradeable } from "./ERC20Upgradeable.sol";
+import { VotesUpgradeable } from "../VotesUpgradeable.sol";
 import { Checkpoints } from "@openzeppelin/contracts/utils/structs/Checkpoints.sol";
+import { Initializable } from "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
 
 /**
  * @dev Extension of ERC-20 to support Compound-like voting and delegation. This version is more generic than Compound's,
@@ -20,11 +21,15 @@ import { Checkpoints } from "@openzeppelin/contracts/utils/structs/Checkpoints.s
  * By default, token balance does not account for voting power. This makes transfers cheaper. The downside is that it
  * requires users to delegate to themselves in order to activate checkpoints and have their voting power tracked.
  */
-abstract contract ERC20Votes is ERC20, Votes {
+abstract contract ERC20VotesUpgradeable is Initializable, ERC20Upgradeable, VotesUpgradeable {
     /**
      * @dev Total supply cap has been exceeded, introducing a risk of votes overflowing.
      */
     error ERC20ExceededSafeSupply(uint256 increasedSupply, uint256 cap);
+
+    function __ERC20Votes_init() internal onlyInitializing {}
+
+    function __ERC20Votes_init_unchained() internal onlyInitializing {}
 
     /**
      * @dev Maximum token supply. Defaults to `type(uint208).max` (2^208^ - 1).

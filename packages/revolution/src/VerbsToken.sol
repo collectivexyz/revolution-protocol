@@ -25,7 +25,7 @@ import { UUPS } from "./libs/proxy/UUPS.sol";
 import { VersionedContract } from "./version/VersionedContract.sol";
 
 import { ERC721CheckpointableUpgradeable } from "./base/ERC721CheckpointableUpgradeable.sol";
-import { IVerbsDescriptorMinimal } from "./interfaces/IVerbsDescriptorMinimal.sol";
+import { IDescriptorMinimal } from "./interfaces/IDescriptorMinimal.sol";
 import { ICultureIndex } from "./interfaces/ICultureIndex.sol";
 import { IVerbsToken } from "./interfaces/IVerbsToken.sol";
 import { IRevolutionBuilder } from "./interfaces/IRevolutionBuilder.sol";
@@ -42,7 +42,7 @@ contract VerbsToken is
     address public minter;
 
     // The Verbs token URI descriptor
-    IVerbsDescriptorMinimal public descriptor;
+    IDescriptorMinimal public descriptor;
 
     // The CultureIndex contract
     ICultureIndex public cultureIndex;
@@ -126,15 +126,14 @@ contract VerbsToken is
     /// @param _initialOwner The address of the initial owner
     /// @param _descriptor The address of the token URI descriptor
     /// @param _cultureIndex The address of the CultureIndex contract
-    /// @param _tokenParams The name, symbol, and contract metadata of the token
+    /// @param _erc721TokenParams The name, symbol, and contract metadata of the token
     function initialize(
         address _minter,
         address _initialOwner,
         address _descriptor,
         address _cultureIndex,
-        IRevolutionBuilder.ERC721TokenParams memory _tokenParams
+        IRevolutionBuilder.ERC721TokenParams memory _erc721TokenParams
     ) external initializer {
-        // Ensure the caller is the contract manager
         require(msg.sender == address(manager), "Only manager can initialize");
 
         require(_minter != address(0), "Minter cannot be zero address");
@@ -147,12 +146,12 @@ contract VerbsToken is
         __Ownable_init(_initialOwner);
 
         // Initialize the ERC-721 token
-        __ERC721_init(_tokenParams.name, _tokenParams.symbol);
-        _contractURIHash = _tokenParams.contractURIHash;
+        __ERC721_init(_erc721TokenParams.name, _erc721TokenParams.symbol);
+        _contractURIHash = _erc721TokenParams.contractURIHash;
 
         // Set the contracts
         minter = _minter;
-        descriptor = IVerbsDescriptorMinimal(_descriptor);
+        descriptor = IDescriptorMinimal(_descriptor);
         cultureIndex = ICultureIndex(_cultureIndex);
     }
 
@@ -229,7 +228,7 @@ contract VerbsToken is
      * @dev Only callable by the owner when not locked.
      */
     function setDescriptor(
-        IVerbsDescriptorMinimal _descriptor
+        IDescriptorMinimal _descriptor
     ) external override onlyOwner nonReentrant whenDescriptorNotLocked {
         descriptor = _descriptor;
 

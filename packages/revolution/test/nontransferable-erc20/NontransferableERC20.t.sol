@@ -3,34 +3,36 @@ pragma solidity ^0.8.22;
 
 import { Test } from "forge-std/Test.sol";
 import { NontransferableERC20Votes } from "../../src/NontransferableERC20Votes.sol";
+import { RevolutionBuilderTest } from "../RevolutionBuilder.t.sol";
 
-contract NontransferableERC20TestSuite is Test {
+contract NontransferableERC20TestSuite is RevolutionBuilderTest {
     event Log(string, uint);
 
-    NontransferableERC20Votes token;
+    // NontransferableERC20Votes token;
 
-    function setUp() public {
-        token = new NontransferableERC20Votes(address(this), "Revolution Governance", "GOV");
+    function setUp() public override {
+        super.setUp();
+        // token = new NontransferableERC20Votes(address(this), "Revolution Governance", "GOV");
     }
 
     function testTransferRestrictions() public {
         // Setup: Mint some tokens to an account
         address account1 = address(0x1);
         uint256 mintAmount = 1000 * 1e18;
-        token.mint(account1, mintAmount);
-        assertEq(token.balanceOf(account1), mintAmount, "Minting failed");
+        erc20Token.mint(account1, mintAmount);
+        assertEq(erc20Token.balanceOf(account1), mintAmount, "Minting failed");
 
         // Attempt to transfer tokens from account1 to account2
         address account2 = address(0x2);
         uint256 transferAmount = 500 * 1e18;
         vm.startPrank(account1);
         vm.expectRevert(abi.encodeWithSignature("TRANSFER_NOT_ALLOWED()"));
-        token.transfer(account2, transferAmount);
+        erc20Token.transfer(account2, transferAmount);
         vm.stopPrank();
 
         // Verify that the balances remain unchanged
-        assertEq(token.balanceOf(account1), mintAmount, "Balance of account1 should not change");
-        assertEq(token.balanceOf(account2), 0, "Balance of account2 should remain zero");
+        assertEq(erc20Token.balanceOf(account1), mintAmount, "Balance of account1 should not change");
+        assertEq(erc20Token.balanceOf(account2), 0, "Balance of account2 should remain zero");
     }
 
     function testApprovalRestrictions() public {
@@ -42,11 +44,11 @@ contract NontransferableERC20TestSuite is Test {
         uint256 approvalAmount = 500 * 1e18;
         vm.startPrank(owner);
         vm.expectRevert(abi.encodeWithSignature("TRANSFER_NOT_ALLOWED()"));
-        token.approve(spender, approvalAmount);
+        erc20Token.approve(spender, approvalAmount);
         vm.stopPrank();
 
         // Verify that the allowance remains zero
-        assertEq(token.allowance(owner, spender), 0, "Allowance should remain zero");
+        assertEq(erc20Token.allowance(owner, spender), 0, "Allowance should remain zero");
     }
 
     function testMintingBehavior() public {
@@ -57,20 +59,20 @@ contract NontransferableERC20TestSuite is Test {
         address nonOwner = address(0x4);
         vm.startPrank(nonOwner);
         vm.expectRevert();
-        token.mint(account, mintAmount);
+        erc20Token.mint(account, mintAmount);
         vm.stopPrank();
 
         // Verify that the balance remains unchanged
-        assertEq(token.balanceOf(account), 0, "Non-owner should not be able to mint");
+        assertEq(erc20Token.balanceOf(account), 0, "Non-owner should not be able to mint");
 
         // Minting by the owner
         vm.startPrank(address(this));
-        token.mint(account, mintAmount);
+        erc20Token.mint(account, mintAmount);
         vm.stopPrank();
 
         // Verify balance and total supply
-        assertEq(token.balanceOf(account), mintAmount, "Minting failed to update balance");
-        assertEq(token.totalSupply(), mintAmount, "Total supply not updated correctly");
+        assertEq(erc20Token.balanceOf(account), mintAmount, "Minting failed to update balance");
+        assertEq(erc20Token.totalSupply(), mintAmount, "Total supply not updated correctly");
     }
 
     function testVotingAndDelegation() public {
@@ -79,23 +81,23 @@ contract NontransferableERC20TestSuite is Test {
 
         // Mint tokens to the owner
         vm.startPrank(address(this));
-        token.mint(address(this), mintAmount);
+        erc20Token.mint(address(this), mintAmount);
         vm.stopPrank();
 
         // Delegate voting power
-        token.delegate(delegate);
+        erc20Token.delegate(delegate);
 
         // Check the voting power of the delegate
-        assertEq(token.getVotes(delegate), mintAmount, "Delegation failed to assign voting power");
+        assertEq(erc20Token.getVotes(delegate), mintAmount, "Delegation failed to assign voting power");
 
         // Ensure that no tokens were transferred in the process of delegation
-        assertEq(token.balanceOf(delegate), 0, "Delegation should not transfer tokens");
+        assertEq(erc20Token.balanceOf(delegate), 0, "Delegation should not transfer tokens");
     }
 
     function testTokenMetadata() public {
-        assertEq(token.name(), "Revolution Governance", "Incorrect token name");
-        assertEq(token.symbol(), "GOV", "Incorrect token symbol");
-        assertEq(token.decimals(), 18, "Incorrect number of decimals");
+        assertEq(erc20Token.name(), "Revolution Governance", "Incorrect token name");
+        assertEq(erc20Token.symbol(), "GOV", "Incorrect token symbol");
+        assertEq(erc20Token.decimals(), 18, "Incorrect number of decimals");
     }
 
     function testSupplyInvariants(uint256 mintAmount1) public {
@@ -109,20 +111,20 @@ contract NontransferableERC20TestSuite is Test {
 
         // Mint tokens to different accounts
         vm.startPrank(address(this));
-        token.mint(account1, mintAmount1);
-        token.mint(account2, mintAmount1 / 10);
+        erc20Token.mint(account1, mintAmount1);
+        erc20Token.mint(account2, mintAmount1 / 10);
         vm.stopPrank();
 
         // Check total supply
-        uint256 totalSupply = token.totalSupply();
+        uint256 totalSupply = erc20Token.totalSupply();
 
         emit Log("totalSupply", totalSupply);
 
         assertEq(totalSupply, mintAmount1 + mintAmount1 / 10, "Total supply should equal sum of balances");
 
         // Check individual balances
-        assertEq(token.balanceOf(account1), mintAmount1, "Incorrect balance for account1");
-        assertEq(token.balanceOf(account2), mintAmount1 / 10, "Incorrect balance for account2");
+        assertEq(erc20Token.balanceOf(account1), mintAmount1, "Incorrect balance for account1");
+        assertEq(erc20Token.balanceOf(account2), mintAmount1 / 10, "Incorrect balance for account2");
     }
 
     function testAccessControl() public {
@@ -132,16 +134,16 @@ contract NontransferableERC20TestSuite is Test {
         // Attempt to mint tokens by a non-owner
         vm.startPrank(nonOwner);
         vm.expectRevert();
-        token.mint(address(1), mintAmount);
+        erc20Token.mint(address(1), mintAmount);
         vm.stopPrank();
 
         // Minting by the owner
         vm.startPrank(address(this));
-        token.mint(address(1), mintAmount);
+        erc20Token.mint(address(1), mintAmount);
         vm.stopPrank();
 
         // Verify that the minting was successful
-        assertEq(token.balanceOf(address(1)), mintAmount, "Owner should be able to mint");
+        assertEq(erc20Token.balanceOf(address(1)), mintAmount, "Owner should be able to mint");
     }
 
     function testEdgeCases() public {
@@ -149,7 +151,7 @@ contract NontransferableERC20TestSuite is Test {
         uint256 excessiveAmount = type(uint256).max;
         vm.startPrank(address(this));
         vm.expectRevert();
-        token.mint(address(1), excessiveAmount);
+        erc20Token.mint(address(1), excessiveAmount);
         vm.stopPrank();
     }
 }

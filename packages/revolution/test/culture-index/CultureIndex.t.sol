@@ -7,53 +7,52 @@ import { MockERC20 } from "../mock/MockERC20.sol";
 import { ICultureIndex } from "../../src/interfaces/ICultureIndex.sol";
 import { NontransferableERC20Votes } from "../../src/NontransferableERC20Votes.sol";
 import { VerbsToken } from "../../src/VerbsToken.sol";
-import { IVerbsDescriptorMinimal } from "../../src/interfaces/IVerbsDescriptorMinimal.sol";
+import { IDescriptorMinimal } from "../../src/interfaces/IDescriptorMinimal.sol";
+import { RevolutionBuilderTest } from "../RevolutionBuilder.t.sol";
 
 /**
  * @title CultureIndexTest
  * @dev Test contract for CultureIndex
  */
-contract CultureIndexTestSuite is Test {
-    CultureIndex public cultureIndex;
-    NontransferableERC20Votes public govToken;
+contract CultureIndexTestSuite is RevolutionBuilderTest {
     CultureIndexVotingTest public voter1Test;
     CultureIndexVotingTest public voter2Test;
-    VerbsToken public verbs;
 
     /**
      * @dev Setup function for each test case
      */
-    function setUp() public virtual {
-        govToken = new NontransferableERC20Votes(address(this), "Revolution Governance", "GOV");
+    function setUp() public virtual override {
+        super.setUp();
+        // govToken = new NontransferableERC20Votes(address(this), "Revolution Governance", "GOV");
 
-        // Initialize VerbsToken with additional parameters
-        verbs = new VerbsToken(
-            address(this), // Address of the minter (and initial owner)
-            address(this), // Address of the owner
-            IVerbsDescriptorMinimal(address(0)),
-            ICultureIndex(address(0)),
-            "Vrbs",
-            "VRBS",
-            "QmQzDwaZ7yQxHHs7sQQenJVB89riTSacSGcJRv9jtHPuz5"
-        );
+        // // Initialize VerbsToken with additional parameters
+        // verbs = new VerbsToken(
+        //     address(this), // Address of the minter (and initial owner)
+        //     address(this), // Address of the owner
+        //     IDescriptorMinimal(address(0)),
+        //     ICultureIndex(address(0)),
+        //     "Vrbs",
+        //     "VRBS",
+        //     "QmQzDwaZ7yQxHHs7sQQenJVB89riTSacSGcJRv9jtHPuz5"
+        // );
 
-        // Initialize your CultureIndex contract
-        cultureIndex = new CultureIndex(
-            "Vrbs",
-            "Our community Vrbs. Must be 32x32.",
-            address(govToken),
-            address(verbs),
-            address(this),
-            10,
-            200,
-            0
-        );
+        // // Initialize your CultureIndex contract
+        // cultureIndex = new CultureIndex(
+        //     "Vrbs",
+        //     "Our community Vrbs. Must be 32x32.",
+        //     address(erc20Token),
+        //     address(erc721Token),
+        //     address(this),
+        //     10,
+        //     200,
+        //     0
+        // );
 
-        verbs.setCultureIndex(cultureIndex);
+        // erc721Token.setCultureIndex(cultureIndex);
 
-        // Create new test instances acting as different voters
-        voter1Test = new CultureIndexVotingTest(address(cultureIndex), address(govToken));
-        voter2Test = new CultureIndexVotingTest(address(cultureIndex), address(govToken));
+        // // Create new test instances acting as different voters
+        voter1Test = new CultureIndexVotingTest(address(cultureIndex), address(erc20Token));
+        voter2Test = new CultureIndexVotingTest(address(cultureIndex), address(erc20Token));
     }
 
     //returns metadata and creators in a tuple

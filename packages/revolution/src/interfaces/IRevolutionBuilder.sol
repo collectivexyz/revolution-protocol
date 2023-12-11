@@ -1,9 +1,13 @@
 // SPDX-License-Identifier: MIT
 pragma solidity 0.8.22;
 
+import { VerbsDAOStorageV1 } from "../governance/VerbsDAOInterfaces.sol";
+import { IUUPS } from "./IUUPS.sol";
+import { RevolutionBuilderTypesV1 } from "../builder/types/RevolutionBuilderTypesV1.sol";
+
 /// @title IRevolutionBuilder
 /// @notice The external RevolutionBuilder events, errors, structs and functions
-interface IRevolutionBuilder {
+interface IRevolutionBuilder is IUUPS {
     ///                                                          ///
     ///                            EVENTS                        ///
     ///                                                          ///
@@ -15,8 +19,9 @@ interface IRevolutionBuilder {
     /// @param executor The executor address
     /// @param dao The dao address
     /// @param cultureIndex The cultureIndex address
-    /// @param erc20TokenEmitter The tokenEmitter address
+    /// @param erc20TokenEmitter The ERC20TokenEmitter address
     /// @param erc20Token The dao address
+    /// @param maxHeap The maxHeap address
     event DAODeployed(
         address erc721Token,
         address descriptor,
@@ -25,7 +30,8 @@ interface IRevolutionBuilder {
         address dao,
         address cultureIndex,
         address erc20TokenEmitter,
-        address erc20Token
+        address erc20Token,
+        address maxHeap
     );
 
     /// @notice Emitted when an upgrade is registered by the Builder DAO
@@ -52,6 +58,7 @@ interface IRevolutionBuilder {
         string cultureIndex;
         string erc20Token;
         string erc20TokenEmitter;
+        string maxHeap;
     }
 
     /// @notice The ERC-721 token parameters
@@ -87,16 +94,20 @@ interface IRevolutionBuilder {
     /// @param timelockDelay The time delay to execute a queued transaction
     /// @param votingDelay The time delay to vote on a created proposal
     /// @param votingPeriod The time period to vote on a proposal
-    /// @param proposalThresholdBps The basis points of the token supply required to create a proposal
-    /// @param quorumThresholdBps The basis points of the token supply required to reach quorum
+    /// @param proposalThresholdBPS The basis points of the token supply required to create a proposal
     /// @param vetoer The address authorized to veto proposals (address(0) if none desired)
+    /// @param erc721TokenVotingWeight The voting weight of the individual ERC721 tokens
+    /// @param daoName The name of the DAO
+    /// @param dynamicQuorumParams The dynamic quorum parameters
     struct GovParams {
         uint256 timelockDelay;
         uint256 votingDelay;
         uint256 votingPeriod;
-        uint256 proposalThresholdBps;
-        uint256 quorumThresholdBps;
+        uint256 proposalThresholdBPS;
         address vetoer;
+        uint256 erc721TokenVotingWeight;
+        string daoName;
+        VerbsDAOStorageV1.DynamicQuorumParams dynamicQuorumParams;
     }
 
     /// @notice The ERC-20 token parameters
@@ -111,10 +122,12 @@ interface IRevolutionBuilder {
     /// @param targetPrice // The target price for a token if sold on pace, scaled by 1e18.
     /// @param priceDecayPercent // The percent the price decays per unit of time with no sales, scaled by 1e18.
     /// @param tokensPerTimeUnit // The number of tokens to target selling in 1 full unit of time, scaled by 1e18.
+    /// @param creatorsAddress // The address to send creator payments to
     struct ERC20TokenEmitterParams {
         int256 targetPrice;
         int256 priceDecayPercent;
         int256 tokensPerTimeUnit;
+        address creatorsAddress;
     }
 
     /// @notice The CultureIndex parameters
@@ -159,8 +172,12 @@ interface IRevolutionBuilder {
     /// @notice The erc20Token implementation address
     function erc20TokenImpl() external view returns (address);
 
+    /// @notice The maxHeap implementation address
+    function maxHeapImpl() external view returns (address);
+
     /// @notice Deploys a DAO with custom token, auction, and governance settings
-    /// @param initialOwner_ The initial owner address
+    /// @param initialOwner The initial owner address
+    /// @param weth The WETH address
     /// @param erc721TokenParams The ERC-721 token settings
     /// @param auctionParams The auction settings
     /// @param govParams The governance settings
@@ -168,25 +185,15 @@ interface IRevolutionBuilder {
     /// @param erc20TokenParams The ERC-20 token settings
     /// @param erc20TokenEmitterParams The ERC-20 token emitter settings
     function deploy(
-        address initialOwner_,
+        address initialOwner,
+        address weth,
         ERC721TokenParams calldata erc721TokenParams,
         AuctionParams calldata auctionParams,
         GovParams calldata govParams,
         CultureIndexParams calldata cultureIndexParams,
         ERC20TokenParams calldata erc20TokenParams,
         ERC20TokenEmitterParams calldata erc20TokenEmitterParams
-    )
-        external
-        returns (
-            address token,
-            address descriptor,
-            address auction,
-            address executor,
-            address dao,
-            address cultureIndex,
-            address erc20Token,
-            address erc20TokenEmitter
-        );
+    ) external returns (RevolutionBuilderTypesV1.DAOAddresses memory);
 
     /// @notice A DAO's remaining contract addresses from its token address
     /// @param token The ERC-721 token address
@@ -195,13 +202,15 @@ interface IRevolutionBuilder {
     )
         external
         returns (
+            address erc721Token,
             address descriptor,
             address auction,
             address executor,
             address dao,
             address cultureIndex,
             address erc20Token,
-            address erc20TokenEmitter
+            address erc20TokenEmitter,
+            address maxHeap
         );
 
     /// @notice If an implementation is registered by the Builder DAO as an optional upgrade

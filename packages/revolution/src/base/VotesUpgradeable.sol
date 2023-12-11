@@ -147,12 +147,14 @@ abstract contract VotesUpgradeable is
         return $._totalCheckpoints.latest();
     }
 
-    /**
-     * @dev Returns the delegate that `account` has chosen.
-     */
+    // /**
+    //  * @notice Overrides the standard `VotesUpgradeable.sol` delegates mapping to return
+    //  * the accounts's own address if they haven't delegated.
+    //  * This avoids having to delegate to oneself.
+    //  */
     function delegates(address account) public view virtual returns (address) {
         VotesStorage storage $ = _getVotesStorage();
-        return $._delegatee[account];
+        return $._delegatee[account] == address(0) ? account : $._delegatee[account];
     }
 
     /**

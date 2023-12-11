@@ -144,7 +144,7 @@ Compiler run [33msuccessful with warnings:[0m
 [34m    |[0m     [1;33m^ (Relevant source part starts here and spans across multiple lines).[0m
 
 
-Running 2 tests for test/auction/AuctionMinting.t.sol:VerbsAuctionHouseMintTest
+Running 2 tests for test/auction/AuctionMinting.t.sol:AuctionHouseMintTest
 [32m[PASS][0m testBehaviorOnMintFailureDuringAuctionCreation() (gas: 53297)
 [32m[PASS][0m testMintFailureDueToEmptyNFTList() (gas: 44749)
 Test result: [32mok[0m. [32m2[0m passed; [31m0[0m failed; [33m0[0m skipped; finished in 1.89ms
@@ -228,7 +228,7 @@ Running 11 tests for test/max-heap/MaxHeap.t.sol:MaxHeapTestSuite
 [32m[PASS][0m testUpdateValueOnlyOwner() (gas: 82600)
 Test result: [32mok[0m. [32m11[0m passed; [31m0[0m failed; [33m0[0m skipped; finished in 1.04ms
 
-Running 16 tests for test/descriptor/VerbsDescriptor.t.sol:VerbsDescriptorTest
+Running 16 tests for test/descriptor/Descriptor.t.sol:DescriptorTest
 [32m[PASS][0m testBaselineTokenURIWithDataURIEnabled() (gas: 48569)
 [32m[PASS][0m testDataURI() (gas: 44384)
 [32m[PASS][0m testGenericDataURI() (gas: 41727)
@@ -330,7 +330,7 @@ Running 15 tests for test/token-emitter/TokenEmitter.t.sol:TokenEmitterTest
 [32m[PASS][0m testTransferTokenContractOwnership() (gas: 5923716)
 Test result: [32mok[0m. [32m15[0m passed; [31m0[0m failed; [33m0[0m skipped; finished in 877.72ms
 
-Running 18 tests for test/auction/AuctionBasic.t.sol:VerbsAuctionHouseBasicTest
+Running 18 tests for test/auction/AuctionBasic.t.sol:AuctionHouseBasicTest
 [32m[PASS][0m testAccessControl() (gas: 16498)
 [32m[PASS][0m testAdministrativeFunctions(uint256,uint256,uint8) (runs: 256, μ: 32064, ~: 33039)
 [32m[PASS][0m testAuctionCreation() (gas: 778853)
@@ -351,7 +351,7 @@ Running 18 tests for test/auction/AuctionBasic.t.sol:VerbsAuctionHouseBasicTest
 [32m[PASS][0m testValueUpdates(uint256,uint256) (runs: 256, μ: 30936, ~: 30955)
 Test result: [32mok[0m. [32m18[0m passed; [31m0[0m failed; [33m0[0m skipped; finished in 866.60ms
 
-Running 8 tests for test/auction/AuctionSettling.t.sol:VerbsAuctionHouseSettleTest
+Running 8 tests for test/auction/AuctionSettling.t.sol:AuctionHouseSettleTest
 [32m[PASS][0m testSettlingAuctionPrematurely() (gas: 779156)
 [32m[PASS][0m testSettlingAuctionWithMultipleCreators(uint8) (runs: 256, μ: 10907269, ~: 6680345)
 [32m[PASS][0m testSettlingAuctionWithNoBids(uint8) (runs: 256, μ: 777557, ~: 777557)
@@ -475,7 +475,7 @@ Test result: [32mok[0m. [32m10[0m passed; [31m0[0m failed; [33m0[0m skip
 | transferOwnership                                                    | 2699            | 2699  | 2699   | 2699   | 46      |
 
 
-| src/TokenEmitter.sol:TokenEmitter contract |                 |        |        |         |         |
+| src/ERC20TokenEmitter.sol:TokenEmitter contract |                 |        |        |         |         |
 |--------------------------------------------|-----------------|--------|--------|---------|---------|
 | Deployment Cost                            | Deployment Size |        |        |         |         |
 | 1565799                                    | 9261            |        |        |         |         |
@@ -497,7 +497,7 @@ Test result: [32mok[0m. [32m10[0m passed; [31m0[0m failed; [33m0[0m skip
 | treasury                                   | 459             | 459    | 459    | 459     | 2       |
 
 
-| src/VerbsAuctionHouse.sol:VerbsAuctionHouse contract |                 |         |        |          |         |
+| src/AuctionHouse.sol:AuctionHouse contract |                 |         |        |          |         |
 |------------------------------------------------------|-----------------|---------|--------|----------|---------|
 | Deployment Cost                                      | Deployment Size |         |        |          |         |
 | 1802708                                              | 9032            |         |        |          |         |
@@ -527,7 +527,7 @@ Test result: [32mok[0m. [32m10[0m passed; [31m0[0m failed; [33m0[0m skip
 | unpause                                              | 2505            | 596723  | 460037 | 3956823  | 16      |
 
 
-| src/VerbsDescriptor.sol:VerbsDescriptor contract |                 |       |        |       |         |
+| src/Descriptor.sol:Descriptor contract |                 |       |        |       |         |
 |--------------------------------------------------|-----------------|-------|--------|-------|---------|
 | Deployment Cost                                  | Deployment Size |       |        |       |         |
 | 856854                                           | 4881            |       |        |       |         |
@@ -580,7 +580,7 @@ Test result: [32mok[0m. [32m10[0m passed; [31m0[0m failed; [33m0[0m skip
 | transferFrom                           | 30564           | 69852  | 71716  | 90507   | 12      |
 
 
-| test/auction/AuctionBasic.t.sol:VerbsAuctionHouseBasicTest contract |                 |     |        |     |         |
+| test/auction/AuctionBasic.t.sol:AuctionHouseBasicTest contract |                 |     |        |     |         |
 |---------------------------------------------------------------------|-----------------|-----|--------|-----|---------|
 | Deployment Cost                                                     | Deployment Size |     |        |     |         |
 | 21079489                                                            | 104921          |     |        |     |         |
@@ -604,7 +604,7 @@ Test result: [32mok[0m. [32m10[0m passed; [31m0[0m failed; [33m0[0m skip
 | fallback                                                                     | 6               | 6   | 6      | 6   | 1       |
 
 
-| test/auction/AuctionSettling.t.sol:VerbsAuctionHouseSettleTest contract |                 |     |        |     |         |
+| test/auction/AuctionSettling.t.sol:AuctionHouseSettleTest contract |                 |     |        |     |         |
 |-------------------------------------------------------------------------|-----------------|-----|--------|-----|---------|
 | Deployment Cost                                                         | Deployment Size |     |        |     |         |
 | 20353788                                                                | 101303          |     |        |     |         |

@@ -1008,7 +1008,7 @@ contract NontransferableERC20Votes is Ownable, ERC20Votes {
     }
 }
 
-interface ITokenEmitter {
+interface IERC20TokenEmitter {
     struct ProtocolRewardAddresses {
         address builder;
         address purchaseReferral;
@@ -1050,7 +1050,7 @@ interface ITokenEmitter {
     );
 }
 
-contract TokenEmitter is VRGDAC, ITokenEmitter, ReentrancyGuard, TokenEmitterRewards, Ownable {
+contract ERC20TokenEmitter is VRGDAC, IERC20TokenEmitter, ReentrancyGuard, TokenEmitterRewards, Ownable {
     // treasury address to pay funds to
     address public immutable treasury;
 

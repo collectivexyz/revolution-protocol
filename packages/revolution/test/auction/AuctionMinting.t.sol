@@ -1,18 +1,18 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.22;
 
-import { VerbsAuctionHouseTest } from "./AuctionHouse.t.sol";
+import { AuctionHouseTest } from "./AuctionHouse.t.sol";
 import { PausableUpgradeable } from "@openzeppelin/contracts-upgradeable/utils/PausableUpgradeable.sol";
 
-contract VerbsAuctionHouseMintTest is VerbsAuctionHouseTest {
+contract AuctionHouseMintTest is AuctionHouseTest {
     function testMintFailureDueToEmptyNFTList() public {
         // Pre-conditions setup to ensure the CultureIndex is empty
         vm.expectEmit(true, true, true, true);
         emit PausableUpgradeable.Paused(address(this));
-        auctionHouse.unpause();
+        auction.unpause();
 
         // Expect that the auction is paused due to error
-        assertEq(auctionHouse.paused(), true, "Auction house should be paused");
+        assertEq(auction.paused(), true, "Auction house should be paused");
     }
 
     function testBehaviorOnMintFailureDuringAuctionCreation() public {
@@ -20,7 +20,7 @@ contract VerbsAuctionHouseMintTest is VerbsAuctionHouseTest {
         vm.expectEmit(true, true, true, true);
         emit PausableUpgradeable.Paused(address(this));
 
-        auctionHouse.unpause();
+        auction.unpause();
 
         (
             uint256 verbId,
@@ -29,7 +29,7 @@ contract VerbsAuctionHouseMintTest is VerbsAuctionHouseTest {
             uint256 auctionEndTime,
             address payable bidder,
             bool settled
-        ) = auctionHouse.auction();
+        ) = auction.auction();
 
         // Check that auction is not created
         assertEq(verbId, 0);

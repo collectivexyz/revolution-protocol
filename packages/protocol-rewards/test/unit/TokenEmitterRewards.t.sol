@@ -3,7 +3,7 @@ pragma solidity 0.8.22;
 
 import "../ProtocolRewardsTest.sol";
 import { RewardsSettings } from "../../src/abstract/RewardSplits.sol";
-import { NontransferableERC20Votes, ITokenEmitter } from "../utils/TokenEmitterLibrary.sol";
+import { NontransferableERC20Votes, IERC20TokenEmitter } from "../utils/TokenEmitterLibrary.sol";
 
 contract TokenEmitterRewardsTest is ProtocolRewardsTest {
     MockTokenEmitter internal mockTokenEmitter;
@@ -22,7 +22,7 @@ contract TokenEmitterRewardsTest is ProtocolRewardsTest {
             revolution
         );
 
-        govToken.transferOwnership(address(mockTokenEmitter));
+        erc20Token.transferOwnership(address(mockTokenEmitter));
 
         vm.label(address(mockTokenEmitter), "MOCK_TOKENEMITTER");
     }
@@ -46,11 +46,12 @@ contract TokenEmitterRewardsTest is ProtocolRewardsTest {
             vm.expectRevert();
         }
 
-        ITokenEmitter.ProtocolRewardAddresses memory rewardAddrs = ITokenEmitter.ProtocolRewardAddresses({
-            builder: builderReferral,
-            purchaseReferral: purchaseReferral,
-            deployer: deployer
-        });
+        IERC20TokenEmitter.ProtocolRewardAddresses memory rewardAddrs = IERC20TokenEmitter
+            .ProtocolRewardAddresses({
+                builder: builderReferral,
+                purchaseReferral: purchaseReferral,
+                deployer: deployer
+            });
 
         mockTokenEmitter.buyToken{ value: msgValue }(addresses, bps, rewardAddrs);
 
@@ -110,7 +111,7 @@ contract TokenEmitterRewardsTest is ProtocolRewardsTest {
         mockTokenEmitter.buyToken{ value: msgValue }(
             addresses,
             bps,
-            ITokenEmitter.ProtocolRewardAddresses({
+            IERC20TokenEmitter.ProtocolRewardAddresses({
                 builder: builderReferral,
                 purchaseReferral: address(0),
                 deployer: deployer

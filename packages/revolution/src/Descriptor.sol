@@ -23,12 +23,12 @@ import { UUPS } from "./libs/proxy/UUPS.sol";
 import { VersionedContract } from "./version/VersionedContract.sol";
 
 import { Strings } from "@openzeppelin/contracts/utils/Strings.sol";
-import { IVerbsDescriptor } from "./interfaces/IVerbsDescriptor.sol";
+import { IDescriptor } from "./interfaces/IDescriptor.sol";
 import { Base64 } from "@openzeppelin/contracts/utils/Base64.sol";
 import { ICultureIndex } from "./interfaces/ICultureIndex.sol";
 import { IRevolutionBuilder } from "./interfaces/IRevolutionBuilder.sol";
 
-contract VerbsDescriptor is IVerbsDescriptor, VersionedContract, UUPS, Ownable2StepUpgradeable {
+contract Descriptor is IDescriptor, VersionedContract, UUPS, Ownable2StepUpgradeable {
     using Strings for uint256;
 
     // Whether or not `tokenURI` should be returned as a data URI (Default: true)
@@ -76,6 +76,8 @@ contract VerbsDescriptor is IVerbsDescriptor, VersionedContract, UUPS, Ownable2S
     /// @param _initialOwner The address of the initial owner
     /// @param _tokenNamePrefix The prefix for the token name eg: "Vrb" -> Vrb 1
     function initialize(address _initialOwner, string calldata _tokenNamePrefix) external initializer {
+        require(msg.sender == address(manager), "Only manager can initialize");
+
         // Ensure the caller is the contract manager
         require(msg.sender == address(manager), "Only manager can initialize");
 

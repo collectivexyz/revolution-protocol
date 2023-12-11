@@ -10,7 +10,7 @@ struct RewardsSettings {
     uint256 revolutionReward;
 }
 
-/// @notice Common logic for Revolution TokenEmitter contracts for protocol reward splits & deposits
+/// @notice Common logic for Revolution ERC20TokenEmitter contracts for protocol reward splits & deposits
 abstract contract RewardSplits {
     error INVALID_ETH_AMOUNT();
 

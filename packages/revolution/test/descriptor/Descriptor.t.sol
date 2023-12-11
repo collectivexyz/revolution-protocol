@@ -2,21 +2,23 @@
 pragma solidity ^0.8.22;
 
 import "forge-std/Test.sol";
-import "../../src/VerbsDescriptor.sol";
-import { IVerbsDescriptor } from "../../src/interfaces/IVerbsDescriptor.sol";
+import "../../src/Descriptor.sol";
+import { IDescriptor } from "../../src/interfaces/IDescriptor.sol";
 import "../utils/Base64Decode.sol";
 import "../utils/JsmnSolLib.sol";
 import { ICultureIndex } from "../../src/interfaces/ICultureIndex.sol";
+import { RevolutionBuilderTest } from "../RevolutionBuilder.t.sol";
 
-contract VerbsDescriptorTest is Test {
-    VerbsDescriptor descriptor;
-    address owner;
-
+contract DescriptorTest is RevolutionBuilderTest {
     string tokenNamePrefix = "Vrb";
 
-    function setUp() public {
-        owner = address(this);
-        descriptor = new VerbsDescriptor(owner, tokenNamePrefix);
+    function setUp() public override {
+        super.setUp();
+        super.setMockParams();
+
+        super.setERC721TokenParams("Mock", "MOCK", "https://example.com/token/", tokenNamePrefix);
+
+        super.deployMock();
     }
 
     /// @notice Test that toggling `isDataURIEnabled` changes state correctly
@@ -163,7 +165,7 @@ contract VerbsDescriptorTest is Test {
     function testToggleDataURIEnabledEvent() public {
         bool expectedNewState = !descriptor.isDataURIEnabled();
         vm.expectEmit(true, true, false, true);
-        emit IVerbsDescriptor.DataURIToggled(expectedNewState);
+        emit IDescriptor.DataURIToggled(expectedNewState);
         descriptor.toggleDataURIEnabled();
     }
 
@@ -171,7 +173,7 @@ contract VerbsDescriptorTest is Test {
     function testSetBaseURIEvent() public {
         string memory newBaseURI = "https://example.com/newbase";
         vm.expectEmit(true, true, false, true);
-        emit IVerbsDescriptor.BaseURIUpdated(newBaseURI);
+        emit IDescriptor.BaseURIUpdated(newBaseURI);
         descriptor.setBaseURI(newBaseURI);
     }
 
@@ -222,7 +224,7 @@ contract VerbsDescriptorTest is Test {
         vm.stopPrank();
 
         // Verify ownership has not changed
-        assertEq(descriptor.owner(), owner, "Ownership should not have changed");
+        assertEq(descriptor.owner(), address(erc721Token), "Ownership should not have changed");
     }
 
     /// @notice Test `tokenURI` with only image metadata set

@@ -9,7 +9,7 @@ import { VersionedContract } from "./version/VersionedContract.sol";
 
 import { IRevolutionBuilder } from "./interfaces/IRevolutionBuilder.sol";
 
-import { ERC20Votes } from "./base/erc20/ERC20Votes.sol";
+import { ERC20VotesUpgradeable } from "./base/erc20/ERC20VotesUpgradeable.sol";
 import { MaxHeap } from "./MaxHeap.sol";
 import { ICultureIndex } from "./interfaces/ICultureIndex.sol";
 
@@ -36,7 +36,7 @@ contract CultureIndex is
     MaxHeap public maxHeap;
 
     // The ERC20 token used for voting
-    ERC20Votes public erc20VotingToken;
+    ERC20VotesUpgradeable public erc20VotingToken;
 
     // The ERC721 token used for voting
     ERC721CheckpointableUpgradeable public erc721VotingToken;
@@ -108,8 +108,11 @@ contract CultureIndex is
         address _erc20VotingToken,
         address _erc721VotingToken,
         address _initialOwner,
+        address _maxHeap,
         IRevolutionBuilder.CultureIndexParams memory _cultureIndexParams
     ) external initializer {
+        require(msg.sender == address(manager), "Only manager can initialize");
+
         require(_cultureIndexParams.quorumVotesBPS <= MAX_QUORUM_VOTES_BPS, "invalid quorum bps");
         require(_cultureIndexParams.erc721VotingTokenWeight > 0, "invalid erc721 voting token weight");
         require(_erc721VotingToken != address(0), "invalid erc721 voting token");
@@ -121,7 +124,7 @@ contract CultureIndex is
         // Initialize EIP-712 support
         __EIP712_init(string.concat(_cultureIndexParams.name, " CultureIndex"), "1");
 
-        erc20VotingToken = ERC20Votes(_erc20VotingToken);
+        erc20VotingToken = ERC20VotesUpgradeable(_erc20VotingToken);
         erc721VotingToken = ERC721CheckpointableUpgradeable(_erc721VotingToken);
         erc721VotingTokenWeight = _cultureIndexParams.erc721VotingTokenWeight;
         name = _cultureIndexParams.name;
@@ -131,7 +134,8 @@ contract CultureIndex is
 
         emit QuorumVotesBPSSet(quorumVotesBPS, _cultureIndexParams.quorumVotesBPS);
 
-        maxHeap = new MaxHeap(address(this));
+        // Create maxHeap
+        maxHeap = MaxHeap(address(_maxHeap));
     }
 
     ///                                                          ///

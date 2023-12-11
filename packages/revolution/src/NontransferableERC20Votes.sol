@@ -17,25 +17,67 @@ pragma solidity ^0.8.22;
  * requires users to delegate to themselves in order to activate checkpoints and have their voting power tracked.
  */
 
-import { Ownable } from "@openzeppelin/contracts/access/Ownable.sol";
-import { ERC20Votes } from "./base/erc20/ERC20Votes.sol";
-import { ERC20 } from "./base/erc20/ERC20.sol";
-import { EIP712 } from "@openzeppelin/contracts/utils/cryptography/EIP712.sol";
+import { Ownable2StepUpgradeable } from "@openzeppelin/contracts-upgradeable/access/Ownable2StepUpgradeable.sol";
+import { PausableUpgradeable } from "@openzeppelin/contracts-upgradeable/utils/PausableUpgradeable.sol";
+import { Initializable } from "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
 
-contract NontransferableERC20Votes is Ownable, ERC20Votes {
+import { ERC20VotesUpgradeable } from "./base/erc20/ERC20VotesUpgradeable.sol";
+import { EIP712Upgradeable } from "@openzeppelin/contracts-upgradeable/utils/cryptography/EIP712Upgradeable.sol";
+
+import { IRevolutionBuilder } from "./interfaces/IRevolutionBuilder.sol";
+
+contract NontransferableERC20Votes is Initializable, ERC20VotesUpgradeable, Ownable2StepUpgradeable {
     error TRANSFER_NOT_ALLOWED();
 
-    /**
-     * @dev Sets the values for {name} and {symbol}.
-     *
-     * All two of these values are immutable: they can only be set once during
-     * construction.
-     */
-    constructor(
+    ///                                                          ///
+    ///                         IMMUTABLES                       ///
+    ///                                                          ///
+
+    /// @notice The contract upgrade manager
+    IRevolutionBuilder private immutable manager;
+
+    ///                                                          ///
+    ///                         CONSTRUCTOR                      ///
+    ///                                                          ///
+
+    /// @param _manager The contract upgrade manager address
+    constructor(address _manager) payable initializer {
+        manager = IRevolutionBuilder(_manager);
+    }
+
+    ///                                                          ///
+    ///                         INITIALIZER                      ///
+    ///                                                          ///
+
+    function __NontransferableERC20Votes_init(
         address _initialOwner,
-        string memory name_,
-        string memory symbol_
-    ) Ownable(_initialOwner) ERC20(name_, symbol_) EIP712(name_, "1") {}
+        string calldata _name,
+        string calldata _symbol
+    ) internal onlyInitializing {
+        __NontransferableERC20Votes_init_unchained(_initialOwner, _name, _symbol);
+    }
+
+    function __NontransferableERC20Votes_init_unchained(
+        address _initialOwner,
+        string calldata _name,
+        string calldata _symbol
+    ) internal onlyInitializing {
+        __Ownable_init(_initialOwner);
+        __ERC20_init(_name, _symbol);
+        __EIP712_init(_name, "1");
+    }
+
+    /// @notice Initializes a DAO's ERC-20 governance token contract
+    /// @param _initialOwner The address of the initial owner
+    /// @param _erc20TokenParams The params of the token
+    function initialize(
+        address _initialOwner,
+        IRevolutionBuilder.ERC20TokenParams calldata _erc20TokenParams
+    ) external initializer {
+        require(msg.sender == address(manager), "Only manager can initialize");
+
+        __NontransferableERC20Votes_init(_initialOwner, _erc20TokenParams.name, _erc20TokenParams.symbol);
+    }
 
     /**
      * @dev Returns the number of decimals used to get its user representation.

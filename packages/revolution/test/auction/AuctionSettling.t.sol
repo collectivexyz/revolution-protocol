@@ -1,36 +1,37 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.22;
 
-import { VerbsAuctionHouseTest } from "./AuctionHouse.t.sol";
+import { AuctionHouseTest } from "./AuctionHouse.t.sol";
 import { IERC20 } from "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import { ICultureIndex } from "../../src/interfaces/ICultureIndex.sol";
 import { IVerbsToken } from "../../src/interfaces/IVerbsToken.sol";
+import { MockWETH } from "../mock/MockWETH.sol";
 
-contract VerbsAuctionHouseSettleTest is VerbsAuctionHouseTest {
+contract AuctionHouseSettleTest is AuctionHouseTest {
     // Fallback function to allow contract to receive Ether
     receive() external payable {}
 
     function testSettlingAuctionWithWinningBid(uint8 nDays) public {
         createDefaultArtPiece();
-        auctionHouse.unpause();
+        auction.unpause();
 
         uint256 balanceBefore = address(this).balance;
 
-        uint256 bidAmount = auctionHouse.reservePrice();
+        uint256 bidAmount = auction.reservePrice();
         vm.deal(address(11), bidAmount);
         vm.startPrank(address(11));
-        auctionHouse.createBid{ value: bidAmount }(0, address(11)); // Assuming first auction's verbId is 0
+        auction.createBid{ value: bidAmount }(0, address(11)); // Assuming first auction's verbId is 0
         vm.stopPrank();
 
-        vm.warp(block.timestamp + auctionHouse.duration() + nDays); // Fast forward time to end the auction
+        vm.warp(block.timestamp + auction.duration() + nDays); // Fast forward time to end the auction
 
         createDefaultArtPiece();
-        auctionHouse.settleCurrentAndCreateNewAuction();
+        auction.settleCurrentAndCreateNewAuction();
         vm.roll(block.number + 1);
 
         uint256 balanceAfter = address(this).balance;
 
-        assertEq(verbs.ownerOf(0), address(11), "Verb should be transferred to the highest bidder");
+        assertEq(erc721Token.ownerOf(0), address(11), "Verb should be transferred to the highest bidder");
         // cultureIndex currentVotes of highest bidder should be 10
         assertEq(
             cultureIndex.getCurrentVotes(address(11)),
@@ -38,8 +39,8 @@ contract VerbsAuctionHouseSettleTest is VerbsAuctionHouseTest {
             "Highest bidder should have 10 votes"
         );
 
-        uint256 creatorRate = auctionHouse.creatorRateBps();
-        uint256 entropyRate = auctionHouse.entropyRateBps();
+        uint256 creatorRate = auction.creatorRateBps();
+        uint256 entropyRate = auction.entropyRateBps();
 
         //calculate fee
         uint256 amountToOwner = (bidAmount * (10_000 - (creatorRate * entropyRate) / 10_000)) / 10_000;
@@ -50,7 +51,7 @@ contract VerbsAuctionHouseSettleTest is VerbsAuctionHouseTest {
             (bidAmount * (entropyRate * creatorRate)) /
             10_000 /
             10_000;
-        uint256 feeAmount = tokenEmitter.computeTotalReward(etherToSpendOnGovernanceTotal);
+        uint256 feeAmount = erc20TokenEmitter.computeTotalReward(etherToSpendOnGovernanceTotal);
 
         assertEq(
             balanceAfter - balanceBefore,
@@ -61,52 +62,52 @@ contract VerbsAuctionHouseSettleTest is VerbsAuctionHouseTest {
 
     function testSettlingAuctionWithNoBids(uint8 nDays) public {
         uint256 verbId = createDefaultArtPiece();
-        auctionHouse.unpause();
+        auction.unpause();
 
-        vm.warp(block.timestamp + auctionHouse.duration() + nDays); // Fast forward time to end the auction
+        vm.warp(block.timestamp + auction.duration() + nDays); // Fast forward time to end the auction
 
-        // Assuming verbs.burn is called for auctions with no bids
+        // Assuming erc721Token.burn is called for auctions with no bids
         vm.expectEmit(true, true, true, true);
         emit IVerbsToken.VerbBurned(verbId);
 
-        auctionHouse.settleCurrentAndCreateNewAuction();
+        auction.settleCurrentAndCreateNewAuction();
     }
 
     function testSettlingAuctionPrematurely() public {
         createDefaultArtPiece();
-        auctionHouse.unpause();
+        auction.unpause();
 
         vm.expectRevert();
-        auctionHouse.settleAuction(); // Attempt to settle before the auction ends
+        auction.settleAuction(); // Attempt to settle before the auction ends
     }
 
     function testTransferFailureAndFallbackToWETH(uint256 amount) public {
-        vm.assume(amount > tokenEmitter.minPurchaseAmount());
-        vm.assume(amount > auctionHouse.reservePrice());
-        vm.assume(amount < tokenEmitter.maxPurchaseAmount());
+        vm.assume(amount > erc20TokenEmitter.minPurchaseAmount());
+        vm.assume(amount > auction.reservePrice());
+        vm.assume(amount < erc20TokenEmitter.maxPurchaseAmount());
 
         createDefaultArtPiece();
-        auctionHouse.unpause();
+        auction.unpause();
 
         address recipient = address(new ContractThatRejectsEther());
 
-        auctionHouse.transferOwnership(recipient);
+        auction.transferOwnership(recipient);
 
-        vm.deal(address(auctionHouse), amount);
-        auctionHouse.createBid{ value: amount }(0, address(this)); // Assuming first auction's verbId is 0
+        vm.deal(address(auction), amount);
+        auction.createBid{ value: amount }(0, address(this)); // Assuming first auction's verbId is 0
 
         // Initially, recipient should have 0 ether and 0 WETH
         assertEq(recipient.balance, 0);
-        assertEq(IERC20(address(mockWETH)).balanceOf(recipient), 0);
+        assertEq(IERC20(address(weth)).balanceOf(recipient), 0);
 
         //go in future
-        vm.warp(block.timestamp + auctionHouse.duration() + 1); // Fast forward time to end the auction
+        vm.warp(block.timestamp + auction.duration() + 1); // Fast forward time to end the auction
 
-        auctionHouse.settleCurrentAndCreateNewAuction();
+        auction.settleCurrentAndCreateNewAuction();
 
         // Check if the recipient received WETH instead of Ether
-        uint256 creatorRate = auctionHouse.creatorRateBps();
-        assertEq(IERC20(address(mockWETH)).balanceOf(recipient), (amount * (10_000 - creatorRate)) / 10_000);
+        uint256 creatorRate = auction.creatorRateBps();
+        assertEq(IERC20(address(weth)).balanceOf(recipient), (amount * (10_000 - creatorRate)) / 10_000);
         assertEq(recipient.balance, 0); // Ether balance should still be 0
         //make sure voting weight on culture index is 721 vote weight for winning bidder
         assertEq(
@@ -118,26 +119,26 @@ contract VerbsAuctionHouseSettleTest is VerbsAuctionHouseTest {
 
     function testTransferToEOA() public {
         createDefaultArtPiece();
-        auctionHouse.unpause();
+        auction.unpause();
 
         address recipient = address(0x123); // Some EOA address
         uint256 amount = 1 ether;
 
-        auctionHouse.transferOwnership(recipient);
+        auction.transferOwnership(recipient);
 
-        vm.deal(address(auctionHouse), amount);
-        auctionHouse.createBid{ value: amount }(0, address(this)); // Assuming first auction's verbId is 0
+        vm.deal(address(auction), amount);
+        auction.createBid{ value: amount }(0, address(this)); // Assuming first auction's verbId is 0
 
         // Initially, recipient should have 0 ether
         assertEq(recipient.balance, 0);
 
         //go in future
-        vm.warp(block.timestamp + auctionHouse.duration() + 1); // Fast forward time to end the auction
+        vm.warp(block.timestamp + auction.duration() + 1); // Fast forward time to end the auction
 
-        auctionHouse.settleCurrentAndCreateNewAuction();
+        auction.settleCurrentAndCreateNewAuction();
 
         // Check if the recipient received Ether
-        uint256 creatorRate = auctionHouse.creatorRateBps();
+        uint256 creatorRate = auction.creatorRateBps();
         assertEq(recipient.balance, (amount * (10_000 - creatorRate)) / 10_000);
         //make sure voting weight on culture index is 721 vote weight for winning bidder
         assertEq(
@@ -148,33 +149,33 @@ contract VerbsAuctionHouseSettleTest is VerbsAuctionHouseTest {
     }
 
     function testTransferToContractWithoutReceiveOrFallback(uint256 amount) public {
-        vm.assume(amount > tokenEmitter.minPurchaseAmount());
-        vm.assume(amount > auctionHouse.reservePrice());
-        vm.assume(amount < tokenEmitter.maxPurchaseAmount());
+        vm.assume(amount > erc20TokenEmitter.minPurchaseAmount());
+        vm.assume(amount > auction.reservePrice());
+        vm.assume(amount < erc20TokenEmitter.maxPurchaseAmount());
 
         createDefaultArtPiece();
-        auctionHouse.unpause();
+        auction.unpause();
 
         address recipient = address(new ContractWithoutReceiveOrFallback());
 
-        auctionHouse.transferOwnership(recipient);
+        auction.transferOwnership(recipient);
 
-        vm.deal(address(auctionHouse), amount);
-        auctionHouse.createBid{ value: amount }(0, address(this)); // Assuming first auction's verbId is 0
+        vm.deal(address(auction), amount);
+        auction.createBid{ value: amount }(0, address(this)); // Assuming first auction's verbId is 0
 
         // Initially, recipient should have 0 ether and 0 WETH
         assertEq(recipient.balance, 0);
-        assertEq(IERC20(address(mockWETH)).balanceOf(recipient), 0);
+        assertEq(IERC20(address(weth)).balanceOf(recipient), 0);
 
         //go in future
-        vm.warp(block.timestamp + auctionHouse.duration() + 1); // Fast forward time to end the auction
+        vm.warp(block.timestamp + auction.duration() + 1); // Fast forward time to end the auction
 
-        auctionHouse.settleCurrentAndCreateNewAuction();
+        auction.settleCurrentAndCreateNewAuction();
 
         // Check if the recipient received WETH instead of Ether
-        uint256 creatorRate = auctionHouse.creatorRateBps();
+        uint256 creatorRate = auction.creatorRateBps();
 
-        assertEq(IERC20(address(mockWETH)).balanceOf(recipient), (amount * (10_000 - creatorRate)) / 10_000);
+        assertEq(IERC20(address(weth)).balanceOf(recipient), (amount * (10_000 - creatorRate)) / 10_000);
         assertEq(recipient.balance, 0); // Ether balance should still be 0
         //make sure voting weight on culture index is 721 vote weight for winning bidder
         assertEq(
@@ -188,8 +189,8 @@ contract VerbsAuctionHouseSettleTest is VerbsAuctionHouseTest {
         vm.assume(nCreators > 2);
         vm.assume(nCreators < 100);
 
-        uint256 creatorRate = (auctionHouse.creatorRateBps());
-        uint256 entropyRate = (auctionHouse.entropyRateBps());
+        uint256 creatorRate = (auction.creatorRateBps());
+        uint256 entropyRate = (auction.entropyRateBps());
 
         address[] memory creatorAddresses = new address[](nCreators);
         uint256[] memory creatorBps = new uint256[](nCreators);
@@ -218,15 +219,15 @@ contract VerbsAuctionHouseSettleTest is VerbsAuctionHouseTest {
             creatorBps
         );
 
-        auctionHouse.unpause();
+        auction.unpause();
 
-        uint256 bidAmount = auctionHouse.reservePrice();
+        uint256 bidAmount = auction.reservePrice();
         vm.deal(address(21_000), bidAmount + 1 ether);
         vm.startPrank(address(21_000));
-        auctionHouse.createBid{ value: bidAmount }(verbId, address(21_000));
+        auction.createBid{ value: bidAmount }(verbId, address(21_000));
         vm.stopPrank();
 
-        vm.warp(block.timestamp + auctionHouse.duration() + 1); // Fast forward time to end the auction
+        vm.warp(block.timestamp + auction.duration() + 1); // Fast forward time to end the auction
 
         // Track balances before auction settlement
         uint256[] memory balancesBefore = new uint256[](creatorAddresses.length);
@@ -234,8 +235,8 @@ contract VerbsAuctionHouseSettleTest is VerbsAuctionHouseTest {
         uint256[] memory governanceTokenBalancesBefore = new uint256[](creatorAddresses.length);
         for (uint256 i = 0; i < creatorAddresses.length; i++) {
             balancesBefore[i] = address(creatorAddresses[i]).balance;
-            governanceTokenBalancesBefore[i] = governanceToken.balanceOf(creatorAddresses[i]);
-            mockWETHBalancesBefore[i] = mockWETH.balanceOf(creatorAddresses[i]);
+            governanceTokenBalancesBefore[i] = erc20Token.balanceOf(creatorAddresses[i]);
+            mockWETHBalancesBefore[i] = MockWETH(payable(weth)).balanceOf(creatorAddresses[i]);
         }
 
         // Track expected governance token payout
@@ -244,15 +245,16 @@ contract VerbsAuctionHouseSettleTest is VerbsAuctionHouseTest {
         );
 
         uint256 expectedGovernanceTokenPayout = uint256(
-            tokenEmitter.getTokenQuoteForEther(
-                etherToSpendOnGovernanceTotal - tokenEmitter.computeTotalReward(etherToSpendOnGovernanceTotal)
+            erc20TokenEmitter.getTokenQuoteForEther(
+                etherToSpendOnGovernanceTotal -
+                    erc20TokenEmitter.computeTotalReward(etherToSpendOnGovernanceTotal)
             )
         );
 
-        auctionHouse.settleCurrentAndCreateNewAuction();
+        auction.settleCurrentAndCreateNewAuction();
 
         //assert auctionHouse balance is 0
-        assertEq(address(auctionHouse).balance, 0);
+        assertEq(address(auction).balance, 0);
 
         // Verify each creator's payout
         for (uint256 i = 0; i < creatorAddresses.length; i++) {
@@ -264,13 +266,13 @@ contract VerbsAuctionHouseSettleTest is VerbsAuctionHouseTest {
             assertEq(
                 address(creatorAddresses[i]).balance - balancesBefore[i] > 0
                     ? address(creatorAddresses[i]).balance - balancesBefore[i]
-                    : mockWETH.balanceOf(creatorAddresses[i]) - mockWETHBalancesBefore[i],
+                    : MockWETH(payable(weth)).balanceOf(creatorAddresses[i]) - mockWETHBalancesBefore[i],
                 (expectedEtherShare * entropyRate) / 10_000,
                 "Incorrect ETH payout for creator"
             );
 
             assertApproxEqAbs(
-                governanceToken.balanceOf(creatorAddresses[i]) - governanceTokenBalancesBefore[i],
+                erc20Token.balanceOf(creatorAddresses[i]) - governanceTokenBalancesBefore[i],
                 uint256((expectedGovernanceTokenPayout * creatorBps[i]) / 10_000),
                 // "Incorrect governance token payout for creator",
                 1
@@ -278,7 +280,11 @@ contract VerbsAuctionHouseSettleTest is VerbsAuctionHouseTest {
         }
 
         // Verify ownership of the verb
-        assertEq(verbs.ownerOf(verbId), address(21_000), "Verb should be transferred to the highest bidder");
+        assertEq(
+            erc721Token.ownerOf(verbId),
+            address(21_000),
+            "Verb should be transferred to the highest bidder"
+        );
         // Verify voting weight on culture index is 721 vote weight for winning bidder
         assertEq(
             cultureIndex.getCurrentVotes(address(21_000)),
@@ -288,9 +294,9 @@ contract VerbsAuctionHouseSettleTest is VerbsAuctionHouseTest {
     }
 
     function testSettlingAuctionWithWinningBidAndCreatorPayout(uint256 bidAmount) public {
-        vm.assume(bidAmount > tokenEmitter.minPurchaseAmount());
-        vm.assume(bidAmount > auctionHouse.reservePrice());
-        vm.assume(bidAmount < tokenEmitter.maxPurchaseAmount());
+        vm.assume(bidAmount > erc20TokenEmitter.minPurchaseAmount());
+        vm.assume(bidAmount > auction.reservePrice());
+        vm.assume(bidAmount < erc20TokenEmitter.maxPurchaseAmount());
 
         uint256 verbId = createArtPiece(
             "Art Piece",
@@ -303,14 +309,14 @@ contract VerbsAuctionHouseSettleTest is VerbsAuctionHouseTest {
             10_000
         );
 
-        uint256 creatorRate = auctionHouse.creatorRateBps();
-        uint256 entropyRate = auctionHouse.entropyRateBps();
+        uint256 creatorRate = auction.creatorRateBps();
+        uint256 entropyRate = auction.entropyRateBps();
 
-        auctionHouse.unpause();
+        auction.unpause();
 
         vm.deal(address(21_000), bidAmount);
         vm.startPrank(address(21_000));
-        auctionHouse.createBid{ value: bidAmount }(verbId, address(21_000));
+        auction.createBid{ value: bidAmount }(verbId, address(21_000));
         vm.stopPrank();
 
         // Ether going to owner of the auction
@@ -326,12 +332,12 @@ contract VerbsAuctionHouseSettleTest is VerbsAuctionHouseTest {
         uint256 creatorGovernancePayment = creatorPayment - creatorDirectPayment;
 
         //Get expected protocol fee amount
-        uint256 feeAmount = tokenEmitter.computeTotalReward(creatorGovernancePayment);
+        uint256 feeAmount = erc20TokenEmitter.computeTotalReward(creatorGovernancePayment);
 
-        vm.warp(block.timestamp + auctionHouse.duration() + 1); // Fast forward time to end the auction
+        vm.warp(block.timestamp + auction.duration() + 1); // Fast forward time to end the auction
 
         uint256 expectedGovernanceTokens = uint256(
-            tokenEmitter.getTokenQuoteForEther(creatorGovernancePayment - feeAmount)
+            erc20TokenEmitter.getTokenQuoteForEther(creatorGovernancePayment - feeAmount)
         );
 
         emit log_string("creatorGovernancePayment");
@@ -347,7 +353,7 @@ contract VerbsAuctionHouseSettleTest is VerbsAuctionHouseTest {
         uint256 balanceBeforeCreator = address(0x1).balance;
         uint256 balanceBeforeTreasury = address(this).balance;
 
-        auctionHouse.settleCurrentAndCreateNewAuction();
+        auction.settleCurrentAndCreateNewAuction();
 
         // Checking if the creator received their share
         assertEq(
@@ -366,7 +372,11 @@ contract VerbsAuctionHouseSettleTest is VerbsAuctionHouseTest {
         );
 
         // Checking ownership of the verb
-        assertEq(verbs.ownerOf(verbId), address(21_000), "Verb should be transferred to the highest bidder");
+        assertEq(
+            erc721Token.ownerOf(verbId),
+            address(21_000),
+            "Verb should be transferred to the highest bidder"
+        );
         // Checking voting weight on culture index is 721 vote weight for winning bidder
         assertEq(
             cultureIndex.getCurrentVotes(address(21_000)),
@@ -375,7 +385,7 @@ contract VerbsAuctionHouseSettleTest is VerbsAuctionHouseTest {
         );
 
         assertEq(
-            governanceToken.balanceOf(address(0x1)),
+            erc20Token.balanceOf(address(0x1)),
             expectedGovernanceTokens,
             "Creator did not receive the correct amount of governance tokens"
         );

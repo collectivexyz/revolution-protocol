@@ -28,7 +28,7 @@
 // VerbsDAOEvents, VerbsDAOProxyStorage, VerbsDAOStorageV1 add support for changes made by Verbs DAO to GovernorBravo.sol
 // See VerbsDAOLogicV1.sol for more details.
 
-import { IVerbsDAOExecutor } from "../interfaces/IVerbsDAOExecutor.sol";
+import { IDAOExecutor } from "../interfaces/IDAOExecutor.sol";
 
 pragma solidity 0.8.22;
 
@@ -72,10 +72,10 @@ contract VerbsDAOEvents {
     /// @notice An event emitted when a proposal has been canceled
     event ProposalCanceled(uint256 id);
 
-    /// @notice An event emitted when a proposal has been queued in the VerbsDAOExecutor
+    /// @notice An event emitted when a proposal has been queued in the DAOExecutor
     event ProposalQueued(uint256 id, uint256 eta);
 
-    /// @notice An event emitted when a proposal has been executed in the VerbsDAOExecutor
+    /// @notice An event emitted when a proposal has been executed in the DAOExecutor
     event ProposalExecuted(uint256 id);
 
     /// @notice An event emitted when a proposal has been vetoed by vetoAddress
@@ -160,8 +160,8 @@ contract VerbsDAOStorageV1 is VerbsDAOProxyStorage {
     /// @notice The total number of proposals
     uint256 public proposalCount;
 
-    /// @notice The address of the Verbs DAO Executor VerbsDAOExecutor
-    IVerbsDAOExecutor public timelock;
+    /// @notice The address of the Verbs DAO Executor DAOExecutor
+    IDAOExecutor public timelock;
 
     /// @notice The address of the Verbs ERC721 tokens
     VerbsTokenLike public verbs;
@@ -180,8 +180,8 @@ contract VerbsDAOStorageV1 is VerbsDAOProxyStorage {
     /// @notice Pending new vetoer
     address public pendingVetoer;
 
-    /// @notice The voting weight of the verbs token eg: owning (2) tokens gets you (2 * verbsTokenVotingWeight) votes
-    uint256 public verbsTokenVotingWeight;
+    /// @notice The voting weight of the verbs token eg: owning (2) tokens gets you (2 * erc721TokenVotingWeight) votes
+    uint256 public erc721TokenVotingWeight;
 
     struct Proposal {
         /// @notice Unique id for looking up a proposal

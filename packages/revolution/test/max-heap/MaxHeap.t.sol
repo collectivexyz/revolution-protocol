@@ -1,17 +1,26 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.22;
 
-import { Test } from "forge-std/Test.sol";
 import { MaxHeap } from "../../src/MaxHeap.sol";
+import { RevolutionBuilderTest } from "../RevolutionBuilder.t.sol";
 
 /// @title MaxHeapTestSuite
 /// @dev The test suite for the MaxHeap contract
-contract MaxHeapTestSuite is Test {
-    MaxHeapTest public maxHeap;
+contract MaxHeapTestSuite is RevolutionBuilderTest {
+    MaxHeap public maxHeap;
+    MaxHeapTester public maxHeapTester;
 
     /// @dev Sets up a new MaxHeap instance before each test
-    function setUp() public {
-        maxHeap = new MaxHeapTest(address(this));
+    function setUp() public override {
+        super.setUp();
+
+        super.deployMock();
+
+        maxHeap = cultureIndex.maxHeap();
+
+        maxHeapTester = new MaxHeapTester(address(this));
+
+        maxHeapTester.initialize(address(this));
     }
 
     /// @dev Tests that only the owner can call updateValue
@@ -100,18 +109,18 @@ contract MaxHeapTestSuite is Test {
     /// @dev Tests the maxHeapify function to ensure it corrects the heap property
     function testHeapify() public {
         // Insert values and manually violate the heap property
-        maxHeap.insert(1, 5);
-        maxHeap.insert(2, 7);
-        maxHeap.insert(3, 15);
-        maxHeap.insert(4, 3);
+        maxHeapTester.insert(1, 5);
+        maxHeapTester.insert(2, 7);
+        maxHeapTester.insert(3, 15);
+        maxHeapTester.insert(4, 3);
         //set max to [10,2]
-        maxHeap._set(0, 10, 2); // Assume a '_set' function for testing
+        maxHeapTester._set(0, 10, 2); // Assume a '_set' function for testing
 
         // Run heapify from the root
-        maxHeap.maxHeapify(0);
+        maxHeapTester.maxHeapify(0);
 
         // Validate the max value
-        (uint256 maxItemId, uint256 correctedMaxValue) = maxHeap.getMax();
+        (uint256 maxItemId, uint256 correctedMaxValue) = maxHeapTester.getMax();
         assertEq(correctedMaxValue, 7, "Max value should be 7");
         assertEq(maxItemId, 2, "Max piece ID should be 2");
     }
@@ -159,14 +168,14 @@ contract MaxHeapTestSuite is Test {
 
     /// @dev Tests the maxHeapify function on a non-root node
     function testHeapifyOnNonRoot() public {
-        maxHeap.insert(1, 10);
-        maxHeap.insert(2, 15);
-        maxHeap.insert(3, 5);
-        maxHeap.insert(4, 12);
-        maxHeap._set(1, 200, 4); // Assume a '_set' function for testing
-        maxHeap.maxHeapify(1);
-        uint256 itemId = maxHeap.heap(1);
-        uint256 val = maxHeap.valueMapping(itemId);
+        maxHeapTester.insert(1, 10);
+        maxHeapTester.insert(2, 15);
+        maxHeapTester.insert(3, 5);
+        maxHeapTester.insert(4, 12);
+        maxHeapTester._set(1, 200, 4); // Assume a '_set' function for testing
+        maxHeapTester.maxHeapify(1);
+        uint256 itemId = maxHeapTester.heap(1);
+        uint256 val = maxHeapTester.valueMapping(itemId);
         assertEq(val, 10, "Value should be 10 after heapify");
         assertEq(itemId, 1, "Item ID should be 1 after heapify");
     }
@@ -182,8 +191,8 @@ contract MaxHeapTestSuite is Test {
     }
 }
 
-contract MaxHeapTest is MaxHeap {
-    constructor(address _owner) MaxHeap(address(_owner)) {}
+contract MaxHeapTester is MaxHeap {
+    constructor(address _manager) MaxHeap(_manager) {}
 
     /// @notice Function to set a value in the heap (ONLY FOR TESTING)
     /// @param pos The position to set

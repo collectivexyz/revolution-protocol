@@ -1,7 +1,9 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.22;
 
-interface ITokenEmitter {
+import { IRevolutionBuilder } from "./IRevolutionBuilder.sol";
+
+interface IERC20TokenEmitter {
     struct ProtocolRewardAddresses {
         address builder;
         address purchaseReferral;
@@ -26,6 +28,10 @@ interface ITokenEmitter {
 
     function setCreatorsAddress(address creators) external;
 
+    function pause() external;
+
+    function unpause() external;
+
     event CreatorsAddressUpdated(address creators);
 
     event CreatorRateBpsUpdated(uint256 rateBps);
@@ -45,18 +51,16 @@ interface ITokenEmitter {
     /**
      * @notice Initialize the token emitter
      * @param initialOwner The initial owner of the token emitter
-     * @param token The token contract address
-     * @param protocolRewards The protocol rewards contract address
-     * @param protocolFeeRecipient The protocol fee recipient address
+     * @param erc20Token The ERC-20 token contract address
      * @param treasury The treasury address to pay funds to
-     * @param erc20TokenEmitterParams The token emitter settings
+     * @param vrgdac The VRGDA contract address
+     * @param creatorsAddress The address of the creators
      */
     function initialize(
         address initialOwner,
-        NontransferableERC20Votes token,
-        address protocolRewards,
-        address protocolFeeRecipient,
+        address erc20Token,
         address treasury,
-        IRevolutionBuilder.ERC20TokenEmitterParams calldata erc20TokenEmitterParams
-    ) external
+        address vrgdac,
+        address creatorsAddress
+    ) external;
 }
