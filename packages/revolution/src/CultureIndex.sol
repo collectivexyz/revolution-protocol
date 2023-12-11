@@ -141,14 +141,6 @@ contract CultureIndex is
     ///                                                          ///
 
     /**
-     * @notice Require that the 721VotingToken has not been locked.
-     */
-    modifier whenERC721VotingTokenNotLocked() {
-        require(!isERC721VotingTokenLocked, "ERC721VotingToken is locked");
-        _;
-    }
-
-    /**
      *  Validates the media type and associated data.
      * @param metadata The metadata associated with the art piece.
      *
