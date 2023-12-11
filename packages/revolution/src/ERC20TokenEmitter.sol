@@ -205,12 +205,13 @@ contract ERC20TokenEmitter is
         uint bpsSum = 0;
 
         //Mint tokens to buyers
-        if (totalTokensForBuyers > 0) {
-            for (uint i = 0; i < addresses.length; i++) {
+
+        for (uint i = 0; i < addresses.length; i++) {
+            if (totalTokensForBuyers > 0) {
                 // transfer tokens to address
                 _mint(addresses[i], uint((totalTokensForBuyers * int(basisPointSplits[i])) / 10_000));
-                bpsSum += basisPointSplits[i];
             }
+            bpsSum += basisPointSplits[i];
         }
 
         require(bpsSum == 10_000, "bps must add up to 10_000");
@@ -287,8 +288,7 @@ contract ERC20TokenEmitter is
     function setEntropyRateBps(uint256 _entropyRateBps) external onlyOwner {
         require(_entropyRateBps <= 10_000, "Entropy rate must be less than or equal to 10_000");
 
-        entropyRateBps = _entropyRateBps;
-        emit EntropyRateBpsUpdated(_entropyRateBps);
+        emit EntropyRateBpsUpdated(entropyRateBps = _entropyRateBps);
     }
 
     /**
@@ -298,9 +298,8 @@ contract ERC20TokenEmitter is
      */
     function setCreatorRateBps(uint256 _creatorRateBps) external onlyOwner {
         require(_creatorRateBps <= 10_000, "Creator rate must be less than or equal to 10_000");
-        creatorRateBps = _creatorRateBps;
 
-        emit CreatorRateBpsUpdated(_creatorRateBps);
+        emit CreatorRateBpsUpdated(creatorRateBps = _creatorRateBps);
     }
 
     /**
@@ -309,8 +308,7 @@ contract ERC20TokenEmitter is
      */
     function setCreatorsAddress(address _creatorsAddress) external override onlyOwner nonReentrant {
         require(_creatorsAddress != address(0), "Invalid address");
-        creatorsAddress = _creatorsAddress;
 
-        emit CreatorsAddressUpdated(_creatorsAddress);
+        emit CreatorsAddressUpdated(creatorsAddress = _creatorsAddress);
     }
 }
