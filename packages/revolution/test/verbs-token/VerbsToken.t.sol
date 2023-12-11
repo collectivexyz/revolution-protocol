@@ -30,6 +30,8 @@ contract VerbsTokenTestSuite is RevolutionBuilderTest {
 
         super.setERC721TokenParams(tokenName, tokenSymbol, "https://example.com/token/", tokenNamePrefix);
 
+        super.setCultureIndexParams("Vrbs", "Our community Vrbs. Must be 32x32.", 10, 200, 0);
+
         super.deployMock();
 
         vm.startPrank(address(auction));

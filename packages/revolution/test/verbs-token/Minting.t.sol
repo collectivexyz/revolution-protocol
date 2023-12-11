@@ -20,6 +20,9 @@ import { VerbsTokenTestSuite } from "./VerbsToken.t.sol";
 contract TokenMintingTest is VerbsTokenTestSuite {
     /// @dev Ensures the dropped art piece is equivalent to the top-voted piece
     function testDroppedArtPieceMatchesTopVoted() public {
+        vm.stopPrank();
+
+        vm.startPrank(address(erc20TokenEmitter));
         erc20Token.mint(address(this), 10);
 
         // Create a new art piece and simulate it being the top voted piece
@@ -28,12 +31,14 @@ contract TokenMintingTest is VerbsTokenTestSuite {
         // ensure vote snapshot is taken
         vm.roll(block.number + 1);
 
+        vm.startPrank(address(this));
         cultureIndex.vote(pieceId); // Simulate voting for the piece to make it top-voted
 
         // Fetch the top voted piece before minting
         ICultureIndex.ArtPiece memory topVotedPieceBeforeMint = cultureIndex.getTopVotedPiece();
 
         // Mint a token
+        vm.startPrank(address(auction));
         uint256 tokenId = erc721Token.mint();
 
         // Fetch the dropped art piece associated with the minted token
@@ -105,7 +110,7 @@ contract TokenMintingTest is VerbsTokenTestSuite {
         uint256 totalSupply = erc721Token.totalSupply();
         assertEq(
             erc721Token.ownerOf(tokenId),
-            address(this),
+            address(auction),
             "The contract should own the newly minted token"
         );
         assertEq(tokenId, 0, "First token ID should be 1");
@@ -121,7 +126,7 @@ contract TokenMintingTest is VerbsTokenTestSuite {
         assertEq(erc721Token.totalSupply(), initialTotalSupply + 1, "One new token should have been minted");
         assertEq(
             erc721Token.ownerOf(newTokenId),
-            address(this),
+            address(auction),
             "The contract should own the newly minted token"
         );
     }
@@ -199,7 +204,7 @@ contract TokenMintingTest is VerbsTokenTestSuite {
             pieceId: 0,
             metadata: metadata,
             creators: creators,
-            dropper: address(this),
+            dropper: address(auction),
             isDropped: true,
             creationBlock: block.number,
             quorumVotes: 0,
@@ -224,8 +229,8 @@ contract TokenMintingTest is VerbsTokenTestSuite {
         emit IVerbsToken.VerbBurned(tokenId);
 
         erc721Token.burn(tokenId);
-        vm.expectRevert("ERC721: owner query for nonexistent token");
-        erc721Token.ownerOf(tokenId); // This should fail because the token was burned
+        assertEq(erc721Token.totalSupply(), 0, "Total supply should be 0 after burning");
+        assertEq(erc721Token.balanceOf(address(auction)), 0, "Auction should not own any tokens after burning");
     }
 
     /// @dev Validates that the token URI is correctly set and retrieved
