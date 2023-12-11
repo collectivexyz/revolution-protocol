@@ -140,7 +140,10 @@ contract Descriptor is IDescriptor, VersionedContract, UUPS, Ownable2StepUpgrade
      * @dev The returned value may be a base64 encoded data URI or an API URL.
      */
     //slither-disable-next-line encode-packed-collision
-    function tokenURI(uint256 tokenId, ICultureIndex.ArtPieceMetadata memory metadata) external view returns (string memory) {
+    function tokenURI(
+        uint256 tokenId,
+        ICultureIndex.ArtPieceMetadata memory metadata
+    ) external view returns (string memory) {
         if (isDataURIEnabled) return dataURI(tokenId, metadata);
 
         return string(abi.encodePacked(baseURI, tokenId.toString()));
@@ -149,7 +152,10 @@ contract Descriptor is IDescriptor, VersionedContract, UUPS, Ownable2StepUpgrade
     /**
      * @notice Given a token ID, construct a base64 encoded data URI for an official Vrbs DAO verb.
      */
-    function dataURI(uint256 tokenId, ICultureIndex.ArtPieceMetadata memory metadata) public view returns (string memory) {
+    function dataURI(
+        uint256 tokenId,
+        ICultureIndex.ArtPieceMetadata memory metadata
+    ) public view returns (string memory) {
         return genericDataURI(string(abi.encodePacked(tokenNamePrefix, " ", tokenId.toString())), metadata);
     }
 

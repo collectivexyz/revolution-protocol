@@ -205,7 +205,10 @@ contract AuctionHouse is IAuctionHouse, PausableUpgradeable, ReentrancyGuardUpgr
      * @param _creatorRateBps New creator rate in basis points.
      */
     function setCreatorRateBps(uint256 _creatorRateBps) external onlyOwner {
-        require(_creatorRateBps >= minCreatorRateBps, "Creator rate must be greater than or equal to minCreatorRateBps");
+        require(
+            _creatorRateBps >= minCreatorRateBps,
+            "Creator rate must be greater than or equal to minCreatorRateBps"
+        );
         require(_creatorRateBps <= 10_000, "Creator rate must be less than or equal to 10_000");
         creatorRateBps = _creatorRateBps;
 
@@ -222,7 +225,10 @@ contract AuctionHouse is IAuctionHouse, PausableUpgradeable, ReentrancyGuardUpgr
         require(_minCreatorRateBps <= 10_000, "Min creator rate must be less than or equal to 10_000");
 
         //ensure new min rate cannot be lower than previous min rate
-        require(_minCreatorRateBps > minCreatorRateBps, "Min creator rate must be greater than previous minCreatorRateBps");
+        require(
+            _minCreatorRateBps > minCreatorRateBps,
+            "Min creator rate must be greater than previous minCreatorRateBps"
+        );
 
         minCreatorRateBps = _minCreatorRateBps;
 
@@ -365,7 +371,7 @@ contract AuctionHouse is IAuctionHouse, PausableUpgradeable, ReentrancyGuardUpgr
 
                 //Transfer creator's share to the creator, for each creator, and build arrays for erc20TokenEmitter.buyToken
                 if (creatorsShare > 0 && entropyRateBps > 0) {
-                    for (uint256 i = 0; i < numCreators; ) {
+                    for (uint256 i = 0; i < numCreators; i++) {
                         ICultureIndex.CreatorBps memory creator = verbs.getArtPieceById(_auction.verbId).creators[i];
                         vrgdaReceivers[i] = creator.creator;
                         vrgdaSplits[i] = creator.bps;
@@ -376,10 +382,6 @@ contract AuctionHouse is IAuctionHouse, PausableUpgradeable, ReentrancyGuardUpgr
 
                         //Transfer creator's share to the creator
                         _safeTransferETHWithFallback(creator.creator, paymentAmount);
-
-                        unchecked {
-                            ++i;
-                        }
                     }
                 }
 

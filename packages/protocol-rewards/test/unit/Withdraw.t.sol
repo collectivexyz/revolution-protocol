@@ -201,7 +201,14 @@ contract WithdrawTest is ProtocolRewardsTest {
         uint256 deadline = block.timestamp + 1 days;
 
         bytes32 withdrawHash = keccak256(
-            abi.encode(protocolRewards.WITHDRAW_TYPEHASH(), builderReferral, address(0), builderRewardsBalance, nonce, deadline)
+            abi.encode(
+                protocolRewards.WITHDRAW_TYPEHASH(),
+                builderReferral,
+                address(0),
+                builderRewardsBalance,
+                nonce,
+                deadline
+            )
         );
 
         bytes32 digest = keccak256(abi.encodePacked("\x19\x01", getDomainSeparator(), withdrawHash));

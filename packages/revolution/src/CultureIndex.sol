@@ -26,7 +26,8 @@ contract CultureIndex is
     EIP712Upgradeable
 {
     /// @notice The EIP-712 typehash for gasless votes
-    bytes32 public constant VOTE_TYPEHASH = keccak256("Vote(address from,uint256[] pieceIds,uint256 nonce,uint256 deadline)");
+    bytes32 public constant VOTE_TYPEHASH =
+        keccak256("Vote(address from,uint256[] pieceIds,uint256 nonce,uint256 deadline)");
 
     /// @notice An account's nonce for gasless votes
     mapping(address => uint256) public nonces;
@@ -151,10 +152,12 @@ contract CultureIndex is
     function validateMediaType(ArtPieceMetadata calldata metadata) internal pure {
         require(uint8(metadata.mediaType) > 0 && uint8(metadata.mediaType) <= 5, "Invalid media type");
 
-        if (metadata.mediaType == MediaType.IMAGE) require(bytes(metadata.image).length > 0, "Image URL must be provided");
+        if (metadata.mediaType == MediaType.IMAGE)
+            require(bytes(metadata.image).length > 0, "Image URL must be provided");
         else if (metadata.mediaType == MediaType.ANIMATION)
             require(bytes(metadata.animationUrl).length > 0, "Animation URL must be provided");
-        else if (metadata.mediaType == MediaType.TEXT) require(bytes(metadata.text).length > 0, "Text must be provided");
+        else if (metadata.mediaType == MediaType.TEXT)
+            require(bytes(metadata.text).length > 0, "Text must be provided");
     }
 
     /**
@@ -172,13 +175,9 @@ contract CultureIndex is
         require(creatorArrayLength <= MAX_NUM_CREATORS, "Creator array must not be > MAX_NUM_CREATORS");
 
         uint256 totalBps;
-        for (uint i; i < creatorArrayLength; ) {
+        for (uint i; i < creatorArrayLength; i++) {
             require(creatorArray[i].creator != address(0), "Invalid creator address");
             totalBps += creatorArray[i].bps;
-
-            unchecked {
-                ++i;
-            }
         }
 
         require(totalBps == 10_000, "Total BPS must sum up to 10,000");
@@ -200,7 +199,10 @@ contract CultureIndex is
      * - `creatorArray` must not contain any zero addresses.
      * - The sum of basis points in `creatorArray` must be exactly 10,000.
      */
-    function createPiece(ArtPieceMetadata calldata metadata, CreatorBps[] calldata creatorArray) public returns (uint256) {
+    function createPiece(
+        ArtPieceMetadata calldata metadata,
+        CreatorBps[] calldata creatorArray
+    ) public returns (uint256) {
         uint256 creatorArrayLength = validateCreatorsArray(creatorArray);
 
         // Validate the media type and associated data
@@ -214,19 +216,18 @@ contract CultureIndex is
         ArtPiece storage newPiece = pieces[pieceId];
 
         newPiece.pieceId = pieceId;
-        newPiece.totalVotesSupply = _calculateVoteWeight(erc20VotingToken.totalSupply(), erc721VotingToken.totalSupply());
+        newPiece.totalVotesSupply = _calculateVoteWeight(
+            erc20VotingToken.totalSupply(),
+            erc721VotingToken.totalSupply()
+        );
         newPiece.totalERC20Supply = erc20VotingToken.totalSupply();
         newPiece.metadata = metadata;
         newPiece.dropper = msg.sender;
         newPiece.creationBlock = block.number;
         newPiece.quorumVotes = (quorumVotesBPS * newPiece.totalVotesSupply) / 10_000;
 
-        for (uint i; i < creatorArrayLength; ) {
+        for (uint i; i < creatorArrayLength; i++) {
             newPiece.creators.push(creatorArray[i]);
-
-            unchecked {
-                ++i;
-            }
         }
 
         _emitPieceCreatedEvents(
@@ -263,12 +264,8 @@ contract CultureIndex is
         emit PieceCreated(pieceId, sender, metadata, quorum, totalVotesSupply);
 
         // Emit an event for each creator
-        for (uint i; i < creatorArrayLength; ) {
+        for (uint i; i < creatorArrayLength; i++) {
             emit PieceCreatorAdded(pieceId, creatorArray[i].creator, msg.sender, creatorArray[i].bps);
-
-            unchecked {
-                ++i;
-            }
         }
     }
 
@@ -377,12 +374,8 @@ contract CultureIndex is
      */
     function _voteForMany(uint256[] calldata pieceIds, address from) internal {
         uint256 len = pieceIds.length;
-        for (uint256 i; i < len; ) {
+        for (uint256 i; i < len; i++) {
             _vote(pieceIds[i], from);
-
-            unchecked {
-                ++i;
-            }
         }
     }
 
@@ -429,22 +422,14 @@ contract CultureIndex is
             "Array lengths must match"
         );
 
-        for (uint256 i; i < len; ) {
+        for (uint256 i; i < len; i++) {
             bool success = _verifyVoteSignature(from[i], pieceIds[i], deadline[i], v[i], r[i], s[i]);
 
             if (!success) revert INVALID_SIGNATURE();
-
-            unchecked {
-                ++i;
-            }
         }
 
-        for (uint256 i; i < len; ) {
+        for (uint256 i; i < len; i++) {
             _voteForMany(pieceIds[i], from[i]);
-
-            unchecked {
-                ++i;
-            }
         }
     }
 
@@ -546,7 +531,9 @@ contract CultureIndex is
      * Differs from `GovernerBravo` which uses fixed amount
      */
     function quorumVotes() public view returns (uint256) {
-        return (quorumVotesBPS * _calculateVoteWeight(erc20VotingToken.totalSupply(), erc721VotingToken.totalSupply())) / 10_000;
+        return
+            (quorumVotesBPS * _calculateVoteWeight(erc20VotingToken.totalSupply(), erc721VotingToken.totalSupply())) /
+            10_000;
     }
 
     /**

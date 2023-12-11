@@ -227,7 +227,9 @@ contract VerbsToken is
      * @notice Set the token URI descriptor.
      * @dev Only callable by the owner when not locked.
      */
-    function setDescriptor(IDescriptorMinimal _descriptor) external override onlyOwner nonReentrant whenDescriptorNotLocked {
+    function setDescriptor(
+        IDescriptorMinimal _descriptor
+    ) external override onlyOwner nonReentrant whenDescriptorNotLocked {
         descriptor = _descriptor;
 
         emit DescriptorUpdated(_descriptor);
@@ -281,7 +283,10 @@ contract VerbsToken is
 
         // Check-Effects-Interactions Pattern
         // Perform all checks
-        require(artPiece.creators.length <= cultureIndex.MAX_NUM_CREATORS(), "Creator array must not be > MAX_NUM_CREATORS");
+        require(
+            artPiece.creators.length <= cultureIndex.MAX_NUM_CREATORS(),
+            "Creator array must not be > MAX_NUM_CREATORS"
+        );
 
         // Use try/catch to handle potential failure
         try cultureIndex.dropTopVotedPiece() returns (ICultureIndex.ArtPiece memory _artPiece) {
@@ -298,12 +303,8 @@ contract VerbsToken is
             newPiece.quorumVotes = artPiece.quorumVotes;
             newPiece.totalVotesSupply = artPiece.totalVotesSupply;
 
-            for (uint i = 0; i < artPiece.creators.length; ) {
+            for (uint i = 0; i < artPiece.creators.length; i++) {
                 newPiece.creators.push(artPiece.creators[i]);
-
-                unchecked {
-                    ++i;
-                }
             }
 
             _mint(to, verbId);

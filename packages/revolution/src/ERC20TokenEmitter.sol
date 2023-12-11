@@ -206,14 +206,10 @@ contract ERC20TokenEmitter is
 
         //Mint tokens to buyers
         if (totalTokensForBuyers > 0) {
-            for (uint i = 0; i < addresses.length; ) {
+            for (uint i = 0; i < addresses.length; i++) {
                 // transfer tokens to address
                 _mint(addresses[i], uint((totalTokensForBuyers * int(basisPointSplits[i])) / 10_000));
                 bpsSum += basisPointSplits[i];
-
-                unchecked {
-                    ++i;
-                }
             }
         }
 

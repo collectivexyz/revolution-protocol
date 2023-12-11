@@ -124,7 +124,16 @@ contract TokenBasicTest is VerbsTokenTestSuite {
             0
         );
 
-        uint256 artPieceId = createArtPiece(name, description, mediaType, image, text, animationUrl, creatorAddress, 10_000);
+        uint256 artPieceId = createArtPiece(
+            name,
+            description,
+            mediaType,
+            image,
+            text,
+            animationUrl,
+            creatorAddress,
+            10_000
+        );
 
         // Act
         (, ICultureIndex.ArtPieceMetadata memory metadata, , , , , , ) = cultureIndex.pieces(artPieceId);
@@ -351,7 +360,11 @@ contract TokenBasicTest is VerbsTokenTestSuite {
         ICultureIndex.ArtPiece memory topPiece = cultureIndex.getTopVotedPiece();
 
         // Assert
-        assertEq(topPiece.pieceId, secondArtPieceId, "The top voted piece should be the second piece with higher votes");
+        assertEq(
+            topPiece.pieceId,
+            secondArtPieceId,
+            "The top voted piece should be the second piece with higher votes"
+        );
     }
 
     /// @dev Tests that dropTopVotedPiece updates the isDropped flag of the art piece.

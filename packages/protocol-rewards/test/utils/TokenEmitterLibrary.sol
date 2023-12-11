@@ -854,11 +854,17 @@ contract VRGDAC {
                             wadDiv(
                                 wadMul(
                                     targetPrice,
-                                    wadMul(perTimeUnit, wadExp(wadMul(soldDifference, wadDiv(decayConstant, perTimeUnit))))
+                                    wadMul(
+                                        perTimeUnit,
+                                        wadExp(wadMul(soldDifference, wadDiv(decayConstant, perTimeUnit)))
+                                    )
                                 ),
                                 wadMul(
                                     targetPrice,
-                                    wadMul(perTimeUnit, wadPow(1e18 - priceDecayPercent, wadDiv(soldDifference, perTimeUnit)))
+                                    wadMul(
+                                        perTimeUnit,
+                                        wadPow(1e18 - priceDecayPercent, wadDiv(soldDifference, perTimeUnit))
+                                    )
                                 ) - wadMul(amount, decayConstant)
                             )
                         ),
@@ -1196,7 +1202,12 @@ contract ERC20TokenEmitter is VRGDAC, IERC20TokenEmitter, ReentrancyGuard, Token
         require(amount > 0, "Amount must be greater than 0");
         // Note: By using toDaysWadUnsafe(block.timestamp - startTime) we are establishing that 1 "unit of time" is 1 day.
         // solhint-disable-next-line not-rely-on-time
-        return xToY({ timeSinceStart: toDaysWadUnsafe(block.timestamp - startTime), sold: emittedTokenWad, amount: int(amount) });
+        return
+            xToY({
+                timeSinceStart: toDaysWadUnsafe(block.timestamp - startTime),
+                sold: emittedTokenWad,
+                amount: int(amount)
+            });
     }
 
     /**

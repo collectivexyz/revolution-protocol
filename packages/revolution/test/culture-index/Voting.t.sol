@@ -238,7 +238,11 @@ contract CultureIndexVotingBasicTest is CultureIndexTestSuite {
         assertEq(erc721Token.balanceOf(address(voter)), 0, "ERC721 token should be burned");
 
         // ensure cultureindex currentvotes is correct
-        assertEq(cultureIndex.getVotes(address(voter)), updateErc20Weight + initialErc20Weight, "Vote weight should be correct");
+        assertEq(
+            cultureIndex.getVotes(address(voter)),
+            updateErc20Weight + initialErc20Weight,
+            "Vote weight should be correct"
+        );
     }
 
     /**

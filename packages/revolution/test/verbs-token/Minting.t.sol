@@ -49,8 +49,14 @@ contract TokenMintingTest is VerbsTokenTestSuite {
         assertEq(droppedArtPiece.dropper, topVotedPieceBeforeMint.dropper, "Dropper address should match");
         //ensure isDropped is now true
         assertTrue(droppedArtPiece.isDropped, "isDropped should be true");
-        assertTrue(areArraysEqual(droppedArtPiece.creators, topVotedPieceBeforeMint.creators), "Creators array should match");
-        assertTrue(areArtPieceMetadataEqual(droppedArtPiece.metadata, topVotedPieceBeforeMint.metadata), "Metadata should match");
+        assertTrue(
+            areArraysEqual(droppedArtPiece.creators, topVotedPieceBeforeMint.creators),
+            "Creators array should match"
+        );
+        assertTrue(
+            areArtPieceMetadataEqual(droppedArtPiece.metadata, topVotedPieceBeforeMint.metadata),
+            "Metadata should match"
+        );
     }
 
     // Helper function to compare ArtPieceMetadata structs

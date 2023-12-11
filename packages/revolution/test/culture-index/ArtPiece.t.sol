@@ -116,16 +116,19 @@ contract CultureIndexArtPieceTest is CultureIndexTestSuite {
     //  * @dev Test case to validate the art piece creation with an invalid zero address for the creator
     //  */
     function testInvalidCreatorAddress() public {
-        (CultureIndex.ArtPieceMetadata memory metadata, ICultureIndex.CreatorBps[] memory creators) = createArtPieceTuple(
-            "Invalid Creator",
-            "Invalid Piece",
-            ICultureIndex.MediaType.IMAGE,
-            "ipfs://invalid",
-            "",
-            "",
-            address(0),
-            10000
-        );
+        (
+            CultureIndex.ArtPieceMetadata memory metadata,
+            ICultureIndex.CreatorBps[] memory creators
+        ) = createArtPieceTuple(
+                "Invalid Creator",
+                "Invalid Piece",
+                ICultureIndex.MediaType.IMAGE,
+                "ipfs://invalid",
+                "",
+                "",
+                address(0),
+                10000
+            );
 
         try cultureIndex.createPiece(metadata, creators) {
             fail("Should not be able to create piece with zero address for creator");
@@ -138,16 +141,19 @@ contract CultureIndexArtPieceTest is CultureIndexTestSuite {
     //  * @dev Test case to validate the art piece creation with incorrect total basis points
     //  */
     function testExcessiveTotalBasisPoints() public {
-        (CultureIndex.ArtPieceMetadata memory metadata, ICultureIndex.CreatorBps[] memory creators) = createArtPieceTuple(
-            "Invalid Creator",
-            "Invalid Piece",
-            ICultureIndex.MediaType.IMAGE,
-            "ipfs://invalid",
-            "",
-            "",
-            address(0x1),
-            21_000_000
-        );
+        (
+            CultureIndex.ArtPieceMetadata memory metadata,
+            ICultureIndex.CreatorBps[] memory creators
+        ) = createArtPieceTuple(
+                "Invalid Creator",
+                "Invalid Piece",
+                ICultureIndex.MediaType.IMAGE,
+                "ipfs://invalid",
+                "",
+                "",
+                address(0x1),
+                21_000_000
+            );
 
         try cultureIndex.createPiece(metadata, creators) {
             fail("Should not be able to create piece with invalid total basis points");
@@ -160,16 +166,19 @@ contract CultureIndexArtPieceTest is CultureIndexTestSuite {
     //  * @dev Test case to validate the art piece creation with incorrect total basis points
     //  */
     function testTooFewTotalBasisPoints() public {
-        (CultureIndex.ArtPieceMetadata memory metadata, ICultureIndex.CreatorBps[] memory creators) = createArtPieceTuple(
-            "Invalid Creator",
-            "Invalid Piece",
-            ICultureIndex.MediaType.IMAGE,
-            "ipfs://invalid",
-            "",
-            "",
-            address(0x1),
-            21
-        );
+        (
+            CultureIndex.ArtPieceMetadata memory metadata,
+            ICultureIndex.CreatorBps[] memory creators
+        ) = createArtPieceTuple(
+                "Invalid Creator",
+                "Invalid Piece",
+                ICultureIndex.MediaType.IMAGE,
+                "ipfs://invalid",
+                "",
+                "",
+                address(0x1),
+                21
+            );
 
         try cultureIndex.createPiece(metadata, creators) {
             fail("Should not be able to create piece with invalid total basis points");
@@ -205,16 +214,19 @@ contract CultureIndexArtPieceTest is CultureIndexTestSuite {
      * @dev Test case to validate art piece creation with missing media data
      */
     function testMissingMediaDataImage() public {
-        (CultureIndex.ArtPieceMetadata memory metadata, ICultureIndex.CreatorBps[] memory creators) = createArtPieceTuple(
-            "Missing Media Data",
-            "Invalid Piece",
-            ICultureIndex.MediaType.IMAGE,
-            "",
-            "",
-            "",
-            address(0x1),
-            10000
-        );
+        (
+            CultureIndex.ArtPieceMetadata memory metadata,
+            ICultureIndex.CreatorBps[] memory creators
+        ) = createArtPieceTuple(
+                "Missing Media Data",
+                "Invalid Piece",
+                ICultureIndex.MediaType.IMAGE,
+                "",
+                "",
+                "",
+                address(0x1),
+                10000
+            );
 
         try cultureIndex.createPiece(metadata, creators) {
             fail("Should not be able to create piece with missing media data");
@@ -227,16 +239,19 @@ contract CultureIndexArtPieceTest is CultureIndexTestSuite {
      * @dev Test case to validate art piece creation with missing media data
      */
     function testMissingMediaDataAnimation() public {
-        (CultureIndex.ArtPieceMetadata memory metadata, ICultureIndex.CreatorBps[] memory creators) = createArtPieceTuple(
-            "Missing Media Data",
-            "Invalid Piece",
-            ICultureIndex.MediaType.ANIMATION,
-            "",
-            "",
-            "",
-            address(0x1),
-            10000
-        );
+        (
+            CultureIndex.ArtPieceMetadata memory metadata,
+            ICultureIndex.CreatorBps[] memory creators
+        ) = createArtPieceTuple(
+                "Missing Media Data",
+                "Invalid Piece",
+                ICultureIndex.MediaType.ANIMATION,
+                "",
+                "",
+                "",
+                address(0x1),
+                10000
+            );
 
         try cultureIndex.createPiece(metadata, creators) {
             fail("Should not be able to create piece with missing media data");
@@ -249,16 +264,19 @@ contract CultureIndexArtPieceTest is CultureIndexTestSuite {
      * @dev Test case to validate art piece creation with missing media data
      */
     function testMissingMediaDataText() public {
-        (CultureIndex.ArtPieceMetadata memory metadata, ICultureIndex.CreatorBps[] memory creators) = createArtPieceTuple(
-            "Missing Media Data",
-            "Invalid Piece",
-            ICultureIndex.MediaType.TEXT,
-            "",
-            "",
-            "",
-            address(0x1),
-            10000
-        );
+        (
+            CultureIndex.ArtPieceMetadata memory metadata,
+            ICultureIndex.CreatorBps[] memory creators
+        ) = createArtPieceTuple(
+                "Missing Media Data",
+                "Invalid Piece",
+                ICultureIndex.MediaType.TEXT,
+                "",
+                "",
+                "",
+                address(0x1),
+                10000
+            );
 
         try cultureIndex.createPiece(metadata, creators) {
             fail("Should not be able to create piece with missing media data");
@@ -345,7 +363,11 @@ contract CultureIndexArtPieceTest is CultureIndexTestSuite {
         uint256 expectedTotalVotesSupply = erc20Supply;
         uint256 expectedQuorumVotes = (quorumVotesBPS * expectedTotalVotesSupply) / 10_000;
         assertEq(piece.quorumVotes, expectedQuorumVotes, "Quorum votes should be set correctly on creation");
-        assertEq(piece.totalVotesSupply, expectedTotalVotesSupply, "Total votes supply should be set correctly on creation");
+        assertEq(
+            piece.totalVotesSupply,
+            expectedTotalVotesSupply,
+            "Total votes supply should be set correctly on creation"
+        );
         assertEq(piece.totalERC20Supply, erc20Supply, "Total ERC20 supply should be set correctly on creation");
 
         vm.roll(block.number + 1);
@@ -365,7 +387,10 @@ contract CultureIndexArtPieceTest is CultureIndexTestSuite {
         CultureIndex.ArtPiece memory newPiece = cultureIndex.getPieceById(createDefaultArtPiece());
         emit log_named_uint("newPiece.quorumVotes", newPiece.quorumVotes);
         emit log_named_uint("erc20Supply", erc20Supply);
-        emit log_named_uint("1e18 * cultureIndex.erc721VotingTokenWeight()", 1e18 * cultureIndex.erc721VotingTokenWeight());
+        emit log_named_uint(
+            "1e18 * cultureIndex.erc721VotingTokenWeight()",
+            1e18 * cultureIndex.erc721VotingTokenWeight()
+        );
 
         uint256 expectedTotalVotesSupply2 = erc20Supply * 2 + 1e18 * cultureIndex.erc721VotingTokenWeight();
         emit log_named_uint("expectedTotalVotesSupply2", expectedTotalVotesSupply2);
@@ -376,6 +401,10 @@ contract CultureIndexArtPieceTest is CultureIndexTestSuite {
             expectedTotalVotesSupply2,
             "Total votes supply should be set correctly on second creation"
         );
-        assertEq(newPiece.totalERC20Supply, erc20Supply * 2, "Total ERC20 supply should be set correctly on second creation");
+        assertEq(
+            newPiece.totalERC20Supply,
+            erc20Supply * 2,
+            "Total ERC20 supply should be set correctly on second creation"
+        );
     }
 }

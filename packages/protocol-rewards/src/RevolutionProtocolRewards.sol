@@ -177,7 +177,15 @@ contract RevolutionProtocolRewards is IRevolutionProtocolRewards, EIP712 {
     /// @param v V component of signature
     /// @param r R component of signature
     /// @param s S component of signature
-    function withdrawWithSig(address from, address to, uint256 amount, uint256 deadline, uint8 v, bytes32 r, bytes32 s) external {
+    function withdrawWithSig(
+        address from,
+        address to,
+        uint256 amount,
+        uint256 deadline,
+        uint8 v,
+        bytes32 r,
+        bytes32 s
+    ) external {
         if (block.timestamp > deadline) revert SIGNATURE_DEADLINE_EXPIRED();
 
         bytes32 withdrawHash;
