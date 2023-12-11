@@ -20,13 +20,13 @@ jobs:
       fail-fast: true
 
     name: Coverage
-    runs-on: ubuntu-latest
+    runs-on: revolution-protocol
     steps:
       - uses: actions/checkout@v3
         with:
           submodules: recursive
 
-      - name: Install node deps and founry
+      - name: Install node deps and foundry
         uses: ./.github/actions/setup_deps
 
       - name: Cache build

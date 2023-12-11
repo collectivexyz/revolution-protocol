@@ -7,7 +7,7 @@ on:
 
 jobs:
   analyze:
-    runs-on: ubuntu-latest
+    runs-on: revolution-protocol
     steps:
       - uses: actions/checkout@v3
 
