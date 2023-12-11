@@ -124,6 +124,8 @@ contract CultureIndex is
         // Initialize EIP-712 support
         __EIP712_init(string.concat(_cultureIndexParams.name, " CultureIndex"), "1");
 
+        __ReentrancyGuard_init();
+
         erc20VotingToken = ERC20VotesUpgradeable(_erc20VotingToken);
         erc721VotingToken = ERC721CheckpointableUpgradeable(_erc721VotingToken);
         erc721VotingTokenWeight = _cultureIndexParams.erc721VotingTokenWeight;

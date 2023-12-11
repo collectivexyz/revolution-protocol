@@ -40,6 +40,7 @@ contract MaxHeap is VersionedContract, UUPS, Ownable2StepUpgradeable, Reentrancy
         require(msg.sender == address(manager), "Only manager can initialize");
 
         __Ownable_init(_initialOwner);
+        __ReentrancyGuard_init();
     }
 
     /// @notice Struct to represent an item in the heap by it's ID
