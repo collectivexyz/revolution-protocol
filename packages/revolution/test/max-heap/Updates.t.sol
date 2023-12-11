@@ -5,7 +5,6 @@ import { Test } from "forge-std/Test.sol";
 import { MaxHeapTestSuite } from "./MaxHeap.t.sol"; // Assuming MaxHeap is in a separate file
 
 contract MaxHeapUpdateTestSuite is MaxHeapTestSuite {
-
     function testInitialInsertAndMax() public {
         maxHeapTester.insert(1, 5);
         maxHeapTester.insert(2, 10);
