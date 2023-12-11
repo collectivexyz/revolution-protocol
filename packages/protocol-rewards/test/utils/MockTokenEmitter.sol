@@ -11,18 +11,7 @@ contract MockTokenEmitter is ERC20TokenEmitter {
         address _treasury,
         address _protocolRewards,
         address _revolutionRewardRecipient
-    )
-        ERC20TokenEmitter(
-            _initialOwner,
-            _erc20Token,
-            _protocolRewards,
-            _revolutionRewardRecipient,
-            _treasury,
-            1e11,
-            1e17,
-            1e22
-        )
-    {
+    ) ERC20TokenEmitter(_initialOwner, _erc20Token, _protocolRewards, _revolutionRewardRecipient, _treasury, 1e11, 1e17, 1e22) {
         treasury = _treasury;
     }
 }

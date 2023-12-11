@@ -547,10 +547,7 @@ abstract contract ERC20Votes is ERC20, Votes {
     /**
      * @dev Get the `pos`-th checkpoint for `account`.
      */
-    function checkpoints(
-        address account,
-        uint32 pos
-    ) public view virtual returns (Checkpoints.Checkpoint208 memory) {
+    function checkpoints(address account, uint32 pos) public view virtual returns (Checkpoints.Checkpoint208 memory) {
         return _checkpoints(account, pos);
     }
 }
@@ -857,17 +854,11 @@ contract VRGDAC {
                             wadDiv(
                                 wadMul(
                                     targetPrice,
-                                    wadMul(
-                                        perTimeUnit,
-                                        wadExp(wadMul(soldDifference, wadDiv(decayConstant, perTimeUnit)))
-                                    )
+                                    wadMul(perTimeUnit, wadExp(wadMul(soldDifference, wadDiv(decayConstant, perTimeUnit))))
                                 ),
                                 wadMul(
                                     targetPrice,
-                                    wadMul(
-                                        perTimeUnit,
-                                        wadPow(1e18 - priceDecayPercent, wadDiv(soldDifference, perTimeUnit))
-                                    )
+                                    wadMul(perTimeUnit, wadPow(1e18 - priceDecayPercent, wadDiv(soldDifference, perTimeUnit)))
                                 ) - wadMul(amount, decayConstant)
                             )
                         ),
@@ -892,11 +883,7 @@ contract VRGDAC {
 
     // given # of tokens sold, returns price p(x) = p0 * (1 - k)^(t - (x/r)) - (x/r) makes it a linearvrgda issuance
     function p(int256 timeSinceStart, int256 sold) internal view returns (int256) {
-        return
-            wadMul(
-                targetPrice,
-                wadPow(1e18 - priceDecayPercent, timeSinceStart - unsafeWadDiv(sold, perTimeUnit))
-            );
+        return wadMul(targetPrice, wadPow(1e18 - priceDecayPercent, timeSinceStart - unsafeWadDiv(sold, perTimeUnit)));
     }
 }
 
@@ -991,12 +978,7 @@ contract NontransferableERC20Votes is Ownable, ERC20Votes {
     /**
      * @dev Not allowed
      */
-    function _approve(
-        address owner,
-        address spender,
-        uint256 value,
-        bool emitEvent
-    ) internal virtual override {
+    function _approve(address owner, address spender, uint256 value, bool emitEvent) internal virtual override {
         return;
     }
 
@@ -1214,12 +1196,7 @@ contract ERC20TokenEmitter is VRGDAC, IERC20TokenEmitter, ReentrancyGuard, Token
         require(amount > 0, "Amount must be greater than 0");
         // Note: By using toDaysWadUnsafe(block.timestamp - startTime) we are establishing that 1 "unit of time" is 1 day.
         // solhint-disable-next-line not-rely-on-time
-        return
-            xToY({
-                timeSinceStart: toDaysWadUnsafe(block.timestamp - startTime),
-                sold: emittedTokenWad,
-                amount: int(amount)
-            });
+        return xToY({ timeSinceStart: toDaysWadUnsafe(block.timestamp - startTime), sold: emittedTokenWad, amount: int(amount) });
     }
 
     /**
@@ -1252,9 +1229,7 @@ contract ERC20TokenEmitter is VRGDAC, IERC20TokenEmitter, ReentrancyGuard, Token
             yToX({
                 timeSinceStart: toDaysWadUnsafe(block.timestamp - startTime),
                 sold: emittedTokenWad,
-                amount: int(
-                    ((paymentAmount - computeTotalReward(paymentAmount)) * (10_000 - creatorRateBps)) / 10_000
-                )
+                amount: int(((paymentAmount - computeTotalReward(paymentAmount)) * (10_000 - creatorRateBps)) / 10_000)
             });
     }
 

@@ -29,10 +29,7 @@ contract ProtocolRewardsInvariantTest is ProtocolRewardsTest {
     }
 
     function invariant_TotalSupplyMatchesTotalDeposits() public {
-        assertEq(
-            protocolRewards.totalRewardsSupply(),
-            handler.ghost_depositSum() - handler.ghost_withdrawSum()
-        );
+        assertEq(protocolRewards.totalRewardsSupply(), handler.ghost_depositSum() - handler.ghost_withdrawSum());
     }
 
     function invariant_UserBalanceCannotExceedTotalSupply() public {

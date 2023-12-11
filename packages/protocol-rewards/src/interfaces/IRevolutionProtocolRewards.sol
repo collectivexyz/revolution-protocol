@@ -32,13 +32,7 @@ interface IRevolutionProtocolRewards {
     /// @param reason Optional bytes4 reason for indexing
     /// @param amount Amount of deposit
     /// @param comment Optional user comment
-    event Deposit(
-        address indexed from,
-        address indexed to,
-        bytes4 indexed reason,
-        uint256 amount,
-        string comment
-    );
+    event Deposit(address indexed from, address indexed to, bytes4 indexed reason, uint256 amount, string comment);
 
     /// @notice Withdraw Event
     /// @param from From user
@@ -118,13 +112,5 @@ interface IRevolutionProtocolRewards {
     /// @param v V component of signature
     /// @param r R component of signature
     /// @param s S component of signature
-    function withdrawWithSig(
-        address from,
-        address to,
-        uint256 amount,
-        uint256 deadline,
-        uint8 v,
-        bytes32 r,
-        bytes32 s
-    ) external;
+    function withdrawWithSig(address from, address to, uint256 amount, uint256 deadline, uint8 v, bytes32 r, bytes32 s) external;
 }

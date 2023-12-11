@@ -27,8 +27,7 @@ abstract contract RewardSplits {
     IRevolutionProtocolRewards internal immutable protocolRewards;
 
     constructor(address _protocolRewards, address _revolutionRewardRecipient) payable {
-        if (_protocolRewards == address(0) || _revolutionRewardRecipient == address(0))
-            revert("Invalid Address Zero");
+        if (_protocolRewards == address(0) || _revolutionRewardRecipient == address(0)) revert("Invalid Address Zero");
 
         protocolRewards = IRevolutionProtocolRewards(_protocolRewards);
         revolutionRewardRecipient = _revolutionRewardRecipient;
@@ -39,8 +38,7 @@ abstract contract RewardSplits {
      * @param _paymentAmountWei The amount of ETH being paid for the purchase
      */
     function computeTotalReward(uint256 paymentAmountWei) public pure returns (uint256) {
-        if (paymentAmountWei <= minPurchaseAmount || paymentAmountWei >= maxPurchaseAmount)
-            revert INVALID_ETH_AMOUNT();
+        if (paymentAmountWei <= minPurchaseAmount || paymentAmountWei >= maxPurchaseAmount) revert INVALID_ETH_AMOUNT();
 
         return
             (paymentAmountWei * BUILDER_REWARD_BPS) /
@@ -53,9 +51,7 @@ abstract contract RewardSplits {
             10_000;
     }
 
-    function computePurchaseRewards(
-        uint256 paymentAmountWei
-    ) public pure returns (RewardsSettings memory, uint256) {
+    function computePurchaseRewards(uint256 paymentAmountWei) public pure returns (RewardsSettings memory, uint256) {
         return (
             RewardsSettings({
                 builderReferralReward: (paymentAmountWei * BUILDER_REWARD_BPS) / 10_000,

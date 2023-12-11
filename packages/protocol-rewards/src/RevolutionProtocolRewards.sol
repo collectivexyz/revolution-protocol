@@ -55,8 +55,7 @@ contract RevolutionProtocolRewards is IRevolutionProtocolRewards, EIP712 {
     ) external payable {
         uint256 numRecipients = recipients.length;
 
-        if (numRecipients != amounts.length || numRecipients != reasons.length)
-            revert ARRAY_LENGTH_MISMATCH();
+        if (numRecipients != amounts.length || numRecipients != reasons.length) revert ARRAY_LENGTH_MISMATCH();
 
         uint256 expectedTotalValue;
 
@@ -178,15 +177,7 @@ contract RevolutionProtocolRewards is IRevolutionProtocolRewards, EIP712 {
     /// @param v V component of signature
     /// @param r R component of signature
     /// @param s S component of signature
-    function withdrawWithSig(
-        address from,
-        address to,
-        uint256 amount,
-        uint256 deadline,
-        uint8 v,
-        bytes32 r,
-        bytes32 s
-    ) external {
+    function withdrawWithSig(address from, address to, uint256 amount, uint256 deadline, uint8 v, bytes32 r, bytes32 s) external {
         if (block.timestamp > deadline) revert SIGNATURE_DEADLINE_EXPIRED();
 
         bytes32 withdrawHash;
