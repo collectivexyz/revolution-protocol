@@ -17,6 +17,46 @@ import { VerbsTokenTestSuite } from "./VerbsToken.t.sol";
 /// @title VerbsTokenTest
 /// @dev The test suite for the VerbsToken contract
 contract TokenBasicTest is VerbsTokenTestSuite {
+    /// @dev Tests token metadata integrity after minting
+    function testTokenMetadataIntegrity() public {
+        // Create an art piece and mint a token
+        uint256 artPieceId = createDefaultArtPiece();
+        uint256 tokenId = erc721Token.mint();
+
+        // Retrieve the token metadata URI
+        string memory tokenURI = erc721Token.tokenURI(tokenId);
+
+        emit log_string(tokenURI);
+
+        // Extract the base64 encoded part of the tokenURI
+        string memory base64Metadata = substring(tokenURI, 29, bytes(tokenURI).length);
+        emit log_string(base64Metadata);
+
+        // Decode the base64 encoded metadata
+        string memory metadataJson = decodeMetadata(base64Metadata);
+        emit log_string(metadataJson);
+
+        // Parse the JSON to get metadata fields
+        (string memory name, string memory description, string memory image) = parseJson(metadataJson);
+
+        // Retrieve the expected metadata directly from the art piece for comparison
+        (, ICultureIndex.ArtPieceMetadata memory metadata, , , , , , ) = cultureIndex.pieces(artPieceId);
+
+        //assert name equals Verb + tokenId
+        string memory expectedName = string(
+            abi.encodePacked(tokenNamePrefix, " ", Strings.toString(tokenId))
+        );
+
+        // Assert that the token metadata matches the expected metadata from the art piece
+        assertEq(name, expectedName, "Token name does not match expected name");
+        assertEq(
+            description,
+            string(abi.encodePacked(metadata.name, ". ", metadata.description)),
+            "Token description does not match expected description"
+        );
+        assertEq(image, metadata.image, "Token image does not match expected image URL");
+    }
+
     /// @dev Tests the symbol of the VerbsToken
     function testSymbol() public {
         assertEq(erc721Token.symbol(), tokenSymbol, "Symbol should be VRBS");
@@ -410,46 +450,6 @@ contract TokenBasicTest is VerbsTokenTestSuite {
         // Act & Assert
         vm.expectRevert("Invalid piece ID"); // Replace with the actual error message
         cultureIndex.getVote(nonExistentArtPieceId, address(this)); // This function should revert
-    }
-
-    /// @dev Tests token metadata integrity after minting
-    function testTokenMetadataIntegrity() public {
-        // Create an art piece and mint a token
-        uint256 artPieceId = createDefaultArtPiece();
-        uint256 tokenId = erc721Token.mint();
-
-        // Retrieve the token metadata URI
-        string memory tokenURI = erc721Token.tokenURI(tokenId);
-
-        emit log_string(tokenURI);
-
-        // Extract the base64 encoded part of the tokenURI
-        string memory base64Metadata = substring(tokenURI, 29, bytes(tokenURI).length);
-        emit log_string(base64Metadata);
-
-        // Decode the base64 encoded metadata
-        string memory metadataJson = decodeMetadata(base64Metadata);
-        emit log_string(metadataJson);
-
-        // Parse the JSON to get metadata fields
-        (string memory name, string memory description, string memory image) = parseJson(metadataJson);
-
-        // Retrieve the expected metadata directly from the art piece for comparison
-        (, ICultureIndex.ArtPieceMetadata memory metadata, , , , , , ) = cultureIndex.pieces(artPieceId);
-
-        //assert name equals Verb + tokenId
-        string memory expectedName = string(
-            abi.encodePacked(tokenNamePrefix, " ", Strings.toString(tokenId))
-        );
-
-        // Assert that the token metadata matches the expected metadata from the art piece
-        assertEq(name, expectedName, "Token name does not match expected name");
-        assertEq(
-            description,
-            string(abi.encodePacked(metadata.name, ". ", metadata.description)),
-            "Token description does not match expected description"
-        );
-        assertEq(image, metadata.image, "Token image does not match expected image URL");
     }
 
     // Helper function to decode base64 encoded metadata

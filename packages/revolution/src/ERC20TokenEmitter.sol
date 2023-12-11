@@ -31,7 +31,7 @@ contract ERC20TokenEmitter is
     VRGDAC public vrgdac;
 
     // solhint-disable-next-line not-rely-on-time
-    uint public immutable startTime = block.timestamp;
+    uint public startTime;
 
     /**
      * @notice A running total of the amount of tokens emitted.
@@ -102,6 +102,7 @@ contract ERC20TokenEmitter is
         creatorsAddress = _creatorsAddress;
         vrgdac = VRGDAC(_vrgdac);
         token = NontransferableERC20Votes(_erc20Token);
+        startTime = block.timestamp;
     }
 
     function _mint(address _to, uint _amount) private {

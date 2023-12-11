@@ -32,7 +32,7 @@ contract Descriptor is IDescriptor, VersionedContract, UUPS, Ownable2StepUpgrade
     using Strings for uint256;
 
     // Whether or not `tokenURI` should be returned as a data URI (Default: true)
-    bool public override isDataURIEnabled = true;
+    bool public override isDataURIEnabled;
 
     // Base URI
     string public override baseURI;
@@ -87,6 +87,8 @@ contract Descriptor is IDescriptor, VersionedContract, UUPS, Ownable2StepUpgrade
         __Ownable_init(_initialOwner);
 
         tokenNamePrefix = _tokenNamePrefix;
+
+        isDataURIEnabled = true;
     }
 
     /**

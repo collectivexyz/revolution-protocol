@@ -139,6 +139,8 @@ contract TokenMintingTest is VerbsTokenTestSuite {
 
     /// @dev Ensures _currentVerbId increments correctly after each mint
     function testMintingIncrement(uint200 voteWeight) public {
+        vm.stopPrank();
+        vm.startPrank(address(erc20TokenEmitter));
         erc20Token.mint(address(1), 10000);
 
         erc20Token.mint(address(this), voteWeight);
@@ -149,11 +151,13 @@ contract TokenMintingTest is VerbsTokenTestSuite {
         // ensure vote snapshot is taken
         vm.roll(block.number + 1);
 
+        vm.startPrank(address(this));
         if (voteWeight == 0) vm.expectRevert("Weight must be greater than minVoteWeight");
         cultureIndex.vote(pieceId1);
 
         bool shouldRevertMint = voteWeight <= (10_000 * cultureIndex.quorumVotesBPS()) / 10_000;
 
+        vm.startPrank(address(auction));
         if (shouldRevertMint) vm.expectRevert("dropTopVotedPiece failed");
         uint256 tokenId1 = erc721Token.mint();
         if (!shouldRevertMint)
@@ -163,9 +167,11 @@ contract TokenMintingTest is VerbsTokenTestSuite {
                 "CurrentVerbId should increment after first mint"
             );
 
+        vm.startPrank(address(this));
         if (voteWeight == 0) vm.expectRevert("Weight must be greater than minVoteWeight");
         cultureIndex.vote(pieceId2);
 
+        vm.startPrank(address(auction));
         if (shouldRevertMint) vm.expectRevert("dropTopVotedPiece failed");
         uint256 tokenId2 = erc721Token.mint();
         if (!shouldRevertMint)
@@ -241,14 +247,17 @@ contract TokenMintingTest is VerbsTokenTestSuite {
         // Create a new piece and simulate it being the top voted piece
         uint256 pieceId = createDefaultArtPiece(); // This function should exist within the test contract
 
+        vm.startPrank(address(erc20TokenEmitter));
         erc20Token.mint(address(this), 10);
 
         // ensure vote snapshot is taken
         vm.roll(block.number + 1);
 
+        vm.startPrank(address(this));
         cultureIndex.vote(pieceId); // Assuming vote function exists and we cast 10 votes
 
         // Mint a token
+        vm.startPrank(address(auction));
         uint256 tokenId = erc721Token.mint();
 
         // Validate the token is associated with the top voted piece
