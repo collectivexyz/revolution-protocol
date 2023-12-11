@@ -351,7 +351,7 @@ contract CultureIndexArtPieceTest is CultureIndexTestSuite {
         cultureIndex._setQuorumVotesBPS(quorumVotesBPS);
 
         cultureIndex.transferOwnership(address(erc721Token));
-        
+
         vm.startPrank(address(erc721Token));
         cultureIndex.acceptOwnership();
 

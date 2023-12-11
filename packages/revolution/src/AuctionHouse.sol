@@ -358,7 +358,7 @@ contract AuctionHouse is IAuctionHouse, PausableUpgradeable, ReentrancyGuardUpgr
                 uint256 creatorsShare = _auction.amount - auctioneerPayment;
 
                 uint256 numCreators = verbs.getArtPieceById(_auction.verbId).creators.length;
-                address deployer = verbs.getArtPieceById(_auction.verbId).dropper;
+                address deployer = verbs.getArtPieceById(_auction.verbId).sponsor;
 
                 //Build arrays for erc20TokenEmitter.buyToken
                 uint256[] memory vrgdaSplits = new uint256[](numCreators);

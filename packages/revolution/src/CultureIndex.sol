@@ -229,7 +229,7 @@ contract CultureIndex is
         );
         newPiece.totalERC20Supply = erc20VotingToken.totalSupply();
         newPiece.metadata = metadata;
-        newPiece.dropper = msg.sender;
+        newPiece.sponsor = msg.sender;
         newPiece.creationBlock = block.number;
         newPiece.quorumVotes = (quorumVotesBPS * newPiece.totalVotesSupply) / 10_000;
 
