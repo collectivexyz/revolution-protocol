@@ -90,9 +90,7 @@ contract RevolutionBuilderTest is Test {
             )
         );
         manager = RevolutionBuilder(
-            address(
-                new ERC1967Proxy(managerImpl0, abi.encodeWithSignature("initialize(address)", revolutionDAO))
-            )
+            address(new ERC1967Proxy(managerImpl0, abi.encodeWithSignature("initialize(address)", revolutionDAO)))
         );
 
         erc721TokenImpl = address(new VerbsToken(address(manager)));

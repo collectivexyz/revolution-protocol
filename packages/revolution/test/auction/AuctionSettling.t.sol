@@ -260,8 +260,7 @@ contract AuctionHouseSettleTest is AuctionHouseTest {
 
         uint256 expectedGovernanceTokenPayout = uint256(
             erc20TokenEmitter.getTokenQuoteForEther(
-                etherToSpendOnGovernanceTotal -
-                    erc20TokenEmitter.computeTotalReward(etherToSpendOnGovernanceTotal)
+                etherToSpendOnGovernanceTotal - erc20TokenEmitter.computeTotalReward(etherToSpendOnGovernanceTotal)
             )
         );
 
@@ -272,9 +271,7 @@ contract AuctionHouseSettleTest is AuctionHouseTest {
 
         // Verify each creator's payout
         for (uint256 i = 0; i < creatorAddresses.length; i++) {
-            uint256 expectedEtherShare = uint256(
-                ((bidAmount) * creatorBps[i] * creatorRate) / 10_000 / 10_000
-            );
+            uint256 expectedEtherShare = uint256(((bidAmount) * creatorBps[i] * creatorRate) / 10_000 / 10_000);
 
             //either the creator gets ETH or WETH
             assertEq(
@@ -294,11 +291,7 @@ contract AuctionHouseSettleTest is AuctionHouseTest {
         }
 
         // Verify ownership of the verb
-        assertEq(
-            erc721Token.ownerOf(verbId),
-            address(21_000),
-            "Verb should be transferred to the highest bidder"
-        );
+        assertEq(erc721Token.ownerOf(verbId), address(21_000), "Verb should be transferred to the highest bidder");
         // Verify voting weight on culture index is 721 vote weight for winning bidder
         assertEq(
             cultureIndex.getVotes(address(21_000)),
@@ -386,11 +379,7 @@ contract AuctionHouseSettleTest is AuctionHouseTest {
         );
 
         // Checking ownership of the verb
-        assertEq(
-            erc721Token.ownerOf(verbId),
-            address(21_000),
-            "Verb should be transferred to the highest bidder"
-        );
+        assertEq(erc721Token.ownerOf(verbId), address(21_000), "Verb should be transferred to the highest bidder");
         // Checking voting weight on culture index is 721 vote weight for winning bidder
         assertEq(
             cultureIndex.getVotes(address(21_000)),

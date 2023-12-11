@@ -110,10 +110,7 @@ contract AuctionHouseBasicTest is AuctionHouseTest {
         auction.setMinCreatorRateBps(newMinCreatorRateBps);
 
         // Assert new minimum rate
-        if (
-            newMinCreatorRateBps <= auction.creatorRateBps() &&
-            newMinCreatorRateBps >= auction.minCreatorRateBps()
-        ) {
+        if (newMinCreatorRateBps <= auction.creatorRateBps() && newMinCreatorRateBps >= auction.minCreatorRateBps()) {
             assertEq(auction.minCreatorRateBps(), newMinCreatorRateBps);
         }
     }
@@ -191,11 +188,7 @@ contract AuctionHouseBasicTest is AuctionHouseTest {
         assertEq(auction.WETH(), address(weth), "WETH address should be set correctly");
         assertEq(auction.timeBuffer(), 15 minutes, "Time buffer should be set correctly");
         assertEq(auction.reservePrice(), 1 ether, "Reserve price should be set correctly");
-        assertEq(
-            auction.minBidIncrementPercentage(),
-            5,
-            "Min bid increment percentage should be set correctly"
-        );
+        assertEq(auction.minBidIncrementPercentage(), 5, "Min bid increment percentage should be set correctly");
         assertEq(auction.duration(), 24 hours, "Auction duration should be set correctly");
     }
 
@@ -322,11 +315,7 @@ contract AuctionHouseBasicTest is AuctionHouseTest {
             (, , , , , bool settled) = auction.auction();
             assertEq(settled, false, "Auction should not be settled because new one created");
         } else {
-            assertEq(
-                erc721Token.ownerOf(verbId),
-                address(1),
-                "Verb should be transferred to the auction house"
-            );
+            assertEq(erc721Token.ownerOf(verbId), address(1), "Verb should be transferred to the auction house");
         }
     }
 

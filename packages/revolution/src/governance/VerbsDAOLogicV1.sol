@@ -192,10 +192,7 @@ contract VerbsDAOLogicV1 is
                 govParams_.proposalThresholdBPS <= MAX_PROPOSAL_THRESHOLD_BPS,
             "VerbsDAO::initialize: invalid proposal threshold bps"
         );
-        require(
-            govParams_.erc721TokenVotingWeight > 0,
-            "VerbsDAO::initialize: invalid verbs token voting weight"
-        );
+        require(govParams_.erc721TokenVotingWeight > 0, "VerbsDAO::initialize: invalid verbs token voting weight");
 
         // Initialize EIP-712 support
         __EIP712_init(govParams_.daoName, "1");
@@ -259,9 +256,7 @@ contract VerbsDAOLogicV1 is
             "VerbsDAO::propose: proposer votes below proposal threshold"
         );
         require(
-            targets.length == values.length &&
-                targets.length == signatures.length &&
-                targets.length == calldatas.length,
+            targets.length == values.length && targets.length == signatures.length && targets.length == calldatas.length,
             "VerbsDAO::propose: proposal function information parity mismatch"
         );
         require(targets.length != 0, "VerbsDAO::propose: must provide actions");
@@ -501,12 +496,7 @@ contract VerbsDAOLogicV1 is
     )
         external
         view
-        returns (
-            address[] memory targets,
-            uint256[] memory values,
-            string[] memory signatures,
-            bytes[] memory calldatas
-        )
+        returns (address[] memory targets, uint256[] memory values, string[] memory signatures, bytes[] memory calldatas)
     {
         Proposal storage p = _proposals[proposalId];
         return (p.targets, p.values, p.signatures, p.calldatas);
@@ -538,9 +528,7 @@ contract VerbsDAOLogicV1 is
             return ProposalState.Pending;
         } else if (block.number <= proposal.endBlock) {
             return ProposalState.Active;
-        } else if (
-            proposal.forVotes <= proposal.againstVotes || proposal.forVotes < quorumVotes(proposal.id)
-        ) {
+        } else if (proposal.forVotes <= proposal.againstVotes || proposal.forVotes < quorumVotes(proposal.id)) {
             return ProposalState.Defeated;
         } else if (proposal.eta == 0) {
             return ProposalState.Succeeded;
@@ -615,11 +603,7 @@ contract VerbsDAOLogicV1 is
      * @param reason The reason given for the vote by the voter
      * @dev Reentrancy is defended against in `castVoteInternal` at the `receipt.hasVoted == false` require statement.
      */
-    function castRefundableVoteWithReason(
-        uint256 proposalId,
-        uint8 support,
-        string calldata reason
-    ) external {
+    function castRefundableVoteWithReason(uint256 proposalId, uint8 support, string calldata reason) external {
         castRefundableVoteInternal(proposalId, support, reason);
     }
 
@@ -646,13 +630,7 @@ contract VerbsDAOLogicV1 is
      * @param reason The reason given for the vote by the voter
      */
     function castVoteWithReason(uint256 proposalId, uint8 support, string calldata reason) external {
-        emit VoteCast(
-            msg.sender,
-            proposalId,
-            support,
-            castVoteInternal(msg.sender, proposalId, support),
-            reason
-        );
+        emit VoteCast(msg.sender, proposalId, support, castVoteInternal(msg.sender, proposalId, support), reason);
     }
 
     /**
@@ -918,10 +896,7 @@ contract VerbsDAOLogicV1 is
      */
     function _acceptAdmin() external {
         // Check caller is pendingAdmin and pendingAdmin ≠ address(0)
-        require(
-            msg.sender == pendingAdmin && msg.sender != address(0),
-            "VerbsDAO::_acceptAdmin: pending admin only"
-        );
+        require(msg.sender == pendingAdmin && msg.sender != address(0), "VerbsDAO::_acceptAdmin: pending admin only");
 
         // Save current values for inclusion in log
         address oldAdmin = admin;
@@ -1047,10 +1022,7 @@ contract VerbsDAOLogicV1 is
      * @return The dynamic quorum parameters that were set at the given block number
      */
     function getDynamicQuorumParamsAt(uint256 blockNumber_) public view returns (DynamicQuorumParams memory) {
-        uint32 blockNumber = safe32(
-            blockNumber_,
-            "VerbsDAO::getDynamicQuorumParamsAt: block number exceeds 32 bits"
-        );
+        uint32 blockNumber = safe32(blockNumber_, "VerbsDAO::getDynamicQuorumParamsAt: block number exceeds 32 bits");
         uint256 len = quorumParamsCheckpoints.length;
 
         if (len == 0) {
@@ -1097,9 +1069,7 @@ contract VerbsDAOLogicV1 is
         if (pos > 0 && quorumParamsCheckpoints[pos - 1].fromBlock == blockNumber) {
             quorumParamsCheckpoints[pos - 1].params = params;
         } else {
-            quorumParamsCheckpoints.push(
-                DynamicQuorumParamsCheckpoint({ fromBlock: blockNumber, params: params })
-            );
+            quorumParamsCheckpoints.push(DynamicQuorumParamsCheckpoint({ fromBlock: blockNumber, params: params }));
         }
     }
 

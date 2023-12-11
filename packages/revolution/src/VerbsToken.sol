@@ -249,9 +249,7 @@ contract VerbsToken is
      * @notice Set the token CultureIndex.
      * @dev Only callable by the owner when not locked.
      */
-    function setCultureIndex(
-        ICultureIndex _cultureIndex
-    ) external onlyOwner whenCultureIndexNotLocked nonReentrant {
+    function setCultureIndex(ICultureIndex _cultureIndex) external onlyOwner whenCultureIndexNotLocked nonReentrant {
         cultureIndex = _cultureIndex;
 
         emit CultureIndexUpdated(_cultureIndex);

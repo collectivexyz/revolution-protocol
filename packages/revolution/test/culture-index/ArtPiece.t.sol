@@ -368,11 +368,7 @@ contract CultureIndexArtPieceTest is CultureIndexTestSuite {
             expectedTotalVotesSupply,
             "Total votes supply should be set correctly on creation"
         );
-        assertEq(
-            piece.totalERC20Supply,
-            erc20Supply,
-            "Total ERC20 supply should be set correctly on creation"
-        );
+        assertEq(piece.totalERC20Supply, erc20Supply, "Total ERC20 supply should be set correctly on creation");
 
         vm.roll(block.number + 1);
         // Cast votes
@@ -399,11 +395,7 @@ contract CultureIndexArtPieceTest is CultureIndexTestSuite {
         uint256 expectedTotalVotesSupply2 = erc20Supply * 2 + 1e18 * cultureIndex.erc721VotingTokenWeight();
         emit log_named_uint("expectedTotalVotesSupply2", expectedTotalVotesSupply2);
         uint256 expectedQuorumVotes2 = (quorumVotesBPS * (expectedTotalVotesSupply2)) / 10_000;
-        assertEq(
-            newPiece.quorumVotes,
-            expectedQuorumVotes2,
-            "Quorum votes should be set correctly on second creation"
-        );
+        assertEq(newPiece.quorumVotes, expectedQuorumVotes2, "Quorum votes should be set correctly on second creation");
         assertEq(
             newPiece.totalVotesSupply,
             expectedTotalVotesSupply2,

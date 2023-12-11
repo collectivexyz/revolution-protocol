@@ -32,13 +32,7 @@ import { Initializable } from "@openzeppelin/contracts-upgradeable/proxy/utils/I
  * by listening to said events. Other implementations of the ERC may not emit
  * these events, as it isn't required by the specification.
  */
-abstract contract ERC20Upgradeable is
-    Initializable,
-    ContextUpgradeable,
-    IERC20,
-    IERC20Metadata,
-    IERC20Errors
-{
+abstract contract ERC20Upgradeable is Initializable, ContextUpgradeable, IERC20, IERC20Metadata, IERC20Errors {
     /// @custom:storage-location erc7201:openzeppelin.storage.ERC20
     struct ERC20Storage {
         mapping(address account => uint256) _balances;
@@ -49,8 +43,7 @@ abstract contract ERC20Upgradeable is
     }
 
     // keccak256(abi.encode(uint256(keccak256("openzeppelin.storage.ERC20")) - 1)) & ~bytes32(uint256(0xff))
-    bytes32 private constant ERC20StorageLocation =
-        0x52c63247e1f47db19d5ce0460030c497f067ca4cebf71ba98eeadabe20bace00;
+    bytes32 private constant ERC20StorageLocation = 0x52c63247e1f47db19d5ce0460030c497f067ca4cebf71ba98eeadabe20bace00;
 
     function _getERC20Storage() private pure returns (ERC20Storage storage $) {
         assembly {

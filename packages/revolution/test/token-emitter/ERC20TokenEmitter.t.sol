@@ -148,10 +148,7 @@ contract ERC20TokenEmitterTest is RevolutionBuilderTest {
 
         INontransferableERC20Votes(governanceToken).initialize({
             initialOwner: address(emitter1),
-            erc20TokenParams: IRevolutionBuilder.ERC20TokenParams({
-                name: "Revolution Governance",
-                symbol: "GOV"
-            })
+            erc20TokenParams: IRevolutionBuilder.ERC20TokenParams({ name: "Revolution Governance", symbol: "GOV" })
         });
 
         vm.deal(address(this), 100000 ether);
@@ -252,11 +249,7 @@ contract ERC20TokenEmitterTest is RevolutionBuilderTest {
 
         // Verify tokens distributed to creator
         uint256 creatorTokenBalance = erc20TokenEmitter.balanceOf(erc20TokenEmitter.creatorsAddress());
-        assertEq(
-            creatorTokenBalance,
-            expectedCreatorTokens,
-            "Creator did not receive correct amount of tokens"
-        );
+        assertEq(creatorTokenBalance, expectedCreatorTokens, "Creator did not receive correct amount of tokens");
 
         // Verify ETH sent to creator
         uint256 creatorsNewEthBalance = address(erc20TokenEmitter.creatorsAddress()).balance;
@@ -416,9 +409,7 @@ contract ERC20TokenEmitterTest is RevolutionBuilderTest {
         correctBps[0] = 5000; // 50%
         correctBps[1] = 5000; // 50%
 
-        int expectedAmount = erc20TokenEmitter.getTokenQuoteForEther(
-            1e18 - erc20TokenEmitter.computeTotalReward(1e18)
-        );
+        int expectedAmount = erc20TokenEmitter.getTokenQuoteForEther(1e18 - erc20TokenEmitter.computeTotalReward(1e18));
         assertGt(expectedAmount, 0, "Token purchase should have a positive amount");
 
         // Attempting a valid token purchase
@@ -553,10 +544,7 @@ contract ERC20TokenEmitterTest is RevolutionBuilderTest {
 
         INontransferableERC20Votes(governanceToken).initialize({
             initialOwner: address(emitter2),
-            erc20TokenParams: IRevolutionBuilder.ERC20TokenParams({
-                name: "Revolution Governance",
-                symbol: "GOV"
-            })
+            erc20TokenParams: IRevolutionBuilder.ERC20TokenParams({ name: "Revolution Governance", symbol: "GOV" })
         });
 
         vm.deal(address(this), 100000 ether);
@@ -583,9 +571,7 @@ contract ERC20TokenEmitterTest is RevolutionBuilderTest {
         vm.assume(payment < erc20TokenEmitter.maxPurchaseAmount());
         vm.startPrank(address(0));
 
-        uint256 SOME_MAX_EXPECTED_VALUE = uint256(wadDiv(int256(payment), 1 ether)) *
-            1e18 *
-            tokensPerTimeUnit;
+        uint256 SOME_MAX_EXPECTED_VALUE = uint256(wadDiv(int256(payment), 1 ether)) * 1e18 * tokensPerTimeUnit;
 
         int256 slightlyMore = erc20TokenEmitter.getTokenQuoteForEther((payment * 101) / 100);
 

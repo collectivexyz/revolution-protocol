@@ -43,9 +43,7 @@ contract TokenBasicTest is VerbsTokenTestSuite {
         (, ICultureIndex.ArtPieceMetadata memory metadata, , , , , , ) = cultureIndex.pieces(artPieceId);
 
         //assert name equals Verb + tokenId
-        string memory expectedName = string(
-            abi.encodePacked(tokenNamePrefix, " ", Strings.toString(tokenId))
-        );
+        string memory expectedName = string(abi.encodePacked(tokenNamePrefix, " ", Strings.toString(tokenId)));
 
         // Assert that the token metadata matches the expected metadata from the art piece
         assertEq(name, expectedName, "Token name does not match expected name");
@@ -147,11 +145,7 @@ contract TokenBasicTest is VerbsTokenTestSuite {
             "A masterpiece",
             "The description of the art piece should match the provided description."
         );
-        assertEq(
-            metadata.image,
-            "ipfs://legends",
-            "The image URL of the art piece should match the provided URL."
-        );
+        assertEq(metadata.image, "ipfs://legends", "The image URL of the art piece should match the provided URL.");
     }
 
     /// @dev Tests creating an art piece with invalid total basis points.
@@ -168,16 +162,7 @@ contract TokenBasicTest is VerbsTokenTestSuite {
 
         // Act & Assert
         vm.expectRevert("Total BPS must sum up to 10,000");
-        createArtPiece(
-            name,
-            description,
-            mediaType,
-            image,
-            text,
-            animationUrl,
-            creatorAddress,
-            invalidCreatorBps
-        );
+        createArtPiece(name, description, mediaType, image, text, animationUrl, creatorAddress, invalidCreatorBps);
     }
 
     /// @dev Tests creating an art piece with a zero address in the creator array.
@@ -194,16 +179,7 @@ contract TokenBasicTest is VerbsTokenTestSuite {
 
         // Act & Assert
         vm.expectRevert("Invalid creator address");
-        createArtPiece(
-            name,
-            description,
-            mediaType,
-            image,
-            text,
-            animationUrl,
-            zeroCreatorAddress,
-            creatorBps
-        );
+        createArtPiece(name, description, mediaType, image, text, animationUrl, zeroCreatorAddress, creatorBps);
     }
 
     /// @dev Tests that creating an art piece with more than 100 creators fails.
@@ -384,11 +360,7 @@ contract TokenBasicTest is VerbsTokenTestSuite {
         ICultureIndex.ArtPiece memory topPiece = cultureIndex.getTopVotedPiece();
 
         // Assert
-        assertEq(
-            topPiece.pieceId,
-            secondArtPieceId,
-            "The top voted piece should be the second piece with higher votes"
-        );
+        assertEq(topPiece.pieceId, secondArtPieceId, "The top voted piece should be the second piece with higher votes");
     }
 
     /// @dev Tests that dropTopVotedPiece updates the isDropped flag of the art piece.
@@ -459,11 +431,7 @@ contract TokenBasicTest is VerbsTokenTestSuite {
     }
 
     // Helper function to extract a substring from a string
-    function substring(
-        string memory str,
-        uint256 startIndex,
-        uint256 endIndex
-    ) internal pure returns (string memory) {
+    function substring(string memory str, uint256 startIndex, uint256 endIndex) internal pure returns (string memory) {
         bytes memory strBytes = bytes(str);
         bytes memory result = new bytes(endIndex - startIndex);
         for (uint256 i = startIndex; i < endIndex; i++) {

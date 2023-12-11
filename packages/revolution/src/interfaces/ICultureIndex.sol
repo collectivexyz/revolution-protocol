@@ -143,10 +143,7 @@ interface ICultureIndex is ICultureIndexEvents {
      * @param creatorArray An array of creators and their associated basis points.
      * @return The ID of the newly created art piece.
      */
-    function createPiece(
-        ArtPieceMetadata memory metadata,
-        CreatorBps[] memory creatorArray
-    ) external returns (uint256);
+    function createPiece(ArtPieceMetadata memory metadata, CreatorBps[] memory creatorArray) external returns (uint256);
 
     /**
      * @notice Allows a user to vote for a specific art piece.

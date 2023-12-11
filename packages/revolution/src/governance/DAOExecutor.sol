@@ -96,14 +96,8 @@ contract DAOExecutor is Initializable {
     /// @param _admin The DAO's address
     /// @param _timelockDelay The time delay to execute a queued transaction
     function initialize(address _admin, uint256 _timelockDelay) external initializer {
-        require(
-            _timelockDelay >= MINIMUM_DELAY,
-            "DAOExecutor::constructor: Delay must exceed minimum delay."
-        );
-        require(
-            _timelockDelay <= MAXIMUM_DELAY,
-            "DAOExecutor::setDelay: Delay must not exceed maximum delay."
-        );
+        require(_timelockDelay >= MINIMUM_DELAY, "DAOExecutor::constructor: Delay must exceed minimum delay.");
+        require(_timelockDelay <= MAXIMUM_DELAY, "DAOExecutor::setDelay: Delay must not exceed maximum delay.");
 
         require(msg.sender == address(manager), "Only manager can initialize");
 
@@ -132,10 +126,7 @@ contract DAOExecutor is Initializable {
     }
 
     function setPendingAdmin(address pendingAdmin_) public {
-        require(
-            msg.sender == address(this),
-            "DAOExecutor::setPendingAdmin: Call must come from DAOExecutor."
-        );
+        require(msg.sender == address(this), "DAOExecutor::setPendingAdmin: Call must come from DAOExecutor.");
         pendingAdmin = pendingAdmin_;
 
         emit NewPendingAdmin(pendingAdmin);
@@ -186,18 +177,9 @@ contract DAOExecutor is Initializable {
         require(msg.sender == admin, "DAOExecutor::executeTransaction: Call must come from admin.");
 
         bytes32 txHash = keccak256(abi.encode(target, value, signature, data, eta));
-        require(
-            queuedTransactions[txHash],
-            "DAOExecutor::executeTransaction: Transaction hasn't been queued."
-        );
-        require(
-            getBlockTimestamp() >= eta,
-            "DAOExecutor::executeTransaction: Transaction hasn't surpassed time lock."
-        );
-        require(
-            getBlockTimestamp() <= eta + GRACE_PERIOD,
-            "DAOExecutor::executeTransaction: Transaction is stale."
-        );
+        require(queuedTransactions[txHash], "DAOExecutor::executeTransaction: Transaction hasn't been queued.");
+        require(getBlockTimestamp() >= eta, "DAOExecutor::executeTransaction: Transaction hasn't surpassed time lock.");
+        require(getBlockTimestamp() <= eta + GRACE_PERIOD, "DAOExecutor::executeTransaction: Transaction is stale.");
 
         queuedTransactions[txHash] = false;
 

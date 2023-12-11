@@ -42,8 +42,7 @@ abstract contract ERC721Upgradeable is
     }
 
     // keccak256(abi.encode(uint256(keccak256("openzeppelin.storage.ERC721")) - 1)) & ~bytes32(uint256(0xff))
-    bytes32 private constant ERC721StorageLocation =
-        0x80bb2b638cc20bc4d0a60d66940f3ab4a00c1d7b313497ca82fb0b4ab0079300;
+    bytes32 private constant ERC721StorageLocation = 0x80bb2b638cc20bc4d0a60d66940f3ab4a00c1d7b313497ca82fb0b4ab0079300;
 
     function _getERC721Storage() private pure returns (ERC721Storage storage $) {
         assembly {
@@ -218,11 +217,7 @@ abstract contract ERC721Upgradeable is
      * WARNING: This function assumes that `owner` is the actual owner of `tokenId` and does not verify this
      * assumption.
      */
-    function _isAuthorized(
-        address owner,
-        address spender,
-        uint256 tokenId
-    ) internal view virtual returns (bool) {
+    function _isAuthorized(address owner, address spender, uint256 tokenId) internal view virtual returns (bool) {
         return
             spender != address(0) &&
             (owner == spender || isApprovedForAll(owner, spender) || _getApproved(tokenId) == spender);
@@ -503,9 +498,7 @@ abstract contract ERC721Upgradeable is
      */
     function _checkOnERC721Received(address from, address to, uint256 tokenId, bytes memory data) private {
         if (to.code.length > 0) {
-            try IERC721Receiver(to).onERC721Received(_msgSender(), from, tokenId, data) returns (
-                bytes4 retval
-            ) {
+            try IERC721Receiver(to).onERC721Received(_msgSender(), from, tokenId, data) returns (bytes4 retval) {
                 if (retval != IERC721Receiver.onERC721Received.selector) {
                     revert ERC721InvalidReceiver(to);
                 }

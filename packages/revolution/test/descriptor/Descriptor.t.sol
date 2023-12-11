@@ -268,12 +268,7 @@ contract DescriptorTest is RevolutionBuilderTest {
         string memory uri = descriptor.tokenURI(tokenId, metadata);
 
         // The token URI should reflect both image and animation URLs
-        assertFullMetadataIntegrity(
-            uri,
-            metadata,
-            tokenId,
-            "Token URI should reflect mixed media types correctly"
-        );
+        assertFullMetadataIntegrity(uri, metadata, tokenId, "Token URI should reflect mixed media types correctly");
     }
 
     /// @notice Test `tokenURI` with full metadata set
@@ -291,12 +286,7 @@ contract DescriptorTest is RevolutionBuilderTest {
         string memory uri = descriptor.tokenURI(tokenId, metadata);
 
         // Validate the token URI against the full metadata
-        assertFullMetadataIntegrity(
-            uri,
-            metadata,
-            tokenId,
-            "Token URI should correctly represent the full metadata"
-        );
+        assertFullMetadataIntegrity(uri, metadata, tokenId, "Token URI should correctly represent the full metadata");
     }
 
     // Corrected use of startsWith in assertUriContainsImage function
@@ -320,17 +310,12 @@ contract DescriptorTest is RevolutionBuilderTest {
         string memory errorMessage
     ) internal {
         string memory metadataJson = decodeMetadata(uri);
-        (
-            string memory name,
-            string memory description,
-            string memory imageUrl,
-            string memory animationUrl
-        ) = parseJson(metadataJson);
+        (string memory name, string memory description, string memory imageUrl, string memory animationUrl) = parseJson(
+            metadataJson
+        );
 
         //expected name should tokenNamePrefix + space + tokenId
-        string memory expectedName = string(
-            abi.encodePacked(tokenNamePrefix, " ", Strings.toString(tokenId))
-        );
+        string memory expectedName = string(abi.encodePacked(tokenNamePrefix, " ", Strings.toString(tokenId)));
 
         assertEq(name, expectedName, string(abi.encodePacked(errorMessage, " - Name mismatch")));
         assertEq(
@@ -338,11 +323,7 @@ contract DescriptorTest is RevolutionBuilderTest {
             string(abi.encodePacked(expectedMetadata.name, ". ", expectedMetadata.description)),
             string(abi.encodePacked(errorMessage, " - Description mismatch"))
         );
-        assertEq(
-            imageUrl,
-            expectedMetadata.image,
-            string(abi.encodePacked(errorMessage, " - Image URL mismatch"))
-        );
+        assertEq(imageUrl, expectedMetadata.image, string(abi.encodePacked(errorMessage, " - Image URL mismatch")));
         assertEq(
             animationUrl,
             expectedMetadata.animationUrl,
@@ -362,15 +343,7 @@ contract DescriptorTest is RevolutionBuilderTest {
     // Helper function to parse JSON strings into components
     function parseJson(
         string memory _json
-    )
-        internal
-        returns (
-            string memory name,
-            string memory description,
-            string memory image,
-            string memory animationUrl
-        )
-    {
+    ) internal returns (string memory name, string memory description, string memory image, string memory animationUrl) {
         uint returnValue;
         JsmnSolLib.Token[] memory tokens;
         uint actualNum;
@@ -434,9 +407,7 @@ contract DescriptorTest is RevolutionBuilderTest {
     /// @param uri The data URI to split.
     /// @return mimeType The MIME type of the data.
     /// @return base64Data The base64 encoded data.
-    function splitDataURI(
-        string memory uri
-    ) internal pure returns (string memory mimeType, string memory base64Data) {
+    function splitDataURI(string memory uri) internal pure returns (string memory mimeType, string memory base64Data) {
         // Find the comma that separates the MIME type from the base64 data
         bytes memory uriBytes = bytes(uri);
         uint256 commaIndex = findComma(uriBytes);
@@ -467,11 +438,7 @@ contract DescriptorTest is RevolutionBuilderTest {
     /// @param startIndex The start index of the substring.
     /// @param endIndex The end index of the substring.
     /// @return The substring.
-    function substring(
-        bytes memory b,
-        uint256 startIndex,
-        uint256 endIndex
-    ) internal pure returns (bytes memory) {
+    function substring(bytes memory b, uint256 startIndex, uint256 endIndex) internal pure returns (bytes memory) {
         bytes memory result = new bytes(endIndex - startIndex);
         for (uint256 i = startIndex; i < endIndex; i++) {
             result[i - startIndex] = b[i];

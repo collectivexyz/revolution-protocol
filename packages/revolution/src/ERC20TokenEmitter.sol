@@ -279,9 +279,7 @@ contract ERC20TokenEmitter is
             vrgdac.yToX({
                 timeSinceStart: toDaysWadUnsafe(block.timestamp - startTime),
                 sold: emittedTokenWad,
-                amount: int(
-                    ((paymentAmount - computeTotalReward(paymentAmount)) * (10_000 - creatorRateBps)) / 10_000
-                )
+                amount: int(((paymentAmount - computeTotalReward(paymentAmount)) * (10_000 - creatorRateBps)) / 10_000)
             });
     }
 

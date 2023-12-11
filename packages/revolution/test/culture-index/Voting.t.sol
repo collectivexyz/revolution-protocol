@@ -210,8 +210,7 @@ contract CultureIndexVotingBasicTest is CultureIndexTestSuite {
         erc721Token.transferFrom(address(auction), voter, 0);
 
         uint256 initialWeight = cultureIndex.getVotes(voter);
-        uint256 expectedInitialWeight = initialErc20Weight +
-            (1 * cultureIndex.erc721VotingTokenWeight() * 1e18);
+        uint256 expectedInitialWeight = initialErc20Weight + (1 * cultureIndex.erc721VotingTokenWeight() * 1e18);
         assertEq(initialWeight, expectedInitialWeight);
 
         // Change token balances
@@ -375,11 +374,7 @@ contract CultureIndexVotingBasicTest is CultureIndexTestSuite {
         try cultureIndex.voteForMany(pieceIds) {
             fail("Batch voting with zero weight should fail");
         } catch Error(string memory reason) {
-            assertEq(
-                reason,
-                "Weight must be greater than minVoteWeight",
-                "Should revert with weight zero error"
-            );
+            assertEq(reason, "Weight must be greater than minVoteWeight", "Should revert with weight zero error");
         }
     }
 
@@ -696,18 +691,13 @@ contract CultureIndexVotingBasicTest is CultureIndexTestSuite {
         vm.roll(block.number + 3);
 
         // Calculate expected vote weight
-        uint256 expectedVoteWeight = erc20Balance +
-            (erc721Balance * cultureIndex.erc721VotingTokenWeight() * 1e18);
+        uint256 expectedVoteWeight = erc20Balance + (erc721Balance * cultureIndex.erc721VotingTokenWeight() * 1e18);
 
         // Get the actual vote weight from the contract
         uint256 actualVoteWeight = cultureIndex.getVotes(address(auction));
 
         // Assert that the actual vote weight matches the expected value
-        assertEq(
-            actualVoteWeight,
-            expectedVoteWeight,
-            "Vote weight calculation does not match expected value"
-        );
+        assertEq(actualVoteWeight, expectedVoteWeight, "Vote weight calculation does not match expected value");
     }
 
     function testQuorumVotesCalculation(uint200 erc20TotalSupply, uint256 erc721TotalSupply) public {
@@ -749,10 +739,6 @@ contract CultureIndexVotingBasicTest is CultureIndexTestSuite {
         uint256 actualQuorumVotes = cultureIndex.quorumVotes();
 
         // Assert that the actual quorum votes match the expected value
-        assertEq(
-            actualQuorumVotes,
-            expectedQuorumVotes,
-            "Quorum votes calculation does not match expected value"
-        );
+        assertEq(actualQuorumVotes, expectedQuorumVotes, "Quorum votes calculation does not match expected value");
     }
 }

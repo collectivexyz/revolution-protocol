@@ -108,11 +108,7 @@ contract TokenMintingTest is VerbsTokenTestSuite {
 
         // Validate the token
         uint256 totalSupply = erc721Token.totalSupply();
-        assertEq(
-            erc721Token.ownerOf(tokenId),
-            address(auction),
-            "The contract should own the newly minted token"
-        );
+        assertEq(erc721Token.ownerOf(tokenId), address(auction), "The contract should own the newly minted token");
         assertEq(tokenId, 0, "First token ID should be 1");
         assertEq(totalSupply, 1, "Total supply should be 1");
     }
@@ -124,11 +120,7 @@ contract TokenMintingTest is VerbsTokenTestSuite {
         uint256 initialTotalSupply = erc721Token.totalSupply();
         uint256 newTokenId = erc721Token.mint();
         assertEq(erc721Token.totalSupply(), initialTotalSupply + 1, "One new token should have been minted");
-        assertEq(
-            erc721Token.ownerOf(newTokenId),
-            address(auction),
-            "The contract should own the newly minted token"
-        );
+        assertEq(erc721Token.ownerOf(newTokenId), address(auction), "The contract should own the newly minted token");
     }
 
     /// @dev Tests burning a verb token
@@ -166,11 +158,7 @@ contract TokenMintingTest is VerbsTokenTestSuite {
         if (shouldRevertMint) vm.expectRevert("dropTopVotedPiece failed");
         uint256 tokenId1 = erc721Token.mint();
         if (!shouldRevertMint)
-            assertEq(
-                erc721Token.totalSupply(),
-                tokenId1 + 1,
-                "CurrentVerbId should increment after first mint"
-            );
+            assertEq(erc721Token.totalSupply(), tokenId1 + 1, "CurrentVerbId should increment after first mint");
 
         vm.startPrank(address(this));
         if (voteWeight == 0) vm.expectRevert("Weight must be greater than minVoteWeight");
@@ -180,20 +168,14 @@ contract TokenMintingTest is VerbsTokenTestSuite {
         if (shouldRevertMint) vm.expectRevert("dropTopVotedPiece failed");
         uint256 tokenId2 = erc721Token.mint();
         if (!shouldRevertMint)
-            assertEq(
-                erc721Token.totalSupply(),
-                tokenId2 + 1,
-                "CurrentVerbId should increment after second mint"
-            );
+            assertEq(erc721Token.totalSupply(), tokenId2 + 1, "CurrentVerbId should increment after second mint");
     }
 
     /// @dev Checks if the VerbCreated event is emitted with correct parameters on minting
     function testMintingEvent() public {
         createDefaultArtPiece();
 
-        (uint256 pieceId, ICultureIndex.ArtPieceMetadata memory metadata, , , , , , ) = cultureIndex.pieces(
-            0
-        );
+        (uint256 pieceId, ICultureIndex.ArtPieceMetadata memory metadata, , , , , , ) = cultureIndex.pieces(0);
 
         emit log_uint(pieceId);
 
@@ -230,11 +212,7 @@ contract TokenMintingTest is VerbsTokenTestSuite {
 
         erc721Token.burn(tokenId);
         assertEq(erc721Token.totalSupply(), 0, "Total supply should be 0 after burning");
-        assertEq(
-            erc721Token.balanceOf(address(auction)),
-            0,
-            "Auction should not own any tokens after burning"
-        );
+        assertEq(erc721Token.balanceOf(address(auction)), 0, "Auction should not own any tokens after burning");
     }
 
     /// @dev Validates that the token URI is correctly set and retrieved
@@ -244,11 +222,7 @@ contract TokenMintingTest is VerbsTokenTestSuite {
         (, ICultureIndex.ArtPieceMetadata memory metadata, , , , , , ) = cultureIndex.pieces(artPieceId);
         // Assuming the descriptor returns a fixed URI for the given tokenId
         string memory expectedTokenURI = descriptor.tokenURI(tokenId, metadata);
-        assertEq(
-            erc721Token.tokenURI(tokenId),
-            expectedTokenURI,
-            "Token URI should be correctly set and retrieved"
-        );
+        assertEq(erc721Token.tokenURI(tokenId), expectedTokenURI, "Token URI should be correctly set and retrieved");
     }
 
     /// @dev Ensures minting fetches and associates the top-voted piece from CultureIndex

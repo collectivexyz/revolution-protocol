@@ -38,9 +38,7 @@ contract CultureIndexVotingSignaturesTest is CultureIndexTestSuite {
         return
             keccak256(
                 abi.encode(
-                    keccak256(
-                        "EIP712Domain(string name,string version,uint256 chainId,address verifyingContract)"
-                    ),
+                    keccak256("EIP712Domain(string name,string version,uint256 chainId,address verifyingContract)"),
                     keccak256(abi.encodePacked(cultureIndex.name(), " CultureIndex")),
                     keccak256(bytes("1")),
                     block.chainid,
@@ -56,9 +54,7 @@ contract CultureIndexVotingSignaturesTest is CultureIndexTestSuite {
         uint256 nonce = cultureIndex.nonces(offchainVoter);
         uint256 deadline = block.timestamp + 1 days;
 
-        bytes32 voteHash = keccak256(
-            abi.encode(cultureIndex.VOTE_TYPEHASH(), address(0), pieceIds, nonce, deadline)
-        );
+        bytes32 voteHash = keccak256(abi.encode(cultureIndex.VOTE_TYPEHASH(), address(0), pieceIds, nonce, deadline));
 
         bytes32 digest = keccak256(abi.encodePacked("\x19\x01", getDomainSeparator(), voteHash));
 
@@ -84,9 +80,7 @@ contract CultureIndexVotingSignaturesTest is CultureIndexTestSuite {
         vm.startPrank(address(this));
         vm.roll(block.number + 1);
 
-        bytes32 voteHash = keccak256(
-            abi.encode(cultureIndex.VOTE_TYPEHASH(), offchainVoter, pieceIds, nonce, deadline)
-        );
+        bytes32 voteHash = keccak256(abi.encode(cultureIndex.VOTE_TYPEHASH(), offchainVoter, pieceIds, nonce, deadline));
 
         bytes32 digest = keccak256(abi.encodePacked("\x19\x01", getDomainSeparator(), voteHash));
 
@@ -123,9 +117,7 @@ contract CultureIndexVotingSignaturesTest is CultureIndexTestSuite {
         uint256 nonce = cultureIndex.nonces(offchainVoter);
         uint256 deadline = block.timestamp + 1 days;
 
-        bytes32 voteHash = keccak256(
-            abi.encode(cultureIndex.VOTE_TYPEHASH(), offchainVoter, pieceIds, nonce, deadline)
-        );
+        bytes32 voteHash = keccak256(abi.encode(cultureIndex.VOTE_TYPEHASH(), offchainVoter, pieceIds, nonce, deadline));
 
         bytes32 digest = keccak256(abi.encodePacked("\x19\x01", getDomainSeparator(), voteHash));
 
@@ -144,9 +136,7 @@ contract CultureIndexVotingSignaturesTest is CultureIndexTestSuite {
         uint256 nonce = cultureIndex.nonces(offchainVoter) + 1;
         uint256 deadline = block.timestamp + 1 days;
 
-        bytes32 voteHash = keccak256(
-            abi.encode(cultureIndex.VOTE_TYPEHASH(), offchainVoter, nonce, deadline)
-        );
+        bytes32 voteHash = keccak256(abi.encode(cultureIndex.VOTE_TYPEHASH(), offchainVoter, nonce, deadline));
 
         bytes32 digest = keccak256(abi.encodePacked("\x19\x01", getDomainSeparator(), voteHash));
 
@@ -171,9 +161,7 @@ contract CultureIndexVotingSignaturesTest is CultureIndexTestSuite {
         vm.roll(block.number + 1);
 
         vm.startPrank(address(offchainVoter));
-        bytes32 voteHash = keccak256(
-            abi.encode(cultureIndex.VOTE_TYPEHASH(), offchainVoter, pieceIds, nonce, deadline)
-        );
+        bytes32 voteHash = keccak256(abi.encode(cultureIndex.VOTE_TYPEHASH(), offchainVoter, pieceIds, nonce, deadline));
 
         bytes32 digest = keccak256(abi.encodePacked("\x19\x01", getDomainSeparator(), voteHash));
 
@@ -237,9 +225,7 @@ contract CultureIndexVotingSignaturesTest is CultureIndexTestSuite {
         nonce = cultureIndex.nonces(funVoterGuy);
         deadline = block.timestamp + 1 days;
 
-        voteHash = keccak256(
-            abi.encode(cultureIndex.VOTE_TYPEHASH(), funVoterGuy, pieceIds, nonce, deadline)
-        );
+        voteHash = keccak256(abi.encode(cultureIndex.VOTE_TYPEHASH(), funVoterGuy, pieceIds, nonce, deadline));
 
         digest = keccak256(abi.encodePacked("\x19\x01", getDomainSeparator(), voteHash));
 
@@ -252,9 +238,7 @@ contract CultureIndexVotingSignaturesTest is CultureIndexTestSuite {
         nonce = cultureIndex.nonces(offchainVoter);
         deadline = block.timestamp + 1 days;
 
-        voteHash = keccak256(
-            abi.encode(cultureIndex.VOTE_TYPEHASH(), offchainVoter, pieceIds, nonce, deadline)
-        );
+        voteHash = keccak256(abi.encode(cultureIndex.VOTE_TYPEHASH(), offchainVoter, pieceIds, nonce, deadline));
 
         digest = keccak256(abi.encodePacked("\x19\x01", getDomainSeparator(), voteHash));
 
@@ -266,9 +250,7 @@ contract CultureIndexVotingSignaturesTest is CultureIndexTestSuite {
         nonce = cultureIndex.nonces(offchainVoter);
         deadline = block.timestamp + 1 days;
 
-        voteHash = keccak256(
-            abi.encode(cultureIndex.VOTE_TYPEHASH(), offchainVoter, pieceIds, nonce, deadline)
-        );
+        voteHash = keccak256(abi.encode(cultureIndex.VOTE_TYPEHASH(), offchainVoter, pieceIds, nonce, deadline));
 
         digest = keccak256(abi.encodePacked("\x19\x01", getDomainSeparator(), voteHash));
 
@@ -287,9 +269,7 @@ contract CultureIndexVotingSignaturesTest is CultureIndexTestSuite {
         nonce = cultureIndex.nonces(notoffchainVoter);
         deadline = block.timestamp + 1 days;
 
-        voteHash = keccak256(
-            abi.encode(cultureIndex.VOTE_TYPEHASH(), notoffchainVoter, pieceIds, nonce, deadline)
-        );
+        voteHash = keccak256(abi.encode(cultureIndex.VOTE_TYPEHASH(), notoffchainVoter, pieceIds, nonce, deadline));
 
         digest = keccak256(abi.encodePacked("\x19\x01", getDomainSeparator(), voteHash));
 

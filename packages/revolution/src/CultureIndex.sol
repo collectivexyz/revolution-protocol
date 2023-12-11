@@ -167,8 +167,7 @@ contract CultureIndex is
             require(bytes(metadata.image).length > 0, "Image URL must be provided");
         else if (metadata.mediaType == MediaType.ANIMATION)
             require(bytes(metadata.animationUrl).length > 0, "Animation URL must be provided");
-        else if (metadata.mediaType == MediaType.TEXT)
-            require(bytes(metadata.text).length > 0, "Text must be provided");
+        else if (metadata.mediaType == MediaType.TEXT) require(bytes(metadata.text).length > 0, "Text must be provided");
     }
 
     /**
@@ -326,10 +325,7 @@ contract CultureIndex is
      * @param erc721Balance The ERC721 balance of the voter.
      * @return The vote weight of the voter.
      */
-    function _calculateVoteWeight(
-        uint256 erc20Balance,
-        uint256 erc721Balance
-    ) internal view returns (uint256) {
+    function _calculateVoteWeight(uint256 erc20Balance, uint256 erc721Balance) internal view returns (uint256) {
         return erc20Balance + (erc721Balance * erc721VotingTokenWeight * 1e18);
     }
 
@@ -448,11 +444,7 @@ contract CultureIndex is
     ) external nonReentrant {
         uint256 len = from.length;
         require(
-            len == pieceIds.length &&
-                len == deadline.length &&
-                len == v.length &&
-                len == r.length &&
-                len == s.length,
+            len == pieceIds.length && len == deadline.length && len == v.length && len == r.length && len == s.length,
             "Array lengths must match"
         );
 
@@ -562,10 +554,7 @@ contract CultureIndex is
      * @param newQuorumVotesBPS new art piece drop threshold
      */
     function _setQuorumVotesBPS(uint256 newQuorumVotesBPS) external onlyOwner {
-        require(
-            newQuorumVotesBPS <= MAX_QUORUM_VOTES_BPS,
-            "CultureIndex::_setQuorumVotesBPS: invalid quorum bps"
-        );
+        require(newQuorumVotesBPS <= MAX_QUORUM_VOTES_BPS, "CultureIndex::_setQuorumVotesBPS: invalid quorum bps");
         emit QuorumVotesBPSSet(quorumVotesBPS, newQuorumVotesBPS);
 
         quorumVotesBPS = newQuorumVotesBPS;
@@ -577,8 +566,7 @@ contract CultureIndex is
      */
     function quorumVotes() public view returns (uint256) {
         return
-            (quorumVotesBPS *
-                _calculateVoteWeight(erc20VotingToken.totalSupply(), erc721VotingToken.totalSupply())) /
+            (quorumVotesBPS * _calculateVoteWeight(erc20VotingToken.totalSupply(), erc721VotingToken.totalSupply())) /
             10_000;
     }
 
@@ -588,10 +576,7 @@ contract CultureIndex is
      */
     function dropTopVotedPiece() public nonReentrant onlyOwner returns (ArtPiece memory) {
         ICultureIndex.ArtPiece memory piece = getTopVotedPiece();
-        require(
-            totalVoteWeights[piece.pieceId] >= piece.quorumVotes,
-            "Does not meet quorum votes to be dropped."
-        );
+        require(totalVoteWeights[piece.pieceId] >= piece.quorumVotes, "Does not meet quorum votes to be dropped.");
 
         //set the piece as dropped
         pieces[piece.pieceId].isDropped = true;

@@ -30,13 +30,7 @@ import { Initializable } from "@openzeppelin/contracts-upgradeable/proxy/utils/I
  * {ERC721-balanceOf}), and can use {_transferVotingUnits} to track a change in the distribution of those units (in the
  * previous example, it would be included in {ERC721-_update}).
  */
-abstract contract VotesUpgradeable is
-    Initializable,
-    ContextUpgradeable,
-    EIP712Upgradeable,
-    NoncesUpgradeable,
-    IERC5805
-{
+abstract contract VotesUpgradeable is Initializable, ContextUpgradeable, EIP712Upgradeable, NoncesUpgradeable, IERC5805 {
     using Checkpoints for Checkpoints.Trace208;
 
     bytes32 private constant DELEGATION_TYPEHASH =
@@ -50,8 +44,7 @@ abstract contract VotesUpgradeable is
     }
 
     // keccak256(abi.encode(uint256(keccak256("openzeppelin.storage.Votes")) - 1)) & ~bytes32(uint256(0xff))
-    bytes32 public constant VotesStorageLocation =
-        0xe8b26c30fad74198956032a3533d903385d56dd795af560196f9c78d4af40d00;
+    bytes32 public constant VotesStorageLocation = 0xe8b26c30fad74198956032a3533d903385d56dd795af560196f9c78d4af40d00;
 
     function _getVotesStorage() private pure returns (VotesStorage storage $) {
         assembly {
@@ -254,10 +247,7 @@ abstract contract VotesUpgradeable is
     /**
      * @dev Get the `pos`-th checkpoint for `account`.
      */
-    function _checkpoints(
-        address account,
-        uint32 pos
-    ) internal view virtual returns (Checkpoints.Checkpoint208 memory) {
+    function _checkpoints(address account, uint32 pos) internal view virtual returns (Checkpoints.Checkpoint208 memory) {
         VotesStorage storage $ = _getVotesStorage();
         return $._delegateCheckpoints[account].at(pos);
     }

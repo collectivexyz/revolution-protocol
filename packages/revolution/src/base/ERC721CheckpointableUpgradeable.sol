@@ -25,11 +25,7 @@ import { Initializable } from "@openzeppelin/contracts-upgradeable/proxy/utils/I
  *   This avoids the delegator needing to "delegate to self" with an additional transaction
  */
 
-abstract contract ERC721CheckpointableUpgradeable is
-    Initializable,
-    ERC721EnumerableUpgradeable,
-    VotesUpgradeable
-{
+abstract contract ERC721CheckpointableUpgradeable is Initializable, ERC721EnumerableUpgradeable, VotesUpgradeable {
     function __ERC721Votes_init() internal onlyInitializing {}
 
     function __ERC721Votes_init_unchained() internal onlyInitializing {}

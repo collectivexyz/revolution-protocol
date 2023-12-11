@@ -33,12 +33,7 @@ import { ICultureIndex } from "./interfaces/ICultureIndex.sol";
 import { IRevolutionBuilder } from "./interfaces/IRevolutionBuilder.sol";
 import { Ownable2StepUpgradeable } from "@openzeppelin/contracts-upgradeable/access/Ownable2StepUpgradeable.sol";
 
-contract AuctionHouse is
-    IAuctionHouse,
-    PausableUpgradeable,
-    ReentrancyGuardUpgradeable,
-    Ownable2StepUpgradeable
-{
+contract AuctionHouse is IAuctionHouse, PausableUpgradeable, ReentrancyGuardUpgradeable, Ownable2StepUpgradeable {
     // The Verbs ERC721 token contract
     IVerbsToken public verbs;
 
@@ -209,10 +204,7 @@ contract AuctionHouse is
      * @param _creatorRateBps New creator rate in basis points.
      */
     function setCreatorRateBps(uint256 _creatorRateBps) external onlyOwner {
-        require(
-            _creatorRateBps >= minCreatorRateBps,
-            "Creator rate must be greater than or equal to minCreatorRateBps"
-        );
+        require(_creatorRateBps >= minCreatorRateBps, "Creator rate must be greater than or equal to minCreatorRateBps");
         require(_creatorRateBps <= 10_000, "Creator rate must be less than or equal to 10_000");
         creatorRateBps = _creatorRateBps;
 
@@ -225,10 +217,7 @@ contract AuctionHouse is
      * @param _minCreatorRateBps New minimum creator rate in basis points.
      */
     function setMinCreatorRateBps(uint256 _minCreatorRateBps) external onlyOwner {
-        require(
-            _minCreatorRateBps <= creatorRateBps,
-            "Min creator rate must be less than or equal to creator rate"
-        );
+        require(_minCreatorRateBps <= creatorRateBps, "Min creator rate must be less than or equal to creator rate");
         require(_minCreatorRateBps <= 10_000, "Min creator rate must be less than or equal to 10_000");
 
         //ensure new min rate cannot be lower than previous min rate
@@ -379,15 +368,12 @@ contract AuctionHouse is
                 //Transfer creator's share to the creator, for each creator, and build arrays for erc20TokenEmitter.buyToken
                 if (creatorsShare > 0 && entropyRateBps > 0) {
                     for (uint256 i = 0; i < numCreators; ) {
-                        ICultureIndex.CreatorBps memory creator = verbs
-                            .getArtPieceById(_auction.verbId)
-                            .creators[i];
+                        ICultureIndex.CreatorBps memory creator = verbs.getArtPieceById(_auction.verbId).creators[i];
                         vrgdaReceivers[i] = creator.creator;
                         vrgdaSplits[i] = creator.bps;
 
                         //Calculate paymentAmount for specific creator based on BPS splits - same as multiplying by creatorDirectPayment
-                        uint256 paymentAmount = (creatorsShare * entropyRateBps * creator.bps) /
-                            (10_000 * 10_000);
+                        uint256 paymentAmount = (creatorsShare * entropyRateBps * creator.bps) / (10_000 * 10_000);
                         ethPaidToCreators += paymentAmount;
 
                         //Transfer creator's share to the creator
@@ -401,9 +387,7 @@ contract AuctionHouse is
 
                 //Buy token from ERC20TokenEmitter for all the creators
                 if (creatorsShare > ethPaidToCreators) {
-                    creatorTokensEmitted = erc20TokenEmitter.buyToken{
-                        value: creatorsShare - ethPaidToCreators
-                    }(
+                    creatorTokensEmitted = erc20TokenEmitter.buyToken{ value: creatorsShare - ethPaidToCreators }(
                         vrgdaReceivers,
                         vrgdaSplits,
                         IERC20TokenEmitter.ProtocolRewardAddresses({

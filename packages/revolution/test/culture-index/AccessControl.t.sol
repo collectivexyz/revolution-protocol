@@ -42,11 +42,7 @@ contract CultureIndexAccessControlTest is CultureIndexTestSuite {
         vm.stopPrank();
 
         // Check if the quorum BPS is updated correctly
-        assertEq(
-            cultureIndex.quorumVotesBPS(),
-            currentQuorumBPS,
-            "Quorum BPS should be updated within valid range"
-        );
+        assertEq(cultureIndex.quorumVotesBPS(), currentQuorumBPS, "Quorum BPS should be updated within valid range");
     }
 
     function testRevertNonOwnerSetQuorumVotesBPS() public {
