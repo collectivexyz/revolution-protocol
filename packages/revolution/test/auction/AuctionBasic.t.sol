@@ -6,280 +6,285 @@ import { IAuctionHouse } from "../../src/interfaces/IAuctionHouse.sol";
 import { wadMul, wadDiv } from "../../src/libs/SignedWadMath.sol";
 
 contract AuctionHouseBasicTest is AuctionHouseTest {
-    // function testEventEmission(uint256 newCreatorRateBps, uint256 newEntropyRateBps) public {
-    //     vm.assume(newCreatorRateBps > auction.minCreatorRateBps());
-    //     vm.assume(newCreatorRateBps <= 10_000);
-    //     vm.assume(newEntropyRateBps <= 10_000);
+    function testEventEmission(uint256 newCreatorRateBps, uint256 newEntropyRateBps) public {
+        vm.assume(newCreatorRateBps > auction.minCreatorRateBps());
+        vm.assume(newCreatorRateBps <= 10_000);
+        vm.assume(newEntropyRateBps <= 10_000);
 
-    //     vm.startPrank(address(dao));
+        
 
-    //     // Expect events when changing creatorRateBps
-    //     vm.expectEmit(true, true, true, true);
-    //     emit IAuctionHouse.CreatorRateBpsUpdated(newCreatorRateBps);
-    //     auction.setCreatorRateBps(newCreatorRateBps);
+        // Expect events when changing creatorRateBps
+        vm.expectEmit(true, true, true, true);
+        emit IAuctionHouse.CreatorRateBpsUpdated(newCreatorRateBps);
+        auction.setCreatorRateBps(newCreatorRateBps);
 
-    //     // Expect events when changing entropyRateBps
-    //     vm.expectEmit(true, true, true, true);
-    //     emit IAuctionHouse.EntropyRateBpsUpdated(newEntropyRateBps);
-    //     auction.setEntropyRateBps(newEntropyRateBps);
-    // }
+        // Expect events when changing entropyRateBps
+        vm.expectEmit(true, true, true, true);
+        emit IAuctionHouse.EntropyRateBpsUpdated(newEntropyRateBps);
+        auction.setEntropyRateBps(newEntropyRateBps);
+    }
 
-    // function testBidEventEmission() public {
-    //     //setup bid
-    //     uint256 bidAmount = 100 ether;
-    //     uint256 verbId = createDefaultArtPiece();
-    //     vm.prank(address(dao));
-    //     auction.unpause();
-    //     vm.deal(address(1), bidAmount + 2 ether);
-    //     vm.prank(address(1));
-    //     // Expect an event emission
-    //     vm.expectEmit(true, true, true, true);
-    //     emit IAuctionHouse.AuctionBid(verbId, address(21), address(1), bidAmount, false);
-    //     auction.createBid{ value: bidAmount }(0, address(21)); // Assuming the first auction's verbId is 0
-    // }
+    function testBidEventEmission() public {
+        //setup bid
+        uint256 bidAmount = 100 ether;
+        uint256 verbId = createDefaultArtPiece();
+        
+        auction.unpause();
+        vm.deal(address(1), bidAmount + 2 ether);
+        vm.stopPrank();
+        vm.prank(address(1));
+        // Expect an event emission
+        vm.expectEmit(true, true, true, true);
+        emit IAuctionHouse.AuctionBid(verbId, address(21), address(1), bidAmount, false);
+        auction.createBid{ value: bidAmount }(0, address(21)); // Assuming the first auction's verbId is 0
+    }
 
-    // function testSetEntropyRateBps(uint256 newEntropyRateBps) public {
-    //     vm.assume(newEntropyRateBps <= 10_000);
-    //     vm.startPrank(address(dao));
+    function testSetEntropyRateBps(uint256 newEntropyRateBps) public {
+        vm.assume(newEntropyRateBps <= 10_000);
+        
 
-    //     // Expect an event emission
-    //     vm.expectEmit(true, true, true, true);
-    //     emit IAuctionHouse.EntropyRateBpsUpdated(newEntropyRateBps);
+        // Expect an event emission
+        vm.expectEmit(true, true, true, true);
+        emit IAuctionHouse.EntropyRateBpsUpdated(newEntropyRateBps);
 
-    //     // Update the rate
-    //     auction.setEntropyRateBps(newEntropyRateBps);
+        // Update the rate
+        auction.setEntropyRateBps(newEntropyRateBps);
 
-    //     // Assert new rate
-    //     assertEq(auction.entropyRateBps(), newEntropyRateBps);
-    // }
+        // Assert new rate
+        assertEq(auction.entropyRateBps(), newEntropyRateBps);
+    }
 
-    // function testSetEntropyRateBpsRestrictToOwner() public {
-    //     uint256 newEntropyRateBps = 5000;
+    function testSetEntropyRateBpsRestrictToOwner() public {
+        uint256 newEntropyRateBps = 5000;
 
-    //     // Attempt to change entropyRateBps as a non-owner
-    //     vm.startPrank(address(2));
-    //     vm.expectRevert();
-    //     auction.setEntropyRateBps(newEntropyRateBps);
-    //     vm.stopPrank();
-    // }
+        // Attempt to change entropyRateBps as a non-owner
+        vm.stopPrank();
+        vm.startPrank(address(2));
+        vm.expectRevert();
+        auction.setEntropyRateBps(newEntropyRateBps);
+        vm.stopPrank();
+    }
 
-    // function testSetEntropyRateBpsInvalidValues(uint256 invalidEntropyRateBps) public {
-    //     vm.assume(invalidEntropyRateBps > 10_000);
+    function testSetEntropyRateBpsInvalidValues(uint256 invalidEntropyRateBps) public {
+        vm.assume(invalidEntropyRateBps > 10_000);
 
-    //     uint256 oldEntropyRateBps = auction.entropyRateBps();
+        uint256 oldEntropyRateBps = auction.entropyRateBps();
 
-    //     vm.startPrank(address(dao));
-    //     // Attempt to set an invalid entropy rate
-    //     vm.expectRevert("Entropy rate must be less than or equal to 10_000");
-    //     auction.setEntropyRateBps(invalidEntropyRateBps);
+        
+        // Attempt to set an invalid entropy rate
+        vm.expectRevert("Entropy rate must be less than or equal to 10_000");
+        auction.setEntropyRateBps(invalidEntropyRateBps);
 
-    //     // Assert that the rate was not updated
-    //     assertEq(auction.entropyRateBps(), oldEntropyRateBps);
+        // Assert that the rate was not updated
+        assertEq(auction.entropyRateBps(), oldEntropyRateBps);
 
-    //     int256 invalidEntropyRateBps2 = -1; // Greater than 10,000
+        int256 invalidEntropyRateBps2 = -1; // Greater than 10,000
 
-    //     // Attempt to set an invalid entropy rate
-    //     vm.expectRevert();
-    //     auction.setEntropyRateBps(uint256(invalidEntropyRateBps2));
+        // Attempt to set an invalid entropy rate
+        vm.expectRevert();
+        auction.setEntropyRateBps(uint256(invalidEntropyRateBps2));
 
-    //     // Assert that the rate was not updated
-    //     assertEq(auction.entropyRateBps(), oldEntropyRateBps);
-    // }
+        // Assert that the rate was not updated
+        assertEq(auction.entropyRateBps(), oldEntropyRateBps);
+    }
 
-    // function testSetMinCreatorRateBps(uint256 newMinCreatorRateBps, uint256 creatorRateBps) public {
-    //     vm.startPrank(address(dao));
+    function testSetMinCreatorRateBps(uint256 newMinCreatorRateBps, uint256 creatorRateBps) public {
+        
+        
+        if (creatorRateBps > 10_000) {
+            vm.expectRevert("Creator rate must be less than or equal to 10_000");
+        } else if (creatorRateBps < auction.minCreatorRateBps()) {
+            vm.expectRevert("Creator rate must be greater than or equal to minCreatorRateBps");
+        } else {
+            // Expect an event emission
+            vm.expectEmit(true, true, true, true);
+            emit IAuctionHouse.CreatorRateBpsUpdated(creatorRateBps);
+        }
+        auction.setCreatorRateBps(creatorRateBps);
 
-    //     if (creatorRateBps > 10_000) {
-    //         vm.expectRevert("Creator rate must be less than or equal to 10_000");
-    //     } else if (creatorRateBps < auction.minCreatorRateBps()) {
-    //         vm.expectRevert("Creator rate must be greater than or equal to minCreatorRateBps");
-    //     } else {
-    //         // Expect an event emission
-    //         vm.expectEmit(true, true, true, true);
-    //         emit IAuctionHouse.CreatorRateBpsUpdated(creatorRateBps);
-    //     }
-    //     auction.setCreatorRateBps(creatorRateBps);
+        //if newMinCreatorRate is greater than creatorRateBps, then expect error
+        if (newMinCreatorRateBps > auction.creatorRateBps()) {
+            vm.expectRevert("Min creator rate must be less than or equal to creator rate");
+        } else if (newMinCreatorRateBps <= auction.minCreatorRateBps()) {
+            vm.expectRevert("Min creator rate must be greater than previous minCreatorRateBps");
+        } else {
+            // Expect an event emission
+            vm.expectEmit(true, true, true, true);
+            emit IAuctionHouse.MinCreatorRateBpsUpdated(newMinCreatorRateBps);
+        }
+        // Update the minimum rate
+        auction.setMinCreatorRateBps(newMinCreatorRateBps);
 
-    //     //if newMinCreatorRate is greater than creatorRateBps, then expect error
-    //     if (newMinCreatorRateBps > auction.creatorRateBps()) {
-    //         vm.expectRevert("Min creator rate must be less than or equal to creator rate");
-    //     } else if (newMinCreatorRateBps <= auction.minCreatorRateBps()) {
-    //         vm.expectRevert("Min creator rate must be greater than previous minCreatorRateBps");
-    //     } else {
-    //         // Expect an event emission
-    //         vm.expectEmit(true, true, true, true);
-    //         emit IAuctionHouse.MinCreatorRateBpsUpdated(newMinCreatorRateBps);
-    //     }
-    //     // Update the minimum rate
-    //     auction.setMinCreatorRateBps(newMinCreatorRateBps);
+        // Assert new minimum rate
+        if (
+            newMinCreatorRateBps <= auction.creatorRateBps() &&
+            newMinCreatorRateBps >= auction.minCreatorRateBps()
+        ) {
+            assertEq(auction.minCreatorRateBps(), newMinCreatorRateBps);
+        }
+    }
 
-    //     // Assert new minimum rate
-    //     if (
-    //         newMinCreatorRateBps <= auction.creatorRateBps() &&
-    //         newMinCreatorRateBps >= auction.minCreatorRateBps()
-    //     ) {
-    //         assertEq(auction.minCreatorRateBps(), newMinCreatorRateBps);
-    //     }
-    // }
+    function testSetMinCreatorRateBpsRestrictToOwner(uint256 newMinCreatorRateBps) public {
+        vm.assume(newMinCreatorRateBps < auction.creatorRateBps());
 
-    // function testSetMinCreatorRateBpsRestrictToOwner(uint256 newMinCreatorRateBps) public {
-    //     vm.assume(newMinCreatorRateBps < auction.creatorRateBps());
+        // Attempt to change minCreatorRateBps as a non-owner
+        vm.startPrank(address(2));
+        vm.expectRevert();
+        auction.setMinCreatorRateBps(newMinCreatorRateBps);
+        vm.stopPrank();
+    }
 
-    //     // Attempt to change minCreatorRateBps as a non-owner
-    //     vm.startPrank(address(2));
-    //     vm.expectRevert();
-    //     auction.setMinCreatorRateBps(newMinCreatorRateBps);
-    //     vm.stopPrank();
-    // }
+    function testSetMinCreatorRateBpsInvalidValues(int256 invalidMinCreatorRateBps) public {
+        vm.assume(uint256(invalidMinCreatorRateBps) < auction.creatorRateBps());
 
-    // function testSetMinCreatorRateBpsInvalidValues(int256 invalidMinCreatorRateBps) public {
-    //     vm.assume(uint256(invalidMinCreatorRateBps) < auction.creatorRateBps());
+        
 
-    //     vm.startPrank(address(dao));
+        // Attempt to set an invalid minimum creator rate
+        if (uint256(invalidMinCreatorRateBps) <= auction.minCreatorRateBps()) {
+            vm.expectRevert("Min creator rate must be greater than previous minCreatorRateBps");
+        } else if (uint256(invalidMinCreatorRateBps) > 10_000) {
+            vm.expectRevert("Min creator rate must be less than or equal to 10_000");
+        }
+        auction.setMinCreatorRateBps(uint256(invalidMinCreatorRateBps));
+    }
 
-    //     // Attempt to set an invalid minimum creator rate
-    //     if (uint256(invalidMinCreatorRateBps) <= auction.minCreatorRateBps()) {
-    //         vm.expectRevert("Min creator rate must be greater than previous minCreatorRateBps");
-    //     } else if (uint256(invalidMinCreatorRateBps) > 10_000) {
-    //         vm.expectRevert("Min creator rate must be less than or equal to 10_000");
-    //     }
-    //     auction.setMinCreatorRateBps(uint256(invalidMinCreatorRateBps));
-    // }
+    function testMinCreatorRateLoweringRestriction(uint256 lowerMinCreatorRateBps) public {
+        vm.assume(lowerMinCreatorRateBps < auction.minCreatorRateBps());
 
-    // function testMinCreatorRateLoweringRestriction(uint256 lowerMinCreatorRateBps) public {
-    //     vm.assume(lowerMinCreatorRateBps < auction.minCreatorRateBps());
+        
 
-    //     vm.startPrank(address(dao));
+        // Attempt to set a lower minimum creator rate than the current one
+        vm.expectRevert("Min creator rate must be greater than previous minCreatorRateBps");
+        auction.setMinCreatorRateBps(lowerMinCreatorRateBps);
+    }
 
-    //     // Attempt to set a lower minimum creator rate than the current one
-    //     vm.expectRevert("Min creator rate must be greater than previous minCreatorRateBps");
-    //     auction.setMinCreatorRateBps(lowerMinCreatorRateBps);
-    // }
+    function testValueUpdates(uint256 newCreatorRateBps, uint256 newEntropyRateBps) public {
+        vm.assume(newCreatorRateBps > auction.minCreatorRateBps());
+        vm.assume(newCreatorRateBps <= 10_000);
+        vm.assume(newEntropyRateBps <= 10_000);
 
-    // function testValueUpdates(uint256 newCreatorRateBps, uint256 newEntropyRateBps) public {
-    //     vm.assume(newCreatorRateBps > auction.minCreatorRateBps());
-    //     vm.assume(newCreatorRateBps <= 10_000);
-    //     vm.assume(newEntropyRateBps <= 10_000);
+        
 
-    //     vm.startPrank(address(dao));
+        // Change creatorRateBps as the owner
+        auction.setCreatorRateBps(newCreatorRateBps);
+        assertEq(auction.creatorRateBps(), newCreatorRateBps, "creatorRateBps should be updated");
 
-    //     // Change creatorRateBps as the owner
-    //     auction.setCreatorRateBps(newCreatorRateBps);
-    //     assertEq(auction.creatorRateBps(), newCreatorRateBps, "creatorRateBps should be updated");
+        // Change entropyRateBps as the owner
+        auction.setEntropyRateBps(newEntropyRateBps);
+        assertEq(auction.entropyRateBps(), newEntropyRateBps, "entropyRateBps should be updated");
+    }
 
-    //     // Change entropyRateBps as the owner
-    //     auction.setEntropyRateBps(newEntropyRateBps);
-    //     assertEq(auction.entropyRateBps(), newEntropyRateBps, "entropyRateBps should be updated");
-    // }
+    function testOwnerOnlyAccess() public {
+        uint256 newCreatorRateBps = 2500;
+        uint256 newEntropyRateBps = 6000;
 
-    // function testOwnerOnlyAccess() public {
-    //     uint256 newCreatorRateBps = 2500;
-    //     uint256 newEntropyRateBps = 6000;
+        // Attempt to change creatorRateBps as a non-owner
+        vm.stopPrank();
+        vm.startPrank(address(2));
+        vm.expectRevert();
+        auction.setCreatorRateBps(newCreatorRateBps);
+        vm.stopPrank();
 
-    //     // Attempt to change creatorRateBps as a non-owner
-    //     vm.startPrank(address(2));
-    //     vm.expectRevert();
-    //     auction.setCreatorRateBps(newCreatorRateBps);
-    //     vm.stopPrank();
+        // Attempt to change entropyRateBps as a non-owner
+        vm.startPrank(address(2));
+        vm.expectRevert();
+        auction.setEntropyRateBps(newEntropyRateBps);
+        vm.stopPrank();
+    }
 
-    //     // Attempt to change entropyRateBps as a non-owner
-    //     vm.startPrank(address(2));
-    //     vm.expectRevert();
-    //     auction.setEntropyRateBps(newEntropyRateBps);
-    //     vm.stopPrank();
-    // }
+    // Fallback function to allow contract to receive Ether
+    receive() external payable {}
 
-    // // Fallback function to allow contract to receive Ether
-    // receive() external payable {}
+    function testInitializationParameters() public {
+        emit log_string("testing");
+        emit log_address(weth);
+        emit log_address(auction.WETH());
 
-    // function testInitializationParameters() public {
-    //     emit log_string("testing");
-    //     emit log_address(weth);
-    //     emit log_address(auction.WETH());
+        assertEq(auction.WETH(), address(weth), "WETH address should be set correctly");
+        assertEq(auction.timeBuffer(), 15 minutes, "Time buffer should be set correctly");
+        assertEq(auction.reservePrice(), 1 ether, "Reserve price should be set correctly");
+        assertEq(
+            auction.minBidIncrementPercentage(),
+            5,
+            "Min bid increment percentage should be set correctly"
+        );
+        assertEq(auction.duration(), 24 hours, "Auction duration should be set correctly");
+    }
 
-    //     assertEq(auction.WETH(), address(weth), "WETH address should be set correctly");
-    //     assertEq(auction.timeBuffer(), 15 minutes, "Time buffer should be set correctly");
-    //     assertEq(auction.reservePrice(), 1 ether, "Reserve price should be set correctly");
-    //     assertEq(
-    //         auction.minBidIncrementPercentage(),
-    //         5,
-    //         "Min bid increment percentage should be set correctly"
-    //     );
-    //     assertEq(auction.duration(), 24 hours, "Auction duration should be set correctly");
-    // }
+    function testBidForAnotherAccount() public {
+        //setup bid
+        uint256 bidAmount = 100 ether;
+        uint256 verbId = createDefaultArtPiece();
+        
+        auction.unpause();
+        vm.deal(address(1), bidAmount + 2 ether);
 
-    // function testBidForAnotherAccount() public {
-    //     //setup bid
-    //     uint256 bidAmount = 100 ether;
-    //     uint256 verbId = createDefaultArtPiece();
-    //     vm.prank(address(dao));
-    //     auction.unpause();
-    //     vm.deal(address(1), bidAmount + 2 ether);
+        vm.stopPrank();
 
-    //     // try to bid with bidder address(0) first and expect revert
-    //     vm.expectRevert("Bidder cannot be zero address");
-    //     auction.createBid{ value: bidAmount }(0, address(0)); // Assuming the first auction's verbId is 0
+        // try to bid with bidder address(0) first and expect revert
+        vm.expectRevert("Bidder cannot be zero address");
+        vm.startPrank(address(1));
+        auction.createBid{ value: bidAmount }(0, address(0)); // Assuming the first auction's verbId is 0
 
-    //     vm.prank(address(1));
-    //     // Expect an event emission
-    //     vm.expectEmit(true, true, true, true);
-    //     emit IAuctionHouse.AuctionBid(verbId, address(21), address(1), bidAmount, false);
-    //     auction.createBid{ value: bidAmount }(0, address(21)); // Assuming the first auction's verbId is 0
+        // Expect an event emission
+        vm.expectEmit(true, true, true, true);
+        emit IAuctionHouse.AuctionBid(verbId, address(21), address(1), bidAmount, false);
+        auction.createBid{ value: bidAmount }(0, address(21)); // Assuming the first auction's verbId is 0
 
-    //     // Expect auction bidder to be 21
-    //     (, , , , address payable bidder, ) = auction.auction();
-    //     assertEq(bidder, address(21), "Bidder address should be set correctly");
+        // Expect auction bidder to be 21
+        (, , , , address payable bidder, ) = auction.auction();
+        assertEq(bidder, address(21), "Bidder address should be set correctly");
 
-    //     // Expect auction amount to be bidAmount
-    //     (, uint256 amount, , , , ) = auction.auction();
-    //     assertEq(amount, bidAmount, "Bid amount should be set correctly");
+        // Expect auction amount to be bidAmount
+        (, uint256 amount, , , , ) = auction.auction();
+        assertEq(amount, bidAmount, "Bid amount should be set correctly");
 
-    //     // Expect auction settled to be false
-    //     (, , , , , bool settled) = auction.auction();
-    //     assertEq(settled, false, "Auction should not be settled");
+        // Expect auction settled to be false
+        (, , , , , bool settled) = auction.auction();
+        assertEq(settled, false, "Auction should not be settled");
 
-    //     // Expect auction verbId to be 0
-    //     (uint256 verbId2, , , , , ) = auction.auction();
-    //     assertEq(verbId2, 0, "Auction should be for the zeroth verb");
+        // Expect auction verbId to be 0
+        (uint256 verbId2, , , , , ) = auction.auction();
+        assertEq(verbId2, 0, "Auction should be for the zeroth verb");
 
-    //     // Expect auction startTime to be set correctly
-    //     (, , uint256 startTime, , , ) = auction.auction();
-    //     assertEq(startTime, block.timestamp, "Auction start time should be set correctly");
+        // Expect auction startTime to be set correctly
+        (, , uint256 startTime, , , ) = auction.auction();
+        assertEq(startTime, block.timestamp, "Auction start time should be set correctly");
 
-    //     // Expect auction endTime to be set correctly
-    //     (, , , uint256 endTime, , ) = auction.auction();
-    //     assertEq(endTime, block.timestamp + auction.duration(), "Auction end time should be set correctly");
+        // Expect auction endTime to be set correctly
+        (, , , uint256 endTime, , ) = auction.auction();
+        assertEq(endTime, block.timestamp + auction.duration(), "Auction end time should be set correctly");
 
-    //     // vm warp and then settle auction
-    //     vm.warp(endTime + 1);
-    //     auction.settleCurrentAndCreateNewAuction(); // This will settle the current auction and create a new one
+        // vm warp and then settle auction
+        vm.warp(endTime + 1);
+        auction.settleCurrentAndCreateNewAuction(); // This will settle the current auction and create a new one
 
-    //     // Expect 21 to be the owner of the verb
-    //     assertEq(erc721Token.ownerOf(verbId), address(21), "Verb should be transferred to bidder param");
-    // }
+        // Expect 21 to be the owner of the verb
+        assertEq(erc721Token.ownerOf(verbId), address(21), "Verb should be transferred to bidder param");
+    }
 
-    // function testAuctionCreation() public {
-    //     createDefaultArtPiece();
+    function testAuctionCreation() public {
+        createDefaultArtPiece();
 
-    //     vm.prank(address(dao));
-    //     auction.unpause();
-    //     uint256 startTime = block.timestamp;
+        
+        auction.unpause();
+        uint256 startTime = block.timestamp;
 
-    //     (
-    //         uint256 verbId,
-    //         uint256 amount,
-    //         uint256 auctionStartTime,
-    //         uint256 auctionEndTime,
-    //         address payable bidder,
-    //         bool settled
-    //     ) = auction.auction();
-    //     assertEq(auctionStartTime, startTime, "Auction start time should be set correctly");
-    //     assertEq(auctionEndTime, startTime + auction.duration(), "Auction end time should be set correctly");
-    //     assertEq(verbId, 0, "Auction should be for the zeroth verb");
-    //     assertEq(amount, 0, "Auction amount should be 0");
-    //     assertEq(bidder, address(0), "Auction bidder should be 0");
-    //     assertEq(settled, false, "Auction should not be settled");
-    // }
+        (
+            uint256 verbId,
+            uint256 amount,
+            uint256 auctionStartTime,
+            uint256 auctionEndTime,
+            address payable bidder,
+            bool settled
+        ) = auction.auction();
+        assertEq(auctionStartTime, startTime, "Auction start time should be set correctly");
+        assertEq(auctionEndTime, startTime + auction.duration(), "Auction end time should be set correctly");
+        assertEq(verbId, 0, "Auction should be for the zeroth verb");
+        assertEq(amount, 0, "Auction amount should be 0");
+        assertEq(bidder, address(0), "Auction bidder should be 0");
+        assertEq(settled, false, "Auction should not be settled");
+    }
 
     function testBiddingProcess(uint256 bidAmount) public {
         vm.assume(bidAmount > auction.reservePrice());
@@ -287,7 +292,7 @@ contract AuctionHouseBasicTest is AuctionHouseTest {
 
         createDefaultArtPiece();
 
-        vm.prank(address(dao));
+        
         auction.unpause();
         vm.deal(address(1), bidAmount + 2 ether);
 

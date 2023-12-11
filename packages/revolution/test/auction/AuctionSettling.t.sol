@@ -15,7 +15,7 @@ contract AuctionHouseSettleTest is AuctionHouseTest {
         createDefaultArtPiece();
         auction.unpause();
 
-        uint256 balanceBefore = address(this).balance;
+        uint256 balanceBefore = address(dao).balance;
 
         uint256 bidAmount = auction.reservePrice();
         vm.deal(address(11), bidAmount);
@@ -29,7 +29,7 @@ contract AuctionHouseSettleTest is AuctionHouseTest {
         auction.settleCurrentAndCreateNewAuction();
         vm.roll(block.number + 1);
 
-        uint256 balanceAfter = address(this).balance;
+        uint256 balanceAfter = address(dao).balance;
 
         assertEq(erc721Token.ownerOf(0), address(11), "Verb should be transferred to the highest bidder");
         // cultureIndex currentVotes of highest bidder should be 10
@@ -93,6 +93,11 @@ contract AuctionHouseSettleTest is AuctionHouseTest {
 
         auction.transferOwnership(recipient);
 
+        vm.startPrank(recipient);
+        auction.acceptOwnership();
+
+        vm.startPrank(address(auction));
+
         vm.deal(address(auction), amount);
         auction.createBid{ value: amount }(0, address(this)); // Assuming first auction's verbId is 0
 
@@ -126,6 +131,10 @@ contract AuctionHouseSettleTest is AuctionHouseTest {
 
         auction.transferOwnership(recipient);
 
+        vm.startPrank(recipient);
+        auction.acceptOwnership();
+
+        vm.startPrank(address(auction));
         vm.deal(address(auction), amount);
         auction.createBid{ value: amount }(0, address(this)); // Assuming first auction's verbId is 0
 
@@ -159,6 +168,11 @@ contract AuctionHouseSettleTest is AuctionHouseTest {
         address recipient = address(new ContractWithoutReceiveOrFallback());
 
         auction.transferOwnership(recipient);
+
+        vm.startPrank(recipient);
+        auction.acceptOwnership();
+
+        vm.startPrank(address(auction));
 
         vm.deal(address(auction), amount);
         auction.createBid{ value: amount }(0, address(this)); // Assuming first auction's verbId is 0
@@ -351,7 +365,7 @@ contract AuctionHouseSettleTest is AuctionHouseTest {
 
         // Track ETH balances
         uint256 balanceBeforeCreator = address(0x1).balance;
-        uint256 balanceBeforeTreasury = address(this).balance;
+        uint256 balanceBeforeTreasury = address(dao).balance;
 
         auction.settleCurrentAndCreateNewAuction();
 
@@ -365,7 +379,7 @@ contract AuctionHouseSettleTest is AuctionHouseTest {
         // Checking if the contract received the correct amount
         uint256 expectedContractShare = bidAmount - creatorDirectPayment - feeAmount;
         assertApproxEqAbs(
-            address(this).balance - balanceBeforeTreasury,
+            address(dao).balance - balanceBeforeTreasury,
             expectedContractShare,
             // "Contract did not receive the correct amount of ETH"
             10

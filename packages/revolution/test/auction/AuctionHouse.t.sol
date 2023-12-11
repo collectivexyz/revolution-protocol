@@ -24,8 +24,27 @@ import { RevolutionBuilderTest } from "../RevolutionBuilder.t.sol";
 contract AuctionHouseTest is RevolutionBuilderTest {
     function setUp() public override {
         super.setUp();
+        super.setMockParams();
+
+        super.setERC20TokenParams("Revolution Governance", "GOV");
+
+        super.setCultureIndexParams("Vrbs", "Our community Vrbs. Must be 32x32.", 10, 200, 0);
+
+        super.setERC721TokenParams("Vrbs", "VRBS", "QmQzDwaZ7yQxHHs7sQQenJVB89riTSacSGcJRv9jtHPuz5", "Vrb");
+
+        super.setAuctionParams(
+            15 minutes, // timeBuffer
+            1 ether, // reservePrice
+            24 hours, // duration
+            5, // minBidIncrementPercentage
+            2_000, // creatorRateBps
+            5_000, //entropyRateBps
+            1_000 //minCreatorRateBps
+        );
 
         super.deployMock();
+
+        vm.startPrank(address(dao));
 
         // governanceToken = new NontransferableERC20Votes(address(this), "Revolution Governance", "GOV");
         // RevolutionProtocolRewards protocolRewards = new RevolutionProtocolRewards();
