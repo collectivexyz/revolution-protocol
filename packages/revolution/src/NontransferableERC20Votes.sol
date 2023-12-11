@@ -54,14 +54,6 @@ contract NontransferableERC20Votes is Initializable, ERC20VotesUpgradeable, Owna
         string calldata _name,
         string calldata _symbol
     ) internal onlyInitializing {
-        __NontransferableERC20Votes_init_unchained(_initialOwner, _name, _symbol);
-    }
-
-    function __NontransferableERC20Votes_init_unchained(
-        address _initialOwner,
-        string calldata _name,
-        string calldata _symbol
-    ) internal onlyInitializing {
         __Ownable_init(_initialOwner);
         __ERC20_init(_name, _symbol);
         __EIP712_init(_name, "1");
