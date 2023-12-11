@@ -12,7 +12,6 @@ import { VersionedContract } from "./version/VersionedContract.sol";
 /// @dev This contract implements a Max Heap data structure with basic operations
 /// @author Written by rocketman and gpt4
 contract MaxHeap is VersionedContract, UUPS, Ownable2StepUpgradeable, ReentrancyGuardUpgradeable {
-    
     /// @notice The parent contract that is allowed to update the data store
     address public admin;
 
