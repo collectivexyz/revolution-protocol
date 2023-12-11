@@ -40,9 +40,6 @@ contract CultureIndex is
     // The ERC721 token used for voting
     ERC721CheckpointableUpgradeable public erc721VotingToken;
 
-    // Whether the 721 voting token can be updated
-    bool public isERC721VotingTokenLocked;
-
     // The weight of the 721 voting token
     uint256 public erc721VotingTokenWeight;
 
