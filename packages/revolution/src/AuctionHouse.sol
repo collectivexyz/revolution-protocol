@@ -354,8 +354,8 @@ contract AuctionHouse is IAuctionHouse, PausableUpgradeable, ReentrancyGuardUpgr
                 address deployer = verbs.getArtPieceById(_auction.verbId).dropper;
 
                 //Build arrays for erc20TokenEmitter.buyToken
-                address[] memory vrgdaReceivers = new address[](numCreators);
                 uint256[] memory vrgdaSplits = new uint256[](numCreators);
+                address[] memory vrgdaReceivers = new address[](numCreators);
 
                 //Transfer auction amount to the DAO treasury
                 _safeTransferETHWithFallback(owner(), auctioneerPayment);
