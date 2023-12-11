@@ -221,10 +221,7 @@ contract AuctionHouse is IAuctionHouse, PausableUpgradeable, ReentrancyGuardUpgr
         require(_minCreatorRateBps <= 10_000, "Min creator rate must be less than or equal to 10_000");
 
         //ensure new min rate cannot be lower than previous min rate
-        require(
-            _minCreatorRateBps > minCreatorRateBps,
-            "Min creator rate must be greater than previous minCreatorRateBps"
-        );
+        require(_minCreatorRateBps > minCreatorRateBps, "Min creator rate must be greater than previous minCreatorRateBps");
 
         minCreatorRateBps = _minCreatorRateBps;
 

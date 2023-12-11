@@ -343,9 +343,7 @@ contract AuctionHouseSettleTest is AuctionHouseTest {
 
         vm.warp(block.timestamp + auction.duration() + 1); // Fast forward time to end the auction
 
-        uint256 expectedGovernanceTokens = uint256(
-            erc20TokenEmitter.getTokenQuoteForEther(creatorGovernancePayment - feeAmount)
-        );
+        uint256 expectedGovernanceTokens = uint256(erc20TokenEmitter.getTokenQuoteForEther(creatorGovernancePayment - feeAmount));
 
         emit log_string("creatorGovernancePayment");
         emit log_uint(creatorGovernancePayment);

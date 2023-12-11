@@ -152,13 +152,7 @@ contract DAOExecutor is Initializable {
         return txHash;
     }
 
-    function cancelTransaction(
-        address target,
-        uint256 value,
-        string memory signature,
-        bytes memory data,
-        uint256 eta
-    ) public {
+    function cancelTransaction(address target, uint256 value, string memory signature, bytes memory data, uint256 eta) public {
         require(msg.sender == admin, "DAOExecutor::cancelTransaction: Call must come from admin.");
 
         bytes32 txHash = keccak256(abi.encode(target, value, signature, data, eta));

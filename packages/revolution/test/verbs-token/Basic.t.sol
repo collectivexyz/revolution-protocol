@@ -124,16 +124,7 @@ contract TokenBasicTest is VerbsTokenTestSuite {
             0
         );
 
-        uint256 artPieceId = createArtPiece(
-            name,
-            description,
-            mediaType,
-            image,
-            text,
-            animationUrl,
-            creatorAddress,
-            10_000
-        );
+        uint256 artPieceId = createArtPiece(name, description, mediaType, image, text, animationUrl, creatorAddress, 10_000);
 
         // Act
         (, ICultureIndex.ArtPieceMetadata memory metadata, , , , , , ) = cultureIndex.pieces(artPieceId);

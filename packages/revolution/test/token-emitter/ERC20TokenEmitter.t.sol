@@ -253,11 +253,7 @@ contract ERC20TokenEmitterTest is RevolutionBuilderTest {
 
         // Verify ETH sent to creator
         uint256 creatorsNewEthBalance = address(erc20TokenEmitter.creatorsAddress()).balance;
-        assertEq(
-            creatorsNewEthBalance - creatorsInitialEthBalance,
-            expectedCreatorEth,
-            "Incorrect ETH amount sent to creator"
-        );
+        assertEq(creatorsNewEthBalance - creatorsInitialEthBalance, expectedCreatorEth, "Incorrect ETH amount sent to creator");
 
         // Verify tokens distributed to recipient
         uint256 recipientTokenBalance = erc20TokenEmitter.balanceOf(address(1));
@@ -362,9 +358,7 @@ contract ERC20TokenEmitterTest is RevolutionBuilderTest {
         bps[1] = 10_000 - firstBps;
 
         // estimate tokens to be emitted
-        int256 expectedAmount = erc20TokenEmitter.getTokenQuoteForEther(
-            1e18 - erc20TokenEmitter.computeTotalReward(1e18)
-        );
+        int256 expectedAmount = erc20TokenEmitter.getTokenQuoteForEther(1e18 - erc20TokenEmitter.computeTotalReward(1e18));
 
         erc20TokenEmitter.buyToken{ value: 1e18 }(
             recipients,
@@ -461,11 +455,7 @@ contract ERC20TokenEmitterTest is RevolutionBuilderTest {
         address newCreatorsAddress = address(0x123);
         vm.prank(address(dao));
         erc20TokenEmitter.setCreatorsAddress(newCreatorsAddress);
-        assertEq(
-            erc20TokenEmitter.creatorsAddress(),
-            newCreatorsAddress,
-            "Owner should be able to set creators address"
-        );
+        assertEq(erc20TokenEmitter.creatorsAddress(), newCreatorsAddress, "Owner should be able to set creators address");
 
         // Attempting to set Creators Address by Non-Owner
         address nonOwner = address(0x4156);
@@ -582,11 +572,7 @@ contract ERC20TokenEmitterTest is RevolutionBuilderTest {
 
         // Assert that the token amount is reasonable (not zero or unexpectedly high)
         assertGt(tokenAmount, 0, "Token amount should be greater than zero");
-        assertLt(
-            tokenAmount,
-            int256(SOME_MAX_EXPECTED_VALUE),
-            "Token amount should be less than some max expected value"
-        );
+        assertLt(tokenAmount, int256(SOME_MAX_EXPECTED_VALUE), "Token amount should be less than some max expected value");
         assertLt(tokenAmount, slightlyMore, "Token amount should be less than slightly more");
 
         //buy 10 ether of tokens

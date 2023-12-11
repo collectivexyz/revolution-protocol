@@ -33,8 +33,7 @@ import { Initializable } from "@openzeppelin/contracts-upgradeable/proxy/utils/I
 abstract contract VotesUpgradeable is Initializable, ContextUpgradeable, EIP712Upgradeable, NoncesUpgradeable, IERC5805 {
     using Checkpoints for Checkpoints.Trace208;
 
-    bytes32 private constant DELEGATION_TYPEHASH =
-        keccak256("Delegation(address delegatee,uint256 nonce,uint256 expiry)");
+    bytes32 private constant DELEGATION_TYPEHASH = keccak256("Delegation(address delegatee,uint256 nonce,uint256 expiry)");
 
     /// @custom:storage-location erc7201:openzeppelin.storage.Votes
     struct VotesStorage {
@@ -161,14 +160,7 @@ abstract contract VotesUpgradeable is Initializable, ContextUpgradeable, EIP712U
     /**
      * @dev Delegates votes from signer to `delegatee`.
      */
-    function delegateBySig(
-        address delegatee,
-        uint256 nonce,
-        uint256 expiry,
-        uint8 v,
-        bytes32 r,
-        bytes32 s
-    ) public virtual {
+    function delegateBySig(address delegatee, uint256 nonce, uint256 expiry, uint8 v, bytes32 r, bytes32 s) public virtual {
         if (block.timestamp > expiry) {
             revert VotesExpiredSignature(expiry);
         }
@@ -218,19 +210,11 @@ abstract contract VotesUpgradeable is Initializable, ContextUpgradeable, EIP712U
         VotesStorage storage $ = _getVotesStorage();
         if (from != to && amount > 0) {
             if (from != address(0)) {
-                (uint256 oldValue, uint256 newValue) = _push(
-                    $._delegateCheckpoints[from],
-                    _subtract,
-                    SafeCast.toUint208(amount)
-                );
+                (uint256 oldValue, uint256 newValue) = _push($._delegateCheckpoints[from], _subtract, SafeCast.toUint208(amount));
                 emit DelegateVotesChanged(from, oldValue, newValue);
             }
             if (to != address(0)) {
-                (uint256 oldValue, uint256 newValue) = _push(
-                    $._delegateCheckpoints[to],
-                    _add,
-                    SafeCast.toUint208(amount)
-                );
+                (uint256 oldValue, uint256 newValue) = _push($._delegateCheckpoints[to], _add, SafeCast.toUint208(amount));
                 emit DelegateVotesChanged(to, oldValue, newValue);
             }
         }

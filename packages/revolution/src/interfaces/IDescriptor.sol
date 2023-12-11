@@ -37,10 +37,7 @@ interface IDescriptor is IDescriptorMinimal {
 
     function dataURI(uint256 tokenId, ICultureIndex.ArtPieceMetadata memory) external view returns (string memory);
 
-    function genericDataURI(
-        string calldata name,
-        ICultureIndex.ArtPieceMetadata memory
-    ) external view returns (string memory);
+    function genericDataURI(string calldata name, ICultureIndex.ArtPieceMetadata memory) external view returns (string memory);
 
     /// @notice Initializes a token's metadata descriptor
     /// @param initialOwner The address of the initial owner

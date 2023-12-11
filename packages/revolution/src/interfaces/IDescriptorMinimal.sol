@@ -24,13 +24,7 @@ interface IDescriptorMinimal {
     /// USED BY TOKEN
     ///
 
-    function tokenURI(
-        uint256 tokenId,
-        ICultureIndex.ArtPieceMetadata memory metadata
-    ) external view returns (string memory);
+    function tokenURI(uint256 tokenId, ICultureIndex.ArtPieceMetadata memory metadata) external view returns (string memory);
 
-    function dataURI(
-        uint256 tokenId,
-        ICultureIndex.ArtPieceMetadata memory metadata
-    ) external view returns (string memory);
+    function dataURI(uint256 tokenId, ICultureIndex.ArtPieceMetadata memory metadata) external view returns (string memory);
 }

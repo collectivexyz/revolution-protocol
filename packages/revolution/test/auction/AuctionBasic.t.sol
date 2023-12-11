@@ -286,17 +286,13 @@ contract AuctionHouseBasicTest is AuctionHouseTest {
         vm.warp(endTime + 1);
         createDefaultArtPiece();
         // Ether going to owner of the auction
-        uint256 auctioneerPayment = uint256(
-            wadDiv(wadMul(int256(bidAmount), 10_000 - int256(auction.creatorRateBps())), 10_000)
-        );
+        uint256 auctioneerPayment = uint256(wadDiv(wadMul(int256(bidAmount), 10_000 - int256(auction.creatorRateBps())), 10_000));
 
         //Total amount of ether going to creator
         uint256 creatorPayment = bidAmount - auctioneerPayment;
 
         //Ether reserved to pay the creator directly
-        uint256 creatorDirectPayment = uint256(
-            wadDiv(wadMul(int256(creatorPayment), int256(auction.entropyRateBps())), 10_000)
-        );
+        uint256 creatorDirectPayment = uint256(wadDiv(wadMul(int256(creatorPayment), int256(auction.entropyRateBps())), 10_000));
 
         //Ether reserved to buy creator governance
         uint256 creatorGovernancePayment = creatorPayment - creatorDirectPayment;

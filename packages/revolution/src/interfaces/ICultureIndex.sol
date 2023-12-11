@@ -48,12 +48,7 @@ interface ICultureIndexEvents {
     event VoteCast(uint256 indexed pieceId, address indexed voter, uint256 weight, uint256 totalWeight);
 
     // The events emitted for the respective creators of a piece
-    event PieceCreatorAdded(
-        uint256 indexed pieceId,
-        address indexed creatorAddress,
-        address indexed dropper,
-        uint256 bps
-    );
+    event PieceCreatorAdded(uint256 indexed pieceId, address indexed creatorAddress, address indexed dropper, uint256 bps);
 
     // @notice Emitted when quorum votes basis points is set
     event QuorumVotesBPSSet(uint256 oldQuorumVotesBPS, uint256 newQuorumVotesBPS);

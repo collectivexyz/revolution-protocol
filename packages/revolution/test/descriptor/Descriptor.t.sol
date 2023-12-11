@@ -290,11 +290,7 @@ contract DescriptorTest is RevolutionBuilderTest {
     }
 
     // Corrected use of startsWith in assertUriContainsImage function
-    function assertUriContainsImage(
-        string memory uri,
-        string memory expectedImageUrl,
-        string memory errorMessage
-    ) internal {
+    function assertUriContainsImage(string memory uri, string memory expectedImageUrl, string memory errorMessage) internal {
         // Decode the URI if it's a data URI, else use as is
         string memory metadataJson = startsWith(uri, "data:") ? decodeMetadata(uri) : uri;
         (, , string memory imageUrl, ) = parseJson(metadataJson);

@@ -4,7 +4,7 @@
     {
       "files": "*.sol",
       "options": {
-        "printWidth": 121,
+        "printWidth": 130,
         "tabWidth": 4,
         "semi": true,
         "singleQuote": false,

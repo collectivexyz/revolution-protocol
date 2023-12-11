@@ -45,13 +45,7 @@ import { IVersionedContract } from "../interfaces/IVersionedContract.sol";
 
 /// @title RevolutionBuilder
 /// @notice The Revolution DAO deployer and upgrade manager
-contract RevolutionBuilder is
-    IRevolutionBuilder,
-    VersionedContract,
-    UUPS,
-    Ownable2StepUpgradeable,
-    RevolutionBuilderStorageV1
-{
+contract RevolutionBuilder is IRevolutionBuilder, VersionedContract, UUPS, Ownable2StepUpgradeable, RevolutionBuilderStorageV1 {
     ///                                                          ///
     ///                          IMMUTABLES                      ///
     ///                                                          ///

@@ -99,9 +99,7 @@ contract RevolutionBuilderTest is Test {
         executorImpl = address(new DAOExecutor(address(manager)));
         daoImpl = address(new VerbsDAOLogicV1(address(manager)));
         erc20TokenImpl = address(new NontransferableERC20Votes(address(manager)));
-        erc20TokenEmitterImpl = address(
-            new ERC20TokenEmitter(address(manager), address(protocolRewards), revolutionDAO)
-        );
+        erc20TokenEmitterImpl = address(new ERC20TokenEmitter(address(manager), address(protocolRewards), revolutionDAO));
         cultureIndexImpl = address(new CultureIndex(address(manager)));
         maxHeapImpl = address(new MaxHeap(address(manager)));
 

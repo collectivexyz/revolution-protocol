@@ -26,8 +26,7 @@ contract CultureIndex is
     EIP712Upgradeable
 {
     /// @notice The EIP-712 typehash for gasless votes
-    bytes32 public constant VOTE_TYPEHASH =
-        keccak256("Vote(address from,uint256[] pieceIds,uint256 nonce,uint256 deadline)");
+    bytes32 public constant VOTE_TYPEHASH = keccak256("Vote(address from,uint256[] pieceIds,uint256 nonce,uint256 deadline)");
 
     /// @notice An account's nonce for gasless votes
     mapping(address => uint256) public nonces;
@@ -163,8 +162,7 @@ contract CultureIndex is
     function validateMediaType(ArtPieceMetadata calldata metadata) internal pure {
         require(uint8(metadata.mediaType) > 0 && uint8(metadata.mediaType) <= 5, "Invalid media type");
 
-        if (metadata.mediaType == MediaType.IMAGE)
-            require(bytes(metadata.image).length > 0, "Image URL must be provided");
+        if (metadata.mediaType == MediaType.IMAGE) require(bytes(metadata.image).length > 0, "Image URL must be provided");
         else if (metadata.mediaType == MediaType.ANIMATION)
             require(bytes(metadata.animationUrl).length > 0, "Animation URL must be provided");
         else if (metadata.mediaType == MediaType.TEXT) require(bytes(metadata.text).length > 0, "Text must be provided");
@@ -213,10 +211,7 @@ contract CultureIndex is
      * - `creatorArray` must not contain any zero addresses.
      * - The sum of basis points in `creatorArray` must be exactly 10,000.
      */
-    function createPiece(
-        ArtPieceMetadata calldata metadata,
-        CreatorBps[] calldata creatorArray
-    ) public returns (uint256) {
+    function createPiece(ArtPieceMetadata calldata metadata, CreatorBps[] calldata creatorArray) public returns (uint256) {
         uint256 creatorArrayLength = validateCreatorsArray(creatorArray);
 
         // Validate the media type and associated data
@@ -230,10 +225,7 @@ contract CultureIndex is
         ArtPiece storage newPiece = pieces[pieceId];
 
         newPiece.pieceId = pieceId;
-        newPiece.totalVotesSupply = _calculateVoteWeight(
-            erc20VotingToken.totalSupply(),
-            erc721VotingToken.totalSupply()
-        );
+        newPiece.totalVotesSupply = _calculateVoteWeight(erc20VotingToken.totalSupply(), erc721VotingToken.totalSupply());
         newPiece.totalERC20Supply = erc20VotingToken.totalSupply();
         newPiece.metadata = metadata;
         newPiece.dropper = msg.sender;
@@ -565,9 +557,7 @@ contract CultureIndex is
      * Differs from `GovernerBravo` which uses fixed amount
      */
     function quorumVotes() public view returns (uint256) {
-        return
-            (quorumVotesBPS * _calculateVoteWeight(erc20VotingToken.totalSupply(), erc721VotingToken.totalSupply())) /
-            10_000;
+        return (quorumVotesBPS * _calculateVoteWeight(erc20VotingToken.totalSupply(), erc721VotingToken.totalSupply())) / 10_000;
     }
 
     /**
