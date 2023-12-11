@@ -136,7 +136,7 @@ contract AuctionHouse is IAuctionHouse, PausableUpgradeable, ReentrancyGuardUpgr
     /**
      * @notice Settle the current auction, mint a new Verb, and put it up for auction.
      */
-    // Can technically reenter via cross function reentrancies in _createAuction, auction, and pause, but those are only callable by the owner. 
+    // Can technically reenter via cross function reentrancies in _createAuction, auction, and pause, but those are only callable by the owner.
     // @wardens if you can find an exploit here go for it - we might be wrong.
     // slither-disable-next-line reentrancy-eth
     function settleCurrentAndCreateNewAuction() external override nonReentrant whenNotPaused {
