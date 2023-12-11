@@ -49,7 +49,7 @@ turbo run test
 Run tests in dev mode for a package w/gas logs
 
 ```
-cd packages/revolution-contracts && pnpm run dev
+cd packages/revolution && pnpm run dev
 ```
 
 ## Gas reports
@@ -59,17 +59,17 @@ Gas reports are located in [gas-reports](https://github.com/collectivexyz/revolu
 Run the tests with and generate a gas report.
 
 ```
-cd packages/revolution-contracts && pnpm run write-gas-report
+cd packages/revolution && pnpm run write-gas-report
 ```
 
-Gas optimizations around the CultureIndex `createPiece` and `vote` functionality, the [MaxHeap](https://github.com/collectivexyz/revolution-protocol/blob/main/packages/revolution-contracts/src/MaxHeap.sol) and [`buyToken`](https://github.com/collectivexyz/revolution-protocol/blob/main/packages/revolution-contracts/src/ERC20TokenEmitter.sol) should be prioritized.
+Gas optimizations around the CultureIndex `createPiece` and `vote` functionality, the [MaxHeap](https://github.com/collectivexyz/revolution-protocol/blob/main/packages/revolution/src/MaxHeap.sol) and [`buyToken`](https://github.com/collectivexyz/revolution-protocol/blob/main/packages/revolution/src/ERC20TokenEmitter.sol) should be prioritized.
 
 ## Slither
 
 #### Revolution contracts
 
 ```
-cd packages/revolution-contracts && slither src --solc-remaps "ds-test/=node_modules/ds-test/src/,forge-std/=node_modules/forge-std/src/,@openzeppelin/contracts/=node_modules/@openzeppelin/contracts/,@openzeppelin/contracts-upgradeable/=node_modules/@openzeppelin/contracts-upgradeable,solmate=node_modules/solmate/src,@collectivexyz/protocol-rewards/src/=node_modules/@collectivexyz/protocol-rewards/src/" --checklist --show-ignored-findings --filter-paths "@openzeppelin|ERC721|Votes.sol" --config-file="../../.github/config/slither.config.json"
+cd packages/revolution && slither src --solc-remaps "ds-test/=node_modules/ds-test/src/,forge-std/=node_modules/forge-std/src/,@openzeppelin/contracts/=node_modules/@openzeppelin/contracts/,@openzeppelin/contracts-upgradeable/=node_modules/@openzeppelin/contracts-upgradeable,solmate=node_modules/solmate/src,@collectivexyz/protocol-rewards/src/=node_modules/@collectivexyz/protocol-rewards/src/" --checklist --show-ignored-findings --filter-paths "@openzeppelin|ERC721|Votes.sol" --config-file="../../.github/config/slither.config.json"
 ```
 
 #### Protocol rewards
@@ -80,33 +80,33 @@ cd packages/protocol-rewards && slither src --solc-remaps "ds-test/=../../node_m
 
 # revolution overview
 
-Instead of [auctioning](https://nouns.wtf/) off a generative PFP like Nouns, anyone can upload art pieces to the [CultureIndex](https://github.com/collectivexyz/revolution-protocol/blob/main/packages/revolution-contracts/src/CultureIndex.sol) contract, and the community votes on their favorite art pieces.
+Instead of [auctioning](https://nouns.wtf/) off a generative PFP like Nouns, anyone can upload art pieces to the [CultureIndex](https://github.com/collectivexyz/revolution-protocol/blob/main/packages/revolution/src/CultureIndex.sol) contract, and the community votes on their favorite art pieces.
 
-The top piece is auctioned off every day as an ERC721 [VerbsToken](https://github.com/collectivexyz/revolution-protocol/blob/main/packages/revolution-contracts/src/VerbsToken.sol) via the [AuctionHouse](https://github.com/collectivexyz/revolution-protocol/blob/main/packages/revolution-contracts/src/AuctionHouse.sol).
+The top piece is auctioned off every day as an ERC721 [VerbsToken](https://github.com/collectivexyz/revolution-protocol/blob/main/packages/revolution/src/VerbsToken.sol) via the [AuctionHouse](https://github.com/collectivexyz/revolution-protocol/blob/main/packages/revolution/src/AuctionHouse.sol).
 
 The auction proceeds are split with the creator(s) of the art piece, and the rest is sent to the owner of the auction contract. The winner of the auction receives an ERC721 of the art piece. The creator receives an amount of ERC20 governance tokens and a share of the winning bid.
 
-The ERC20 tokens the creator receives is calculated by the [ERC20TokenEmitter](https://github.com/collectivexyz/revolution-protocol/blob/main/packages/revolution-contracts/src/ERC20TokenEmitter.sol). Both the ERC721 and the ERC20 governance token have voting power to vote on art pieces in the **CultureIndex**.
+The ERC20 tokens the creator receives is calculated by the [ERC20TokenEmitter](https://github.com/collectivexyz/revolution-protocol/blob/main/packages/revolution/src/ERC20TokenEmitter.sol). Both the ERC721 and the ERC20 governance token have voting power to vote on art pieces in the **CultureIndex**.
 
 # relevant contracts
 
 ## CultureIndex
 
-[**CultureIndex.sol**](https://github.com/collectivexyz/revolution-protocol/blob/main/packages/revolution-contracts/src/CultureIndex.sol) is a directory of uploaded art pieces that anyone can add media to. Owners of an ERC721 or ERC20 can vote weighted by their balance on any given art piece.
+[**CultureIndex.sol**](https://github.com/collectivexyz/revolution-protocol/blob/main/packages/revolution/src/CultureIndex.sol) is a directory of uploaded art pieces that anyone can add media to. Owners of an ERC721 or ERC20 can vote weighted by their balance on any given art piece.
 
 <img width="817" alt="culture index" src="https://github.com/collectivexyz/revolution-protocol/blob/main/readme-img/culture-index.png">
 
-The art piece votes data is stored in [**MaxHeap.sol**](https://github.com/collectivexyz/revolution-protocol/blob/main/packages/revolution-contracts/src/MaxHeap.sol), a heap datastructure that enables efficient lookups of the highest voted art piece.
+The art piece votes data is stored in [**MaxHeap.sol**](https://github.com/collectivexyz/revolution-protocol/blob/main/packages/revolution/src/MaxHeap.sol), a heap datastructure that enables efficient lookups of the highest voted art piece.
 
 The contract has a function called **dropTopVotedPiece**, only callable by the owner, which pops (removes) the top voted item from the **MaxHeap** and returns it.
 
 ## VerbsToken
 
-[**VerbsToken.sol**](https://github.com/collectivexyz/revolution-protocol/blob/main/packages/revolution-contracts/src/VerbsToken.sol) is a fork of the [NounsToken](https://github.com/nounsDAO/nouns-monorepo/blob/master/packages/nouns-contracts/contracts/NounsToken.sol) contract. **VerbsToken** owns the **CultureIndex**. When calling **mint()** on the **VerbsToken**, the contract calls **dropTopVotedPiece** on **CultureIndex**, and creates an ERC721 with metadata based on the dropped art piece data from the **CultureIndex**.
+[**VerbsToken.sol**](https://github.com/collectivexyz/revolution-protocol/blob/main/packages/revolution/src/VerbsToken.sol) is a fork of the [NounsToken](https://github.com/nounsDAO/nouns-monorepo/blob/master/packages/nouns-contracts/contracts/NounsToken.sol) contract. **VerbsToken** owns the **CultureIndex**. When calling **mint()** on the **VerbsToken**, the contract calls **dropTopVotedPiece** on **CultureIndex**, and creates an ERC721 with metadata based on the dropped art piece data from the **CultureIndex**.
 
 ## AuctionHouse
 
-[**AuctionHouse.sol**](https://github.com/collectivexyz/revolution-protocol/blob/main/packages/revolution-contracts/src/AuctionHouse.sol) is a fork of the [NounsAuctionHouse](https://github.com/nounsDAO/nouns-monorepo/blob/master/packages/nouns-contracts/contracts/NounsAuctionHouse.sol) contract, that mints **VerbsToken**s. Additionally, the **AuctionHouse** splits auction proceeds (the winning bid) with the creator(s) of the art piece that is minted.
+[**AuctionHouse.sol**](https://github.com/collectivexyz/revolution-protocol/blob/main/packages/revolution/src/AuctionHouse.sol) is a fork of the [NounsAuctionHouse](https://github.com/nounsDAO/nouns-monorepo/blob/master/packages/nouns-contracts/contracts/NounsAuctionHouse.sol) contract, that mints **VerbsToken**s. Additionally, the **AuctionHouse** splits auction proceeds (the winning bid) with the creator(s) of the art piece that is minted.
 
 <img width="882" alt="Screenshot 2023-12-06 at 11 25 27 AM" src="https://github.com/collectivexyz/revolution-protocol/blob/main/readme-img/vrb-auction.png">
 
@@ -124,11 +124,11 @@ The **entropyRateBps** defines the proportion of the _creator's share_ that is s
 direct creator payment = (creator_share * entropyRateBps) / 10_000
 ```
 
-The remaining amount of the _creator's share_ is sent to the [ERC20TokenEmitter](https://github.com/collectivexyz/revolution-protocol/blob/main/packages/revolution-contracts/src/ERC20TokenEmitter.sol) contract's **buyToken** function to buy the creator ERC20 governance tokens, according to a linear token emission schedule.
+The remaining amount of the _creator's share_ is sent to the [ERC20TokenEmitter](https://github.com/collectivexyz/revolution-protocol/blob/main/packages/revolution/src/ERC20TokenEmitter.sol) contract's **buyToken** function to buy the creator ERC20 governance tokens, according to a linear token emission schedule.
 
 ## ERC20TokenEmitter
 
-**[ERC20TokenEmitter.sol](https://github.com/collectivexyz/revolution-protocol/blob/main/packages/revolution-contracts/src/ERC20TokenEmitter.sol)** is a linear [VRGDA](https://www.paradigm.xyz/2022/08/vrgda) that mints an ERC20 token when the payable **buyToken** function is called, and enables anyone to purchase the ERC20 governance token at any time. A portion of value spent on buying the ERC20 tokens is paid to creators and to a protocol rewards contract.
+**[ERC20TokenEmitter.sol](https://github.com/collectivexyz/revolution-protocol/blob/main/packages/revolution/src/ERC20TokenEmitter.sol)** is a linear [VRGDA](https://www.paradigm.xyz/2022/08/vrgda) that mints an ERC20 token when the payable **buyToken** function is called, and enables anyone to purchase the ERC20 governance token at any time. A portion of value spent on buying the ERC20 tokens is paid to creators and to a protocol rewards contract.
 
 ### Creator payment
 
@@ -229,15 +229,15 @@ For all contracts - only the RevolutionBuilder manager should be able to initial
 
 ### VRGDAC
 
-The Token Emitter utilizes a continuous VRGDA ([VRGDAC.sol](https://github.com/collectivexyz/revolution-protocol/blob/main/packages/revolution-contracts/src/libs/VRGDAC.sol)) to facilitate ERC20 token purchases. Given an amount of ether to pay, it will return the number of tokens to sell (`YtoX`), and given an amount of tokens to buy, will return the cost (`XtoY`) where X is the ERC20 token and Y is ether. The original VRGDAC implementation is [here](https://gist.github.com/transmissions11/485a6e2deb89236202bd2f59796262fd).
+The Token Emitter utilizes a continuous VRGDA ([VRGDAC.sol](https://github.com/collectivexyz/revolution-protocol/blob/main/packages/revolution/src/libs/VRGDAC.sol)) to facilitate ERC20 token purchases. Given an amount of ether to pay, it will return the number of tokens to sell (`YtoX`), and given an amount of tokens to buy, will return the cost (`XtoY`) where X is the ERC20 token and Y is ether. The original VRGDAC implementation is [here](https://gist.github.com/transmissions11/485a6e2deb89236202bd2f59796262fd).
 
-In order to get the amount of tokens to emit given a payment of ether (`YtoX` in [VRGDAC.sol](https://github.com/collectivexyz/revolution-protocol/blob/main/packages/revolution-contracts/src/libs/VRGDAC.sol)), we first take the integral of the linear VRGDA pricing function [p(x)](https://www.paradigm.xyz/2022/08/vrgda).
+In order to get the amount of tokens to emit given a payment of ether (`YtoX` in [VRGDAC.sol](https://github.com/collectivexyz/revolution-protocol/blob/main/packages/revolution/src/libs/VRGDAC.sol)), we first take the integral of the linear VRGDA pricing function [p(x)](https://www.paradigm.xyz/2022/08/vrgda).
 
 <img width="487" alt="Screenshot 2023-12-05 at 9 21 59 PM" src="https://github.com/collectivexyz/revolution-protocol/blob/main/readme-img/vrgda-c-integral.png">
 
-Then - we can get the cost of a specific number of tokens (`XtoY` in [VRGDAC.sol](https://github.com/collectivexyz/revolution-protocol/blob/main/packages/revolution-contracts/src/libs/VRGDAC.sol)) by doing `p_integral(x_start+x_bought) - p_integral(x_start)` where `x_start` is the current supply of the ERC20 and `x_bought` is the amount of tokens you wish to purchase.
+Then - we can get the cost of a specific number of tokens (`XtoY` in [VRGDAC.sol](https://github.com/collectivexyz/revolution-protocol/blob/main/packages/revolution/src/libs/VRGDAC.sol)) by doing `p_integral(x_start+x_bought) - p_integral(x_start)` where `x_start` is the current supply of the ERC20 and `x_bought` is the amount of tokens you wish to purchase.
 
-We can then solve for `x_bought` using a handy python [solver](https://github.com/collectivexyz/revolution-protocol/blob/main/packages/revolution-contracts/script/solve.py) to find `YtoX`, allowing us to pass in an amount of ether and receive an amount of tokens to sell.
+We can then solve for `x_bought` using a handy python [solver](https://github.com/collectivexyz/revolution-protocol/blob/main/packages/revolution/script/solve.py) to find `YtoX`, allowing us to pass in an amount of ether and receive an amount of tokens to sell.
 
 <img width="1727" alt="Screenshot 2023-12-05 at 8 34 22 PM" src="https://github.com/collectivexyz/revolution-protocol/blob/main/readme-img/vrgdac-graph.png">
 
