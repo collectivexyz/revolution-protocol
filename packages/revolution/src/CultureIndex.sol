@@ -423,9 +423,7 @@ contract CultureIndex is
         );
 
         for (uint256 i; i < len; i++) {
-            bool success = _verifyVoteSignature(from[i], pieceIds[i], deadline[i], v[i], r[i], s[i]);
-
-            if (!success) revert INVALID_SIGNATURE();
+            if (!_verifyVoteSignature(from[i], pieceIds[i], deadline[i], v[i], r[i], s[i])) revert INVALID_SIGNATURE();
         }
 
         for (uint256 i; i < len; i++) {
