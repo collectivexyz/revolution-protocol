@@ -101,16 +101,16 @@ interface ICultureIndex is ICultureIndexEvents {
     }
 
     /**
-    * @dev Struct defining an art piece.
-    *@param pieceId Unique identifier for the piece.
-    * @param metadata Metadata associated with the art piece.
-   * @param creators Creators of the art piece.
-   * @param sponsor Address that created the piece.
-   * @param isDropped Boolean indicating if the piece has been dropped.
-   * @param creationBlock Block number when the piece was created.
-   * @param quorumVotes The quorum votes for the piece.
-   * @param totalERC20Supply The total ERC20 supply for the piece.
-   * @param totalVotesSupply The total votes supply for the piece.
+     * @dev Struct defining an art piece.
+     *@param pieceId Unique identifier for the piece.
+     * @param metadata Metadata associated with the art piece.
+     * @param creators Creators of the art piece.
+     * @param sponsor Address that created the piece.
+     * @param isDropped Boolean indicating if the piece has been dropped.
+     * @param creationBlock Block number when the piece was created.
+     * @param quorumVotes The quorum votes for the piece.
+     * @param totalERC20Supply The total ERC20 supply for the piece.
+     * @param totalVotesSupply The total votes supply for the piece.
      */
     struct ArtPiece {
         uint256 pieceId;
