@@ -182,7 +182,7 @@ contract RevolutionBuilder is
         IVerbsToken(erc721Token).initialize({
             minter: daoAddressesByToken[erc721Token].auction,
             descriptor: daoAddressesByToken[erc721Token].descriptor,
-            initialOwner: daoAddressesByToken[erc721Token].auction,
+            initialOwner: daoAddressesByToken[erc721Token].dao,
             cultureIndex: daoAddressesByToken[erc721Token].cultureIndex,
             erc721TokenParams: _erc721TokenParams
         });
@@ -195,7 +195,8 @@ contract RevolutionBuilder is
         ICultureIndex(daoAddressesByToken[erc721Token].cultureIndex).initialize({
             erc20VotingToken: daoAddressesByToken[erc721Token].erc20Token,
             erc721VotingToken: daoAddressesByToken[erc721Token].erc721Token,
-            initialOwner: daoAddressesByToken[erc721Token].erc721Token,
+            initialOwner: daoAddressesByToken[erc721Token].dao,
+            dropperAdmin: daoAddressesByToken[erc721Token].erc721Token,
             cultureIndexParams: _cultureIndexParams,
             maxHeap: daoAddressesByToken[erc721Token].maxHeap
         });

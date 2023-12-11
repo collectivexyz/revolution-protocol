@@ -74,6 +74,9 @@ contract CultureIndex is
     // Constant for max number of creators
     uint256 public constant MAX_NUM_CREATORS = 100;
 
+    // The address that is allowed to drop art pieces
+    address public dropperAdmin;
+
     ///                                                          ///
     ///                         IMMUTABLES                       ///
     ///                                                          ///
@@ -99,6 +102,8 @@ contract CultureIndex is
      * @param _erc20VotingToken The address of the ERC20 voting token, commonly referred to as "points"
      * @param _erc721VotingToken The address of the ERC721 voting token, commonly the dropped art pieces
      * @param _initialOwner The owner of the contract, allowed to drop pieces. Commonly updated to the AuctionHouse
+     * @param _maxHeap The address of the max heap contract
+     * @param _dropperAdmin The address that can drop new art pieces
      * @param _cultureIndexParams The CultureIndex settings
      */
     function initialize(
@@ -106,6 +111,7 @@ contract CultureIndex is
         address _erc721VotingToken,
         address _initialOwner,
         address _maxHeap,
+        address _dropperAdmin,
         IRevolutionBuilder.CultureIndexParams memory _cultureIndexParams
     ) external initializer {
         require(msg.sender == address(manager), "Only manager can initialize");
@@ -130,6 +136,7 @@ contract CultureIndex is
         description = _cultureIndexParams.description;
         quorumVotesBPS = _cultureIndexParams.quorumVotesBPS;
         minVoteWeight = _cultureIndexParams.minVoteWeight;
+        dropperAdmin = _dropperAdmin;
 
         emit QuorumVotesBPSSet(quorumVotesBPS, _cultureIndexParams.quorumVotesBPS);
 
@@ -538,7 +545,9 @@ contract CultureIndex is
      * @notice Pulls and drops the top-voted piece.
      * @return The top voted piece
      */
-    function dropTopVotedPiece() public nonReentrant onlyOwner returns (ArtPiece memory) {
+    function dropTopVotedPiece() public nonReentrant returns (ArtPiece memory) {
+        require(msg.sender == dropperAdmin, "Only dropper can drop pieces");
+
         ICultureIndex.ArtPiece memory piece = getTopVotedPiece();
         require(totalVoteWeights[piece.pieceId] >= piece.quorumVotes, "Does not meet quorum votes to be dropped.");
 

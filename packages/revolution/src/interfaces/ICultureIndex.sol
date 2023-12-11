@@ -237,6 +237,7 @@ interface ICultureIndex is ICultureIndexEvents {
      * @param erc721VotingToken The address of the ERC721 voting token, commonly the dropped art pieces
      * @param initialOwner The owner of the contract, allowed to drop pieces. Commonly updated to the AuctionHouse
      * @param maxHeap The address of the max heap contract
+     * @param dropperAdmin The address that can drop new art pieces
      * @param cultureIndexParams The CultureIndex settings
      */
     function initialize(
@@ -244,6 +245,7 @@ interface ICultureIndex is ICultureIndexEvents {
         address erc721VotingToken,
         address initialOwner,
         address maxHeap,
+        address dropperAdmin,
         IRevolutionBuilder.CultureIndexParams calldata cultureIndexParams
     ) external;
 }
