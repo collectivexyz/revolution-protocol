@@ -31,7 +31,7 @@ import { Initializable } from "@openzeppelin/contracts-upgradeable/proxy/utils/I
  * previous example, it would be included in {ERC721-_update}).
  */
 
- /**
+/**
  * @dev MODIFICATIONS
  * Checkpointing logic from VotesUpgradeable.sol has been used with the following modifications:
  * - `delegates` is renamed to `_delegates` and is set to private
