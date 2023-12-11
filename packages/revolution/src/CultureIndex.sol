@@ -237,43 +237,14 @@ contract CultureIndex is
             newPiece.creators.push(creatorArray[i]);
         }
 
-        _emitPieceCreatedEvents(
-            pieceId,
-            msg.sender,
-            metadata,
-            creatorArray,
-            creatorArrayLength,
-            newPiece.quorumVotes,
-            newPiece.totalVotesSupply
-        );
-
-        return newPiece.pieceId;
-    }
-
-    /**
-     * @notice Emits events for created art piece
-     * @param pieceId The ID of the art piece.
-     * @param sender The address of the sender.
-     * @param metadata The metadata associated with the art piece, including name, description, image, and optional animation URL.
-     * @param creatorArray An array of creators who contributed to the piece, along with their respective basis points that must sum up to 10,000.
-     * @param quorum The quorum votes required for the art piece to be dropped.
-     * @param totalVotesSupply The total votes supply at the time of creation.
-     */
-    function _emitPieceCreatedEvents(
-        uint256 pieceId,
-        address sender,
-        ArtPieceMetadata calldata metadata,
-        CreatorBps[] calldata creatorArray,
-        uint256 creatorArrayLength,
-        uint256 quorum,
-        uint256 totalVotesSupply
-    ) internal {
-        emit PieceCreated(pieceId, sender, metadata, quorum, totalVotesSupply);
+        emit PieceCreated(pieceId, msg.sender, metadata, newPiece.quorumVotes, newPiece.totalVotesSupply);
 
         // Emit an event for each creator
         for (uint i; i < creatorArrayLength; i++) {
             emit PieceCreatorAdded(pieceId, creatorArray[i].creator, msg.sender, creatorArray[i].bps);
         }
+
+        return newPiece.pieceId;
     }
 
     /**
