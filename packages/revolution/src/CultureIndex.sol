@@ -141,7 +141,7 @@ contract CultureIndex is
         emit QuorumVotesBPSSet(quorumVotesBPS, _cultureIndexParams.quorumVotesBPS);
 
         // Create maxHeap
-        maxHeap = MaxHeap(address(_maxHeap));
+        maxHeap = MaxHeap(_maxHeap);
     }
 
     ///                                                          ///
