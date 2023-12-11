@@ -13,7 +13,7 @@ The ultimate goal of Revolution is fair ownership distribution over a community 
 ## Setup
 
 ```
-git clone https://github.com/collectivexyz/revolution-protocol.git && cd 2023-12-revolutionprotocol
+git clone https://github.com/collectivexyz/revolution-protocol.git && cd revolution-protocol
 ```
 
 #### Node.js and pnpm
