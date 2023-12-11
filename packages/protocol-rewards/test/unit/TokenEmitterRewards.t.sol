@@ -7,16 +7,16 @@ import { NontransferableERC20Votes, IERC20TokenEmitter } from "../utils/TokenEmi
 
 contract TokenEmitterRewardsTest is ProtocolRewardsTest {
     MockTokenEmitter internal mockTokenEmitter;
-    NontransferableERC20Votes internal govToken;
+    NontransferableERC20Votes internal erc20Token;
 
     function setUp() public override {
         super.setUp();
 
-        govToken = new NontransferableERC20Votes(address(this), "Revolution Governance", "GOV");
+        erc20Token = new NontransferableERC20Votes(address(this), "Revolution Governance", "GOV");
 
         mockTokenEmitter = new MockTokenEmitter(
             address(this),
-            govToken,
+            erc20Token,
             treasury,
             address(protocolRewards),
             revolution
