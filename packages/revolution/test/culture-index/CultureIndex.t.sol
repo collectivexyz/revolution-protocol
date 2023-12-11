@@ -23,6 +23,19 @@ contract CultureIndexTestSuite is RevolutionBuilderTest {
      */
     function setUp() public virtual override {
         super.setUp();
+        super.setMockParams();
+
+        super.setERC20TokenParams("Revolution Governance", "GOV");
+
+        super.setCultureIndexParams("Vrbs", "Our community Vrbs. Must be 32x32.", 10, 200, 0);
+
+        super.setERC721TokenParams("Vrbs", "VRBS", "QmQzDwaZ7yQxHHs7sQQenJVB89riTSacSGcJRv9jtHPuz5", "Vrb");
+
+        super.deployMock();
+
+        //start prank to be cultureindex's owner
+        vm.startPrank(address(erc721Token));
+
         // govToken = new NontransferableERC20Votes(address(this), "Revolution Governance", "GOV");
 
         // // Initialize VerbsToken with additional parameters

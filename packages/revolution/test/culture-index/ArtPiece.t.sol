@@ -352,6 +352,7 @@ contract CultureIndexArtPieceTest is CultureIndexTestSuite {
 
         cultureIndex.transferOwnership(address(erc721Token));
 
+        vm.startPrank(address(erc20TokenEmitter));
         erc20Token.mint(address(this), erc20Supply);
 
         // Create an art piece
@@ -375,10 +376,14 @@ contract CultureIndexArtPieceTest is CultureIndexTestSuite {
 
         vm.roll(block.number + 1);
         // Cast votes
+        vm.startPrank(address(this));
         voteForPiece(pieceId);
 
         // Mint token and govTokens, create a new piece and check fields
+        vm.startPrank(address(auction));
         erc721Token.mint();
+
+        vm.startPrank(address(erc20TokenEmitter));
         erc20Token.mint(address(this), erc20Supply);
 
         vm.roll(block.number + 1);
