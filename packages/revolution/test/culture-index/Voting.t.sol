@@ -407,7 +407,7 @@ contract CultureIndexVotingBasicTest is CultureIndexTestSuite {
         emit log_uint(gasUsedIndividual); // Log gas used for individual votes
 
         vm.stopPrank();
-        
+
         setUp();
         // Resetting state for a fair comparison
         // Reset contract state (this would need to be implemented to revert to initial state)
@@ -736,6 +736,9 @@ contract CultureIndexVotingBasicTest is CultureIndexTestSuite {
 
             vm.startPrank(address(auction));
             erc721Token.mint();
+
+            //transfer to voter
+            erc721Token.transferFrom(address(auction), address(this), i);
         }
 
         // Calculate expected quorum votes
