@@ -11,7 +11,8 @@ jobs:
       fail-fast: true
 
     name: Build
-    runs-on: ubuntu-latest
+    runs-on:
+      group: revolution-protocol
     steps:
       - uses: actions/checkout@v3
 
