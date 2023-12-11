@@ -41,7 +41,7 @@ contract CultureIndexVotingSignaturesTest is CultureIndexTestSuite {
                     keccak256(
                         "EIP712Domain(string name,string version,uint256 chainId,address verifyingContract)"
                     ),
-                    keccak256(bytes("CultureIndex")),
+                    keccak256(abi.encodePacked(cultureIndex.name(), " CultureIndex")),
                     keccak256(bytes("1")),
                     block.chainid,
                     address(cultureIndex)
@@ -77,8 +77,11 @@ contract CultureIndexVotingSignaturesTest is CultureIndexTestSuite {
 
         //mint offchainVoterWeight to offchainVoter
         uint256 offchainVoterWeight = 100;
+        vm.startPrank(address(erc20TokenEmitter));
         erc20Token.mint(offchainVoter, offchainVoterWeight);
+        vm.stopPrank();
 
+        vm.startPrank(address(this));
         vm.roll(block.number + 1);
 
         bytes32 voteHash = keccak256(
@@ -162,10 +165,12 @@ contract CultureIndexVotingSignaturesTest is CultureIndexTestSuite {
 
         // mint offchainVoterWeight to offchainVoter
         uint256 offchainVoterWeight = 100;
+        vm.startPrank(address(erc20TokenEmitter));
         erc20Token.mint(offchainVoter, offchainVoterWeight);
 
         vm.roll(block.number + 1);
 
+        vm.startPrank(address(offchainVoter));
         bytes32 voteHash = keccak256(
             abi.encode(cultureIndex.VOTE_TYPEHASH(), offchainVoter, pieceIds, nonce, deadline)
         );
@@ -223,6 +228,7 @@ contract CultureIndexVotingSignaturesTest is CultureIndexTestSuite {
         cultureIndex.voteForManyWithSig(offchainVoter, invalidPieceIds, deadline, v, r, s);
 
         //mint tokens finally
+        vm.startPrank(address(erc20TokenEmitter));
         erc20Token.mint(offchainVoter, 100);
 
         vm.roll(block.number + 1);
@@ -272,6 +278,7 @@ contract CultureIndexVotingSignaturesTest is CultureIndexTestSuite {
         cultureIndex.voteForManyWithSig(offchainVoter, pieceIds, deadline, v, r, s);
 
         // dropTopVotedPiece
+        vm.startPrank(address(erc721Token));
         cultureIndex.dropTopVotedPiece();
 
         // vote again with different address and expect "Piece has already been dropped"

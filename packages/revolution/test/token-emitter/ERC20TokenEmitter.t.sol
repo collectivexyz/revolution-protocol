@@ -44,7 +44,6 @@ contract ERC20TokenEmitterTest is RevolutionBuilderTest {
 
         vm.deal(address(0), 100000 ether);
 
-
         // vm.startPrank(address(0));
         // RevolutionProtocolRewards protocolRewards = new RevolutionProtocolRewards();
 
@@ -352,7 +351,7 @@ contract ERC20TokenEmitterTest is RevolutionBuilderTest {
         );
 
         // should get more expensive
-        assertGt(erc20TokenEmitter.balanceOf(address(1)),erc20TokenEmitter.balanceOf(address(2)));
+        assertGt(erc20TokenEmitter.balanceOf(address(1)), erc20TokenEmitter.balanceOf(address(2)));
     }
 
     // test multiple payouts
@@ -370,7 +369,9 @@ contract ERC20TokenEmitterTest is RevolutionBuilderTest {
         bps[1] = 10_000 - firstBps;
 
         // estimate tokens to be emitted
-        int256 expectedAmount =erc20TokenEmitter.getTokenQuoteForEther(1e18 -erc20TokenEmitter.computeTotalReward(1e18));
+        int256 expectedAmount = erc20TokenEmitter.getTokenQuoteForEther(
+            1e18 - erc20TokenEmitter.computeTotalReward(1e18)
+        );
 
         erc20TokenEmitter.buyToken{ value: 1e18 }(
             recipients,
@@ -397,7 +398,7 @@ contract ERC20TokenEmitterTest is RevolutionBuilderTest {
         //assert treasury balance is correct
         assertEq(
             address(erc20TokenEmitter.treasury()).balance,
-            1e18 -erc20TokenEmitter.computeTotalReward(1e18),
+            1e18 - erc20TokenEmitter.computeTotalReward(1e18),
             "Treasury should have payment - totalReward in balance"
         );
     }
@@ -415,11 +416,13 @@ contract ERC20TokenEmitterTest is RevolutionBuilderTest {
         correctBps[0] = 5000; // 50%
         correctBps[1] = 5000; // 50%
 
-        int expectedAmount =erc20TokenEmitter.getTokenQuoteForEther(1e18 -erc20TokenEmitter.computeTotalReward(1e18));
+        int expectedAmount = erc20TokenEmitter.getTokenQuoteForEther(
+            1e18 - erc20TokenEmitter.computeTotalReward(1e18)
+        );
         assertGt(expectedAmount, 0, "Token purchase should have a positive amount");
 
         // Attempting a valid token purchase
-        uint emittedWad =erc20TokenEmitter.buyToken{ value: 1e18 }(
+        uint emittedWad = erc20TokenEmitter.buyToken{ value: 1e18 }(
             recipients,
             correctBps,
             IERC20TokenEmitter.ProtocolRewardAddresses({
@@ -438,7 +441,7 @@ contract ERC20TokenEmitterTest is RevolutionBuilderTest {
         //expect treasury to have payment - totalReward in balance
         assertEq(
             address(erc20TokenEmitter.treasury()).balance,
-            1e18 -erc20TokenEmitter.computeTotalReward(1e18),
+            1e18 - erc20TokenEmitter.computeTotalReward(1e18),
             "Treasury should have payment - totalReward in balance"
         );
 
@@ -482,254 +485,254 @@ contract ERC20TokenEmitterTest is RevolutionBuilderTest {
         vm.stopPrank();
     }
 
-        // // // TODO: test scamming creator fails with percentage low
-        // function testFailLowPercentage() public {
-        //     vm.startPrank(address(0));
+    // // // TODO: test scamming creator fails with percentage low
+    // function testFailLowPercentage() public {
+    //     vm.startPrank(address(0));
 
-        //     address[] memory recipients = new address[](2);
-        //     recipients[0] = address(1);
-        //     recipients[1] = address(2);
+    //     address[] memory recipients = new address[](2);
+    //     recipients[0] = address(1);
+    //     recipients[1] = address(2);
 
-        //     uint256[] memory bps = new uint256[](2);
-        //     bps[0] = 9_500;
-        //     bps[1] = 500;
+    //     uint256[] memory bps = new uint256[](2);
+    //     bps[0] = 9_500;
+    //     bps[1] = 500;
 
-        //    erc20TokenEmitter.buyToken{value: 1e18}(recipients, bps);
-        // }
+    //    erc20TokenEmitter.buyToken{value: 1e18}(recipients, bps);
+    // }
 
-        function testBuyingTwiceAmountIsNotMoreThanTwiceEmittedTokens() public {
-            vm.startPrank(address(0));
+    function testBuyingTwiceAmountIsNotMoreThanTwiceEmittedTokens() public {
+        vm.startPrank(address(0));
 
-            address[] memory recipients = new address[](1);
-            recipients[0] = address(1);
+        address[] memory recipients = new address[](1);
+        recipients[0] = address(1);
 
-            uint256[] memory bps = new uint256[](1);
-            bps[0] = 10_000;
+        uint256[] memory bps = new uint256[](1);
+        bps[0] = 10_000;
 
-           erc20TokenEmitter.buyToken{ value: 1e18 }(
-                recipients,
-                bps,
-                IERC20TokenEmitter.ProtocolRewardAddresses({
-                    builder: address(0),
-                    purchaseReferral: address(0),
-                    deployer: address(0)
-                })
-            );
-            uint256 firstAmount =erc20TokenEmitter.balanceOf(address(1));
+        erc20TokenEmitter.buyToken{ value: 1e18 }(
+            recipients,
+            bps,
+            IERC20TokenEmitter.ProtocolRewardAddresses({
+                builder: address(0),
+                purchaseReferral: address(0),
+                deployer: address(0)
+            })
+        );
+        uint256 firstAmount = erc20TokenEmitter.balanceOf(address(1));
 
-           erc20TokenEmitter.buyToken{ value: 1e18 }(
-                recipients,
-                bps,
-                IERC20TokenEmitter.ProtocolRewardAddresses({
-                    builder: address(0),
-                    purchaseReferral: address(0),
-                    deployer: address(0)
-                })
-            );
-            uint256 secondAmountDifference =erc20TokenEmitter.balanceOf(address(1)) - firstAmount;
+        erc20TokenEmitter.buyToken{ value: 1e18 }(
+            recipients,
+            bps,
+            IERC20TokenEmitter.ProtocolRewardAddresses({
+                builder: address(0),
+                purchaseReferral: address(0),
+                deployer: address(0)
+            })
+        );
+        uint256 secondAmountDifference = erc20TokenEmitter.balanceOf(address(1)) - firstAmount;
 
-            assert(secondAmountDifference <= 2 *erc20TokenEmitter.totalSupply());
-        }
-
-        function testBuyTokenReentrancy() public {
-            // Deploy the malicious treasury contract
-            MaliciousTreasury maliciousTreasury = new MaliciousTreasury(address(erc20TokenEmitter));
-
-            address governanceToken = address(new ERC1967Proxy(erc20TokenImpl, ""));
-
-            address emitter2 = address(new ERC1967Proxy(erc20TokenEmitterImpl, ""));
-
-            vm.startPrank(address(manager));
-            IERC20TokenEmitter(emitter2).initialize({
-                initialOwner: address(this),
-                erc20Token: address(governanceToken),
-                treasury: address(maliciousTreasury),
-                vrgdac: address(erc20TokenEmitter.vrgdac()),
-                creatorsAddress: creatorsAddress
-            });
-
-            INontransferableERC20Votes(governanceToken).initialize({
-                initialOwner: address(emitter2),
-                erc20TokenParams: IRevolutionBuilder.ERC20TokenParams({
-                    name: "Revolution Governance",
-                    symbol: "GOV"
-                })
-            });
-
-            vm.deal(address(this), 100000 ether);
-
-            //buy tokens and see if malicious treasury can reenter
-            address[] memory recipients = new address[](1);
-            recipients[0] = address(1);
-            uint256[] memory bps = new uint256[](1);
-            bps[0] = 10_000;
-            vm.expectRevert();
-            IERC20TokenEmitter(emitter2).buyToken{ value: 1e18 }(
-                recipients,
-                bps,
-                IERC20TokenEmitter.ProtocolRewardAddresses({
-                    builder: address(0),
-                    purchaseReferral: address(0),
-                    deployer: address(0)
-                })
-            );
-        }
-
-        function testGetTokenAmountForMultiPurchaseGeneral(uint256 payment) public {
-            vm.assume(payment >erc20TokenEmitter.minPurchaseAmount());
-            vm.assume(payment <erc20TokenEmitter.maxPurchaseAmount());
-            vm.startPrank(address(0));
-
-            uint256 SOME_MAX_EXPECTED_VALUE = uint256(wadDiv(int256(payment), 1 ether)) *
-                1e18 *
-                tokensPerTimeUnit;
-
-            int256 slightlyMore =erc20TokenEmitter.getTokenQuoteForEther((payment * 101) / 100);
-
-            // Call the function with the typical payment amount
-            int256 tokenAmount =erc20TokenEmitter.getTokenQuoteForEther(payment);
-
-            emit log_int(tokenAmount);
-
-            // Assert that the token amount is reasonable (not zero or unexpectedly high)
-            assertGt(tokenAmount, 0, "Token amount should be greater than zero");
-            assertLt(
-                tokenAmount,
-                int256(SOME_MAX_EXPECTED_VALUE),
-                "Token amount should be less than some max expected value"
-            );
-            assertLt(tokenAmount, slightlyMore, "Token amount should be less than slightly more");
-
-            //buy 10 ether of tokens
-            address[] memory recipients = new address[](1);
-            recipients[0] = address(1);
-            uint256[] memory bps = new uint256[](1);
-            bps[0] = 10_000;
-
-            //ensure that enough volume was bought for the day, so purchase expectedVolume amount first
-           erc20TokenEmitter.buyToken{ value: expectedVolume }(
-                recipients,
-                bps,
-                IERC20TokenEmitter.ProtocolRewardAddresses({
-                    builder: address(0),
-                    purchaseReferral: address(0),
-                    deployer: address(0)
-                })
-            );
-
-           erc20TokenEmitter.buyToken{ value: payment }(
-                recipients,
-                bps,
-                IERC20TokenEmitter.ProtocolRewardAddresses({
-                    builder: address(0),
-                    purchaseReferral: address(0),
-                    deployer: address(0)
-                })
-            );
-
-            int256 newTokenAmount =erc20TokenEmitter.getTokenQuoteForEther(payment);
-
-            // Assert that the new token amount is less than the previous tokenAmount
-            assertLt(newTokenAmount, tokenAmount, "Token amount should be less than previous token amount");
-
-            vm.stopPrank();
-        }
-
-        function testGetTokenAmountForMultiPurchaseEdgeCases() public {
-            vm.startPrank(address(0));
-
-            // Edge Case 1: Very Small Payment
-            uint256 smallPayment = 0.00001 ether;
-            int256 smallPaymentTokenAmount =erc20TokenEmitter.getTokenQuoteForEther(smallPayment);
-            assertGt(smallPaymentTokenAmount, 0, "Token amount for small payment should be greater than zero");
-            emit log_int(smallPaymentTokenAmount);
-
-            // A days worth of payment amount
-            int256 dailyPaymentTokenAmount =erc20TokenEmitter.getTokenQuoteForEther(expectedVolume);
-            assertLt(
-                uint256(dailyPaymentTokenAmount),
-                tokensPerTimeUnit * 1e18,
-                "Token amount for daily payment should be less than tokens per day"
-            );
-            emit log_string("Daily Payment Token Amount: ");
-            emit log_int(dailyPaymentTokenAmount);
-
-            // Edge Case 2: Very Large Payment
-            // An unusually large payment amount
-            int256 largePaymentTokenAmount =erc20TokenEmitter.getTokenQuoteForEther(expectedVolume * 100);
-            //spending 100x the expected amount per day should get you < 25x the tokens
-            uint256 SOME_REALISTIC_UPPER_BOUND = 25 * tokensPerTimeUnit * 1e18;
-            assertLt(
-                uint256(largePaymentTokenAmount),
-                SOME_REALISTIC_UPPER_BOUND,
-                "Token amount for large payment should be less than some realistic upper bound"
-            );
-            emit log_string("Large Payment Token Amount: ");
-            emit log_int(largePaymentTokenAmount);
-
-            uint256 largestPayment = expectedVolume * 1_000; // An unusually large payment amount
-            int256 largestPaymentTokenAmount =erc20TokenEmitter.getTokenQuoteForEther(largestPayment);
-            //spending 1000x the daily amount should get you less than 50x the tokens
-            assertLt(
-                uint256(largestPaymentTokenAmount),
-                50 * tokensPerTimeUnit * 1e18,
-                "Token amount for largest payment should be less than some realistic upper bound"
-            );
-
-            emit log_string("Largest Payment Token Amount: ");
-            emit log_int(largestPaymentTokenAmount);
-
-            vm.stopPrank();
-        }
-
-        function testGetTokenPrice() public {
-            vm.startPrank(address(0));
-
-            vm.deal(address(0), 100000 ether);
-            vm.stopPrank();
-
-            int256 priceAfterManyPurchases =erc20TokenEmitter.buyTokenQuote(1e18);
-            emit log_int(priceAfterManyPurchases);
-
-            // Simulate the passage of time
-            uint256 daysElapsed = 221;
-            vm.warp(block.timestamp + daysElapsed * 1 days);
-
-            int256 priceAfterManyDays =erc20TokenEmitter.buyTokenQuote(1e18);
-
-            emit log_int(priceAfterManyDays);
-
-            // Assert that the price is greater than zero
-            assertGt(priceAfterManyDays, 0, "Price should never hit zero");
-        }
+        assert(secondAmountDifference <= 2 * erc20TokenEmitter.totalSupply());
     }
 
-    contract MaliciousTreasury {
-        ERC20TokenEmitter erc20TokenEmitter;
-        bool public reentryAttempted;
+    function testBuyTokenReentrancy() public {
+        // Deploy the malicious treasury contract
+        MaliciousTreasury maliciousTreasury = new MaliciousTreasury(address(erc20TokenEmitter));
 
-        constructor(address _emitter) {
-            erc20TokenEmitter = ERC20TokenEmitter(_emitter);
-            reentryAttempted = false;
-        }
+        address governanceToken = address(new ERC1967Proxy(erc20TokenImpl, ""));
 
-        // Fallback function to enable re-entrance to TokenEmitter
-        function call() external payable {
-            reentryAttempted = true;
-            address[] memory recipients = new address[](1);
-            recipients[0] = address(this);
-            uint256[] memory bps = new uint256[](1);
-            bps[0] = 10_000;
+        address emitter2 = address(new ERC1967Proxy(erc20TokenEmitterImpl, ""));
 
-            // Attempt to re-enter TokenEmitter
-           erc20TokenEmitter.buyToken{ value: msg.value }(
-                recipients,
-                bps,
-                IERC20TokenEmitter.ProtocolRewardAddresses({
-                    builder: address(0),
-                    purchaseReferral: address(0),
-                    deployer: address(0)
-                })
-            );
+        vm.startPrank(address(manager));
+        IERC20TokenEmitter(emitter2).initialize({
+            initialOwner: address(this),
+            erc20Token: address(governanceToken),
+            treasury: address(maliciousTreasury),
+            vrgdac: address(erc20TokenEmitter.vrgdac()),
+            creatorsAddress: creatorsAddress
+        });
+
+        INontransferableERC20Votes(governanceToken).initialize({
+            initialOwner: address(emitter2),
+            erc20TokenParams: IRevolutionBuilder.ERC20TokenParams({
+                name: "Revolution Governance",
+                symbol: "GOV"
+            })
+        });
+
+        vm.deal(address(this), 100000 ether);
+
+        //buy tokens and see if malicious treasury can reenter
+        address[] memory recipients = new address[](1);
+        recipients[0] = address(1);
+        uint256[] memory bps = new uint256[](1);
+        bps[0] = 10_000;
+        vm.expectRevert();
+        IERC20TokenEmitter(emitter2).buyToken{ value: 1e18 }(
+            recipients,
+            bps,
+            IERC20TokenEmitter.ProtocolRewardAddresses({
+                builder: address(0),
+                purchaseReferral: address(0),
+                deployer: address(0)
+            })
+        );
+    }
+
+    function testGetTokenAmountForMultiPurchaseGeneral(uint256 payment) public {
+        vm.assume(payment > erc20TokenEmitter.minPurchaseAmount());
+        vm.assume(payment < erc20TokenEmitter.maxPurchaseAmount());
+        vm.startPrank(address(0));
+
+        uint256 SOME_MAX_EXPECTED_VALUE = uint256(wadDiv(int256(payment), 1 ether)) *
+            1e18 *
+            tokensPerTimeUnit;
+
+        int256 slightlyMore = erc20TokenEmitter.getTokenQuoteForEther((payment * 101) / 100);
+
+        // Call the function with the typical payment amount
+        int256 tokenAmount = erc20TokenEmitter.getTokenQuoteForEther(payment);
+
+        emit log_int(tokenAmount);
+
+        // Assert that the token amount is reasonable (not zero or unexpectedly high)
+        assertGt(tokenAmount, 0, "Token amount should be greater than zero");
+        assertLt(
+            tokenAmount,
+            int256(SOME_MAX_EXPECTED_VALUE),
+            "Token amount should be less than some max expected value"
+        );
+        assertLt(tokenAmount, slightlyMore, "Token amount should be less than slightly more");
+
+        //buy 10 ether of tokens
+        address[] memory recipients = new address[](1);
+        recipients[0] = address(1);
+        uint256[] memory bps = new uint256[](1);
+        bps[0] = 10_000;
+
+        //ensure that enough volume was bought for the day, so purchase expectedVolume amount first
+        erc20TokenEmitter.buyToken{ value: expectedVolume }(
+            recipients,
+            bps,
+            IERC20TokenEmitter.ProtocolRewardAddresses({
+                builder: address(0),
+                purchaseReferral: address(0),
+                deployer: address(0)
+            })
+        );
+
+        erc20TokenEmitter.buyToken{ value: payment }(
+            recipients,
+            bps,
+            IERC20TokenEmitter.ProtocolRewardAddresses({
+                builder: address(0),
+                purchaseReferral: address(0),
+                deployer: address(0)
+            })
+        );
+
+        int256 newTokenAmount = erc20TokenEmitter.getTokenQuoteForEther(payment);
+
+        // Assert that the new token amount is less than the previous tokenAmount
+        assertLt(newTokenAmount, tokenAmount, "Token amount should be less than previous token amount");
+
+        vm.stopPrank();
+    }
+
+    function testGetTokenAmountForMultiPurchaseEdgeCases() public {
+        vm.startPrank(address(0));
+
+        // Edge Case 1: Very Small Payment
+        uint256 smallPayment = 0.00001 ether;
+        int256 smallPaymentTokenAmount = erc20TokenEmitter.getTokenQuoteForEther(smallPayment);
+        assertGt(smallPaymentTokenAmount, 0, "Token amount for small payment should be greater than zero");
+        emit log_int(smallPaymentTokenAmount);
+
+        // A days worth of payment amount
+        int256 dailyPaymentTokenAmount = erc20TokenEmitter.getTokenQuoteForEther(expectedVolume);
+        assertLt(
+            uint256(dailyPaymentTokenAmount),
+            tokensPerTimeUnit * 1e18,
+            "Token amount for daily payment should be less than tokens per day"
+        );
+        emit log_string("Daily Payment Token Amount: ");
+        emit log_int(dailyPaymentTokenAmount);
+
+        // Edge Case 2: Very Large Payment
+        // An unusually large payment amount
+        int256 largePaymentTokenAmount = erc20TokenEmitter.getTokenQuoteForEther(expectedVolume * 100);
+        //spending 100x the expected amount per day should get you < 25x the tokens
+        uint256 SOME_REALISTIC_UPPER_BOUND = 25 * tokensPerTimeUnit * 1e18;
+        assertLt(
+            uint256(largePaymentTokenAmount),
+            SOME_REALISTIC_UPPER_BOUND,
+            "Token amount for large payment should be less than some realistic upper bound"
+        );
+        emit log_string("Large Payment Token Amount: ");
+        emit log_int(largePaymentTokenAmount);
+
+        uint256 largestPayment = expectedVolume * 1_000; // An unusually large payment amount
+        int256 largestPaymentTokenAmount = erc20TokenEmitter.getTokenQuoteForEther(largestPayment);
+        //spending 1000x the daily amount should get you less than 50x the tokens
+        assertLt(
+            uint256(largestPaymentTokenAmount),
+            50 * tokensPerTimeUnit * 1e18,
+            "Token amount for largest payment should be less than some realistic upper bound"
+        );
+
+        emit log_string("Largest Payment Token Amount: ");
+        emit log_int(largestPaymentTokenAmount);
+
+        vm.stopPrank();
+    }
+
+    function testGetTokenPrice() public {
+        vm.startPrank(address(0));
+
+        vm.deal(address(0), 100000 ether);
+        vm.stopPrank();
+
+        int256 priceAfterManyPurchases = erc20TokenEmitter.buyTokenQuote(1e18);
+        emit log_int(priceAfterManyPurchases);
+
+        // Simulate the passage of time
+        uint256 daysElapsed = 221;
+        vm.warp(block.timestamp + daysElapsed * 1 days);
+
+        int256 priceAfterManyDays = erc20TokenEmitter.buyTokenQuote(1e18);
+
+        emit log_int(priceAfterManyDays);
+
+        // Assert that the price is greater than zero
+        assertGt(priceAfterManyDays, 0, "Price should never hit zero");
+    }
+}
+
+contract MaliciousTreasury {
+    ERC20TokenEmitter erc20TokenEmitter;
+    bool public reentryAttempted;
+
+    constructor(address _emitter) {
+        erc20TokenEmitter = ERC20TokenEmitter(_emitter);
+        reentryAttempted = false;
+    }
+
+    // Fallback function to enable re-entrance to TokenEmitter
+    function call() external payable {
+        reentryAttempted = true;
+        address[] memory recipients = new address[](1);
+        recipients[0] = address(this);
+        uint256[] memory bps = new uint256[](1);
+        bps[0] = 10_000;
+
+        // Attempt to re-enter TokenEmitter
+        erc20TokenEmitter.buyToken{ value: msg.value }(
+            recipients,
+            bps,
+            IERC20TokenEmitter.ProtocolRewardAddresses({
+                builder: address(0),
+                purchaseReferral: address(0),
+                deployer: address(0)
+            })
+        );
     }
 }

@@ -314,8 +314,8 @@ contract CultureIndex is
      * @param account The address of the voter.
      * @return The voting power of the voter.
      */
-    function getPriorVotes(address account, uint256 blockNumber) external view override returns (uint256) {
-        return _getPriorVotes(account, blockNumber);
+    function getPastVotes(address account, uint256 blockNumber) external view override returns (uint256) {
+        return _getPastVotes(account, blockNumber);
     }
 
     /**
@@ -335,7 +335,7 @@ contract CultureIndex is
         return _calculateVoteWeight(erc20VotingToken.getVotes(account), erc721VotingToken.getVotes(account));
     }
 
-    function _getPriorVotes(address account, uint256 blockNumber) internal view returns (uint256) {
+    function _getPastVotes(address account, uint256 blockNumber) internal view returns (uint256) {
         return
             _calculateVoteWeight(
                 erc20VotingToken.getPastVotes(account, blockNumber),
@@ -356,7 +356,7 @@ contract CultureIndex is
         require(!pieces[pieceId].isDropped, "Piece has already been dropped");
         require(!(votes[pieceId][voter].voterAddress != address(0)), "Already voted");
 
-        uint256 weight = _getPriorVotes(voter, pieces[pieceId].creationBlock);
+        uint256 weight = _getPastVotes(voter, pieces[pieceId].creationBlock);
         require(weight > minVoteWeight, "Weight must be greater than minVoteWeight");
 
         votes[pieceId][voter] = Vote(voter, weight);

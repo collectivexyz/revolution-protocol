@@ -230,7 +230,11 @@ contract TokenMintingTest is VerbsTokenTestSuite {
 
         erc721Token.burn(tokenId);
         assertEq(erc721Token.totalSupply(), 0, "Total supply should be 0 after burning");
-        assertEq(erc721Token.balanceOf(address(auction)), 0, "Auction should not own any tokens after burning");
+        assertEq(
+            erc721Token.balanceOf(address(auction)),
+            0,
+            "Auction should not own any tokens after burning"
+        );
     }
 
     /// @dev Validates that the token URI is correctly set and retrieved
