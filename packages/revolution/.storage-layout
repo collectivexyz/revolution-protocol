@@ -90,17 +90,3 @@
 | isDataURIEnabled | bool   | 0    | 0      | 1     | src/Descriptor.sol:Descriptor |
 | baseURI          | string | 1    | 0      | 32    | src/Descriptor.sol:Descriptor |
 | tokenNamePrefix  | string | 2    | 0      | 32    | src/Descriptor.sol:Descriptor |
-
-=======================
-➡ NontransferableERC20Votes
-=======================
-
-| Name | Type | Slot | Offset | Bytes | Contract |
-|------|------|------|--------|-------|----------|
-
-=======================
-➡ VRGDAC
-=======================
-
-| Name | Type | Slot | Offset | Bytes | Contract |
-|------|------|------|--------|-------|----------|
