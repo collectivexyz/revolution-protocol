@@ -177,7 +177,10 @@ contract RevolutionBuilder is
         });
 
         // Initialize each instance with the provided settings
-        IMaxHeap(daoAddressesByToken[erc721Token].maxHeap).initialize(daoAddressesByToken[erc721Token].cultureIndex);
+        IMaxHeap(daoAddressesByToken[erc721Token].maxHeap).initialize({
+            initialOwner: daoAddressesByToken[erc721Token].dao,
+            admin: daoAddressesByToken[erc721Token].cultureIndex
+        });
 
         IVerbsToken(erc721Token).initialize({
             minter: daoAddressesByToken[erc721Token].auction,
