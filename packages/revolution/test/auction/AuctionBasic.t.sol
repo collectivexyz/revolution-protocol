@@ -11,8 +11,6 @@ contract AuctionHouseBasicTest is AuctionHouseTest {
         vm.assume(newCreatorRateBps <= 10_000);
         vm.assume(newEntropyRateBps <= 10_000);
 
-        
-
         // Expect events when changing creatorRateBps
         vm.expectEmit(true, true, true, true);
         emit IAuctionHouse.CreatorRateBpsUpdated(newCreatorRateBps);
@@ -28,7 +26,7 @@ contract AuctionHouseBasicTest is AuctionHouseTest {
         //setup bid
         uint256 bidAmount = 100 ether;
         uint256 verbId = createDefaultArtPiece();
-        
+
         auction.unpause();
         vm.deal(address(1), bidAmount + 2 ether);
         vm.stopPrank();
@@ -41,7 +39,6 @@ contract AuctionHouseBasicTest is AuctionHouseTest {
 
     function testSetEntropyRateBps(uint256 newEntropyRateBps) public {
         vm.assume(newEntropyRateBps <= 10_000);
-        
 
         // Expect an event emission
         vm.expectEmit(true, true, true, true);
@@ -70,7 +67,6 @@ contract AuctionHouseBasicTest is AuctionHouseTest {
 
         uint256 oldEntropyRateBps = auction.entropyRateBps();
 
-        
         // Attempt to set an invalid entropy rate
         vm.expectRevert("Entropy rate must be less than or equal to 10_000");
         auction.setEntropyRateBps(invalidEntropyRateBps);
@@ -89,8 +85,6 @@ contract AuctionHouseBasicTest is AuctionHouseTest {
     }
 
     function testSetMinCreatorRateBps(uint256 newMinCreatorRateBps, uint256 creatorRateBps) public {
-        
-        
         if (creatorRateBps > 10_000) {
             vm.expectRevert("Creator rate must be less than or equal to 10_000");
         } else if (creatorRateBps < auction.minCreatorRateBps()) {
@@ -137,8 +131,6 @@ contract AuctionHouseBasicTest is AuctionHouseTest {
     function testSetMinCreatorRateBpsInvalidValues(int256 invalidMinCreatorRateBps) public {
         vm.assume(uint256(invalidMinCreatorRateBps) < auction.creatorRateBps());
 
-        
-
         // Attempt to set an invalid minimum creator rate
         if (uint256(invalidMinCreatorRateBps) <= auction.minCreatorRateBps()) {
             vm.expectRevert("Min creator rate must be greater than previous minCreatorRateBps");
@@ -151,8 +143,6 @@ contract AuctionHouseBasicTest is AuctionHouseTest {
     function testMinCreatorRateLoweringRestriction(uint256 lowerMinCreatorRateBps) public {
         vm.assume(lowerMinCreatorRateBps < auction.minCreatorRateBps());
 
-        
-
         // Attempt to set a lower minimum creator rate than the current one
         vm.expectRevert("Min creator rate must be greater than previous minCreatorRateBps");
         auction.setMinCreatorRateBps(lowerMinCreatorRateBps);
@@ -162,8 +152,6 @@ contract AuctionHouseBasicTest is AuctionHouseTest {
         vm.assume(newCreatorRateBps > auction.minCreatorRateBps());
         vm.assume(newCreatorRateBps <= 10_000);
         vm.assume(newEntropyRateBps <= 10_000);
-
-        
 
         // Change creatorRateBps as the owner
         auction.setCreatorRateBps(newCreatorRateBps);
@@ -215,7 +203,7 @@ contract AuctionHouseBasicTest is AuctionHouseTest {
         //setup bid
         uint256 bidAmount = 100 ether;
         uint256 verbId = createDefaultArtPiece();
-        
+
         auction.unpause();
         vm.deal(address(1), bidAmount + 2 ether);
 
@@ -266,7 +254,6 @@ contract AuctionHouseBasicTest is AuctionHouseTest {
     function testAuctionCreation() public {
         createDefaultArtPiece();
 
-        
         auction.unpause();
         uint256 startTime = block.timestamp;
 
@@ -292,7 +279,6 @@ contract AuctionHouseBasicTest is AuctionHouseTest {
 
         createDefaultArtPiece();
 
-        
         auction.unpause();
         vm.deal(address(1), bidAmount + 2 ether);
 

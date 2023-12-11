@@ -19,7 +19,7 @@ contract CultureIndexArtPieceTest is CultureIndexTestSuite {
         // Mint tokens to the test contracts (acting as voters)
         vm.stopPrank();
         vm.startPrank(address(erc20TokenEmitter));
-        
+
         erc20Token.mint(address(voter1Test), 100);
         erc20Token.mint(address(voter2Test), 200);
 
