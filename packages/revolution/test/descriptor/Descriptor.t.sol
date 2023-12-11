@@ -19,6 +19,8 @@ contract DescriptorTest is RevolutionBuilderTest {
         super.setERC721TokenParams("Mock", "MOCK", "https://example.com/token/", tokenNamePrefix);
 
         super.deployMock();
+
+        vm.startPrank(address(dao));
     }
 
     /// @notice Test that toggling `isDataURIEnabled` changes state correctly
@@ -32,6 +34,7 @@ contract DescriptorTest is RevolutionBuilderTest {
 
     /// @notice Test that only owner can toggle `isDataURIEnabled`
     function testToggleDataURIEnabledAccessControl() public {
+        vm.stopPrank();
         address nonOwner = address(0x123);
         vm.startPrank(nonOwner);
         vm.expectRevert();
@@ -50,6 +53,7 @@ contract DescriptorTest is RevolutionBuilderTest {
 
     /// @notice Test that only the owner can update `baseURI`
     function testSetBaseURI_AccessControl() public {
+        vm.stopPrank();
         string memory newBaseURI = "https://newexample.com/";
         address nonOwner = address(0x456);
 
@@ -208,12 +212,16 @@ contract DescriptorTest is RevolutionBuilderTest {
         // The current owner transfers ownership to the newOwner
         descriptor.transferOwnership(newOwner);
 
+        vm.startPrank(address(newOwner));
+        descriptor.acceptOwnership();
+
         // Verify that the new owner is indeed set
         assertEq(descriptor.owner(), newOwner, "Ownership should be transferred to newOwner");
     }
 
     /// @notice Ensure `transferOwnership` access control
     function testTransferOwnershipAccessControl() public {
+        vm.stopPrank();
         address nonOwner = address(0x789);
         address newOwner = address(0x456);
 
@@ -224,7 +232,7 @@ contract DescriptorTest is RevolutionBuilderTest {
         vm.stopPrank();
 
         // Verify ownership has not changed
-        assertEq(descriptor.owner(), address(erc721Token), "Ownership should not have changed");
+        assertEq(descriptor.owner(), address(dao), "Ownership should not have changed");
     }
 
     /// @notice Test `tokenURI` with only image metadata set

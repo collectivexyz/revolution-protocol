@@ -268,6 +268,7 @@ contract RevolutionBuilderTest is Test {
     CultureIndex internal cultureIndex;
     NontransferableERC20Votes internal erc20Token;
     ERC20TokenEmitter internal erc20TokenEmitter;
+    MaxHeap internal maxHeap;
 
     function setMockParams() internal virtual {
         setMockERC721TokenParams();
@@ -320,6 +321,7 @@ contract RevolutionBuilderTest is Test {
         cultureIndex = CultureIndex(_addresses.cultureIndex);
         erc20Token = NontransferableERC20Votes(_addresses.erc20Token);
         erc20TokenEmitter = ERC20TokenEmitter(_addresses.erc20TokenEmitter);
+        maxHeap = MaxHeap(_addresses.maxHeap);
 
         vm.label(address(erc721Token), "ERC721TOKEN");
         vm.label(address(descriptor), "DESCRIPTOR");
@@ -329,6 +331,7 @@ contract RevolutionBuilderTest is Test {
         vm.label(address(cultureIndex), "CULTURE_INDEX");
         vm.label(address(erc20Token), "ERC20TOKEN");
         vm.label(address(erc20TokenEmitter), "ERC20TOKEN_EMITTER");
+        vm.label(address(maxHeap), "MAX_HEAP");
     }
 
     ///                                                          ///

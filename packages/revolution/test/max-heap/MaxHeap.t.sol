@@ -3,24 +3,30 @@ pragma solidity ^0.8.22;
 
 import { MaxHeap } from "../../src/MaxHeap.sol";
 import { RevolutionBuilderTest } from "../RevolutionBuilder.t.sol";
+import { ERC1967Proxy } from "../../src/libs/proxy/ERC1967Proxy.sol";
 
 /// @title MaxHeapTestSuite
 /// @dev The test suite for the MaxHeap contract
 contract MaxHeapTestSuite is RevolutionBuilderTest {
-    MaxHeap public maxHeap;
     MaxHeapTester public maxHeapTester;
 
     /// @dev Sets up a new MaxHeap instance before each test
     function setUp() public override {
         super.setUp();
 
+        super.setMockParams();
+
         super.deployMock();
 
-        maxHeap = cultureIndex.maxHeap();
+        address maxHeapTesterImpl = address(new MaxHeapTester(address(this)));
 
-        maxHeapTester = new MaxHeapTester(address(this));
+        address maxHeapTesterAddr = address(new ERC1967Proxy(maxHeapTesterImpl, ""));
 
-        maxHeapTester.initialize(address(this));
+        MaxHeapTester(maxHeapTesterAddr).initialize(address(cultureIndex));
+
+        maxHeapTester = MaxHeapTester(maxHeapTesterAddr);
+
+        vm.startPrank(address(cultureIndex));
     }
 
     /// @dev Tests that only the owner can call updateValue
@@ -28,7 +34,7 @@ contract MaxHeapTestSuite is RevolutionBuilderTest {
         maxHeap.insert(1, 10); // Setup a state with an element
 
         address nonOwner = address(2);
-        vm.prank(nonOwner);
+        vm.startPrank(nonOwner);
         bool hasErrored = false;
         try maxHeap.updateValue(1, 20) {
             fail("updateValue should be callable only by the owner");
@@ -37,14 +43,15 @@ contract MaxHeapTestSuite is RevolutionBuilderTest {
         }
         assertTrue(hasErrored, "updateValue should have errored");
 
-        vm.prank(address(this));
+        vm.startPrank(address(cultureIndex));
         maxHeap.updateValue(1, 20); // No error expected
     }
 
     /// @dev Tests that only the owner can call insert
     function testInsertOnlyOwner() public {
+        vm.stopPrank();
         address nonOwner = address(3);
-        vm.prank(nonOwner);
+        vm.startPrank(nonOwner);
         bool hasErrored = false;
         try maxHeap.insert(2, 15) {
             fail("insert should be callable only by the owner");
@@ -53,7 +60,7 @@ contract MaxHeapTestSuite is RevolutionBuilderTest {
         }
         assertTrue(hasErrored, "insert should have errored");
 
-        vm.prank(address(this));
+        vm.startPrank(address(cultureIndex));
         maxHeap.insert(2, 15); // No error expected
     }
 
@@ -64,7 +71,7 @@ contract MaxHeapTestSuite is RevolutionBuilderTest {
 
         // Try to call extractMax as a non-owner and expect it to fail
         address nonOwner = address(2); // assume this address is not the owner
-        vm.prank(nonOwner); // this sets the next call to be from the address `nonOwner`
+        vm.startPrank(nonOwner); // this sets the next call to be from the address `nonOwner`
         bool hasErrored = false;
         try maxHeap.extractMax() {
             fail("extractMax should only be callable by the owner");
@@ -75,7 +82,7 @@ contract MaxHeapTestSuite is RevolutionBuilderTest {
         assertTrue(hasErrored, "extractMax should have errored");
 
         // Call extractMax as the owner and expect it to succeed
-        vm.prank(address(this)); // set the owner to be the caller for the next transaction
+        vm.startPrank(address(cultureIndex)); // set the owner to be the caller for the next transaction
         maxHeap.extractMax(); // this should succeed without reverting
     }
 
