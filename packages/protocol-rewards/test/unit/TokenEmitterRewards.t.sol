@@ -3,26 +3,26 @@ pragma solidity 0.8.22;
 
 import "../ProtocolRewardsTest.sol";
 import { RewardsSettings } from "../../src/abstract/RewardSplits.sol";
-import { NontransferableERC20Votes, ITokenEmitter } from "../utils/TokenEmitterLibrary.sol";
+import { NontransferableERC20Votes, IERC20TokenEmitter } from "../utils/TokenEmitterLibrary.sol";
 
 contract TokenEmitterRewardsTest is ProtocolRewardsTest {
     MockTokenEmitter internal mockTokenEmitter;
-    NontransferableERC20Votes internal govToken;
+    NontransferableERC20Votes internal erc20Token;
 
     function setUp() public override {
         super.setUp();
 
-        govToken = new NontransferableERC20Votes(address(this), "Revolution Governance", "GOV");
+        erc20Token = new NontransferableERC20Votes(address(this), "Revolution Governance", "GOV");
 
         mockTokenEmitter = new MockTokenEmitter(
             address(this),
-            govToken,
+            erc20Token,
             treasury,
             address(protocolRewards),
             revolution
         );
 
-        govToken.transferOwnership(address(mockTokenEmitter));
+        erc20Token.transferOwnership(address(mockTokenEmitter));
 
         vm.label(address(mockTokenEmitter), "MOCK_TOKENEMITTER");
     }
@@ -46,7 +46,7 @@ contract TokenEmitterRewardsTest is ProtocolRewardsTest {
             vm.expectRevert();
         }
 
-        ITokenEmitter.ProtocolRewardAddresses memory rewardAddrs = ITokenEmitter.ProtocolRewardAddresses({
+        IERC20TokenEmitter.ProtocolRewardAddresses memory rewardAddrs = IERC20TokenEmitter.ProtocolRewardAddresses({
             builder: builderReferral,
             purchaseReferral: purchaseReferral,
             deployer: deployer
@@ -57,18 +57,12 @@ contract TokenEmitterRewardsTest is ProtocolRewardsTest {
         if (shouldExpectRevert) {
             vm.expectRevert();
         }
-        (RewardsSettings memory settings, uint256 totalReward) = mockTokenEmitter.computePurchaseRewards(
-            msgValue
-        );
+        (RewardsSettings memory settings, uint256 totalReward) = mockTokenEmitter.computePurchaseRewards(msgValue);
 
         if (!shouldExpectRevert) {
             assertApproxEqAbs(protocolRewards.totalRewardsSupply(), totalReward, 5);
             assertApproxEqAbs(protocolRewards.balanceOf(builderReferral), settings.builderReferralReward, 5);
-            assertApproxEqAbs(
-                protocolRewards.balanceOf(purchaseReferral),
-                settings.purchaseReferralReward,
-                5
-            );
+            assertApproxEqAbs(protocolRewards.balanceOf(purchaseReferral), settings.purchaseReferralReward, 5);
             assertApproxEqAbs(protocolRewards.balanceOf(deployer), settings.deployerReward, 5);
             assertApproxEqAbs(protocolRewards.balanceOf(revolution), settings.revolutionReward, 5);
         }
@@ -110,7 +104,7 @@ contract TokenEmitterRewardsTest is ProtocolRewardsTest {
         mockTokenEmitter.buyToken{ value: msgValue }(
             addresses,
             bps,
-            ITokenEmitter.ProtocolRewardAddresses({
+            IERC20TokenEmitter.ProtocolRewardAddresses({
                 builder: builderReferral,
                 purchaseReferral: address(0),
                 deployer: deployer
@@ -121,9 +115,7 @@ contract TokenEmitterRewardsTest is ProtocolRewardsTest {
             //expect INVALID_ETH_AMOUNT()
             vm.expectRevert();
         }
-        (RewardsSettings memory settings, uint256 totalReward) = mockTokenEmitter.computePurchaseRewards(
-            msgValue
-        );
+        (RewardsSettings memory settings, uint256 totalReward) = mockTokenEmitter.computePurchaseRewards(msgValue);
 
         if (!shouldExpectRevert) {
             assertApproxEqAbs(protocolRewards.totalRewardsSupply(), totalReward, 5);
@@ -138,9 +130,7 @@ contract TokenEmitterRewardsTest is ProtocolRewardsTest {
     }
 
     function testRevertInvalidEth(uint16 msgValue) public {
-        vm.assume(
-            msgValue < mockTokenEmitter.minPurchaseAmount() || msgValue > mockTokenEmitter.maxPurchaseAmount()
-        );
+        vm.assume(msgValue < mockTokenEmitter.minPurchaseAmount() || msgValue > mockTokenEmitter.maxPurchaseAmount());
 
         vm.expectRevert(abi.encodeWithSignature("INVALID_ETH_AMOUNT()"));
         mockTokenEmitter.computePurchaseRewards(msgValue);

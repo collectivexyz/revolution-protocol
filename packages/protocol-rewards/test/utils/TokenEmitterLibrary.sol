@@ -547,10 +547,7 @@ abstract contract ERC20Votes is ERC20, Votes {
     /**
      * @dev Get the `pos`-th checkpoint for `account`.
      */
-    function checkpoints(
-        address account,
-        uint32 pos
-    ) public view virtual returns (Checkpoints.Checkpoint208 memory) {
+    function checkpoints(address account, uint32 pos) public view virtual returns (Checkpoints.Checkpoint208 memory) {
         return _checkpoints(account, pos);
     }
 }
@@ -892,11 +889,7 @@ contract VRGDAC {
 
     // given # of tokens sold, returns price p(x) = p0 * (1 - k)^(t - (x/r)) - (x/r) makes it a linearvrgda issuance
     function p(int256 timeSinceStart, int256 sold) internal view returns (int256) {
-        return
-            wadMul(
-                targetPrice,
-                wadPow(1e18 - priceDecayPercent, timeSinceStart - unsafeWadDiv(sold, perTimeUnit))
-            );
+        return wadMul(targetPrice, wadPow(1e18 - priceDecayPercent, timeSinceStart - unsafeWadDiv(sold, perTimeUnit)));
     }
 }
 
@@ -991,12 +984,7 @@ contract NontransferableERC20Votes is Ownable, ERC20Votes {
     /**
      * @dev Not allowed
      */
-    function _approve(
-        address owner,
-        address spender,
-        uint256 value,
-        bool emitEvent
-    ) internal virtual override {
+    function _approve(address owner, address spender, uint256 value, bool emitEvent) internal virtual override {
         return;
     }
 
@@ -1008,7 +996,7 @@ contract NontransferableERC20Votes is Ownable, ERC20Votes {
     }
 }
 
-interface ITokenEmitter {
+interface IERC20TokenEmitter {
     struct ProtocolRewardAddresses {
         address builder;
         address purchaseReferral;
@@ -1050,7 +1038,7 @@ interface ITokenEmitter {
     );
 }
 
-contract TokenEmitter is VRGDAC, ITokenEmitter, ReentrancyGuard, TokenEmitterRewards, Ownable {
+contract ERC20TokenEmitter is VRGDAC, IERC20TokenEmitter, ReentrancyGuard, TokenEmitterRewards, Ownable {
     // treasury address to pay funds to
     address public immutable treasury;
 
@@ -1252,9 +1240,7 @@ contract TokenEmitter is VRGDAC, ITokenEmitter, ReentrancyGuard, TokenEmitterRew
             yToX({
                 timeSinceStart: toDaysWadUnsafe(block.timestamp - startTime),
                 sold: emittedTokenWad,
-                amount: int(
-                    ((paymentAmount - computeTotalReward(paymentAmount)) * (10_000 - creatorRateBps)) / 10_000
-                )
+                amount: int(((paymentAmount - computeTotalReward(paymentAmount)) * (10_000 - creatorRateBps)) / 10_000)
             });
     }
 

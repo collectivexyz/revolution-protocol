@@ -17,22 +17,32 @@
 
 pragma solidity ^0.8.22;
 
-import { Ownable } from "@openzeppelin/contracts/access/Ownable.sol";
-import { ERC721Checkpointable } from "./base/ERC721Checkpointable.sol";
-import { IVerbsDescriptorMinimal } from "./interfaces/IVerbsDescriptorMinimal.sol";
+import { Ownable2StepUpgradeable } from "@openzeppelin/contracts-upgradeable/access/Ownable2StepUpgradeable.sol";
+import { ReentrancyGuardUpgradeable } from "@openzeppelin/contracts-upgradeable/utils/ReentrancyGuardUpgradeable.sol";
+import { IERC721 } from "@openzeppelin/contracts/token/ERC721/IERC721.sol";
+
+import { UUPS } from "./libs/proxy/UUPS.sol";
+import { VersionedContract } from "./version/VersionedContract.sol";
+
+import { ERC721CheckpointableUpgradeable } from "./base/ERC721CheckpointableUpgradeable.sol";
+import { IDescriptorMinimal } from "./interfaces/IDescriptorMinimal.sol";
 import { ICultureIndex } from "./interfaces/ICultureIndex.sol";
 import { IVerbsToken } from "./interfaces/IVerbsToken.sol";
-import { ERC721 } from "./base/ERC721.sol";
-import { IERC721 } from "@openzeppelin/contracts/token/ERC721/IERC721.sol";
-import { IProxyRegistry } from "./external/opensea/IProxyRegistry.sol";
-import { ReentrancyGuard } from "@openzeppelin/contracts/utils/ReentrancyGuard.sol";
+import { IRevolutionBuilder } from "./interfaces/IRevolutionBuilder.sol";
 
-contract VerbsToken is IVerbsToken, Ownable, ERC721Checkpointable, ReentrancyGuard {
+contract VerbsToken is
+    IVerbsToken,
+    VersionedContract,
+    UUPS,
+    Ownable2StepUpgradeable,
+    ReentrancyGuardUpgradeable,
+    ERC721CheckpointableUpgradeable
+{
     // An address who has permissions to mint Verbs
     address public minter;
 
     // The Verbs token URI descriptor
-    IVerbsDescriptorMinimal public descriptor;
+    IDescriptorMinimal public descriptor;
 
     // The CultureIndex contract
     ICultureIndex public cultureIndex;
@@ -52,11 +62,12 @@ contract VerbsToken is IVerbsToken, Ownable, ERC721Checkpointable, ReentrancyGua
     // IPFS content hash of contract-level metadata
     string private _contractURIHash = "QmQzDwaZ7yQxHHs7sQQenJVB89riTSacSGcJRv9jtHPuz5";
 
-    // OpenSea's Proxy Registry
-    IProxyRegistry public immutable proxyRegistry;
-
     // The Verb art pieces
     mapping(uint256 => ICultureIndex.ArtPiece) public artPieces;
+
+    ///                                                          ///
+    ///                          MODIFIERS                       ///
+    ///                                                          ///
 
     /**
      * @notice Require that the minter has not been locked.
@@ -90,20 +101,58 @@ contract VerbsToken is IVerbsToken, Ownable, ERC721Checkpointable, ReentrancyGua
         _;
     }
 
-    constructor(
+    ///                                                          ///
+    ///                         IMMUTABLES                       ///
+    ///                                                          ///
+
+    /// @notice The contract upgrade manager
+    IRevolutionBuilder private immutable manager;
+
+    ///                                                          ///
+    ///                         CONSTRUCTOR                      ///
+    ///                                                          ///
+
+    /// @param _manager The contract upgrade manager address
+    constructor(address _manager) payable initializer {
+        manager = IRevolutionBuilder(_manager);
+    }
+
+    ///                                                          ///
+    ///                         INITIALIZER                      ///
+    ///                                                          ///
+
+    /// @notice Initializes a DAO's ERC-721 token contract
+    /// @param _minter The address of the minter
+    /// @param _initialOwner The address of the initial owner
+    /// @param _descriptor The address of the token URI descriptor
+    /// @param _cultureIndex The address of the CultureIndex contract
+    /// @param _erc721TokenParams The name, symbol, and contract metadata of the token
+    function initialize(
         address _minter,
         address _initialOwner,
-        IVerbsDescriptorMinimal _descriptor,
-        IProxyRegistry _proxyRegistry,
-        ICultureIndex _cultureIndex,
-        string memory _tokenName,
-        string memory _tokenSymbol
-    ) ERC721(_tokenName, _tokenSymbol) Ownable(_initialOwner) {
+        address _descriptor,
+        address _cultureIndex,
+        IRevolutionBuilder.ERC721TokenParams memory _erc721TokenParams
+    ) external initializer {
+        require(msg.sender == address(manager), "Only manager can initialize");
+
         require(_minter != address(0), "Minter cannot be zero address");
+        require(_initialOwner != address(0), "Initial owner cannot be zero address");
+
+        // Initialize the reentrancy guard
+        __ReentrancyGuard_init();
+
+        // Setup ownable
+        __Ownable_init(_initialOwner);
+
+        // Initialize the ERC-721 token
+        __ERC721_init(_erc721TokenParams.name, _erc721TokenParams.symbol);
+        _contractURIHash = _erc721TokenParams.contractURIHash;
+
+        // Set the contracts
         minter = _minter;
-        descriptor = _descriptor;
-        cultureIndex = _cultureIndex;
-        proxyRegistry = _proxyRegistry;
+        descriptor = IDescriptorMinimal(_descriptor);
+        cultureIndex = ICultureIndex(_cultureIndex);
     }
 
     /**
@@ -119,19 +168,6 @@ contract VerbsToken is IVerbsToken, Ownable, ERC721Checkpointable, ReentrancyGua
      */
     function setContractURIHash(string memory newContractURIHash) external onlyOwner {
         _contractURIHash = newContractURIHash;
-    }
-
-    /**
-     * @notice Override isApprovedForAll to whitelist user's OpenSea proxy accounts to enable gas-less listings.
-     */
-    function isApprovedForAll(
-        address owner,
-        address operator
-    ) public view override(IERC721, ERC721) returns (bool) {
-        // Whitelist OpenSea proxy contract for easy trading.
-        if (proxyRegistry.proxies(owner) == operator) return true;
-
-        return super.isApprovedForAll(owner, operator);
     }
 
     /**
@@ -155,7 +191,6 @@ contract VerbsToken is IVerbsToken, Ownable, ERC721Checkpointable, ReentrancyGua
      * @dev See {IERC721Metadata-tokenURI}.
      */
     function tokenURI(uint256 tokenId) public view override returns (string memory) {
-        require(_exists(tokenId), "VerbsToken: URI query for nonexistent token");
         return descriptor.tokenURI(tokenId, artPieces[tokenId].metadata);
     }
 
@@ -164,7 +199,6 @@ contract VerbsToken is IVerbsToken, Ownable, ERC721Checkpointable, ReentrancyGua
      * with the JSON contents directly inlined.
      */
     function dataURI(uint256 tokenId) public view override returns (string memory) {
-        require(_exists(tokenId), "VerbsToken: URI query for nonexistent token");
         return descriptor.dataURI(tokenId, artPieces[tokenId].metadata);
     }
 
@@ -194,7 +228,7 @@ contract VerbsToken is IVerbsToken, Ownable, ERC721Checkpointable, ReentrancyGua
      * @dev Only callable by the owner when not locked.
      */
     function setDescriptor(
-        IVerbsDescriptorMinimal _descriptor
+        IDescriptorMinimal _descriptor
     ) external override onlyOwner nonReentrant whenDescriptorNotLocked {
         descriptor = _descriptor;
 
@@ -215,9 +249,7 @@ contract VerbsToken is IVerbsToken, Ownable, ERC721Checkpointable, ReentrancyGua
      * @notice Set the token CultureIndex.
      * @dev Only callable by the owner when not locked.
      */
-    function setCultureIndex(
-        ICultureIndex _cultureIndex
-    ) external onlyOwner whenCultureIndexNotLocked nonReentrant {
+    function setCultureIndex(ICultureIndex _cultureIndex) external onlyOwner whenCultureIndexNotLocked nonReentrant {
         cultureIndex = _cultureIndex;
 
         emit CultureIndexUpdated(_cultureIndex);
@@ -271,15 +303,11 @@ contract VerbsToken is IVerbsToken, Ownable, ERC721Checkpointable, ReentrancyGua
             newPiece.quorumVotes = artPiece.quorumVotes;
             newPiece.totalVotesSupply = artPiece.totalVotesSupply;
 
-            for (uint i = 0; i < artPiece.creators.length; ) {
+            for (uint i = 0; i < artPiece.creators.length; i++) {
                 newPiece.creators.push(artPiece.creators[i]);
-
-                unchecked {
-                    ++i;
-                }
             }
 
-            _mint(owner(), to, verbId);
+            _mint(to, verbId);
 
             emit VerbCreated(verbId, artPiece);
 
@@ -288,5 +316,17 @@ contract VerbsToken is IVerbsToken, Ownable, ERC721Checkpointable, ReentrancyGua
             // Handle failure (e.g., revert, emit an event, set a flag, etc.)
             revert("dropTopVotedPiece failed");
         }
+    }
+
+    ///                                                          ///
+    ///                         TOKEN UPGRADE                    ///
+    ///                                                          ///
+
+    // /// @notice Ensures the caller is authorized to upgrade the contract and that the new implementation is valid
+    // /// @dev This function is called in `upgradeTo` & `upgradeToAndCall`
+    // /// @param _newImpl The new implementation address
+    function _authorizeUpgrade(address _newImpl) internal view override onlyOwner {
+        // Ensure the implementation is valid
+        require(manager.isRegisteredUpgrade(_getImplementation(), _newImpl), "Invalid upgrade");
     }
 }

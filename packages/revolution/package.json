@@ -1,6 +1,6 @@
 {
   "name": "@collectivexyz/revolution",
-  "version": "0.0.4",
+  "version": "0.1.0",
   "repository": "https://github.com/collectivexyz/revolution-protocol.git",
   "license": "MIT",
   "files": [
@@ -16,8 +16,8 @@
     "lint": "prettier --check 'src/**/*.sol' 'test/**/*.sol'",
     "write-gas-report": "forge test --gas-report > ../../gas-reports/revolution.ansi",
     "clean": "forge cache clean && if [ -d out ]; then forge clean; fi",
-    "storage-inspect:check": "./script/storage-check.sh check CultureIndex TokenEmitter VerbsAuctionHouse",
-    "storage-inspect:generate": "./script/storage-check.sh generate CultureIndex TokenEmitter VerbsAuctionHouse",
+    "storage-inspect:check": "./script/storage-check.sh check CultureIndex ERC20TokenEmitter AuctionHouse MaxHeap VerbsToken Descriptor",
+    "storage-inspect:generate": "./script/storage-check.sh generate CultureIndex ERC20TokenEmitter AuctionHouse MaxHeap VerbsToken Descriptor",
     "update-contract-version": "node script/update-contract-version.mjs"
   },
   "publishConfig": {

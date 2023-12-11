@@ -4,13 +4,12 @@ pragma solidity ^0.8.22;
 import { Test } from "forge-std/Test.sol";
 import { VerbsToken } from "../../src/VerbsToken.sol";
 import { IVerbsToken } from "../../src/interfaces/IVerbsToken.sol";
-import { IVerbsDescriptorMinimal } from "../../src/interfaces/IVerbsDescriptorMinimal.sol";
-import { IProxyRegistry } from "../../src/external/opensea/IProxyRegistry.sol";
+import { IDescriptorMinimal } from "../../src/interfaces/IDescriptorMinimal.sol";
 import { ICultureIndex, ICultureIndexEvents } from "../../src/interfaces/ICultureIndex.sol";
 import { Strings } from "@openzeppelin/contracts/utils/Strings.sol";
 import { CultureIndex } from "../../src/CultureIndex.sol";
 import { MockERC20 } from "../mock/MockERC20.sol";
-import { VerbsDescriptor } from "../../src/VerbsDescriptor.sol";
+import { Descriptor } from "../../src/Descriptor.sol";
 import "../utils/Base64Decode.sol";
 import "../utils/JsmnSolLib.sol";
 import { VerbsTokenTestSuite } from "./VerbsToken.t.sol";
@@ -18,32 +17,70 @@ import { VerbsTokenTestSuite } from "./VerbsToken.t.sol";
 /// @title VerbsTokenTest
 /// @dev The test suite for the VerbsToken contract
 contract TokenBasicTest is VerbsTokenTestSuite {
+    /// @dev Tests token metadata integrity after minting
+    function testTokenMetadataIntegrity() public {
+        // Create an art piece and mint a token
+        uint256 artPieceId = createDefaultArtPiece();
+        uint256 tokenId = erc721Token.mint();
+
+        // Retrieve the token metadata URI
+        string memory tokenURI = erc721Token.tokenURI(tokenId);
+
+        emit log_string(tokenURI);
+
+        // Extract the base64 encoded part of the tokenURI
+        string memory base64Metadata = substring(tokenURI, 29, bytes(tokenURI).length);
+        emit log_string(base64Metadata);
+
+        // Decode the base64 encoded metadata
+        string memory metadataJson = decodeMetadata(base64Metadata);
+        emit log_string(metadataJson);
+
+        // Parse the JSON to get metadata fields
+        (string memory name, string memory description, string memory image) = parseJson(metadataJson);
+
+        // Retrieve the expected metadata directly from the art piece for comparison
+        (, ICultureIndex.ArtPieceMetadata memory metadata, , , , , , ) = cultureIndex.pieces(artPieceId);
+
+        //assert name equals Verb + tokenId
+        string memory expectedName = string(abi.encodePacked(tokenNamePrefix, " ", Strings.toString(tokenId)));
+
+        // Assert that the token metadata matches the expected metadata from the art piece
+        assertEq(name, expectedName, "Token name does not match expected name");
+        assertEq(
+            description,
+            string(abi.encodePacked(metadata.name, ". ", metadata.description)),
+            "Token description does not match expected description"
+        );
+        assertEq(image, metadata.image, "Token image does not match expected image URL");
+    }
+
     /// @dev Tests the symbol of the VerbsToken
     function testSymbol() public {
-        assertEq(verbsToken.symbol(), tokenSymbol, "Symbol should be VRBS");
+        assertEq(erc721Token.symbol(), tokenSymbol, "Symbol should be VRBS");
     }
 
     /// @dev Tests the name of the VerbsToken
     function testName() public {
-        assertEq(verbsToken.name(), tokenName, "Name should be Vrbs");
+        assertEq(erc721Token.name(), tokenName, "Name should be Vrbs");
     }
 
     /// @dev Tests the contract URI of the VerbsToken
     function testContractURI() public {
         assertEq(
-            verbsToken.contractURI(),
-            "ipfs://QmQzDwaZ7yQxHHs7sQQenJVB89riTSacSGcJRv9jtHPuz5",
+            erc721Token.contractURI(),
+            string(abi.encodePacked("ipfs://", erc721TokenParams.contractURIHash)),
             "Contract URI should match"
         );
     }
 
     /// @dev Tests the initial state of the contract variables
     function testInitialVariablesState() public {
-        address minter = verbsToken.minter();
-        address descriptorAddress = address(verbsToken.descriptor());
-        address cultureIndexAddress = address(verbsToken.cultureIndex());
+        address minter = erc721Token.minter();
+        address descriptorAddress = address(erc721Token.descriptor());
+        address cultureIndexAddress = address(erc721Token.cultureIndex());
 
-        assertEq(minter, address(this), "Initial minter should be the contract deployer");
+        assertEq(minter, address(auction), "Initial minter should be the auction");
         assertEq(descriptorAddress, address(descriptor), "Initial descriptor should be set correctly");
         assertEq(cultureIndexAddress, address(cultureIndex), "Initial cultureIndex should be set correctly");
     }
@@ -51,9 +88,9 @@ contract TokenBasicTest is VerbsTokenTestSuite {
     /// @dev Tests that minted tokens are correctly associated with the art piece from CultureIndex
     function testCorrectArtAssociation() public {
         uint256 artPieceId = createDefaultArtPiece();
-        uint256 tokenId = verbsToken.mint();
+        uint256 tokenId = erc721Token.mint();
 
-        (uint256 recordedPieceId, , , , , , , ) = verbsToken.artPieces(tokenId);
+        (uint256 recordedPieceId, , , , , , , ) = erc721Token.artPieces(tokenId);
 
         // Validate the token's associated art piece
         assertEq(recordedPieceId, artPieceId, "Minted token should be associated with the correct art piece");
@@ -74,7 +111,7 @@ contract TokenBasicTest is VerbsTokenTestSuite {
         vm.expectEmit(true, true, true, true);
         emit ICultureIndexEvents.PieceCreated(
             0,
-            address(this),
+            address(auction),
             ICultureIndex.ArtPieceMetadata({
                 name: name,
                 description: description,
@@ -108,11 +145,7 @@ contract TokenBasicTest is VerbsTokenTestSuite {
             "A masterpiece",
             "The description of the art piece should match the provided description."
         );
-        assertEq(
-            metadata.image,
-            "ipfs://legends",
-            "The image URL of the art piece should match the provided URL."
-        );
+        assertEq(metadata.image, "ipfs://legends", "The image URL of the art piece should match the provided URL.");
     }
 
     /// @dev Tests creating an art piece with invalid total basis points.
@@ -129,16 +162,7 @@ contract TokenBasicTest is VerbsTokenTestSuite {
 
         // Act & Assert
         vm.expectRevert("Total BPS must sum up to 10,000");
-        createArtPiece(
-            name,
-            description,
-            mediaType,
-            image,
-            text,
-            animationUrl,
-            creatorAddress,
-            invalidCreatorBps
-        );
+        createArtPiece(name, description, mediaType, image, text, animationUrl, creatorAddress, invalidCreatorBps);
     }
 
     /// @dev Tests creating an art piece with a zero address in the creator array.
@@ -155,16 +179,7 @@ contract TokenBasicTest is VerbsTokenTestSuite {
 
         // Act & Assert
         vm.expectRevert("Invalid creator address");
-        createArtPiece(
-            name,
-            description,
-            mediaType,
-            image,
-            text,
-            animationUrl,
-            zeroCreatorAddress,
-            creatorBps
-        );
+        createArtPiece(name, description, mediaType, image, text, animationUrl, zeroCreatorAddress, creatorBps);
     }
 
     /// @dev Tests that creating an art piece with more than 100 creators fails.
@@ -220,7 +235,9 @@ contract TokenBasicTest is VerbsTokenTestSuite {
         uint256 voteWeight = 100;
 
         // We assume govToken is the token used for voting, and voter has enough balance
-        govToken.mint(voter, voteWeight);
+        vm.stopPrank();
+        vm.startPrank(address(erc20TokenEmitter));
+        erc20Token.mint(voter, voteWeight);
 
         vm.roll(block.number + 1);
 
@@ -228,7 +245,7 @@ contract TokenBasicTest is VerbsTokenTestSuite {
 
         // Act
         // Assuming the voter is msg.sender for the vote function, and it only takes the artPieceId
-        vm.prank(voter); // Set the next message sender to the voter address
+        vm.startPrank(voter); // Set the next message sender to the voter address
         cultureIndex.vote(artPieceId);
 
         // Assert
@@ -243,14 +260,15 @@ contract TokenBasicTest is VerbsTokenTestSuite {
 
     /// @dev Tests that a vote from a voter with a zero balance is rejected.
     function testVotingWithZeroBalance() public {
+        vm.stopPrank();
         // Arrange
         uint256 artPieceId = createDefaultArtPiece();
         vm.roll(block.number + 1);
         address voter = address(0x3); // An address that does not hold any voting tokens
 
         // Act & Assert
-        vm.prank(voter); // Set the next message sender to the voter address
-        vm.expectRevert("Weight must be greater than zero"); // This assumes your contract reverts with this message for zero balance
+        vm.startPrank(voter); // Set the next message sender to the voter address
+        vm.expectRevert("Weight must be greater than minVoteWeight"); // This assumes your contract reverts with this message for zero balance
         cultureIndex.vote(artPieceId); // Trying to vote
     }
 
@@ -262,16 +280,18 @@ contract TokenBasicTest is VerbsTokenTestSuite {
         uint256 voteWeight = 50;
 
         // Give the voter some tokens and allow them to vote
-        govToken.mint(voter, voteWeight);
+        vm.stopPrank();
+        vm.startPrank(address(erc20TokenEmitter));
+        erc20Token.mint(voter, voteWeight);
         vm.roll(block.number + 1);
 
         // First vote
-        vm.prank(voter);
+        vm.startPrank(voter);
         cultureIndex.vote(artPieceId);
 
         // Act & Assert
         // Attempt to vote again
-        vm.prank(voter);
+        vm.startPrank(voter);
         vm.expectRevert("Already voted"); // This assumes your contract reverts with this message for double voting
         cultureIndex.vote(artPieceId);
     }
@@ -284,14 +304,16 @@ contract TokenBasicTest is VerbsTokenTestSuite {
         uint256 voteWeight = 100;
 
         // Simulate dropping the piece
-        verbsToken.mint(); // Replace with your actual function to mark a piece as dropped
+        erc721Token.mint(); // Replace with your actual function to mark a piece as dropped
 
         // Give the voter some tokens
-        govToken.mint(voter, voteWeight);
+        vm.stopPrank();
+        vm.startPrank(address(erc20TokenEmitter));
+        erc20Token.mint(voter, voteWeight);
         vm.roll(block.number + 1);
 
         // Act & Assert
-        vm.prank(voter); // Set the next message sender to the voter address
+        vm.startPrank(voter); // Set the next message sender to the voter address
         vm.expectRevert("Piece has already been dropped"); // This assumes your contract reverts with this message when voting on a dropped piece
         cultureIndex.vote(artPieceId);
     }
@@ -307,14 +329,17 @@ contract TokenBasicTest is VerbsTokenTestSuite {
         address voter = address(0x6);
 
         // Give the voter some tokens and vote on both pieces
-        govToken.mint(voter, firstPieceVoteWeight);
+        vm.stopPrank();
+        vm.startPrank(address(erc20TokenEmitter));
+        erc20Token.mint(voter, firstPieceVoteWeight);
 
         // Vote on the first piece
-        vm.prank(voter);
+        vm.startPrank(voter);
         vm.roll(block.number + 1);
         cultureIndex.vote(firstArtPieceId);
 
-        govToken.mint(voter, secondPieceVoteWeight);
+        vm.startPrank(address(erc20TokenEmitter));
+        erc20Token.mint(voter, secondPieceVoteWeight);
 
         // Vote on the second piece with a higher weight
         uint256 secondArtPieceId = createArtPiece(
@@ -328,7 +353,7 @@ contract TokenBasicTest is VerbsTokenTestSuite {
             10000
         );
         vm.roll(block.number + 1);
-        vm.prank(voter);
+        vm.startPrank(voter);
         cultureIndex.vote(secondArtPieceId);
 
         // Act
@@ -348,15 +373,17 @@ contract TokenBasicTest is VerbsTokenTestSuite {
         uint256 artPieceId = createDefaultArtPiece();
         // Vote on the piece to make it the top voted
         address voter = address(0x7);
-        govToken.mint(voter, 100);
+        vm.stopPrank();
+        vm.startPrank(address(erc20TokenEmitter));
+        erc20Token.mint(voter, 100);
         vm.roll(block.number + 1);
         vm.startPrank(voter);
         cultureIndex.vote(artPieceId);
         vm.stopPrank();
 
-        vm.startPrank(address(this));
+        vm.startPrank(address(auction));
         // Act
-        verbsToken.mint();
+        erc721Token.mint();
 
         // Assert
         ICultureIndex.ArtPiece memory piece = cultureIndex.getPieceById(artPieceId);
@@ -370,7 +397,7 @@ contract TokenBasicTest is VerbsTokenTestSuite {
 
         // Act & Assert
         vm.expectRevert("Culture index is empty");
-        verbsToken.mint();
+        erc721Token.mint();
     }
 
     /// @dev Tests that voting on a non-existent art piece is rejected.
@@ -380,11 +407,13 @@ contract TokenBasicTest is VerbsTokenTestSuite {
         address voter = address(0x9);
         uint256 voteWeight = 100;
 
-        govToken.mint(voter, voteWeight);
+        vm.stopPrank();
+        vm.startPrank(address(erc20TokenEmitter));
+        erc20Token.mint(voter, voteWeight);
         vm.roll(block.number + 1);
 
         // Act & Assert
-        vm.prank(voter);
+        vm.startPrank(voter);
         vm.expectRevert("Invalid piece ID"); // Replace with the actual error message
         cultureIndex.vote(nonExistentArtPieceId);
     }
@@ -399,46 +428,6 @@ contract TokenBasicTest is VerbsTokenTestSuite {
         cultureIndex.getVote(nonExistentArtPieceId, address(this)); // This function should revert
     }
 
-    /// @dev Tests token metadata integrity after minting
-    function testTokenMetadataIntegrity() public {
-        // Create an art piece and mint a token
-        uint256 artPieceId = createDefaultArtPiece();
-        uint256 tokenId = verbsToken.mint();
-
-        // Retrieve the token metadata URI
-        string memory tokenURI = verbsToken.tokenURI(tokenId);
-
-        emit log_string(tokenURI);
-
-        // Extract the base64 encoded part of the tokenURI
-        string memory base64Metadata = substring(tokenURI, 29, bytes(tokenURI).length);
-        emit log_string(base64Metadata);
-
-        // Decode the base64 encoded metadata
-        string memory metadataJson = decodeMetadata(base64Metadata);
-        emit log_string(metadataJson);
-
-        // Parse the JSON to get metadata fields
-        (string memory name, string memory description, string memory image) = parseJson(metadataJson);
-
-        // Retrieve the expected metadata directly from the art piece for comparison
-        (, ICultureIndex.ArtPieceMetadata memory metadata, , , , , , ) = cultureIndex.pieces(artPieceId);
-
-        //assert name equals Verb + tokenId
-        string memory expectedName = string(
-            abi.encodePacked(tokenNamePrefix, " ", Strings.toString(tokenId))
-        );
-
-        // Assert that the token metadata matches the expected metadata from the art piece
-        assertEq(name, expectedName, "Token name does not match expected name");
-        assertEq(
-            description,
-            string(abi.encodePacked(metadata.name, ". ", metadata.description)),
-            "Token description does not match expected description"
-        );
-        assertEq(image, metadata.image, "Token image does not match expected image URL");
-    }
-
     // Helper function to decode base64 encoded metadata
     function decodeMetadata(string memory base64Metadata) internal pure returns (string memory) {
         // Decode the base64 string
@@ -446,11 +435,7 @@ contract TokenBasicTest is VerbsTokenTestSuite {
     }
 
     // Helper function to extract a substring from a string
-    function substring(
-        string memory str,
-        uint256 startIndex,
-        uint256 endIndex
-    ) internal pure returns (string memory) {
+    function substring(string memory str, uint256 startIndex, uint256 endIndex) internal pure returns (string memory) {
         bytes memory strBytes = bytes(str);
         bytes memory result = new bytes(endIndex - startIndex);
         for (uint256 i = startIndex; i < endIndex; i++) {
@@ -508,13 +493,9 @@ contract TokenBasicTest is VerbsTokenTestSuite {
         createDefaultArtPiece();
 
         uint256 preMintPieceId = cultureIndex.topVotedPieceId();
-        uint256 tokenId = verbsToken.mint();
-        (uint256 pieceId, , , , , , , ) = verbsToken.artPieces(tokenId);
+        uint256 tokenId = erc721Token.mint();
+        (uint256 pieceId, , , , , , , ) = erc721Token.artPieces(tokenId);
 
         assertTrue(pieceId == preMintPieceId, "Art piece ID should match top voted piece ID before minting");
     }
-}
-
-contract ProxyRegistry is IProxyRegistry {
-    mapping(address => address) public proxies;
 }

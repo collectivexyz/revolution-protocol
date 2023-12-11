@@ -1,17 +1,32 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.22;
 
-import { Test } from "forge-std/Test.sol";
 import { MaxHeap } from "../../src/MaxHeap.sol";
+import { RevolutionBuilderTest } from "../RevolutionBuilder.t.sol";
+import { ERC1967Proxy } from "../../src/libs/proxy/ERC1967Proxy.sol";
 
 /// @title MaxHeapTestSuite
 /// @dev The test suite for the MaxHeap contract
-contract MaxHeapTestSuite is Test {
-    MaxHeapTest public maxHeap;
+contract MaxHeapTestSuite is RevolutionBuilderTest {
+    MaxHeapTester public maxHeapTester;
 
     /// @dev Sets up a new MaxHeap instance before each test
-    function setUp() public {
-        maxHeap = new MaxHeapTest(address(this));
+    function setUp() public override {
+        super.setUp();
+
+        super.setMockParams();
+
+        super.deployMock();
+
+        address maxHeapTesterImpl = address(new MaxHeapTester(address(this)));
+
+        address maxHeapTesterAddr = address(new ERC1967Proxy(maxHeapTesterImpl, ""));
+
+        MaxHeapTester(maxHeapTesterAddr).initialize(address(cultureIndex));
+
+        maxHeapTester = MaxHeapTester(maxHeapTesterAddr);
+
+        vm.startPrank(address(cultureIndex));
     }
 
     /// @dev Tests that only the owner can call updateValue
@@ -19,7 +34,7 @@ contract MaxHeapTestSuite is Test {
         maxHeap.insert(1, 10); // Setup a state with an element
 
         address nonOwner = address(2);
-        vm.prank(nonOwner);
+        vm.startPrank(nonOwner);
         bool hasErrored = false;
         try maxHeap.updateValue(1, 20) {
             fail("updateValue should be callable only by the owner");
@@ -28,14 +43,15 @@ contract MaxHeapTestSuite is Test {
         }
         assertTrue(hasErrored, "updateValue should have errored");
 
-        vm.prank(address(this));
+        vm.startPrank(address(cultureIndex));
         maxHeap.updateValue(1, 20); // No error expected
     }
 
     /// @dev Tests that only the owner can call insert
     function testInsertOnlyOwner() public {
+        vm.stopPrank();
         address nonOwner = address(3);
-        vm.prank(nonOwner);
+        vm.startPrank(nonOwner);
         bool hasErrored = false;
         try maxHeap.insert(2, 15) {
             fail("insert should be callable only by the owner");
@@ -44,7 +60,7 @@ contract MaxHeapTestSuite is Test {
         }
         assertTrue(hasErrored, "insert should have errored");
 
-        vm.prank(address(this));
+        vm.startPrank(address(cultureIndex));
         maxHeap.insert(2, 15); // No error expected
     }
 
@@ -55,7 +71,7 @@ contract MaxHeapTestSuite is Test {
 
         // Try to call extractMax as a non-owner and expect it to fail
         address nonOwner = address(2); // assume this address is not the owner
-        vm.prank(nonOwner); // this sets the next call to be from the address `nonOwner`
+        vm.startPrank(nonOwner); // this sets the next call to be from the address `nonOwner`
         bool hasErrored = false;
         try maxHeap.extractMax() {
             fail("extractMax should only be callable by the owner");
@@ -66,7 +82,7 @@ contract MaxHeapTestSuite is Test {
         assertTrue(hasErrored, "extractMax should have errored");
 
         // Call extractMax as the owner and expect it to succeed
-        vm.prank(address(this)); // set the owner to be the caller for the next transaction
+        vm.startPrank(address(cultureIndex)); // set the owner to be the caller for the next transaction
         maxHeap.extractMax(); // this should succeed without reverting
     }
 
@@ -100,18 +116,18 @@ contract MaxHeapTestSuite is Test {
     /// @dev Tests the maxHeapify function to ensure it corrects the heap property
     function testHeapify() public {
         // Insert values and manually violate the heap property
-        maxHeap.insert(1, 5);
-        maxHeap.insert(2, 7);
-        maxHeap.insert(3, 15);
-        maxHeap.insert(4, 3);
+        maxHeapTester.insert(1, 5);
+        maxHeapTester.insert(2, 7);
+        maxHeapTester.insert(3, 15);
+        maxHeapTester.insert(4, 3);
         //set max to [10,2]
-        maxHeap._set(0, 10, 2); // Assume a '_set' function for testing
+        maxHeapTester._set(0, 10, 2); // Assume a '_set' function for testing
 
         // Run heapify from the root
-        maxHeap.maxHeapify(0);
+        maxHeapTester.maxHeapify(0);
 
         // Validate the max value
-        (uint256 maxItemId, uint256 correctedMaxValue) = maxHeap.getMax();
+        (uint256 maxItemId, uint256 correctedMaxValue) = maxHeapTester.getMax();
         assertEq(correctedMaxValue, 7, "Max value should be 7");
         assertEq(maxItemId, 2, "Max piece ID should be 2");
     }
@@ -159,14 +175,14 @@ contract MaxHeapTestSuite is Test {
 
     /// @dev Tests the maxHeapify function on a non-root node
     function testHeapifyOnNonRoot() public {
-        maxHeap.insert(1, 10);
-        maxHeap.insert(2, 15);
-        maxHeap.insert(3, 5);
-        maxHeap.insert(4, 12);
-        maxHeap._set(1, 200, 4); // Assume a '_set' function for testing
-        maxHeap.maxHeapify(1);
-        uint256 itemId = maxHeap.heap(1);
-        uint256 val = maxHeap.valueMapping(itemId);
+        maxHeapTester.insert(1, 10);
+        maxHeapTester.insert(2, 15);
+        maxHeapTester.insert(3, 5);
+        maxHeapTester.insert(4, 12);
+        maxHeapTester._set(1, 200, 4); // Assume a '_set' function for testing
+        maxHeapTester.maxHeapify(1);
+        uint256 itemId = maxHeapTester.heap(1);
+        uint256 val = maxHeapTester.valueMapping(itemId);
         assertEq(val, 10, "Value should be 10 after heapify");
         assertEq(itemId, 1, "Item ID should be 1 after heapify");
     }
@@ -182,8 +198,8 @@ contract MaxHeapTestSuite is Test {
     }
 }
 
-contract MaxHeapTest is MaxHeap {
-    constructor(address _owner) MaxHeap(address(_owner)) {}
+contract MaxHeapTester is MaxHeap {
+    constructor(address _manager) MaxHeap(_manager) {}
 
     /// @notice Function to set a value in the heap (ONLY FOR TESTING)
     /// @param pos The position to set

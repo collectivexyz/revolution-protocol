@@ -55,8 +55,7 @@ contract RevolutionProtocolRewards is IRevolutionProtocolRewards, EIP712 {
     ) external payable {
         uint256 numRecipients = recipients.length;
 
-        if (numRecipients != amounts.length || numRecipients != reasons.length)
-            revert ARRAY_LENGTH_MISMATCH();
+        if (numRecipients != amounts.length || numRecipients != reasons.length) revert ARRAY_LENGTH_MISMATCH();
 
         uint256 expectedTotalValue;
 

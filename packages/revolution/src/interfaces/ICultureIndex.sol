@@ -3,14 +3,15 @@
 pragma solidity ^0.8.22;
 
 import { IERC20 } from "@openzeppelin/contracts/token/ERC20/IERC20.sol";
-import { ERC721Checkpointable } from "../base/ERC721Checkpointable.sol";
+import { ERC721CheckpointableUpgradeable } from "../base/ERC721CheckpointableUpgradeable.sol";
+import { IRevolutionBuilder } from "./IRevolutionBuilder.sol";
 
 /**
  * @title ICultureIndexEvents
  * @dev This interface defines the events for the CultureIndex contract.
  */
 interface ICultureIndexEvents {
-    event ERC721VotingTokenUpdated(ERC721Checkpointable ERC721VotingToken);
+    event ERC721VotingTokenUpdated(ERC721CheckpointableUpgradeable ERC721VotingToken);
 
     event ERC721VotingTokenLocked();
 
@@ -142,10 +143,7 @@ interface ICultureIndex is ICultureIndexEvents {
      * @param creatorArray An array of creators and their associated basis points.
      * @return The ID of the newly created art piece.
      */
-    function createPiece(
-        ArtPieceMetadata memory metadata,
-        CreatorBps[] memory creatorArray
-    ) external returns (uint256);
+    function createPiece(ArtPieceMetadata memory metadata, CreatorBps[] memory creatorArray) external returns (uint256);
 
     /**
      * @notice Allows a user to vote for a specific art piece.
@@ -229,11 +227,23 @@ interface ICultureIndex is ICultureIndexEvents {
      */
     function dropTopVotedPiece() external returns (ArtPiece memory);
 
-    function setERC721VotingToken(ERC721Checkpointable _ERC721VotingToken) external;
+    function getVotes(address account) external view returns (uint256);
 
-    function lockERC721VotingToken() external;
+    function getPastVotes(address account, uint256 blockNumber) external view returns (uint256);
 
-    function getCurrentVotes(address account) external view returns (uint256);
-
-    function getPriorVotes(address account, uint256 blockNumber) external view returns (uint256);
+    /**
+     * @notice Initializes a token's metadata descriptor
+     * @param erc20VotingToken The address of the ERC20 voting token, commonly referred to as "points"
+     * @param erc721VotingToken The address of the ERC721 voting token, commonly the dropped art pieces
+     * @param initialOwner The owner of the contract, allowed to drop pieces. Commonly updated to the AuctionHouse
+     * @param maxHeap The address of the max heap contract
+     * @param cultureIndexParams The CultureIndex settings
+     */
+    function initialize(
+        address erc20VotingToken,
+        address erc721VotingToken,
+        address initialOwner,
+        address maxHeap,
+        IRevolutionBuilder.CultureIndexParams calldata cultureIndexParams
+    ) external;
 }

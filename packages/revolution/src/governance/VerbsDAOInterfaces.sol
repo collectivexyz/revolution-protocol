@@ -28,7 +28,9 @@
 // VerbsDAOEvents, VerbsDAOProxyStorage, VerbsDAOStorageV1 add support for changes made by Verbs DAO to GovernorBravo.sol
 // See VerbsDAOLogicV1.sol for more details.
 
-pragma solidity ^0.8.6;
+import { IDAOExecutor } from "../interfaces/IDAOExecutor.sol";
+
+pragma solidity 0.8.22;
 
 contract VerbsDAOEvents {
     /// @notice An event emitted when a new proposal is created
@@ -70,10 +72,10 @@ contract VerbsDAOEvents {
     /// @notice An event emitted when a proposal has been canceled
     event ProposalCanceled(uint256 id);
 
-    /// @notice An event emitted when a proposal has been queued in the VerbsDAOExecutor
+    /// @notice An event emitted when a proposal has been queued in the DAOExecutor
     event ProposalQueued(uint256 id, uint256 eta);
 
-    /// @notice An event emitted when a proposal has been executed in the VerbsDAOExecutor
+    /// @notice An event emitted when a proposal has been executed in the DAOExecutor
     event ProposalExecuted(uint256 id);
 
     /// @notice An event emitted when a proposal has been vetoed by vetoAddress
@@ -158,8 +160,8 @@ contract VerbsDAOStorageV1 is VerbsDAOProxyStorage {
     /// @notice The total number of proposals
     uint256 public proposalCount;
 
-    /// @notice The address of the Verbs DAO Executor VerbsDAOExecutor
-    IVerbsDAOExecutor public timelock;
+    /// @notice The address of the Verbs DAO Executor DAOExecutor
+    IDAOExecutor public timelock;
 
     /// @notice The address of the Verbs ERC721 tokens
     VerbsTokenLike public verbs;
@@ -178,8 +180,8 @@ contract VerbsDAOStorageV1 is VerbsDAOProxyStorage {
     /// @notice Pending new vetoer
     address public pendingVetoer;
 
-    /// @notice The voting weight of the verbs token eg: owning (2) tokens gets you (2 * verbsTokenVotingWeight) votes
-    uint256 public verbsTokenVotingWeight;
+    /// @notice The voting weight of the verbs token eg: owning (2) tokens gets you (2 * erc721TokenVotingWeight) votes
+    uint256 public erc721TokenVotingWeight;
 
     struct Proposal {
         /// @notice Unique id for looking up a proposal
@@ -297,40 +299,6 @@ contract VerbsDAOStorageV1 is VerbsDAOProxyStorage {
         /// @notice The block at which this proposal was created
         uint256 creationBlock;
     }
-}
-
-interface IVerbsDAOExecutor {
-    function delay() external view returns (uint256);
-
-    function GRACE_PERIOD() external view returns (uint256);
-
-    function acceptAdmin() external;
-
-    function queuedTransactions(bytes32 hash) external view returns (bool);
-
-    function queueTransaction(
-        address target,
-        uint256 value,
-        string calldata signature,
-        bytes calldata data,
-        uint256 eta
-    ) external returns (bytes32);
-
-    function cancelTransaction(
-        address target,
-        uint256 value,
-        string calldata signature,
-        bytes calldata data,
-        uint256 eta
-    ) external;
-
-    function executeTransaction(
-        address target,
-        uint256 value,
-        string calldata signature,
-        bytes calldata data,
-        uint256 eta
-    ) external payable returns (bytes memory);
 }
 
 interface VerbsTokenLike {

@@ -16,7 +16,7 @@
  *********************************/
 
 // LICENSE
-// VerbsAuctionHouse.sol is a modified version of Zora's AuctionHouse.sol:
+// AuctionHouse.sol is a modified version of Zora's AuctionHouse.sol:
 // https://github.com/ourzora/auction-house/blob/54a12ec1a6cf562e49f0a4917990474b11350a2d/contracts/AuctionHouse.sol
 //
 // AuctionHouse.sol source code Copyright Zora licensed under the GPL-3.0 license.
@@ -25,24 +25,20 @@ pragma solidity ^0.8.22;
 
 import { PausableUpgradeable } from "@openzeppelin/contracts-upgradeable/utils/PausableUpgradeable.sol";
 import { ReentrancyGuardUpgradeable } from "@openzeppelin/contracts-upgradeable/utils/ReentrancyGuardUpgradeable.sol";
-import { OwnableUpgradeable } from "@openzeppelin/contracts-upgradeable/access/OwnableUpgradeable.sol";
-import { IVerbsAuctionHouse } from "./interfaces/IVerbsAuctionHouse.sol";
+import { IAuctionHouse } from "./interfaces/IAuctionHouse.sol";
 import { IVerbsToken } from "./interfaces/IVerbsToken.sol";
 import { IWETH } from "./interfaces/IWETH.sol";
-import { ITokenEmitter } from "./interfaces/ITokenEmitter.sol";
+import { IERC20TokenEmitter } from "./interfaces/IERC20TokenEmitter.sol";
 import { ICultureIndex } from "./interfaces/ICultureIndex.sol";
+import { IRevolutionBuilder } from "./interfaces/IRevolutionBuilder.sol";
+import { Ownable2StepUpgradeable } from "@openzeppelin/contracts-upgradeable/access/Ownable2StepUpgradeable.sol";
 
-contract VerbsAuctionHouse is
-    IVerbsAuctionHouse,
-    PausableUpgradeable,
-    ReentrancyGuardUpgradeable,
-    OwnableUpgradeable
-{
+contract AuctionHouse is IAuctionHouse, PausableUpgradeable, ReentrancyGuardUpgradeable, Ownable2StepUpgradeable {
     // The Verbs ERC721 token contract
     IVerbsToken public verbs;
 
     // The ERC20 governance token
-    ITokenEmitter public tokenEmitter;
+    IERC20TokenEmitter public erc20TokenEmitter;
 
     // The address of the WETH contract
     address public WETH;
@@ -69,58 +65,80 @@ contract VerbsAuctionHouse is
     uint256 public duration;
 
     // The active auction
-    IVerbsAuctionHouse.Auction public auction;
+    IAuctionHouse.Auction public auction;
 
-    // The minimum gas threshold for creating an auction (minting VerbsToken)
+    ///                                                          ///
+    ///                         IMMUTABLES                       ///
+    ///                                                          ///
+
+    /// @notice The contract upgrade manager
+    IRevolutionBuilder public immutable manager;
+
+    // TODO investigate this - The minimum gas threshold for creating an auction (minting VerbsToken)
     uint32 public constant MIN_TOKEN_MINT_GAS_THRESHOLD = 750_000;
+
+    ///                                                          ///
+    ///                         CONSTRUCTOR                      ///
+    ///                                                          ///
+
+    /// @param _manager The contract upgrade manager address
+    constructor(address _manager) payable initializer {
+        manager = IRevolutionBuilder(_manager);
+    }
+
+    ///                                                          ///
+    ///                         INITIALIZER                      ///
+    ///                                                          ///
 
     /**
      * @notice Initialize the auction house and base contracts,
      * populate configuration values, and pause the contract.
      * @dev This function can only be called once.
+     * @param _erc721Token The address of the Verbs ERC721 token contract.
+     * @param _erc20TokenEmitter The address of the ERC-20 token emitter contract.
+     * @param _initialOwner The address of the owner.
+     * @param _weth The address of the WETH contract
+     * @param _auctionParams The auction params for auctions.
      */
     function initialize(
-        IVerbsToken _verbs,
-        ITokenEmitter _tokenEmitter,
-        address _WETH,
-        address _founder,
-        uint256 _timeBuffer,
-        uint256 _reservePrice,
-        uint8 _minBidIncrementPercentage,
-        uint256 _duration,
-        uint256 _creatorRateBps,
-        uint256 _entropyRateBps,
-        uint256 _minCreatorRateBps
+        address _erc721Token,
+        address _erc20TokenEmitter,
+        address _initialOwner,
+        address _weth,
+        IRevolutionBuilder.AuctionParams calldata _auctionParams
     ) external initializer {
+        require(msg.sender == address(manager), "Only manager can initialize");
+        require(_weth != address(0), "WETH cannot be zero address");
+
         __Pausable_init();
         __ReentrancyGuard_init();
-        __Ownable_init(_founder);
+        __Ownable_init(_initialOwner);
 
         _pause();
 
         require(
-            _creatorRateBps >= _minCreatorRateBps,
+            _auctionParams.creatorRateBps >= _auctionParams.minCreatorRateBps,
             "Creator rate must be greater than or equal to the creator rate"
         );
-        require(_WETH != address(0), "WETH cannot be zero address");
 
-        verbs = _verbs;
-        tokenEmitter = _tokenEmitter;
-        WETH = _WETH;
-        timeBuffer = _timeBuffer;
-        reservePrice = _reservePrice;
-        minBidIncrementPercentage = _minBidIncrementPercentage;
-        duration = _duration;
-        creatorRateBps = _creatorRateBps;
-        entropyRateBps = _entropyRateBps;
-        minCreatorRateBps = _minCreatorRateBps;
+        verbs = IVerbsToken(_erc721Token);
+        erc20TokenEmitter = IERC20TokenEmitter(_erc20TokenEmitter);
+        timeBuffer = _auctionParams.timeBuffer;
+        reservePrice = _auctionParams.reservePrice;
+        minBidIncrementPercentage = _auctionParams.minBidIncrementPercentage;
+        duration = _auctionParams.duration;
+        creatorRateBps = _auctionParams.creatorRateBps;
+        entropyRateBps = _auctionParams.entropyRateBps;
+        minCreatorRateBps = _auctionParams.minCreatorRateBps;
+        WETH = _weth;
     }
 
     /**
      * @notice Settle the current auction, mint a new Verb, and put it up for auction.
      */
-    //Can technically reenter via cross function reentrancies in _createAuction, auction, and pause, but those are only callable by the owner
-    //slither-disable-next-line reentrancy-eth
+    // Can technically reenter via cross function reentrancies in _createAuction, auction, and pause, but those are only callable by the owner.
+    // @wardens if you can find an exploit here go for it - we might be wrong.
+    // slither-disable-next-line reentrancy-eth
     function settleCurrentAndCreateNewAuction() external override nonReentrant whenNotPaused {
         _settleAuction();
         _createAuction();
@@ -141,7 +159,7 @@ contract VerbsAuctionHouse is
      * @param bidder The address of the bidder.
      */
     function createBid(uint256 verbId, address bidder) external payable override nonReentrant {
-        IVerbsAuctionHouse.Auction memory _auction = auction;
+        IAuctionHouse.Auction memory _auction = auction;
 
         //require bidder is valid address
         require(bidder != address(0), "Bidder cannot be zero address");
@@ -203,10 +221,7 @@ contract VerbsAuctionHouse is
      * @param _minCreatorRateBps New minimum creator rate in basis points.
      */
     function setMinCreatorRateBps(uint256 _minCreatorRateBps) external onlyOwner {
-        require(
-            _minCreatorRateBps <= creatorRateBps,
-            "Min creator rate must be less than or equal to creator rate"
-        );
+        require(_minCreatorRateBps <= creatorRateBps, "Min creator rate must be less than or equal to creator rate");
         require(_minCreatorRateBps <= 10_000, "Min creator rate must be less than or equal to 10_000");
 
         //ensure new min rate cannot be lower than previous min rate
@@ -309,7 +324,7 @@ contract VerbsAuctionHouse is
      * @dev If there are no bids, the Verb is burned.
      */
     function _settleAuction() internal {
-        IVerbsAuctionHouse.Auction memory _auction = auction;
+        IAuctionHouse.Auction memory _auction = auction;
 
         require(_auction.startTime != 0, "Auction hasn't begun");
         require(!_auction.settled, "Auction has already been settled");
@@ -345,44 +360,37 @@ contract VerbsAuctionHouse is
                 uint256 numCreators = verbs.getArtPieceById(_auction.verbId).creators.length;
                 address deployer = verbs.getArtPieceById(_auction.verbId).dropper;
 
-                //Build arrays for tokenEmitter.buyToken
-                address[] memory vrgdaReceivers = new address[](numCreators);
+                //Build arrays for erc20TokenEmitter.buyToken
                 uint256[] memory vrgdaSplits = new uint256[](numCreators);
+                address[] memory vrgdaReceivers = new address[](numCreators);
 
                 //Transfer auction amount to the DAO treasury
                 _safeTransferETHWithFallback(owner(), auctioneerPayment);
 
                 uint256 ethPaidToCreators = 0;
 
-                //Transfer creator's share to the creator, for each creator, and build arrays for tokenEmitter.buyToken
+                //Transfer creator's share to the creator, for each creator, and build arrays for erc20TokenEmitter.buyToken
                 if (creatorsShare > 0 && entropyRateBps > 0) {
-                    for (uint256 i = 0; i < numCreators; ) {
-                        ICultureIndex.CreatorBps memory creator = verbs
-                            .getArtPieceById(_auction.verbId)
-                            .creators[i];
+                    for (uint256 i = 0; i < numCreators; i++) {
+                        ICultureIndex.CreatorBps memory creator = verbs.getArtPieceById(_auction.verbId).creators[i];
                         vrgdaReceivers[i] = creator.creator;
                         vrgdaSplits[i] = creator.bps;
 
                         //Calculate paymentAmount for specific creator based on BPS splits - same as multiplying by creatorDirectPayment
-                        uint256 paymentAmount = (creatorsShare * entropyRateBps * creator.bps) /
-                            (10_000 * 10_000);
+                        uint256 paymentAmount = (creatorsShare * entropyRateBps * creator.bps) / (10_000 * 10_000);
                         ethPaidToCreators += paymentAmount;
 
                         //Transfer creator's share to the creator
                         _safeTransferETHWithFallback(creator.creator, paymentAmount);
-
-                        unchecked {
-                            ++i;
-                        }
                     }
                 }
 
-                //Buy token from tokenEmitter for all the creators
+                //Buy token from ERC20TokenEmitter for all the creators
                 if (creatorsShare > ethPaidToCreators) {
-                    creatorTokensEmitted = tokenEmitter.buyToken{ value: creatorsShare - ethPaidToCreators }(
+                    creatorTokensEmitted = erc20TokenEmitter.buyToken{ value: creatorsShare - ethPaidToCreators }(
                         vrgdaReceivers,
                         vrgdaSplits,
-                        ITokenEmitter.ProtocolRewardAddresses({
+                        IERC20TokenEmitter.ProtocolRewardAddresses({
                             builder: address(0),
                             purchaseReferral: address(0),
                             deployer: deployer

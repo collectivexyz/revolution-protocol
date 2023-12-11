@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: GPL-3.0
 
-/// @title Common interface for VerbsDescriptor versions, as used by VerbsToken
+/// @title Common interface for Descriptor versions, as used by VerbsToken
 
 /*********************************
  * ░░░░░░░░░░░░░░░░░░░░░░░░░░░░░ *
@@ -19,7 +19,7 @@ pragma solidity ^0.8.22;
 
 import { ICultureIndex } from "./ICultureIndex.sol";
 
-interface IVerbsDescriptorMinimal {
+interface IDescriptorMinimal {
     ///
     /// USED BY TOKEN
     ///

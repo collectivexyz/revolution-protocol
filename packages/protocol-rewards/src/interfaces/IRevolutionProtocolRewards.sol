@@ -32,13 +32,7 @@ interface IRevolutionProtocolRewards {
     /// @param reason Optional bytes4 reason for indexing
     /// @param amount Amount of deposit
     /// @param comment Optional user comment
-    event Deposit(
-        address indexed from,
-        address indexed to,
-        bytes4 indexed reason,
-        uint256 amount,
-        string comment
-    );
+    event Deposit(address indexed from, address indexed to, bytes4 indexed reason, uint256 amount, string comment);
 
     /// @notice Withdraw Event
     /// @param from From user

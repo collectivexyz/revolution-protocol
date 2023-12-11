@@ -1,16 +1,30 @@
 // SPDX-License-Identifier: GPL-3.0
 pragma solidity ^0.8.22;
 
-import { ERC20Votes } from "./base/erc20/ERC20Votes.sol";
+import { Ownable2StepUpgradeable } from "@openzeppelin/contracts-upgradeable/access/Ownable2StepUpgradeable.sol";
+import { ReentrancyGuardUpgradeable } from "@openzeppelin/contracts-upgradeable/utils/ReentrancyGuardUpgradeable.sol";
+
+import { UUPS } from "./libs/proxy/UUPS.sol";
+import { VersionedContract } from "./version/VersionedContract.sol";
+
+import { IRevolutionBuilder } from "./interfaces/IRevolutionBuilder.sol";
+
+import { ERC20VotesUpgradeable } from "./base/erc20/ERC20VotesUpgradeable.sol";
 import { MaxHeap } from "./MaxHeap.sol";
 import { ICultureIndex } from "./interfaces/ICultureIndex.sol";
-import { Ownable } from "@openzeppelin/contracts/access/Ownable.sol";
-import { ReentrancyGuard } from "@openzeppelin/contracts/utils/ReentrancyGuard.sol";
-import { ERC721Checkpointable } from "./base/ERC721Checkpointable.sol";
-import { EIP712 } from "@openzeppelin/contracts/utils/cryptography/EIP712.sol";
+
+import { ERC721CheckpointableUpgradeable } from "./base/ERC721CheckpointableUpgradeable.sol";
+import { EIP712Upgradeable } from "@openzeppelin/contracts-upgradeable/utils/cryptography/EIP712Upgradeable.sol";
 import { Strings } from "@openzeppelin/contracts/utils/Strings.sol";
 
-contract CultureIndex is ICultureIndex, Ownable, ReentrancyGuard, EIP712 {
+contract CultureIndex is
+    ICultureIndex,
+    VersionedContract,
+    UUPS,
+    Ownable2StepUpgradeable,
+    ReentrancyGuardUpgradeable,
+    EIP712Upgradeable
+{
     /// @notice The EIP-712 typehash for gasless votes
     bytes32 public constant VOTE_TYPEHASH =
         keccak256("Vote(address from,uint256[] pieceIds,uint256 nonce,uint256 deadline)");
@@ -19,31 +33,30 @@ contract CultureIndex is ICultureIndex, Ownable, ReentrancyGuard, EIP712 {
     mapping(address => uint256) public nonces;
 
     // The MaxHeap data structure used to keep track of the top-voted piece
-    MaxHeap public immutable maxHeap;
+    MaxHeap public maxHeap;
 
     // The ERC20 token used for voting
-    ERC20Votes public immutable erc20VotingToken;
+    ERC20VotesUpgradeable public erc20VotingToken;
 
     // The ERC721 token used for voting
-    ERC721Checkpointable public erc721VotingToken;
-
-    // Whether the 721 voting token can be updated
-    bool public isERC721VotingTokenLocked;
+    ERC721CheckpointableUpgradeable public erc721VotingToken;
 
     // The weight of the 721 voting token
-    uint256 public immutable erc721VotingTokenWeight;
-
-    /// @notice The minimum settable quorum votes basis points
-    uint256 public constant MIN_QUORUM_VOTES_BPS = 200; // 200 basis points or 2%
+    uint256 public erc721VotingTokenWeight;
 
     /// @notice The maximum settable quorum votes basis points
-    uint256 public constant MAX_QUORUM_VOTES_BPS = 4_000; // 4,000 basis points or 40%
+    uint256 public constant MAX_QUORUM_VOTES_BPS = 6_000; // 6,000 basis points or 60%
+
+    /// @notice The minimum vote weight required in order to vote
+    uint256 public minVoteWeight;
 
     /// @notice The basis point number of votes in support of a art piece required in order for a quorum to be reached and for an art piece to be dropped.
     uint256 public quorumVotesBPS;
 
+    /// @notice The name of the culture index
     string public name;
 
+    /// @notice A description of the culture index - can include rules or guidelines
     string public description;
 
     // The list of all pieces
@@ -61,74 +74,72 @@ contract CultureIndex is ICultureIndex, Ownable, ReentrancyGuard, EIP712 {
     // Constant for max number of creators
     uint256 public constant MAX_NUM_CREATORS = 100;
 
-    /**
-     * @notice Constructor
-     * @param name_ The name of the culture index
-     * @param description_ A description for the culture index, can include rules for uploads etc.
-     * @param erc20VotingToken_ The address of the ERC20 voting token, commonly referred to as "points"
-     * @param erc721VotingToken_ The address of the ERC721 voting token, commonly the dropped art pieces
-     * @param initialOwner_ The owner of the contract, allowed to drop pieces. Commonly updated to the AuctionHouse
-     * @param erc721VotingTokenWeight_ The voting weight of the individual ERC721 tokens. Normally a large multiple to match up with daily emission of ERC20 points
-     * @param quorumVotesBPS_ The initial quorum votes threshold in basis points
-     */
-    constructor(
-        string memory name_,
-        string memory description_,
-        address erc20VotingToken_,
-        address erc721VotingToken_,
-        address initialOwner_,
-        uint256 erc721VotingTokenWeight_,
-        uint256 quorumVotesBPS_
-    ) Ownable(initialOwner_) EIP712("CultureIndex", "1") {
-        require(
-            quorumVotesBPS_ >= MIN_QUORUM_VOTES_BPS && quorumVotesBPS_ <= MAX_QUORUM_VOTES_BPS,
-            "invalid quorum bps"
-        );
-        require(erc721VotingTokenWeight_ > 0, "invalid erc721 voting token weight");
-        require(erc721VotingToken_ != address(0), "invalid erc721 voting token");
-        require(erc20VotingToken_ != address(0), "invalid erc20 voting token");
+    ///                                                          ///
+    ///                         IMMUTABLES                       ///
+    ///                                                          ///
 
-        erc20VotingToken = ERC20Votes(erc20VotingToken_);
-        erc721VotingToken = ERC721Checkpointable(erc721VotingToken_);
-        erc721VotingTokenWeight = erc721VotingTokenWeight_;
-        name = name_;
-        description = description_;
-        quorumVotesBPS = quorumVotesBPS_;
+    /// @notice The contract upgrade manager
+    IRevolutionBuilder private immutable manager;
 
-        emit QuorumVotesBPSSet(quorumVotesBPS, quorumVotesBPS_);
+    ///                                                          ///
+    ///                         CONSTRUCTOR                      ///
+    ///                                                          ///
 
-        maxHeap = new MaxHeap(address(this));
+    /// @param _manager The contract upgrade manager address
+    constructor(address _manager) payable initializer {
+        manager = IRevolutionBuilder(_manager);
     }
 
-    /**
-     * @notice Require that the 721VotingToken has not been locked.
-     */
-    modifier whenERC721VotingTokenNotLocked() {
-        require(!isERC721VotingTokenLocked, "ERC721VotingToken is locked");
-        _;
-    }
+    ///                                                          ///
+    ///                         INITIALIZER                      ///
+    ///                                                          ///
 
     /**
-     * @notice Set the ERC721 voting token.
-     * @dev Only callable by the owner when not locked.
+     * @notice Initializes a token's metadata descriptor
+     * @param _erc20VotingToken The address of the ERC20 voting token, commonly referred to as "points"
+     * @param _erc721VotingToken The address of the ERC721 voting token, commonly the dropped art pieces
+     * @param _initialOwner The owner of the contract, allowed to drop pieces. Commonly updated to the AuctionHouse
+     * @param _cultureIndexParams The CultureIndex settings
      */
-    function setERC721VotingToken(
-        ERC721Checkpointable _ERC721VotingToken
-    ) external override onlyOwner nonReentrant whenERC721VotingTokenNotLocked {
-        erc721VotingToken = _ERC721VotingToken;
+    function initialize(
+        address _erc20VotingToken,
+        address _erc721VotingToken,
+        address _initialOwner,
+        address _maxHeap,
+        IRevolutionBuilder.CultureIndexParams memory _cultureIndexParams
+    ) external initializer {
+        require(msg.sender == address(manager), "Only manager can initialize");
 
-        emit ERC721VotingTokenUpdated(_ERC721VotingToken);
+        require(_cultureIndexParams.quorumVotesBPS <= MAX_QUORUM_VOTES_BPS, "invalid quorum bps");
+        require(_cultureIndexParams.erc721VotingTokenWeight > 0, "invalid erc721 voting token weight");
+        require(_erc721VotingToken != address(0), "invalid erc721 voting token");
+        require(_erc20VotingToken != address(0), "invalid erc20 voting token");
+
+        // Setup ownable
+        __Ownable_init(_initialOwner);
+
+        // Initialize EIP-712 support
+        __EIP712_init(string.concat(_cultureIndexParams.name, " CultureIndex"), "1");
+
+        __ReentrancyGuard_init();
+
+        erc20VotingToken = ERC20VotesUpgradeable(_erc20VotingToken);
+        erc721VotingToken = ERC721CheckpointableUpgradeable(_erc721VotingToken);
+        erc721VotingTokenWeight = _cultureIndexParams.erc721VotingTokenWeight;
+        name = _cultureIndexParams.name;
+        description = _cultureIndexParams.description;
+        quorumVotesBPS = _cultureIndexParams.quorumVotesBPS;
+        minVoteWeight = _cultureIndexParams.minVoteWeight;
+
+        emit QuorumVotesBPSSet(quorumVotesBPS, _cultureIndexParams.quorumVotesBPS);
+
+        // Create maxHeap
+        maxHeap = MaxHeap(address(_maxHeap));
     }
 
-    /**
-     * @notice Lock the ERC721 voting token.
-     * @dev This cannot be reversed and is only callable by the owner when not locked.
-     */
-    function lockERC721VotingToken() external override onlyOwner whenERC721VotingTokenNotLocked {
-        isERC721VotingTokenLocked = true;
-
-        emit ERC721VotingTokenLocked();
-    }
+    ///                                                          ///
+    ///                         MODIFIERS                        ///
+    ///                                                          ///
 
     /**
      *  Validates the media type and associated data.
@@ -164,13 +175,9 @@ contract CultureIndex is ICultureIndex, Ownable, ReentrancyGuard, EIP712 {
         require(creatorArrayLength <= MAX_NUM_CREATORS, "Creator array must not be > MAX_NUM_CREATORS");
 
         uint256 totalBps;
-        for (uint i; i < creatorArrayLength; ) {
+        for (uint i; i < creatorArrayLength; i++) {
             require(creatorArray[i].creator != address(0), "Invalid creator address");
             totalBps += creatorArray[i].bps;
-
-            unchecked {
-                ++i;
-            }
         }
 
         require(totalBps == 10_000, "Total BPS must sum up to 10,000");
@@ -219,12 +226,8 @@ contract CultureIndex is ICultureIndex, Ownable, ReentrancyGuard, EIP712 {
         newPiece.creationBlock = block.number;
         newPiece.quorumVotes = (quorumVotesBPS * newPiece.totalVotesSupply) / 10_000;
 
-        for (uint i; i < creatorArrayLength; ) {
+        for (uint i; i < creatorArrayLength; i++) {
             newPiece.creators.push(creatorArray[i]);
-
-            unchecked {
-                ++i;
-            }
         }
 
         _emitPieceCreatedEvents(
@@ -261,12 +264,8 @@ contract CultureIndex is ICultureIndex, Ownable, ReentrancyGuard, EIP712 {
         emit PieceCreated(pieceId, sender, metadata, quorum, totalVotesSupply);
 
         // Emit an event for each creator
-        for (uint i; i < creatorArrayLength; ) {
+        for (uint i; i < creatorArrayLength; i++) {
             emit PieceCreatorAdded(pieceId, creatorArray[i].creator, msg.sender, creatorArray[i].bps);
-
-            unchecked {
-                ++i;
-            }
         }
     }
 
@@ -285,8 +284,8 @@ contract CultureIndex is ICultureIndex, Ownable, ReentrancyGuard, EIP712 {
      * @param account The address of the voter.
      * @return The voting power of the voter.
      */
-    function getCurrentVotes(address account) external view override returns (uint256) {
-        return _getCurrentVotes(account);
+    function getVotes(address account) external view override returns (uint256) {
+        return _getVotes(account);
     }
 
     /**
@@ -294,8 +293,8 @@ contract CultureIndex is ICultureIndex, Ownable, ReentrancyGuard, EIP712 {
      * @param account The address of the voter.
      * @return The voting power of the voter.
      */
-    function getPriorVotes(address account, uint256 blockNumber) external view override returns (uint256) {
-        return _getPriorVotes(account, blockNumber);
+    function getPastVotes(address account, uint256 blockNumber) external view override returns (uint256) {
+        return _getPastVotes(account, blockNumber);
     }
 
     /**
@@ -304,26 +303,19 @@ contract CultureIndex is ICultureIndex, Ownable, ReentrancyGuard, EIP712 {
      * @param erc721Balance The ERC721 balance of the voter.
      * @return The vote weight of the voter.
      */
-    function _calculateVoteWeight(
-        uint256 erc20Balance,
-        uint256 erc721Balance
-    ) internal view returns (uint256) {
+    function _calculateVoteWeight(uint256 erc20Balance, uint256 erc721Balance) internal view returns (uint256) {
         return erc20Balance + (erc721Balance * erc721VotingTokenWeight * 1e18);
     }
 
-    function _getCurrentVotes(address account) internal view returns (uint256) {
-        return
-            _calculateVoteWeight(
-                erc20VotingToken.getVotes(account),
-                erc721VotingToken.getCurrentVotes(account)
-            );
+    function _getVotes(address account) internal view returns (uint256) {
+        return _calculateVoteWeight(erc20VotingToken.getVotes(account), erc721VotingToken.getVotes(account));
     }
 
-    function _getPriorVotes(address account, uint256 blockNumber) internal view returns (uint256) {
+    function _getPastVotes(address account, uint256 blockNumber) internal view returns (uint256) {
         return
             _calculateVoteWeight(
                 erc20VotingToken.getPastVotes(account, blockNumber),
-                erc721VotingToken.getPriorVotes(account, blockNumber)
+                erc721VotingToken.getPastVotes(account, blockNumber)
             );
     }
 
@@ -331,7 +323,7 @@ contract CultureIndex is ICultureIndex, Ownable, ReentrancyGuard, EIP712 {
      * @notice Cast a vote for a specific ArtPiece.
      * @param pieceId The ID of the ArtPiece to vote for.
      * @param voter The address of the voter.
-     * @dev Requires that the pieceId is valid, the voter has not already voted on this piece, and the weight is greater than zero.
+     * @dev Requires that the pieceId is valid, the voter has not already voted on this piece, and the weight is greater than the minimum vote weight.
      * Emits a VoteCast event upon successful execution.
      */
     function _vote(uint256 pieceId, address voter) internal {
@@ -340,8 +332,8 @@ contract CultureIndex is ICultureIndex, Ownable, ReentrancyGuard, EIP712 {
         require(!pieces[pieceId].isDropped, "Piece has already been dropped");
         require(!(votes[pieceId][voter].voterAddress != address(0)), "Already voted");
 
-        uint256 weight = _getPriorVotes(voter, pieces[pieceId].creationBlock);
-        require(weight > 0, "Weight must be greater than zero");
+        uint256 weight = _getPastVotes(voter, pieces[pieceId].creationBlock);
+        require(weight > minVoteWeight, "Weight must be greater than minVoteWeight");
 
         votes[pieceId][voter] = Vote(voter, weight);
         totalVoteWeights[pieceId] += weight;
@@ -356,7 +348,7 @@ contract CultureIndex is ICultureIndex, Ownable, ReentrancyGuard, EIP712 {
     /**
      * @notice Cast a vote for a specific ArtPiece.
      * @param pieceId The ID of the ArtPiece to vote for.
-     * @dev Requires that the pieceId is valid, the voter has not already voted on this piece, and the weight is greater than zero.
+     * @dev Requires that the pieceId is valid, the voter has not already voted on this piece, and the weight is greater than the minimum vote weight.
      * Emits a VoteCast event upon successful execution.
      */
     function vote(uint256 pieceId) public nonReentrant {
@@ -366,7 +358,7 @@ contract CultureIndex is ICultureIndex, Ownable, ReentrancyGuard, EIP712 {
     /**
      * @notice Cast a vote for a list of ArtPieces.
      * @param pieceIds The IDs of the ArtPieces to vote for.
-     * @dev Requires that the pieceIds are valid, the voter has not already voted on this piece, and the weight is greater than zero.
+     * @dev Requires that the pieceIds are valid, the voter has not already voted on this piece, and the weight is greater than the minimum vote weight.
      * Emits a series of VoteCast event upon successful execution.
      */
     function voteForMany(uint256[] calldata pieceIds) public nonReentrant {
@@ -377,17 +369,13 @@ contract CultureIndex is ICultureIndex, Ownable, ReentrancyGuard, EIP712 {
      * @notice Cast a vote for a list of ArtPieces pieceIds.
      * @param pieceIds The IDs of the ArtPieces to vote for.
      * @param from The address of the voter.
-     * @dev Requires that the pieceIds are valid, the voter has not already voted on this piece, and the weight is greater than zero.
+     * @dev Requires that the pieceIds are valid, the voter has not already voted on this piece, and the weight is greater than the minimum vote weight.
      * Emits a series of VoteCast event upon successful execution.
      */
     function _voteForMany(uint256[] calldata pieceIds, address from) internal {
         uint256 len = pieceIds.length;
-        for (uint256 i; i < len; ) {
+        for (uint256 i; i < len; i++) {
             _vote(pieceIds[i], from);
-
-            unchecked {
-                ++i;
-            }
         }
     }
 
@@ -430,30 +418,16 @@ contract CultureIndex is ICultureIndex, Ownable, ReentrancyGuard, EIP712 {
     ) external nonReentrant {
         uint256 len = from.length;
         require(
-            len == pieceIds.length &&
-                len == deadline.length &&
-                len == v.length &&
-                len == r.length &&
-                len == s.length,
+            len == pieceIds.length && len == deadline.length && len == v.length && len == r.length && len == s.length,
             "Array lengths must match"
         );
 
-        for (uint256 i; i < len; ) {
-            bool success = _verifyVoteSignature(from[i], pieceIds[i], deadline[i], v[i], r[i], s[i]);
-
-            if (!success) revert INVALID_SIGNATURE();
-
-            unchecked {
-                ++i;
-            }
+        for (uint256 i; i < len; i++) {
+            if (!_verifyVoteSignature(from[i], pieceIds[i], deadline[i], v[i], r[i], s[i])) revert INVALID_SIGNATURE();
         }
 
-        for (uint256 i; i < len; ) {
+        for (uint256 i; i < len; i++) {
             _voteForMany(pieceIds[i], from[i]);
-
-            unchecked {
-                ++i;
-            }
         }
     }
 
@@ -544,10 +518,7 @@ contract CultureIndex is ICultureIndex, Ownable, ReentrancyGuard, EIP712 {
      * @param newQuorumVotesBPS new art piece drop threshold
      */
     function _setQuorumVotesBPS(uint256 newQuorumVotesBPS) external onlyOwner {
-        require(
-            newQuorumVotesBPS >= MIN_QUORUM_VOTES_BPS && newQuorumVotesBPS <= MAX_QUORUM_VOTES_BPS,
-            "CultureIndex::_setQuorumVotesBPS: invalid quorum bps"
-        );
+        require(newQuorumVotesBPS <= MAX_QUORUM_VOTES_BPS, "CultureIndex::_setQuorumVotesBPS: invalid quorum bps");
         emit QuorumVotesBPSSet(quorumVotesBPS, newQuorumVotesBPS);
 
         quorumVotesBPS = newQuorumVotesBPS;
@@ -559,8 +530,7 @@ contract CultureIndex is ICultureIndex, Ownable, ReentrancyGuard, EIP712 {
      */
     function quorumVotes() public view returns (uint256) {
         return
-            (quorumVotesBPS *
-                _calculateVoteWeight(erc20VotingToken.totalSupply(), erc721VotingToken.totalSupply())) /
+            (quorumVotesBPS * _calculateVoteWeight(erc20VotingToken.totalSupply(), erc721VotingToken.totalSupply())) /
             10_000;
     }
 
@@ -570,10 +540,7 @@ contract CultureIndex is ICultureIndex, Ownable, ReentrancyGuard, EIP712 {
      */
     function dropTopVotedPiece() public nonReentrant onlyOwner returns (ArtPiece memory) {
         ICultureIndex.ArtPiece memory piece = getTopVotedPiece();
-        require(
-            totalVoteWeights[piece.pieceId] >= piece.quorumVotes,
-            "Does not meet quorum votes to be dropped."
-        );
+        require(totalVoteWeights[piece.pieceId] >= piece.quorumVotes, "Does not meet quorum votes to be dropped.");
 
         //set the piece as dropped
         pieces[piece.pieceId].isDropped = true;
@@ -584,5 +551,17 @@ contract CultureIndex is ICultureIndex, Ownable, ReentrancyGuard, EIP712 {
         emit PieceDropped(piece.pieceId, msg.sender);
 
         return pieces[piece.pieceId];
+    }
+
+    ///                                                          ///
+    ///                   CULTURE INDEX UPGRADE                  ///
+    ///                                                          ///
+
+    /// @notice Ensures the caller is authorized to upgrade the contract and that the new implementation is valid
+    /// @dev This function is called in `upgradeTo` & `upgradeToAndCall`
+    /// @param _newImpl The new implementation address
+    function _authorizeUpgrade(address _newImpl) internal view override onlyOwner {
+        // Ensure the new implementation is a registered upgrade
+        if (!manager.isRegisteredUpgrade(_getImplementation(), _newImpl)) revert INVALID_UPGRADE(_newImpl);
     }
 }

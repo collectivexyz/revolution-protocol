@@ -2,5 +2,5 @@
 pragma solidity 0.8.22;
 
 interface IVersionedContract {
-    function contractVersion() external returns (string memory);
+    function contractVersion() external view returns (string memory);
 }

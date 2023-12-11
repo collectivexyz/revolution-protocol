@@ -2,21 +2,25 @@
 pragma solidity ^0.8.22;
 
 import "forge-std/Test.sol";
-import "../../src/VerbsDescriptor.sol";
-import { IVerbsDescriptor } from "../../src/interfaces/IVerbsDescriptor.sol";
+import "../../src/Descriptor.sol";
+import { IDescriptor } from "../../src/interfaces/IDescriptor.sol";
 import "../utils/Base64Decode.sol";
 import "../utils/JsmnSolLib.sol";
 import { ICultureIndex } from "../../src/interfaces/ICultureIndex.sol";
+import { RevolutionBuilderTest } from "../RevolutionBuilder.t.sol";
 
-contract VerbsDescriptorTest is Test {
-    VerbsDescriptor descriptor;
-    address owner;
-
+contract DescriptorTest is RevolutionBuilderTest {
     string tokenNamePrefix = "Vrb";
 
-    function setUp() public {
-        owner = address(this);
-        descriptor = new VerbsDescriptor(owner, tokenNamePrefix);
+    function setUp() public override {
+        super.setUp();
+        super.setMockParams();
+
+        super.setERC721TokenParams("Mock", "MOCK", "https://example.com/token/", tokenNamePrefix);
+
+        super.deployMock();
+
+        vm.startPrank(address(dao));
     }
 
     /// @notice Test that toggling `isDataURIEnabled` changes state correctly
@@ -30,6 +34,7 @@ contract VerbsDescriptorTest is Test {
 
     /// @notice Test that only owner can toggle `isDataURIEnabled`
     function testToggleDataURIEnabledAccessControl() public {
+        vm.stopPrank();
         address nonOwner = address(0x123);
         vm.startPrank(nonOwner);
         vm.expectRevert();
@@ -48,6 +53,7 @@ contract VerbsDescriptorTest is Test {
 
     /// @notice Test that only the owner can update `baseURI`
     function testSetBaseURI_AccessControl() public {
+        vm.stopPrank();
         string memory newBaseURI = "https://newexample.com/";
         address nonOwner = address(0x456);
 
@@ -163,7 +169,7 @@ contract VerbsDescriptorTest is Test {
     function testToggleDataURIEnabledEvent() public {
         bool expectedNewState = !descriptor.isDataURIEnabled();
         vm.expectEmit(true, true, false, true);
-        emit IVerbsDescriptor.DataURIToggled(expectedNewState);
+        emit IDescriptor.DataURIToggled(expectedNewState);
         descriptor.toggleDataURIEnabled();
     }
 
@@ -171,7 +177,7 @@ contract VerbsDescriptorTest is Test {
     function testSetBaseURIEvent() public {
         string memory newBaseURI = "https://example.com/newbase";
         vm.expectEmit(true, true, false, true);
-        emit IVerbsDescriptor.BaseURIUpdated(newBaseURI);
+        emit IDescriptor.BaseURIUpdated(newBaseURI);
         descriptor.setBaseURI(newBaseURI);
     }
 
@@ -206,12 +212,16 @@ contract VerbsDescriptorTest is Test {
         // The current owner transfers ownership to the newOwner
         descriptor.transferOwnership(newOwner);
 
+        vm.startPrank(address(newOwner));
+        descriptor.acceptOwnership();
+
         // Verify that the new owner is indeed set
         assertEq(descriptor.owner(), newOwner, "Ownership should be transferred to newOwner");
     }
 
     /// @notice Ensure `transferOwnership` access control
     function testTransferOwnershipAccessControl() public {
+        vm.stopPrank();
         address nonOwner = address(0x789);
         address newOwner = address(0x456);
 
@@ -222,7 +232,7 @@ contract VerbsDescriptorTest is Test {
         vm.stopPrank();
 
         // Verify ownership has not changed
-        assertEq(descriptor.owner(), owner, "Ownership should not have changed");
+        assertEq(descriptor.owner(), address(dao), "Ownership should not have changed");
     }
 
     /// @notice Test `tokenURI` with only image metadata set
@@ -258,12 +268,7 @@ contract VerbsDescriptorTest is Test {
         string memory uri = descriptor.tokenURI(tokenId, metadata);
 
         // The token URI should reflect both image and animation URLs
-        assertFullMetadataIntegrity(
-            uri,
-            metadata,
-            tokenId,
-            "Token URI should reflect mixed media types correctly"
-        );
+        assertFullMetadataIntegrity(uri, metadata, tokenId, "Token URI should reflect mixed media types correctly");
     }
 
     /// @notice Test `tokenURI` with full metadata set
@@ -281,12 +286,7 @@ contract VerbsDescriptorTest is Test {
         string memory uri = descriptor.tokenURI(tokenId, metadata);
 
         // Validate the token URI against the full metadata
-        assertFullMetadataIntegrity(
-            uri,
-            metadata,
-            tokenId,
-            "Token URI should correctly represent the full metadata"
-        );
+        assertFullMetadataIntegrity(uri, metadata, tokenId, "Token URI should correctly represent the full metadata");
     }
 
     // Corrected use of startsWith in assertUriContainsImage function
@@ -310,17 +310,12 @@ contract VerbsDescriptorTest is Test {
         string memory errorMessage
     ) internal {
         string memory metadataJson = decodeMetadata(uri);
-        (
-            string memory name,
-            string memory description,
-            string memory imageUrl,
-            string memory animationUrl
-        ) = parseJson(metadataJson);
+        (string memory name, string memory description, string memory imageUrl, string memory animationUrl) = parseJson(
+            metadataJson
+        );
 
         //expected name should tokenNamePrefix + space + tokenId
-        string memory expectedName = string(
-            abi.encodePacked(tokenNamePrefix, " ", Strings.toString(tokenId))
-        );
+        string memory expectedName = string(abi.encodePacked(tokenNamePrefix, " ", Strings.toString(tokenId)));
 
         assertEq(name, expectedName, string(abi.encodePacked(errorMessage, " - Name mismatch")));
         assertEq(
@@ -328,11 +323,7 @@ contract VerbsDescriptorTest is Test {
             string(abi.encodePacked(expectedMetadata.name, ". ", expectedMetadata.description)),
             string(abi.encodePacked(errorMessage, " - Description mismatch"))
         );
-        assertEq(
-            imageUrl,
-            expectedMetadata.image,
-            string(abi.encodePacked(errorMessage, " - Image URL mismatch"))
-        );
+        assertEq(imageUrl, expectedMetadata.image, string(abi.encodePacked(errorMessage, " - Image URL mismatch")));
         assertEq(
             animationUrl,
             expectedMetadata.animationUrl,
@@ -354,12 +345,7 @@ contract VerbsDescriptorTest is Test {
         string memory _json
     )
         internal
-        returns (
-            string memory name,
-            string memory description,
-            string memory image,
-            string memory animationUrl
-        )
+        returns (string memory name, string memory description, string memory image, string memory animationUrl)
     {
         uint returnValue;
         JsmnSolLib.Token[] memory tokens;
@@ -424,9 +410,7 @@ contract VerbsDescriptorTest is Test {
     /// @param uri The data URI to split.
     /// @return mimeType The MIME type of the data.
     /// @return base64Data The base64 encoded data.
-    function splitDataURI(
-        string memory uri
-    ) internal pure returns (string memory mimeType, string memory base64Data) {
+    function splitDataURI(string memory uri) internal pure returns (string memory mimeType, string memory base64Data) {
         // Find the comma that separates the MIME type from the base64 data
         bytes memory uriBytes = bytes(uri);
         uint256 commaIndex = findComma(uriBytes);
@@ -457,11 +441,7 @@ contract VerbsDescriptorTest is Test {
     /// @param startIndex The start index of the substring.
     /// @param endIndex The end index of the substring.
     /// @return The substring.
-    function substring(
-        bytes memory b,
-        uint256 startIndex,
-        uint256 endIndex
-    ) internal pure returns (bytes memory) {
+    function substring(bytes memory b, uint256 startIndex, uint256 endIndex) internal pure returns (bytes memory) {
         bytes memory result = new bytes(endIndex - startIndex);
         for (uint256 i = startIndex; i < endIndex; i++) {
             result[i - startIndex] = b[i];

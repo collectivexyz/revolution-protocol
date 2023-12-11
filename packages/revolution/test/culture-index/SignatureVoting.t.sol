@@ -7,8 +7,7 @@ import { MockERC20 } from "../mock/MockERC20.sol";
 import { ICultureIndex, ICultureIndexEvents } from "../../src/interfaces/ICultureIndex.sol";
 import { NontransferableERC20Votes } from "../../src/NontransferableERC20Votes.sol";
 import { CultureIndexTestSuite } from "./CultureIndex.t.sol";
-import { Votes } from "../../src/base/Votes.sol";
-import { ERC721Checkpointable } from "../../src/base/ERC721Checkpointable.sol";
+import { ERC721CheckpointableUpgradeable } from "../../src/base/ERC721CheckpointableUpgradeable.sol";
 
 /**
  * @title CultureIndexTest
@@ -39,10 +38,8 @@ contract CultureIndexVotingSignaturesTest is CultureIndexTestSuite {
         return
             keccak256(
                 abi.encode(
-                    keccak256(
-                        "EIP712Domain(string name,string version,uint256 chainId,address verifyingContract)"
-                    ),
-                    keccak256(bytes("CultureIndex")),
+                    keccak256("EIP712Domain(string name,string version,uint256 chainId,address verifyingContract)"),
+                    keccak256(abi.encodePacked(cultureIndex.name(), " CultureIndex")),
                     keccak256(bytes("1")),
                     block.chainid,
                     address(cultureIndex)
@@ -57,9 +54,7 @@ contract CultureIndexVotingSignaturesTest is CultureIndexTestSuite {
         uint256 nonce = cultureIndex.nonces(offchainVoter);
         uint256 deadline = block.timestamp + 1 days;
 
-        bytes32 voteHash = keccak256(
-            abi.encode(cultureIndex.VOTE_TYPEHASH(), address(0), pieceIds, nonce, deadline)
-        );
+        bytes32 voteHash = keccak256(abi.encode(cultureIndex.VOTE_TYPEHASH(), address(0), pieceIds, nonce, deadline));
 
         bytes32 digest = keccak256(abi.encodePacked("\x19\x01", getDomainSeparator(), voteHash));
 
@@ -78,8 +73,11 @@ contract CultureIndexVotingSignaturesTest is CultureIndexTestSuite {
 
         //mint offchainVoterWeight to offchainVoter
         uint256 offchainVoterWeight = 100;
-        govToken.mint(offchainVoter, offchainVoterWeight);
+        vm.startPrank(address(erc20TokenEmitter));
+        erc20Token.mint(offchainVoter, offchainVoterWeight);
+        vm.stopPrank();
 
+        vm.startPrank(address(this));
         vm.roll(block.number + 1);
 
         bytes32 voteHash = keccak256(
@@ -142,9 +140,7 @@ contract CultureIndexVotingSignaturesTest is CultureIndexTestSuite {
         uint256 nonce = cultureIndex.nonces(offchainVoter) + 1;
         uint256 deadline = block.timestamp + 1 days;
 
-        bytes32 voteHash = keccak256(
-            abi.encode(cultureIndex.VOTE_TYPEHASH(), offchainVoter, nonce, deadline)
-        );
+        bytes32 voteHash = keccak256(abi.encode(cultureIndex.VOTE_TYPEHASH(), offchainVoter, nonce, deadline));
 
         bytes32 digest = keccak256(abi.encodePacked("\x19\x01", getDomainSeparator(), voteHash));
 
@@ -163,10 +159,12 @@ contract CultureIndexVotingSignaturesTest is CultureIndexTestSuite {
 
         // mint offchainVoterWeight to offchainVoter
         uint256 offchainVoterWeight = 100;
-        govToken.mint(offchainVoter, offchainVoterWeight);
+        vm.startPrank(address(erc20TokenEmitter));
+        erc20Token.mint(offchainVoter, offchainVoterWeight);
 
         vm.roll(block.number + 1);
 
+        vm.startPrank(address(offchainVoter));
         bytes32 voteHash = keccak256(
             abi.encode(cultureIndex.VOTE_TYPEHASH(), offchainVoter, pieceIds, nonce, deadline)
         );
@@ -224,32 +222,29 @@ contract CultureIndexVotingSignaturesTest is CultureIndexTestSuite {
         cultureIndex.voteForManyWithSig(offchainVoter, invalidPieceIds, deadline, v, r, s);
 
         //mint tokens finally
-        govToken.mint(offchainVoter, 100);
+        vm.startPrank(address(erc20TokenEmitter));
+        erc20Token.mint(offchainVoter, 100);
 
         vm.roll(block.number + 1);
 
-        // vote correctly but expect "Weight must be greater than zero"
+        // vote correctly but expect "Weight must be greater than minVoteWeight"
         nonce = cultureIndex.nonces(funVoterGuy);
         deadline = block.timestamp + 1 days;
 
-        voteHash = keccak256(
-            abi.encode(cultureIndex.VOTE_TYPEHASH(), funVoterGuy, pieceIds, nonce, deadline)
-        );
+        voteHash = keccak256(abi.encode(cultureIndex.VOTE_TYPEHASH(), funVoterGuy, pieceIds, nonce, deadline));
 
         digest = keccak256(abi.encodePacked("\x19\x01", getDomainSeparator(), voteHash));
 
         (v, r, s) = vm.sign(funVoterGuyPk, digest);
 
-        vm.expectRevert("Weight must be greater than zero");
+        vm.expectRevert("Weight must be greater than minVoteWeight");
         cultureIndex.voteForManyWithSig(funVoterGuy, pieceIds, deadline, v, r, s);
 
         //vote with offchainVoter
         nonce = cultureIndex.nonces(offchainVoter);
         deadline = block.timestamp + 1 days;
 
-        voteHash = keccak256(
-            abi.encode(cultureIndex.VOTE_TYPEHASH(), offchainVoter, pieceIds, nonce, deadline)
-        );
+        voteHash = keccak256(abi.encode(cultureIndex.VOTE_TYPEHASH(), offchainVoter, pieceIds, nonce, deadline));
 
         digest = keccak256(abi.encodePacked("\x19\x01", getDomainSeparator(), voteHash));
 
@@ -261,9 +256,7 @@ contract CultureIndexVotingSignaturesTest is CultureIndexTestSuite {
         nonce = cultureIndex.nonces(offchainVoter);
         deadline = block.timestamp + 1 days;
 
-        voteHash = keccak256(
-            abi.encode(cultureIndex.VOTE_TYPEHASH(), offchainVoter, pieceIds, nonce, deadline)
-        );
+        voteHash = keccak256(abi.encode(cultureIndex.VOTE_TYPEHASH(), offchainVoter, pieceIds, nonce, deadline));
 
         digest = keccak256(abi.encodePacked("\x19\x01", getDomainSeparator(), voteHash));
 
@@ -273,6 +266,7 @@ contract CultureIndexVotingSignaturesTest is CultureIndexTestSuite {
         cultureIndex.voteForManyWithSig(offchainVoter, pieceIds, deadline, v, r, s);
 
         // dropTopVotedPiece
+        vm.startPrank(address(erc721Token));
         cultureIndex.dropTopVotedPiece();
 
         // vote again with different address and expect "Piece has already been dropped"
@@ -281,9 +275,7 @@ contract CultureIndexVotingSignaturesTest is CultureIndexTestSuite {
         nonce = cultureIndex.nonces(notoffchainVoter);
         deadline = block.timestamp + 1 days;
 
-        voteHash = keccak256(
-            abi.encode(cultureIndex.VOTE_TYPEHASH(), notoffchainVoter, pieceIds, nonce, deadline)
-        );
+        voteHash = keccak256(abi.encode(cultureIndex.VOTE_TYPEHASH(), notoffchainVoter, pieceIds, nonce, deadline));
 
         digest = keccak256(abi.encodePacked("\x19\x01", getDomainSeparator(), voteHash));
 
