@@ -305,8 +305,8 @@ contract CultureIndex is
      * @param account The address of the voter.
      * @return The voting power of the voter.
      */
-    function getCurrentVotes(address account) external view override returns (uint256) {
-        return _getCurrentVotes(account);
+    function getVotes(address account) external view override returns (uint256) {
+        return _getVotes(account);
     }
 
     /**
@@ -331,7 +331,7 @@ contract CultureIndex is
         return erc20Balance + (erc721Balance * erc721VotingTokenWeight * 1e18);
     }
 
-    function _getCurrentVotes(address account) internal view returns (uint256) {
+    function _getVotes(address account) internal view returns (uint256) {
         return _calculateVoteWeight(erc20VotingToken.getVotes(account), erc721VotingToken.getVotes(account));
     }
 

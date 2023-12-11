@@ -230,7 +230,7 @@ interface ICultureIndex is ICultureIndexEvents {
      */
     function dropTopVotedPiece() external returns (ArtPiece memory);
 
-    function getCurrentVotes(address account) external view returns (uint256);
+    function getVotes(address account) external view returns (uint256);
 
     function getPastVotes(address account, uint256 blockNumber) external view returns (uint256);
 
