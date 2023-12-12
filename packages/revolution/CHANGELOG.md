@@ -1,5 +1,11 @@
 # @collectivexyz/revolution
 
+## 0.2.2
+
+### Patch Changes
+
+- 7f495d2: Token, culture index, and maxheap owned by DAO, adds new cultureindex dropper and maxheap admin
+
 ## 0.2.0
 
 ### Minor Changes
