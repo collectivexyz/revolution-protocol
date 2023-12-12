@@ -33,7 +33,7 @@ lcov.info
 packages/*/src/artifacts/**/*.json
 
 
-# package/wagmiGenerated.ts
-# package/chainConfigs.ts
+package/wagmiGenerated.ts
+package/chainConfigs.ts
 
-# **/*wagmiGenerated.ts
+**/*wagmiGenerated.ts
