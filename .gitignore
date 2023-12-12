@@ -37,3 +37,6 @@ package/wagmiGenerated.ts
 package/chainConfigs.ts
 
 **/*wagmiGenerated.ts
+
+# package files
+dist/
