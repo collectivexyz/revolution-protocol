@@ -3,9 +3,9 @@
   "version": "0.2.1",
   "repository": "https://github.com/collectivexyz/revolution-protocol.git",
   "license": "MIT",
-  "files": [
-    "src/"
-  ],
+  "main": "./dist/index.js",
+  "types": "./dist/package/index.d.ts",
+  "type": "module",
   "scripts": {
     "build:sizes": "forge build --sizes",
     "dev": "FOUNDRY_PROFILE=dev forge test --watch -vvv",
@@ -23,9 +23,15 @@
     "storage-inspect:generate": "./script/storage-check.sh generate CultureIndex ERC20TokenEmitter AuctionHouse MaxHeap VerbsToken Descriptor",
     "update-contract-version": "node script/update-contract-version.mjs"
   },
-  "publishConfig": {
-    "access": "public"
-  },
+  "files": [
+    "dist/",
+    "src/",
+    "out/",
+    "addresses/",
+    "chainConfigs/",
+    "package/",
+    "abis/"
+  ],
   "devDependencies": {
     "glob": "^10.3.10",
     "pathe": "^1.1.1",
