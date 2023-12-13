@@ -69,14 +69,35 @@ Gas optimizations around the CultureIndex `createPiece` and `vote` functionality
 #### Revolution contracts
 
 ```
-cd packages/revolution && slither src --solc-remaps "ds-test/=node_modules/ds-test/src/,forge-std/=node_modules/forge-std/src/,@openzeppelin/contracts/=node_modules/@openzeppelin/contracts/,@openzeppelin/contracts-upgradeable/=node_modules/@openzeppelin/contracts-upgradeable,solmate=node_modules/solmate/src,@collectivexyz/protocol-rewards/src/=node_modules/@collectivexyz/protocol-rewards/src/" --checklist --show-ignored-findings --filter-paths "@openzeppelin|ERC721|Votes.sol" --config-file="../../.github/config/slither.config.json"
+cd packages/revolution && slither src --checklist --show-ignored-findings --filter-paths "@openzeppelin|ERC721|Votes.sol" --config-file="../../.github/config/slither.config.json"
 ```
 
 #### Protocol rewards
 
 ```
-cd packages/protocol-rewards && slither src --solc-remaps "ds-test/=../../node_modules/ds-test/src/,forge-std/=../../node_modules/forge-std/src/,@openzeppelin/contracts/=../../node_modules/@openzeppelin/contracts/,@openzeppelin/contracts-upgradeable/=../../node_modules/@openzeppelin/contracts-upgradeable,solmate=../../node_modules/solmate/src" --checklist --show-ignored-findings --filter-paths "@openzeppelin"
+cd packages/protocol-rewards && slither src --checklist --show-ignored-findings --filter-paths "@openzeppelin"
 ```
+
+# Developer Workflow
+
+creds @ourzora
+
+## Publishing the package; Generating changesets, versioning, building and Publishing.
+
+Publishing happens in the following steps:
+
+- Some changes are made to the repo; this can include smart contract changes or additions, if smart contracts are changed, tests should be created or updated to reflect the changes.
+- The changes are committed to a branch which is **pushed** to **github**.
+- A **pr** is **opened** for this branch.
+- The changes are reviewed, if they are **approved**:
+- _If there are changes to the smart contracts that should be deployed_: the contract should be. Deploying the contract results in the addresses of the deployed contracts being updated in the corresponding `./addresses/{chainId}.json` file. This file should be committed and pushed to github.
+- Running the command `npx changeset` will generate **a new changeset** in the `./changesets` directory. This changeset will be used to determine the next version of the bundled packages; this commit should then be pushed.
+- The changeset and smart contract addresses are pushed to the branch.
+- The pr is merged into main - any changesets in the PR are detected by a github action `release`, which will then **open a new PR** with proper versions and readme updated in each each package. If more changesets are pushed to main before this branch is merged, the PR will continuously update the version of the packages according to the changeset specification.
+
+7. That version is merged into main along with the new versions.
+
+8. The package is then published to npm.
 
 # revolution overview
 

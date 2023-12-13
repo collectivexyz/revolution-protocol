@@ -51,7 +51,7 @@ importers:
 
   packages/revolution:
     dependencies:
-      '@collectivexyz/protocol-rewards':
+      '@cobuilding/protocol-rewards':
         specifier: workspace:*
         version: link:../protocol-rewards
       '@openzeppelin/contracts':

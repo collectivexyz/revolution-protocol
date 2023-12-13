@@ -16,8 +16,8 @@ import { NontransferableERC20Votes } from "../../src/NontransferableERC20Votes.s
 import { ERC20TokenEmitter } from "../../src/ERC20TokenEmitter.sol";
 import { IERC20TokenEmitter } from "../../src/interfaces/IERC20TokenEmitter.sol";
 import { wadMul, wadDiv } from "../../src/libs/SignedWadMath.sol";
-import { RevolutionProtocolRewards } from "@collectivexyz/protocol-rewards/src/RevolutionProtocolRewards.sol";
-import { TokenEmitterRewards } from "@collectivexyz/protocol-rewards/src/abstract/TokenEmitter/TokenEmitterRewards.sol";
+import { RevolutionProtocolRewards } from "@cobuilding/protocol-rewards/src/RevolutionProtocolRewards.sol";
+import { TokenEmitterRewards } from "@cobuilding/protocol-rewards/src/abstract/TokenEmitter/TokenEmitterRewards.sol";
 import { ERC721CheckpointableUpgradeable } from "../../src/base/ERC721CheckpointableUpgradeable.sol";
 import { RevolutionBuilderTest } from "../RevolutionBuilder.t.sol";
 
