@@ -1,6 +1,5 @@
 {
   "name": "@cobuilding/protocol-rewards",
-  "private": true,
   "repository": "https://github.com/collectivexyz/revolution-protocol.git",
   "license": "MIT",
   "files": [
