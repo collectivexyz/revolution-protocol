@@ -1,5 +1,11 @@
 # @collectivexyz/revolution
 
+## 0.2.4
+
+### Patch Changes
+
+- ea77155: fix package org
+
 ## 0.2.3
 
 ### Patch Changes
