@@ -1,5 +1,6 @@
 {
-  "name": "@collectivexyz/revolution",
+  "name": "@cobuilding/revolution",
+  "private": true,
   "version": "0.2.2",
   "repository": "https://github.com/collectivexyz/revolution-protocol.git",
   "license": "MIT",
@@ -9,7 +10,7 @@
   "scripts": {
     "build:sizes": "forge build --sizes",
     "dev": "FOUNDRY_PROFILE=dev forge test --watch -vvv",
-    "test": "forge test -vvv",
+    "test": "FOUNDRY_PROFILE=dev forge test -vvv",
     "build:contracts": "forge build",
     "prettier:check": "prettier --check 'src/**/*.sol' 'test/**/*.sol'",
     "prettier": "prettier --write 'src/**/*.sol' 'test/**/*.sol'",
