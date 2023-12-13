@@ -1,6 +1,6 @@
 {
-  "name": "@collectivexyz/revolution",
-  "version": "0.0.0",
+  "name": "revolution-protocol",
+  "private": true,
   "scripts": {
     "build": "turbo run build",
     "test": "turbo run test",

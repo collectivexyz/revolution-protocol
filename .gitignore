@@ -1,6 +1,7 @@
 # Compiler files
 cache/
 out/
+abis/
 
 #turbo
 .turbo
@@ -30,3 +31,12 @@ lcov.info
 .deps
 
 packages/*/src/artifacts/**/*.json
+
+
+package/wagmiGenerated.ts
+package/chainConfigs.ts
+
+**/*wagmiGenerated.ts
+
+# package files
+dist/
