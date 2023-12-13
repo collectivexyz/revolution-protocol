@@ -1,6 +1,5 @@
 {
   "name": "@cobuilding/revolution",
-  "private": true,
   "version": "0.2.4",
   "repository": "https://github.com/collectivexyz/revolution-protocol.git",
   "license": "MIT",
@@ -27,7 +26,6 @@
   "files": [
     "dist/",
     "src/",
-    "out/",
     "addresses/",
     "chainConfigs/",
     "package/",
