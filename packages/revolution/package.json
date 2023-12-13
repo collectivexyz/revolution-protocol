@@ -43,7 +43,7 @@
     "tsx": "^4.6.2"
   },
   "dependencies": {
-    "@collectivexyz/protocol-rewards": "workspace:*",
+    "@cobuilding/protocol-rewards": "workspace:*",
     "@openzeppelin/contracts": "5.0.0",
     "@openzeppelin/contracts-upgradeable": "5.0.0",
     "@wagmi/cli": "^1.5.2",
