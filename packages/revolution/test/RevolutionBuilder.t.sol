@@ -15,7 +15,7 @@ import { NontransferableERC20Votes } from "../src/NontransferableERC20Votes.sol"
 import { ERC20TokenEmitter } from "../src/ERC20TokenEmitter.sol";
 import { MaxHeap } from "../src/MaxHeap.sol";
 import { VerbsDAOStorageV1 } from "../src/governance/VerbsDAOInterfaces.sol";
-import { RevolutionProtocolRewards } from "@cobuilding/protocol-rewards/src/RevolutionProtocolRewards.sol";
+import { RevolutionProtocolRewards } from "@cobuild/protocol-rewards/src/RevolutionProtocolRewards.sol";
 import { RevolutionBuilderTypesV1 } from "../src/builder/types/RevolutionBuilderTypesV1.sol";
 
 import { ERC1967Proxy } from "../src/libs/proxy/ERC1967Proxy.sol";

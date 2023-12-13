@@ -1,11 +1,17 @@
 {
-  "name": "@cobuilding/protocol-rewards",
+  "name": "@cobuild/protocol-rewards",
   "repository": "https://github.com/collectivexyz/revolution-protocol.git",
   "license": "MIT",
   "files": [
-    "src/"
+    "dist/",
+    "src/",
+    "package/",
+    "abis/"
   ],
-  "version": "0.9.0",
+  "version": "0.9.1",
+  "publishConfig": {
+    "access": "public"
+  },
   "scripts": {
     "build:sizes": "forge build --sizes",
     "dev": "FOUNDRY_PROFILE=dev forge test --watch -vvv",
@@ -14,12 +20,16 @@
     "prettier:check": "prettier --check 'src/**/*.sol' 'test/**/*.sol'",
     "prettier": "prettier --write 'src/**/*.sol' 'test/**/*.sol'",
     "lint": "prettier --check 'src/**/*.sol' 'test/**/*.sol'",
+    "copy-abis": "tsx script/bundle-abis.ts",
+    "build": "pnpm run wagmi && pnpm run copy-abis && tsup",
+    "wagmi": "FOUNDRY_PROFILE=dev forge build && wagmi generate",
     "write-gas-report": "forge test --gas-report > ../../gas-reports/protocol-rewards.ansi",
     "clean": "forge cache clean && if [ -d out ]; then forge clean; fi",
     "storage-inspect:check": "./script/storage-check.sh check RevolutionProtocolRewards RewardSplits TokenEmitterRewards",
     "storage-inspect:generate": "./script/storage-check.sh generate RevolutionProtocolRewards RewardSplits TokenEmitterRewards"
   },
   "dependencies": {
+    "@wagmi/cli": "^1.5.2",
     "@openzeppelin/contracts": "5.0.0",
     "@openzeppelin/contracts-upgradeable": "5.0.0",
     "ds-test": "https://github.com/dapphub/ds-test#cd98eff28324bfac652e63a239a60632a761790b",
@@ -27,8 +37,12 @@
   },
   "devDependencies": {
     "@types/node": "^20.10.4",
+    "glob": "^10.3.10",
+    "pathe": "^1.1.1",
+    "tsup": "^8.0.1",
     "prettier": "2.8.8",
     "prettier-plugin-solidity": "1.1.3",
-    "solhint": "3.4.1"
+    "solhint": "3.4.1",
+    "tsx": "^4.6.2"
   }
 }

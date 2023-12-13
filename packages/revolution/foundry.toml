@@ -3,7 +3,7 @@ fs_permissions = [
   { access = "read", path = "./package.json" },
 ]
 libs = ['node_modules']
-allow_paths = ["node_modules/@cobuilding/protocol-rewards", "../../node_modules"]
+allow_paths = ["node_modules/@cobuild/protocol-rewards", "../../node_modules"]
 optimizer = true
 optimizer_runs = 50
 via_ir = true
