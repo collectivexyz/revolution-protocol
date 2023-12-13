@@ -58,7 +58,7 @@ importers:
   packages/revolution:
     dependencies:
       '@cobuilding/protocol-rewards':
-        specifier: workspace:*
+        specifier: workspace:@cobuilding/protocol-rewards@*
         version: link:../protocol-rewards
       '@openzeppelin/contracts':
         specifier: 5.0.0
