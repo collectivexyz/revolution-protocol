@@ -1,5 +1,11 @@
 # @collectivexyz/revolution
 
+## 0.2.3
+
+### Patch Changes
+
+- 6f1de66: adds tsup and tsconfig to enable publishing, uses new npm org
+
 ## 0.2.2
 
 ### Patch Changes

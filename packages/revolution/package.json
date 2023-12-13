@@ -1,7 +1,7 @@
 {
   "name": "@cobuilding/revolution",
   "private": true,
-  "version": "0.2.2",
+  "version": "0.2.3",
   "repository": "https://github.com/collectivexyz/revolution-protocol.git",
   "license": "MIT",
   "main": "./dist/index.js",
