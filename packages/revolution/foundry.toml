@@ -12,6 +12,7 @@ out = 'out'
 src = 'src'
 
 [profile.dev]
+libs = ['node_modules', 'script']
 optimizer = false
 optimizer_runs = 0
 via_ir = false
