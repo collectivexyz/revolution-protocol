@@ -1,6 +1,7 @@
 // SPDX-License-Identifier: MIT
 pragma solidity 0.8.22;
 
+import { console2 } from "forge-std/console2.sol";
 import { Script } from "forge-std/Script.sol";
 import { Strings } from "@openzeppelin/contracts/utils/Strings.sol";
 
@@ -11,7 +12,7 @@ import { IAuctionHouse, AuctionHouse } from "../src/AuctionHouse.sol";
 import { VerbsDAOLogicV1 } from "../src/governance/VerbsDAOLogicV1.sol";
 import { DAOExecutor } from "../src/governance/DAOExecutor.sol";
 import { CultureIndex } from "../src/CultureIndex.sol";
-import { RevolutionProtocolRewards } from "@cobuild/protocol-rewards";
+import { RevolutionProtocolRewards } from "@cobuild/protocol-rewards/src/RevolutionProtocolRewards.sol";
 import { MaxHeap } from "../src/MaxHeap.sol";
 import { NontransferableERC20Votes } from "../src/NontransferableERC20Votes.sol";
 import { ERC20TokenEmitter } from "../src/ERC20TokenEmitter.sol";
@@ -74,7 +75,7 @@ contract DeployContracts is Script {
         address nontransferableERC20Impl = address(new NontransferableERC20Votes(address(builder)));
 
         // Deploy erc20 token emitter implementation
-        address erc20TokenEmitterImpl = address(new ERC20TokenEmitter(address(builder), address(protocolRewards), rewardsRecipient));
+        address erc20TokenEmitterImpl = address(new ERC20TokenEmitter(address(builder), address(rewardsRecipient), rewardsRecipient));
 
         address builderImpl = address(new RevolutionBuilder(erc721TokenImpl, descriptorImpl, auctionImpl, executorImpl, daoImpl, cultureIndexImpl, nontransferableERC20Impl, erc20TokenEmitterImpl, maxHeapImpl));
 
