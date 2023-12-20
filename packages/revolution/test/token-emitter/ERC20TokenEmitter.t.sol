@@ -89,10 +89,10 @@ contract ERC20TokenEmitterTest is RevolutionBuilderTest {
 
         //Share of purchase amount to send to treasury
         uint256 toPayTreasury = (msgValueRemaining * (10_000 - creatorRateBps)) / 10_000;
-        
+
         //Ether directly sent to creators
         uint256 creatorDirectPayment = ((msgValueRemaining - toPayTreasury) * entropyRateBps) / 10_000;
-       
+
         //get expected tokens for creators
         int256 expectedAmountForCreators = erc20TokenEmitter.getTokenQuoteForEther(
             msgValueRemaining - toPayTreasury - creatorDirectPayment

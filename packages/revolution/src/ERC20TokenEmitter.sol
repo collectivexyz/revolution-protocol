@@ -174,7 +174,7 @@ contract ERC20TokenEmitter is
 
         //Ether directly sent to creators
         uint256 creatorDirectPayment = ((msgValueRemaining - toPayTreasury) * entropyRateBps) / 10_000;
-        
+
         //Tokens to emit to creators
         int totalTokensForCreators = ((msgValueRemaining - toPayTreasury) - creatorDirectPayment) > 0
             ? getTokenQuoteForEther((msgValueRemaining - toPayTreasury) - creatorDirectPayment)
