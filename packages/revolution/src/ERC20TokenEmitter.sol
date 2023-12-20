@@ -169,26 +169,27 @@ contract ERC20TokenEmitter is
             protocolRewardsRecipients.deployer
         );
 
-        //Share of purchase amount to send to treasury
-        uint256 toPayTreasury = (msgValueRemaining * (10_000 - creatorRateBps)) / 10_000;
+        // Share of purchase amount reserved for creators
+        uint256 creatorsShare = (msgValueRemaining * creatorRateBps) / 10_000;
+
+        //Share of purchase amount reserved for buyers
+        uint256 buyersShare = msgValueRemaining - creatorsShare;
 
         //Ether directly sent to creators
-        uint256 creatorDirectPayment = ((msgValueRemaining - toPayTreasury) * entropyRateBps) / 10_000;
+        uint256 creatorDirectPayment = (creatorsShare * entropyRateBps) / 10_000;
 
         //Tokens to emit to creators
-        int totalTokensForCreators = ((msgValueRemaining - toPayTreasury) - creatorDirectPayment) > 0
-            ? getTokenQuoteForEther((msgValueRemaining - toPayTreasury) - creatorDirectPayment)
+        int totalTokensForCreators = ((creatorsShare) - creatorDirectPayment) > 0
+            ? getTokenQuoteForEther((creatorsShare) - creatorDirectPayment)
             : int(0);
         if (totalTokensForCreators > 0) emittedTokenWad += totalTokensForCreators; // update total tokens emitted
 
         // Tokens to emit to buyers
-        int totalTokensForBuyers = toPayTreasury > 0 ? getTokenQuoteForEther(toPayTreasury) : int(0);
+        int totalTokensForBuyers = buyersShare > 0 ? getTokenQuoteForEther(buyersShare) : int(0);
         if (totalTokensForBuyers > 0) emittedTokenWad += totalTokensForBuyers; // update total tokens emitted
 
         //Deposit treasury funds, and eth used to buy creators gov. tokens to treasury
-        (bool success, ) = treasury.call{
-            value: toPayTreasury + ((msgValueRemaining - toPayTreasury) - creatorDirectPayment)
-        }(new bytes(0));
+        (bool success, ) = treasury.call{ value: buyersShare + (creatorsShare - creatorDirectPayment) }(new bytes(0));
         require(success, "Transfer failed.");
 
         //Transfer ETH to creators
@@ -218,7 +219,7 @@ contract ERC20TokenEmitter is
         emit PurchaseFinalized(
             msg.sender,
             msg.value,
-            toPayTreasury,
+            buyersShare + (creatorsShare - creatorDirectPayment),
             msg.value - msgValueRemaining,
             uint256(totalTokensForBuyers),
             uint256(totalTokensForCreators),
