@@ -189,7 +189,7 @@ contract ERC20TokenEmitterTest is RevolutionBuilderTest {
         //get msg value remaining
         uint256 msgValueRemaining = 1 ether - erc20TokenEmitter.computeTotalReward(1 ether);
 
-       // Calculate share of purchase amount reserved for creators
+        // Calculate share of purchase amount reserved for creators
         uint256 creatorsShare = (msgValueRemaining * creatorRateBps) / 10_000;
 
         // Calculate share of purchase amount reserved for buyers

@@ -184,7 +184,7 @@ contract ERC20TokenEmitter is
         int totalTokensForCreators = (creatorsShare - creatorDirectPayment) > 0
             ? getTokenQuoteForEther(creatorsShare - creatorDirectPayment)
             : int(0);
-        
+
         // Update total tokens emitted for this purchase with tokens for creators
         if (totalTokensForCreators > 0) emittedTokenWad += totalTokensForCreators;
 
@@ -196,7 +196,7 @@ contract ERC20TokenEmitter is
 
         //Deposit treasury funds, and eth used to buy creators gov. tokens to treasury
         (bool success, ) = treasury.call{ value: buyersShare + (creatorsShare - creatorDirectPayment) }(new bytes(0));
-        require(success, "Transfer failed."); 
+        require(success, "Transfer failed.");
 
         //Transfer ETH to creators
         if (creatorDirectPayment > 0) {
