@@ -217,7 +217,7 @@ contract CultureIndex is
 
         uint256 pieceId = _currentPieceId++;
 
-        /// @dev Insert the new piece into the max heap
+        /// @dev Insert the new piece into the max heap with 0 vote weight
         maxHeap.insert(pieceId, 0);
 
         ArtPiece storage newPiece = pieces[pieceId];

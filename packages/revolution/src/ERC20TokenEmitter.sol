@@ -179,13 +179,13 @@ contract ERC20TokenEmitter is
         int totalTokensForCreators = ((msgValueRemaining - toPayTreasury) - creatorDirectPayment) > 0
             ? getTokenQuoteForEther((msgValueRemaining - toPayTreasury) - creatorDirectPayment)
             : int(0);
+        if (totalTokensForCreators > 0) emittedTokenWad += totalTokensForCreators;
 
         // Tokens to emit to buyers
         int totalTokensForBuyers = toPayTreasury > 0 ? getTokenQuoteForEther(toPayTreasury) : int(0);
 
         //Transfer ETH to treasury and update emitted
         emittedTokenWad += totalTokensForBuyers;
-        if (totalTokensForCreators > 0) emittedTokenWad += totalTokensForCreators;
 
         //Deposit funds to treasury
         (bool success, ) = treasury.call{ value: toPayTreasury }(new bytes(0));
