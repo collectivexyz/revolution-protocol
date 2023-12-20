@@ -166,6 +166,56 @@ contract ERC20TokenEmitterTest is RevolutionBuilderTest {
         assertEq(uint(address(erc20TokenEmitter).balance), 0, "TokenEmitter should have correct balance");
     }
 
+    //test that treasury receives correct amount of ether
+    function test_TreasuryBalance(uint256 creatorRateBps, uint256 entropyRateBps) public {
+        // Assume valid rates
+        vm.assume(creatorRateBps > 0 && creatorRateBps <= 10000 && entropyRateBps > 0 && entropyRateBps <= 10000);
+
+        vm.startPrank(erc20TokenEmitter.owner());
+        //set creatorRate and entropyRate
+        erc20TokenEmitter.setCreatorRateBps(creatorRateBps);
+        erc20TokenEmitter.setEntropyRateBps(entropyRateBps);
+        vm.stopPrank();
+
+        //expect treasury balance to start out at 0
+        assertEq(address(erc20TokenEmitter.treasury()).balance, 0, "Balance should start at 0");
+
+        address[] memory recipients = new address[](1);
+        recipients[0] = address(1);
+
+        uint256[] memory bps = new uint256[](1);
+        bps[0] = 10_000;
+
+        //get msg value remaining
+        uint256 msgValueRemaining = 1 ether - erc20TokenEmitter.computeTotalReward(1 ether);
+
+       // Calculate share of purchase amount reserved for creators
+        uint256 creatorsShare = (msgValueRemaining * creatorRateBps) / 10_000;
+
+        // Calculate share of purchase amount reserved for buyers
+        uint256 buyersShare = msgValueRemaining - creatorsShare;
+
+        // Calculate ether directly sent to creators
+        uint256 creatorDirectPayment = (creatorsShare * entropyRateBps) / 10_000;
+
+        erc20TokenEmitter.buyToken{ value: 1 ether }(
+            recipients,
+            bps,
+            IERC20TokenEmitter.ProtocolRewardAddresses({
+                builder: address(0),
+                purchaseReferral: address(1),
+                deployer: address(0)
+            })
+        );
+
+        //assert that treasury balance is correct
+        assertEq(
+            uint(address(erc20TokenEmitter.treasury()).balance),
+            uint(buyersShare + creatorsShare - creatorDirectPayment),
+            "Treasury should have correct balance"
+        );
+    }
+
     function testCannotBuyAsTreasury() public {
         vm.startPrank(erc20TokenEmitter.treasury());
 
