@@ -143,6 +143,30 @@ contract ERC20TokenEmitter is
     }
 
     /**
+     * @notice A function to calculate the shares of the purchase that go to the buyer's governance purchase, and the creators
+     * @param msgValueRemaining The amount of ether left after protocol rewards are taken out
+     * @return buyTokenPaymentShares A struct containing the shares of the purchase that go to the buyer's governance purchase, and the creators
+     */
+    function _calculateBuyTokenPaymentShares(uint256 msgValueRemaining)
+        internal
+        view
+        returns (BuyTokenPaymentShares memory buyTokenPaymentShares)
+    {
+        // Calculate share of purchase amount reserved for creators
+        uint256 creatorsShare = (msgValueRemaining * creatorRateBps) / 10_000;
+
+        // Calculate share of purchase amount reserved for buyers
+        buyTokenPaymentShares.buyersShare = msgValueRemaining - creatorsShare;
+
+        // Calculate ether directly sent to creators
+        buyTokenPaymentShares.creatorsDirectPayment = (creatorsShare * entropyRateBps) / 10_000;
+
+        // Calculate ether spent on creators governance tokens
+        buyTokenPaymentShares.creatorsGovernancePayment = creatorsShare - buyTokenPaymentShares.creatorsDirectPayment;
+    }
+    
+
+    /**
      * @notice A payable function that allows a user to buy tokens for a list of addresses and a list of basis points to split the token purchase between.
      * @param addresses The addresses to send purchased tokens to.
      * @param basisPointSplits The basis points of the purchase to send to each address.
@@ -171,36 +195,29 @@ contract ERC20TokenEmitter is
             protocolRewardsRecipients.deployer
         );
 
-        // Calculate share of purchase amount reserved for creators
-        uint256 creatorsShare = (msgValueRemaining * creatorRateBps) / 10_000;
-
-        // Calculate share of purchase amount reserved for buyers
-        uint256 buyersShare = msgValueRemaining - creatorsShare;
-
-        // Calculate ether directly sent to creators
-        uint256 creatorDirectPayment = (creatorsShare * entropyRateBps) / 10_000;
+        BuyTokenPaymentShares memory buyTokenPaymentShares = _calculateBuyTokenPaymentShares(msgValueRemaining);
 
         // Calculate tokens to emit to creators
-        int totalTokensForCreators = (creatorsShare - creatorDirectPayment) > 0
-            ? getTokenQuoteForEther(creatorsShare - creatorDirectPayment)
+        int totalTokensForCreators = buyTokenPaymentShares.creatorsGovernancePayment > 0
+            ? getTokenQuoteForEther(buyTokenPaymentShares.creatorsGovernancePayment)
             : int(0);
 
         // Update total tokens emitted for this purchase with tokens for creators
         if (totalTokensForCreators > 0) emittedTokenWad += totalTokensForCreators;
 
         // Tokens to emit to buyers
-        int totalTokensForBuyers = buyersShare > 0 ? getTokenQuoteForEther(buyersShare) : int(0);
+        int totalTokensForBuyers = buyTokenPaymentShares.buyersShare > 0 ? getTokenQuoteForEther(buyTokenPaymentShares.buyersShare) : int(0);
 
         // Update total tokens emitted for this purchase with tokens for buyers
         if (totalTokensForBuyers > 0) emittedTokenWad += totalTokensForBuyers;
 
         //Deposit treasury funds, and eth used to buy creators gov. tokens to treasury
-        (bool success, ) = treasury.call{ value: buyersShare + (creatorsShare - creatorDirectPayment) }(new bytes(0));
+        (bool success, ) = treasury.call{ value: buyTokenPaymentShares.buyersShare + (buyTokenPaymentShares.creatorsGovernancePayment) }(new bytes(0));
         require(success, "Transfer failed.");
 
         //Transfer ETH to creators
-        if (creatorDirectPayment > 0) {
-            (success, ) = creatorsAddress.call{ value: creatorDirectPayment }(new bytes(0));
+        if (buyTokenPaymentShares.creatorsDirectPayment > 0) {
+            (success, ) = creatorsAddress.call{ value: buyTokenPaymentShares.creatorsDirectPayment }(new bytes(0));
             require(success, "Transfer failed.");
         }
 
@@ -226,11 +243,11 @@ contract ERC20TokenEmitter is
         emit PurchaseFinalized(
             msg.sender,
             msg.value,
-            buyersShare + (creatorsShare - creatorDirectPayment),
+            buyTokenPaymentShares.buyersShare + buyTokenPaymentShares.creatorsGovernancePayment,
             msg.value - msgValueRemaining,
             uint256(totalTokensForBuyers),
             uint256(totalTokensForCreators),
-            creatorDirectPayment
+            buyTokenPaymentShares.creatorsDirectPayment
         );
 
         return uint256(totalTokensForBuyers);
