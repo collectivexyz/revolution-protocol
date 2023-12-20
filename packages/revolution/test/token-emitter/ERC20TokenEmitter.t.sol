@@ -2,7 +2,7 @@
 pragma solidity ^0.8.22;
 
 import { Test } from "forge-std/Test.sol";
-import { unsafeWadDiv } from "../../src/libs/SignedWadMath.sol";
+import { unsafeWadDiv, toDaysWadUnsafe } from "../../src/libs/SignedWadMath.sol";
 import { ERC20TokenEmitter } from "../../src/ERC20TokenEmitter.sol";
 import { IERC20TokenEmitter } from "../../src/interfaces/IERC20TokenEmitter.sol";
 import { NontransferableERC20Votes } from "../../src/NontransferableERC20Votes.sol";
@@ -43,38 +43,93 @@ contract ERC20TokenEmitterTest is RevolutionBuilderTest {
         super.deployMock();
 
         vm.deal(address(0), 100000 ether);
+    }
 
-        // vm.startPrank(address(0));
-        // RevolutionProtocolRewards protocolRewards = new RevolutionProtocolRewards();
+    function getTokenQuoteForEtherHelper(uint256 etherAmount, int256 supply) public view returns (int gainedX) {
+        require(etherAmount > 0, "Ether amount must be greater than 0");
+        // Note: By using toDaysWadUnsafe(block.timestamp - startTime) we are establishing that 1 "unit of time" is 1 day.
+        // solhint-disable-next-line not-rely-on-time
+        return
+            erc20TokenEmitter.vrgdac().yToX({
+                timeSinceStart: toDaysWadUnsafe(block.timestamp - erc20TokenEmitter.startTime()),
+                sold: supply,
+                amount: int(etherAmount)
+            });
+    }
 
-        // vm.deal(address(0), 100000 ether);
-        // vm.stopPrank();
+    function test_correctEmitted() public {
+        uint256 creatorRateBps = 2_000;
+        uint256 entropyRateBps = 8_000;
 
-        // //20% - how much the price decays per unit of time with no sales
+        vm.startPrank(erc20TokenEmitter.owner());
+        //set creatorRate and entropyRate
+        erc20TokenEmitter.setCreatorRateBps(creatorRateBps);
+        erc20TokenEmitter.setEntropyRateBps(entropyRateBps);
+        vm.stopPrank();
 
-        // erc20Token.initialize({
-        //     _erc20TokenParams: IRevolutionBuilder.ERC20TokenParams({name: "Revolution Governance", symbol: "GOV"}),
-        //     _initialOwner: address(this)
-        // });
+        vm.deal(address(this), 100000 ether);
 
-        // //this setup assumes an ideal of 1e21 or 1_000 ETH (1_000 * 1e18) coming into the system per day, token prices will increaase if more ETH comes in
-        // emitter = new ERC20TokenEmitter(
-        //     address(this),
-        //     governanceToken,
-        //     address(protocolRewards),
-        //     address(this),
-        //     erc20TokenEmitter.treasury(),
-        //     oneFullTokenTargetPrice,
-        //     priceDecayPercent,
-        //     //scale by 1e18 the tokens per time unit
-        //     int256(1e18 * tokensPerTimeUnit)
-        // );
+        emit log_address(erc20TokenEmitter.creatorsAddress());
+        emit log_uint(erc20Token.balanceOf(erc20TokenEmitter.creatorsAddress()));
 
-        //erc20TokenEmitter.setCreatorsAddress(erc20TokenEmitter.creatorsAddress());
+        //expect balance to start out at 0
+        assertEq(erc20Token.balanceOf(erc20TokenEmitter.creatorsAddress()), 0, "Balance should start at 0");
 
-        // address emitterAddress = address(emitter);
+        address[] memory recipients = new address[](1);
+        recipients[0] = address(1);
 
-        // erc20Token.transferOwnership(emitterAddress);
+        uint256[] memory bps = new uint256[](1);
+        bps[0] = 10_000;
+
+        //expect recipient0 balance to start out at 0
+        assertEq(erc20Token.balanceOf(address(1)), 0, "Balance should start at 0");
+
+        //get msg value remaining
+        uint256 msgValueRemaining = 1 ether - erc20TokenEmitter.computeTotalReward(1 ether);
+
+        //Share of purchase amount to send to treasury
+        uint256 toPayTreasury = (msgValueRemaining * (10_000 - creatorRateBps)) / 10_000;
+        
+        //Ether directly sent to creators
+        uint256 creatorDirectPayment = ((msgValueRemaining - toPayTreasury) * entropyRateBps) / 10_000;
+       
+        //get expected tokens for creators
+        int256 expectedAmountForCreators = erc20TokenEmitter.getTokenQuoteForEther(
+            msgValueRemaining - toPayTreasury - creatorDirectPayment
+        );
+
+        //get expected tokens for recipient0
+        int256 expectedAmountForRecipient0 = getTokenQuoteForEtherHelper(toPayTreasury, expectedAmountForCreators);
+
+        erc20TokenEmitter.buyToken{ value: 1 ether }(
+            recipients,
+            bps,
+            IERC20TokenEmitter.ProtocolRewardAddresses({
+                builder: address(0),
+                purchaseReferral: address(0),
+                deployer: address(0)
+            })
+        );
+
+        //log creatorsAddress balance
+        emit log_uint(erc20Token.balanceOf(erc20TokenEmitter.creatorsAddress()));
+
+        //assert that creatorsAddress balance is correct
+        assertEq(
+            uint(erc20Token.balanceOf(erc20TokenEmitter.creatorsAddress())),
+            uint(expectedAmountForCreators),
+            "Creators should have correct balance"
+        );
+
+        //log recipient0 balance
+        emit log_uint(erc20Token.balanceOf(address(1)));
+
+        // assert that recipient0 balance is correct
+        assertEq(
+            uint(erc20Token.balanceOf(address(1))),
+            uint(expectedAmountForRecipient0),
+            "Recipient0 should have correct balance"
+        );
     }
 
     function testCannotBuyAsTreasury() public {

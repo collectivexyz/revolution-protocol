@@ -172,20 +172,17 @@ contract ERC20TokenEmitter is
         //Share of purchase amount to send to treasury
         uint256 toPayTreasury = (msgValueRemaining * (10_000 - creatorRateBps)) / 10_000;
 
-        //Share of purchase amount to reserve for creators
         //Ether directly sent to creators
         uint256 creatorDirectPayment = ((msgValueRemaining - toPayTreasury) * entropyRateBps) / 10_000;
+        
         //Tokens to emit to creators
         int totalTokensForCreators = ((msgValueRemaining - toPayTreasury) - creatorDirectPayment) > 0
             ? getTokenQuoteForEther((msgValueRemaining - toPayTreasury) - creatorDirectPayment)
             : int(0);
+        if (totalTokensForCreators > 0) emittedTokenWad += totalTokensForCreators;
 
         // Tokens to emit to buyers
         int totalTokensForBuyers = toPayTreasury > 0 ? getTokenQuoteForEther(toPayTreasury) : int(0);
-
-        if (totalTokensForCreators > 0) emittedTokenWad += totalTokensForCreators;
-
-        //Transfer ETH to treasury and update emitted
         if (totalTokensForBuyers > 0) emittedTokenWad += totalTokensForBuyers;
 
         //Deposit funds to treasury
