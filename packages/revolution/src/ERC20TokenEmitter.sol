@@ -179,13 +179,13 @@ contract ERC20TokenEmitter is
         int totalTokensForCreators = ((msgValueRemaining - toPayTreasury) - creatorDirectPayment) > 0
             ? getTokenQuoteForEther((msgValueRemaining - toPayTreasury) - creatorDirectPayment)
             : int(0);
-        if (totalTokensForCreators > 0) emittedTokenWad += totalTokensForCreators;
+        if (totalTokensForCreators > 0) emittedTokenWad += totalTokensForCreators; // update total tokens emitted
 
         // Tokens to emit to buyers
         int totalTokensForBuyers = toPayTreasury > 0 ? getTokenQuoteForEther(toPayTreasury) : int(0);
-        if (totalTokensForBuyers > 0) emittedTokenWad += totalTokensForBuyers;
+        if (totalTokensForBuyers > 0) emittedTokenWad += totalTokensForBuyers; // update total tokens emitted
 
-        //Deposit funds to treasury
+        //Deposit treasury funds, and eth used to buy creators gov. tokens to treasury
         (bool success, ) = treasury.call{ value: toPayTreasury }(new bytes(0));
         require(success, "Transfer failed.");
 
@@ -203,7 +203,6 @@ contract ERC20TokenEmitter is
         uint256 bpsSum = 0;
 
         //Mint tokens to buyers
-
         for (uint256 i = 0; i < addresses.length; i++) {
             if (totalTokensForBuyers > 0) {
                 // transfer tokens to address
