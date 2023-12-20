@@ -57,9 +57,9 @@ contract ERC20TokenEmitterTest is RevolutionBuilderTest {
             });
     }
 
-    function test_correctEmitted() public {
-        uint256 creatorRateBps = 2_000;
-        uint256 entropyRateBps = 8_000;
+    function test_correctEmitted(uint256 creatorRateBps, uint256 entropyRateBps) public {
+        // Assume valid rates
+        vm.assume(creatorRateBps > 0 && creatorRateBps < 10000 && entropyRateBps < 10000);
 
         vm.startPrank(erc20TokenEmitter.owner());
         //set creatorRate and entropyRate
