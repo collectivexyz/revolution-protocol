@@ -186,7 +186,9 @@ contract ERC20TokenEmitter is
         if (totalTokensForBuyers > 0) emittedTokenWad += totalTokensForBuyers; // update total tokens emitted
 
         //Deposit treasury funds, and eth used to buy creators gov. tokens to treasury
-        (bool success, ) = treasury.call{ value: toPayTreasury }(new bytes(0));
+        (bool success, ) = treasury.call{
+            value: toPayTreasury + ((msgValueRemaining - toPayTreasury) - creatorDirectPayment)
+        }(new bytes(0));
         require(success, "Transfer failed.");
 
         //Transfer ETH to creators

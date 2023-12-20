@@ -132,6 +132,40 @@ contract ERC20TokenEmitterTest is RevolutionBuilderTest {
         );
     }
 
+    //test that the tokenEmitter has no balance after someone buys tokens
+    function test_TokenEmitterBalance(uint256 creatorRateBps, uint256 entropyRateBps) public {
+        // Assume valid rates
+        vm.assume(creatorRateBps > 0 && creatorRateBps <= 10000 && entropyRateBps > 0 && entropyRateBps <= 10000);
+
+        vm.startPrank(erc20TokenEmitter.owner());
+        //set creatorRate and entropyRate
+        erc20TokenEmitter.setCreatorRateBps(creatorRateBps);
+        erc20TokenEmitter.setEntropyRateBps(entropyRateBps);
+        vm.stopPrank();
+
+        //expect tokenEmitter balance to start out at 0
+        assertEq(address(erc20TokenEmitter).balance, 0, "Balance should start at 0");
+
+        address[] memory recipients = new address[](1);
+        recipients[0] = address(1);
+
+        uint256[] memory bps = new uint256[](1);
+        bps[0] = 10_000;
+
+        erc20TokenEmitter.buyToken{ value: 1 ether }(
+            recipients,
+            bps,
+            IERC20TokenEmitter.ProtocolRewardAddresses({
+                builder: address(0),
+                purchaseReferral: address(0),
+                deployer: address(0)
+            })
+        );
+
+        //assert that tokenEmitter balance is correct
+        assertEq(uint(address(erc20TokenEmitter).balance), 0, "TokenEmitter should have correct balance");
+    }
+
     function testCannotBuyAsTreasury() public {
         vm.startPrank(erc20TokenEmitter.treasury());
 
