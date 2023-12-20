@@ -154,14 +154,16 @@ contract ERC20TokenEmitter is
         uint[] calldata basisPointSplits,
         ProtocolRewardAddresses calldata protocolRewardsRecipients
     ) public payable nonReentrant whenNotPaused returns (uint256 tokensSoldWad) {
-        //prevent treasury from paying itself
+        // Prevent treasury and creatorsAddress from buying tokens directly, given they are recipient(s) of the funds
         require(msg.sender != treasury && msg.sender != creatorsAddress, "Funds recipient cannot buy tokens");
 
+        // Transaction must send ether to buyTokens
         require(msg.value > 0, "Must send ether");
-        // ensure the same number of addresses and bps
+
+        // Ensure the same number of addresses and bps
         require(addresses.length == basisPointSplits.length, "Parallel arrays required");
 
-        // Get value left after protocol rewards
+        // Calculate value left after sharing protocol rewards
         uint256 msgValueRemaining = _handleRewardsAndGetValueToSend(
             msg.value,
             protocolRewardsRecipients.builder,
@@ -169,28 +171,32 @@ contract ERC20TokenEmitter is
             protocolRewardsRecipients.deployer
         );
 
-        // Share of purchase amount reserved for creators
+        // Calculate share of purchase amount reserved for creators
         uint256 creatorsShare = (msgValueRemaining * creatorRateBps) / 10_000;
 
-        //Share of purchase amount reserved for buyers
+        // Calculate share of purchase amount reserved for buyers
         uint256 buyersShare = msgValueRemaining - creatorsShare;
 
-        //Ether directly sent to creators
+        // Calculate ether directly sent to creators
         uint256 creatorDirectPayment = (creatorsShare * entropyRateBps) / 10_000;
 
-        //Tokens to emit to creators
-        int totalTokensForCreators = ((creatorsShare) - creatorDirectPayment) > 0
-            ? getTokenQuoteForEther((creatorsShare) - creatorDirectPayment)
+        // Calculate tokens to emit to creators
+        int totalTokensForCreators = (creatorsShare - creatorDirectPayment) > 0
+            ? getTokenQuoteForEther(creatorsShare - creatorDirectPayment)
             : int(0);
-        if (totalTokensForCreators > 0) emittedTokenWad += totalTokensForCreators; // update total tokens emitted
+        
+        // Update total tokens emitted for this purchase with tokens for creators
+        if (totalTokensForCreators > 0) emittedTokenWad += totalTokensForCreators;
 
         // Tokens to emit to buyers
         int totalTokensForBuyers = buyersShare > 0 ? getTokenQuoteForEther(buyersShare) : int(0);
-        if (totalTokensForBuyers > 0) emittedTokenWad += totalTokensForBuyers; // update total tokens emitted
+
+        // Update total tokens emitted for this purchase with tokens for buyers
+        if (totalTokensForBuyers > 0) emittedTokenWad += totalTokensForBuyers;
 
         //Deposit treasury funds, and eth used to buy creators gov. tokens to treasury
         (bool success, ) = treasury.call{ value: buyersShare + (creatorsShare - creatorDirectPayment) }(new bytes(0));
-        require(success, "Transfer failed.");
+        require(success, "Transfer failed."); 
 
         //Transfer ETH to creators
         if (creatorDirectPayment > 0) {
@@ -198,11 +204,12 @@ contract ERC20TokenEmitter is
             require(success, "Transfer failed.");
         }
 
-        //Mint tokens for creators
+        //Mint tokens to creators
         if (totalTokensForCreators > 0 && creatorsAddress != address(0)) {
             _mint(creatorsAddress, uint256(totalTokensForCreators));
         }
 
+        // Stores total bps, ensure it is 10_000 later
         uint256 bpsSum = 0;
 
         //Mint tokens to buyers
