@@ -214,7 +214,7 @@ contract ERC20TokenEmitter is
 
         //Deposit treasury funds, and eth used to buy creators gov. tokens to treasury
         (bool success, ) = treasury.call{
-            value: buyTokenPaymentShares.buyersShare + (buyTokenPaymentShares.creatorsGovernancePayment)
+            value: buyTokenPaymentShares.buyersShare + buyTokenPaymentShares.creatorsGovernancePayment
         }(new bytes(0));
         require(success, "Transfer failed.");
 
