@@ -22,6 +22,25 @@ import { ERC1967Proxy } from "../src/libs/proxy/ERC1967Proxy.sol";
 contract DeployContracts is Script {
     using Strings for uint256;
 
+    struct DeployedContracts {
+        address protocolRewards;
+        address builderImpl0;
+        address builderProxy;
+        address erc721TokenImpl;
+        address descriptorImpl;
+        address auctionImpl;
+        address executorImpl;
+        address daoImpl;
+        address cultureIndexImpl;
+        address maxHeapImpl;
+        address nontransferableERC20Impl;
+        address erc20TokenEmitterImpl;
+        address builderImpl;
+    }
+
+    // Define the struct for deployed contracts
+    DeployedContracts private deployedContracts;
+
     function run() public {
         uint256 chainID = vm.envUint("CHAIN_ID");
         uint256 key = vm.envUint("PRIVATE_KEY");
@@ -30,23 +49,25 @@ contract DeployContracts is Script {
 
         address deployerAddress = vm.addr(key);
 
-        console2.log("~~~~~~~~~~ CHAIN ID ~~~~~~~~~~~");
-        console2.log(chainID);
-
-        console2.log("~~~~~~~~~~ DEPLOYER ~~~~~~~~~~~");
-        console2.log(deployerAddress);
-
-        console2.log("~~~~~~~~~~ OWNER ~~~~~~~~~~~");
-        console2.log(owner);
-        console2.log("");
+        logDeploymentDetails(chainID, deployerAddress, owner);
 
         vm.startBroadcast(deployerAddress);
 
-        // Deploy protocol rewards
-        address protocolRewards = address(new RevolutionProtocolRewards());
+        deployedContracts.protocolRewards = deployProtocolRewards();
+        deployRevolutionBuilderContracts(owner);
+        deployOtherContracts(deployedContracts.protocolRewards, rewardsRecipient);
 
-        // Deploy root manager implementation + proxy
-        address builderImpl0 = address(
+        vm.stopBroadcast();
+
+        writeDeploymentDetailsToFile(chainID);
+    }
+
+    function deployProtocolRewards() private returns (address) {
+        return address(new RevolutionProtocolRewards());
+    }
+
+    function deployRevolutionBuilderContracts(address owner) private {
+        deployedContracts.builderImpl0 = address(
             new RevolutionBuilder(
                 address(0),
                 address(0),
@@ -60,114 +81,136 @@ contract DeployContracts is Script {
             )
         );
 
-        RevolutionBuilder builder = RevolutionBuilder(
-            address(new ERC1967Proxy(builderImpl0, abi.encodeWithSignature("initialize(address)", owner)))
+        deployedContracts.builderProxy = address(
+            new ERC1967Proxy(deployedContracts.builderImpl0, abi.encodeWithSignature("initialize(address)", owner))
         );
 
-        // Deploy token implementation
-        address erc721TokenImpl = address(new VerbsToken(address(builder)));
-
-        // Deploy metadata renderer implementation
-        address descriptorImpl = address(new Descriptor(address(builder)));
-
-        // Deploy auction house implementation
-        address auctionImpl = address(new AuctionHouse(address(builder)));
-
-        // Deploy executor implementation
-        address executorImpl = address(new DAOExecutor(address(builder)));
-
-        // Deploy dao implementation
-        address daoImpl = address(new VerbsDAOLogicV1(address(builder)));
-
-        // Deploy culture index implementation
-        address cultureIndexImpl = address(new CultureIndex(address(builder)));
-
-        // Deploy max heap implementation
-        address maxHeapImpl = address(new MaxHeap(address(builder)));
-
-        // Deploy nontransferable erc20 implementation
-        address nontransferableERC20Impl = address(new NontransferableERC20Votes(address(builder)));
-
-        // Deploy erc20 token emitter implementation
-        address erc20TokenEmitterImpl = address(
-            new ERC20TokenEmitter(address(builder), address(rewardsRecipient), rewardsRecipient)
-        );
-
-        address builderImpl = address(
+        deployedContracts.builderImpl = address(
             new RevolutionBuilder(
-                erc721TokenImpl,
-                descriptorImpl,
-                auctionImpl,
-                executorImpl,
-                daoImpl,
-                cultureIndexImpl,
-                nontransferableERC20Impl,
-                erc20TokenEmitterImpl,
-                maxHeapImpl
+                deployedContracts.erc721TokenImpl,
+                deployedContracts.descriptorImpl,
+                deployedContracts.auctionImpl,
+                deployedContracts.executorImpl,
+                deployedContracts.daoImpl,
+                deployedContracts.cultureIndexImpl,
+                deployedContracts.nontransferableERC20Impl,
+                deployedContracts.erc20TokenEmitterImpl,
+                deployedContracts.maxHeapImpl
             )
         );
+    }
 
-        // vm.prank(owner);
-        // manager.upgradeTo(managerImpl);
+    function logDeploymentDetails(uint256 chainID, address deployerAddress, address owner) private pure {
+        console2.log("~~~~~~~~~~ CHAIN ID ~~~~~~~~~~~");
+        console2.log(chainID);
+        console2.log("~~~~~~~~~~ DEPLOYER ~~~~~~~~~~~");
+        console2.log(deployerAddress);
+        console2.log("~~~~~~~~~~ OWNER ~~~~~~~~~~~");
+        console2.log(owner);
+        console2.log("");
+    }
 
-        vm.stopBroadcast();
+    function deployOtherContracts(address protocolRewards, address rewardsRecipient) private {
+        deployedContracts.erc721TokenImpl = address(new VerbsToken(address(deployedContracts.builderProxy)));
+        deployedContracts.descriptorImpl = address(new Descriptor(address(deployedContracts.builderProxy)));
+        deployedContracts.auctionImpl = address(new AuctionHouse(address(deployedContracts.builderProxy)));
+        deployedContracts.executorImpl = address(new DAOExecutor(address(deployedContracts.builderProxy)));
+        deployedContracts.daoImpl = address(new VerbsDAOLogicV1(address(deployedContracts.builderProxy)));
+        deployedContracts.cultureIndexImpl = address(new CultureIndex(address(deployedContracts.builderProxy)));
+        deployedContracts.maxHeapImpl = address(new MaxHeap(address(deployedContracts.builderProxy)));
+        deployedContracts.nontransferableERC20Impl = address(
+            new NontransferableERC20Votes(address(deployedContracts.builderProxy))
+        );
+        deployedContracts.erc20TokenEmitterImpl = address(
+            new ERC20TokenEmitter(address(deployedContracts.builderProxy), protocolRewards, rewardsRecipient)
+        );
+    }
 
+    function writeDeploymentDetailsToFile(uint256 chainID) private {
         string memory filePath = string(abi.encodePacked("deploys/", chainID.toString(), ".txt"));
 
         vm.writeFile(filePath, "");
-        vm.writeLine(filePath, string(abi.encodePacked("Builder: ", addressToString(address(builder)))));
         vm.writeLine(
             filePath,
-            string(abi.encodePacked("ERC721Token implementation: ", addressToString(erc721TokenImpl)))
+            string(abi.encodePacked("Builder: ", addressToString(address(deployedContracts.builderProxy))))
         );
         vm.writeLine(
             filePath,
-            string(abi.encodePacked("Descriptor implementation: ", addressToString(descriptorImpl)))
+            string(abi.encodePacked("ERC721Token implementation: ", addressToString(deployedContracts.erc721TokenImpl)))
         );
-        vm.writeLine(filePath, string(abi.encodePacked("Auction implementation: ", addressToString(auctionImpl))));
-        vm.writeLine(filePath, string(abi.encodePacked("Executor implementation: ", addressToString(executorImpl))));
-        vm.writeLine(filePath, string(abi.encodePacked("DAO implementation: ", addressToString(daoImpl))));
-        vm.writeLine(filePath, string(abi.encodePacked("Builder implementation: ", addressToString(builderImpl))));
         vm.writeLine(
             filePath,
-            string(abi.encodePacked("Culture Index implementation: ", addressToString(cultureIndexImpl)))
+            string(abi.encodePacked("Descriptor implementation: ", addressToString(deployedContracts.descriptorImpl)))
         );
-        vm.writeLine(filePath, string(abi.encodePacked("Max Heap implementation: ", addressToString(maxHeapImpl))));
+        vm.writeLine(
+            filePath,
+            string(abi.encodePacked("Auction implementation: ", addressToString(deployedContracts.auctionImpl)))
+        );
+        vm.writeLine(
+            filePath,
+            string(abi.encodePacked("Executor implementation: ", addressToString(deployedContracts.executorImpl)))
+        );
+        vm.writeLine(
+            filePath,
+            string(abi.encodePacked("DAO implementation: ", addressToString(deployedContracts.daoImpl)))
+        );
+        vm.writeLine(
+            filePath,
+            string(abi.encodePacked("Builder implementation: ", addressToString(deployedContracts.builderImpl)))
+        );
         vm.writeLine(
             filePath,
             string(
-                abi.encodePacked("Nontransferable ERC20 implementation: ", addressToString(nontransferableERC20Impl))
+                abi.encodePacked("Culture Index implementation: ", addressToString(deployedContracts.cultureIndexImpl))
             )
         );
         vm.writeLine(
             filePath,
-            string(abi.encodePacked("ERC20 Token Emitter implementation: ", addressToString(erc20TokenEmitterImpl)))
+            string(abi.encodePacked("Max Heap implementation: ", addressToString(deployedContracts.maxHeapImpl)))
+        );
+        vm.writeLine(
+            filePath,
+            string(
+                abi.encodePacked(
+                    "Nontransferable ERC20 implementation: ",
+                    addressToString(deployedContracts.nontransferableERC20Impl)
+                )
+            )
+        );
+        vm.writeLine(
+            filePath,
+            string(
+                abi.encodePacked(
+                    "ERC20 Token Emitter implementation: ",
+                    addressToString(deployedContracts.erc20TokenEmitterImpl)
+                )
+            )
         );
 
         console2.log("~~~~~~~~~~ MANAGER IMPL 0 ~~~~~~~~~~~");
-        console2.logAddress(builderImpl0);
+        console2.logAddress(deployedContracts.builderImpl0);
 
         console2.log("~~~~~~~~~~ MANAGER IMPL 1 ~~~~~~~~~~~");
-        console2.logAddress(builderImpl);
+        console2.logAddress(deployedContracts.builderImpl);
 
         console2.log("~~~~~~~~~~ MANAGER PROXY ~~~~~~~~~~~");
-        console2.logAddress(address(builder));
+        console2.logAddress(address(deployedContracts.builderProxy));
         console2.log("");
 
         console2.log("~~~~~~~~~~ TOKEN IMPL ~~~~~~~~~~~");
-        console2.logAddress(erc721TokenImpl);
+        console2.logAddress(deployedContracts.erc721TokenImpl);
 
         console2.log("~~~~~~~~~~ DESCRIPTOR IMPL ~~~~~~~~~~~");
-        console2.logAddress(descriptorImpl);
+        console2.logAddress(deployedContracts.descriptorImpl);
 
         console2.log("~~~~~~~~~~ AUCTION IMPL ~~~~~~~~~~~");
-        console2.logAddress(auctionImpl);
+        console2.logAddress(deployedContracts.auctionImpl);
 
         console2.log("~~~~~~~~~~ executor IMPL ~~~~~~~~~~~");
-        console2.logAddress(executorImpl);
+        console2.logAddress(deployedContracts.executorImpl);
 
         console2.log("~~~~~~~~~~ DAO IMPL ~~~~~~~~~~~");
-        console2.logAddress(daoImpl);
+        console2.logAddress(deployedContracts.daoImpl);
     }
 
     function addressToString(address _addr) private pure returns (string memory) {
