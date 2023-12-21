@@ -113,7 +113,6 @@ contract MaxHeap is VersionedContract, UUPS, Ownable2StepUpgradeable, Reentrancy
     }
 
     /// @notice Insert an element into the heap
-    /// @dev The function will revert if the heap is full
     /// @param itemId The item ID to insert
     /// @param value The value to insert
     function insert(uint256 itemId, uint256 value) public onlyAdmin {

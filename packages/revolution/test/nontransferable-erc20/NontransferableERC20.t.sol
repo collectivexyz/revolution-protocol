@@ -8,8 +8,6 @@ import { RevolutionBuilderTest } from "../RevolutionBuilder.t.sol";
 contract NontransferableERC20TestSuite is RevolutionBuilderTest {
     event Log(string, uint);
 
-    // NontransferableERC20Votes token;
-
     function setUp() public override {
         super.setUp();
         super.setMockParams();
@@ -19,8 +17,6 @@ contract NontransferableERC20TestSuite is RevolutionBuilderTest {
         super.setCultureIndexParams("Vrbs", "Our community Vrbs. Must be 32x32.", 10, 200, 0);
 
         super.deployMock();
-
-        // token = new NontransferableERC20Votes(address(erc20TokenEmitter), "Revolution Governance", "GOV");
     }
 
     function testTransferRestrictions() public {
