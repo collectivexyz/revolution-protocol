@@ -46,9 +46,23 @@ contract DeployContracts is Script {
         address protocolRewards = address(new RevolutionProtocolRewards());
 
         // Deploy root manager implementation + proxy
-        address builderImpl0 = address(new RevolutionBuilder(address(0), address(0), address(0), address(0), address(0), address(0), address(0), address(0), address(0)));
+        address builderImpl0 = address(
+            new RevolutionBuilder(
+                address(0),
+                address(0),
+                address(0),
+                address(0),
+                address(0),
+                address(0),
+                address(0),
+                address(0),
+                address(0)
+            )
+        );
 
-        RevolutionBuilder builder = RevolutionBuilder(address(new ERC1967Proxy(builderImpl0, abi.encodeWithSignature("initialize(address)", owner))));
+        RevolutionBuilder builder = RevolutionBuilder(
+            address(new ERC1967Proxy(builderImpl0, abi.encodeWithSignature("initialize(address)", owner)))
+        );
 
         // Deploy token implementation
         address erc721TokenImpl = address(new VerbsToken(address(builder)));
@@ -75,9 +89,23 @@ contract DeployContracts is Script {
         address nontransferableERC20Impl = address(new NontransferableERC20Votes(address(builder)));
 
         // Deploy erc20 token emitter implementation
-        address erc20TokenEmitterImpl = address(new ERC20TokenEmitter(address(builder), address(rewardsRecipient), rewardsRecipient));
+        address erc20TokenEmitterImpl = address(
+            new ERC20TokenEmitter(address(builder), address(rewardsRecipient), rewardsRecipient)
+        );
 
-        address builderImpl = address(new RevolutionBuilder(erc721TokenImpl, descriptorImpl, auctionImpl, executorImpl, daoImpl, cultureIndexImpl, nontransferableERC20Impl, erc20TokenEmitterImpl, maxHeapImpl));
+        address builderImpl = address(
+            new RevolutionBuilder(
+                erc721TokenImpl,
+                descriptorImpl,
+                auctionImpl,
+                executorImpl,
+                daoImpl,
+                cultureIndexImpl,
+                nontransferableERC20Impl,
+                erc20TokenEmitterImpl,
+                maxHeapImpl
+            )
+        );
 
         // vm.prank(owner);
         // manager.upgradeTo(managerImpl);
@@ -88,16 +116,33 @@ contract DeployContracts is Script {
 
         vm.writeFile(filePath, "");
         vm.writeLine(filePath, string(abi.encodePacked("Builder: ", addressToString(address(builder)))));
-        vm.writeLine(filePath, string(abi.encodePacked("ERC721Token implementation: ", addressToString(erc721TokenImpl))));
-        vm.writeLine(filePath, string(abi.encodePacked("Descriptor implementation: ", addressToString(descriptorImpl))));
+        vm.writeLine(
+            filePath,
+            string(abi.encodePacked("ERC721Token implementation: ", addressToString(erc721TokenImpl)))
+        );
+        vm.writeLine(
+            filePath,
+            string(abi.encodePacked("Descriptor implementation: ", addressToString(descriptorImpl)))
+        );
         vm.writeLine(filePath, string(abi.encodePacked("Auction implementation: ", addressToString(auctionImpl))));
         vm.writeLine(filePath, string(abi.encodePacked("Executor implementation: ", addressToString(executorImpl))));
         vm.writeLine(filePath, string(abi.encodePacked("DAO implementation: ", addressToString(daoImpl))));
         vm.writeLine(filePath, string(abi.encodePacked("Builder implementation: ", addressToString(builderImpl))));
-        vm.writeLine(filePath, string(abi.encodePacked("Culture Index implementation: ", addressToString(cultureIndexImpl))));
+        vm.writeLine(
+            filePath,
+            string(abi.encodePacked("Culture Index implementation: ", addressToString(cultureIndexImpl)))
+        );
         vm.writeLine(filePath, string(abi.encodePacked("Max Heap implementation: ", addressToString(maxHeapImpl))));
-        vm.writeLine(filePath, string(abi.encodePacked("Nontransferable ERC20 implementation: ", addressToString(nontransferableERC20Impl))));
-        vm.writeLine(filePath, string(abi.encodePacked("ERC20 Token Emitter implementation: ", addressToString(erc20TokenEmitterImpl))));
+        vm.writeLine(
+            filePath,
+            string(
+                abi.encodePacked("Nontransferable ERC20 implementation: ", addressToString(nontransferableERC20Impl))
+            )
+        );
+        vm.writeLine(
+            filePath,
+            string(abi.encodePacked("ERC20 Token Emitter implementation: ", addressToString(erc20TokenEmitterImpl)))
+        );
 
         console2.log("~~~~~~~~~~ MANAGER IMPL 0 ~~~~~~~~~~~");
         console2.logAddress(builderImpl0);
@@ -128,7 +173,7 @@ contract DeployContracts is Script {
     function addressToString(address _addr) private pure returns (string memory) {
         bytes memory s = new bytes(40);
         for (uint256 i = 0; i < 20; i++) {
-            bytes1 b = bytes1(uint8(uint256(uint160(_addr)) / (2**(8 * (19 - i)))));
+            bytes1 b = bytes1(uint8(uint256(uint160(_addr)) / (2 ** (8 * (19 - i)))));
             bytes1 hi = bytes1(uint8(b) / 16);
             bytes1 lo = bytes1(uint8(b) - 16 * uint8(hi));
             s[2 * i] = char(hi);
