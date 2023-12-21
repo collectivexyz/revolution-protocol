@@ -10,6 +10,12 @@ interface IERC20TokenEmitter {
         address deployer;
     }
 
+    struct BuyTokenPaymentShares {
+        uint256 buyersShare;
+        uint256 creatorsDirectPayment;
+        uint256 creatorsGovernancePayment;
+    }
+
     function buyToken(
         address[] calldata addresses,
         uint[] calldata bps,

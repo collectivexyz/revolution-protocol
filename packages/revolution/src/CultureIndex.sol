@@ -217,7 +217,7 @@ contract CultureIndex is
 
         uint256 pieceId = _currentPieceId++;
 
-        /// @dev Insert the new piece into the max heap
+        /// @dev Insert the new piece into the max heap with 0 vote weight
         maxHeap.insert(pieceId, 0);
 
         ArtPiece storage newPiece = pieces[pieceId];
@@ -308,7 +308,7 @@ contract CultureIndex is
         require(pieceId < _currentPieceId, "Invalid piece ID");
         require(voter != address(0), "Invalid voter address");
         require(!pieces[pieceId].isDropped, "Piece has already been dropped");
-        require(!(votes[pieceId][voter].voterAddress != address(0)), "Already voted");
+        require(votes[pieceId][voter].voterAddress == address(0), "Already voted");
 
         uint256 weight = _getPastVotes(voter, pieces[pieceId].creationBlock);
         require(weight > minVoteWeight, "Weight must be greater than minVoteWeight");
