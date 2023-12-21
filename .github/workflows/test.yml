@@ -31,5 +31,5 @@ jobs:
 
       - name: Run Geiger Check
         run: |
-          forge geiger --check ${{ inputs.package_folder }}*
+          forge geiger --check ${{ inputs.package_folder }}/src*
         id: geiger
