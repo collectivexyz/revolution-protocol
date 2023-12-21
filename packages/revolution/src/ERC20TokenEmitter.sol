@@ -154,10 +154,15 @@ contract ERC20TokenEmitter is
         buyTokenPaymentShares.buyersShare = msgValueRemaining - ((msgValueRemaining * creatorRateBps) / 10_000);
 
         // Calculate ether directly sent to creators
-        buyTokenPaymentShares.creatorsDirectPayment = (msgValueRemaining * creatorRateBps * entropyRateBps) / 10_000 / 10_000;
+        buyTokenPaymentShares.creatorsDirectPayment =
+            (msgValueRemaining * creatorRateBps * entropyRateBps) /
+            10_000 /
+            10_000;
 
         // Calculate ether spent on creators governance tokens
-        buyTokenPaymentShares.creatorsGovernancePayment = ((msgValueRemaining * creatorRateBps) / 10_000) - buyTokenPaymentShares.creatorsDirectPayment;
+        buyTokenPaymentShares.creatorsGovernancePayment =
+            ((msgValueRemaining * creatorRateBps) / 10_000) -
+            buyTokenPaymentShares.creatorsDirectPayment;
     }
 
     /**
