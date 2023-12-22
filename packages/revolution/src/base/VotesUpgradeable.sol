@@ -34,8 +34,7 @@ import { Initializable } from "@openzeppelin/contracts-upgradeable/proxy/utils/I
 /**
  * @dev MODIFICATIONS
  * Checkpointing logic from VotesUpgradeable.sol has been used with the following modifications:
- * - `delegates` is renamed to `_delegates` and is set to private
- * - `delegates` is a public function that uses the `_delegates` mapping look-up, but unlike
+ * - `delegates` is a public function that uses the `_delegatee` mapping look-up, but unlike
  *   VotesUpgradeable.sol, returns the delegator's own address if there is no delegate.
  *   This avoids the delegator needing to "delegate to self" with an additional transaction
  */

@@ -18,8 +18,6 @@ import { Initializable } from "@openzeppelin/contracts-upgradeable/proxy/utils/I
  * by calling the {delegate} function directly, or by providing a signature to be used with {delegateBySig}. Voting
  * power can be queried through the public accessors {getVotes} and {getPastVotes}.
  *
- * By default, token balance does not account for voting power. This makes transfers cheaper. The downside is that it
- * requires users to delegate to themselves in order to activate checkpoints and have their voting power tracked.
  */
 abstract contract ERC20VotesUpgradeable is Initializable, ERC20Upgradeable, VotesUpgradeable {
     /**
