@@ -17,7 +17,7 @@ interface RevolutionBuilderTypesV1 {
         address erc20Token;
         /// @notice Address for deployed cultureIndex contract
         address cultureIndex;
-        /// @notice Address for deployed treasury contract
+        /// @notice Address for deployed executor (treasury) contract
         address executor;
         /// @notice Address for deployed DAO contract
         address dao;

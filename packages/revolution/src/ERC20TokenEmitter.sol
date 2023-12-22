@@ -21,9 +21,6 @@ contract ERC20TokenEmitter is
     Ownable2StepUpgradeable,
     PausableUpgradeable
 {
-    // treasury address to pay funds to
-    address public treasury;
-
     // The token that is being minted.
     NontransferableERC20Votes public token;
 
@@ -78,13 +75,11 @@ contract ERC20TokenEmitter is
      * @param _initialOwner The initial owner of the token emitter
      * @param _erc20Token The ERC-20 token contract address
      * @param _vrgdac The VRGDA contract address
-     * @param _treasury The treasury address to pay funds to
      * @param _creatorsAddress The address to pay the creator reward to
      */
     function initialize(
         address _initialOwner,
         address _erc20Token,
-        address _treasury,
         address _vrgdac,
         address _creatorsAddress
     ) external initializer {
@@ -93,12 +88,11 @@ contract ERC20TokenEmitter is
         __Pausable_init();
         __ReentrancyGuard_init();
 
-        require(_treasury != address(0), "Invalid treasury address");
+        require(_initialOwner != address(0), "Invalid _initialOwner");
 
         // Set up ownable
         __Ownable_init(_initialOwner);
 
-        treasury = _treasury;
         creatorsAddress = _creatorsAddress;
         vrgdac = VRGDAC(_vrgdac);
         token = NontransferableERC20Votes(_erc20Token);
@@ -177,8 +171,8 @@ contract ERC20TokenEmitter is
         uint[] calldata basisPointSplits,
         ProtocolRewardAddresses calldata protocolRewardsRecipients
     ) public payable nonReentrant whenNotPaused returns (uint256 tokensSoldWad) {
-        // Prevent treasury and creatorsAddress from buying tokens directly, given they are recipient(s) of the funds
-        require(msg.sender != treasury && msg.sender != creatorsAddress, "Funds recipient cannot buy tokens");
+        // Prevent owner and creatorsAddress from buying tokens directly, given they are recipient(s) of the funds
+        require(msg.sender != owner() && msg.sender != creatorsAddress, "Funds recipient cannot buy tokens");
 
         // Transaction must send ether to buyTokens
         require(msg.value > 0, "Must send ether");
@@ -212,8 +206,8 @@ contract ERC20TokenEmitter is
         // Update total tokens emitted for this purchase with tokens for buyers
         if (totalTokensForBuyers > 0) emittedTokenWad += totalTokensForBuyers;
 
-        //Deposit treasury funds, and eth used to buy creators gov. tokens to treasury
-        (bool success, ) = treasury.call{
+        //Deposit owner's funds, and eth used to buy creators gov. tokens to owner's account
+        (bool success, ) = owner().call{
             value: buyTokenPaymentShares.buyersShare + buyTokenPaymentShares.creatorsGovernancePayment
         }(new bytes(0));
         require(success, "Transfer failed.");

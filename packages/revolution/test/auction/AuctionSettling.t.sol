@@ -358,7 +358,7 @@ contract AuctionHouseSettleTest is AuctionHouseTest {
 
         // Track ETH balances
         uint256 balanceBeforeCreator = address(0x1).balance;
-        uint256 balanceBeforeTreasury = address(dao).balance;
+        uint256 balanceBeforeOwner = address(dao).balance;
 
         auction.settleCurrentAndCreateNewAuction();
 
@@ -372,7 +372,7 @@ contract AuctionHouseSettleTest is AuctionHouseTest {
         // Checking if the contract received the correct amount
         uint256 expectedContractShare = bidAmount - creatorDirectPayment - feeAmount;
         assertApproxEqAbs(
-            address(dao).balance - balanceBeforeTreasury,
+            address(dao).balance - balanceBeforeOwner,
             expectedContractShare,
             // "Contract did not receive the correct amount of ETH"
             10

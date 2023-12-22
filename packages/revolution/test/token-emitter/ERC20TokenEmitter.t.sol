@@ -87,19 +87,19 @@ contract ERC20TokenEmitterTest is RevolutionBuilderTest {
         //get msg value remaining
         uint256 msgValueRemaining = 1 ether - erc20TokenEmitter.computeTotalReward(1 ether);
 
-        //Share of purchase amount to send to treasury
-        uint256 toPayTreasury = (msgValueRemaining * (10_000 - creatorRateBps)) / 10_000;
+        //Share of purchase amount to send to owner
+        uint256 toPayOwner = (msgValueRemaining * (10_000 - creatorRateBps)) / 10_000;
 
         //Ether directly sent to creators
-        uint256 creatorDirectPayment = ((msgValueRemaining - toPayTreasury) * entropyRateBps) / 10_000;
+        uint256 creatorDirectPayment = ((msgValueRemaining - toPayOwner) * entropyRateBps) / 10_000;
 
         //get expected tokens for creators
         int256 expectedAmountForCreators = erc20TokenEmitter.getTokenQuoteForEther(
-            msgValueRemaining - toPayTreasury - creatorDirectPayment
+            msgValueRemaining - toPayOwner - creatorDirectPayment
         );
 
         //get expected tokens for recipient0
-        int256 expectedAmountForRecipient0 = getTokenQuoteForEtherHelper(toPayTreasury, expectedAmountForCreators);
+        int256 expectedAmountForRecipient0 = getTokenQuoteForEtherHelper(toPayOwner, expectedAmountForCreators);
 
         erc20TokenEmitter.buyToken{ value: 1 ether }(
             recipients,
@@ -166,8 +166,8 @@ contract ERC20TokenEmitterTest is RevolutionBuilderTest {
         assertEq(uint(address(erc20TokenEmitter).balance), 0, "TokenEmitter should have correct balance");
     }
 
-    //test that treasury receives correct amount of ether
-    function test_TreasuryBalance(uint256 creatorRateBps, uint256 entropyRateBps) public {
+    //test that owner receives correct amount of ether
+    function test_OwnerBalance(uint256 creatorRateBps, uint256 entropyRateBps) public {
         // Assume valid rates
         vm.assume(creatorRateBps > 0 && creatorRateBps <= 10000 && entropyRateBps > 0 && entropyRateBps <= 10000);
 
@@ -177,8 +177,8 @@ contract ERC20TokenEmitterTest is RevolutionBuilderTest {
         erc20TokenEmitter.setEntropyRateBps(entropyRateBps);
         vm.stopPrank();
 
-        //expect treasury balance to start out at 0
-        assertEq(address(erc20TokenEmitter.treasury()).balance, 0, "Balance should start at 0");
+        //expect owner balance to start out at 0
+        assertEq(address(erc20TokenEmitter.owner()).balance, 0, "Balance should start at 0");
 
         address[] memory recipients = new address[](1);
         recipients[0] = address(1);
@@ -208,18 +208,18 @@ contract ERC20TokenEmitterTest is RevolutionBuilderTest {
             })
         );
 
-        //assert that treasury balance is correct
+        //assert that owner balance is correct
         assertEq(
-            uint(address(erc20TokenEmitter.treasury()).balance),
+            uint(address(erc20TokenEmitter.owner()).balance),
             uint(buyersShare + creatorsShare - creatorDirectPayment),
-            "Treasury should have correct balance"
+            "Owner should have correct balance"
         );
     }
 
-    function testCannotBuyAsTreasury() public {
-        vm.startPrank(erc20TokenEmitter.treasury());
+    function testCannotBuyAsOwner() public {
+        vm.startPrank(erc20TokenEmitter.owner());
 
-        vm.deal(erc20TokenEmitter.treasury(), 100000 ether);
+        vm.deal(erc20TokenEmitter.owner(), 100000 ether);
 
         address[] memory recipients = new address[](1);
         recipients[0] = address(1);
@@ -269,7 +269,8 @@ contract ERC20TokenEmitterTest is RevolutionBuilderTest {
         // transfers ownership to the second
         // ensures that the second can mint and calling buyGovernance succeeds
 
-        address treasury = address(0x36);
+        address owner = address(0x123);
+
         RevolutionProtocolRewards protocolRewards = new RevolutionProtocolRewards();
 
         address governanceToken = address(new ERC1967Proxy(erc20TokenImpl, ""));
@@ -278,9 +279,8 @@ contract ERC20TokenEmitterTest is RevolutionBuilderTest {
 
         vm.startPrank(address(manager));
         IERC20TokenEmitter(emitter1).initialize({
-            initialOwner: address(this),
+            initialOwner: owner,
             erc20Token: address(governanceToken),
-            treasury: treasury,
             vrgdac: address(erc20TokenEmitter.vrgdac()),
             creatorsAddress: creatorsAddress
         });
@@ -290,7 +290,7 @@ contract ERC20TokenEmitterTest is RevolutionBuilderTest {
             erc20TokenParams: IRevolutionBuilder.ERC20TokenParams({ name: "Revolution Governance", symbol: "GOV" })
         });
 
-        vm.deal(address(this), 100000 ether);
+        vm.deal(address(21), 100000 ether);
 
         address[] memory recipients = new address[](1);
         recipients[0] = address(1);
@@ -298,7 +298,7 @@ contract ERC20TokenEmitterTest is RevolutionBuilderTest {
         uint256[] memory bps = new uint256[](1);
         bps[0] = 10_000;
 
-        vm.startPrank(address(this));
+        vm.startPrank(address(21));
         IERC20TokenEmitter(emitter1).buyToken{ value: 1e18 }(
             recipients,
             bps,
@@ -313,9 +313,8 @@ contract ERC20TokenEmitterTest is RevolutionBuilderTest {
 
         vm.startPrank(address(manager));
         IERC20TokenEmitter(emitter2).initialize({
-            initialOwner: address(this),
+            initialOwner: owner,
             erc20Token: address(governanceToken),
-            treasury: treasury,
             vrgdac: address(erc20TokenEmitter.vrgdac()),
             creatorsAddress: creatorsAddress
         });
@@ -527,11 +526,11 @@ contract ERC20TokenEmitterTest is RevolutionBuilderTest {
             "Second recipient should have correct balance"
         );
 
-        //assert treasury balance is correct
+        //assert owner balance is correct
         assertEq(
-            address(erc20TokenEmitter.treasury()).balance,
+            address(erc20TokenEmitter.owner()).balance,
             1e18 - erc20TokenEmitter.computeTotalReward(1e18),
-            "Treasury should have payment - totalReward in balance"
+            "Owner should have payment - totalReward in balance"
         );
     }
 
@@ -568,11 +567,11 @@ contract ERC20TokenEmitterTest is RevolutionBuilderTest {
         //emitted should match supply
         assertEq(int(emittedWad), totalSupplyAfterValidPurchase, "Emitted amount should match total supply");
 
-        //expect treasury to have payment - totalReward in balance
+        //expect owner to have payment - totalReward in balance
         assertEq(
-            address(erc20TokenEmitter.treasury()).balance,
+            address(erc20TokenEmitter.owner()).balance,
             1e18 - erc20TokenEmitter.computeTotalReward(1e18),
-            "Treasury should have payment - totalReward in balance"
+            "Owner should have payment - totalReward in balance"
         );
 
         // Test case with incorrect total of basis points
@@ -665,8 +664,8 @@ contract ERC20TokenEmitterTest is RevolutionBuilderTest {
     }
 
     function testBuyTokenReentrancy() public {
-        // Deploy the malicious treasury contract
-        MaliciousTreasury maliciousTreasury = new MaliciousTreasury(address(erc20TokenEmitter));
+        // Deploy the malicious owner contract
+        MaliciousOwner maliciousOwner = new MaliciousOwner(address(erc20TokenEmitter));
 
         address governanceToken = address(new ERC1967Proxy(erc20TokenImpl, ""));
 
@@ -674,9 +673,8 @@ contract ERC20TokenEmitterTest is RevolutionBuilderTest {
 
         vm.startPrank(address(manager));
         IERC20TokenEmitter(emitter2).initialize({
-            initialOwner: address(this),
+            initialOwner: address(maliciousOwner),
             erc20Token: address(governanceToken),
-            treasury: address(maliciousTreasury),
             vrgdac: address(erc20TokenEmitter.vrgdac()),
             creatorsAddress: creatorsAddress
         });
@@ -688,7 +686,7 @@ contract ERC20TokenEmitterTest is RevolutionBuilderTest {
 
         vm.deal(address(this), 100000 ether);
 
-        //buy tokens and see if malicious treasury can reenter
+        //buy tokens and see if malicious owner can reenter
         address[] memory recipients = new address[](1);
         recipients[0] = address(1);
         uint256[] memory bps = new uint256[](1);
@@ -832,7 +830,7 @@ contract ERC20TokenEmitterTest is RevolutionBuilderTest {
     }
 }
 
-contract MaliciousTreasury {
+contract MaliciousOwner {
     ERC20TokenEmitter erc20TokenEmitter;
     bool public reentryAttempted;
 
