@@ -1003,23 +1003,33 @@ interface IERC20TokenEmitter {
         address deployer;
     }
 
+    struct BuyTokenPaymentShares {
+        uint256 buyersShare;
+        uint256 creatorsDirectPayment;
+        uint256 creatorsGovernancePayment;
+    }
+
     function buyToken(
-        address[] calldata _addresses,
-        uint[] calldata _bps,
+        address[] calldata addresses,
+        uint[] calldata bps,
         ProtocolRewardAddresses calldata protocolRewardsRecipients
     ) external payable returns (uint);
 
     function totalSupply() external view returns (uint);
 
-    function balanceOf(address _owner) external view returns (uint);
+    function balanceOf(address owner) external view returns (uint);
 
-    function setCreatorRateBps(uint256 _creatorRateBps) external;
+    function setCreatorRateBps(uint256 creatorRateBps) external;
 
-    function setEntropyRateBps(uint256 _entropyRateBps) external;
+    function setEntropyRateBps(uint256 entropyRateBps) external;
 
     function getTokenQuoteForPayment(uint256 paymentAmount) external returns (int);
 
     function setCreatorsAddress(address creators) external;
+
+    function pause() external;
+
+    function unpause() external;
 
     event CreatorsAddressUpdated(address creators);
 
@@ -1030,23 +1040,38 @@ interface IERC20TokenEmitter {
     event PurchaseFinalized(
         address indexed buyer,
         uint256 payment,
-        uint256 treasuryAmount,
+        uint256 ownerAmount,
         uint256 protocolRewardsAmount,
         uint256 buyerTokensEmitted,
         uint256 creatorTokensEmitted,
         uint256 creatorDirectPayment
     );
+
+    /**
+     * @notice Initialize the token emitter
+     * @param initialOwner The initial owner of the token emitter
+     * @param erc20Token The ERC-20 token contract address
+     * @param vrgdac The VRGDA contract address
+     * @param creatorsAddress The address of the creators
+     */
+    function initialize(address initialOwner, address erc20Token, address vrgdac, address creatorsAddress) external;
 }
 
-contract ERC20TokenEmitter is VRGDAC, IERC20TokenEmitter, ReentrancyGuard, TokenEmitterRewards, Ownable {
-    // treasury address to pay funds to
-    address public immutable treasury;
+contract ERC20TokenEmitter is
+    IERC20TokenEmitter,
+    ReentrancyGuardUpgradeable,
+    TokenEmitterRewards,
+    Ownable2StepUpgradeable,
+    PausableUpgradeable
+{
+    // The token that is being minted.
+    NontransferableERC20Votes public token;
 
-    // The token that is being emitted.
-    NontransferableERC20Votes public immutable token;
+    // The VRGDA contract
+    VRGDAC public vrgdac;
 
     // solhint-disable-next-line not-rely-on-time
-    uint public immutable startTime = block.timestamp;
+    uint256 public startTime;
 
     /**
      * @notice A running total of the amount of tokens emitted.
@@ -1062,29 +1087,62 @@ contract ERC20TokenEmitter is VRGDAC, IERC20TokenEmitter, ReentrancyGuard, Token
     // The account or contract to pay the creator reward to
     address public creatorsAddress;
 
-    // approved contracts, owner, and a token contract address
+    ///                                                          ///
+    ///                         IMMUTABLES                       ///
+    ///                                                          ///
+
+    /// @notice The contract upgrade manager
+    IRevolutionBuilder private immutable manager;
+
+    ///                                                          ///
+    ///                         CONSTRUCTOR                      ///
+    ///                                                          ///
+
+    /// @param _manager The contract upgrade manager address
+    /// @param _protocolRewards The protocol rewards contract address
+    /// @param _protocolFeeRecipient The protocol fee recipient address
     constructor(
-        address _initialOwner,
-        NontransferableERC20Votes _token,
+        address _manager,
         address _protocolRewards,
-        address _protocolFeeRecipient,
-        address _treasury,
-        int _targetPrice, // The target price for a token if sold on pace, scaled by 1e18.
-        int _priceDecayPercent, // The percent price decays per unit of time with no sales, scaled by 1e18.
-        int _tokensPerTimeUnit // The number of tokens to target selling in 1 full unit of time, scaled by 1e18.
-    )
-        TokenEmitterRewards(_protocolRewards, _protocolFeeRecipient)
-        VRGDAC(_targetPrice, _priceDecayPercent, _tokensPerTimeUnit)
-        Ownable(_initialOwner)
-    {
-        require(_treasury != address(0), "Invalid treasury address");
-
-        treasury = _treasury;
-
-        token = _token;
+        address _protocolFeeRecipient
+    ) payable TokenEmitterRewards(_protocolRewards, _protocolFeeRecipient) initializer {
+        manager = IRevolutionBuilder(_manager);
     }
 
-    function _mint(address _to, uint _amount) private {
+    ///                                                          ///
+    ///                         INITIALIZER                      ///
+    ///                                                          ///
+
+    /**
+     * @notice Initialize the token emitter
+     * @param _initialOwner The initial owner of the token emitter
+     * @param _erc20Token The ERC-20 token contract address
+     * @param _vrgdac The VRGDA contract address
+     * @param _creatorsAddress The address to pay the creator reward to
+     */
+    function initialize(
+        address _initialOwner,
+        address _erc20Token,
+        address _vrgdac,
+        address _creatorsAddress
+    ) external initializer {
+        require(msg.sender == address(manager), "Only manager can initialize");
+
+        __Pausable_init();
+        __ReentrancyGuard_init();
+
+        require(_initialOwner != address(0), "Invalid _initialOwner");
+
+        // Set up ownable
+        __Ownable_init(_initialOwner);
+
+        creatorsAddress = _creatorsAddress;
+        vrgdac = VRGDAC(_vrgdac);
+        token = NontransferableERC20Votes(_erc20Token);
+        if (startTime == 0) startTime = block.timestamp;
+    }
+
+    function _mint(address _to, uint256 _amount) private {
         token.mint(_to, _amount);
     }
 
@@ -1104,78 +1162,120 @@ contract ERC20TokenEmitter is VRGDAC, IERC20TokenEmitter, ReentrancyGuard, Token
     }
 
     /**
+     * @notice Pause the contract.
+     * @dev This function can only be called by the owner when the
+     * contract is unpaused.
+     */
+    function pause() external override onlyOwner {
+        _pause();
+    }
+
+    /**
+     * @notice Unpause the token emitter.
+     * @dev This function can only be called by the owner when the
+     * contract is paused.
+     */
+    function unpause() external override onlyOwner {
+        _unpause();
+    }
+
+    /**
+     * @notice A function to calculate the shares of the purchase that go to the buyer's governance purchase, and the creators
+     * @param msgValueRemaining The amount of ether left after protocol rewards are taken out
+     * @return buyTokenPaymentShares A struct containing the shares of the purchase that go to the buyer's governance purchase, and the creators
+     */
+    function _calculateBuyTokenPaymentShares(
+        uint256 msgValueRemaining
+    ) internal view returns (BuyTokenPaymentShares memory buyTokenPaymentShares) {
+        // Calculate share of purchase amount reserved for buyers
+        buyTokenPaymentShares.buyersShare = msgValueRemaining - ((msgValueRemaining * creatorRateBps) / 10_000);
+
+        // Calculate ether directly sent to creators
+        buyTokenPaymentShares.creatorsDirectPayment =
+            (msgValueRemaining * creatorRateBps * entropyRateBps) /
+            10_000 /
+            10_000;
+
+        // Calculate ether spent on creators governance tokens
+        buyTokenPaymentShares.creatorsGovernancePayment =
+            ((msgValueRemaining * creatorRateBps) / 10_000) -
+            buyTokenPaymentShares.creatorsDirectPayment;
+    }
+
+    /**
      * @notice A payable function that allows a user to buy tokens for a list of addresses and a list of basis points to split the token purchase between.
      * @param addresses The addresses to send purchased tokens to.
-     * @param bps The basis points of the purchase to send to each address.
+     * @param basisPointSplits The basis points of the purchase to send to each address.
      * @param protocolRewardsRecipients The addresses to pay the builder, purchaseRefferal, and deployer rewards to
      * @return tokensSoldWad The amount of tokens sold in wad units.
      */
     function buyToken(
         address[] calldata addresses,
-        uint[] calldata bps,
+        uint[] calldata basisPointSplits,
         ProtocolRewardAddresses calldata protocolRewardsRecipients
-    ) public payable nonReentrant returns (uint tokensSoldWad) {
-        //prevent treasury from paying itself
-        require(msg.sender != treasury && msg.sender != creatorsAddress, "Funds recipient cannot buy tokens");
+    ) public payable nonReentrant whenNotPaused returns (uint256 tokensSoldWad) {
+        // Prevent owner and creatorsAddress from buying tokens directly, given they are recipient(s) of the funds
+        require(msg.sender != owner() && msg.sender != creatorsAddress, "Funds recipient cannot buy tokens");
 
+        // Transaction must send ether to buyTokens
         require(msg.value > 0, "Must send ether");
-        // ensure the same number of addresses and bps
-        require(addresses.length == bps.length, "Parallel arrays required");
 
-        // Get value left after protocol rewards
-        uint msgValueRemaining = _handleRewardsAndGetValueToSend(
+        // Ensure the same number of addresses and bps
+        require(addresses.length == basisPointSplits.length, "Parallel arrays required");
+
+        // Calculate value left after sharing protocol rewards
+        uint256 msgValueRemaining = _handleRewardsAndGetValueToSend(
             msg.value,
             protocolRewardsRecipients.builder,
             protocolRewardsRecipients.purchaseReferral,
             protocolRewardsRecipients.deployer
         );
 
-        //Share of purchase amount to send to treasury
-        uint256 toPayTreasury = (msgValueRemaining * (10_000 - creatorRateBps)) / 10_000;
+        BuyTokenPaymentShares memory buyTokenPaymentShares = _calculateBuyTokenPaymentShares(msgValueRemaining);
 
-        //Share of purchase amount to reserve for creators
-        //Ether directly sent to creators
-        uint256 creatorDirectPayment = ((msgValueRemaining - toPayTreasury) * entropyRateBps) / 10_000;
-        //Tokens to emit to creators
-        int totalTokensForCreators = ((msgValueRemaining - toPayTreasury) - creatorDirectPayment) > 0
-            ? getTokenQuoteForEther((msgValueRemaining - toPayTreasury) - creatorDirectPayment)
+        // Calculate tokens to emit to creators
+        int totalTokensForCreators = buyTokenPaymentShares.creatorsGovernancePayment > 0
+            ? getTokenQuoteForEther(buyTokenPaymentShares.creatorsGovernancePayment)
             : int(0);
 
-        // Tokens to emit to buyers
-        int totalTokensForBuyers = toPayTreasury > 0 ? getTokenQuoteForEther(toPayTreasury) : int(0);
-
-        //Transfer ETH to treasury and update emitted
-        emittedTokenWad += totalTokensForBuyers;
+        // Update total tokens emitted for this purchase with tokens for creators
         if (totalTokensForCreators > 0) emittedTokenWad += totalTokensForCreators;
 
-        //Deposit funds to treasury
-        (bool success, ) = treasury.call{ value: toPayTreasury }(new bytes(0));
+        // Tokens to emit to buyers
+        int totalTokensForBuyers = buyTokenPaymentShares.buyersShare > 0
+            ? getTokenQuoteForEther(buyTokenPaymentShares.buyersShare)
+            : int(0);
+
+        // Update total tokens emitted for this purchase with tokens for buyers
+        if (totalTokensForBuyers > 0) emittedTokenWad += totalTokensForBuyers;
+
+        //Deposit owner's funds, and eth used to buy creators gov. tokens to owner's account
+        (bool success, ) = owner().call{
+            value: buyTokenPaymentShares.buyersShare + buyTokenPaymentShares.creatorsGovernancePayment
+        }(new bytes(0));
         require(success, "Transfer failed.");
 
         //Transfer ETH to creators
-        if (creatorDirectPayment > 0) {
-            (success, ) = creatorsAddress.call{ value: creatorDirectPayment }(new bytes(0));
+        if (buyTokenPaymentShares.creatorsDirectPayment > 0) {
+            (success, ) = creatorsAddress.call{ value: buyTokenPaymentShares.creatorsDirectPayment }(new bytes(0));
             require(success, "Transfer failed.");
         }
 
-        //Mint tokens for creators
+        //Mint tokens to creators
         if (totalTokensForCreators > 0 && creatorsAddress != address(0)) {
-            _mint(creatorsAddress, uint(totalTokensForCreators));
+            _mint(creatorsAddress, uint256(totalTokensForCreators));
         }
 
-        uint bpsSum = 0;
+        // Stores total bps, ensure it is 10_000 later
+        uint256 bpsSum = 0;
 
         //Mint tokens to buyers
-        if (totalTokensForBuyers > 0) {
-            for (uint i = 0; i < addresses.length; ) {
+        for (uint256 i = 0; i < addresses.length; i++) {
+            if (totalTokensForBuyers > 0) {
                 // transfer tokens to address
-                _mint(addresses[i], uint((totalTokensForBuyers * int(bps[i])) / 10_000));
-                bpsSum += bps[i];
-
-                unchecked {
-                    ++i;
-                }
+                _mint(addresses[i], uint256((totalTokensForBuyers * int(basisPointSplits[i])) / 10_000));
             }
+            bpsSum += basisPointSplits[i];
         }
 
         require(bpsSum == 10_000, "bps must add up to 10_000");
@@ -1183,14 +1283,14 @@ contract ERC20TokenEmitter is VRGDAC, IERC20TokenEmitter, ReentrancyGuard, Token
         emit PurchaseFinalized(
             msg.sender,
             msg.value,
-            toPayTreasury,
+            buyTokenPaymentShares.buyersShare + buyTokenPaymentShares.creatorsGovernancePayment,
             msg.value - msgValueRemaining,
-            uint(totalTokensForBuyers),
-            uint(totalTokensForCreators),
-            creatorDirectPayment
+            uint256(totalTokensForBuyers),
+            uint256(totalTokensForCreators),
+            buyTokenPaymentShares.creatorsDirectPayment
         );
 
-        return uint(totalTokensForBuyers);
+        return uint256(totalTokensForBuyers);
     }
 
     /**
@@ -1198,12 +1298,12 @@ contract ERC20TokenEmitter is VRGDAC, IERC20TokenEmitter, ReentrancyGuard, Token
      * @param amount the amount of tokens to buy.
      * @return spentY The cost in wei of the token purchase.
      */
-    function buyTokenQuote(uint amount) public view returns (int spentY) {
+    function buyTokenQuote(uint256 amount) public view returns (int spentY) {
         require(amount > 0, "Amount must be greater than 0");
         // Note: By using toDaysWadUnsafe(block.timestamp - startTime) we are establishing that 1 "unit of time" is 1 day.
         // solhint-disable-next-line not-rely-on-time
         return
-            xToY({
+            vrgdac.xToY({
                 timeSinceStart: toDaysWadUnsafe(block.timestamp - startTime),
                 sold: emittedTokenWad,
                 amount: int(amount)
@@ -1215,12 +1315,12 @@ contract ERC20TokenEmitter is VRGDAC, IERC20TokenEmitter, ReentrancyGuard, Token
      * @param etherAmount the payment amount in wei.
      * @return gainedX The amount of tokens that would be emitted for the payment amount.
      */
-    function getTokenQuoteForEther(uint etherAmount) public view returns (int gainedX) {
+    function getTokenQuoteForEther(uint256 etherAmount) public view returns (int gainedX) {
         require(etherAmount > 0, "Ether amount must be greater than 0");
         // Note: By using toDaysWadUnsafe(block.timestamp - startTime) we are establishing that 1 "unit of time" is 1 day.
         // solhint-disable-next-line not-rely-on-time
         return
-            yToX({
+            vrgdac.yToX({
                 timeSinceStart: toDaysWadUnsafe(block.timestamp - startTime),
                 sold: emittedTokenWad,
                 amount: int(etherAmount)
@@ -1232,12 +1332,12 @@ contract ERC20TokenEmitter is VRGDAC, IERC20TokenEmitter, ReentrancyGuard, Token
      * @param paymentAmount the payment amount in wei.
      * @return gainedX The amount of tokens that would be emitted for the payment amount.
      */
-    function getTokenQuoteForPayment(uint paymentAmount) external view returns (int gainedX) {
+    function getTokenQuoteForPayment(uint256 paymentAmount) external view returns (int gainedX) {
         require(paymentAmount > 0, "Payment amount must be greater than 0");
         // Note: By using toDaysWadUnsafe(block.timestamp - startTime) we are establishing that 1 "unit of time" is 1 day.
         // solhint-disable-next-line not-rely-on-time
         return
-            yToX({
+            vrgdac.yToX({
                 timeSinceStart: toDaysWadUnsafe(block.timestamp - startTime),
                 sold: emittedTokenWad,
                 amount: int(((paymentAmount - computeTotalReward(paymentAmount)) * (10_000 - creatorRateBps)) / 10_000)
@@ -1252,8 +1352,7 @@ contract ERC20TokenEmitter is VRGDAC, IERC20TokenEmitter, ReentrancyGuard, Token
     function setEntropyRateBps(uint256 _entropyRateBps) external onlyOwner {
         require(_entropyRateBps <= 10_000, "Entropy rate must be less than or equal to 10_000");
 
-        entropyRateBps = _entropyRateBps;
-        emit EntropyRateBpsUpdated(_entropyRateBps);
+        emit EntropyRateBpsUpdated(entropyRateBps = _entropyRateBps);
     }
 
     /**
@@ -1263,9 +1362,8 @@ contract ERC20TokenEmitter is VRGDAC, IERC20TokenEmitter, ReentrancyGuard, Token
      */
     function setCreatorRateBps(uint256 _creatorRateBps) external onlyOwner {
         require(_creatorRateBps <= 10_000, "Creator rate must be less than or equal to 10_000");
-        creatorRateBps = _creatorRateBps;
 
-        emit CreatorRateBpsUpdated(_creatorRateBps);
+        emit CreatorRateBpsUpdated(creatorRateBps = _creatorRateBps);
     }
 
     /**
@@ -1274,8 +1372,7 @@ contract ERC20TokenEmitter is VRGDAC, IERC20TokenEmitter, ReentrancyGuard, Token
      */
     function setCreatorsAddress(address _creatorsAddress) external override onlyOwner nonReentrant {
         require(_creatorsAddress != address(0), "Invalid address");
-        creatorsAddress = _creatorsAddress;
 
-        emit CreatorsAddressUpdated(_creatorsAddress);
+        emit CreatorsAddressUpdated(creatorsAddress = _creatorsAddress);
     }
 }

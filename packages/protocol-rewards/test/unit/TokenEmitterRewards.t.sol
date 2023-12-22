@@ -14,13 +14,7 @@ contract TokenEmitterRewardsTest is ProtocolRewardsTest {
 
         erc20Token = new NontransferableERC20Votes(address(this), "Revolution Governance", "GOV");
 
-        mockTokenEmitter = new MockTokenEmitter(
-            address(this),
-            erc20Token,
-            treasury,
-            address(protocolRewards),
-            revolution
-        );
+        mockTokenEmitter = new MockTokenEmitter(address(this), erc20Token, address(protocolRewards), revolution);
 
         erc20Token.transferOwnership(address(mockTokenEmitter));
 
@@ -78,13 +72,7 @@ contract TokenEmitterRewardsTest is ProtocolRewardsTest {
             "GOV"
         );
 
-        mockTokenEmitter = new MockTokenEmitter(
-            address(this),
-            govToken2,
-            treasury,
-            address(protocolRewards),
-            revolution
-        );
+        mockTokenEmitter = new MockTokenEmitter(address(this), govToken2, address(protocolRewards), revolution);
 
         govToken2.transferOwnership(address(mockTokenEmitter));
 

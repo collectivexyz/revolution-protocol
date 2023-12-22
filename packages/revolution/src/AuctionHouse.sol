@@ -374,7 +374,7 @@ contract AuctionHouse is
                 uint256[] memory vrgdaSplits = new uint256[](numCreators);
                 address[] memory vrgdaReceivers = new address[](numCreators);
 
-                //Transfer auction amount to the DAO treasury
+                //Transfer auction amount to the DAO
                 _safeTransferETHWithFallback(owner(), auctioneerPayment);
 
                 uint256 ethPaidToCreators = 0;
