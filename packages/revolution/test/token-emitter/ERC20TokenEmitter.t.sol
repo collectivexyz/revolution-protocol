@@ -282,7 +282,11 @@ contract ERC20TokenEmitterTest is RevolutionBuilderTest {
             initialOwner: owner,
             erc20Token: address(governanceToken),
             vrgdac: address(erc20TokenEmitter.vrgdac()),
-            creatorsAddress: creatorsAddress
+            creatorsAddress: creatorsAddress,
+            creatorParams: IRevolutionBuilder.TokenEmitterCreatorParams({
+                creatorRateBps: 1_000,
+                entropyRateBps: 5_000
+            })
         });
 
         INontransferableERC20Votes(governanceToken).initialize({
@@ -316,7 +320,11 @@ contract ERC20TokenEmitterTest is RevolutionBuilderTest {
             initialOwner: owner,
             erc20Token: address(governanceToken),
             vrgdac: address(erc20TokenEmitter.vrgdac()),
-            creatorsAddress: creatorsAddress
+            creatorsAddress: creatorsAddress,
+            creatorParams: IRevolutionBuilder.TokenEmitterCreatorParams({
+                creatorRateBps: 1_000,
+                entropyRateBps: 5_000
+            })
         });
 
         vm.startPrank(address(emitter1));
@@ -491,6 +499,9 @@ contract ERC20TokenEmitterTest is RevolutionBuilderTest {
         vm.assume(firstBps > 0);
         vm.startPrank(address(0));
 
+        uint creatorRateBps = erc20TokenEmitter.creatorRateBps();
+        uint entropyRateBps = erc20TokenEmitter.entropyRateBps();
+
         address[] memory recipients = new address[](2);
         recipients[0] = address(1);
         recipients[1] = address(2);
@@ -500,9 +511,15 @@ contract ERC20TokenEmitterTest is RevolutionBuilderTest {
         bps[1] = 10_000 - firstBps;
 
         // estimate tokens to be emitted
-        int256 expectedAmount = erc20TokenEmitter.getTokenQuoteForEther(
-            1e18 - erc20TokenEmitter.computeTotalReward(1e18)
-        );
+        uint msgValueRemaining = 1e18 - erc20TokenEmitter.computeTotalReward(1e18);
+        uint creatorsShare = (msgValueRemaining * creatorRateBps) / 10_000;
+        uint buyersShare = msgValueRemaining - creatorsShare;
+        uint creatorsGovernancePayment = creatorsShare - (creatorsShare * entropyRateBps) / 10_000;
+        int expectedCreatorsAmount = erc20TokenEmitter.getTokenQuoteForEther(creatorsGovernancePayment);
+
+        int expectedBuyerAmount = getTokenQuoteForEtherHelper(buyersShare, expectedCreatorsAmount);
+
+        int expectedAmount = expectedCreatorsAmount + expectedBuyerAmount;
 
         erc20TokenEmitter.buyToken{ value: 1e18 }(
             recipients,
@@ -514,22 +531,22 @@ contract ERC20TokenEmitterTest is RevolutionBuilderTest {
             })
         );
         //assert address balances are correct
-        //multiply bps by expectedAmount and assert
+        //multiply bps by expectedBuyerAmount and assert
         assertEq(
             erc20TokenEmitter.balanceOf(address(1)),
-            (firstBps * uint256(expectedAmount)) / 10_000,
+            (firstBps * uint256(expectedBuyerAmount)) / 10_000,
             "First recipient should have correct balance"
         );
         assertEq(
             erc20TokenEmitter.balanceOf(address(2)),
-            ((10_000 - firstBps) * uint256(expectedAmount)) / 10_000,
+            ((10_000 - firstBps) * uint256(expectedBuyerAmount)) / 10_000,
             "Second recipient should have correct balance"
         );
 
-        //assert owner balance is correct
+        // //assert owner balance is correct
         assertEq(
             address(erc20TokenEmitter.owner()).balance,
-            1e18 - erc20TokenEmitter.computeTotalReward(1e18),
+            1e18 - erc20TokenEmitter.computeTotalReward(1e18) - (creatorsShare * entropyRateBps) / 10_000,
             "Owner should have payment - totalReward in balance"
         );
     }
@@ -537,6 +554,9 @@ contract ERC20TokenEmitterTest is RevolutionBuilderTest {
     // Test to ensure the total basis points add up to 100%
     function testTotalBasisPoints() public {
         vm.startPrank(address(0));
+
+        uint256 creatorRateBps = erc20TokenEmitter.creatorRateBps();
+        uint256 entropyRateBps = erc20TokenEmitter.entropyRateBps();
 
         address[] memory recipients = new address[](2);
         recipients[0] = address(1);
@@ -547,7 +567,25 @@ contract ERC20TokenEmitterTest is RevolutionBuilderTest {
         correctBps[0] = 5000; // 50%
         correctBps[1] = 5000; // 50%
 
-        int expectedAmount = erc20TokenEmitter.getTokenQuoteForEther(1e18 - erc20TokenEmitter.computeTotalReward(1e18));
+        uint256 msgValueRemaining = 1e18 - erc20TokenEmitter.computeTotalReward(1e18);
+        // Calculate share of purchase amount reserved for buyers
+        uint256 buyersShare = msgValueRemaining - ((msgValueRemaining * creatorRateBps) / 10_000);
+
+        // Calculate ether directly sent to creators
+        uint256 creatorsDirectPayment = (msgValueRemaining * creatorRateBps * entropyRateBps) / 10_000 / 10_000;
+
+        // Calculate ether spent on creators governance tokens
+        uint256 creatorsGovernancePayment = ((msgValueRemaining * creatorRateBps) / 10_000) - creatorsDirectPayment;
+
+        emit log_uint(buyersShare);
+        emit log_uint(creatorsGovernancePayment);
+
+        int expectedCreatorsAmount = erc20TokenEmitter.getTokenQuoteForEther(creatorsGovernancePayment);
+
+        int expectedBuyerAmount = getTokenQuoteForEtherHelper(buyersShare, expectedCreatorsAmount);
+
+        int expectedAmount = expectedCreatorsAmount + expectedBuyerAmount;
+
         assertGt(expectedAmount, 0, "Token purchase should have a positive amount");
 
         // Attempting a valid token purchase
@@ -562,15 +600,19 @@ contract ERC20TokenEmitterTest is RevolutionBuilderTest {
         );
         int totalSupplyAfterValidPurchase = int(erc20TokenEmitter.totalSupply());
         assertEq(totalSupplyAfterValidPurchase, expectedAmount, "Supply should match the expected amount");
-        //emitted should match expected
-        assertEq(int(emittedWad), expectedAmount, "Emitted amount should match expected amount");
-        //emitted should match supply
-        assertEq(int(emittedWad), totalSupplyAfterValidPurchase, "Emitted amount should match total supply");
+        // //emitted should match expected
+        assertEq(int(emittedWad), expectedBuyerAmount, "Emitted amount should match expected amount");
+        // //emitted should match supply
+        assertEq(
+            int(emittedWad) + int(erc20Token.balanceOf(erc20TokenEmitter.creatorsAddress())),
+            totalSupplyAfterValidPurchase,
+            "Emitted amount should match total supply"
+        );
 
-        //expect owner to have payment - totalReward in balance
+        //expect owner to have payment - totalReward - creatorsDirectPayment in balance
         assertEq(
             address(erc20TokenEmitter.owner()).balance,
-            1e18 - erc20TokenEmitter.computeTotalReward(1e18),
+            1e18 - erc20TokenEmitter.computeTotalReward(1e18) - creatorsDirectPayment,
             "Owner should have payment - totalReward in balance"
         );
 
@@ -676,7 +718,11 @@ contract ERC20TokenEmitterTest is RevolutionBuilderTest {
             initialOwner: address(maliciousOwner),
             erc20Token: address(governanceToken),
             vrgdac: address(erc20TokenEmitter.vrgdac()),
-            creatorsAddress: creatorsAddress
+            creatorsAddress: creatorsAddress,
+            creatorParams: IRevolutionBuilder.TokenEmitterCreatorParams({
+                creatorRateBps: 1_000,
+                entropyRateBps: 5_000
+            })
         });
 
         INontransferableERC20Votes(governanceToken).initialize({

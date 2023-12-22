@@ -81,14 +81,19 @@ contract ERC20TokenEmitter is
         address _initialOwner,
         address _erc20Token,
         address _vrgdac,
-        address _creatorsAddress
+        address _creatorsAddress,
+        IRevolutionBuilder.TokenEmitterCreatorParams calldata _creatorParams
     ) external initializer {
         require(msg.sender == address(manager), "Only manager can initialize");
+        require(_initialOwner != address(0), "Invalid _initialOwner");
+        require(_erc20Token != address(0), "Invalid _erc20Token");
+        require(_vrgdac != address(0), "Invalid _vrgdac");
+        require(_creatorsAddress != address(0), "Invalid _creatorsAddress");
+        require(_creatorParams.creatorRateBps <= 10_000, "Creator rate must be <= to 10_000");
+        require(_creatorParams.entropyRateBps <= 10_000, "Entropy rate must be <= to 10_000");
 
         __Pausable_init();
         __ReentrancyGuard_init();
-
-        require(_initialOwner != address(0), "Invalid _initialOwner");
 
         // Set up ownable
         __Ownable_init(_initialOwner);
@@ -96,6 +101,10 @@ contract ERC20TokenEmitter is
         creatorsAddress = _creatorsAddress;
         vrgdac = VRGDAC(_vrgdac);
         token = NontransferableERC20Votes(_erc20Token);
+        creatorRateBps = _creatorParams.creatorRateBps;
+        entropyRateBps = _creatorParams.entropyRateBps;
+
+        // If we are upgrading, don't reset the start time
         if (startTime == 0) startTime = block.timestamp;
     }
 
@@ -285,7 +294,7 @@ contract ERC20TokenEmitter is
     }
 
     /**
-     * @notice Returns the amount of tokens that would be emitted for the payment amount, taking into account the protocol rewards.
+     * @notice Returns the amount of tokens that would be emitted to a buyer for the payment amount, taking into account the protocol rewards and creator rate.
      * @param paymentAmount the payment amount in wei.
      * @return gainedX The amount of tokens that would be emitted for the payment amount.
      */

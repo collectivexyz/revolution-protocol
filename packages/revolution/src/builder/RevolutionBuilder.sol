@@ -154,9 +154,9 @@ contract RevolutionBuilder is
         // Deploy the VRGDAC contract
         address vrgdac = address(
             new VRGDAC(
-                _erc20TokenEmitterParams.targetPrice,
-                _erc20TokenEmitterParams.priceDecayPercent,
-                _erc20TokenEmitterParams.tokensPerTimeUnit
+                _erc20TokenEmitterParams.vrgdaParams.targetPrice,
+                _erc20TokenEmitterParams.vrgdaParams.priceDecayPercent,
+                _erc20TokenEmitterParams.vrgdaParams.tokensPerTimeUnit
             )
         );
 
@@ -221,7 +221,8 @@ contract RevolutionBuilder is
             erc20Token: daoAddressesByToken[erc721Token].erc20Token,
             initialOwner: daoAddressesByToken[erc721Token].dao,
             vrgdac: vrgdac,
-            creatorsAddress: _erc20TokenEmitterParams.creatorsAddress
+            creatorsAddress: _erc20TokenEmitterParams.creatorsAddress,
+            creatorParams: _erc20TokenEmitterParams.creatorParams
         });
 
         IDAOExecutor(daoAddressesByToken[erc721Token].executor).initialize({

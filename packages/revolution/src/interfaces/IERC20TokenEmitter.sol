@@ -60,6 +60,13 @@ interface IERC20TokenEmitter {
      * @param erc20Token The ERC-20 token contract address
      * @param vrgdac The VRGDA contract address
      * @param creatorsAddress The address of the creators
+     * @param creatorParams The creator and entropy rate parameters
      */
-    function initialize(address initialOwner, address erc20Token, address vrgdac, address creatorsAddress) external;
+    function initialize(
+        address initialOwner,
+        address erc20Token,
+        address vrgdac,
+        address creatorsAddress,
+        IRevolutionBuilder.TokenEmitterCreatorParams calldata creatorParams
+    ) external;
 }
