@@ -102,7 +102,7 @@ contract ERC20TokenEmitter is
         creatorsAddress = _creatorsAddress;
         vrgdac = VRGDAC(_vrgdac);
         token = NontransferableERC20Votes(_erc20Token);
-        startTime = block.timestamp;
+        if (startTime == 0) startTime = block.timestamp;
     }
 
     function _mint(address _to, uint256 _amount) private {
