@@ -140,13 +140,6 @@ interface ICultureIndex is ICultureIndexEvents {
     function pieceCount() external view returns (uint256);
 
     /**
-     * @notice Returns the total voting weight for a specific art piece.
-     * @param pieceId The ID of the art piece.
-     * @return The total vote weight for the art piece.
-     */
-    function totalVoteWeights(uint256 pieceId) external view returns (uint256);
-
-    /**
      * @notice Checks if a specific voter has already voted for a given art piece.
      * @param pieceId The ID of the art piece.
      * @param voter The address of the voter.

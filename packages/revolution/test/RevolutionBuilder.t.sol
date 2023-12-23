@@ -10,7 +10,7 @@ import { Descriptor } from "../src/Descriptor.sol";
 import { IAuctionHouse, AuctionHouse } from "../src/AuctionHouse.sol";
 import { VerbsDAOLogicV1 } from "../src/governance/VerbsDAOLogicV1.sol";
 import { DAOExecutor } from "../src/governance/DAOExecutor.sol";
-import { CultureIndex } from "../src/CultureIndex.sol";
+import { CultureIndex } from "../src/culture-index/CultureIndex.sol";
 import { NontransferableERC20Votes } from "../src/NontransferableERC20Votes.sol";
 import { ERC20TokenEmitter } from "../src/ERC20TokenEmitter.sol";
 import { MaxHeap } from "../src/MaxHeap.sol";
