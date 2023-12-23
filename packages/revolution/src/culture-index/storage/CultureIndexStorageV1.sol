@@ -43,11 +43,7 @@ contract CultureIndexStorageV1 {
     // The mapping of all votes for a piece
     mapping(uint256 => mapping(address => ICultureIndex.Vote)) public votes;
 
-    /**
-     * @notice Returns the total voting weight for a specific art piece.
-     * @param pieceId The ID of the art piece.
-     * @return The total vote weight for the art piece.
-     */
+    // The total voting weight for a piece
     mapping(uint256 => uint256) public totalVoteWeights;
 
     // The address that is allowed to drop art pieces
