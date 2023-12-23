@@ -129,7 +129,7 @@ contract CultureIndexVotingSignaturesTest is CultureIndexTestSuite {
 
         vm.warp(deadline + 1);
 
-        vm.expectRevert("Signature expired");
+        vm.expectRevert(abi.encodeWithSignature("SIGNATURE_EXPIRED()"));
         cultureIndex.voteForManyWithSig(offchainVoter, pieceIds, deadline, v, r, s);
     }
 
@@ -218,7 +218,7 @@ contract CultureIndexVotingSignaturesTest is CultureIndexTestSuite {
 
         (uint8 v, bytes32 r, bytes32 s) = vm.sign(offchainVoterPk, digest);
 
-        vm.expectRevert("Invalid piece ID");
+        vm.expectRevert(abi.encodeWithSignature("INVALID_PIECE_ID()"));
         cultureIndex.voteForManyWithSig(offchainVoter, invalidPieceIds, deadline, v, r, s);
 
         //mint tokens finally
@@ -237,7 +237,7 @@ contract CultureIndexVotingSignaturesTest is CultureIndexTestSuite {
 
         (v, r, s) = vm.sign(funVoterGuyPk, digest);
 
-        vm.expectRevert("Weight must be greater than minVoteWeight");
+        vm.expectRevert(abi.encodeWithSignature("WEIGHT_TOO_LOW()"));
         cultureIndex.voteForManyWithSig(funVoterGuy, pieceIds, deadline, v, r, s);
 
         //vote with offchainVoter
@@ -262,7 +262,7 @@ contract CultureIndexVotingSignaturesTest is CultureIndexTestSuite {
 
         (v, r, s) = vm.sign(offchainVoterPk, digest);
 
-        vm.expectRevert("Already voted");
+        vm.expectRevert(abi.encodeWithSignature("ALREADY_VOTED()"));
         cultureIndex.voteForManyWithSig(offchainVoter, pieceIds, deadline, v, r, s);
 
         // dropTopVotedPiece
@@ -281,7 +281,7 @@ contract CultureIndexVotingSignaturesTest is CultureIndexTestSuite {
 
         (v, r, s) = vm.sign(notoffchainVoterPk, digest);
 
-        vm.expectRevert("Piece has already been dropped");
+        vm.expectRevert(abi.encodeWithSignature("ALREADY_DROPPED()"));
         cultureIndex.voteForManyWithSig(notoffchainVoter, pieceIds, deadline, v, r, s);
     }
 }

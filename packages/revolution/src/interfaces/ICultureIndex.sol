@@ -74,11 +74,63 @@ interface ICultureIndex is ICultureIndexEvents {
     ///                           ERRORS                         ///
     ///                                                          ///
 
-    /// @dev thrown if the voting signature is invalid
+    /// @dev Reverts if the lengths of the provided arrays do not match.
+    error ARRAY_LENGTH_MISMATCH();
+
+    /// @dev Reverts if the specified piece ID is invalid or out of range.
+    error INVALID_PIECE_ID();
+
+    /// @dev Reverts if the art piece has already been dropped.
+    error ALREADY_DROPPED();
+
+    /// @dev Reverts if the voter has already voted for this piece.
+    error ALREADY_VOTED();
+
+    /// @dev Reverts if the voter's weight is below the minimum required vote weight.
+    error WEIGHT_TOO_LOW();
+
+    /// @dev Reverts if the voting signature is invalid
     error INVALID_SIGNATURE();
 
-    /// @dev thrown if address 0 is passed but not allowed
+    /// @dev Reverts if the function caller is not the manager.
+    error NOT_MANAGER();
+
+    /// @dev Reverts if the quorum votes basis points exceed the maximum allowed value.
+    error INVALID_QUORUM_BPS();
+
+    /// @dev Reverts if the ERC721 voting token weight is invalid (i.e., non-positive).
+    error INVALID_ERC721_VOTING_WEIGHT();
+
+    /// @dev Reverts if the total vote weights do not meet the required quorum votes for a piece to be dropped.
+    error DOES_NOT_MEET_QUORUM();
+
+    /// @dev Reverts if the function caller is not the authorized dropper admin.
+    error NOT_DROPPER_ADMIN();
+
+    /// @dev Reverts if the voting signature has expired
+    error SIGNATURE_EXPIRED();
+
+    /// @dev Reverts if the culture index heap is empty.
+    error CULTURE_INDEX_EMPTY();
+
+    /// @dev Reverts if address 0 is passed but not allowed
     error ADDRESS_ZERO();
+
+    /// @dev Reverts if art piece metadata is invalid
+    error INVALID_MEDIA_TYPE();
+
+    /// @dev Reverts if art piece metadata is invalid
+    error INVALID_MEDIA_METADATA();
+
+    /// @dev Reverts if bps does not sum to 10000
+    error INVALID_BPS_SUM();
+
+    /// @dev Reverts if max number of creators is exceeded
+    error MAX_NUM_CREATORS_EXCEEDED();
+
+    ///                                                          ///
+    ///                         CONSTANTS                        ///
+    ///                                                          ///
 
     // Enum representing different media types for art pieces.
     enum MediaType {

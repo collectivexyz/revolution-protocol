@@ -121,13 +121,13 @@ contract CultureIndexVotingBasicTest is CultureIndexTestSuite {
 
         // Attempt to have the original voter cast another vote
         vm.startPrank(voter);
-        vm.expectRevert("Already voted");
+        vm.expectRevert(abi.encodeWithSignature("ALREADY_VOTED()"));
         cultureIndex.vote(artPieceId);
         vm.stopPrank();
 
         // Attempt to have recipient cast a vote
         vm.startPrank(recipient);
-        vm.expectRevert("Weight must be greater than minVoteWeight");
+        vm.expectRevert(abi.encodeWithSignature("WEIGHT_TOO_LOW()"));
         cultureIndex.vote(artPieceId);
         vm.stopPrank();
     }
@@ -187,7 +187,7 @@ contract CultureIndexVotingBasicTest is CultureIndexTestSuite {
 
         vm.startPrank(voter);
         vm.roll(block.number + 1);
-        vm.expectRevert("Invalid piece ID");
+        vm.expectRevert(abi.encodeWithSignature("INVALID_PIECE_ID()"));
         cultureIndex.vote(invalidPieceId);
         vm.stopPrank();
     }
@@ -315,11 +315,8 @@ contract CultureIndexVotingBasicTest is CultureIndexTestSuite {
         vm.roll(block.number + 1); // Roll forward to ensure votes are snapshotted
 
         // This should revert because one of the pieceIds is invalid
-        try cultureIndex.voteForMany(pieceIds) {
-            fail("Batch voting with an invalid pieceId should fail");
-        } catch Error(string memory reason) {
-            assertEq(reason, "Invalid piece ID", "Should revert with invalid piece ID error");
-        }
+        vm.expectRevert(abi.encodeWithSignature("INVALID_PIECE_ID()"));
+        cultureIndex.voteForMany(pieceIds);
     }
 
     function testBatchVotingFailsIfAlreadyVoted() public {
@@ -336,11 +333,8 @@ contract CultureIndexVotingBasicTest is CultureIndexTestSuite {
         pieceIds[0] = pieceId;
 
         // This should revert because the voter has already voted for this pieceId
-        try cultureIndex.voteForMany(pieceIds) {
-            fail("Batch voting for an already voted pieceId should fail");
-        } catch Error(string memory reason) {
-            assertEq(reason, "Already voted", "Should revert with already voted error");
-        }
+        vm.expectRevert(abi.encodeWithSignature("ALREADY_VOTED()"));
+        cultureIndex.voteForMany(pieceIds);
     }
 
     function testBatchVotingFailsIfPieceDropped() public {
@@ -357,11 +351,8 @@ contract CultureIndexVotingBasicTest is CultureIndexTestSuite {
         pieceIds[0] = pieceId;
 
         // This should revert because the piece has been dropped
-        try cultureIndex.voteForMany(pieceIds) {
-            fail("Batch voting for a dropped pieceId should fail");
-        } catch Error(string memory reason) {
-            assertEq(reason, "Piece has already been dropped", "Should revert with piece dropped error");
-        }
+        vm.expectRevert(abi.encodeWithSignature("ALREADY_DROPPED()"));
+        cultureIndex.voteForMany(pieceIds);
     }
 
     function testBatchVotingFailsForZeroWeight() public {
@@ -371,11 +362,8 @@ contract CultureIndexVotingBasicTest is CultureIndexTestSuite {
         // Do not mint any tokens to ensure weight is zero
 
         // This should revert because the voter weight is zero
-        try cultureIndex.voteForMany(pieceIds) {
-            fail("Batch voting with zero weight should fail");
-        } catch Error(string memory reason) {
-            assertEq(reason, "Weight must be greater than minVoteWeight", "Should revert with weight zero error");
-        }
+        vm.expectRevert(abi.encodeWithSignature("WEIGHT_TOO_LOW()"));
+        cultureIndex.voteForMany(pieceIds);
     }
 
     function testGasUsage() public {
@@ -460,11 +448,8 @@ contract CultureIndexVotingBasicTest is CultureIndexTestSuite {
         cultureIndex.vote(newPieceId);
 
         // Try to vote again and expect to fail
-        try cultureIndex.vote(newPieceId) {
-            fail("Should not be able to vote twice");
-        } catch Error(string memory reason) {
-            assertEq(reason, "Already voted");
-        }
+        vm.expectRevert(abi.encodeWithSignature("ALREADY_VOTED()"));
+        cultureIndex.vote(newPieceId);
     }
 
     /**
@@ -488,11 +473,8 @@ contract CultureIndexVotingBasicTest is CultureIndexTestSuite {
         vm.roll(block.number + 1); // Roll forward to ensure votes are snapshotted
 
         // Try to vote and expect to fail
-        try cultureIndex.vote(newPieceId) {
-            fail("Should not be able to vote without tokens");
-        } catch Error(string memory reason) {
-            assertEq(reason, "Weight must be greater than minVoteWeight");
-        }
+        vm.expectRevert(abi.encodeWithSignature("WEIGHT_TOO_LOW()"));
+        cultureIndex.vote(newPieceId);
     }
 
     /**
@@ -539,18 +521,12 @@ contract CultureIndexVotingBasicTest is CultureIndexTestSuite {
         cultureIndex.vote(secondPieceId);
 
         // Try to vote again for the first piece and expect to fail
-        try cultureIndex.vote(firstPieceId) {
-            fail("Should not be able to vote twice on the first piece");
-        } catch Error(string memory reason) {
-            assertEq(reason, "Already voted");
-        }
+        vm.expectRevert(abi.encodeWithSignature("ALREADY_VOTED()"));
+        cultureIndex.vote(firstPieceId);
 
         // Try to vote again for the second piece and expect to fail
-        try cultureIndex.vote(secondPieceId) {
-            fail("Should not be able to vote twice on the second piece");
-        } catch Error(string memory reason) {
-            assertEq(reason, "Already voted");
-        }
+        vm.expectRevert(abi.encodeWithSignature("ALREADY_VOTED()"));
+        cultureIndex.vote(secondPieceId);
     }
 
     /**
@@ -584,18 +560,12 @@ contract CultureIndexVotingBasicTest is CultureIndexTestSuite {
         vm.roll(block.number + 1); // Roll forward to ensure votes are snapshotted
 
         // Try to vote for the first piece and expect to fail
-        try cultureIndex.vote(firstPieceId) {
-            fail("Should not be able to vote without tokens on the first piece");
-        } catch Error(string memory reason) {
-            assertEq(reason, "Weight must be greater than minVoteWeight");
-        }
+        vm.expectRevert(abi.encodeWithSignature("WEIGHT_TOO_LOW()"));
+        cultureIndex.vote(firstPieceId);
 
         // Try to vote for the second piece and expect to fail
-        try cultureIndex.vote(secondPieceId) {
-            fail("Should not be able to vote without tokens on the second piece");
-        } catch Error(string memory reason) {
-            assertEq(reason, "Weight must be greater than minVoteWeight");
-        }
+        vm.expectRevert(abi.encodeWithSignature("WEIGHT_TOO_LOW()"));
+        cultureIndex.vote(secondPieceId);
     }
 
     function testVoteAfterTransferringTokens() public {
@@ -618,12 +588,8 @@ contract CultureIndexVotingBasicTest is CultureIndexTestSuite {
         vm.startPrank(anotherAccount);
 
         // Try to vote again and expect to fail
-        try cultureIndex.vote(newPieceId) {
-            fail("Should not be able to vote without tokens");
-        } catch Error(string memory reason) {
-            emit log_string(reason);
-            assertEq(reason, "Weight must be greater than minVoteWeight");
-        }
+        vm.expectRevert(abi.encodeWithSignature("WEIGHT_TOO_LOW()"));
+        cultureIndex.vote(newPieceId);
     }
 
     function testInvalidPieceID() public {
@@ -635,12 +601,8 @@ contract CultureIndexVotingBasicTest is CultureIndexTestSuite {
 
         vm.startPrank(address(this));
         // Attempt to vote for an invalid piece ID
-        try cultureIndex.vote(9999) {
-            // Assuming 9999 is an invalid ID
-            fail("Should not be able to vote for an invalid piece ID");
-        } catch Error(string memory reason) {
-            assertEq(reason, "Invalid piece ID");
-        }
+        vm.expectRevert(abi.encodeWithSignature("INVALID_PIECE_ID()"));
+        cultureIndex.vote(9999);
     }
 
     /**
@@ -663,11 +625,8 @@ contract CultureIndexVotingBasicTest is CultureIndexTestSuite {
         cultureIndex.dropTopVotedPiece();
 
         // Try to vote for the dropped piece and expect to fail
-        try cultureIndex.vote(newPieceId) {
-            fail("Should not be able to vote on a dropped piece");
-        } catch Error(string memory reason) {
-            assertEq(reason, "Piece has already been dropped");
-        }
+        vm.expectRevert(abi.encodeWithSignature("ALREADY_DROPPED()"));
+        cultureIndex.vote(newPieceId);
     }
 
     function testCalculateVoteWeights(uint200 erc20Balance, uint40 erc721Balance) public {

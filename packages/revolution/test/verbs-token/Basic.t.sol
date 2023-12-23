@@ -169,7 +169,7 @@ contract TokenBasicTest is VerbsTokenTestSuite {
         uint256 invalidCreatorBps = 9999; // Invalid because it does not sum up to 10000
 
         // Act & Assert
-        vm.expectRevert("Total BPS must sum up to 10,000");
+        vm.expectRevert(abi.encodeWithSignature("INVALID_BPS_SUM()"));
         createArtPiece(name, description, mediaType, image, text, animationUrl, creatorAddress, invalidCreatorBps);
     }
 
@@ -207,7 +207,7 @@ contract TokenBasicTest is VerbsTokenTestSuite {
         }
 
         // Act & Assert
-        vm.expectRevert("Creator array must not be > MAX_NUM_CREATORS");
+        vm.expectRevert(abi.encodeWithSignature("MAX_NUM_CREATORS_EXCEEDED()"));
         cultureIndex.createPiece(
             ICultureIndex.ArtPieceMetadata({
                 name: name,
@@ -276,7 +276,7 @@ contract TokenBasicTest is VerbsTokenTestSuite {
 
         // Act & Assert
         vm.startPrank(voter); // Set the next message sender to the voter address
-        vm.expectRevert("Weight must be greater than minVoteWeight"); // This assumes your contract reverts with this message for zero balance
+        vm.expectRevert(abi.encodeWithSignature("WEIGHT_TOO_LOW()"));
         cultureIndex.vote(artPieceId); // Trying to vote
     }
 
@@ -300,7 +300,7 @@ contract TokenBasicTest is VerbsTokenTestSuite {
         // Act & Assert
         // Attempt to vote again
         vm.startPrank(voter);
-        vm.expectRevert("Already voted"); // This assumes your contract reverts with this message for double voting
+        vm.expectRevert(abi.encodeWithSignature("ALREADY_VOTED()"));
         cultureIndex.vote(artPieceId);
     }
 
@@ -325,7 +325,7 @@ contract TokenBasicTest is VerbsTokenTestSuite {
 
         // Act & Assert
         vm.startPrank(voter); // Set the next message sender to the voter address
-        vm.expectRevert("Piece has already been dropped"); // This assumes your contract reverts with this message when voting on a dropped piece
+        vm.expectRevert(abi.encodeWithSignature("ALREADY_DROPPED()"));
         cultureIndex.vote(artPieceId);
     }
 
@@ -409,7 +409,7 @@ contract TokenBasicTest is VerbsTokenTestSuite {
         vm.startPrank(address(auction));
 
         // Act & Assert
-        vm.expectRevert("Culture index is empty");
+        vm.expectRevert(abi.encodeWithSignature("CULTURE_INDEX_EMPTY()"));
         erc721Token.mint();
     }
 
@@ -427,7 +427,7 @@ contract TokenBasicTest is VerbsTokenTestSuite {
 
         // Act & Assert
         vm.startPrank(voter);
-        vm.expectRevert("Invalid piece ID"); // Replace with the actual error message
+        vm.expectRevert(abi.encodeWithSignature("INVALID_PIECE_ID()"));
         cultureIndex.vote(nonExistentArtPieceId);
     }
 
@@ -437,7 +437,7 @@ contract TokenBasicTest is VerbsTokenTestSuite {
         uint256 nonExistentArtPieceId = 999; // Assuming this ID has not been created
 
         // Act & Assert
-        vm.expectRevert("Invalid piece ID"); // Replace with the actual error message
+        vm.expectRevert(abi.encodeWithSignature("INVALID_PIECE_ID()"));
         cultureIndex.getVote(nonExistentArtPieceId, address(this)); // This function should revert
     }
 

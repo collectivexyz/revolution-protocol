@@ -190,11 +190,8 @@ contract MaxHeapTestSuite is RevolutionBuilderTest {
     /// @dev Tests that the heap does not allow removal of max element when it's empty
     function testCannotRemoveMaxWhenEmpty() public {
         // Try to remove max and expect to fail
-        try maxHeap.extractMax() {
-            fail("Should not be able to remove max when heap is empty");
-        } catch Error(string memory reason) {
-            assertEq(reason, "Heap is empty");
-        }
+        vm.expectRevert(abi.encodeWithSignature("EMPTY_HEAP()"));
+        maxHeap.extractMax();
     }
 }
 

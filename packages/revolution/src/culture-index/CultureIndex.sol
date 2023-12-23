@@ -78,10 +78,10 @@ contract CultureIndex is
         address _dropperAdmin,
         IRevolutionBuilder.CultureIndexParams memory _cultureIndexParams
     ) external initializer {
-        require(msg.sender == address(manager), "Only manager can initialize");
+        if (msg.sender != address(manager)) revert NOT_MANAGER();
 
-        require(_cultureIndexParams.quorumVotesBPS <= MAX_QUORUM_VOTES_BPS, "invalid quorum bps");
-        require(_cultureIndexParams.erc721VotingTokenWeight > 0, "invalid erc721 voting token weight");
+        if (_cultureIndexParams.quorumVotesBPS > MAX_QUORUM_VOTES_BPS) revert INVALID_QUORUM_BPS();
+        if (_cultureIndexParams.erc721VotingTokenWeight <= 0) revert INVALID_ERC721_VOTING_WEIGHT();
         if (_erc20VotingToken == address(0)) revert ADDRESS_ZERO();
         if (_erc721VotingToken == address(0)) revert ADDRESS_ZERO();
         if (_initialOwner == address(0)) revert ADDRESS_ZERO();
@@ -122,14 +122,18 @@ contract CultureIndex is
      * - The corresponding media data must not be empty.
      */
     function validateMediaType(ArtPieceMetadata calldata metadata) internal pure {
-        require(uint8(metadata.mediaType) > 0 && uint8(metadata.mediaType) <= 5, "Invalid media type");
+        if (uint8(metadata.mediaType) == 0 || uint8(metadata.mediaType) > 5) revert INVALID_MEDIA_TYPE();
 
-        if (metadata.mediaType == MediaType.IMAGE)
-            require(bytes(metadata.image).length > 0, "Image URL must be provided");
-        else if (metadata.mediaType == MediaType.ANIMATION)
-            require(bytes(metadata.animationUrl).length > 0, "Animation URL must be provided");
-        else if (metadata.mediaType == MediaType.TEXT)
-            require(bytes(metadata.text).length > 0, "Text must be provided");
+        if (metadata.mediaType == MediaType.IMAGE) {
+            if (bytes(metadata.image).length == 0) revert INVALID_MEDIA_METADATA();
+        } else if (metadata.mediaType == MediaType.ANIMATION) {
+            if (bytes(metadata.animationUrl).length == 0) revert INVALID_MEDIA_METADATA();
+        } else if (metadata.mediaType == MediaType.TEXT) {
+            if (bytes(metadata.text).length == 0) revert INVALID_MEDIA_METADATA();
+        }
+
+        //ensure name is set
+        if (bytes(metadata.name).length == 0) revert INVALID_MEDIA_METADATA();
     }
 
     /**
@@ -144,7 +148,7 @@ contract CultureIndex is
     function validateCreatorsArray(CreatorBps[] calldata creatorArray) internal pure returns (uint256) {
         uint256 creatorArrayLength = creatorArray.length;
         //Require that creatorArray is not more than MAX_NUM_CREATORS to prevent gas limit issues
-        require(creatorArrayLength <= MAX_NUM_CREATORS, "Creator array must not be > MAX_NUM_CREATORS");
+        if (creatorArrayLength > MAX_NUM_CREATORS) revert MAX_NUM_CREATORS_EXCEEDED();
 
         uint256 totalBps;
         for (uint i; i < creatorArrayLength; i++) {
@@ -152,7 +156,7 @@ contract CultureIndex is
             totalBps += creatorArray[i].bps;
         }
 
-        require(totalBps == 10_000, "Total BPS must sum up to 10,000");
+        if (totalBps != 10_000) revert INVALID_BPS_SUM();
 
         return creatorArrayLength;
     }
@@ -270,13 +274,13 @@ contract CultureIndex is
      * Emits a VoteCast event upon successful execution.
      */
     function _vote(uint256 pieceId, address voter) internal {
-        require(pieceId < _currentPieceId, "Invalid piece ID");
+        if (pieceId >= _currentPieceId) revert INVALID_PIECE_ID();
         if (voter == address(0)) revert ADDRESS_ZERO();
-        require(!pieces[pieceId].isDropped, "Piece has already been dropped");
-        require(votes[pieceId][voter].voterAddress == address(0), "Already voted");
+        if (pieces[pieceId].isDropped) revert ALREADY_DROPPED();
+        if (votes[pieceId][voter].voterAddress != address(0)) revert ALREADY_VOTED();
 
         uint256 weight = _getPastVotes(voter, pieces[pieceId].creationBlock);
-        require(weight > minVoteWeight, "Weight must be greater than minVoteWeight");
+        if (weight <= minVoteWeight) revert WEIGHT_TOO_LOW();
 
         votes[pieceId][voter] = Vote(voter, weight);
         totalVoteWeights[pieceId] += weight;
@@ -360,10 +364,8 @@ contract CultureIndex is
         bytes32[] memory s
     ) external nonReentrant {
         uint256 len = from.length;
-        require(
-            len == pieceIds.length && len == deadline.length && len == v.length && len == r.length && len == s.length,
-            "Array lengths must match"
-        );
+        if (len != pieceIds.length || len != deadline.length || len != v.length || len != r.length || len != s.length)
+            revert ARRAY_LENGTH_MISMATCH();
 
         for (uint256 i; i < len; i++) {
             if (!_verifyVoteSignature(from[i], pieceIds[i], deadline[i], v[i], r[i], s[i])) revert INVALID_SIGNATURE();
@@ -389,7 +391,7 @@ contract CultureIndex is
         bytes32 r,
         bytes32 s
     ) internal returns (bool success) {
-        require(deadline >= block.timestamp, "Signature expired");
+        if (deadline < block.timestamp) revert SIGNATURE_EXPIRED();
 
         bytes32 voteHash;
 
@@ -414,7 +416,7 @@ contract CultureIndex is
      * @return The ArtPiece struct associated with the given ID.
      */
     function getPieceById(uint256 pieceId) public view returns (ArtPiece memory) {
-        require(pieceId < _currentPieceId, "Invalid piece ID");
+        if (pieceId >= _currentPieceId) revert INVALID_PIECE_ID();
         return pieces[pieceId];
     }
 
@@ -424,7 +426,7 @@ contract CultureIndex is
      * @return An array of Vote structs for the given art piece ID.
      */
     function getVote(uint256 pieceId, address voter) public view returns (Vote memory) {
-        require(pieceId < _currentPieceId, "Invalid piece ID");
+        if (pieceId >= _currentPieceId) revert INVALID_PIECE_ID();
         return votes[pieceId][voter];
     }
 
@@ -449,7 +451,7 @@ contract CultureIndex is
      * @return The top-voted pieceId
      */
     function topVotedPieceId() public view returns (uint256) {
-        require(maxHeap.size() > 0, "Culture index is empty");
+        if (maxHeap.size() == 0) revert CULTURE_INDEX_EMPTY();
         //slither-disable-next-line unused-return
         (uint256 pieceId, ) = maxHeap.getMax();
         return pieceId;
@@ -461,7 +463,7 @@ contract CultureIndex is
      * @param newQuorumVotesBPS new art piece drop threshold
      */
     function _setQuorumVotesBPS(uint256 newQuorumVotesBPS) external onlyOwner {
-        require(newQuorumVotesBPS <= MAX_QUORUM_VOTES_BPS, "CultureIndex::_setQuorumVotesBPS: invalid quorum bps");
+        if (newQuorumVotesBPS > MAX_QUORUM_VOTES_BPS) revert INVALID_QUORUM_BPS();
         emit QuorumVotesBPSSet(quorumVotesBPS, newQuorumVotesBPS);
 
         quorumVotesBPS = newQuorumVotesBPS;
@@ -482,10 +484,10 @@ contract CultureIndex is
      * @return The top voted piece
      */
     function dropTopVotedPiece() public nonReentrant returns (ArtPiece memory) {
-        require(msg.sender == dropperAdmin, "Only dropper can drop pieces");
+        if (msg.sender != dropperAdmin) revert NOT_DROPPER_ADMIN();
 
         ICultureIndex.ArtPiece memory piece = getTopVotedPiece();
-        require(totalVoteWeights[piece.pieceId] >= piece.quorumVotes, "Does not meet quorum votes to be dropped.");
+        if (totalVoteWeights[piece.pieceId] < piece.quorumVotes) revert DOES_NOT_MEET_QUORUM();
 
         //set the piece as dropped
         pieces[piece.pieceId].isDropped = true;

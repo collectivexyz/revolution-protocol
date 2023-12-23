@@ -39,9 +39,28 @@ contract MaxHeap is VersionedContract, UUPS, Ownable2StepUpgradeable, Reentrancy
      * @notice Require that the minter has not been locked.
      */
     modifier onlyAdmin() {
-        require(msg.sender == admin, "Sender is not the admin");
+        if (msg.sender != admin) revert SENDER_NOT_ADMIN();
         _;
     }
+
+    ///                                                          ///
+    ///                           ERRORS                         ///
+    ///                                                          ///
+
+    /// @notice Reverts for empty heap
+    error EMPTY_HEAP();
+
+    /// @notice Reverts for invalid manager initialization
+    error SENDER_NOT_MANAGER();
+
+    /// @notice Reverts for sender not admin
+    error SENDER_NOT_ADMIN();
+
+    /// @notice Reverts for address zero
+    error INVALID_ADDRESS_ZERO();
+
+    /// @notice Reverts for position zero
+    error INVALID_POSITION_ZERO();
 
     ///                                                          ///
     ///                         INITIALIZER                      ///
@@ -53,7 +72,9 @@ contract MaxHeap is VersionedContract, UUPS, Ownable2StepUpgradeable, Reentrancy
      * @param _admin The contract that is allowed to update the data store
      */
     function initialize(address _initialOwner, address _admin) public initializer {
-        require(msg.sender == address(manager), "Only manager can initialize");
+        if (msg.sender != address(manager)) revert SENDER_NOT_MANAGER();
+        if (_initialOwner == address(0)) revert INVALID_ADDRESS_ZERO();
+        if (_admin == address(0)) revert INVALID_ADDRESS_ZERO();
 
         admin = _admin;
 
@@ -76,7 +97,7 @@ contract MaxHeap is VersionedContract, UUPS, Ownable2StepUpgradeable, Reentrancy
     /// @param pos The position for which to find the parent
     /// @return The index of the parent node
     function parent(uint256 pos) private pure returns (uint256) {
-        require(pos != 0, "Position should not be zero");
+        if (pos == 0) revert INVALID_POSITION_ZERO();
         return (pos - 1) / 2;
     }
 
@@ -153,7 +174,7 @@ contract MaxHeap is VersionedContract, UUPS, Ownable2StepUpgradeable, Reentrancy
     /// @dev The function will revert if the heap is empty
     /// @return The maximum element from the heap
     function extractMax() external onlyAdmin returns (uint256, uint256) {
-        require(size > 0, "Heap is empty");
+        if (size == 0) revert EMPTY_HEAP();
 
         uint256 popped = heap[0];
         heap[0] = heap[--size];
@@ -166,7 +187,8 @@ contract MaxHeap is VersionedContract, UUPS, Ownable2StepUpgradeable, Reentrancy
     /// @dev The function will revert if the heap is empty
     /// @return The maximum element from the heap
     function getMax() public view returns (uint256, uint256) {
-        require(size > 0, "Heap is empty");
+        if (size == 0) revert EMPTY_HEAP();
+
         return (heap[0], valueMapping[heap[0]]);
     }
 
