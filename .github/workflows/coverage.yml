@@ -20,7 +20,7 @@ jobs:
       fail-fast: true
 
     name: Coverage
-    runs-on: revolution-protocol
+    runs-on: revolution_solidity
     steps:
       - uses: actions/checkout@v3
         with:

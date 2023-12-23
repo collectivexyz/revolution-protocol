@@ -10,7 +10,7 @@ concurrency: ${{ github.workflow }}-${{ github.ref }}
 jobs:
   release:
     name: Release
-    runs-on: revolution-protocol
+    runs-on: revolution_solidity
     steps:
       - name: Checkout Repo
         uses: actions/checkout@v3

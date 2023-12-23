@@ -7,7 +7,7 @@ on:
 
 jobs:
   analyze:
-    runs-on: revolution-protocol
+    runs-on: revolution_solidity
     steps:
       - uses: actions/checkout@v3
 
