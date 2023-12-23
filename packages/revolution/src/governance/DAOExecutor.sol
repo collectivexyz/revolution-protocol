@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: BSD-3-Clause
 
-/// @title The Verbs DAO executo
+/// @title The Verbs DAO executor
 
 /*********************************
  * ░░░░░░░░░░░░░░░░░░░░░░░░░░░░░ *
