@@ -105,11 +105,8 @@ contract CultureIndexArtPieceTest is CultureIndexTestSuite {
         creators[1] = ICultureIndex.CreatorBps({ creator: address(0x2), bps: 500 });
 
         // Validate that the piece was created with correct data
-        try cultureIndex.createPiece(metadata, creators) {
-            fail("Should not be able to create piece with invalid BPS");
-        } catch Error(string memory reason) {
-            assertEq(reason, "Total BPS must sum up to 10,000");
-        }
+        vm.expectRevert(abi.encodeWithSignature("INVALID_BPS_SUM()"));
+        cultureIndex.createPiece(metadata, creators);
     }
 
     // /**
@@ -134,9 +131,9 @@ contract CultureIndexArtPieceTest is CultureIndexTestSuite {
         cultureIndex.createPiece(metadata, creators);
     }
 
-    // /**
-    //  * @dev Test case to validate the art piece creation with incorrect total basis points
-    //  */
+    /**
+     * @dev Test case to validate the art piece creation with incorrect total basis points
+     */
     function testExcessiveTotalBasisPoints() public {
         (
             CultureIndex.ArtPieceMetadata memory metadata,
@@ -152,11 +149,8 @@ contract CultureIndexArtPieceTest is CultureIndexTestSuite {
                 21_000_000
             );
 
-        try cultureIndex.createPiece(metadata, creators) {
-            fail("Should not be able to create piece with invalid total basis points");
-        } catch Error(string memory reason) {
-            assertEq(reason, "Total BPS must sum up to 10,000");
-        }
+        vm.expectRevert(abi.encodeWithSignature("INVALID_BPS_SUM()"));
+        cultureIndex.createPiece(metadata, creators);
     }
 
     // /**
@@ -177,11 +171,8 @@ contract CultureIndexArtPieceTest is CultureIndexTestSuite {
                 21
             );
 
-        try cultureIndex.createPiece(metadata, creators) {
-            fail("Should not be able to create piece with invalid total basis points");
-        } catch Error(string memory reason) {
-            assertEq(reason, "Total BPS must sum up to 10,000");
-        }
+        vm.expectRevert(abi.encodeWithSignature("INVALID_BPS_SUM()"));
+        cultureIndex.createPiece(metadata, creators);
     }
 
     /**
@@ -200,11 +191,8 @@ contract CultureIndexArtPieceTest is CultureIndexTestSuite {
         ICultureIndex.CreatorBps[] memory creators = new ICultureIndex.CreatorBps[](1);
         creators[0] = ICultureIndex.CreatorBps({ creator: address(0x1), bps: 10000 });
 
-        try cultureIndex.createPiece(metadata, creators) {
-            fail("Should not be able to create piece with invalid media type");
-        } catch Error(string memory reason) {
-            assertEq(reason, "Invalid media type");
-        }
+        vm.expectRevert(abi.encodeWithSignature("INVALID_MEDIA_TYPE()"));
+        cultureIndex.createPiece(metadata, creators);
     }
 
     /**
@@ -225,11 +213,8 @@ contract CultureIndexArtPieceTest is CultureIndexTestSuite {
                 10000
             );
 
-        try cultureIndex.createPiece(metadata, creators) {
-            fail("Should not be able to create piece with missing media data");
-        } catch Error(string memory reason) {
-            assertEq(reason, "Image URL must be provided");
-        }
+        vm.expectRevert(abi.encodeWithSignature("INVALID_MEDIA_METADATA()"));
+        cultureIndex.createPiece(metadata, creators);
     }
 
     /**
@@ -250,11 +235,8 @@ contract CultureIndexArtPieceTest is CultureIndexTestSuite {
                 10000
             );
 
-        try cultureIndex.createPiece(metadata, creators) {
-            fail("Should not be able to create piece with missing media data");
-        } catch Error(string memory reason) {
-            assertEq(reason, "Animation URL must be provided");
-        }
+        vm.expectRevert(abi.encodeWithSignature("INVALID_MEDIA_METADATA()"));
+        cultureIndex.createPiece(metadata, creators);
     }
 
     /**
@@ -275,11 +257,21 @@ contract CultureIndexArtPieceTest is CultureIndexTestSuite {
                 10000
             );
 
-        try cultureIndex.createPiece(metadata, creators) {
-            fail("Should not be able to create piece with missing media data");
-        } catch Error(string memory reason) {
-            assertEq(reason, "Text must be provided");
-        }
+        vm.expectRevert(abi.encodeWithSignature("INVALID_MEDIA_METADATA()"));
+        cultureIndex.createPiece(metadata, creators);
+    }
+
+    /**
+     * @dev Test case to validate art piece creation with missing name
+     */
+    function testMissingName() public {
+        (
+            CultureIndex.ArtPieceMetadata memory metadata,
+            ICultureIndex.CreatorBps[] memory creators
+        ) = createArtPieceTuple("", "Invalid Piece", ICultureIndex.MediaType.TEXT, "", "", "", address(0x1), 10000);
+
+        vm.expectRevert(abi.encodeWithSignature("INVALID_MEDIA_METADATA()"));
+        cultureIndex.createPiece(metadata, creators);
     }
 
     /**
@@ -333,11 +325,8 @@ contract CultureIndexArtPieceTest is CultureIndexTestSuite {
             });
         }
 
-        try cultureIndex.createPiece(metadata, creators) {
-            fail("Should not be able to create piece with creatorArray length > MAX_NUM_CREATORS");
-        } catch Error(string memory reason) {
-            assertEq(reason, "Creator array must not be > MAX_NUM_CREATORS");
-        }
+        vm.expectRevert(abi.encodeWithSignature("MAX_NUM_CREATORS_EXCEEDED()"));
+        cultureIndex.createPiece(metadata, creators);
     }
 
     function testArtPieceCreationAndVoting(uint256 erc20Supply, uint256 quorumVotesBPS) public {
