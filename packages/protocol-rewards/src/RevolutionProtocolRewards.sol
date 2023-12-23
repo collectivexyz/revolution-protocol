@@ -10,7 +10,7 @@ import { IRevolutionProtocolRewards } from "./interfaces/IRevolutionProtocolRewa
 //
 // ProtocolRewards.sol source code Copyright Zora licensed under the MIT license.
 
-/// @title ProtocolRewards
+/// @title RevolutionProtocolRewards
 /// @notice Manager of deposits & withdrawals for protocol rewards
 contract RevolutionProtocolRewards is IRevolutionProtocolRewards, EIP712 {
     /// @notice The EIP-712 typehash for gasless withdraws

@@ -146,6 +146,7 @@ contract TokenMintingTest is VerbsTokenTestSuite {
 
     /// @dev Ensures _currentVerbId increments correctly after each mint
     function testMintingIncrement(uint200 voteWeight) public {
+        vm.assume(voteWeight < type(uint200).max / 2);
         vm.stopPrank();
         vm.startPrank(address(erc20TokenEmitter));
         erc20Token.mint(address(1), 10000);
@@ -162,7 +163,9 @@ contract TokenMintingTest is VerbsTokenTestSuite {
         if (voteWeight == 0) vm.expectRevert("Weight must be greater than minVoteWeight");
         cultureIndex.vote(pieceId1);
 
-        bool shouldRevertMint = voteWeight <= (10_000 * cultureIndex.quorumVotesBPS()) / 10_000;
+        uint256 expectedQuorum = ((10_000 + voteWeight) * cultureIndex.quorumVotesBPS()) / 10_000;
+
+        bool shouldRevertMint = voteWeight <= expectedQuorum;
 
         vm.startPrank(address(auction));
         if (shouldRevertMint) vm.expectRevert("dropTopVotedPiece failed");

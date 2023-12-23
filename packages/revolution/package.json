@@ -1,11 +1,14 @@
 {
-  "name": "@cobuilding/revolution",
-  "version": "0.2.9",
+  "name": "@cobuild/revolution",
+  "version": "0.2.1",
   "repository": "https://github.com/collectivexyz/revolution-protocol.git",
   "license": "MIT",
   "main": "./dist/index.js",
   "types": "./dist/package/index.d.ts",
   "type": "module",
+  "publishConfig": {
+    "access": "public"
+  },
   "scripts": {
     "build:sizes": "forge build --sizes",
     "dev": "FOUNDRY_PROFILE=dev forge test --watch -vvv",
@@ -26,8 +29,6 @@
   "files": [
     "dist/",
     "src/",
-    "addresses/",
-    "chainConfigs/",
     "package/",
     "abis/"
   ],
@@ -42,7 +43,7 @@
     "tsx": "^4.6.2"
   },
   "dependencies": {
-    "@cobuilding/protocol-rewards": "0.9.0",
+    "@cobuild/protocol-rewards": "workspace:*",
     "@openzeppelin/contracts": "5.0.0",
     "@openzeppelin/contracts-upgradeable": "5.0.0",
     "@wagmi/cli": "^1.5.2",

@@ -1,9 +1,10 @@
 [profile.default]
 fs_permissions = [
   { access = "read", path = "./package.json" },
+  { access = "read-write", path = "./deploys"}
 ]
-libs = ['node_modules']
-allow_paths = ["node_modules/@cobuilding/protocol-rewards", "../../node_modules"]
+libs = ['node_modules', 'script', '../../node_modules']
+allow_paths = ["node_modules/@cobuild/protocol-rewards", "../../node_modules"]
 optimizer = true
 optimizer_runs = 50
 via_ir = true
@@ -12,6 +13,7 @@ out = 'out'
 src = 'src'
 
 [profile.dev]
+libs = ['node_modules', 'script']
 optimizer = false
 optimizer_runs = 0
 via_ir = false

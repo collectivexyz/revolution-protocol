@@ -6,7 +6,7 @@ import { unsafeWadDiv, toDaysWadUnsafe } from "../../src/libs/SignedWadMath.sol"
 import { ERC20TokenEmitter } from "../../src/ERC20TokenEmitter.sol";
 import { IERC20TokenEmitter } from "../../src/interfaces/IERC20TokenEmitter.sol";
 import { NontransferableERC20Votes } from "../../src/NontransferableERC20Votes.sol";
-import { RevolutionProtocolRewards } from "@cobuilding/protocol-rewards/src/RevolutionProtocolRewards.sol";
+import { RevolutionProtocolRewards } from "@cobuild/protocol-rewards/src/RevolutionProtocolRewards.sol";
 import { wadDiv } from "../../src/libs/SignedWadMath.sol";
 import { IRevolutionBuilder } from "../../src/interfaces/IRevolutionBuilder.sol";
 import { RevolutionBuilderTest } from "../RevolutionBuilder.t.sol";

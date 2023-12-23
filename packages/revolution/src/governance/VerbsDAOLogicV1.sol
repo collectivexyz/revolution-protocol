@@ -406,6 +406,7 @@ contract VerbsDAOLogicV1 is
 
         uint256 erc20PointsVotesWad = verbsPoints.getPastVotes(account, blockNumber);
 
+        //todo rm 1e18
         return (erc721TokenVotes * 1e18 * erc721TokenVotingWeight) + erc20PointsVotesWad;
     }
 
