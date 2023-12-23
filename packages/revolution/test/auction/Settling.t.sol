@@ -36,7 +36,7 @@ contract AuctionHouseSettleTest is AuctionHouseTest {
         // cultureIndex currentVotes of highest bidder should be 10
         assertEq(
             cultureIndex.getVotes(address(11)),
-            cultureIndex.erc721VotingTokenWeight() * 1e18,
+            cultureIndex.erc721VotingTokenWeight(),
             "Highest bidder should have 10 votes"
         );
     }
@@ -141,7 +141,7 @@ contract AuctionHouseSettleTest is AuctionHouseTest {
         //make sure voting weight on culture index is 721 vote weight for winning bidder
         assertEq(
             cultureIndex.getVotes(address(this)),
-            cultureIndex.erc721VotingTokenWeight() * 1e18,
+            cultureIndex.erc721VotingTokenWeight(),
             "Highest bidder should have 10 votes"
         );
     }
@@ -176,7 +176,7 @@ contract AuctionHouseSettleTest is AuctionHouseTest {
         //make sure voting weight on culture index is 721 vote weight for winning bidder
         assertEq(
             cultureIndex.getVotes(address(this)),
-            cultureIndex.erc721VotingTokenWeight() * 1e18,
+            cultureIndex.erc721VotingTokenWeight(),
             "Highest bidder should have 10 votes"
         );
     }
@@ -218,7 +218,7 @@ contract AuctionHouseSettleTest is AuctionHouseTest {
         //make sure voting weight on culture index is 721 vote weight for winning bidder
         assertEq(
             cultureIndex.getVotes(address(this)),
-            cultureIndex.erc721VotingTokenWeight() * 1e18,
+            cultureIndex.erc721VotingTokenWeight(),
             "Highest bidder should have 10 votes"
         );
     }
@@ -343,14 +343,14 @@ contract AuctionHouseSettleTest is AuctionHouseTest {
             );
         }
 
-        // // Verify ownership of the verb
-        // assertEq(erc721Token.ownerOf(0), address(21_000), "Verb should be transferred to the highest bidder");
-        // // Verify voting weight on culture index is 721 vote weight for winning bidder
-        // assertEq(
-        //     cultureIndex.getVotes(address(21_000)),
-        //     cultureIndex.erc721VotingTokenWeight() * 1e18,
-        //     "Highest bidder should have 10 votes"
-        // );
+        // Verify ownership of the verb
+        assertEq(erc721Token.ownerOf(0), address(21_000), "Verb should be transferred to the highest bidder");
+        // Verify voting weight on culture index is 721 vote weight for winning bidder
+        assertEq(
+            cultureIndex.getVotes(address(21_000)),
+            cultureIndex.erc721VotingTokenWeight(),
+            "Highest bidder should have 10 votes"
+        );
     }
 
     function testSettlingAuctionWithWinningBidAndCreatorPayout(uint256 bidAmount) public {
@@ -418,12 +418,11 @@ contract AuctionHouseSettleTest is AuctionHouseTest {
             10
         );
 
-        // Checking ownership of the verb
         assertEq(erc721Token.ownerOf(verbId), address(21_000), "Verb should be transferred to the highest bidder");
         // Checking voting weight on culture index is 721 vote weight for winning bidder
         assertEq(
             cultureIndex.getVotes(address(21_000)),
-            cultureIndex.erc721VotingTokenWeight() * 1e18,
+            cultureIndex.erc721VotingTokenWeight(),
             "Highest bidder should have 10 votes"
         );
 

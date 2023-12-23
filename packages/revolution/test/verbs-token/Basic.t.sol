@@ -7,7 +7,7 @@ import { IVerbsToken } from "../../src/interfaces/IVerbsToken.sol";
 import { IDescriptorMinimal } from "../../src/interfaces/IDescriptorMinimal.sol";
 import { ICultureIndex, ICultureIndexEvents } from "../../src/interfaces/ICultureIndex.sol";
 import { Strings } from "@openzeppelin/contracts/utils/Strings.sol";
-import { CultureIndex } from "../../src/CultureIndex.sol";
+import { CultureIndex } from "../../src/culture-index/CultureIndex.sol";
 import { MockERC20 } from "../mock/MockERC20.sol";
 import { Descriptor } from "../../src/Descriptor.sol";
 import "../utils/Base64Decode.sol";
@@ -186,7 +186,7 @@ contract TokenBasicTest is VerbsTokenTestSuite {
         uint256 creatorBps = 10000;
 
         // Act & Assert
-        vm.expectRevert("Invalid creator address");
+        vm.expectRevert(abi.encodeWithSignature("ADDRESS_ZERO()"));
         createArtPiece(name, description, mediaType, image, text, animationUrl, zeroCreatorAddress, creatorBps);
     }
 

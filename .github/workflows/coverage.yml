@@ -20,7 +20,7 @@ jobs:
       fail-fast: true
 
     name: Coverage
-    runs-on: ubuntu-latest
+    runs-on: revolution_protocol_builds_ubuntu
     steps:
       - uses: actions/checkout@v3
         with:

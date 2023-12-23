@@ -4,16 +4,17 @@ pragma solidity ^0.8.22;
 import { Ownable2StepUpgradeable } from "@openzeppelin/contracts-upgradeable/access/Ownable2StepUpgradeable.sol";
 import { ReentrancyGuardUpgradeable } from "@openzeppelin/contracts-upgradeable/utils/ReentrancyGuardUpgradeable.sol";
 
-import { UUPS } from "./libs/proxy/UUPS.sol";
-import { VersionedContract } from "./version/VersionedContract.sol";
+import { UUPS } from "../libs/proxy/UUPS.sol";
+import { VersionedContract } from "../version/VersionedContract.sol";
 
-import { IRevolutionBuilder } from "./interfaces/IRevolutionBuilder.sol";
+import { IRevolutionBuilder } from "../interfaces/IRevolutionBuilder.sol";
 
-import { ERC20VotesUpgradeable } from "./base/erc20/ERC20VotesUpgradeable.sol";
-import { MaxHeap } from "./MaxHeap.sol";
-import { ICultureIndex } from "./interfaces/ICultureIndex.sol";
+import { ERC20VotesUpgradeable } from "../base/erc20/ERC20VotesUpgradeable.sol";
+import { MaxHeap } from "../MaxHeap.sol";
+import { ICultureIndex } from "../interfaces/ICultureIndex.sol";
+import { CultureIndexStorageV1 } from "./storage/CultureIndexStorageV1.sol";
 
-import { ERC721CheckpointableUpgradeable } from "./base/ERC721CheckpointableUpgradeable.sol";
+import { ERC721CheckpointableUpgradeable } from "../base/ERC721CheckpointableUpgradeable.sol";
 import { EIP712Upgradeable } from "@openzeppelin/contracts-upgradeable/utils/cryptography/EIP712Upgradeable.sol";
 import { Strings } from "@openzeppelin/contracts/utils/Strings.sol";
 
@@ -23,60 +24,9 @@ contract CultureIndex is
     UUPS,
     Ownable2StepUpgradeable,
     ReentrancyGuardUpgradeable,
-    EIP712Upgradeable
+    EIP712Upgradeable,
+    CultureIndexStorageV1
 {
-    /// @notice The EIP-712 typehash for gasless votes
-    bytes32 public constant VOTE_TYPEHASH =
-        keccak256("Vote(address from,uint256[] pieceIds,uint256 nonce,uint256 deadline)");
-
-    /// @notice An account's nonce for gasless votes
-    mapping(address => uint256) public nonces;
-
-    // The MaxHeap data structure used to keep track of the top-voted piece
-    MaxHeap public maxHeap;
-
-    // The ERC20 token used for voting
-    ERC20VotesUpgradeable public erc20VotingToken;
-
-    // The ERC721 token used for voting
-    ERC721CheckpointableUpgradeable public erc721VotingToken;
-
-    // The weight of the 721 voting token
-    uint256 public erc721VotingTokenWeight;
-
-    /// @notice The maximum settable quorum votes basis points
-    uint256 public constant MAX_QUORUM_VOTES_BPS = 6_000; // 6,000 basis points or 60%
-
-    /// @notice The minimum vote weight required in order to vote
-    uint256 public minVoteWeight;
-
-    /// @notice The basis point number of votes in support of a art piece required in order for a quorum to be reached and for an art piece to be dropped.
-    uint256 public quorumVotesBPS;
-
-    /// @notice The name of the culture index
-    string public name;
-
-    /// @notice A description of the culture index - can include rules or guidelines
-    string public description;
-
-    // The list of all pieces
-    mapping(uint256 => ArtPiece) public pieces;
-
-    // The internal piece ID tracker
-    uint256 public _currentPieceId;
-
-    // The mapping of all votes for a piece
-    mapping(uint256 => mapping(address => Vote)) public votes;
-
-    // The total voting weight for a piece
-    mapping(uint256 => uint256) public totalVoteWeights;
-
-    // Constant for max number of creators
-    uint256 public constant MAX_NUM_CREATORS = 100;
-
-    // The address that is allowed to drop art pieces
-    address public dropperAdmin;
-
     ///                                                          ///
     ///                         IMMUTABLES                       ///
     ///                                                          ///
@@ -84,12 +34,26 @@ contract CultureIndex is
     /// @notice The contract upgrade manager
     IRevolutionBuilder private immutable manager;
 
+    // Constant for max number of creators
+    uint256 public constant MAX_NUM_CREATORS = 100;
+
+    // The weight of the 721 voting token
+    uint256 public erc721VotingTokenWeight;
+
+    /// @notice The maximum settable quorum votes basis points
+    uint256 public constant MAX_QUORUM_VOTES_BPS = 6_000; // 6,000 basis points or 60%
+
+    /// @notice The EIP-712 typehash for gasless votes
+    bytes32 public constant VOTE_TYPEHASH =
+        keccak256("Vote(address from,uint256[] pieceIds,uint256 nonce,uint256 deadline)");
+
     ///                                                          ///
     ///                         CONSTRUCTOR                      ///
     ///                                                          ///
 
     /// @param _manager The contract upgrade manager address
     constructor(address _manager) payable initializer {
+        if (_manager == address(0)) revert ADDRESS_ZERO();
         manager = IRevolutionBuilder(_manager);
     }
 
@@ -118,8 +82,9 @@ contract CultureIndex is
 
         require(_cultureIndexParams.quorumVotesBPS <= MAX_QUORUM_VOTES_BPS, "invalid quorum bps");
         require(_cultureIndexParams.erc721VotingTokenWeight > 0, "invalid erc721 voting token weight");
-        require(_erc721VotingToken != address(0), "invalid erc721 voting token");
-        require(_erc20VotingToken != address(0), "invalid erc20 voting token");
+        if (_erc20VotingToken == address(0)) revert ADDRESS_ZERO();
+        if (_erc721VotingToken == address(0)) revert ADDRESS_ZERO();
+        if (_initialOwner == address(0)) revert ADDRESS_ZERO();
 
         // Setup ownable
         __Ownable_init(_initialOwner);
@@ -183,7 +148,7 @@ contract CultureIndex is
 
         uint256 totalBps;
         for (uint i; i < creatorArrayLength; i++) {
-            require(creatorArray[i].creator != address(0), "Invalid creator address");
+            if (creatorArray[i].creator == address(0)) revert ADDRESS_ZERO();
             totalBps += creatorArray[i].bps;
         }
 
@@ -282,7 +247,7 @@ contract CultureIndex is
      * @return The vote weight of the voter.
      */
     function _calculateVoteWeight(uint256 erc20Balance, uint256 erc721Balance) internal view returns (uint256) {
-        return erc20Balance + (erc721Balance * erc721VotingTokenWeight * 1e18);
+        return erc20Balance + (erc721Balance * erc721VotingTokenWeight);
     }
 
     function _getVotes(address account) internal view returns (uint256) {
@@ -306,7 +271,7 @@ contract CultureIndex is
      */
     function _vote(uint256 pieceId, address voter) internal {
         require(pieceId < _currentPieceId, "Invalid piece ID");
-        require(voter != address(0), "Invalid voter address");
+        if (voter == address(0)) revert ADDRESS_ZERO();
         require(!pieces[pieceId].isDropped, "Piece has already been dropped");
         require(votes[pieceId][voter].voterAddress == address(0), "Already voted");
 

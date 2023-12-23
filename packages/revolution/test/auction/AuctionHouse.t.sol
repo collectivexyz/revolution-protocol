@@ -7,7 +7,7 @@ import { MockERC20 } from "../mock/MockERC20.sol";
 import { VerbsToken } from "../../src/VerbsToken.sol";
 import { IVerbsToken } from "../../src/interfaces/IVerbsToken.sol";
 import { Descriptor } from "../../src/Descriptor.sol";
-import { CultureIndex } from "../../src/CultureIndex.sol";
+import { CultureIndex } from "../../src/culture-index/CultureIndex.sol";
 import { IDescriptorMinimal } from "../../src/interfaces/IDescriptorMinimal.sol";
 import { ICultureIndex, ICultureIndexEvents } from "../../src/interfaces/ICultureIndex.sol";
 import { IAuctionHouse } from "../../src/interfaces/IAuctionHouse.sol";

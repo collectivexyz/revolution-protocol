@@ -29,6 +29,7 @@
 // See VerbsDAOLogicV1.sol for more details.
 
 import { IDAOExecutor } from "../interfaces/IDAOExecutor.sol";
+import { IRevolutionBuilder } from "../interfaces/IRevolutionBuilder.sol";
 
 pragma solidity 0.8.22;
 
@@ -142,6 +143,9 @@ contract VerbsDAOProxyStorage {
  * VerbsDAOStorageVX.
  */
 contract VerbsDAOStorageV1 is VerbsDAOProxyStorage {
+    /// @notice The contract upgrade manager
+    IRevolutionBuilder public immutable manager;
+
     /// @notice Vetoer who has the ability to veto any proposal
     address public vetoer;
 
@@ -167,7 +171,7 @@ contract VerbsDAOStorageV1 is VerbsDAOProxyStorage {
     VerbsTokenLike public verbs;
 
     /// @notice The address of the Verbs ERC20 points
-    VerbsPointsLike public verbsPoints;
+    PointsLike public points;
 
     /// @notice The official record of all proposals ever proposed
     mapping(uint256 => Proposal) internal _proposals;
@@ -220,8 +224,12 @@ contract VerbsDAOStorageV1 is VerbsDAOProxyStorage {
         bool executed;
         /// @notice Receipts of ballots for the entire set of voters
         mapping(address => Receipt) receipts;
-        /// @notice The total supply at the time of proposal creation
-        uint256 totalSupply;
+        /// @notice The total weighted supply at the time of proposal creation
+        uint256 totalWeightedSupply;
+        /// @notice The total supply of points at the time of proposal creation
+        uint256 erc20PointsSupply;
+        /// @notice The total supply of verbs at the time of proposal creation
+        uint256 verbsTokenSupply;
         /// @notice The block at which this proposal was created
         uint256 creationBlock;
     }
@@ -294,20 +302,20 @@ contract VerbsDAOStorageV1 is VerbsDAOProxyStorage {
         bool vetoed;
         /// @notice Flag marking whether the proposal has been executed
         bool executed;
-        /// @notice The total supply at the time of proposal creation
-        uint256 totalSupply;
+        /// @notice The total weighted supply at the time of proposal creation
+        uint256 totalWeightedSupply;
         /// @notice The block at which this proposal was created
         uint256 creationBlock;
     }
 }
 
 interface VerbsTokenLike {
-    function getPriorVotes(address account, uint256 blockNumber) external view returns (uint96);
+    function getPastVotes(address account, uint256 blockNumber) external view returns (uint96);
 
     function totalSupply() external view returns (uint256);
 }
 
-interface VerbsPointsLike {
+interface PointsLike {
     function getPastVotes(address account, uint256 blockNumber) external view returns (uint96);
 
     function totalSupply() external view returns (uint256);

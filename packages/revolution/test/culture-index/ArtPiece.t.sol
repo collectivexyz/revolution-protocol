@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.22;
 
-import { CultureIndex } from "../../src/CultureIndex.sol";
+import { CultureIndex } from "../../src/culture-index/CultureIndex.sol";
 import { MockERC20 } from "../mock/MockERC20.sol";
 import { ICultureIndex } from "../../src/interfaces/ICultureIndex.sol";
 import { CultureIndexTestSuite } from "./CultureIndex.t.sol";
@@ -130,11 +130,8 @@ contract CultureIndexArtPieceTest is CultureIndexTestSuite {
                 10000
             );
 
-        try cultureIndex.createPiece(metadata, creators) {
-            fail("Should not be able to create piece with zero address for creator");
-        } catch Error(string memory reason) {
-            assertEq(reason, "Invalid creator address");
-        }
+        vm.expectRevert(abi.encodeWithSignature("ADDRESS_ZERO()"));
+        cultureIndex.createPiece(metadata, creators);
     }
 
     // /**
@@ -395,7 +392,7 @@ contract CultureIndexArtPieceTest is CultureIndexTestSuite {
             1e18 * cultureIndex.erc721VotingTokenWeight()
         );
 
-        uint256 expectedTotalVotesSupply2 = erc20Supply * 2 + 1e18 * cultureIndex.erc721VotingTokenWeight();
+        uint256 expectedTotalVotesSupply2 = erc20Supply * 2 + cultureIndex.erc721VotingTokenWeight();
         emit log_named_uint("expectedTotalVotesSupply2", expectedTotalVotesSupply2);
         uint256 expectedQuorumVotes2 = (quorumVotesBPS * (expectedTotalVotesSupply2)) / 10_000;
         assertEq(newPiece.quorumVotes, expectedQuorumVotes2, "Quorum votes should be set correctly on second creation");

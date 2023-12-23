@@ -10,7 +10,7 @@ import { Descriptor } from "../src/Descriptor.sol";
 import { IAuctionHouse, AuctionHouse } from "../src/AuctionHouse.sol";
 import { VerbsDAOLogicV1 } from "../src/governance/VerbsDAOLogicV1.sol";
 import { DAOExecutor } from "../src/governance/DAOExecutor.sol";
-import { CultureIndex } from "../src/CultureIndex.sol";
+import { CultureIndex } from "../src/culture-index/CultureIndex.sol";
 import { NontransferableERC20Votes } from "../src/NontransferableERC20Votes.sol";
 import { ERC20TokenEmitter } from "../src/ERC20TokenEmitter.sol";
 import { MaxHeap } from "../src/MaxHeap.sol";
@@ -177,7 +177,7 @@ contract RevolutionBuilderTest is Test {
     }
 
     function setMockGovParams() internal virtual {
-        setGovParams(2 days, 1 seconds, 1 weeks, 50, founder, 100, 1000, 0, 1000, "Vrbs DAO");
+        setGovParams(2 days, 1 seconds, 1 weeks, 50, founder, 100 * 1e18, 1000, 0, 1000, "Vrbs DAO");
     }
 
     function setGovParams(
@@ -209,7 +209,7 @@ contract RevolutionBuilderTest is Test {
     }
 
     function setMockCultureIndexParams() internal virtual {
-        setCultureIndexParams("Vrbs", "Our community Vrbs. Must be 32x32.", 100, 1000, 0);
+        setCultureIndexParams("Vrbs", "Our community Vrbs. Must be 32x32.", 100 * 1e18, 1000, 0);
     }
 
     function setCultureIndexParams(

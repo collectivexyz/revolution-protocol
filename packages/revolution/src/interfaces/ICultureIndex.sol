@@ -70,8 +70,14 @@ interface ICultureIndexEvents {
  * @dev This interface defines the methods for the CultureIndex contract for art piece management and voting.
  */
 interface ICultureIndex is ICultureIndexEvents {
+    ///                                                          ///
+    ///                           ERRORS                         ///
+    ///                                                          ///
+
+    /// @dev thrown if the voting signature is invalid
     error INVALID_SIGNATURE();
 
+    /// @dev thrown if address 0 is passed but not allowed
     error ADDRESS_ZERO();
 
     // Enum representing different media types for art pieces.
@@ -138,13 +144,6 @@ interface ICultureIndex is ICultureIndexEvents {
      * @return The total count of art pieces.
      */
     function pieceCount() external view returns (uint256);
-
-    /**
-     * @notice Returns the total voting weight for a specific art piece.
-     * @param pieceId The ID of the art piece.
-     * @return The total vote weight for the art piece.
-     */
-    function totalVoteWeights(uint256 pieceId) external view returns (uint256);
 
     /**
      * @notice Checks if a specific voter has already voted for a given art piece.

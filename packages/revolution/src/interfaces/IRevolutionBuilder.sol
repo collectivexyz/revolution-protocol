@@ -96,7 +96,7 @@ interface IRevolutionBuilder is IUUPS {
     /// @param votingPeriod The time period to vote on a proposal
     /// @param proposalThresholdBPS The basis points of the token supply required to create a proposal
     /// @param vetoer The address authorized to veto proposals (address(0) if none desired)
-    /// @param erc721TokenVotingWeight The voting weight of the individual ERC721 tokens
+    /// @param erc721TokenVotingWeight The voting weight of the individual ERC721 tokens, normally a large multiple of 1e18 eg: (100 * 1e18) to match up with daily emission of ERC20 points (which normally have 18 decimals)
     /// @param daoName The name of the DAO
     /// @param dynamicQuorumParams The dynamic quorum parameters
     struct GovParams {
@@ -148,7 +148,7 @@ interface IRevolutionBuilder is IUUPS {
     /// @notice The CultureIndex parameters
     /// @param name The name of the culture index
     /// @param description A description for the culture index, can include rules for uploads etc.
-    /// @param erc721VotingTokenWeight The voting weight of the individual ERC721 tokens. Normally a large multiple to match up with daily emission of ERC20 points
+    /// @param erc721VotingTokenWeight The voting weight of the individual ERC721 tokens. Normally a large multiple to match up with daily emission of ERC20 points to match up with daily emission of ERC20 points (which normally have 18 decimals)
     /// @param quorumVotesBPS The initial quorum votes threshold in basis points
     /// @param minVoteWeight The minimum vote weight in basis points that a voter must have to be able to vote.
     struct CultureIndexParams {

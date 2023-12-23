@@ -5,22 +5,22 @@
 ➡ CultureIndex
 =======================
 
-| Name                    | Type                                                              | Slot | Offset | Bytes | Contract                          |
-|-------------------------|-------------------------------------------------------------------|------|--------|-------|-----------------------------------|
-| nonces                  | mapping(address => uint256)                                       | 0    | 0      | 32    | src/CultureIndex.sol:CultureIndex |
-| maxHeap                 | contract MaxHeap                                                  | 1    | 0      | 20    | src/CultureIndex.sol:CultureIndex |
-| erc20VotingToken        | contract ERC20VotesUpgradeable                                    | 2    | 0      | 20    | src/CultureIndex.sol:CultureIndex |
-| erc721VotingToken       | contract ERC721CheckpointableUpgradeable                          | 3    | 0      | 20    | src/CultureIndex.sol:CultureIndex |
-| erc721VotingTokenWeight | uint256                                                           | 4    | 0      | 32    | src/CultureIndex.sol:CultureIndex |
-| minVoteWeight           | uint256                                                           | 5    | 0      | 32    | src/CultureIndex.sol:CultureIndex |
-| quorumVotesBPS          | uint256                                                           | 6    | 0      | 32    | src/CultureIndex.sol:CultureIndex |
-| name                    | string                                                            | 7    | 0      | 32    | src/CultureIndex.sol:CultureIndex |
-| description             | string                                                            | 8    | 0      | 32    | src/CultureIndex.sol:CultureIndex |
-| pieces                  | mapping(uint256 => struct ICultureIndex.ArtPiece)                 | 9    | 0      | 32    | src/CultureIndex.sol:CultureIndex |
-| _currentPieceId         | uint256                                                           | 10   | 0      | 32    | src/CultureIndex.sol:CultureIndex |
-| votes                   | mapping(uint256 => mapping(address => struct ICultureIndex.Vote)) | 11   | 0      | 32    | src/CultureIndex.sol:CultureIndex |
-| totalVoteWeights        | mapping(uint256 => uint256)                                       | 12   | 0      | 32    | src/CultureIndex.sol:CultureIndex |
-| dropperAdmin            | address                                                           | 13   | 0      | 20    | src/CultureIndex.sol:CultureIndex |
+| Name                    | Type                                                              | Slot | Offset | Bytes | Contract                                        |
+|-------------------------|-------------------------------------------------------------------|------|--------|-------|-------------------------------------------------|
+| nonces                  | mapping(address => uint256)                                       | 0    | 0      | 32    | src/culture-index/CultureIndex.sol:CultureIndex |
+| maxHeap                 | contract MaxHeap                                                  | 1    | 0      | 20    | src/culture-index/CultureIndex.sol:CultureIndex |
+| erc20VotingToken        | contract ERC20VotesUpgradeable                                    | 2    | 0      | 20    | src/culture-index/CultureIndex.sol:CultureIndex |
+| erc721VotingToken       | contract ERC721CheckpointableUpgradeable                          | 3    | 0      | 20    | src/culture-index/CultureIndex.sol:CultureIndex |
+| minVoteWeight           | uint256                                                           | 4    | 0      | 32    | src/culture-index/CultureIndex.sol:CultureIndex |
+| quorumVotesBPS          | uint256                                                           | 5    | 0      | 32    | src/culture-index/CultureIndex.sol:CultureIndex |
+| name                    | string                                                            | 6    | 0      | 32    | src/culture-index/CultureIndex.sol:CultureIndex |
+| description             | string                                                            | 7    | 0      | 32    | src/culture-index/CultureIndex.sol:CultureIndex |
+| pieces                  | mapping(uint256 => struct ICultureIndex.ArtPiece)                 | 8    | 0      | 32    | src/culture-index/CultureIndex.sol:CultureIndex |
+| _currentPieceId         | uint256                                                           | 9    | 0      | 32    | src/culture-index/CultureIndex.sol:CultureIndex |
+| votes                   | mapping(uint256 => mapping(address => struct ICultureIndex.Vote)) | 10   | 0      | 32    | src/culture-index/CultureIndex.sol:CultureIndex |
+| totalVoteWeights        | mapping(uint256 => uint256)                                       | 11   | 0      | 32    | src/culture-index/CultureIndex.sol:CultureIndex |
+| dropperAdmin            | address                                                           | 12   | 0      | 20    | src/culture-index/CultureIndex.sol:CultureIndex |
+| erc721VotingTokenWeight | uint256                                                           | 13   | 0      | 32    | src/culture-index/CultureIndex.sol:CultureIndex |
 
 =======================
 ➡ ERC20TokenEmitter

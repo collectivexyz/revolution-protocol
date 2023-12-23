@@ -2,7 +2,7 @@
 pragma solidity ^0.8.22;
 
 import { Test } from "forge-std/Test.sol";
-import { CultureIndex } from "../../src/CultureIndex.sol";
+import { CultureIndex } from "../../src/culture-index/CultureIndex.sol";
 import { MockERC20 } from "../mock/MockERC20.sol";
 import { ICultureIndex } from "../../src/interfaces/ICultureIndex.sol";
 import { NontransferableERC20Votes } from "../../src/NontransferableERC20Votes.sol";
@@ -35,33 +35,6 @@ contract CultureIndexTestSuite is RevolutionBuilderTest {
 
         //start prank to be cultureindex's owner
         vm.startPrank(address(dao));
-
-        // govToken = new NontransferableERC20Votes(address(this), "Revolution Governance", "GOV");
-
-        // // Initialize VerbsToken with additional parameters
-        // verbs = new VerbsToken(
-        //     address(this), // Address of the minter (and initial owner)
-        //     address(this), // Address of the owner
-        //     IDescriptorMinimal(address(0)),
-        //     ICultureIndex(address(0)),
-        //     "Vrbs",
-        //     "VRBS",
-        //     "QmQzDwaZ7yQxHHs7sQQenJVB89riTSacSGcJRv9jtHPuz5"
-        // );
-
-        // // Initialize your CultureIndex contract
-        // cultureIndex = new CultureIndex(
-        //     "Vrbs",
-        //     "Our community Vrbs. Must be 32x32.",
-        //     address(erc20Token),
-        //     address(erc721Token),
-        //     address(this),
-        //     10,
-        //     200,
-        //     0
-        // );
-
-        // erc721Token.setCultureIndex(cultureIndex);
 
         // // Create new test instances acting as different voters
         voter1Test = new CultureIndexVotingTest(address(cultureIndex), address(erc20Token));

@@ -152,12 +152,12 @@ contract ERC1967Proxy is IERC1967Upgrade, Proxy, ERC1967Upgrade {
 }
 
 interface VerbsTokenLike {
-    function getPriorVotes(address account, uint256 blockNumber) external view returns (uint96);
+    function getPastVotes(address account, uint256 blockNumber) external view returns (uint96);
 
     function totalSupply() external view returns (uint256);
 }
 
-interface VerbsPointsLike {
+interface PointsLike {
     function getPastVotes(address account, uint256 blockNumber) external view returns (uint96);
 
     function totalSupply() external view returns (uint256);
@@ -1918,8 +1918,8 @@ contract VerbsDAOStorageV1 is VerbsDAOProxyStorage {
     /// @notice The address of the Verbs ERC721 tokens
     VerbsTokenLike public verbs;
 
-    /// @notice The address of the Verbs ERC20 points
-    VerbsPointsLike public verbsPoints;
+    /// @notice The address of the ERC20 points
+    PointsLike public points;
 
     /// @notice The official record of all proposals ever proposed
     mapping(uint256 => Proposal) internal _proposals;
