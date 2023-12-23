@@ -96,7 +96,7 @@ interface IRevolutionBuilder is IUUPS {
     /// @param votingPeriod The time period to vote on a proposal
     /// @param proposalThresholdBPS The basis points of the token supply required to create a proposal
     /// @param vetoer The address authorized to veto proposals (address(0) if none desired)
-    /// @param erc721TokenVotingWeight The voting weight of the individual ERC721 tokens
+    /// @param erc721TokenVotingWeight The voting weight of the individual ERC721 tokens, normally a large multiple of 1e18 eg: (100 * 1e18) to match up with daily emission of ERC20 points (which normally have 18 decimals)
     /// @param daoName The name of the DAO
     /// @param dynamicQuorumParams The dynamic quorum parameters
     struct GovParams {

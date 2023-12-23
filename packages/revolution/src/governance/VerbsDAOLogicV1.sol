@@ -38,7 +38,7 @@
 //    - `_setMaxQuorumVotesBPS(uint16 newMaxQuorumVotesBPS)`
 //    - `_setQuorumCoefficient(uint32 newQuorumCoefficient)`
 // - `minQuorumVotes` and `maxQuorumVotes`, which returns the current min and
-// max quorum votes using the current Noun supply.
+// max quorum votes using the current Verb token and points supply.
 // - New `Proposal` struct member:
 //    - `totalSupply` used in dynamic quorum calculation.
 //    - `creationBlock` used for retrieving checkpoints of votes and dynamic quorum params. This now
@@ -248,7 +248,7 @@ contract VerbsDAOLogicV1 is
     ) public returns (uint256) {
         ProposalTemp memory temp;
 
-        temp.totalSupply = verbs.totalSupply();
+        temp.totalSupply = _getWeightedTotalSupply();
 
         temp.proposalThreshold = bps2Uint(proposalThresholdBPS, temp.totalSupply);
 
@@ -405,10 +405,20 @@ contract VerbsDAOLogicV1 is
     function getTotalVotes(address account, uint256 blockNumber) public view returns (uint256) {
         uint256 erc721TokenVotes = verbs.getPriorVotes(account, blockNumber);
 
-        uint256 erc20PointsVotesWad = verbsPoints.getPastVotes(account, blockNumber);
+        uint256 erc20PointsVotes = verbsPoints.getPastVotes(account, blockNumber);
 
-        //todo rm 1e18
-        return (erc721TokenVotes * 1e18 * erc721TokenVotingWeight) + erc20PointsVotesWad;
+        return (erc721TokenVotes * erc721TokenVotingWeight) + erc20PointsVotes;
+    }
+
+    /**
+     * @notice Calculates the total supply of votes based on the current Verb token and points supply and the erc721 token voting weight
+     */
+    function _getWeightedTotalSupply() internal view returns (uint256) {
+        uint256 erc721TokenSupply = verbs.totalSupply();
+
+        uint256 erc20PointsSupply = verbsPoints.totalSupply();
+
+        return (erc721TokenSupply * erc721TokenVotingWeight) + erc20PointsSupply;
     }
 
     /**
@@ -967,11 +977,11 @@ contract VerbsDAOLogicV1 is
     }
 
     /**
-     * @notice Current proposal threshold using Noun Total Supply
+     * @notice Current proposal threshold using Verb Total Supply
      * Differs from `GovernerBravo` which uses fixed amount
      */
     function proposalThreshold() public view returns (uint256) {
-        return bps2Uint(proposalThresholdBPS, verbs.totalSupply());
+        return bps2Uint(proposalThresholdBPS, _getWeightedTotalSupply());
     }
 
     function proposalCreationBlock(Proposal storage proposal) internal view returns (uint256) {
@@ -1102,17 +1112,17 @@ contract VerbsDAOLogicV1 is
     }
 
     /**
-     * @notice Current min quorum votes using Noun total supply
+     * @notice Current min quorum votes using Verb total supply
      */
     function minQuorumVotes() public view returns (uint256) {
-        return bps2Uint(getDynamicQuorumParamsAt(block.number).minQuorumVotesBPS, verbs.totalSupply());
+        return bps2Uint(getDynamicQuorumParamsAt(block.number).minQuorumVotesBPS, _getWeightedTotalSupply());
     }
 
     /**
-     * @notice Current max quorum votes using Noun total supply
+     * @notice Current max quorum votes using Verb total supply
      */
     function maxQuorumVotes() public view returns (uint256) {
-        return bps2Uint(getDynamicQuorumParamsAt(block.number).maxQuorumVotesBPS, verbs.totalSupply());
+        return bps2Uint(getDynamicQuorumParamsAt(block.number).maxQuorumVotesBPS, _getWeightedTotalSupply());
     }
 
     function bps2Uint(uint256 bps, uint256 number) internal pure returns (uint256) {

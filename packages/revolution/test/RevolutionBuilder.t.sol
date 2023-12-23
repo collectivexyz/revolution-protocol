@@ -177,7 +177,7 @@ contract RevolutionBuilderTest is Test {
     }
 
     function setMockGovParams() internal virtual {
-        setGovParams(2 days, 1 seconds, 1 weeks, 50, founder, 100, 1000, 0, 1000, "Vrbs DAO");
+        setGovParams(2 days, 1 seconds, 1 weeks, 50, founder, 100 * 1e18, 1000, 0, 1000, "Vrbs DAO");
     }
 
     function setGovParams(
