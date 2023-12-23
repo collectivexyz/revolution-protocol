@@ -5,9 +5,8 @@ fs_permissions = [
 ]
 libs = ['node_modules', 'script', '../../node_modules']
 allow_paths = ["node_modules/@cobuild/protocol-rewards", "../../node_modules"]
-optimizer = false
-optimizer_runs = 0
-via_ir = false
+optimizer = true
+optimizer_runs = 500_000
 solc_version = '0.8.22'
 out = 'out'
 src = 'src'
