@@ -37,7 +37,7 @@ contract CultureIndexAccessControlTest is CultureIndexTestSuite {
 
         // Set new quorum BPS by owner
         vm.startPrank(address(dao));
-        vm.expectRevert("CultureIndex::_setQuorumVotesBPS: invalid quorum bps");
+        vm.expectRevert(abi.encodeWithSignature("INVALID_QUORUM_BPS()"));
         cultureIndex._setQuorumVotesBPS(newQuorumBPS);
         vm.stopPrank();
 
@@ -81,7 +81,7 @@ contract CultureIndexAccessControlTest is CultureIndexTestSuite {
         emit log_address(address(cultureIndex.dropperAdmin()));
 
         // Attempt to drop the top-voted piece and expect it to fail
-        vm.expectRevert("Does not meet quorum votes to be dropped.");
+        vm.expectRevert(abi.encodeWithSignature("DOES_NOT_MEET_QUORUM()"));
         vm.startPrank(address(erc721Token));
         cultureIndex.dropTopVotedPiece();
 
