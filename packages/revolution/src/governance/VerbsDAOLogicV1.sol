@@ -206,7 +206,7 @@ contract VerbsDAOLogicV1 is
 
         timelock = IDAOExecutor(executor_);
         verbs = VerbsTokenLike(erc721Token_);
-        verbsPoints = VerbsPointsLike(erc20Token_);
+        points = PointsLike(erc20Token_);
         vetoer = govParams_.vetoer;
         votingPeriod = govParams_.votingPeriod;
         votingDelay = govParams_.votingDelay;
@@ -223,7 +223,9 @@ contract VerbsDAOLogicV1 is
     }
 
     struct ProposalTemp {
-        uint256 totalSupply;
+        uint256 totalWeightedSupply;
+        uint256 erc20PointsSupply;
+        uint256 verbsTokenSupply;
         uint256 proposalThreshold;
         uint256 latestProposalId;
         uint256 startBlock;
@@ -248,7 +250,9 @@ contract VerbsDAOLogicV1 is
     ) public returns (uint256) {
         ProposalTemp memory temp;
 
-        temp.totalSupply = _getWeightedTotalSupply();
+        temp.totalWeightedSupply = _getWeightedTotalSupply();
+        temp.erc20PointsSupply = points.totalSupply();
+        temp.verbsTokenSupply = verbs.totalSupply();
 
         temp.proposalThreshold = bps2Uint(proposalThresholdBPS, temp.totalSupply);
 
@@ -299,7 +303,9 @@ contract VerbsDAOLogicV1 is
         newProposal.canceled = false;
         newProposal.executed = false;
         newProposal.vetoed = false;
-        newProposal.totalSupply = temp.totalSupply;
+        newProposal.totalWeightedSupply = temp.totalWeightedSupply;
+        newProposal.verbsTokenSupply = temp.verbsTokenSupply;
+        newProposal.erc20PointsSupply = temp.erc20PointsSupply;
         newProposal.creationBlock = block.number;
 
         latestProposalIds[newProposal.proposer] = newProposal.id;
@@ -403,9 +409,9 @@ contract VerbsDAOLogicV1 is
      * @param blockNumber The block number to get the votes at
      */
     function getTotalVotes(address account, uint256 blockNumber) public view returns (uint256) {
-        uint256 erc721TokenVotes = verbs.getPriorVotes(account, blockNumber);
+        uint256 erc721TokenVotes = verbs.getPastVotes(account, blockNumber);
 
-        uint256 erc20PointsVotes = verbsPoints.getPastVotes(account, blockNumber);
+        uint256 erc20PointsVotes = points.getPastVotes(account, blockNumber);
 
         return (erc721TokenVotes * erc721TokenVotingWeight) + erc20PointsVotes;
     }
@@ -416,7 +422,7 @@ contract VerbsDAOLogicV1 is
     function _getWeightedTotalSupply() internal view returns (uint256) {
         uint256 erc721TokenSupply = verbs.totalSupply();
 
-        uint256 erc20PointsSupply = verbsPoints.totalSupply();
+        uint256 erc20PointsSupply = points.totalSupply();
 
         return (erc721TokenSupply * erc721TokenVotingWeight) + erc20PointsSupply;
     }
