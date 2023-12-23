@@ -2,7 +2,7 @@
 pragma solidity 0.8.22;
 
 import { TokenEmitterRewards } from "../../src/abstract/TokenEmitter/TokenEmitterRewards.sol";
-import { ERC20TokenEmitter, NontransferableERC20Votes } from "./TokenEmitterLibrary.sol";
+import { ERC20TokenEmitter, NontransferableERC20Votes, IRevolutionBuilder } from "./TokenEmitterLibrary.sol";
 
 contract MockTokenEmitter is ERC20TokenEmitter {
     constructor(
@@ -10,5 +10,5 @@ contract MockTokenEmitter is ERC20TokenEmitter {
         NontransferableERC20Votes _erc20Token,
         address _protocolRewards,
         address _revolutionRewardRecipient
-    ) ERC20TokenEmitter(_initialOwner, _erc20Token, _protocolRewards, _revolutionRewardRecipient, 1e11, 1e17, 1e22) {}
+    ) ERC20TokenEmitter(_initialOwner, _protocolRewards, _revolutionRewardRecipient) {}
 }
