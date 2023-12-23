@@ -22,6 +22,8 @@ interface IERC20TokenEmitter {
         ProtocolRewardAddresses calldata protocolRewardsRecipients
     ) external payable returns (uint);
 
+    function WETH() external view returns (address);
+
     function totalSupply() external view returns (uint);
 
     function balanceOf(address owner) external view returns (uint);
@@ -57,6 +59,7 @@ interface IERC20TokenEmitter {
     /**
      * @notice Initialize the token emitter
      * @param initialOwner The initial owner of the token emitter
+     * @param weth The address of the WETH contract.
      * @param erc20Token The ERC-20 token contract address
      * @param vrgdac The VRGDA contract address
      * @param creatorsAddress The address of the creators
@@ -64,6 +67,7 @@ interface IERC20TokenEmitter {
      */
     function initialize(
         address initialOwner,
+        address weth,
         address erc20Token,
         address vrgdac,
         address creatorsAddress,

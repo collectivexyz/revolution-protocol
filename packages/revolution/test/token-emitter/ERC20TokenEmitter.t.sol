@@ -46,7 +46,6 @@ contract ERC20TokenEmitterTest is RevolutionBuilderTest {
     }
 
     function getTokenQuoteForEtherHelper(uint256 etherAmount, int256 supply) public view returns (int gainedX) {
-        require(etherAmount > 0, "Ether amount must be greater than 0");
         // Note: By using toDaysWadUnsafe(block.timestamp - startTime) we are establishing that 1 "unit of time" is 1 day.
         // solhint-disable-next-line not-rely-on-time
         return
@@ -227,7 +226,7 @@ contract ERC20TokenEmitterTest is RevolutionBuilderTest {
         uint256[] memory bps = new uint256[](1);
         bps[0] = 10_000;
 
-        vm.expectRevert("Funds recipient cannot buy tokens");
+        vm.expectRevert(abi.encodeWithSignature("FUNDS_RECIPIENT_CANNOT_BUY_TOKENS()"));
         erc20TokenEmitter.buyToken{ value: 1e18 }(
             recipients,
             bps,
@@ -250,7 +249,7 @@ contract ERC20TokenEmitterTest is RevolutionBuilderTest {
         uint256[] memory bps = new uint256[](1);
         bps[0] = 10_000;
 
-        vm.expectRevert("Funds recipient cannot buy tokens");
+        vm.expectRevert(abi.encodeWithSignature("FUNDS_RECIPIENT_CANNOT_BUY_TOKENS()"));
         erc20TokenEmitter.buyToken{ value: 1e18 }(
             recipients,
             bps,
@@ -280,6 +279,7 @@ contract ERC20TokenEmitterTest is RevolutionBuilderTest {
         vm.startPrank(address(manager));
         IERC20TokenEmitter(emitter1).initialize({
             initialOwner: owner,
+            weth: address(weth),
             erc20Token: address(governanceToken),
             vrgdac: address(erc20TokenEmitter.vrgdac()),
             creatorsAddress: creatorsAddress,
@@ -318,6 +318,7 @@ contract ERC20TokenEmitterTest is RevolutionBuilderTest {
         vm.startPrank(address(manager));
         IERC20TokenEmitter(emitter2).initialize({
             initialOwner: owner,
+            weth: address(weth),
             erc20Token: address(governanceToken),
             vrgdac: address(erc20TokenEmitter.vrgdac()),
             creatorsAddress: creatorsAddress,
@@ -376,7 +377,7 @@ contract ERC20TokenEmitterTest is RevolutionBuilderTest {
         uint256 totalPaymentForCreator = ((valueToSend - feeAmount) * creatorRate) / 10000;
         uint256 expectedCreatorEth = (totalPaymentForCreator * entropyRate) / 10000;
 
-        if (creatorRate == 0 || entropyRate == 10_000) vm.expectRevert("Ether amount must be greater than 0");
+        if (creatorRate == 0 || entropyRate == 10_000) vm.expectRevert(abi.encodeWithSignature("INVALID_PAYMENT()"));
         uint256 expectedCreatorTokens = uint(
             erc20TokenEmitter.getTokenQuoteForEther(totalPaymentForCreator - expectedCreatorEth)
         );
@@ -551,6 +552,51 @@ contract ERC20TokenEmitterTest is RevolutionBuilderTest {
         );
     }
 
+    //if buyToken is called with payment 0, then it should revert with INVALID_PAYMENT()
+    function test_revertNoPayment() public {
+        vm.startPrank(address(0));
+
+        address[] memory recipients = new address[](1);
+        recipients[0] = address(1);
+
+        uint256[] memory bps = new uint256[](1);
+        bps[0] = 10_000;
+
+        vm.expectRevert(abi.encodeWithSignature("INVALID_PAYMENT()"));
+        erc20TokenEmitter.buyToken{ value: 0 }(
+            recipients,
+            bps,
+            IERC20TokenEmitter.ProtocolRewardAddresses({
+                builder: address(0),
+                purchaseReferral: address(1),
+                deployer: address(0)
+            })
+        );
+    }
+
+    //if buyToken is called with mismatched length arrays, then it should revert with PARALLEL_ARRAYS_REQUIRED()
+    function test_revertMismatchedLengthArrays() public {
+        vm.startPrank(address(0));
+
+        address[] memory recipients = new address[](2);
+        recipients[0] = address(1);
+        recipients[1] = address(2);
+
+        uint256[] memory bps = new uint256[](1);
+        bps[0] = 10_000;
+
+        vm.expectRevert(abi.encodeWithSignature("PARALLEL_ARRAYS_REQUIRED()"));
+        erc20TokenEmitter.buyToken{ value: 1e18 }(
+            recipients,
+            bps,
+            IERC20TokenEmitter.ProtocolRewardAddresses({
+                builder: address(1),
+                purchaseReferral: address(1),
+                deployer: address(0)
+            })
+        );
+    }
+
     // Test to ensure the total basis points add up to 100%
     function testTotalBasisPoints() public {
         vm.startPrank(address(0));
@@ -622,7 +668,7 @@ contract ERC20TokenEmitterTest is RevolutionBuilderTest {
         incorrectBps[1] = 4000; // 40%
 
         // Expecting the transaction to revert due to incorrect total basis points
-        vm.expectRevert("bps must add up to 10_000");
+        vm.expectRevert(abi.encodeWithSignature("INVALID_BPS_SUM()"));
         erc20TokenEmitter.buyToken{ value: 1e18 }(
             recipients,
             incorrectBps,
@@ -716,6 +762,7 @@ contract ERC20TokenEmitterTest is RevolutionBuilderTest {
         vm.startPrank(address(manager));
         IERC20TokenEmitter(emitter2).initialize({
             initialOwner: address(maliciousOwner),
+            weth: address(weth),
             erc20Token: address(governanceToken),
             vrgdac: address(erc20TokenEmitter.vrgdac()),
             creatorsAddress: creatorsAddress,

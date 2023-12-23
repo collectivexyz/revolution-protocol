@@ -6,6 +6,7 @@ import { TokenEmitterRewards } from "@cobuild/protocol-rewards/src/abstract/Toke
 import { Ownable2StepUpgradeable } from "@openzeppelin/contracts-upgradeable/access/Ownable2StepUpgradeable.sol";
 import { PausableUpgradeable } from "@openzeppelin/contracts-upgradeable/utils/PausableUpgradeable.sol";
 
+import { IWETH } from "./interfaces/IWETH.sol";
 import { VRGDAC } from "./libs/VRGDAC.sol";
 import { toDaysWadUnsafe } from "./libs/SignedWadMath.sol";
 import { Strings } from "@openzeppelin/contracts/utils/Strings.sol";
@@ -21,6 +22,9 @@ contract ERC20TokenEmitter is
     Ownable2StepUpgradeable,
     PausableUpgradeable
 {
+    // The address of the WETH contract
+    address public WETH;
+
     // The token that is being minted.
     NontransferableERC20Votes public token;
 
@@ -53,6 +57,30 @@ contract ERC20TokenEmitter is
 
     /// @dev Reverts if address 0 is passed but not allowed
     error ADDRESS_ZERO();
+
+    /// @dev Reverts if invalid BPS is passed
+    error INVALID_BPS();
+
+    /// @dev Reverts if BPS does not add up to 10_000
+    error INVALID_BPS_SUM();
+
+    /// @dev Reverts if payment amount is 0
+    error INVALID_PAYMENT();
+
+    /// @dev Reverts if amount is 0
+    error INVALID_AMOUNT();
+
+    /// @dev Reverts if there is an array length mismatch
+    error PARALLEL_ARRAYS_REQUIRED();
+
+    /// @dev Reverts if the buyToken sender is the owner or creatorsAddress
+    error FUNDS_RECIPIENT_CANNOT_BUY_TOKENS();
+
+    /// @dev Reverts if insufficient balance to transfer
+    error INSUFFICIENT_BALANCE();
+
+    /// @dev Reverts if the WETH transfer fails
+    error WETH_TRANSFER_FAILED();
 
     ///                                                          ///
     ///                         IMMUTABLES                       ///
@@ -87,12 +115,14 @@ contract ERC20TokenEmitter is
     /**
      * @notice Initialize the token emitter
      * @param _initialOwner The initial owner of the token emitter
+     * @param _weth The address of the WETH contract
      * @param _erc20Token The ERC-20 token contract address
      * @param _vrgdac The VRGDA contract address
      * @param _creatorsAddress The address to pay the creator reward to
      */
     function initialize(
         address _initialOwner,
+        address _weth,
         address _erc20Token,
         address _vrgdac,
         address _creatorsAddress,
@@ -103,9 +133,10 @@ contract ERC20TokenEmitter is
         if (_erc20Token == address(0)) revert ADDRESS_ZERO();
         if (_vrgdac == address(0)) revert ADDRESS_ZERO();
         if (_creatorsAddress == address(0)) revert ADDRESS_ZERO();
+        if (_weth == address(0)) revert ADDRESS_ZERO();
 
-        require(_creatorParams.creatorRateBps <= 10_000, "Creator rate must be <= to 10_000");
-        require(_creatorParams.entropyRateBps <= 10_000, "Entropy rate must be <= to 10_000");
+        if (_creatorParams.creatorRateBps > 10_000) revert INVALID_BPS();
+        if (_creatorParams.entropyRateBps > 10_000) revert INVALID_BPS();
 
         __Pausable_init();
         __ReentrancyGuard_init();
@@ -118,6 +149,7 @@ contract ERC20TokenEmitter is
         token = NontransferableERC20Votes(_erc20Token);
         creatorRateBps = _creatorParams.creatorRateBps;
         entropyRateBps = _creatorParams.entropyRateBps;
+        WETH = _weth;
 
         // If we are upgrading, don't reset the start time
         if (startTime == 0) startTime = block.timestamp;
@@ -196,13 +228,13 @@ contract ERC20TokenEmitter is
         ProtocolRewardAddresses calldata protocolRewardsRecipients
     ) public payable nonReentrant whenNotPaused returns (uint256 tokensSoldWad) {
         // Prevent owner and creatorsAddress from buying tokens directly, given they are recipient(s) of the funds
-        require(msg.sender != owner() && msg.sender != creatorsAddress, "Funds recipient cannot buy tokens");
+        if (msg.sender == owner() || msg.sender == creatorsAddress) revert FUNDS_RECIPIENT_CANNOT_BUY_TOKENS();
 
         // Transaction must send ether to buyTokens
-        require(msg.value > 0, "Must send ether");
+        if (msg.value == 0) revert INVALID_PAYMENT();
 
         // Ensure the same number of addresses and bps
-        require(addresses.length == basisPointSplits.length, "Parallel arrays required");
+        if (addresses.length != basisPointSplits.length) revert PARALLEL_ARRAYS_REQUIRED();
 
         // Calculate value left after sharing protocol rewards
         uint256 msgValueRemaining = _handleRewardsAndGetValueToSend(
@@ -231,15 +263,14 @@ contract ERC20TokenEmitter is
         if (totalTokensForBuyers > 0) emittedTokenWad += totalTokensForBuyers;
 
         //Deposit owner's funds, and eth used to buy creators gov. tokens to owner's account
-        (bool success, ) = owner().call{
-            value: buyTokenPaymentShares.buyersShare + buyTokenPaymentShares.creatorsGovernancePayment
-        }(new bytes(0));
-        require(success, "Transfer failed.");
+        _safeTransferETHWithFallback(
+            owner(),
+            buyTokenPaymentShares.buyersShare + buyTokenPaymentShares.creatorsGovernancePayment
+        );
 
         //Transfer ETH to creators
         if (buyTokenPaymentShares.creatorsDirectPayment > 0) {
-            (success, ) = creatorsAddress.call{ value: buyTokenPaymentShares.creatorsDirectPayment }(new bytes(0));
-            require(success, "Transfer failed.");
+            _safeTransferETHWithFallback(creatorsAddress, buyTokenPaymentShares.creatorsDirectPayment);
         }
 
         //Mint tokens to creators
@@ -259,7 +290,7 @@ contract ERC20TokenEmitter is
             bpsSum += basisPointSplits[i];
         }
 
-        require(bpsSum == 10_000, "bps must add up to 10_000");
+        if (bpsSum != 10_000) revert INVALID_BPS_SUM();
 
         emit PurchaseFinalized(
             msg.sender,
@@ -280,7 +311,7 @@ contract ERC20TokenEmitter is
      * @return spentY The cost in wei of the token purchase.
      */
     function buyTokenQuote(uint256 amount) public view returns (int spentY) {
-        require(amount > 0, "Amount must be greater than 0");
+        if (amount == 0) revert INVALID_AMOUNT();
         // Note: By using toDaysWadUnsafe(block.timestamp - startTime) we are establishing that 1 "unit of time" is 1 day.
         // solhint-disable-next-line not-rely-on-time
         return
@@ -297,7 +328,7 @@ contract ERC20TokenEmitter is
      * @return gainedX The amount of tokens that would be emitted for the payment amount.
      */
     function getTokenQuoteForEther(uint256 etherAmount) public view returns (int gainedX) {
-        require(etherAmount > 0, "Ether amount must be greater than 0");
+        if (etherAmount == 0) revert INVALID_PAYMENT();
         // Note: By using toDaysWadUnsafe(block.timestamp - startTime) we are establishing that 1 "unit of time" is 1 day.
         // solhint-disable-next-line not-rely-on-time
         return
@@ -314,7 +345,7 @@ contract ERC20TokenEmitter is
      * @return gainedX The amount of tokens that would be emitted for the payment amount.
      */
     function getTokenQuoteForPayment(uint256 paymentAmount) external view returns (int gainedX) {
-        require(paymentAmount > 0, "Payment amount must be greater than 0");
+        if (paymentAmount == 0) revert INVALID_PAYMENT();
         // Note: By using toDaysWadUnsafe(block.timestamp - startTime) we are establishing that 1 "unit of time" is 1 day.
         // solhint-disable-next-line not-rely-on-time
         return
@@ -331,7 +362,7 @@ contract ERC20TokenEmitter is
      * @param _entropyRateBps New entropy rate in basis points.
      */
     function setEntropyRateBps(uint256 _entropyRateBps) external onlyOwner {
-        require(_entropyRateBps <= 10_000, "Entropy rate must be less than or equal to 10_000");
+        if (_entropyRateBps > 10_000) revert INVALID_BPS();
 
         emit EntropyRateBpsUpdated(entropyRateBps = _entropyRateBps);
     }
@@ -342,7 +373,7 @@ contract ERC20TokenEmitter is
      * @param _creatorRateBps New creator rate in basis points.
      */
     function setCreatorRateBps(uint256 _creatorRateBps) external onlyOwner {
-        require(_creatorRateBps <= 10_000, "Creator rate must be less than or equal to 10_000");
+        if (_creatorRateBps > 10_000) revert INVALID_BPS();
 
         emit CreatorRateBpsUpdated(creatorRateBps = _creatorRateBps);
     }
@@ -355,5 +386,36 @@ contract ERC20TokenEmitter is
         if (_creatorsAddress == address(0)) revert ADDRESS_ZERO();
 
         emit CreatorsAddressUpdated(creatorsAddress = _creatorsAddress);
+    }
+
+    /**
+    @notice Transfer ETH/WETH from the contract
+    @param _to The recipient address
+    @param _amount The amount transferring
+    */
+    function _safeTransferETHWithFallback(address _to, uint256 _amount) private {
+        // Ensure the contract has enough ETH to transfer
+        if (address(this).balance < _amount) revert INSUFFICIENT_BALANCE();
+
+        // Used to store if the transfer succeeded
+        bool success;
+
+        assembly {
+            // Transfer ETH to the recipient
+            // Limit the call to 50,000 gas
+            success := call(50000, _to, _amount, 0, 0, 0, 0)
+        }
+
+        // If the transfer failed:
+        if (!success) {
+            // Wrap as WETH
+            IWETH(WETH).deposit{ value: _amount }();
+
+            // Transfer WETH instead
+            bool wethSuccess = IWETH(WETH).transfer(_to, _amount);
+
+            // Ensure successful transfer
+            if (!wethSuccess) revert WETH_TRANSFER_FAILED();
+        }
     }
 }
