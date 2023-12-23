@@ -75,9 +75,6 @@ contract VerbsDAOLogicV1 is
     ///                         IMMUTABLES                       ///
     ///                                                          ///
 
-    /// @notice The contract upgrade manager
-    IRevolutionBuilder private immutable manager;
-
     /// @notice The name of this contract
     string public name;
 

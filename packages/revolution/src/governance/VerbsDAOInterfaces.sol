@@ -29,6 +29,7 @@
 // See VerbsDAOLogicV1.sol for more details.
 
 import { IDAOExecutor } from "../interfaces/IDAOExecutor.sol";
+import { IRevolutionBuilder } from "../interfaces/IRevolutionBuilder.sol";
 
 pragma solidity 0.8.22;
 
@@ -142,6 +143,9 @@ contract VerbsDAOProxyStorage {
  * VerbsDAOStorageVX.
  */
 contract VerbsDAOStorageV1 is VerbsDAOProxyStorage {
+    /// @notice The contract upgrade manager
+    IRevolutionBuilder public immutable manager;
+
     /// @notice Vetoer who has the ability to veto any proposal
     address public vetoer;
 
