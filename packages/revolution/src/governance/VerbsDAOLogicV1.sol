@@ -197,7 +197,7 @@ contract VerbsDAOLogicV1 is
         // Initialize EIP-712 support
         __EIP712_init(govParams_.daoName, "1");
 
-        // Grant ownership to the treasury
+        // Grant ownership to the executor
         __Ownable_init(executor_);
 
         emit VotingPeriodSet(votingPeriod, govParams_.votingPeriod);

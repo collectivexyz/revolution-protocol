@@ -4,7 +4,6 @@ pragma solidity 0.8.22;
 import "forge-std/Test.sol";
 
 import "../src/RevolutionProtocolRewards.sol";
-import "./utils/MockTokenEmitter.sol";
 
 contract ProtocolRewardsTest is Test {
     uint256 internal constant ETH_SUPPLY = 120_200_000 ether;
@@ -16,7 +15,6 @@ contract ProtocolRewardsTest is Test {
     address internal purchaseReferral;
     address internal deployer;
     address internal revolution;
-    address internal treasury;
 
     function setUp() public virtual {
         protocolRewards = new RevolutionProtocolRewards();
@@ -28,6 +26,5 @@ contract ProtocolRewardsTest is Test {
         purchaseReferral = makeAddr("purchaseReferral");
         deployer = makeAddr("firstMinter");
         revolution = makeAddr("revolution");
-        treasury = makeAddr("treasury");
     }
 }

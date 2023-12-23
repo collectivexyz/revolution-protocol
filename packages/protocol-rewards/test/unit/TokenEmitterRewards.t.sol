@@ -3,28 +3,50 @@ pragma solidity 0.8.22;
 
 import "../ProtocolRewardsTest.sol";
 import { RewardsSettings } from "../../src/abstract/RewardSplits.sol";
-import { NontransferableERC20Votes, IERC20TokenEmitter } from "../utils/TokenEmitterLibrary.sol";
+import { NontransferableERC20Votes, IERC20TokenEmitter, IRevolutionBuilder, VRGDAC, ERC1967Proxy, ERC20TokenEmitter } from "../utils/TokenEmitterLibrary.sol";
 
 contract TokenEmitterRewardsTest is ProtocolRewardsTest {
-    MockTokenEmitter internal mockTokenEmitter;
+    ERC20TokenEmitter mockTokenEmitter;
     NontransferableERC20Votes internal erc20Token;
+
+    address creatorsAddress;
+    address vrgdac;
+
+    //enable this contract to receive eth
+    receive() external payable {}
 
     function setUp() public override {
         super.setUp();
 
-        erc20Token = new NontransferableERC20Votes(address(this), "Revolution Governance", "GOV");
+        creatorsAddress = address(0x1);
 
-        mockTokenEmitter = new MockTokenEmitter(
-            address(this),
-            erc20Token,
-            treasury,
-            address(protocolRewards),
-            revolution
+        // Deploy the VRGDAC contract
+        vrgdac = address(new VRGDAC(1e11, 1e17, 1e22));
+
+        address erc20TokenEmitterImpl = address(
+            new ERC20TokenEmitter(address(this), address(protocolRewards), revolution)
         );
 
-        erc20Token.transferOwnership(address(mockTokenEmitter));
+        erc20Token = new NontransferableERC20Votes(address(this), "Revolution Governance", "GOV");
 
-        vm.label(address(mockTokenEmitter), "MOCK_TOKENEMITTER");
+        address mockTokenEmitterAddress = address(new ERC1967Proxy(erc20TokenEmitterImpl, ""));
+
+        IERC20TokenEmitter(mockTokenEmitterAddress).initialize({
+            initialOwner: address(this),
+            erc20Token: address(erc20Token),
+            vrgdac: vrgdac,
+            creatorsAddress: creatorsAddress,
+            creatorParams: IRevolutionBuilder.TokenEmitterCreatorParams({
+                creatorRateBps: 1_000,
+                entropyRateBps: 5_000
+            })
+        });
+
+        erc20Token.transferOwnership(mockTokenEmitterAddress);
+
+        vm.label(mockTokenEmitterAddress, "MOCK_TOKENEMITTER");
+
+        mockTokenEmitter = ERC20TokenEmitter(mockTokenEmitterAddress);
     }
 
     function testDeposit(uint256 msgValue) public {
@@ -78,13 +100,24 @@ contract TokenEmitterRewardsTest is ProtocolRewardsTest {
             "GOV"
         );
 
-        mockTokenEmitter = new MockTokenEmitter(
-            address(this),
-            govToken2,
-            treasury,
-            address(protocolRewards),
-            revolution
+        address mockTokenEmitterImpl = address(
+            new ERC20TokenEmitter(address(this), address(protocolRewards), revolution)
         );
+
+        address mockTokenEmitterAddress = address(new ERC1967Proxy(mockTokenEmitterImpl, ""));
+
+        IERC20TokenEmitter(mockTokenEmitterAddress).initialize({
+            initialOwner: address(this),
+            erc20Token: address(govToken2),
+            vrgdac: vrgdac,
+            creatorsAddress: creatorsAddress,
+            creatorParams: IRevolutionBuilder.TokenEmitterCreatorParams({
+                creatorRateBps: 1_000,
+                entropyRateBps: 5_000
+            })
+        });
+
+        mockTokenEmitter = ERC20TokenEmitter(mockTokenEmitterAddress);
 
         govToken2.transferOwnership(address(mockTokenEmitter));
 

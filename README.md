@@ -16,7 +16,7 @@ The ultimate goal of Revolution is fair ownership distribution over a community 
 git clone https://github.com/collectivexyz/revolution-protocol.git && cd revolution-protocol
 ```
 
-#### Node.js and pnpm
+#### node.js and pnpm
 
 ```
 npm install -g pnpm
@@ -238,13 +238,13 @@ For all contracts - only the RevolutionBuilder manager should be able to initial
 
 ### ERC20TokenEmitter
 
-- The treasury and creatorsAddress should not be able to buy tokens.
+- The owner and creatorsAddress should not be able to buy tokens.
 
 - The distribution of ERC20 governance tokens should be in accordance with the defined linear emission schedule.
 
 - The ERC20TokenEmitter should always pay protocol rewards assuming enough ETH was paid to the buyToken function.
 
-- The treasury should always receive it's share of ether (minus creatorRateBps and protocol rewards share).
+- The owner should always receive it's share of ether (minus creatorRateBps and protocol rewards share).
 
 # Additional Context
 

@@ -1,6 +1,7 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.22;
 
+import { IERC1822Proxiable } from "@openzeppelin/contracts/interfaces/draft-IERC1822.sol";
 import { Strings } from "@openzeppelin/contracts/utils/Strings.sol";
 import { ReentrancyGuard } from "@openzeppelin/contracts/utils/ReentrancyGuard.sol";
 import { TokenEmitterRewards } from "../../src/abstract/TokenEmitter/TokenEmitterRewards.sol";
@@ -11,6 +12,222 @@ import { Checkpoints } from "@openzeppelin/contracts/utils/structs/Checkpoints.s
 import { Context } from "@openzeppelin/contracts/utils/Context.sol";
 import { IERC20 } from "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import { IERC20Metadata } from "@openzeppelin/contracts/token/ERC20/extensions/IERC20Metadata.sol";
+import { ReentrancyGuardUpgradeable } from "@openzeppelin/contracts-upgradeable/utils/ReentrancyGuardUpgradeable.sol";
+import { ERC20Upgradeable } from "@openzeppelin/contracts-upgradeable/token/ERC20/ERC20Upgradeable.sol";
+import { ERC20VotesUpgradeable } from "@openzeppelin/contracts-upgradeable/token/ERC20/extensions/ERC20VotesUpgradeable.sol";
+import { Ownable2StepUpgradeable } from "@openzeppelin/contracts-upgradeable/access/Ownable2StepUpgradeable.sol";
+import { PausableUpgradeable } from "@openzeppelin/contracts-upgradeable/utils/PausableUpgradeable.sol";
+import { Proxy } from "@openzeppelin/contracts/proxy/Proxy.sol";
+import { StorageSlot } from "@openzeppelin/contracts/utils/StorageSlot.sol";
+import { Address } from "@openzeppelin/contracts/utils/Address.sol";
+
+/// @title IERC1967Upgrade
+/// @author Rohan Kulkarni
+/// @notice The external ERC1967Upgrade events and errors
+interface IERC1967Upgrade {
+    ///                                                          ///
+    ///                            EVENTS                        ///
+    ///                                                          ///
+
+    /// @notice Emitted when the implementation is upgraded
+    /// @param impl The address of the implementation
+    event Upgraded(address impl);
+
+    ///                                                          ///
+    ///                            ERRORS                        ///
+    ///                                                          ///
+
+    /// @dev Reverts if an implementation is an invalid upgrade
+    /// @param impl The address of the invalid implementation
+    error INVALID_UPGRADE(address impl);
+
+    /// @dev Reverts if an implementation upgrade is not stored at the storage slot of the original
+    error UNSUPPORTED_UUID();
+
+    /// @dev Reverts if an implementation does not support ERC1822 proxiableUUID()
+    error ONLY_UUPS();
+}
+
+/// @title ERC1967Upgrade
+/// @author Rohan Kulkarni
+/// @notice Modified from OpenZeppelin Contracts v4.7.3 (proxy/ERC1967/ERC1967Upgrade.sol)
+/// - Uses custom errors declared in IERC1967Upgrade
+/// - Removes ERC1967 admin and beacon support
+abstract contract ERC1967Upgrade is IERC1967Upgrade {
+    ///                                                          ///
+    ///                          CONSTANTS                       ///
+    ///                                                          ///
+
+    /// @dev bytes32(uint256(keccak256('eip1967.proxy.rollback')) - 1)
+    bytes32 private constant _ROLLBACK_SLOT = 0x4910fdfa16fed3260ed0e7147f7cc6da11a60208b5b9406d12a635614ffd9143;
+
+    /// @dev bytes32(uint256(keccak256('eip1967.proxy.implementation')) - 1)
+    bytes32 internal constant _IMPLEMENTATION_SLOT = 0x360894a13ba1a3210667c828492db98dca3e2076cc3735a920a3ca505d382bbc;
+
+    ///                                                          ///
+    ///                          FUNCTIONS                       ///
+    ///                                                          ///
+
+    /// @dev Upgrades to an implementation with security checks for UUPS proxies and an additional function call
+    /// @param _newImpl The new implementation address
+    /// @param _data The encoded function call
+    function _upgradeToAndCallUUPS(address _newImpl, bytes memory _data, bool _forceCall) internal {
+        if (StorageSlot.getBooleanSlot(_ROLLBACK_SLOT).value) {
+            _setImplementation(_newImpl);
+        } else {
+            try IERC1822Proxiable(_newImpl).proxiableUUID() returns (bytes32 slot) {
+                if (slot != _IMPLEMENTATION_SLOT) revert UNSUPPORTED_UUID();
+            } catch {
+                revert ONLY_UUPS();
+            }
+
+            _upgradeToAndCall(_newImpl, _data, _forceCall);
+        }
+    }
+
+    /// @dev Upgrades to an implementation with an additional function call
+    /// @param _newImpl The new implementation address
+    /// @param _data The encoded function call
+    function _upgradeToAndCall(address _newImpl, bytes memory _data, bool _forceCall) internal {
+        _upgradeTo(_newImpl);
+
+        if (_data.length > 0 || _forceCall) {
+            Address.functionDelegateCall(_newImpl, _data);
+        }
+    }
+
+    /// @dev Performs an implementation upgrade
+    /// @param _newImpl The new implementation address
+    function _upgradeTo(address _newImpl) internal {
+        _setImplementation(_newImpl);
+
+        emit Upgraded(_newImpl);
+    }
+
+    /// @dev If an address is a contract
+    function isContract(address _account) internal view returns (bool rv) {
+        assembly {
+            rv := gt(extcodesize(_account), 0)
+        }
+    }
+
+    /// @dev Stores the address of an implementation
+    /// @param _impl The implementation address
+    function _setImplementation(address _impl) private {
+        if (!isContract(_impl)) revert INVALID_UPGRADE(_impl);
+
+        StorageSlot.getAddressSlot(_IMPLEMENTATION_SLOT).value = _impl;
+    }
+
+    /// @dev The address of the current implementation
+    function _getImplementation() internal view returns (address) {
+        return StorageSlot.getAddressSlot(_IMPLEMENTATION_SLOT).value;
+    }
+}
+
+/// @title ERC1967Proxy
+/// @author Rohan Kulkarni
+/// @notice Modified from OpenZeppelin Contracts v4.7.3 (proxy/ERC1967/ERC1967Proxy.sol)
+/// - Inherits a modern, minimal ERC1967Upgrade
+contract ERC1967Proxy is IERC1967Upgrade, Proxy, ERC1967Upgrade {
+    ///                                                          ///
+    ///                         CONSTRUCTOR                      ///
+    ///                                                          ///
+
+    /// @dev Initializes the proxy with an implementation contract and encoded function call
+    /// @param _logic The implementation address
+    /// @param _data The encoded function call
+    constructor(address _logic, bytes memory _data) payable {
+        _upgradeToAndCall(_logic, _data, false);
+    }
+
+    ///                                                          ///
+    ///                          FUNCTIONS                       ///
+    ///                                                          ///
+
+    /// @dev The address of the current implementation
+    function _implementation() internal view virtual override returns (address) {
+        return ERC1967Upgrade._getImplementation();
+    }
+}
+
+interface VerbsTokenLike {
+    function getPriorVotes(address account, uint256 blockNumber) external view returns (uint96);
+
+    function totalSupply() external view returns (uint256);
+}
+
+interface VerbsPointsLike {
+    function getPastVotes(address account, uint256 blockNumber) external view returns (uint96);
+
+    function totalSupply() external view returns (uint256);
+}
+
+interface IDAOExecutor {
+    function delay() external view returns (uint256);
+
+    function GRACE_PERIOD() external view returns (uint256);
+
+    function acceptAdmin() external;
+
+    function queuedTransactions(bytes32 hash) external view returns (bool);
+
+    function queueTransaction(
+        address target,
+        uint256 value,
+        string calldata signature,
+        bytes calldata data,
+        uint256 eta
+    ) external returns (bytes32);
+
+    function cancelTransaction(
+        address target,
+        uint256 value,
+        string calldata signature,
+        bytes calldata data,
+        uint256 eta
+    ) external;
+
+    function executeTransaction(
+        address target,
+        uint256 value,
+        string calldata signature,
+        bytes calldata data,
+        uint256 eta
+    ) external payable returns (bytes memory);
+
+    /// @notice Initializes an instance of a DAO's treasury
+    /// @param admin The DAO's address
+    /// @param timelockDelay The time delay to execute a queued transaction
+    function initialize(address admin, uint256 timelockDelay) external;
+}
+
+/// @title RevolutionBuilderTypesV1
+/// @author rocketman
+/// @notice The external Base Metadata errors and functions
+interface RevolutionBuilderTypesV1 {
+    /// @notice Stores deployed addresses for a given token's DAO
+    struct DAOAddresses {
+        /// @notice Address for deployed metadata contract
+        address descriptor;
+        /// @notice Address for deployed auction contract
+        address auction;
+        /// @notice Address for deployed auction contract
+        address erc20TokenEmitter;
+        /// @notice Address for deployed auction contract
+        address erc20Token;
+        /// @notice Address for deployed cultureIndex contract
+        address cultureIndex;
+        /// @notice Address for deployed executor (treasury) contract
+        address executor;
+        /// @notice Address for deployed DAO contract
+        address dao;
+        /// @notice Address for deployed ERC-721 token contract
+        address erc721Token;
+        /// @notice Address for deployed MaxHeap contract
+        address maxHeap;
+    }
+}
 
 /**
  * @dev Standard ERC-20 Errors
@@ -1003,23 +1220,33 @@ interface IERC20TokenEmitter {
         address deployer;
     }
 
+    struct BuyTokenPaymentShares {
+        uint256 buyersShare;
+        uint256 creatorsDirectPayment;
+        uint256 creatorsGovernancePayment;
+    }
+
     function buyToken(
-        address[] calldata _addresses,
-        uint[] calldata _bps,
+        address[] calldata addresses,
+        uint[] calldata bps,
         ProtocolRewardAddresses calldata protocolRewardsRecipients
     ) external payable returns (uint);
 
     function totalSupply() external view returns (uint);
 
-    function balanceOf(address _owner) external view returns (uint);
+    function balanceOf(address owner) external view returns (uint);
 
-    function setCreatorRateBps(uint256 _creatorRateBps) external;
+    function setCreatorRateBps(uint256 creatorRateBps) external;
 
-    function setEntropyRateBps(uint256 _entropyRateBps) external;
+    function setEntropyRateBps(uint256 entropyRateBps) external;
 
     function getTokenQuoteForPayment(uint256 paymentAmount) external returns (int);
 
     function setCreatorsAddress(address creators) external;
+
+    function pause() external;
+
+    function unpause() external;
 
     event CreatorsAddressUpdated(address creators);
 
@@ -1030,23 +1257,45 @@ interface IERC20TokenEmitter {
     event PurchaseFinalized(
         address indexed buyer,
         uint256 payment,
-        uint256 treasuryAmount,
+        uint256 ownerAmount,
         uint256 protocolRewardsAmount,
         uint256 buyerTokensEmitted,
         uint256 creatorTokensEmitted,
         uint256 creatorDirectPayment
     );
+
+    /**
+     * @notice Initialize the token emitter
+     * @param initialOwner The initial owner of the token emitter
+     * @param erc20Token The ERC-20 token contract address
+     * @param vrgdac The VRGDA contract address
+     * @param creatorsAddress The address of the creators
+     * @param creatorParams The creator and entropy rate parameters
+     */
+    function initialize(
+        address initialOwner,
+        address erc20Token,
+        address vrgdac,
+        address creatorsAddress,
+        IRevolutionBuilder.TokenEmitterCreatorParams calldata creatorParams
+    ) external;
 }
 
-contract ERC20TokenEmitter is VRGDAC, IERC20TokenEmitter, ReentrancyGuard, TokenEmitterRewards, Ownable {
-    // treasury address to pay funds to
-    address public immutable treasury;
+contract ERC20TokenEmitter is
+    IERC20TokenEmitter,
+    ReentrancyGuardUpgradeable,
+    TokenEmitterRewards,
+    Ownable2StepUpgradeable,
+    PausableUpgradeable
+{
+    // The token that is being minted.
+    NontransferableERC20Votes public token;
 
-    // The token that is being emitted.
-    NontransferableERC20Votes public immutable token;
+    // The VRGDA contract
+    VRGDAC public vrgdac;
 
     // solhint-disable-next-line not-rely-on-time
-    uint public immutable startTime = block.timestamp;
+    uint256 public startTime;
 
     /**
      * @notice A running total of the amount of tokens emitted.
@@ -1062,29 +1311,67 @@ contract ERC20TokenEmitter is VRGDAC, IERC20TokenEmitter, ReentrancyGuard, Token
     // The account or contract to pay the creator reward to
     address public creatorsAddress;
 
-    // approved contracts, owner, and a token contract address
+    ///                                                          ///
+    ///                         IMMUTABLES                       ///
+    ///                                                          ///
+
+    /// @notice The contract upgrade manager
+    IRevolutionBuilder private immutable manager;
+
+    ///                                                          ///
+    ///                         CONSTRUCTOR                      ///
+    ///                                                          ///
+
+    /// @param _manager The contract upgrade manager address
+    /// @param _protocolRewards The protocol rewards contract address
+    /// @param _protocolFeeRecipient The protocol fee recipient address
     constructor(
-        address _initialOwner,
-        NontransferableERC20Votes _token,
+        address _manager,
         address _protocolRewards,
-        address _protocolFeeRecipient,
-        address _treasury,
-        int _targetPrice, // The target price for a token if sold on pace, scaled by 1e18.
-        int _priceDecayPercent, // The percent price decays per unit of time with no sales, scaled by 1e18.
-        int _tokensPerTimeUnit // The number of tokens to target selling in 1 full unit of time, scaled by 1e18.
-    )
-        TokenEmitterRewards(_protocolRewards, _protocolFeeRecipient)
-        VRGDAC(_targetPrice, _priceDecayPercent, _tokensPerTimeUnit)
-        Ownable(_initialOwner)
-    {
-        require(_treasury != address(0), "Invalid treasury address");
-
-        treasury = _treasury;
-
-        token = _token;
+        address _protocolFeeRecipient
+    ) payable TokenEmitterRewards(_protocolRewards, _protocolFeeRecipient) initializer {
+        manager = IRevolutionBuilder(_manager);
     }
 
-    function _mint(address _to, uint _amount) private {
+    ///                                                          ///
+    ///                         INITIALIZER                      ///
+    ///                                                          ///
+
+    /**
+     * @notice Initialize the token emitter
+     * @param _initialOwner The initial owner of the token emitter
+     * @param _erc20Token The ERC-20 token contract address
+     * @param _vrgdac The VRGDA contract address
+     * @param _creatorsAddress The address to pay the creator reward to
+     */
+    function initialize(
+        address _initialOwner,
+        address _erc20Token,
+        address _vrgdac,
+        address _creatorsAddress,
+        IRevolutionBuilder.TokenEmitterCreatorParams calldata _creatorParams
+    ) external initializer {
+        require(msg.sender == address(manager), "Only manager can initialize");
+        require(_initialOwner != address(0), "Invalid _initialOwner");
+        require(_erc20Token != address(0), "Invalid _erc20Token");
+        require(_vrgdac != address(0), "Invalid _vrgdac");
+        require(_creatorsAddress != address(0), "Invalid _creatorsAddress");
+        require(_creatorParams.creatorRateBps <= 10_000, "Creator rate must be <= to 10_000");
+        require(_creatorParams.entropyRateBps <= 10_000, "Entropy rate must be <= to 10_000");
+        __Pausable_init();
+        __ReentrancyGuard_init();
+        // Set up ownable
+        __Ownable_init(_initialOwner);
+        creatorsAddress = _creatorsAddress;
+        vrgdac = VRGDAC(_vrgdac);
+        token = NontransferableERC20Votes(_erc20Token);
+        creatorRateBps = _creatorParams.creatorRateBps;
+        entropyRateBps = _creatorParams.entropyRateBps;
+        // If we are upgrading, don't reset the start time
+        if (startTime == 0) startTime = block.timestamp;
+    }
+
+    function _mint(address _to, uint256 _amount) private {
         token.mint(_to, _amount);
     }
 
@@ -1104,78 +1391,120 @@ contract ERC20TokenEmitter is VRGDAC, IERC20TokenEmitter, ReentrancyGuard, Token
     }
 
     /**
+     * @notice Pause the contract.
+     * @dev This function can only be called by the owner when the
+     * contract is unpaused.
+     */
+    function pause() external override onlyOwner {
+        _pause();
+    }
+
+    /**
+     * @notice Unpause the token emitter.
+     * @dev This function can only be called by the owner when the
+     * contract is paused.
+     */
+    function unpause() external override onlyOwner {
+        _unpause();
+    }
+
+    /**
+     * @notice A function to calculate the shares of the purchase that go to the buyer's governance purchase, and the creators
+     * @param msgValueRemaining The amount of ether left after protocol rewards are taken out
+     * @return buyTokenPaymentShares A struct containing the shares of the purchase that go to the buyer's governance purchase, and the creators
+     */
+    function _calculateBuyTokenPaymentShares(
+        uint256 msgValueRemaining
+    ) internal view returns (BuyTokenPaymentShares memory buyTokenPaymentShares) {
+        // Calculate share of purchase amount reserved for buyers
+        buyTokenPaymentShares.buyersShare = msgValueRemaining - ((msgValueRemaining * creatorRateBps) / 10_000);
+
+        // Calculate ether directly sent to creators
+        buyTokenPaymentShares.creatorsDirectPayment =
+            (msgValueRemaining * creatorRateBps * entropyRateBps) /
+            10_000 /
+            10_000;
+
+        // Calculate ether spent on creators governance tokens
+        buyTokenPaymentShares.creatorsGovernancePayment =
+            ((msgValueRemaining * creatorRateBps) / 10_000) -
+            buyTokenPaymentShares.creatorsDirectPayment;
+    }
+
+    /**
      * @notice A payable function that allows a user to buy tokens for a list of addresses and a list of basis points to split the token purchase between.
      * @param addresses The addresses to send purchased tokens to.
-     * @param bps The basis points of the purchase to send to each address.
+     * @param basisPointSplits The basis points of the purchase to send to each address.
      * @param protocolRewardsRecipients The addresses to pay the builder, purchaseRefferal, and deployer rewards to
      * @return tokensSoldWad The amount of tokens sold in wad units.
      */
     function buyToken(
         address[] calldata addresses,
-        uint[] calldata bps,
+        uint[] calldata basisPointSplits,
         ProtocolRewardAddresses calldata protocolRewardsRecipients
-    ) public payable nonReentrant returns (uint tokensSoldWad) {
-        //prevent treasury from paying itself
-        require(msg.sender != treasury && msg.sender != creatorsAddress, "Funds recipient cannot buy tokens");
+    ) public payable nonReentrant whenNotPaused returns (uint256 tokensSoldWad) {
+        // Prevent owner and creatorsAddress from buying tokens directly, given they are recipient(s) of the funds
+        require(msg.sender != owner() && msg.sender != creatorsAddress, "Funds recipient cannot buy tokens");
 
+        // Transaction must send ether to buyTokens
         require(msg.value > 0, "Must send ether");
-        // ensure the same number of addresses and bps
-        require(addresses.length == bps.length, "Parallel arrays required");
 
-        // Get value left after protocol rewards
-        uint msgValueRemaining = _handleRewardsAndGetValueToSend(
+        // Ensure the same number of addresses and bps
+        require(addresses.length == basisPointSplits.length, "Parallel arrays required");
+
+        // Calculate value left after sharing protocol rewards
+        uint256 msgValueRemaining = _handleRewardsAndGetValueToSend(
             msg.value,
             protocolRewardsRecipients.builder,
             protocolRewardsRecipients.purchaseReferral,
             protocolRewardsRecipients.deployer
         );
 
-        //Share of purchase amount to send to treasury
-        uint256 toPayTreasury = (msgValueRemaining * (10_000 - creatorRateBps)) / 10_000;
+        BuyTokenPaymentShares memory buyTokenPaymentShares = _calculateBuyTokenPaymentShares(msgValueRemaining);
 
-        //Share of purchase amount to reserve for creators
-        //Ether directly sent to creators
-        uint256 creatorDirectPayment = ((msgValueRemaining - toPayTreasury) * entropyRateBps) / 10_000;
-        //Tokens to emit to creators
-        int totalTokensForCreators = ((msgValueRemaining - toPayTreasury) - creatorDirectPayment) > 0
-            ? getTokenQuoteForEther((msgValueRemaining - toPayTreasury) - creatorDirectPayment)
+        // Calculate tokens to emit to creators
+        int totalTokensForCreators = buyTokenPaymentShares.creatorsGovernancePayment > 0
+            ? getTokenQuoteForEther(buyTokenPaymentShares.creatorsGovernancePayment)
             : int(0);
 
-        // Tokens to emit to buyers
-        int totalTokensForBuyers = toPayTreasury > 0 ? getTokenQuoteForEther(toPayTreasury) : int(0);
-
-        //Transfer ETH to treasury and update emitted
-        emittedTokenWad += totalTokensForBuyers;
+        // Update total tokens emitted for this purchase with tokens for creators
         if (totalTokensForCreators > 0) emittedTokenWad += totalTokensForCreators;
 
-        //Deposit funds to treasury
-        (bool success, ) = treasury.call{ value: toPayTreasury }(new bytes(0));
+        // Tokens to emit to buyers
+        int totalTokensForBuyers = buyTokenPaymentShares.buyersShare > 0
+            ? getTokenQuoteForEther(buyTokenPaymentShares.buyersShare)
+            : int(0);
+
+        // Update total tokens emitted for this purchase with tokens for buyers
+        if (totalTokensForBuyers > 0) emittedTokenWad += totalTokensForBuyers;
+
+        //Deposit owner's funds, and eth used to buy creators gov. tokens to owner's account
+        (bool success, ) = owner().call{
+            value: buyTokenPaymentShares.buyersShare + buyTokenPaymentShares.creatorsGovernancePayment
+        }(new bytes(0));
         require(success, "Transfer failed.");
 
         //Transfer ETH to creators
-        if (creatorDirectPayment > 0) {
-            (success, ) = creatorsAddress.call{ value: creatorDirectPayment }(new bytes(0));
+        if (buyTokenPaymentShares.creatorsDirectPayment > 0) {
+            (success, ) = creatorsAddress.call{ value: buyTokenPaymentShares.creatorsDirectPayment }(new bytes(0));
             require(success, "Transfer failed.");
         }
 
-        //Mint tokens for creators
+        //Mint tokens to creators
         if (totalTokensForCreators > 0 && creatorsAddress != address(0)) {
-            _mint(creatorsAddress, uint(totalTokensForCreators));
+            _mint(creatorsAddress, uint256(totalTokensForCreators));
         }
 
-        uint bpsSum = 0;
+        // Stores total bps, ensure it is 10_000 later
+        uint256 bpsSum = 0;
 
         //Mint tokens to buyers
-        if (totalTokensForBuyers > 0) {
-            for (uint i = 0; i < addresses.length; ) {
+        for (uint256 i = 0; i < addresses.length; i++) {
+            if (totalTokensForBuyers > 0) {
                 // transfer tokens to address
-                _mint(addresses[i], uint((totalTokensForBuyers * int(bps[i])) / 10_000));
-                bpsSum += bps[i];
-
-                unchecked {
-                    ++i;
-                }
+                _mint(addresses[i], uint256((totalTokensForBuyers * int(basisPointSplits[i])) / 10_000));
             }
+            bpsSum += basisPointSplits[i];
         }
 
         require(bpsSum == 10_000, "bps must add up to 10_000");
@@ -1183,14 +1512,14 @@ contract ERC20TokenEmitter is VRGDAC, IERC20TokenEmitter, ReentrancyGuard, Token
         emit PurchaseFinalized(
             msg.sender,
             msg.value,
-            toPayTreasury,
+            buyTokenPaymentShares.buyersShare + buyTokenPaymentShares.creatorsGovernancePayment,
             msg.value - msgValueRemaining,
-            uint(totalTokensForBuyers),
-            uint(totalTokensForCreators),
-            creatorDirectPayment
+            uint256(totalTokensForBuyers),
+            uint256(totalTokensForCreators),
+            buyTokenPaymentShares.creatorsDirectPayment
         );
 
-        return uint(totalTokensForBuyers);
+        return uint256(totalTokensForBuyers);
     }
 
     /**
@@ -1198,12 +1527,12 @@ contract ERC20TokenEmitter is VRGDAC, IERC20TokenEmitter, ReentrancyGuard, Token
      * @param amount the amount of tokens to buy.
      * @return spentY The cost in wei of the token purchase.
      */
-    function buyTokenQuote(uint amount) public view returns (int spentY) {
+    function buyTokenQuote(uint256 amount) public view returns (int spentY) {
         require(amount > 0, "Amount must be greater than 0");
         // Note: By using toDaysWadUnsafe(block.timestamp - startTime) we are establishing that 1 "unit of time" is 1 day.
         // solhint-disable-next-line not-rely-on-time
         return
-            xToY({
+            vrgdac.xToY({
                 timeSinceStart: toDaysWadUnsafe(block.timestamp - startTime),
                 sold: emittedTokenWad,
                 amount: int(amount)
@@ -1215,12 +1544,12 @@ contract ERC20TokenEmitter is VRGDAC, IERC20TokenEmitter, ReentrancyGuard, Token
      * @param etherAmount the payment amount in wei.
      * @return gainedX The amount of tokens that would be emitted for the payment amount.
      */
-    function getTokenQuoteForEther(uint etherAmount) public view returns (int gainedX) {
+    function getTokenQuoteForEther(uint256 etherAmount) public view returns (int gainedX) {
         require(etherAmount > 0, "Ether amount must be greater than 0");
         // Note: By using toDaysWadUnsafe(block.timestamp - startTime) we are establishing that 1 "unit of time" is 1 day.
         // solhint-disable-next-line not-rely-on-time
         return
-            yToX({
+            vrgdac.yToX({
                 timeSinceStart: toDaysWadUnsafe(block.timestamp - startTime),
                 sold: emittedTokenWad,
                 amount: int(etherAmount)
@@ -1228,16 +1557,16 @@ contract ERC20TokenEmitter is VRGDAC, IERC20TokenEmitter, ReentrancyGuard, Token
     }
 
     /**
-     * @notice Returns the amount of tokens that would be emitted for the payment amount, taking into account the protocol rewards.
+     * @notice Returns the amount of tokens that would be emitted to a buyer for the payment amount, taking into account the protocol rewards and creator rate.
      * @param paymentAmount the payment amount in wei.
      * @return gainedX The amount of tokens that would be emitted for the payment amount.
      */
-    function getTokenQuoteForPayment(uint paymentAmount) external view returns (int gainedX) {
+    function getTokenQuoteForPayment(uint256 paymentAmount) external view returns (int gainedX) {
         require(paymentAmount > 0, "Payment amount must be greater than 0");
         // Note: By using toDaysWadUnsafe(block.timestamp - startTime) we are establishing that 1 "unit of time" is 1 day.
         // solhint-disable-next-line not-rely-on-time
         return
-            yToX({
+            vrgdac.yToX({
                 timeSinceStart: toDaysWadUnsafe(block.timestamp - startTime),
                 sold: emittedTokenWad,
                 amount: int(((paymentAmount - computeTotalReward(paymentAmount)) * (10_000 - creatorRateBps)) / 10_000)
@@ -1252,8 +1581,7 @@ contract ERC20TokenEmitter is VRGDAC, IERC20TokenEmitter, ReentrancyGuard, Token
     function setEntropyRateBps(uint256 _entropyRateBps) external onlyOwner {
         require(_entropyRateBps <= 10_000, "Entropy rate must be less than or equal to 10_000");
 
-        entropyRateBps = _entropyRateBps;
-        emit EntropyRateBpsUpdated(_entropyRateBps);
+        emit EntropyRateBpsUpdated(entropyRateBps = _entropyRateBps);
     }
 
     /**
@@ -1263,9 +1591,8 @@ contract ERC20TokenEmitter is VRGDAC, IERC20TokenEmitter, ReentrancyGuard, Token
      */
     function setCreatorRateBps(uint256 _creatorRateBps) external onlyOwner {
         require(_creatorRateBps <= 10_000, "Creator rate must be less than or equal to 10_000");
-        creatorRateBps = _creatorRateBps;
 
-        emit CreatorRateBpsUpdated(_creatorRateBps);
+        emit CreatorRateBpsUpdated(creatorRateBps = _creatorRateBps);
     }
 
     /**
@@ -1274,8 +1601,454 @@ contract ERC20TokenEmitter is VRGDAC, IERC20TokenEmitter, ReentrancyGuard, Token
      */
     function setCreatorsAddress(address _creatorsAddress) external override onlyOwner nonReentrant {
         require(_creatorsAddress != address(0), "Invalid address");
-        creatorsAddress = _creatorsAddress;
 
-        emit CreatorsAddressUpdated(_creatorsAddress);
+        emit CreatorsAddressUpdated(creatorsAddress = _creatorsAddress);
+    }
+}
+
+/// @title IUUPS
+/// @author Rohan Kulkarni
+/// @notice The external UUPS errors and functions
+interface IUUPS is IERC1967Upgrade, IERC1822Proxiable {
+    ///                                                          ///
+    ///                            ERRORS                        ///
+    ///                                                          ///
+
+    /// @dev Reverts if not called directly
+    error ONLY_CALL();
+
+    /// @dev Reverts if not called via delegatecall
+    error ONLY_DELEGATECALL();
+
+    /// @dev Reverts if not called via proxy
+    error ONLY_PROXY();
+
+    ///                                                          ///
+    ///                           FUNCTIONS                      ///
+    ///                                                          ///
+
+    /// @notice Upgrades to an implementation
+    /// @param newImpl The new implementation address
+    function upgradeTo(address newImpl) external;
+
+    /// @notice Upgrades to an implementation with an additional function call
+    /// @param newImpl The new implementation address
+    /// @param data The encoded function call
+    function upgradeToAndCall(address newImpl, bytes memory data) external payable;
+}
+
+/// @title IRevolutionBuilder
+/// @notice The external RevolutionBuilder events, errors, structs and functions
+interface IRevolutionBuilder is IUUPS {
+    ///                                                          ///
+    ///                            EVENTS                        ///
+    ///                                                          ///
+
+    /// @notice Emitted when a DAO is deployed
+    /// @param erc721Token The ERC-721 token address
+    /// @param descriptor The descriptor renderer address
+    /// @param auction The auction address
+    /// @param executor The executor address
+    /// @param dao The dao address
+    /// @param cultureIndex The cultureIndex address
+    /// @param erc20TokenEmitter The ERC20TokenEmitter address
+    /// @param erc20Token The dao address
+    /// @param maxHeap The maxHeap address
+    event DAODeployed(
+        address erc721Token,
+        address descriptor,
+        address auction,
+        address executor,
+        address dao,
+        address cultureIndex,
+        address erc20TokenEmitter,
+        address erc20Token,
+        address maxHeap
+    );
+
+    /// @notice Emitted when an upgrade is registered by the Builder DAO
+    /// @param baseImpl The base implementation address
+    /// @param upgradeImpl The upgrade implementation address
+    event UpgradeRegistered(address baseImpl, address upgradeImpl);
+
+    /// @notice Emitted when an upgrade is unregistered by the Builder DAO
+    /// @param baseImpl The base implementation address
+    /// @param upgradeImpl The upgrade implementation address
+    event UpgradeRemoved(address baseImpl, address upgradeImpl);
+
+    ///                                                          ///
+    ///                            STRUCTS                       ///
+    ///                                                          ///
+
+    /// @notice DAO Version Information information struct
+    struct DAOVersionInfo {
+        string erc721Token;
+        string descriptor;
+        string auction;
+        string executor;
+        string dao;
+        string cultureIndex;
+        string erc20Token;
+        string erc20TokenEmitter;
+        string maxHeap;
+    }
+
+    /// @notice The ERC-721 token parameters
+    /// @param name The token name
+    /// @param symbol The token symbol
+    /// @param contractURIHash The IPFS content hash of the contract-level metadata
+    struct ERC721TokenParams {
+        string name;
+        string symbol;
+        string contractURIHash;
+        string tokenNamePrefix;
+    }
+
+    /// @notice The auction parameters
+    /// @param timeBuffer The time buffer of each auction
+    /// @param reservePrice The reserve price of each auction
+    /// @param duration The duration of each auction
+    /// @param minBidIncrementPercentage The minimum bid increment percentage of each auction
+    /// @param creatorRateBps The creator rate basis points of each auction - the share of the winning bid that is reserved for the creator
+    /// @param entropyRateBps The entropy rate basis points of each auction - the portion of the creator's share that is directly sent to the creator in ETH
+    /// @param minCreatorRateBps The minimum creator rate basis points of each auction
+    struct AuctionParams {
+        uint256 timeBuffer;
+        uint256 reservePrice;
+        uint256 duration;
+        uint8 minBidIncrementPercentage;
+        uint256 creatorRateBps;
+        uint256 entropyRateBps;
+        uint256 minCreatorRateBps;
+    }
+
+    /// @notice The governance parameters
+    /// @param timelockDelay The time delay to execute a queued transaction
+    /// @param votingDelay The time delay to vote on a created proposal
+    /// @param votingPeriod The time period to vote on a proposal
+    /// @param proposalThresholdBPS The basis points of the token supply required to create a proposal
+    /// @param vetoer The address authorized to veto proposals (address(0) if none desired)
+    /// @param erc721TokenVotingWeight The voting weight of the individual ERC721 tokens
+    /// @param daoName The name of the DAO
+    /// @param dynamicQuorumParams The dynamic quorum parameters
+    struct GovParams {
+        uint256 timelockDelay;
+        uint256 votingDelay;
+        uint256 votingPeriod;
+        uint256 proposalThresholdBPS;
+        address vetoer;
+        uint256 erc721TokenVotingWeight;
+        string daoName;
+        VerbsDAOStorageV1.DynamicQuorumParams dynamicQuorumParams;
+    }
+
+    /// @notice The ERC-20 token parameters
+    /// @param name The token name
+    /// @param symbol The token symbol
+    struct ERC20TokenParams {
+        string name;
+        string symbol;
+    }
+
+    /// @notice The ERC-20 token emitter VRGDA parameters
+    /// @param vrgdaParams // The VRGDA parameters
+    /// @param creatorsAddress // The address to send creator payments to
+    struct ERC20TokenEmitterParams {
+        VRGDAParams vrgdaParams;
+        TokenEmitterCreatorParams creatorParams;
+        address creatorsAddress;
+    }
+
+    /// @notice The ERC-20 token emitter VRGDA parameters
+    /// @param targetPrice // The target price for a token if sold on pace, scaled by 1e18.
+    /// @param priceDecayPercent // The percent the price decays per unit of time with no sales, scaled by 1e18.
+    /// @param tokensPerTimeUnit // The number of tokens to target selling in 1 full unit of time, scaled by 1e18.
+    struct VRGDAParams {
+        int256 targetPrice;
+        int256 priceDecayPercent;
+        int256 tokensPerTimeUnit;
+    }
+
+    /// @notice The ERC-20 token emitter creator parameters
+    /// @param creatorRateBps The creator rate basis points of each auction - the share of the winning bid that is reserved for the creator
+    /// @param entropyRateBps The entropy rate basis points of each auction - the portion of the creator's share that is directly sent to the creator in ETH
+    struct TokenEmitterCreatorParams {
+        uint256 creatorRateBps;
+        uint256 entropyRateBps;
+    }
+
+    /// @notice The CultureIndex parameters
+    /// @param name The name of the culture index
+    /// @param description A description for the culture index, can include rules for uploads etc.
+    /// @param erc721VotingTokenWeight The voting weight of the individual ERC721 tokens. Normally a large multiple to match up with daily emission of ERC20 points
+    /// @param quorumVotesBPS The initial quorum votes threshold in basis points
+    /// @param minVoteWeight The minimum vote weight in basis points that a voter must have to be able to vote.
+    struct CultureIndexParams {
+        string name;
+        string description;
+        uint256 erc721VotingTokenWeight;
+        uint256 quorumVotesBPS;
+        uint256 minVoteWeight;
+    }
+
+    ///                                                          ///
+    ///                           FUNCTIONS                      ///
+    ///                                                          ///
+
+    /// @notice The token implementation address
+    function erc721TokenImpl() external view returns (address);
+
+    /// @notice The descriptor renderer implementation address
+    function descriptorImpl() external view returns (address);
+
+    /// @notice The auction house implementation address
+    function auctionImpl() external view returns (address);
+
+    /// @notice The executor implementation address
+    function executorImpl() external view returns (address);
+
+    /// @notice The dao implementation address
+    function daoImpl() external view returns (address);
+
+    /// @notice The erc20TokenEmitter implementation address
+    function erc20TokenEmitterImpl() external view returns (address);
+
+    /// @notice The cultureIndex implementation address
+    function cultureIndexImpl() external view returns (address);
+
+    /// @notice The erc20Token implementation address
+    function erc20TokenImpl() external view returns (address);
+
+    /// @notice The maxHeap implementation address
+    function maxHeapImpl() external view returns (address);
+
+    /// @notice Deploys a DAO with custom token, auction, and governance settings
+    /// @param initialOwner The initial owner address
+    /// @param weth The WETH address
+    /// @param erc721TokenParams The ERC-721 token settings
+    /// @param auctionParams The auction settings
+    /// @param govParams The governance settings
+    /// @param cultureIndexParams The CultureIndex settings
+    /// @param erc20TokenParams The ERC-20 token settings
+    /// @param erc20TokenEmitterParams The ERC-20 token emitter settings
+    function deploy(
+        address initialOwner,
+        address weth,
+        ERC721TokenParams calldata erc721TokenParams,
+        AuctionParams calldata auctionParams,
+        GovParams calldata govParams,
+        CultureIndexParams calldata cultureIndexParams,
+        ERC20TokenParams calldata erc20TokenParams,
+        ERC20TokenEmitterParams calldata erc20TokenEmitterParams
+    ) external returns (RevolutionBuilderTypesV1.DAOAddresses memory);
+
+    /// @notice A DAO's remaining contract addresses from its token address
+    /// @param token The ERC-721 token address
+    function getAddresses(
+        address token
+    )
+        external
+        returns (
+            address erc721Token,
+            address descriptor,
+            address auction,
+            address executor,
+            address dao,
+            address cultureIndex,
+            address erc20Token,
+            address erc20TokenEmitter,
+            address maxHeap
+        );
+
+    /// @notice If an implementation is registered by the Builder DAO as an optional upgrade
+    /// @param baseImpl The base implementation address
+    /// @param upgradeImpl The upgrade implementation address
+    function isRegisteredUpgrade(address baseImpl, address upgradeImpl) external view returns (bool);
+
+    /// @notice Called by the Builder DAO to offer opt-in implementation upgrades for all other DAOs
+    /// @param baseImpl The base implementation address
+    /// @param upgradeImpl The upgrade implementation address
+    function registerUpgrade(address baseImpl, address upgradeImpl) external;
+
+    /// @notice Called by the Builder DAO to remove an upgrade
+    /// @param baseImpl The base implementation address
+    /// @param upgradeImpl The upgrade implementation address
+    function removeUpgrade(address baseImpl, address upgradeImpl) external;
+}
+
+contract VerbsDAOProxyStorage {
+    /// @notice Administrator for this contract
+    address public admin;
+
+    /// @notice Pending administrator for this contract
+    address public pendingAdmin;
+
+    /// @notice Active brains of Governor
+    address public implementation;
+}
+
+/**
+ * @title Storage for Governor Bravo Delegate
+ * @notice For future upgrades, do not change VerbsDAOStorageV1. Create a new
+ * contract which implements VerbsDAOStorageV1 and following the naming convention
+ * VerbsDAOStorageVX.
+ */
+contract VerbsDAOStorageV1 is VerbsDAOProxyStorage {
+    /// @notice Vetoer who has the ability to veto any proposal
+    address public vetoer;
+
+    /// @notice The delay before voting on a proposal may take place, once proposed, in blocks
+    uint256 public votingDelay;
+
+    /// @notice The duration of voting on a proposal, in blocks
+    uint256 public votingPeriod;
+
+    /// @notice The basis point number of votes required in order for a voter to become a proposer. *DIFFERS from GovernerBravo
+    uint256 public proposalThresholdBPS;
+
+    /// @notice The basis point number of votes in support of a proposal required in order for a quorum to be reached and for a vote to succeed. *DIFFERS from GovernerBravo
+    uint256 public quorumVotesBPS;
+
+    /// @notice The total number of proposals
+    uint256 public proposalCount;
+
+    /// @notice The address of the Verbs DAO Executor DAOExecutor
+    IDAOExecutor public timelock;
+
+    /// @notice The address of the Verbs ERC721 tokens
+    VerbsTokenLike public verbs;
+
+    /// @notice The address of the Verbs ERC20 points
+    VerbsPointsLike public verbsPoints;
+
+    /// @notice The official record of all proposals ever proposed
+    mapping(uint256 => Proposal) internal _proposals;
+
+    /// @notice The latest proposal for each proposer
+    mapping(address => uint256) public latestProposalIds;
+
+    DynamicQuorumParamsCheckpoint[] public quorumParamsCheckpoints;
+
+    /// @notice Pending new vetoer
+    address public pendingVetoer;
+
+    /// @notice The voting weight of the verbs token eg: owning (2) tokens gets you (2 * erc721TokenVotingWeight) votes
+    uint256 public erc721TokenVotingWeight;
+
+    struct Proposal {
+        /// @notice Unique id for looking up a proposal
+        uint256 id;
+        /// @notice Creator of the proposal
+        address proposer;
+        /// @notice The number of votes needed to create a proposal at the time of proposal creation. *DIFFERS from GovernerBravo
+        uint256 proposalThreshold;
+        /// @notice The number of votes in support of a proposal required in order for a quorum to be reached and for a vote to succeed at the time of proposal creation. *DIFFERS from GovernerBravo
+        uint256 quorumVotes;
+        /// @notice The timestamp that the proposal will be available for execution, set once the vote succeeds
+        uint256 eta;
+        /// @notice the ordered list of target addresses for calls to be made
+        address[] targets;
+        /// @notice The ordered list of values (i.e. msg.value) to be passed to the calls to be made
+        uint256[] values;
+        /// @notice The ordered list of function signatures to be called
+        string[] signatures;
+        /// @notice The ordered list of calldata to be passed to each call
+        bytes[] calldatas;
+        /// @notice The block at which voting begins: holders must delegate their votes prior to this block
+        uint256 startBlock;
+        /// @notice The block at which voting ends: votes must be cast prior to this block
+        uint256 endBlock;
+        /// @notice Current number of votes in favor of this proposal
+        uint256 forVotes;
+        /// @notice Current number of votes in opposition to this proposal
+        uint256 againstVotes;
+        /// @notice Current number of votes for abstaining for this proposal
+        uint256 abstainVotes;
+        /// @notice Flag marking whether the proposal has been canceled
+        bool canceled;
+        /// @notice Flag marking whether the proposal has been vetoed
+        bool vetoed;
+        /// @notice Flag marking whether the proposal has been executed
+        bool executed;
+        /// @notice Receipts of ballots for the entire set of voters
+        mapping(address => Receipt) receipts;
+        /// @notice The total supply at the time of proposal creation
+        uint256 totalSupply;
+        /// @notice The block at which this proposal was created
+        uint256 creationBlock;
+    }
+
+    /// @notice Ballot receipt record for a voter
+    struct Receipt {
+        /// @notice Whether or not a vote has been cast
+        bool hasVoted;
+        /// @notice Whether or not the voter supports the proposal or abstains
+        uint8 support;
+        /// @notice The number of votes the voter had, which were cast
+        uint256 votes;
+    }
+
+    /// @notice Possible states that a proposal may be in
+    enum ProposalState {
+        Pending,
+        Active,
+        Canceled,
+        Defeated,
+        Succeeded,
+        Queued,
+        Expired,
+        Executed,
+        Vetoed
+    }
+
+    struct DynamicQuorumParams {
+        /// @notice The minimum basis point number of votes in support of a proposal required in order for a quorum to be reached and for a vote to succeed.
+        uint16 minQuorumVotesBPS;
+        /// @notice The maximum basis point number of votes in support of a proposal required in order for a quorum to be reached and for a vote to succeed.
+        uint16 maxQuorumVotesBPS;
+        /// @notice The dynamic quorum coefficient
+        /// @dev Assumed to be fixed point integer with 6 decimals, i.e 0.2 is represented as 0.2 * 1e6 = 200000
+        uint32 quorumCoefficient;
+    }
+
+    /// @notice A checkpoint for storing dynamic quorum params from a given block
+    struct DynamicQuorumParamsCheckpoint {
+        /// @notice The block at which the new values were set
+        uint32 fromBlock;
+        /// @notice The parameter values of this checkpoint
+        DynamicQuorumParams params;
+    }
+
+    struct ProposalCondensed {
+        /// @notice Unique id for looking up a proposal
+        uint256 id;
+        /// @notice Creator of the proposal
+        address proposer;
+        /// @notice The number of votes needed to create a proposal at the time of proposal creation. *DIFFERS from GovernerBravo
+        uint256 proposalThreshold;
+        /// @notice The minimum number of votes in support of a proposal required in order for a quorum to be reached and for a vote to succeed at the time of proposal creation. *DIFFERS from GovernerBravo
+        uint256 quorumVotes;
+        /// @notice The timestamp that the proposal will be available for execution, set once the vote succeeds
+        uint256 eta;
+        /// @notice The block at which voting begins: holders must delegate their votes prior to this block
+        uint256 startBlock;
+        /// @notice The block at which voting ends: votes must be cast prior to this block
+        uint256 endBlock;
+        /// @notice Current number of votes in favor of this proposal
+        uint256 forVotes;
+        /// @notice Current number of votes in opposition to this proposal
+        uint256 againstVotes;
+        /// @notice Current number of votes for abstaining for this proposal
+        uint256 abstainVotes;
+        /// @notice Flag marking whether the proposal has been canceled
+        bool canceled;
+        /// @notice Flag marking whether the proposal has been vetoed
+        bool vetoed;
+        /// @notice Flag marking whether the proposal has been executed
+        bool executed;
+        /// @notice The total supply at the time of proposal creation
+        uint256 totalSupply;
+        /// @notice The block at which this proposal was created
+        uint256 creationBlock;
     }
 }
