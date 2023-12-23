@@ -921,6 +921,33 @@ contract ERC20TokenEmitterTest is RevolutionBuilderTest {
         // Assert that the price is greater than zero
         assertGt(priceAfterManyDays, 0, "Price should never hit zero");
     }
+
+    //ensure when creating new tokenemitter, that INVALID_BPS is thrown if > 10_000
+    function test_bpsInitialization() public {
+        address owner = address(0x123);
+
+        RevolutionProtocolRewards protocolRewards = new RevolutionProtocolRewards();
+
+        address governanceToken = address(new ERC1967Proxy(erc20TokenImpl, ""));
+
+        address emitter1 = address(new ERC1967Proxy(erc20TokenEmitterImpl, ""));
+
+        address vrgdac = address(erc20TokenEmitter.vrgdac());
+
+        vm.startPrank(address(manager));
+        vm.expectRevert(abi.encodeWithSignature("INVALID_BPS()"));
+        IERC20TokenEmitter(emitter1).initialize({
+            initialOwner: owner,
+            weth: address(weth),
+            erc20Token: address(governanceToken),
+            vrgdac: vrgdac,
+            creatorsAddress: creatorsAddress,
+            creatorParams: IRevolutionBuilder.TokenEmitterCreatorParams({
+                creatorRateBps: 100_000,
+                entropyRateBps: 50_000
+            })
+        });
+    }
 }
 
 contract MaliciousOwner {
