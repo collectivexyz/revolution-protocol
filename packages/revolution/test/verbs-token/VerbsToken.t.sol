@@ -35,43 +35,6 @@ contract VerbsTokenTestSuite is RevolutionBuilderTest {
         super.deployMock();
 
         vm.startPrank(address(dao));
-
-        // // Create a new mock ERC20 token for voting
-        // govToken = new NontransferableERC20Votes(address(this), "Revolution Governance", "GOV");
-
-        // // Create a new VerbsToken contract, passing address(this) as both the minter and the initial owner
-        // verbsToken = new VerbsToken(
-        //     address(this),
-        //     address(this),
-        //     IDescriptorMinimal(address(0)),
-        //     ICultureIndex(address(0)),
-        //     tokenName,
-        //     tokenSymbol,
-        //     "QmQzDwaZ7yQxHHs7sQQenJVB89riTSacSGcJRv9jtHPuz5"
-        // );
-
-        // // Deploy CultureIndex with the VerbsToken's address as the initial owner
-        // cultureIndex = new CultureIndex(
-        //     "Vrbs",
-        //     "Our community Vrbs. Must be 32x32.",
-        //     address(erc20Token),
-        //     address(erc721Token),
-        //     address(erc721Token),
-        //     10,
-        //     200,
-        //     0
-        // );
-        // ICultureIndex _cultureIndex = cultureIndex;
-
-        // // Now that CultureIndex is deployed, set it in VerbsToken
-        // erc721Token.setCultureIndex(_cultureIndex);
-
-        // // Deploy a new Descriptor, which will be used by VerbsToken
-        // descriptor = new Descriptor(address(erc721Token), tokenNamePrefix);
-        // IDescriptorMinimal _descriptor = descriptor;
-
-        // // Now that Descriptor is deployed, set it in VerbsToken
-        // erc721Token.setDescriptor(_descriptor);
     }
 
     // Utility function to create a new art piece and return its ID

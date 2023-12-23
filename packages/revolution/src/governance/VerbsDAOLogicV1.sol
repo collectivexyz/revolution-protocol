@@ -669,7 +669,7 @@ contract VerbsDAOLogicV1 is
         bytes32 structHash = keccak256(abi.encode(BALLOT_TYPEHASH, proposalId, support));
         bytes32 digest = keccak256(abi.encodePacked("\x19\x01", domainSeparator, structHash));
         address signatory = ecrecover(digest, v, r, s);
-        require(signatory != address(0), "castVoteBySig: invalid signature");
+        require(signatory != address(0), "DAO::castVoteBySig: invalid signature");
         emit VoteCast(signatory, proposalId, support, castVoteInternal(signatory, proposalId, support), "");
     }
 
