@@ -79,7 +79,7 @@ contract VerbsDAOLogicV1 is
     IRevolutionBuilder private immutable manager;
 
     /// @notice The name of this contract
-    string public constant name = "Vrbs DAO";
+    string public name;
 
     /// @notice The minimum settable proposal threshold
     uint256 public constant MIN_PROPOSAL_THRESHOLD_BPS = 1; // 1 basis point or 0.01%
@@ -212,6 +212,7 @@ contract VerbsDAOLogicV1 is
         votingDelay = govParams_.votingDelay;
         proposalThresholdBPS = govParams_.proposalThresholdBPS;
         erc721TokenVotingWeight = govParams_.erc721TokenVotingWeight;
+        name = govParams_.daoName;
 
         // TODO set these dynamic quorum params
         // _setDynamicQuorumParams(
