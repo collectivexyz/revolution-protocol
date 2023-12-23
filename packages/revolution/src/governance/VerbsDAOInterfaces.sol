@@ -298,8 +298,8 @@ contract VerbsDAOStorageV1 is VerbsDAOProxyStorage {
         bool vetoed;
         /// @notice Flag marking whether the proposal has been executed
         bool executed;
-        /// @notice The total supply at the time of proposal creation
-        uint256 totalSupply;
+        /// @notice The total weighted supply at the time of proposal creation
+        uint256 totalWeightedSupply;
         /// @notice The block at which this proposal was created
         uint256 creationBlock;
     }
