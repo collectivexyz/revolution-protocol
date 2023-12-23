@@ -94,11 +94,8 @@ contract TokenMintingTest is VerbsTokenTestSuite {
         vm.startPrank(address(auction));
 
         // Try to remove max and expect to fail
-        try erc721Token.mint() {
-            fail("Should revert on removing max from empty heap");
-        } catch Error(string memory reason) {
-            assertEq(reason, "Culture index is empty");
-        }
+        vm.expectRevert(abi.encodeWithSignature("CULTURE_INDEX_EMPTY()"));
+        erc721Token.mint();
     }
 
     /// @dev Tests basic minting
@@ -160,7 +157,7 @@ contract TokenMintingTest is VerbsTokenTestSuite {
         vm.roll(block.number + 1);
 
         vm.startPrank(address(this));
-        if (voteWeight == 0) vm.expectRevert("Weight must be greater than minVoteWeight");
+        if (voteWeight == 0) vm.expectRevert(abi.encodeWithSignature("WEIGHT_TOO_LOW()"));
         cultureIndex.vote(pieceId1);
 
         uint256 expectedQuorum = ((10_000 + voteWeight) * cultureIndex.quorumVotesBPS()) / 10_000;
@@ -174,7 +171,7 @@ contract TokenMintingTest is VerbsTokenTestSuite {
             assertEq(erc721Token.totalSupply(), tokenId1 + 1, "CurrentVerbId should increment after first mint");
 
         vm.startPrank(address(this));
-        if (voteWeight == 0) vm.expectRevert("Weight must be greater than minVoteWeight");
+        if (voteWeight == 0) vm.expectRevert(abi.encodeWithSignature("WEIGHT_TOO_LOW()"));
         cultureIndex.vote(pieceId2);
 
         vm.startPrank(address(auction));
