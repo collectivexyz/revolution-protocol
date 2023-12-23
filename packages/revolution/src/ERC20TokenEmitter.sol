@@ -21,9 +21,6 @@ contract ERC20TokenEmitter is
     Ownable2StepUpgradeable,
     PausableUpgradeable
 {
-    // treasury address to pay funds to
-    address public treasury;
-
     // The token that is being minted.
     NontransferableERC20Votes public token;
 
@@ -78,31 +75,37 @@ contract ERC20TokenEmitter is
      * @param _initialOwner The initial owner of the token emitter
      * @param _erc20Token The ERC-20 token contract address
      * @param _vrgdac The VRGDA contract address
-     * @param _treasury The treasury address to pay funds to
      * @param _creatorsAddress The address to pay the creator reward to
      */
     function initialize(
         address _initialOwner,
         address _erc20Token,
-        address _treasury,
         address _vrgdac,
-        address _creatorsAddress
+        address _creatorsAddress,
+        IRevolutionBuilder.TokenEmitterCreatorParams calldata _creatorParams
     ) external initializer {
         require(msg.sender == address(manager), "Only manager can initialize");
+        require(_initialOwner != address(0), "Invalid _initialOwner");
+        require(_erc20Token != address(0), "Invalid _erc20Token");
+        require(_vrgdac != address(0), "Invalid _vrgdac");
+        require(_creatorsAddress != address(0), "Invalid _creatorsAddress");
+        require(_creatorParams.creatorRateBps <= 10_000, "Creator rate must be <= to 10_000");
+        require(_creatorParams.entropyRateBps <= 10_000, "Entropy rate must be <= to 10_000");
 
         __Pausable_init();
         __ReentrancyGuard_init();
 
-        require(_treasury != address(0), "Invalid treasury address");
-
         // Set up ownable
         __Ownable_init(_initialOwner);
 
-        treasury = _treasury;
         creatorsAddress = _creatorsAddress;
         vrgdac = VRGDAC(_vrgdac);
         token = NontransferableERC20Votes(_erc20Token);
-        startTime = block.timestamp;
+        creatorRateBps = _creatorParams.creatorRateBps;
+        entropyRateBps = _creatorParams.entropyRateBps;
+
+        // If we are upgrading, don't reset the start time
+        if (startTime == 0) startTime = block.timestamp;
     }
 
     function _mint(address _to, uint256 _amount) private {
@@ -177,8 +180,8 @@ contract ERC20TokenEmitter is
         uint[] calldata basisPointSplits,
         ProtocolRewardAddresses calldata protocolRewardsRecipients
     ) public payable nonReentrant whenNotPaused returns (uint256 tokensSoldWad) {
-        // Prevent treasury and creatorsAddress from buying tokens directly, given they are recipient(s) of the funds
-        require(msg.sender != treasury && msg.sender != creatorsAddress, "Funds recipient cannot buy tokens");
+        // Prevent owner and creatorsAddress from buying tokens directly, given they are recipient(s) of the funds
+        require(msg.sender != owner() && msg.sender != creatorsAddress, "Funds recipient cannot buy tokens");
 
         // Transaction must send ether to buyTokens
         require(msg.value > 0, "Must send ether");
@@ -212,8 +215,8 @@ contract ERC20TokenEmitter is
         // Update total tokens emitted for this purchase with tokens for buyers
         if (totalTokensForBuyers > 0) emittedTokenWad += totalTokensForBuyers;
 
-        //Deposit treasury funds, and eth used to buy creators gov. tokens to treasury
-        (bool success, ) = treasury.call{
+        //Deposit owner's funds, and eth used to buy creators gov. tokens to owner's account
+        (bool success, ) = owner().call{
             value: buyTokenPaymentShares.buyersShare + buyTokenPaymentShares.creatorsGovernancePayment
         }(new bytes(0));
         require(success, "Transfer failed.");
@@ -291,7 +294,7 @@ contract ERC20TokenEmitter is
     }
 
     /**
-     * @notice Returns the amount of tokens that would be emitted for the payment amount, taking into account the protocol rewards.
+     * @notice Returns the amount of tokens that would be emitted to a buyer for the payment amount, taking into account the protocol rewards and creator rate.
      * @param paymentAmount the payment amount in wei.
      * @return gainedX The amount of tokens that would be emitted for the payment amount.
      */

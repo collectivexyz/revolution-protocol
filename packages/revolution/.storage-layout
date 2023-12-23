@@ -28,14 +28,13 @@
 
 | Name            | Type                               | Slot | Offset | Bytes | Contract                                    |
 |-----------------|------------------------------------|------|--------|-------|---------------------------------------------|
-| treasury        | address                            | 0    | 0      | 20    | src/ERC20TokenEmitter.sol:ERC20TokenEmitter |
-| token           | contract NontransferableERC20Votes | 1    | 0      | 20    | src/ERC20TokenEmitter.sol:ERC20TokenEmitter |
-| vrgdac          | contract VRGDAC                    | 2    | 0      | 20    | src/ERC20TokenEmitter.sol:ERC20TokenEmitter |
-| startTime       | uint256                            | 3    | 0      | 32    | src/ERC20TokenEmitter.sol:ERC20TokenEmitter |
-| emittedTokenWad | int256                             | 4    | 0      | 32    | src/ERC20TokenEmitter.sol:ERC20TokenEmitter |
-| creatorRateBps  | uint256                            | 5    | 0      | 32    | src/ERC20TokenEmitter.sol:ERC20TokenEmitter |
-| entropyRateBps  | uint256                            | 6    | 0      | 32    | src/ERC20TokenEmitter.sol:ERC20TokenEmitter |
-| creatorsAddress | address                            | 7    | 0      | 20    | src/ERC20TokenEmitter.sol:ERC20TokenEmitter |
+| token           | contract NontransferableERC20Votes | 0    | 0      | 20    | src/ERC20TokenEmitter.sol:ERC20TokenEmitter |
+| vrgdac          | contract VRGDAC                    | 1    | 0      | 20    | src/ERC20TokenEmitter.sol:ERC20TokenEmitter |
+| startTime       | uint256                            | 2    | 0      | 32    | src/ERC20TokenEmitter.sol:ERC20TokenEmitter |
+| emittedTokenWad | int256                             | 3    | 0      | 32    | src/ERC20TokenEmitter.sol:ERC20TokenEmitter |
+| creatorRateBps  | uint256                            | 4    | 0      | 32    | src/ERC20TokenEmitter.sol:ERC20TokenEmitter |
+| entropyRateBps  | uint256                            | 5    | 0      | 32    | src/ERC20TokenEmitter.sol:ERC20TokenEmitter |
+| creatorsAddress | address                            | 6    | 0      | 20    | src/ERC20TokenEmitter.sol:ERC20TokenEmitter |
 
 =======================
 ➡ AuctionHouse

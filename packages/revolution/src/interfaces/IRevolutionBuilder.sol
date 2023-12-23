@@ -77,8 +77,8 @@ interface IRevolutionBuilder is IUUPS {
     /// @param reservePrice The reserve price of each auction
     /// @param duration The duration of each auction
     /// @param minBidIncrementPercentage The minimum bid increment percentage of each auction
-    /// @param creatorRateBps The creator rate basis points of each auction
-    /// @param entropyRateBps The entropy rate basis points of each auction
+    /// @param creatorRateBps The creator rate basis points of each auction - the share of the winning bid that is reserved for the creator
+    /// @param entropyRateBps The entropy rate basis points of each auction - the portion of the creator's share that is directly sent to the creator in ETH
     /// @param minCreatorRateBps The minimum creator rate basis points of each auction
     struct AuctionParams {
         uint256 timeBuffer;
@@ -119,15 +119,30 @@ interface IRevolutionBuilder is IUUPS {
     }
 
     /// @notice The ERC-20 token emitter VRGDA parameters
+    /// @param vrgdaParams // The VRGDA parameters
+    /// @param creatorsAddress // The address to send creator payments to
+    struct ERC20TokenEmitterParams {
+        VRGDAParams vrgdaParams;
+        TokenEmitterCreatorParams creatorParams;
+        address creatorsAddress;
+    }
+
+    /// @notice The ERC-20 token emitter VRGDA parameters
     /// @param targetPrice // The target price for a token if sold on pace, scaled by 1e18.
     /// @param priceDecayPercent // The percent the price decays per unit of time with no sales, scaled by 1e18.
     /// @param tokensPerTimeUnit // The number of tokens to target selling in 1 full unit of time, scaled by 1e18.
-    /// @param creatorsAddress // The address to send creator payments to
-    struct ERC20TokenEmitterParams {
+    struct VRGDAParams {
         int256 targetPrice;
         int256 priceDecayPercent;
         int256 tokensPerTimeUnit;
-        address creatorsAddress;
+    }
+
+    /// @notice The ERC-20 token emitter creator parameters
+    /// @param creatorRateBps The creator rate basis points of each auction - the share of the winning bid that is reserved for the creator
+    /// @param entropyRateBps The entropy rate basis points of each auction - the portion of the creator's share that is directly sent to the creator in ETH
+    struct TokenEmitterCreatorParams {
+        uint256 creatorRateBps;
+        uint256 entropyRateBps;
     }
 
     /// @notice The CultureIndex parameters

@@ -47,7 +47,7 @@ interface IERC20TokenEmitter {
     event PurchaseFinalized(
         address indexed buyer,
         uint256 payment,
-        uint256 treasuryAmount,
+        uint256 ownerAmount,
         uint256 protocolRewardsAmount,
         uint256 buyerTokensEmitted,
         uint256 creatorTokensEmitted,
@@ -58,15 +58,15 @@ interface IERC20TokenEmitter {
      * @notice Initialize the token emitter
      * @param initialOwner The initial owner of the token emitter
      * @param erc20Token The ERC-20 token contract address
-     * @param treasury The treasury address to pay funds to
      * @param vrgdac The VRGDA contract address
      * @param creatorsAddress The address of the creators
+     * @param creatorParams The creator and entropy rate parameters
      */
     function initialize(
         address initialOwner,
         address erc20Token,
-        address treasury,
         address vrgdac,
-        address creatorsAddress
+        address creatorsAddress,
+        IRevolutionBuilder.TokenEmitterCreatorParams calldata creatorParams
     ) external;
 }

@@ -14,7 +14,7 @@
   },
   "scripts": {
     "build:sizes": "forge build --sizes",
-    "dev": "FOUNDRY_PROFILE=dev forge test --watch -vvv",
+    "dev": "FOUNDRY_PROFILE=dev forge test --watch -vvvv",
     "test": "forge test -vvv",
     "build:contracts": "forge build",
     "prettier:check": "prettier --check 'src/**/*.sol' 'test/**/*.sol'",

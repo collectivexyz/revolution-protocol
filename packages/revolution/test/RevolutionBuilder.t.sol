@@ -247,9 +247,15 @@ contract RevolutionBuilderTest is Test {
         address _creatorsAddress
     ) internal virtual {
         erc20TokenEmitterParams = IRevolutionBuilder.ERC20TokenEmitterParams({
-            targetPrice: _targetPrice,
-            priceDecayPercent: _priceDecayPercent,
-            tokensPerTimeUnit: _tokensPerTimeUnit,
+            vrgdaParams: IRevolutionBuilder.VRGDAParams({
+                targetPrice: _targetPrice,
+                priceDecayPercent: _priceDecayPercent,
+                tokensPerTimeUnit: _tokensPerTimeUnit
+            }),
+            creatorParams: IRevolutionBuilder.TokenEmitterCreatorParams({
+                creatorRateBps: 1000,
+                entropyRateBps: 4_000
+            }),
             creatorsAddress: _creatorsAddress
         });
     }
