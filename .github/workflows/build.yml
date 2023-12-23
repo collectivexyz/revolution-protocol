@@ -11,7 +11,7 @@ jobs:
       fail-fast: true
 
     name: Build
-    runs-on: revolution_solidity
+    runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
 
