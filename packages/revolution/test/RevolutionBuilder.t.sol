@@ -209,7 +209,7 @@ contract RevolutionBuilderTest is Test {
     }
 
     function setMockCultureIndexParams() internal virtual {
-        setCultureIndexParams("Vrbs", "Our community Vrbs. Must be 32x32.", 100, 1000, 0);
+        setCultureIndexParams("Vrbs", "Our community Vrbs. Must be 32x32.", 100 * 1e18, 1000, 0);
     }
 
     function setCultureIndexParams(
