@@ -359,6 +359,8 @@ contract ERC20TokenEmitter is
     @param _to The recipient address
     @param _amount The amount transferring
     */
+    // Assumption + reason for ignoring: Since this function is called in the buyToken public function, but buyToken sends ETH to only owner and creatorsAddress, this function is safe
+    // slither-disable-next-line arbitrary-send-eth
     function _safeTransferETHWithFallback(address _to, uint256 _amount) private {
         // Ensure the contract has enough ETH to transfer
         if (address(this).balance < _amount) revert INSUFFICIENT_BALANCE();
