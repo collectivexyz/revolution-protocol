@@ -11,7 +11,7 @@ jobs:
       fail-fast: true
 
     name: Forge storage test
-    runs-on: ubuntu-latest
+    runs-on: revolution_protocol_builds
     steps:
       - uses: actions/checkout@v3
         with:
