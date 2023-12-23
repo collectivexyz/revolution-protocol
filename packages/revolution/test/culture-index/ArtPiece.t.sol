@@ -395,7 +395,7 @@ contract CultureIndexArtPieceTest is CultureIndexTestSuite {
             1e18 * cultureIndex.erc721VotingTokenWeight()
         );
 
-        uint256 expectedTotalVotesSupply2 = erc20Supply * 2 + 1e18 * cultureIndex.erc721VotingTokenWeight();
+        uint256 expectedTotalVotesSupply2 = erc20Supply * 2 + cultureIndex.erc721VotingTokenWeight();
         emit log_named_uint("expectedTotalVotesSupply2", expectedTotalVotesSupply2);
         uint256 expectedQuorumVotes2 = (quorumVotesBPS * (expectedTotalVotesSupply2)) / 10_000;
         assertEq(newPiece.quorumVotes, expectedQuorumVotes2, "Quorum votes should be set correctly on second creation");
