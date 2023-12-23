@@ -4,6 +4,40 @@ pragma solidity ^0.8.22;
 import { IRevolutionBuilder } from "./IRevolutionBuilder.sol";
 
 interface IERC20TokenEmitter {
+    ///                                                          ///
+    ///                           ERRORS                         ///
+    ///                                                          ///
+
+    /// @dev Reverts if the function caller is not the manager.
+    error NOT_MANAGER();
+
+    /// @dev Reverts if address 0 is passed but not allowed
+    error ADDRESS_ZERO();
+
+    /// @dev Reverts if invalid BPS is passed
+    error INVALID_BPS();
+
+    /// @dev Reverts if BPS does not add up to 10_000
+    error INVALID_BPS_SUM();
+
+    /// @dev Reverts if payment amount is 0
+    error INVALID_PAYMENT();
+
+    /// @dev Reverts if amount is 0
+    error INVALID_AMOUNT();
+
+    /// @dev Reverts if there is an array length mismatch
+    error PARALLEL_ARRAYS_REQUIRED();
+
+    /// @dev Reverts if the buyToken sender is the owner or creatorsAddress
+    error FUNDS_RECIPIENT_CANNOT_BUY_TOKENS();
+
+    /// @dev Reverts if insufficient balance to transfer
+    error INSUFFICIENT_BALANCE();
+
+    /// @dev Reverts if the WETH transfer fails
+    error WETH_TRANSFER_FAILED();
+
     struct ProtocolRewardAddresses {
         address builder;
         address purchaseReferral;
