@@ -16,7 +16,7 @@ The ultimate goal of Revolution is fair ownership distribution over a community 
 git clone https://github.com/collectivexyz/revolution-protocol.git && cd revolution-protocol
 ```
 
-#### Node.js and pnpm
+#### node.js and pnpm
 
 ```
 npm install -g pnpm
