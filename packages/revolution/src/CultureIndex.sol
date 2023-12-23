@@ -282,7 +282,7 @@ contract CultureIndex is
      * @return The vote weight of the voter.
      */
     function _calculateVoteWeight(uint256 erc20Balance, uint256 erc721Balance) internal view returns (uint256) {
-        return erc20Balance + (erc721Balance * erc721VotingTokenWeight * 1e18);
+        return erc20Balance + (erc721Balance * erc721VotingTokenWeight);
     }
 
     function _getVotes(address account) internal view returns (uint256) {
