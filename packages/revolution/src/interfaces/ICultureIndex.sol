@@ -74,11 +74,35 @@ interface ICultureIndex is ICultureIndexEvents {
     ///                           ERRORS                         ///
     ///                                                          ///
 
-    /// @dev thrown if the voting signature is invalid
+    /// @dev Reverts if the specified piece ID is invalid or out of range.
+    error INVALID_PIECE_ID();
+
+    /// @dev Reverts if the art piece has already been dropped.
+    error ALREADY_DROPPED();
+
+    /// @dev Reverts if the voter has already voted for this piece.
+    error ALREADY_VOTED();
+
+    /// @dev Reverts if the voter's weight is below the minimum required vote weight.
+    error WEIGHT_TOO_LOW();
+
+    /// @dev Reverts if the voting signature is invalid
     error INVALID_SIGNATURE();
 
-    /// @dev thrown if address 0 is passed but not allowed
+    /// @dev Reverts if address 0 is passed but not allowed
     error ADDRESS_ZERO();
+
+    /// @dev Reverts if art piece metadata is invalid
+    error INVALID_MEDIA_TYPE();
+
+    /// @dev Reverts if art piece metadata is invalid
+    error INVALID_MEDIA_METADATA();
+
+    /// @dev Reverts if bps does not sum to 10000
+    error INVALID_BPS_SUM();
+
+    /// @dev Reverts if max number of creators is exceeded
+    error MAX_NUM_CREATORS_EXCEEDED();
 
     // Enum representing different media types for art pieces.
     enum MediaType {

@@ -122,14 +122,18 @@ contract CultureIndex is
      * - The corresponding media data must not be empty.
      */
     function validateMediaType(ArtPieceMetadata calldata metadata) internal pure {
-        require(uint8(metadata.mediaType) > 0 && uint8(metadata.mediaType) <= 5, "Invalid media type");
+        if (uint8(metadata.mediaType) == 0 || uint8(metadata.mediaType) > 5) revert INVALID_MEDIA_TYPE();
 
-        if (metadata.mediaType == MediaType.IMAGE)
-            require(bytes(metadata.image).length > 0, "Image URL must be provided");
-        else if (metadata.mediaType == MediaType.ANIMATION)
-            require(bytes(metadata.animationUrl).length > 0, "Animation URL must be provided");
-        else if (metadata.mediaType == MediaType.TEXT)
-            require(bytes(metadata.text).length > 0, "Text must be provided");
+        if (metadata.mediaType == MediaType.IMAGE) {
+            if (bytes(metadata.image).length == 0) revert INVALID_MEDIA_METADATA();
+        } else if (metadata.mediaType == MediaType.ANIMATION) {
+            if (bytes(metadata.animationUrl).length == 0) revert INVALID_MEDIA_METADATA();
+        } else if (metadata.mediaType == MediaType.TEXT) {
+            if (bytes(metadata.text).length == 0) revert INVALID_MEDIA_METADATA();
+        }
+
+        //ensure name is set
+        if (bytes(metadata.name).length == 0) revert INVALID_MEDIA_METADATA();
     }
 
     /**
@@ -144,7 +148,7 @@ contract CultureIndex is
     function validateCreatorsArray(CreatorBps[] calldata creatorArray) internal pure returns (uint256) {
         uint256 creatorArrayLength = creatorArray.length;
         //Require that creatorArray is not more than MAX_NUM_CREATORS to prevent gas limit issues
-        require(creatorArrayLength <= MAX_NUM_CREATORS, "Creator array must not be > MAX_NUM_CREATORS");
+        if (creatorArrayLength > MAX_NUM_CREATORS) revert MAX_NUM_CREATORS_EXCEEDED();
 
         uint256 totalBps;
         for (uint i; i < creatorArrayLength; i++) {
@@ -152,7 +156,7 @@ contract CultureIndex is
             totalBps += creatorArray[i].bps;
         }
 
-        require(totalBps == 10_000, "Total BPS must sum up to 10,000");
+        if (totalBps != 10_000) revert INVALID_BPS_SUM();
 
         return creatorArrayLength;
     }
@@ -270,13 +274,13 @@ contract CultureIndex is
      * Emits a VoteCast event upon successful execution.
      */
     function _vote(uint256 pieceId, address voter) internal {
-        require(pieceId < _currentPieceId, "Invalid piece ID");
+        if (pieceId >= _currentPieceId) revert INVALID_PIECE_ID();
         if (voter == address(0)) revert ADDRESS_ZERO();
-        require(!pieces[pieceId].isDropped, "Piece has already been dropped");
-        require(votes[pieceId][voter].voterAddress == address(0), "Already voted");
+        if (pieces[pieceId].isDropped) revert ALREADY_DROPPED();
+        if (votes[pieceId][voter].voterAddress != address(0)) revert ALREADY_VOTED();
 
         uint256 weight = _getPastVotes(voter, pieces[pieceId].creationBlock);
-        require(weight > minVoteWeight, "Weight must be greater than minVoteWeight");
+        if (weight <= minVoteWeight) revert WEIGHT_TOO_LOW();
 
         votes[pieceId][voter] = Vote(voter, weight);
         totalVoteWeights[pieceId] += weight;
