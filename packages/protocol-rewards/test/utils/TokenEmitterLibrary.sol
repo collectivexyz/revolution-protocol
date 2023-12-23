@@ -21,6 +21,14 @@ import { Proxy } from "@openzeppelin/contracts/proxy/Proxy.sol";
 import { StorageSlot } from "@openzeppelin/contracts/utils/StorageSlot.sol";
 import { Address } from "@openzeppelin/contracts/utils/Address.sol";
 
+interface IWETH {
+    function deposit() external payable;
+
+    function withdraw(uint256 wad) external;
+
+    function transfer(address to, uint256 value) external returns (bool);
+}
+
 /// @title IERC1967Upgrade
 /// @author Rohan Kulkarni
 /// @notice The external ERC1967Upgrade events and errors
