@@ -17,6 +17,139 @@ import { ERC20Upgradeable } from "@openzeppelin/contracts-upgradeable/token/ERC2
 import { ERC20VotesUpgradeable } from "@openzeppelin/contracts-upgradeable/token/ERC20/extensions/ERC20VotesUpgradeable.sol";
 import { Ownable2StepUpgradeable } from "@openzeppelin/contracts-upgradeable/access/Ownable2StepUpgradeable.sol";
 import { PausableUpgradeable } from "@openzeppelin/contracts-upgradeable/utils/PausableUpgradeable.sol";
+import { Proxy } from "@openzeppelin/contracts/proxy/Proxy.sol";
+import { StorageSlot } from "@openzeppelin/contracts/utils/StorageSlot.sol";
+import { Address } from "@openzeppelin/contracts/utils/Address.sol";
+
+/// @title IERC1967Upgrade
+/// @author Rohan Kulkarni
+/// @notice The external ERC1967Upgrade events and errors
+interface IERC1967Upgrade {
+    ///                                                          ///
+    ///                            EVENTS                        ///
+    ///                                                          ///
+
+    /// @notice Emitted when the implementation is upgraded
+    /// @param impl The address of the implementation
+    event Upgraded(address impl);
+
+    ///                                                          ///
+    ///                            ERRORS                        ///
+    ///                                                          ///
+
+    /// @dev Reverts if an implementation is an invalid upgrade
+    /// @param impl The address of the invalid implementation
+    error INVALID_UPGRADE(address impl);
+
+    /// @dev Reverts if an implementation upgrade is not stored at the storage slot of the original
+    error UNSUPPORTED_UUID();
+
+    /// @dev Reverts if an implementation does not support ERC1822 proxiableUUID()
+    error ONLY_UUPS();
+}
+
+/// @title ERC1967Upgrade
+/// @author Rohan Kulkarni
+/// @notice Modified from OpenZeppelin Contracts v4.7.3 (proxy/ERC1967/ERC1967Upgrade.sol)
+/// - Uses custom errors declared in IERC1967Upgrade
+/// - Removes ERC1967 admin and beacon support
+abstract contract ERC1967Upgrade is IERC1967Upgrade {
+    ///                                                          ///
+    ///                          CONSTANTS                       ///
+    ///                                                          ///
+
+    /// @dev bytes32(uint256(keccak256('eip1967.proxy.rollback')) - 1)
+    bytes32 private constant _ROLLBACK_SLOT = 0x4910fdfa16fed3260ed0e7147f7cc6da11a60208b5b9406d12a635614ffd9143;
+
+    /// @dev bytes32(uint256(keccak256('eip1967.proxy.implementation')) - 1)
+    bytes32 internal constant _IMPLEMENTATION_SLOT = 0x360894a13ba1a3210667c828492db98dca3e2076cc3735a920a3ca505d382bbc;
+
+    ///                                                          ///
+    ///                          FUNCTIONS                       ///
+    ///                                                          ///
+
+    /// @dev Upgrades to an implementation with security checks for UUPS proxies and an additional function call
+    /// @param _newImpl The new implementation address
+    /// @param _data The encoded function call
+    function _upgradeToAndCallUUPS(address _newImpl, bytes memory _data, bool _forceCall) internal {
+        if (StorageSlot.getBooleanSlot(_ROLLBACK_SLOT).value) {
+            _setImplementation(_newImpl);
+        } else {
+            try IERC1822Proxiable(_newImpl).proxiableUUID() returns (bytes32 slot) {
+                if (slot != _IMPLEMENTATION_SLOT) revert UNSUPPORTED_UUID();
+            } catch {
+                revert ONLY_UUPS();
+            }
+
+            _upgradeToAndCall(_newImpl, _data, _forceCall);
+        }
+    }
+
+    /// @dev Upgrades to an implementation with an additional function call
+    /// @param _newImpl The new implementation address
+    /// @param _data The encoded function call
+    function _upgradeToAndCall(address _newImpl, bytes memory _data, bool _forceCall) internal {
+        _upgradeTo(_newImpl);
+
+        if (_data.length > 0 || _forceCall) {
+            Address.functionDelegateCall(_newImpl, _data);
+        }
+    }
+
+    /// @dev Performs an implementation upgrade
+    /// @param _newImpl The new implementation address
+    function _upgradeTo(address _newImpl) internal {
+        _setImplementation(_newImpl);
+
+        emit Upgraded(_newImpl);
+    }
+
+    /// @dev If an address is a contract
+    function isContract(address _account) internal view returns (bool rv) {
+        assembly {
+            rv := gt(extcodesize(_account), 0)
+        }
+    }
+
+    /// @dev Stores the address of an implementation
+    /// @param _impl The implementation address
+    function _setImplementation(address _impl) private {
+        if (!isContract(_impl)) revert INVALID_UPGRADE(_impl);
+
+        StorageSlot.getAddressSlot(_IMPLEMENTATION_SLOT).value = _impl;
+    }
+
+    /// @dev The address of the current implementation
+    function _getImplementation() internal view returns (address) {
+        return StorageSlot.getAddressSlot(_IMPLEMENTATION_SLOT).value;
+    }
+}
+
+/// @title ERC1967Proxy
+/// @author Rohan Kulkarni
+/// @notice Modified from OpenZeppelin Contracts v4.7.3 (proxy/ERC1967/ERC1967Proxy.sol)
+/// - Inherits a modern, minimal ERC1967Upgrade
+contract ERC1967Proxy is IERC1967Upgrade, Proxy, ERC1967Upgrade {
+    ///                                                          ///
+    ///                         CONSTRUCTOR                      ///
+    ///                                                          ///
+
+    /// @dev Initializes the proxy with an implementation contract and encoded function call
+    /// @param _logic The implementation address
+    /// @param _data The encoded function call
+    constructor(address _logic, bytes memory _data) payable {
+        _upgradeToAndCall(_logic, _data, false);
+    }
+
+    ///                                                          ///
+    ///                          FUNCTIONS                       ///
+    ///                                                          ///
+
+    /// @dev The address of the current implementation
+    function _implementation() internal view virtual override returns (address) {
+        return ERC1967Upgrade._getImplementation();
+    }
+}
 
 interface VerbsTokenLike {
     function getPriorVotes(address account, uint256 blockNumber) external view returns (uint96);
@@ -1137,8 +1270,15 @@ interface IERC20TokenEmitter {
      * @param erc20Token The ERC-20 token contract address
      * @param vrgdac The VRGDA contract address
      * @param creatorsAddress The address of the creators
+     * @param creatorParams The creator and entropy rate parameters
      */
-    function initialize(address initialOwner, address erc20Token, address vrgdac, address creatorsAddress) external;
+    function initialize(
+        address initialOwner,
+        address erc20Token,
+        address vrgdac,
+        address creatorsAddress,
+        IRevolutionBuilder.TokenEmitterCreatorParams calldata creatorParams
+    ) external;
 }
 
 contract ERC20TokenEmitter is
@@ -1208,21 +1348,26 @@ contract ERC20TokenEmitter is
         address _initialOwner,
         address _erc20Token,
         address _vrgdac,
-        address _creatorsAddress
+        address _creatorsAddress,
+        IRevolutionBuilder.TokenEmitterCreatorParams calldata _creatorParams
     ) external initializer {
         require(msg.sender == address(manager), "Only manager can initialize");
-
+        require(_initialOwner != address(0), "Invalid _initialOwner");
+        require(_erc20Token != address(0), "Invalid _erc20Token");
+        require(_vrgdac != address(0), "Invalid _vrgdac");
+        require(_creatorsAddress != address(0), "Invalid _creatorsAddress");
+        require(_creatorParams.creatorRateBps <= 10_000, "Creator rate must be <= to 10_000");
+        require(_creatorParams.entropyRateBps <= 10_000, "Entropy rate must be <= to 10_000");
         __Pausable_init();
         __ReentrancyGuard_init();
-
-        require(_initialOwner != address(0), "Invalid _initialOwner");
-
         // Set up ownable
         __Ownable_init(_initialOwner);
-
         creatorsAddress = _creatorsAddress;
         vrgdac = VRGDAC(_vrgdac);
         token = NontransferableERC20Votes(_erc20Token);
+        creatorRateBps = _creatorParams.creatorRateBps;
+        entropyRateBps = _creatorParams.entropyRateBps;
+        // If we are upgrading, don't reset the start time
         if (startTime == 0) startTime = block.timestamp;
     }
 
@@ -1412,7 +1557,7 @@ contract ERC20TokenEmitter is
     }
 
     /**
-     * @notice Returns the amount of tokens that would be emitted for the payment amount, taking into account the protocol rewards.
+     * @notice Returns the amount of tokens that would be emitted to a buyer for the payment amount, taking into account the protocol rewards and creator rate.
      * @param paymentAmount the payment amount in wei.
      * @return gainedX The amount of tokens that would be emitted for the payment amount.
      */
@@ -1459,33 +1604,6 @@ contract ERC20TokenEmitter is
 
         emit CreatorsAddressUpdated(creatorsAddress = _creatorsAddress);
     }
-}
-
-/// @title IERC1967Upgrade
-/// @author Rohan Kulkarni
-/// @notice The external ERC1967Upgrade events and errors
-interface IERC1967Upgrade {
-    ///                                                          ///
-    ///                            EVENTS                        ///
-    ///                                                          ///
-
-    /// @notice Emitted when the implementation is upgraded
-    /// @param impl The address of the implementation
-    event Upgraded(address impl);
-
-    ///                                                          ///
-    ///                            ERRORS                        ///
-    ///                                                          ///
-
-    /// @dev Reverts if an implementation is an invalid upgrade
-    /// @param impl The address of the invalid implementation
-    error INVALID_UPGRADE(address impl);
-
-    /// @dev Reverts if an implementation upgrade is not stored at the storage slot of the original
-    error UNSUPPORTED_UUID();
-
-    /// @dev Reverts if an implementation does not support ERC1822 proxiableUUID()
-    error ONLY_UUPS();
 }
 
 /// @title IUUPS
