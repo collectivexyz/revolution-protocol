@@ -45,6 +45,16 @@ contract ERC20TokenEmitter is
     address public creatorsAddress;
 
     ///                                                          ///
+    ///                           ERRORS                         ///
+    ///                                                          ///
+
+    /// @dev Reverts if the function caller is not the manager.
+    error NOT_MANAGER();
+
+    /// @dev Reverts if address 0 is passed but not allowed
+    error ADDRESS_ZERO();
+
+    ///                                                          ///
     ///                         IMMUTABLES                       ///
     ///                                                          ///
 
@@ -63,6 +73,10 @@ contract ERC20TokenEmitter is
         address _protocolRewards,
         address _protocolFeeRecipient
     ) payable TokenEmitterRewards(_protocolRewards, _protocolFeeRecipient) initializer {
+        if (_manager == address(0)) revert ADDRESS_ZERO();
+        if (_protocolRewards == address(0)) revert ADDRESS_ZERO();
+        if (_protocolFeeRecipient == address(0)) revert ADDRESS_ZERO();
+
         manager = IRevolutionBuilder(_manager);
     }
 
@@ -84,11 +98,12 @@ contract ERC20TokenEmitter is
         address _creatorsAddress,
         IRevolutionBuilder.TokenEmitterCreatorParams calldata _creatorParams
     ) external initializer {
-        require(msg.sender == address(manager), "Only manager can initialize");
-        require(_initialOwner != address(0), "Invalid _initialOwner");
-        require(_erc20Token != address(0), "Invalid _erc20Token");
-        require(_vrgdac != address(0), "Invalid _vrgdac");
-        require(_creatorsAddress != address(0), "Invalid _creatorsAddress");
+        if (msg.sender != address(manager)) revert NOT_MANAGER();
+        if (_initialOwner == address(0)) revert ADDRESS_ZERO();
+        if (_erc20Token == address(0)) revert ADDRESS_ZERO();
+        if (_vrgdac == address(0)) revert ADDRESS_ZERO();
+        if (_creatorsAddress == address(0)) revert ADDRESS_ZERO();
+
         require(_creatorParams.creatorRateBps <= 10_000, "Creator rate must be <= to 10_000");
         require(_creatorParams.entropyRateBps <= 10_000, "Entropy rate must be <= to 10_000");
 
@@ -337,7 +352,7 @@ contract ERC20TokenEmitter is
      * @dev Only callable by the owner.
      */
     function setCreatorsAddress(address _creatorsAddress) external override onlyOwner nonReentrant {
-        require(_creatorsAddress != address(0), "Invalid address");
+        if (_creatorsAddress == address(0)) revert ADDRESS_ZERO();
 
         emit CreatorsAddressUpdated(creatorsAddress = _creatorsAddress);
     }
