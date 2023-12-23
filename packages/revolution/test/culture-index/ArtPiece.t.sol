@@ -130,11 +130,8 @@ contract CultureIndexArtPieceTest is CultureIndexTestSuite {
                 10000
             );
 
-        try cultureIndex.createPiece(metadata, creators) {
-            fail("Should not be able to create piece with zero address for creator");
-        } catch Error(string memory reason) {
-            assertEq(reason, "Invalid creator address");
-        }
+        vm.expectRevert(abi.encodeWithSignature("ADDRESS_ZERO()"));
+        cultureIndex.createPiece(metadata, creators);
     }
 
     // /**

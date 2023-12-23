@@ -53,6 +53,7 @@ contract CultureIndex is
 
     /// @param _manager The contract upgrade manager address
     constructor(address _manager) payable initializer {
+        if (_manager == address(0)) revert ADDRESS_ZERO();
         manager = IRevolutionBuilder(_manager);
     }
 
@@ -81,8 +82,9 @@ contract CultureIndex is
 
         require(_cultureIndexParams.quorumVotesBPS <= MAX_QUORUM_VOTES_BPS, "invalid quorum bps");
         require(_cultureIndexParams.erc721VotingTokenWeight > 0, "invalid erc721 voting token weight");
-        require(_erc721VotingToken != address(0), "invalid erc721 voting token");
-        require(_erc20VotingToken != address(0), "invalid erc20 voting token");
+        if (_erc20VotingToken == address(0)) revert ADDRESS_ZERO();
+        if (_erc721VotingToken == address(0)) revert ADDRESS_ZERO();
+        if (_initialOwner == address(0)) revert ADDRESS_ZERO();
 
         // Setup ownable
         __Ownable_init(_initialOwner);
@@ -146,7 +148,7 @@ contract CultureIndex is
 
         uint256 totalBps;
         for (uint i; i < creatorArrayLength; i++) {
-            require(creatorArray[i].creator != address(0), "Invalid creator address");
+            if (creatorArray[i].creator == address(0)) revert ADDRESS_ZERO();
             totalBps += creatorArray[i].bps;
         }
 
@@ -269,7 +271,7 @@ contract CultureIndex is
      */
     function _vote(uint256 pieceId, address voter) internal {
         require(pieceId < _currentPieceId, "Invalid piece ID");
-        require(voter != address(0), "Invalid voter address");
+        if (voter == address(0)) revert ADDRESS_ZERO();
         require(!pieces[pieceId].isDropped, "Piece has already been dropped");
         require(votes[pieceId][voter].voterAddress == address(0), "Already voted");
 

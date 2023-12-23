@@ -186,7 +186,7 @@ contract TokenBasicTest is VerbsTokenTestSuite {
         uint256 creatorBps = 10000;
 
         // Act & Assert
-        vm.expectRevert("Invalid creator address");
+        vm.expectRevert(abi.encodeWithSignature("ADDRESS_ZERO()"));
         createArtPiece(name, description, mediaType, image, text, animationUrl, zeroCreatorAddress, creatorBps);
     }
 

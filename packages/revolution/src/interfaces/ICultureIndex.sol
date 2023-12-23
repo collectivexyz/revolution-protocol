@@ -70,8 +70,14 @@ interface ICultureIndexEvents {
  * @dev This interface defines the methods for the CultureIndex contract for art piece management and voting.
  */
 interface ICultureIndex is ICultureIndexEvents {
+    ///                                                          ///
+    ///                           ERRORS                         ///
+    ///                                                          ///
+
+    /// @dev thrown if the voting signature is invalid
     error INVALID_SIGNATURE();
 
+    /// @dev thrown if address 0 is passed but not allowed
     error ADDRESS_ZERO();
 
     // Enum representing different media types for art pieces.
