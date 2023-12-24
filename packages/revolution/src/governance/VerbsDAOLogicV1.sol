@@ -704,10 +704,9 @@ contract VerbsDAOLogicV1 is
         if (msg.sender != admin) {
             revert ADMIN_ONLY();
         }
-        require(
-            newVotingPeriod >= MIN_VOTING_PERIOD && newVotingPeriod <= MAX_VOTING_PERIOD,
-            "DAO::_setVotingPeriod: invalid voting period"
-        );
+
+        if (newVotingPeriod < MIN_VOTING_PERIOD || newVotingPeriod > MAX_VOTING_PERIOD) revert INVALID_VOTING_PERIOD();
+
         uint256 oldVotingPeriod = votingPeriod;
         votingPeriod = newVotingPeriod;
 
@@ -723,11 +722,11 @@ contract VerbsDAOLogicV1 is
         if (msg.sender != admin) {
             revert ADMIN_ONLY();
         }
-        require(
-            newProposalThresholdBPS >= MIN_PROPOSAL_THRESHOLD_BPS &&
-                newProposalThresholdBPS <= MAX_PROPOSAL_THRESHOLD_BPS,
-            "DAO::_setProposalThreshold: invalid proposal threshold bps"
-        );
+
+        if (
+            newProposalThresholdBPS < MIN_PROPOSAL_THRESHOLD_BPS || newProposalThresholdBPS > MAX_PROPOSAL_THRESHOLD_BPS
+        ) revert INVALID_PROPOSAL_THRESHOLD_BPS();
+
         uint256 oldProposalThresholdBPS = proposalThresholdBPS;
         proposalThresholdBPS = newProposalThresholdBPS;
 
@@ -938,7 +937,7 @@ contract VerbsDAOLogicV1 is
      */
     function _burnVetoPower() public {
         // Check caller is vetoer
-        require(msg.sender == vetoer, "DAO::_burnVetoPower: vetoer only");
+        if (msg.sender != vetoer) revert VETOER_ONLY();
 
         // Update vetoer to 0x0
         emit NewVetoer(vetoer, address(0));
