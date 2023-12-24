@@ -301,8 +301,8 @@ contract AuctionHouseBasicTest is AuctionHouseTest {
         //Ether reserved to buy creator governance
         uint256 creatorGovernancePayment = creatorPayment - creatorDirectPayment;
 
-        bool shouldExpectRevert = creatorGovernancePayment <= erc20TokenEmitter.minPurchaseAmount() ||
-            creatorGovernancePayment >= erc20TokenEmitter.maxPurchaseAmount();
+        bool shouldExpectRevert = creatorGovernancePayment <= revolutionPointsEmitter.minPurchaseAmount() ||
+            creatorGovernancePayment >= revolutionPointsEmitter.maxPurchaseAmount();
 
         // // BPS too small to issue rewards
         if (shouldExpectRevert) {

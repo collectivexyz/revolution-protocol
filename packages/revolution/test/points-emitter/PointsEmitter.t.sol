@@ -3,8 +3,8 @@ pragma solidity ^0.8.22;
 
 import { Test } from "forge-std/Test.sol";
 import { unsafeWadDiv, toDaysWadUnsafe } from "../../src/libs/SignedWadMath.sol";
-import { ERC20TokenEmitter } from "../../src/ERC20TokenEmitter.sol";
-import { IERC20TokenEmitter } from "../../src/interfaces/IERC20TokenEmitter.sol";
+import { RevolutionPointsEmitter } from "../../src/RevolutionPointsEmitter.sol";
+import { IRevolutionPointsEmitter } from "../../src/interfaces/IRevolutionPointsEmitter.sol";
 import { NontransferableERC20Votes } from "../../src/NontransferableERC20Votes.sol";
 import { RevolutionProtocolRewards } from "@cobuild/protocol-rewards/src/RevolutionProtocolRewards.sol";
 import { wadDiv } from "../../src/libs/SignedWadMath.sol";
@@ -13,7 +13,7 @@ import { RevolutionBuilderTest } from "../RevolutionBuilder.t.sol";
 import { INontransferableERC20Votes } from "../../src/interfaces/INontransferableERC20Votes.sol";
 import { ERC1967Proxy } from "../../src/libs/proxy/ERC1967Proxy.sol";
 
-contract ERC20TokenEmitterTest is RevolutionBuilderTest {
+contract ERC20PointsEmitterTest is RevolutionBuilderTest {
     event Log(string, uint);
 
     // 1,000 tokens per day is the target emission
@@ -33,7 +33,7 @@ contract ERC20TokenEmitterTest is RevolutionBuilderTest {
 
         int256 priceDecayPercent = 1e18 / 10;
 
-        super.setERC20TokenEmitterParams(
+        super.setRevolutionPointsEmitterParams(
             oneFullTokenTargetPrice,
             priceDecayPercent,
             int256(1e18 * tokensPerTimeUnit),
@@ -49,8 +49,8 @@ contract ERC20TokenEmitterTest is RevolutionBuilderTest {
         // Note: By using toDaysWadUnsafe(block.timestamp - startTime) we are establishing that 1 "unit of time" is 1 day.
         // solhint-disable-next-line not-rely-on-time
         return
-            erc20TokenEmitter.vrgdac().yToX({
-                timeSinceStart: toDaysWadUnsafe(block.timestamp - erc20TokenEmitter.startTime()),
+            revolutionPointsEmitter.vrgdac().yToX({
+                timeSinceStart: toDaysWadUnsafe(block.timestamp - revolutionPointsEmitter.startTime()),
                 sold: supply,
                 amount: int(etherAmount)
             });
@@ -60,19 +60,19 @@ contract ERC20TokenEmitterTest is RevolutionBuilderTest {
         // Assume valid rates
         vm.assume(creatorRateBps > 0 && creatorRateBps < 10000 && entropyRateBps < 10000);
 
-        vm.startPrank(erc20TokenEmitter.owner());
+        vm.startPrank(revolutionPointsEmitter.owner());
         //set creatorRate and entropyRate
-        erc20TokenEmitter.setCreatorRateBps(creatorRateBps);
-        erc20TokenEmitter.setEntropyRateBps(entropyRateBps);
+        revolutionPointsEmitter.setCreatorRateBps(creatorRateBps);
+        revolutionPointsEmitter.setEntropyRateBps(entropyRateBps);
         vm.stopPrank();
 
         vm.deal(address(this), 100000 ether);
 
-        emit log_address(erc20TokenEmitter.creatorsAddress());
-        emit log_uint(erc20Token.balanceOf(erc20TokenEmitter.creatorsAddress()));
+        emit log_address(revolutionPointsEmitter.creatorsAddress());
+        emit log_uint(erc20Token.balanceOf(revolutionPointsEmitter.creatorsAddress()));
 
         //expect balance to start out at 0
-        assertEq(erc20Token.balanceOf(erc20TokenEmitter.creatorsAddress()), 0, "Balance should start at 0");
+        assertEq(erc20Token.balanceOf(revolutionPointsEmitter.creatorsAddress()), 0, "Balance should start at 0");
 
         address[] memory recipients = new address[](1);
         recipients[0] = address(1);
@@ -84,7 +84,7 @@ contract ERC20TokenEmitterTest is RevolutionBuilderTest {
         assertEq(erc20Token.balanceOf(address(1)), 0, "Balance should start at 0");
 
         //get msg value remaining
-        uint256 msgValueRemaining = 1 ether - erc20TokenEmitter.computeTotalReward(1 ether);
+        uint256 msgValueRemaining = 1 ether - revolutionPointsEmitter.computeTotalReward(1 ether);
 
         //Share of purchase amount to send to owner
         uint256 toPayOwner = (msgValueRemaining * (10_000 - creatorRateBps)) / 10_000;
@@ -93,17 +93,17 @@ contract ERC20TokenEmitterTest is RevolutionBuilderTest {
         uint256 creatorDirectPayment = ((msgValueRemaining - toPayOwner) * entropyRateBps) / 10_000;
 
         //get expected tokens for creators
-        int256 expectedAmountForCreators = erc20TokenEmitter.getTokenQuoteForEther(
+        int256 expectedAmountForCreators = revolutionPointsEmitter.getTokenQuoteForEther(
             msgValueRemaining - toPayOwner - creatorDirectPayment
         );
 
         //get expected tokens for recipient0
         int256 expectedAmountForRecipient0 = getTokenQuoteForEtherHelper(toPayOwner, expectedAmountForCreators);
 
-        erc20TokenEmitter.buyToken{ value: 1 ether }(
+        revolutionPointsEmitter.buyToken{ value: 1 ether }(
             recipients,
             bps,
-            IERC20TokenEmitter.ProtocolRewardAddresses({
+            IRevolutionPointsEmitter.ProtocolRewardAddresses({
                 builder: address(0),
                 purchaseReferral: address(0),
                 deployer: address(0)
@@ -111,11 +111,11 @@ contract ERC20TokenEmitterTest is RevolutionBuilderTest {
         );
 
         //log creatorsAddress balance
-        emit log_uint(erc20Token.balanceOf(erc20TokenEmitter.creatorsAddress()));
+        emit log_uint(erc20Token.balanceOf(revolutionPointsEmitter.creatorsAddress()));
 
         //assert that creatorsAddress balance is correct
         assertEq(
-            uint(erc20Token.balanceOf(erc20TokenEmitter.creatorsAddress())),
+            uint(erc20Token.balanceOf(revolutionPointsEmitter.creatorsAddress())),
             uint(expectedAmountForCreators),
             "Creators should have correct balance"
         );
@@ -131,19 +131,19 @@ contract ERC20TokenEmitterTest is RevolutionBuilderTest {
         );
     }
 
-    //test that the tokenEmitter has no balance after someone buys tokens
-    function test_TokenEmitterBalance(uint256 creatorRateBps, uint256 entropyRateBps) public {
+    //test that the pointsEmitter has no balance after someone buys tokens
+    function test_PointsEmitterBalance(uint256 creatorRateBps, uint256 entropyRateBps) public {
         // Assume valid rates
         vm.assume(creatorRateBps > 0 && creatorRateBps <= 10000 && entropyRateBps > 0 && entropyRateBps <= 10000);
 
-        vm.startPrank(erc20TokenEmitter.owner());
+        vm.startPrank(revolutionPointsEmitter.owner());
         //set creatorRate and entropyRate
-        erc20TokenEmitter.setCreatorRateBps(creatorRateBps);
-        erc20TokenEmitter.setEntropyRateBps(entropyRateBps);
+        revolutionPointsEmitter.setCreatorRateBps(creatorRateBps);
+        revolutionPointsEmitter.setEntropyRateBps(entropyRateBps);
         vm.stopPrank();
 
-        //expect tokenEmitter balance to start out at 0
-        assertEq(address(erc20TokenEmitter).balance, 0, "Balance should start at 0");
+        //expect pointsEmitter balance to start out at 0
+        assertEq(address(revolutionPointsEmitter).balance, 0, "Balance should start at 0");
 
         address[] memory recipients = new address[](1);
         recipients[0] = address(1);
@@ -151,18 +151,18 @@ contract ERC20TokenEmitterTest is RevolutionBuilderTest {
         uint256[] memory bps = new uint256[](1);
         bps[0] = 10_000;
 
-        erc20TokenEmitter.buyToken{ value: 1 ether }(
+        revolutionPointsEmitter.buyToken{ value: 1 ether }(
             recipients,
             bps,
-            IERC20TokenEmitter.ProtocolRewardAddresses({
+            IRevolutionPointsEmitter.ProtocolRewardAddresses({
                 builder: address(0),
                 purchaseReferral: address(0),
                 deployer: address(0)
             })
         );
 
-        //assert that tokenEmitter balance is correct
-        assertEq(uint(address(erc20TokenEmitter).balance), 0, "TokenEmitter should have correct balance");
+        //assert that pointsEmitter balance is correct
+        assertEq(uint(address(revolutionPointsEmitter).balance), 0, "PointsEmitter should have correct balance");
     }
 
     //test that owner receives correct amount of ether
@@ -170,14 +170,14 @@ contract ERC20TokenEmitterTest is RevolutionBuilderTest {
         // Assume valid rates
         vm.assume(creatorRateBps > 0 && creatorRateBps <= 10000 && entropyRateBps > 0 && entropyRateBps <= 10000);
 
-        vm.startPrank(erc20TokenEmitter.owner());
+        vm.startPrank(revolutionPointsEmitter.owner());
         //set creatorRate and entropyRate
-        erc20TokenEmitter.setCreatorRateBps(creatorRateBps);
-        erc20TokenEmitter.setEntropyRateBps(entropyRateBps);
+        revolutionPointsEmitter.setCreatorRateBps(creatorRateBps);
+        revolutionPointsEmitter.setEntropyRateBps(entropyRateBps);
         vm.stopPrank();
 
         //expect owner balance to start out at 0
-        assertEq(address(erc20TokenEmitter.owner()).balance, 0, "Balance should start at 0");
+        assertEq(address(revolutionPointsEmitter.owner()).balance, 0, "Balance should start at 0");
 
         address[] memory recipients = new address[](1);
         recipients[0] = address(1);
@@ -186,7 +186,7 @@ contract ERC20TokenEmitterTest is RevolutionBuilderTest {
         bps[0] = 10_000;
 
         //get msg value remaining
-        uint256 msgValueRemaining = 1 ether - erc20TokenEmitter.computeTotalReward(1 ether);
+        uint256 msgValueRemaining = 1 ether - revolutionPointsEmitter.computeTotalReward(1 ether);
 
         // Calculate share of purchase amount reserved for creators
         uint256 creatorsShare = (msgValueRemaining * creatorRateBps) / 10_000;
@@ -197,10 +197,10 @@ contract ERC20TokenEmitterTest is RevolutionBuilderTest {
         // Calculate ether directly sent to creators
         uint256 creatorDirectPayment = (creatorsShare * entropyRateBps) / 10_000;
 
-        erc20TokenEmitter.buyToken{ value: 1 ether }(
+        revolutionPointsEmitter.buyToken{ value: 1 ether }(
             recipients,
             bps,
-            IERC20TokenEmitter.ProtocolRewardAddresses({
+            IRevolutionPointsEmitter.ProtocolRewardAddresses({
                 builder: address(0),
                 purchaseReferral: address(1),
                 deployer: address(0)
@@ -209,16 +209,16 @@ contract ERC20TokenEmitterTest is RevolutionBuilderTest {
 
         //assert that owner balance is correct
         assertEq(
-            uint(address(erc20TokenEmitter.owner()).balance),
+            uint(address(revolutionPointsEmitter.owner()).balance),
             uint(buyersShare + creatorsShare - creatorDirectPayment),
             "Owner should have correct balance"
         );
     }
 
     function testCannotBuyAsOwner() public {
-        vm.startPrank(erc20TokenEmitter.owner());
+        vm.startPrank(revolutionPointsEmitter.owner());
 
-        vm.deal(erc20TokenEmitter.owner(), 100000 ether);
+        vm.deal(revolutionPointsEmitter.owner(), 100000 ether);
 
         address[] memory recipients = new address[](1);
         recipients[0] = address(1);
@@ -227,10 +227,10 @@ contract ERC20TokenEmitterTest is RevolutionBuilderTest {
         bps[0] = 10_000;
 
         vm.expectRevert(abi.encodeWithSignature("FUNDS_RECIPIENT_CANNOT_BUY_TOKENS()"));
-        erc20TokenEmitter.buyToken{ value: 1e18 }(
+        revolutionPointsEmitter.buyToken{ value: 1e18 }(
             recipients,
             bps,
-            IERC20TokenEmitter.ProtocolRewardAddresses({
+            IRevolutionPointsEmitter.ProtocolRewardAddresses({
                 builder: address(0),
                 purchaseReferral: address(0),
                 deployer: address(0)
@@ -239,9 +239,9 @@ contract ERC20TokenEmitterTest is RevolutionBuilderTest {
     }
 
     function testCannotBuyAsCreators() public {
-        vm.startPrank(erc20TokenEmitter.creatorsAddress());
+        vm.startPrank(revolutionPointsEmitter.creatorsAddress());
 
-        vm.deal(erc20TokenEmitter.creatorsAddress(), 100000 ether);
+        vm.deal(revolutionPointsEmitter.creatorsAddress(), 100000 ether);
 
         address[] memory recipients = new address[](1);
         recipients[0] = address(1);
@@ -250,10 +250,10 @@ contract ERC20TokenEmitterTest is RevolutionBuilderTest {
         bps[0] = 10_000;
 
         vm.expectRevert(abi.encodeWithSignature("FUNDS_RECIPIENT_CANNOT_BUY_TOKENS()"));
-        erc20TokenEmitter.buyToken{ value: 1e18 }(
+        revolutionPointsEmitter.buyToken{ value: 1e18 }(
             recipients,
             bps,
-            IERC20TokenEmitter.ProtocolRewardAddresses({
+            IRevolutionPointsEmitter.ProtocolRewardAddresses({
                 builder: address(0),
                 purchaseReferral: address(0),
                 deployer: address(0)
@@ -274,16 +274,16 @@ contract ERC20TokenEmitterTest is RevolutionBuilderTest {
 
         address governanceToken = address(new ERC1967Proxy(erc20TokenImpl, ""));
 
-        address emitter1 = address(new ERC1967Proxy(erc20TokenEmitterImpl, ""));
+        address emitter1 = address(new ERC1967Proxy(revolutionPointsEmitterImpl, ""));
 
         vm.startPrank(address(manager));
-        IERC20TokenEmitter(emitter1).initialize({
+        IRevolutionPointsEmitter(emitter1).initialize({
             initialOwner: owner,
             weth: address(weth),
             erc20Token: address(governanceToken),
-            vrgdac: address(erc20TokenEmitter.vrgdac()),
+            vrgdac: address(revolutionPointsEmitter.vrgdac()),
             creatorsAddress: creatorsAddress,
-            creatorParams: IRevolutionBuilder.TokenEmitterCreatorParams({
+            creatorParams: IRevolutionBuilder.PointsEmitterCreatorParams({
                 creatorRateBps: 1_000,
                 entropyRateBps: 5_000
             })
@@ -303,26 +303,26 @@ contract ERC20TokenEmitterTest is RevolutionBuilderTest {
         bps[0] = 10_000;
 
         vm.startPrank(address(21));
-        IERC20TokenEmitter(emitter1).buyToken{ value: 1e18 }(
+        IRevolutionPointsEmitter(emitter1).buyToken{ value: 1e18 }(
             recipients,
             bps,
-            IERC20TokenEmitter.ProtocolRewardAddresses({
+            IRevolutionPointsEmitter.ProtocolRewardAddresses({
                 builder: address(0),
                 purchaseReferral: address(0),
                 deployer: address(0)
             })
         );
 
-        address emitter2 = address(new ERC1967Proxy(erc20TokenEmitterImpl, ""));
+        address emitter2 = address(new ERC1967Proxy(revolutionPointsEmitterImpl, ""));
 
         vm.startPrank(address(manager));
-        IERC20TokenEmitter(emitter2).initialize({
+        IRevolutionPointsEmitter(emitter2).initialize({
             initialOwner: owner,
             weth: address(weth),
             erc20Token: address(governanceToken),
-            vrgdac: address(erc20TokenEmitter.vrgdac()),
+            vrgdac: address(revolutionPointsEmitter.vrgdac()),
             creatorsAddress: creatorsAddress,
-            creatorParams: IRevolutionBuilder.TokenEmitterCreatorParams({
+            creatorParams: IRevolutionBuilder.PointsEmitterCreatorParams({
                 creatorRateBps: 1_000,
                 entropyRateBps: 5_000
             })
@@ -337,10 +337,10 @@ contract ERC20TokenEmitterTest is RevolutionBuilderTest {
 
         vm.startPrank(address(48));
         vm.deal(address(48), 100000 ether);
-        IERC20TokenEmitter(emitter2).buyToken{ value: 1e18 }(
+        IRevolutionPointsEmitter(emitter2).buyToken{ value: 1e18 }(
             recipients,
             bps,
-            IERC20TokenEmitter.ProtocolRewardAddresses({
+            IRevolutionPointsEmitter.ProtocolRewardAddresses({
                 builder: address(0),
                 purchaseReferral: address(0),
                 deployer: address(0)
@@ -354,10 +354,10 @@ contract ERC20TokenEmitterTest is RevolutionBuilderTest {
 
         vm.startPrank(address(dao));
         // Set creator and entropy rates
-        erc20TokenEmitter.setCreatorRateBps(creatorRate);
-        erc20TokenEmitter.setEntropyRateBps(entropyRate);
-        assertEq(erc20TokenEmitter.creatorRateBps(), creatorRate, "Creator rate not set correctly");
-        assertEq(erc20TokenEmitter.entropyRateBps(), entropyRate, "Entropy rate not set correctly");
+        revolutionPointsEmitter.setCreatorRateBps(creatorRate);
+        revolutionPointsEmitter.setEntropyRateBps(entropyRate);
+        assertEq(revolutionPointsEmitter.creatorRateBps(), creatorRate, "Creator rate not set correctly");
+        assertEq(revolutionPointsEmitter.entropyRateBps(), entropyRate, "Entropy rate not set correctly");
 
         // Setup for buying token
         address[] memory recipients = new address[](1);
@@ -367,11 +367,11 @@ contract ERC20TokenEmitterTest is RevolutionBuilderTest {
         bps[0] = 10000; // 100% of the tokens to the recipient
 
         uint256 valueToSend = 1 ether;
-        erc20TokenEmitter.setCreatorsAddress(address(80));
-        address creatorsAddress = erc20TokenEmitter.creatorsAddress();
-        uint256 creatorsInitialEthBalance = address(erc20TokenEmitter.creatorsAddress()).balance;
+        revolutionPointsEmitter.setCreatorsAddress(address(80));
+        address creatorsAddress = revolutionPointsEmitter.creatorsAddress();
+        uint256 creatorsInitialEthBalance = address(revolutionPointsEmitter.creatorsAddress()).balance;
 
-        uint256 feeAmount = erc20TokenEmitter.computeTotalReward(valueToSend);
+        uint256 feeAmount = revolutionPointsEmitter.computeTotalReward(valueToSend);
 
         // Calculate expected ETH sent to creator
         uint256 totalPaymentForCreator = ((valueToSend - feeAmount) * creatorRate) / 10000;
@@ -379,15 +379,15 @@ contract ERC20TokenEmitterTest is RevolutionBuilderTest {
 
         if (creatorRate == 0 || entropyRate == 10_000) vm.expectRevert(abi.encodeWithSignature("INVALID_PAYMENT()"));
         uint256 expectedCreatorTokens = uint(
-            erc20TokenEmitter.getTokenQuoteForEther(totalPaymentForCreator - expectedCreatorEth)
+            revolutionPointsEmitter.getTokenQuoteForEther(totalPaymentForCreator - expectedCreatorEth)
         );
 
         // Perform token purchase
         vm.startPrank(address(this));
-        uint256 tokensSold = erc20TokenEmitter.buyToken{ value: valueToSend }(
+        uint256 tokensSold = revolutionPointsEmitter.buyToken{ value: valueToSend }(
             recipients,
             bps,
-            IERC20TokenEmitter.ProtocolRewardAddresses({
+            IRevolutionPointsEmitter.ProtocolRewardAddresses({
                 builder: address(0),
                 purchaseReferral: address(0),
                 deployer: address(0)
@@ -395,11 +395,11 @@ contract ERC20TokenEmitterTest is RevolutionBuilderTest {
         );
 
         // Verify tokens distributed to creator
-        uint256 creatorTokenBalance = erc20TokenEmitter.balanceOf(erc20TokenEmitter.creatorsAddress());
+        uint256 creatorTokenBalance = revolutionPointsEmitter.balanceOf(revolutionPointsEmitter.creatorsAddress());
         assertEq(creatorTokenBalance, expectedCreatorTokens, "Creator did not receive correct amount of tokens");
 
         // Verify ETH sent to creator
-        uint256 creatorsNewEthBalance = address(erc20TokenEmitter.creatorsAddress()).balance;
+        uint256 creatorsNewEthBalance = address(revolutionPointsEmitter.creatorsAddress()).balance;
         assertEq(
             creatorsNewEthBalance - creatorsInitialEthBalance,
             expectedCreatorEth,
@@ -407,26 +407,26 @@ contract ERC20TokenEmitterTest is RevolutionBuilderTest {
         );
 
         // Verify tokens distributed to recipient
-        uint256 recipientTokenBalance = erc20TokenEmitter.balanceOf(address(1));
+        uint256 recipientTokenBalance = revolutionPointsEmitter.balanceOf(address(1));
         assertEq(recipientTokenBalance, tokensSold, "Recipient did not receive correct amount of tokens");
     }
 
     function testBuyingLaterIsBetter() public {
         vm.startPrank(address(0));
 
-        int256 initAmount = erc20TokenEmitter.getTokenQuoteForEther(1e18);
+        int256 initAmount = revolutionPointsEmitter.getTokenQuoteForEther(1e18);
 
-        int256 firstPrice = erc20TokenEmitter.buyTokenQuote(1e19);
+        int256 firstPrice = revolutionPointsEmitter.buyTokenQuote(1e19);
 
         // solhint-disable-next-line not-rely-on-time
         vm.warp(block.timestamp + (10 days));
 
-        int256 secondPrice = erc20TokenEmitter.buyTokenQuote(1e19);
+        int256 secondPrice = revolutionPointsEmitter.buyTokenQuote(1e19);
 
         emit log_int(firstPrice);
         emit log_int(secondPrice);
 
-        int256 laterAmount = erc20TokenEmitter.getTokenQuoteForEther(1e18);
+        int256 laterAmount = revolutionPointsEmitter.getTokenQuoteForEther(1e18);
 
         assertGt(laterAmount, initAmount, "Later amount should be greater than initial amount");
 
@@ -446,16 +446,16 @@ contract ERC20TokenEmitterTest is RevolutionBuilderTest {
 
         emit log_address(address(0));
 
-        erc20TokenEmitter.buyToken{ value: 1e18 }(
+        revolutionPointsEmitter.buyToken{ value: 1e18 }(
             recipients,
             bps,
-            IERC20TokenEmitter.ProtocolRewardAddresses({
+            IRevolutionPointsEmitter.ProtocolRewardAddresses({
                 builder: address(0),
                 purchaseReferral: address(0),
                 deployer: address(0)
             })
         );
-        emit Log("Balance: ", erc20TokenEmitter.balanceOf(address(1)));
+        emit Log("Balance: ", revolutionPointsEmitter.balanceOf(address(1)));
     }
 
     function testBuyTokenPriceIncreases() public {
@@ -470,20 +470,20 @@ contract ERC20TokenEmitterTest is RevolutionBuilderTest {
         uint256[] memory bps = new uint256[](1);
         bps[0] = 10_000;
 
-        erc20TokenEmitter.buyToken{ value: 1e18 }(
+        revolutionPointsEmitter.buyToken{ value: 1e18 }(
             firstRecipients,
             bps,
-            IERC20TokenEmitter.ProtocolRewardAddresses({
+            IRevolutionPointsEmitter.ProtocolRewardAddresses({
                 builder: address(0),
                 purchaseReferral: address(0),
                 deployer: address(0)
             })
         );
 
-        erc20TokenEmitter.buyToken{ value: 1e18 }(
+        revolutionPointsEmitter.buyToken{ value: 1e18 }(
             secondRecipients,
             bps,
-            IERC20TokenEmitter.ProtocolRewardAddresses({
+            IRevolutionPointsEmitter.ProtocolRewardAddresses({
                 builder: address(0),
                 purchaseReferral: address(0),
                 deployer: address(0)
@@ -491,7 +491,7 @@ contract ERC20TokenEmitterTest is RevolutionBuilderTest {
         );
 
         // should get more expensive
-        assertGt(erc20TokenEmitter.balanceOf(address(1)), erc20TokenEmitter.balanceOf(address(2)));
+        assertGt(revolutionPointsEmitter.balanceOf(address(1)), revolutionPointsEmitter.balanceOf(address(2)));
     }
 
     // test multiple payouts
@@ -500,8 +500,8 @@ contract ERC20TokenEmitterTest is RevolutionBuilderTest {
         vm.assume(firstBps > 0);
         vm.startPrank(address(0));
 
-        uint creatorRateBps = erc20TokenEmitter.creatorRateBps();
-        uint entropyRateBps = erc20TokenEmitter.entropyRateBps();
+        uint creatorRateBps = revolutionPointsEmitter.creatorRateBps();
+        uint entropyRateBps = revolutionPointsEmitter.entropyRateBps();
 
         address[] memory recipients = new address[](2);
         recipients[0] = address(1);
@@ -512,20 +512,20 @@ contract ERC20TokenEmitterTest is RevolutionBuilderTest {
         bps[1] = 10_000 - firstBps;
 
         // estimate tokens to be emitted
-        uint msgValueRemaining = 1e18 - erc20TokenEmitter.computeTotalReward(1e18);
+        uint msgValueRemaining = 1e18 - revolutionPointsEmitter.computeTotalReward(1e18);
         uint creatorsShare = (msgValueRemaining * creatorRateBps) / 10_000;
         uint buyersShare = msgValueRemaining - creatorsShare;
         uint creatorsGovernancePayment = creatorsShare - (creatorsShare * entropyRateBps) / 10_000;
-        int expectedCreatorsAmount = erc20TokenEmitter.getTokenQuoteForEther(creatorsGovernancePayment);
+        int expectedCreatorsAmount = revolutionPointsEmitter.getTokenQuoteForEther(creatorsGovernancePayment);
 
         int expectedBuyerAmount = getTokenQuoteForEtherHelper(buyersShare, expectedCreatorsAmount);
 
         int expectedAmount = expectedCreatorsAmount + expectedBuyerAmount;
 
-        erc20TokenEmitter.buyToken{ value: 1e18 }(
+        revolutionPointsEmitter.buyToken{ value: 1e18 }(
             recipients,
             bps,
-            IERC20TokenEmitter.ProtocolRewardAddresses({
+            IRevolutionPointsEmitter.ProtocolRewardAddresses({
                 builder: address(0),
                 purchaseReferral: address(0),
                 deployer: address(0)
@@ -534,20 +534,20 @@ contract ERC20TokenEmitterTest is RevolutionBuilderTest {
         //assert address balances are correct
         //multiply bps by expectedBuyerAmount and assert
         assertEq(
-            erc20TokenEmitter.balanceOf(address(1)),
+            revolutionPointsEmitter.balanceOf(address(1)),
             (firstBps * uint256(expectedBuyerAmount)) / 10_000,
             "First recipient should have correct balance"
         );
         assertEq(
-            erc20TokenEmitter.balanceOf(address(2)),
+            revolutionPointsEmitter.balanceOf(address(2)),
             ((10_000 - firstBps) * uint256(expectedBuyerAmount)) / 10_000,
             "Second recipient should have correct balance"
         );
 
         // //assert owner balance is correct
         assertEq(
-            address(erc20TokenEmitter.owner()).balance,
-            1e18 - erc20TokenEmitter.computeTotalReward(1e18) - (creatorsShare * entropyRateBps) / 10_000,
+            address(revolutionPointsEmitter.owner()).balance,
+            1e18 - revolutionPointsEmitter.computeTotalReward(1e18) - (creatorsShare * entropyRateBps) / 10_000,
             "Owner should have payment - totalReward in balance"
         );
     }
@@ -563,10 +563,10 @@ contract ERC20TokenEmitterTest is RevolutionBuilderTest {
         bps[0] = 10_000;
 
         vm.expectRevert(abi.encodeWithSignature("INVALID_PAYMENT()"));
-        erc20TokenEmitter.buyToken{ value: 0 }(
+        revolutionPointsEmitter.buyToken{ value: 0 }(
             recipients,
             bps,
-            IERC20TokenEmitter.ProtocolRewardAddresses({
+            IRevolutionPointsEmitter.ProtocolRewardAddresses({
                 builder: address(0),
                 purchaseReferral: address(1),
                 deployer: address(0)
@@ -586,10 +586,10 @@ contract ERC20TokenEmitterTest is RevolutionBuilderTest {
         bps[0] = 10_000;
 
         vm.expectRevert(abi.encodeWithSignature("PARALLEL_ARRAYS_REQUIRED()"));
-        erc20TokenEmitter.buyToken{ value: 1e18 }(
+        revolutionPointsEmitter.buyToken{ value: 1e18 }(
             recipients,
             bps,
-            IERC20TokenEmitter.ProtocolRewardAddresses({
+            IRevolutionPointsEmitter.ProtocolRewardAddresses({
                 builder: address(1),
                 purchaseReferral: address(1),
                 deployer: address(0)
@@ -601,8 +601,8 @@ contract ERC20TokenEmitterTest is RevolutionBuilderTest {
     function testTotalBasisPoints() public {
         vm.startPrank(address(0));
 
-        uint256 creatorRateBps = erc20TokenEmitter.creatorRateBps();
-        uint256 entropyRateBps = erc20TokenEmitter.entropyRateBps();
+        uint256 creatorRateBps = revolutionPointsEmitter.creatorRateBps();
+        uint256 entropyRateBps = revolutionPointsEmitter.entropyRateBps();
 
         address[] memory recipients = new address[](2);
         recipients[0] = address(1);
@@ -613,7 +613,7 @@ contract ERC20TokenEmitterTest is RevolutionBuilderTest {
         correctBps[0] = 5000; // 50%
         correctBps[1] = 5000; // 50%
 
-        uint256 msgValueRemaining = 1e18 - erc20TokenEmitter.computeTotalReward(1e18);
+        uint256 msgValueRemaining = 1e18 - revolutionPointsEmitter.computeTotalReward(1e18);
         // Calculate share of purchase amount reserved for buyers
         uint256 buyersShare = msgValueRemaining - ((msgValueRemaining * creatorRateBps) / 10_000);
 
@@ -626,7 +626,7 @@ contract ERC20TokenEmitterTest is RevolutionBuilderTest {
         emit log_uint(buyersShare);
         emit log_uint(creatorsGovernancePayment);
 
-        int expectedCreatorsAmount = erc20TokenEmitter.getTokenQuoteForEther(creatorsGovernancePayment);
+        int expectedCreatorsAmount = revolutionPointsEmitter.getTokenQuoteForEther(creatorsGovernancePayment);
 
         int expectedBuyerAmount = getTokenQuoteForEtherHelper(buyersShare, expectedCreatorsAmount);
 
@@ -635,30 +635,30 @@ contract ERC20TokenEmitterTest is RevolutionBuilderTest {
         assertGt(expectedAmount, 0, "Token purchase should have a positive amount");
 
         // Attempting a valid token purchase
-        uint emittedWad = erc20TokenEmitter.buyToken{ value: 1e18 }(
+        uint emittedWad = revolutionPointsEmitter.buyToken{ value: 1e18 }(
             recipients,
             correctBps,
-            IERC20TokenEmitter.ProtocolRewardAddresses({
+            IRevolutionPointsEmitter.ProtocolRewardAddresses({
                 builder: address(0),
                 purchaseReferral: address(0),
                 deployer: address(0)
             })
         );
-        int totalSupplyAfterValidPurchase = int(erc20TokenEmitter.totalSupply());
+        int totalSupplyAfterValidPurchase = int(revolutionPointsEmitter.totalSupply());
         assertEq(totalSupplyAfterValidPurchase, expectedAmount, "Supply should match the expected amount");
         // //emitted should match expected
         assertEq(int(emittedWad), expectedBuyerAmount, "Emitted amount should match expected amount");
         // //emitted should match supply
         assertEq(
-            int(emittedWad) + int(erc20Token.balanceOf(erc20TokenEmitter.creatorsAddress())),
+            int(emittedWad) + int(erc20Token.balanceOf(revolutionPointsEmitter.creatorsAddress())),
             totalSupplyAfterValidPurchase,
             "Emitted amount should match total supply"
         );
 
         //expect owner to have payment - totalReward - creatorsDirectPayment in balance
         assertEq(
-            address(erc20TokenEmitter.owner()).balance,
-            1e18 - erc20TokenEmitter.computeTotalReward(1e18) - creatorsDirectPayment,
+            address(revolutionPointsEmitter.owner()).balance,
+            1e18 - revolutionPointsEmitter.computeTotalReward(1e18) - creatorsDirectPayment,
             "Owner should have payment - totalReward in balance"
         );
 
@@ -669,10 +669,10 @@ contract ERC20TokenEmitterTest is RevolutionBuilderTest {
 
         // Expecting the transaction to revert due to incorrect total basis points
         vm.expectRevert(abi.encodeWithSignature("INVALID_BPS_SUM()"));
-        erc20TokenEmitter.buyToken{ value: 1e18 }(
+        revolutionPointsEmitter.buyToken{ value: 1e18 }(
             recipients,
             incorrectBps,
-            IERC20TokenEmitter.ProtocolRewardAddresses({
+            IRevolutionPointsEmitter.ProtocolRewardAddresses({
                 builder: address(0),
                 purchaseReferral: address(0),
                 deployer: address(0)
@@ -686,9 +686,9 @@ contract ERC20TokenEmitterTest is RevolutionBuilderTest {
         // Setting Creators Address by Owner
         address newCreatorsAddress = address(0x123);
         vm.prank(address(dao));
-        erc20TokenEmitter.setCreatorsAddress(newCreatorsAddress);
+        revolutionPointsEmitter.setCreatorsAddress(newCreatorsAddress);
         assertEq(
-            erc20TokenEmitter.creatorsAddress(),
+            revolutionPointsEmitter.creatorsAddress(),
             newCreatorsAddress,
             "Owner should be able to set creators address"
         );
@@ -696,7 +696,7 @@ contract ERC20TokenEmitterTest is RevolutionBuilderTest {
         // Attempting to set Creators Address by Non-Owner
         address nonOwner = address(0x4156);
         vm.startPrank(nonOwner);
-        try erc20TokenEmitter.setCreatorsAddress(nonOwner) {
+        try revolutionPointsEmitter.setCreatorsAddress(nonOwner) {
             fail("Non-owner should not be able to set creators address");
         } catch {}
         vm.stopPrank();
@@ -714,7 +714,7 @@ contract ERC20TokenEmitterTest is RevolutionBuilderTest {
     //     bps[0] = 9_500;
     //     bps[1] = 500;
 
-    //    erc20TokenEmitter.buyToken{value: 1e18}(recipients, bps);
+    //    revolutionPointsEmitter.buyToken{value: 1e18}(recipients, bps);
     // }
 
     function testBuyingTwiceAmountIsNotMoreThanTwiceEmittedTokens() public {
@@ -726,47 +726,47 @@ contract ERC20TokenEmitterTest is RevolutionBuilderTest {
         uint256[] memory bps = new uint256[](1);
         bps[0] = 10_000;
 
-        erc20TokenEmitter.buyToken{ value: 1e18 }(
+        revolutionPointsEmitter.buyToken{ value: 1e18 }(
             recipients,
             bps,
-            IERC20TokenEmitter.ProtocolRewardAddresses({
+            IRevolutionPointsEmitter.ProtocolRewardAddresses({
                 builder: address(0),
                 purchaseReferral: address(0),
                 deployer: address(0)
             })
         );
-        uint256 firstAmount = erc20TokenEmitter.balanceOf(address(1));
+        uint256 firstAmount = revolutionPointsEmitter.balanceOf(address(1));
 
-        erc20TokenEmitter.buyToken{ value: 1e18 }(
+        revolutionPointsEmitter.buyToken{ value: 1e18 }(
             recipients,
             bps,
-            IERC20TokenEmitter.ProtocolRewardAddresses({
+            IRevolutionPointsEmitter.ProtocolRewardAddresses({
                 builder: address(0),
                 purchaseReferral: address(0),
                 deployer: address(0)
             })
         );
-        uint256 secondAmountDifference = erc20TokenEmitter.balanceOf(address(1)) - firstAmount;
+        uint256 secondAmountDifference = revolutionPointsEmitter.balanceOf(address(1)) - firstAmount;
 
-        assert(secondAmountDifference <= 2 * erc20TokenEmitter.totalSupply());
+        assert(secondAmountDifference <= 2 * revolutionPointsEmitter.totalSupply());
     }
 
     function testBuyTokenReentrancy() public {
         // Deploy the malicious owner contract
-        MaliciousOwner maliciousOwner = new MaliciousOwner(address(erc20TokenEmitter));
+        MaliciousOwner maliciousOwner = new MaliciousOwner(address(revolutionPointsEmitter));
 
         address governanceToken = address(new ERC1967Proxy(erc20TokenImpl, ""));
 
-        address emitter2 = address(new ERC1967Proxy(erc20TokenEmitterImpl, ""));
+        address emitter2 = address(new ERC1967Proxy(revolutionPointsEmitterImpl, ""));
 
         vm.startPrank(address(manager));
-        IERC20TokenEmitter(emitter2).initialize({
+        IRevolutionPointsEmitter(emitter2).initialize({
             initialOwner: address(maliciousOwner),
             weth: address(weth),
             erc20Token: address(governanceToken),
-            vrgdac: address(erc20TokenEmitter.vrgdac()),
+            vrgdac: address(revolutionPointsEmitter.vrgdac()),
             creatorsAddress: creatorsAddress,
-            creatorParams: IRevolutionBuilder.TokenEmitterCreatorParams({
+            creatorParams: IRevolutionBuilder.PointsEmitterCreatorParams({
                 creatorRateBps: 1_000,
                 entropyRateBps: 5_000
             })
@@ -785,10 +785,10 @@ contract ERC20TokenEmitterTest is RevolutionBuilderTest {
         uint256[] memory bps = new uint256[](1);
         bps[0] = 10_000;
         vm.expectRevert();
-        IERC20TokenEmitter(emitter2).buyToken{ value: 1e18 }(
+        IRevolutionPointsEmitter(emitter2).buyToken{ value: 1e18 }(
             recipients,
             bps,
-            IERC20TokenEmitter.ProtocolRewardAddresses({
+            IRevolutionPointsEmitter.ProtocolRewardAddresses({
                 builder: address(0),
                 purchaseReferral: address(0),
                 deployer: address(0)
@@ -797,16 +797,16 @@ contract ERC20TokenEmitterTest is RevolutionBuilderTest {
     }
 
     function testGetTokenAmountForMultiPurchaseGeneral(uint256 payment) public {
-        vm.assume(payment > erc20TokenEmitter.minPurchaseAmount());
-        vm.assume(payment < erc20TokenEmitter.maxPurchaseAmount());
+        vm.assume(payment > revolutionPointsEmitter.minPurchaseAmount());
+        vm.assume(payment < revolutionPointsEmitter.maxPurchaseAmount());
         vm.startPrank(address(0));
 
         uint256 SOME_MAX_EXPECTED_VALUE = uint256(wadDiv(int256(payment), 1 ether)) * 1e18 * tokensPerTimeUnit;
 
-        int256 slightlyMore = erc20TokenEmitter.getTokenQuoteForEther((payment * 101) / 100);
+        int256 slightlyMore = revolutionPointsEmitter.getTokenQuoteForEther((payment * 101) / 100);
 
         // Call the function with the typical payment amount
-        int256 tokenAmount = erc20TokenEmitter.getTokenQuoteForEther(payment);
+        int256 tokenAmount = revolutionPointsEmitter.getTokenQuoteForEther(payment);
 
         emit log_int(tokenAmount);
 
@@ -826,27 +826,27 @@ contract ERC20TokenEmitterTest is RevolutionBuilderTest {
         bps[0] = 10_000;
 
         //ensure that enough volume was bought for the day, so purchase expectedVolume amount first
-        erc20TokenEmitter.buyToken{ value: expectedVolume }(
+        revolutionPointsEmitter.buyToken{ value: expectedVolume }(
             recipients,
             bps,
-            IERC20TokenEmitter.ProtocolRewardAddresses({
+            IRevolutionPointsEmitter.ProtocolRewardAddresses({
                 builder: address(0),
                 purchaseReferral: address(0),
                 deployer: address(0)
             })
         );
 
-        erc20TokenEmitter.buyToken{ value: payment }(
+        revolutionPointsEmitter.buyToken{ value: payment }(
             recipients,
             bps,
-            IERC20TokenEmitter.ProtocolRewardAddresses({
+            IRevolutionPointsEmitter.ProtocolRewardAddresses({
                 builder: address(0),
                 purchaseReferral: address(0),
                 deployer: address(0)
             })
         );
 
-        int256 newTokenAmount = erc20TokenEmitter.getTokenQuoteForEther(payment);
+        int256 newTokenAmount = revolutionPointsEmitter.getTokenQuoteForEther(payment);
 
         // Assert that the new token amount is less than the previous tokenAmount
         assertLt(newTokenAmount, tokenAmount, "Token amount should be less than previous token amount");
@@ -859,12 +859,12 @@ contract ERC20TokenEmitterTest is RevolutionBuilderTest {
 
         // Edge Case 1: Very Small Payment
         uint256 smallPayment = 0.00001 ether;
-        int256 smallPaymentTokenAmount = erc20TokenEmitter.getTokenQuoteForEther(smallPayment);
+        int256 smallPaymentTokenAmount = revolutionPointsEmitter.getTokenQuoteForEther(smallPayment);
         assertGt(smallPaymentTokenAmount, 0, "Token amount for small payment should be greater than zero");
         emit log_int(smallPaymentTokenAmount);
 
         // A days worth of payment amount
-        int256 dailyPaymentTokenAmount = erc20TokenEmitter.getTokenQuoteForEther(expectedVolume);
+        int256 dailyPaymentTokenAmount = revolutionPointsEmitter.getTokenQuoteForEther(expectedVolume);
         assertLt(
             uint256(dailyPaymentTokenAmount),
             tokensPerTimeUnit * 1e18,
@@ -875,7 +875,7 @@ contract ERC20TokenEmitterTest is RevolutionBuilderTest {
 
         // Edge Case 2: Very Large Payment
         // An unusually large payment amount
-        int256 largePaymentTokenAmount = erc20TokenEmitter.getTokenQuoteForEther(expectedVolume * 100);
+        int256 largePaymentTokenAmount = revolutionPointsEmitter.getTokenQuoteForEther(expectedVolume * 100);
         //spending 100x the expected amount per day should get you < 25x the tokens
         uint256 SOME_REALISTIC_UPPER_BOUND = 25 * tokensPerTimeUnit * 1e18;
         assertLt(
@@ -887,7 +887,7 @@ contract ERC20TokenEmitterTest is RevolutionBuilderTest {
         emit log_int(largePaymentTokenAmount);
 
         uint256 largestPayment = expectedVolume * 1_000; // An unusually large payment amount
-        int256 largestPaymentTokenAmount = erc20TokenEmitter.getTokenQuoteForEther(largestPayment);
+        int256 largestPaymentTokenAmount = revolutionPointsEmitter.getTokenQuoteForEther(largestPayment);
         //spending 1000x the daily amount should get you less than 50x the tokens
         assertLt(
             uint256(largestPaymentTokenAmount),
@@ -907,14 +907,14 @@ contract ERC20TokenEmitterTest is RevolutionBuilderTest {
         vm.deal(address(0), 100000 ether);
         vm.stopPrank();
 
-        int256 priceAfterManyPurchases = erc20TokenEmitter.buyTokenQuote(1e18);
+        int256 priceAfterManyPurchases = revolutionPointsEmitter.buyTokenQuote(1e18);
         emit log_int(priceAfterManyPurchases);
 
         // Simulate the passage of time
         uint256 daysElapsed = 221;
         vm.warp(block.timestamp + daysElapsed * 1 days);
 
-        int256 priceAfterManyDays = erc20TokenEmitter.buyTokenQuote(1e18);
+        int256 priceAfterManyDays = revolutionPointsEmitter.buyTokenQuote(1e18);
 
         emit log_int(priceAfterManyDays);
 
@@ -922,7 +922,7 @@ contract ERC20TokenEmitterTest is RevolutionBuilderTest {
         assertGt(priceAfterManyDays, 0, "Price should never hit zero");
     }
 
-    //ensure when creating new tokenemitter, that INVALID_BPS is thrown if > 10_000
+    //ensure when creating new points emitter, that INVALID_BPS is thrown if > 10_000
     function test_bpsInitialization() public {
         address owner = address(0x123);
 
@@ -930,19 +930,19 @@ contract ERC20TokenEmitterTest is RevolutionBuilderTest {
 
         address governanceToken = address(new ERC1967Proxy(erc20TokenImpl, ""));
 
-        address emitter1 = address(new ERC1967Proxy(erc20TokenEmitterImpl, ""));
+        address emitter1 = address(new ERC1967Proxy(revolutionPointsEmitterImpl, ""));
 
-        address vrgdac = address(erc20TokenEmitter.vrgdac());
+        address vrgdac = address(revolutionPointsEmitter.vrgdac());
 
         vm.startPrank(address(manager));
         vm.expectRevert(abi.encodeWithSignature("INVALID_BPS()"));
-        IERC20TokenEmitter(emitter1).initialize({
+        IRevolutionPointsEmitter(emitter1).initialize({
             initialOwner: owner,
             weth: address(weth),
             erc20Token: address(governanceToken),
             vrgdac: vrgdac,
             creatorsAddress: creatorsAddress,
-            creatorParams: IRevolutionBuilder.TokenEmitterCreatorParams({
+            creatorParams: IRevolutionBuilder.PointsEmitterCreatorParams({
                 creatorRateBps: 100_000,
                 entropyRateBps: 50_000
             })
@@ -951,15 +951,15 @@ contract ERC20TokenEmitterTest is RevolutionBuilderTest {
 }
 
 contract MaliciousOwner {
-    ERC20TokenEmitter erc20TokenEmitter;
+    RevolutionPointsEmitter revolutionPointsEmitter;
     bool public reentryAttempted;
 
     constructor(address _emitter) {
-        erc20TokenEmitter = ERC20TokenEmitter(_emitter);
+        revolutionPointsEmitter = RevolutionPointsEmitter(_emitter);
         reentryAttempted = false;
     }
 
-    // Fallback function to enable re-entrance to TokenEmitter
+    // Fallback function to enable re-entrance to PointsEmitter
     function call() external payable {
         reentryAttempted = true;
         address[] memory recipients = new address[](1);
@@ -967,11 +967,11 @@ contract MaliciousOwner {
         uint256[] memory bps = new uint256[](1);
         bps[0] = 10_000;
 
-        // Attempt to re-enter TokenEmitter
-        erc20TokenEmitter.buyToken{ value: msg.value }(
+        // Attempt to re-enter PointsEmitter
+        revolutionPointsEmitter.buyToken{ value: msg.value }(
             recipients,
             bps,
-            IERC20TokenEmitter.ProtocolRewardAddresses({
+            IRevolutionPointsEmitter.ProtocolRewardAddresses({
                 builder: address(0),
                 purchaseReferral: address(0),
                 deployer: address(0)

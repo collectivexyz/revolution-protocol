@@ -15,7 +15,7 @@ import { CultureIndex } from "../src/culture-index/CultureIndex.sol";
 import { RevolutionProtocolRewards } from "@cobuild/protocol-rewards/src/RevolutionProtocolRewards.sol";
 import { MaxHeap } from "../src/MaxHeap.sol";
 import { NontransferableERC20Votes } from "../src/NontransferableERC20Votes.sol";
-import { ERC20TokenEmitter } from "../src/ERC20TokenEmitter.sol";
+import { RevolutionPointsEmitter } from "../src/RevolutionPointsEmitter.sol";
 import { IDAOExecutor } from "../src/governance/VerbsDAOInterfaces.sol";
 import { ERC1967Proxy } from "../src/libs/proxy/ERC1967Proxy.sol";
 
@@ -34,7 +34,7 @@ contract DeployContracts is Script {
         address cultureIndexImpl;
         address maxHeapImpl;
         address nontransferableERC20Impl;
-        address erc20TokenEmitterImpl;
+        address revolutionPointsEmitterImpl;
         address builderImpl;
     }
 
@@ -94,7 +94,7 @@ contract DeployContracts is Script {
                 deployedContracts.daoImpl,
                 deployedContracts.cultureIndexImpl,
                 deployedContracts.nontransferableERC20Impl,
-                deployedContracts.erc20TokenEmitterImpl,
+                deployedContracts.revolutionPointsEmitterImpl,
                 deployedContracts.maxHeapImpl
             )
         );
@@ -121,8 +121,8 @@ contract DeployContracts is Script {
         deployedContracts.nontransferableERC20Impl = address(
             new NontransferableERC20Votes(address(deployedContracts.builderProxy))
         );
-        deployedContracts.erc20TokenEmitterImpl = address(
-            new ERC20TokenEmitter(address(deployedContracts.builderProxy), protocolRewards, rewardsRecipient)
+        deployedContracts.revolutionPointsEmitterImpl = address(
+            new RevolutionPointsEmitter(address(deployedContracts.builderProxy), protocolRewards, rewardsRecipient)
         );
     }
 
@@ -182,7 +182,7 @@ contract DeployContracts is Script {
             string(
                 abi.encodePacked(
                     "ERC20 Token Emitter implementation: ",
-                    addressToString(deployedContracts.erc20TokenEmitterImpl)
+                    addressToString(deployedContracts.revolutionPointsEmitterImpl)
                 )
             )
         );

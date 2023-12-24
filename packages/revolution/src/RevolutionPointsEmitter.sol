@@ -2,7 +2,7 @@
 pragma solidity ^0.8.22;
 
 import { ReentrancyGuardUpgradeable } from "@openzeppelin/contracts-upgradeable/utils/ReentrancyGuardUpgradeable.sol";
-import { TokenEmitterRewards } from "@cobuild/protocol-rewards/src/abstract/TokenEmitter/TokenEmitterRewards.sol";
+import { PointsEmitterRewards } from "@cobuild/protocol-rewards/src/abstract/PointsEmitter/PointsEmitterRewards.sol";
 import { Ownable2StepUpgradeable } from "@openzeppelin/contracts-upgradeable/access/Ownable2StepUpgradeable.sol";
 import { PausableUpgradeable } from "@openzeppelin/contracts-upgradeable/utils/PausableUpgradeable.sol";
 
@@ -11,14 +11,14 @@ import { VRGDAC } from "./libs/VRGDAC.sol";
 import { toDaysWadUnsafe } from "./libs/SignedWadMath.sol";
 import { Strings } from "@openzeppelin/contracts/utils/Strings.sol";
 import { NontransferableERC20Votes } from "./NontransferableERC20Votes.sol";
-import { IERC20TokenEmitter } from "./interfaces/IERC20TokenEmitter.sol";
+import { IRevolutionPointsEmitter } from "./interfaces/IRevolutionPointsEmitter.sol";
 
 import { IRevolutionBuilder } from "./interfaces/IRevolutionBuilder.sol";
 
-contract ERC20TokenEmitter is
-    IERC20TokenEmitter,
+contract RevolutionPointsEmitter is
+    IRevolutionPointsEmitter,
     ReentrancyGuardUpgradeable,
-    TokenEmitterRewards,
+    PointsEmitterRewards,
     Ownable2StepUpgradeable,
     PausableUpgradeable
 {
@@ -66,7 +66,7 @@ contract ERC20TokenEmitter is
         address _manager,
         address _protocolRewards,
         address _protocolFeeRecipient
-    ) payable TokenEmitterRewards(_protocolRewards, _protocolFeeRecipient) initializer {
+    ) payable PointsEmitterRewards(_protocolRewards, _protocolFeeRecipient) initializer {
         if (_manager == address(0)) revert ADDRESS_ZERO();
         if (_protocolRewards == address(0)) revert ADDRESS_ZERO();
         if (_protocolFeeRecipient == address(0)) revert ADDRESS_ZERO();
@@ -92,7 +92,7 @@ contract ERC20TokenEmitter is
         address _erc20Token,
         address _vrgdac,
         address _creatorsAddress,
-        IRevolutionBuilder.TokenEmitterCreatorParams calldata _creatorParams
+        IRevolutionBuilder.PointsEmitterCreatorParams calldata _creatorParams
     ) external initializer {
         if (msg.sender != address(manager)) revert NOT_MANAGER();
         if (_initialOwner == address(0)) revert ADDRESS_ZERO();

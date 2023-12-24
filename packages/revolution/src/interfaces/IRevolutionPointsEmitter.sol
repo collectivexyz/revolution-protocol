@@ -3,7 +3,7 @@ pragma solidity ^0.8.22;
 
 import { IRevolutionBuilder } from "./IRevolutionBuilder.sol";
 
-interface IERC20TokenEmitter {
+interface IRevolutionPointsEmitter {
     ///                                                          ///
     ///                           ERRORS                         ///
     ///                                                          ///
@@ -105,6 +105,6 @@ interface IERC20TokenEmitter {
         address erc20Token,
         address vrgdac,
         address creatorsAddress,
-        IRevolutionBuilder.TokenEmitterCreatorParams calldata creatorParams
+        IRevolutionBuilder.PointsEmitterCreatorParams calldata creatorParams
     ) external;
 }

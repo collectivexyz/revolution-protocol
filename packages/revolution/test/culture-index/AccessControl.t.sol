@@ -65,7 +65,7 @@ contract CultureIndexAccessControlTest is CultureIndexTestSuite {
         cultureIndex._setQuorumVotesBPS(quorumBps);
         vm.stopPrank();
 
-        vm.startPrank(address(erc20TokenEmitter));
+        vm.startPrank(address(revolutionPointsEmitter));
         erc20Token.mint(address(0x21), quorumBps * 10);
         erc20Token.mint(address(this), ((quorumBps / 2) * (quorumBps)) / 10_000);
 

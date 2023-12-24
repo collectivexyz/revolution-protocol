@@ -4,10 +4,10 @@ pragma solidity 0.8.22;
 import "../ProtocolRewardsTest.sol";
 import { RewardsSettings } from "../../src/abstract/RewardSplits.sol";
 import { MockWETH } from "../mock/MockWETH.sol";
-import { NontransferableERC20Votes, IERC20TokenEmitter, IRevolutionBuilder, VRGDAC, ERC1967Proxy, ERC20TokenEmitter } from "../utils/TokenEmitterLibrary.sol";
+import { NontransferableERC20Votes, IRevolutionPointsEmitter, IRevolutionBuilder, VRGDAC, ERC1967Proxy, RevolutionPointsEmitter } from "../utils/PointsEmitterLibrary.sol";
 
-contract TokenEmitterRewardsTest is ProtocolRewardsTest {
-    ERC20TokenEmitter mockTokenEmitter;
+contract PointsEmitterRewardsTest is ProtocolRewardsTest {
+    RevolutionPointsEmitter mockPointsEmitter;
     NontransferableERC20Votes internal erc20Token;
 
     address creatorsAddress;
@@ -24,36 +24,36 @@ contract TokenEmitterRewardsTest is ProtocolRewardsTest {
         // Deploy the VRGDAC contract
         vrgdac = address(new VRGDAC(1e11, 1e17, 1e22));
 
-        address erc20TokenEmitterImpl = address(
-            new ERC20TokenEmitter(address(this), address(protocolRewards), revolution)
+        address revolutionPointsEmitterImpl = address(
+            new RevolutionPointsEmitter(address(this), address(protocolRewards), revolution)
         );
 
         erc20Token = new NontransferableERC20Votes(address(this), "Revolution Governance", "GOV");
 
-        address mockTokenEmitterAddress = address(new ERC1967Proxy(erc20TokenEmitterImpl, ""));
+        address mockPointsEmitterAddress = address(new ERC1967Proxy(revolutionPointsEmitterImpl, ""));
 
-        IERC20TokenEmitter(mockTokenEmitterAddress).initialize({
+        IRevolutionPointsEmitter(mockPointsEmitterAddress).initialize({
             initialOwner: address(this),
             erc20Token: address(erc20Token),
             vrgdac: vrgdac,
             creatorsAddress: creatorsAddress,
-            creatorParams: IRevolutionBuilder.TokenEmitterCreatorParams({
+            creatorParams: IRevolutionBuilder.PointsEmitterCreatorParams({
                 creatorRateBps: 1_000,
                 entropyRateBps: 5_000
             }),
             weth: address(new MockWETH())
         });
 
-        erc20Token.transferOwnership(mockTokenEmitterAddress);
+        erc20Token.transferOwnership(mockPointsEmitterAddress);
 
-        vm.label(mockTokenEmitterAddress, "MOCK_TOKENEMITTER");
+        vm.label(mockPointsEmitterAddress, "MOCK_POINTSEMITTER");
 
-        mockTokenEmitter = ERC20TokenEmitter(mockTokenEmitterAddress);
+        mockPointsEmitter = RevolutionPointsEmitter(mockPointsEmitterAddress);
     }
 
     function testDeposit(uint256 msgValue) public {
-        bool shouldExpectRevert = msgValue <= mockTokenEmitter.minPurchaseAmount() ||
-            msgValue >= mockTokenEmitter.maxPurchaseAmount();
+        bool shouldExpectRevert = msgValue <= mockPointsEmitter.minPurchaseAmount() ||
+            msgValue >= mockPointsEmitter.maxPurchaseAmount();
 
         vm.deal(collector, msgValue);
 
@@ -70,18 +70,19 @@ contract TokenEmitterRewardsTest is ProtocolRewardsTest {
             vm.expectRevert();
         }
 
-        IERC20TokenEmitter.ProtocolRewardAddresses memory rewardAddrs = IERC20TokenEmitter.ProtocolRewardAddresses({
-            builder: builderReferral,
-            purchaseReferral: purchaseReferral,
-            deployer: deployer
-        });
+        IRevolutionPointsEmitter.ProtocolRewardAddresses memory rewardAddrs = IRevolutionPointsEmitter
+            .ProtocolRewardAddresses({
+                builder: builderReferral,
+                purchaseReferral: purchaseReferral,
+                deployer: deployer
+            });
 
-        mockTokenEmitter.buyToken{ value: msgValue }(addresses, bps, rewardAddrs);
+        mockPointsEmitter.buyToken{ value: msgValue }(addresses, bps, rewardAddrs);
 
         if (shouldExpectRevert) {
             vm.expectRevert();
         }
-        (RewardsSettings memory settings, uint256 totalReward) = mockTokenEmitter.computePurchaseRewards(msgValue);
+        (RewardsSettings memory settings, uint256 totalReward) = mockPointsEmitter.computePurchaseRewards(msgValue);
 
         if (!shouldExpectRevert) {
             assertApproxEqAbs(protocolRewards.totalRewardsSupply(), totalReward, 5);
@@ -93,8 +94,8 @@ contract TokenEmitterRewardsTest is ProtocolRewardsTest {
     }
 
     function testNullReferralRecipient(uint256 msgValue) public {
-        bool shouldExpectRevert = msgValue <= mockTokenEmitter.minPurchaseAmount() ||
-            msgValue >= mockTokenEmitter.maxPurchaseAmount();
+        bool shouldExpectRevert = msgValue <= mockPointsEmitter.minPurchaseAmount() ||
+            msgValue >= mockPointsEmitter.maxPurchaseAmount();
 
         NontransferableERC20Votes govToken2 = new NontransferableERC20Votes(
             address(this),
@@ -102,27 +103,27 @@ contract TokenEmitterRewardsTest is ProtocolRewardsTest {
             "GOV"
         );
 
-        address mockTokenEmitterImpl = address(
-            new ERC20TokenEmitter(address(this), address(protocolRewards), revolution)
+        address mockPointsEmitterImpl = address(
+            new RevolutionPointsEmitter(address(this), address(protocolRewards), revolution)
         );
 
-        address mockTokenEmitterAddress = address(new ERC1967Proxy(mockTokenEmitterImpl, ""));
+        address mockPointsEmitterAddress = address(new ERC1967Proxy(mockPointsEmitterImpl, ""));
 
-        IERC20TokenEmitter(mockTokenEmitterAddress).initialize({
+        IRevolutionPointsEmitter(mockPointsEmitterAddress).initialize({
             initialOwner: address(this),
             erc20Token: address(govToken2),
             vrgdac: vrgdac,
             creatorsAddress: creatorsAddress,
-            creatorParams: IRevolutionBuilder.TokenEmitterCreatorParams({
+            creatorParams: IRevolutionBuilder.PointsEmitterCreatorParams({
                 creatorRateBps: 1_000,
                 entropyRateBps: 5_000
             }),
             weth: address(new MockWETH())
         });
 
-        mockTokenEmitter = ERC20TokenEmitter(mockTokenEmitterAddress);
+        mockPointsEmitter = RevolutionPointsEmitter(mockPointsEmitterAddress);
 
-        govToken2.transferOwnership(address(mockTokenEmitter));
+        govToken2.transferOwnership(address(mockPointsEmitter));
 
         // array of len 1 addresses
         address[] memory addresses = new address[](1);
@@ -137,10 +138,10 @@ contract TokenEmitterRewardsTest is ProtocolRewardsTest {
             //expect INVALID_ETH_AMOUNT()
             vm.expectRevert();
         }
-        mockTokenEmitter.buyToken{ value: msgValue }(
+        mockPointsEmitter.buyToken{ value: msgValue }(
             addresses,
             bps,
-            IERC20TokenEmitter.ProtocolRewardAddresses({
+            IRevolutionPointsEmitter.ProtocolRewardAddresses({
                 builder: builderReferral,
                 purchaseReferral: address(0),
                 deployer: deployer
@@ -151,7 +152,7 @@ contract TokenEmitterRewardsTest is ProtocolRewardsTest {
             //expect INVALID_ETH_AMOUNT()
             vm.expectRevert();
         }
-        (RewardsSettings memory settings, uint256 totalReward) = mockTokenEmitter.computePurchaseRewards(msgValue);
+        (RewardsSettings memory settings, uint256 totalReward) = mockPointsEmitter.computePurchaseRewards(msgValue);
 
         if (!shouldExpectRevert) {
             assertApproxEqAbs(protocolRewards.totalRewardsSupply(), totalReward, 5);
@@ -166,9 +167,9 @@ contract TokenEmitterRewardsTest is ProtocolRewardsTest {
     }
 
     function testRevertInvalidEth(uint16 msgValue) public {
-        vm.assume(msgValue < mockTokenEmitter.minPurchaseAmount() || msgValue > mockTokenEmitter.maxPurchaseAmount());
+        vm.assume(msgValue < mockPointsEmitter.minPurchaseAmount() || msgValue > mockPointsEmitter.maxPurchaseAmount());
 
         vm.expectRevert(abi.encodeWithSignature("INVALID_ETH_AMOUNT()"));
-        mockTokenEmitter.computePurchaseRewards(msgValue);
+        mockPointsEmitter.computePurchaseRewards(msgValue);
     }
 }

@@ -12,7 +12,7 @@ import { VerbsDAOLogicV1 } from "../src/governance/VerbsDAOLogicV1.sol";
 import { DAOExecutor } from "../src/governance/DAOExecutor.sol";
 import { CultureIndex } from "../src/culture-index/CultureIndex.sol";
 import { NontransferableERC20Votes } from "../src/NontransferableERC20Votes.sol";
-import { ERC20TokenEmitter } from "../src/ERC20TokenEmitter.sol";
+import { RevolutionPointsEmitter } from "../src/RevolutionPointsEmitter.sol";
 import { MaxHeap } from "../src/MaxHeap.sol";
 import { VerbsDAOStorageV1 } from "../src/governance/VerbsDAOInterfaces.sol";
 import { RevolutionProtocolRewards } from "@cobuild/protocol-rewards/src/RevolutionProtocolRewards.sol";
@@ -38,7 +38,7 @@ contract RevolutionBuilderTest is Test {
     address internal executorImpl;
     address internal daoImpl;
     address internal erc20TokenImpl;
-    address internal erc20TokenEmitterImpl;
+    address internal revolutionPointsEmitterImpl;
     address internal cultureIndexImpl;
     address internal maxHeapImpl;
 
@@ -99,8 +99,8 @@ contract RevolutionBuilderTest is Test {
         executorImpl = address(new DAOExecutor(address(manager)));
         daoImpl = address(new VerbsDAOLogicV1(address(manager)));
         erc20TokenImpl = address(new NontransferableERC20Votes(address(manager)));
-        erc20TokenEmitterImpl = address(
-            new ERC20TokenEmitter(address(manager), address(protocolRewards), revolutionDAO)
+        revolutionPointsEmitterImpl = address(
+            new RevolutionPointsEmitter(address(manager), address(protocolRewards), revolutionDAO)
         );
         cultureIndexImpl = address(new CultureIndex(address(manager)));
         maxHeapImpl = address(new MaxHeap(address(manager)));
@@ -114,7 +114,7 @@ contract RevolutionBuilderTest is Test {
                 daoImpl,
                 cultureIndexImpl,
                 erc20TokenImpl,
-                erc20TokenEmitterImpl,
+                revolutionPointsEmitterImpl,
                 maxHeapImpl
             )
         );
@@ -132,7 +132,7 @@ contract RevolutionBuilderTest is Test {
     IRevolutionBuilder.GovParams internal govParams;
     IRevolutionBuilder.CultureIndexParams internal cultureIndexParams;
     IRevolutionBuilder.ERC20TokenParams internal erc20TokenParams;
-    IRevolutionBuilder.ERC20TokenEmitterParams internal erc20TokenEmitterParams;
+    IRevolutionBuilder.RevolutionPointsEmitterParams internal revolutionPointsEmitterParams;
 
     function setMockERC721TokenParams() internal virtual {
         setERC721TokenParams("Mock Token", "MOCK", "Qmew7TdyGnj6YRUjQR68sUJN3239MYXRD8uxowxF6rGK8j", "Mock");
@@ -236,23 +236,23 @@ contract RevolutionBuilderTest is Test {
         erc20TokenParams = IRevolutionBuilder.ERC20TokenParams({ name: _name, symbol: _symbol });
     }
 
-    function setMockERC20TokenEmitterParams() internal virtual {
-        setERC20TokenEmitterParams(1 ether, 1e18 / 10, 1_000 * 1e18, creatorsAddress);
+    function setMockRevolutionPointsEmitterParams() internal virtual {
+        setRevolutionPointsEmitterParams(1 ether, 1e18 / 10, 1_000 * 1e18, creatorsAddress);
     }
 
-    function setERC20TokenEmitterParams(
+    function setRevolutionPointsEmitterParams(
         int256 _targetPrice,
         int256 _priceDecayPercent,
         int256 _tokensPerTimeUnit,
         address _creatorsAddress
     ) internal virtual {
-        erc20TokenEmitterParams = IRevolutionBuilder.ERC20TokenEmitterParams({
+        revolutionPointsEmitterParams = IRevolutionBuilder.RevolutionPointsEmitterParams({
             vrgdaParams: IRevolutionBuilder.VRGDAParams({
                 targetPrice: _targetPrice,
                 priceDecayPercent: _priceDecayPercent,
                 tokensPerTimeUnit: _tokensPerTimeUnit
             }),
-            creatorParams: IRevolutionBuilder.TokenEmitterCreatorParams({
+            creatorParams: IRevolutionBuilder.PointsEmitterCreatorParams({
                 creatorRateBps: 1000,
                 entropyRateBps: 4_000
             }),
@@ -271,7 +271,7 @@ contract RevolutionBuilderTest is Test {
     VerbsDAOLogicV1 internal dao;
     CultureIndex internal cultureIndex;
     NontransferableERC20Votes internal erc20Token;
-    ERC20TokenEmitter internal erc20TokenEmitter;
+    RevolutionPointsEmitter internal revolutionPointsEmitter;
     MaxHeap internal maxHeap;
 
     function setMockParams() internal virtual {
@@ -280,7 +280,7 @@ contract RevolutionBuilderTest is Test {
         setMockGovParams();
         setMockCultureIndexParams();
         setMockERC20TokenParams();
-        setMockERC20TokenEmitterParams();
+        setMockRevolutionPointsEmitterParams();
     }
 
     function deployMock() internal virtual {
@@ -292,7 +292,7 @@ contract RevolutionBuilderTest is Test {
             govParams,
             cultureIndexParams,
             erc20TokenParams,
-            erc20TokenEmitterParams
+            revolutionPointsEmitterParams
         );
     }
 
@@ -304,7 +304,7 @@ contract RevolutionBuilderTest is Test {
         IRevolutionBuilder.GovParams memory _govParams,
         IRevolutionBuilder.CultureIndexParams memory _cultureIndexParams,
         IRevolutionBuilder.ERC20TokenParams memory _ERC20TokenParams,
-        IRevolutionBuilder.ERC20TokenEmitterParams memory _ERC20TokenEmitterParams
+        IRevolutionBuilder.RevolutionPointsEmitterParams memory _RevolutionPointsEmitterParams
     ) internal virtual {
         RevolutionBuilderTypesV1.DAOAddresses memory _addresses = manager.deploy(
             _initialOwner,
@@ -314,7 +314,7 @@ contract RevolutionBuilderTest is Test {
             _govParams,
             _cultureIndexParams,
             _ERC20TokenParams,
-            _ERC20TokenEmitterParams
+            _RevolutionPointsEmitterParams
         );
 
         erc721Token = VerbsToken(_addresses.erc721Token);
@@ -324,7 +324,7 @@ contract RevolutionBuilderTest is Test {
         dao = VerbsDAOLogicV1(payable(_addresses.dao));
         cultureIndex = CultureIndex(_addresses.cultureIndex);
         erc20Token = NontransferableERC20Votes(_addresses.erc20Token);
-        erc20TokenEmitter = ERC20TokenEmitter(_addresses.erc20TokenEmitter);
+        revolutionPointsEmitter = RevolutionPointsEmitter(_addresses.revolutionPointsEmitter);
         maxHeap = MaxHeap(_addresses.maxHeap);
 
         vm.label(address(erc721Token), "ERC721TOKEN");
@@ -334,7 +334,7 @@ contract RevolutionBuilderTest is Test {
         vm.label(address(dao), "DAO");
         vm.label(address(cultureIndex), "CULTURE_INDEX");
         vm.label(address(erc20Token), "ERC20TOKEN");
-        vm.label(address(erc20TokenEmitter), "ERC20TOKEN_EMITTER");
+        vm.label(address(revolutionPointsEmitter), "ERC20TOKEN_EMITTER");
         vm.label(address(maxHeap), "MAX_HEAP");
     }
 
