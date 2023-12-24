@@ -201,6 +201,12 @@ contract VerbsDAOStorageV1 is VerbsDAOProxyStorage {
     /// @dev Reverts if the voter has already cast a vote for the proposal.
     error VOTER_ALREADY_VOTED();
 
+    /// @dev Reverts if the new minimum quorum votes basis points are outside the allowed bounds.
+    error INVALID_MIN_QUORUM_VOTES_BPS();
+
+    /// @dev Reverts if the new minimum quorum votes basis points exceed the maximum quorum votes basis points.
+    error MIN_QUORUM_EXCEEDS_MAX();
+
     /// @notice The contract upgrade manager
     IRevolutionBuilder public immutable manager;
 
