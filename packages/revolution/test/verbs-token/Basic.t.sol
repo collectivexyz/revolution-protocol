@@ -113,6 +113,9 @@ contract TokenBasicTest is VerbsTokenTestSuite {
         address creatorAddress = address(0x1);
         ICultureIndex.MediaType mediaType = ICultureIndex.MediaType.IMAGE;
 
+        ICultureIndex.CreatorBps[] memory creators = new ICultureIndex.CreatorBps[](1);
+        creators[0] = ICultureIndex.CreatorBps({ creator: creatorAddress, bps: 10_000 });
+
         // Check for PieceCreated event
         vm.expectEmit(true, true, true, true);
         emit ICultureIndexEvents.PieceCreated(
@@ -127,7 +130,8 @@ contract TokenBasicTest is VerbsTokenTestSuite {
                 mediaType: mediaType
             }),
             0,
-            0
+            0,
+            creators
         );
 
         vm.stopPrank();

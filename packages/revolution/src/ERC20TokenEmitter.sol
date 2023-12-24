@@ -218,7 +218,7 @@ contract ERC20TokenEmitter is
             : int(0);
 
         // Update total tokens emitted for this purchase with tokens for creators
-        if (totalTokensForCreators > 0) emittedTokenWad += totalTokensForCreators;
+        if (totalTokensForCreators > 0) emittedTokenWad = emittedTokenWad + totalTokensForCreators;
 
         // Tokens to emit to buyers
         int totalTokensForBuyers = buyTokenPaymentShares.buyersShare > 0
@@ -226,7 +226,7 @@ contract ERC20TokenEmitter is
             : int(0);
 
         // Update total tokens emitted for this purchase with tokens for buyers
-        if (totalTokensForBuyers > 0) emittedTokenWad += totalTokensForBuyers;
+        if (totalTokensForBuyers > 0) emittedTokenWad = emittedTokenWad + totalTokensForBuyers;
 
         //Deposit owner's funds, and eth used to buy creators gov. tokens to owner's account
         _safeTransferETHWithFallback(
@@ -246,14 +246,15 @@ contract ERC20TokenEmitter is
 
         // Stores total bps, ensure it is 10_000 later
         uint256 bpsSum = 0;
+        uint256 addressesLength = addresses.length;
 
         //Mint tokens to buyers
-        for (uint256 i = 0; i < addresses.length; i++) {
+        for (uint256 i = 0; i < addressesLength; i++) {
             if (totalTokensForBuyers > 0) {
                 // transfer tokens to address
                 _mint(addresses[i], uint256((totalTokensForBuyers * int(basisPointSplits[i])) / 10_000));
             }
-            bpsSum += basisPointSplits[i];
+            bpsSum = bpsSum + basisPointSplits[i];
         }
 
         if (bpsSum != 10_000) revert INVALID_BPS_SUM();

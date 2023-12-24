@@ -143,6 +143,124 @@ contract VerbsDAOProxyStorage {
  * VerbsDAOStorageVX.
  */
 contract VerbsDAOStorageV1 is VerbsDAOProxyStorage {
+    ///                                                          ///
+    ///                           ERRORS                         ///
+    ///                                                          ///
+
+    /// @dev Introduced these errors to reduce contract size, to avoid deployment failure
+
+    /// @dev Reverts if the caller is not the manager.
+    error NOT_MANAGER();
+
+    /// @dev Reverts if the provided executor address is invalid (zero address).
+    error INVALID_EXECUTOR_ADDRESS();
+
+    /// @dev Reverts if the provided ERC721 token address is invalid (zero address).
+    error INVALID_ERC721_ADDRESS();
+
+    /// @dev Reverts if the provided ERC20 token address is invalid (zero address).
+    error INVALID_ERC20_ADDRESS();
+
+    /// @dev Reverts if the voting period is outside the allowed range.
+    error INVALID_VOTING_PERIOD();
+
+    /// @dev Reverts if the voting delay is outside the allowed range.
+    error INVALID_VOTING_DELAY();
+
+    /// @dev Reverts if the proposal threshold basis points are outside the allowed range.
+    error INVALID_PROPOSAL_THRESHOLD_BPS();
+
+    /// @dev Reverts if the ERC721 token voting weight is invalid (non-positive).
+    error INVALID_ERC721_VOTING_WEIGHT();
+
+    /// @dev Reverts if the proposer's votes are below the proposal threshold.
+    error PROPOSER_VOTES_BELOW_THRESHOLD();
+
+    /// @dev Reverts if the lengths of proposal arrays (targets, values, signatures, calldatas) do not match.
+    error PROPOSAL_FUNCTION_PARITY_MISMATCH();
+
+    /// @dev Reverts if no actions are provided in the proposal.
+    error NO_ACTIONS_PROVIDED();
+
+    /// @dev Reverts if the number of actions in the proposal exceeds the maximum allowed.
+    error TOO_MANY_ACTIONS();
+
+    /// @dev Reverts if the proposer already has an active proposal.
+    error ACTIVE_PROPOSAL_EXISTS();
+
+    /// @dev Reverts if the proposer already has a pending proposal.
+    error PENDING_PROPOSAL_EXISTS();
+
+    /// @dev Reverts if the proposal is not in the 'Succeeded' state when attempting to queue.
+    error PROPOSAL_NOT_SUCCEEDED();
+
+    /// @dev Reverts if the proposal is not currently in an active state for voting.
+    error VOTING_CLOSED();
+
+    /// @dev Reverts if an invalid vote type is provided (vote type must be within a certain range).
+    error INVALID_VOTE_TYPE();
+
+    /// @dev Reverts if the voter has already cast a vote for the proposal.
+    error VOTER_ALREADY_VOTED();
+
+    /// @dev Reverts if the new minimum quorum votes basis points are outside the allowed bounds.
+    error INVALID_MIN_QUORUM_VOTES_BPS();
+
+    /// @dev Reverts if the new minimum quorum votes basis points exceed the maximum quorum votes basis points.
+    error MIN_QUORUM_EXCEEDS_MAX();
+
+    /// @dev Reverts if the new maximum quorum votes basis points exceed the upper bound.
+    error INVALID_MAX_QUORUM_VOTES_BPS();
+
+    /// @dev Reverts if the minimum quorum votes basis points are greater than the new maximum quorum votes basis points.
+    error MAX_QUORUM_EXCEEDS_MIN();
+
+    /// @dev Reverts if the caller is not the pending admin or is the zero address.
+    error PENDING_ADMIN_ONLY();
+
+    /// @dev Reverts if the caller is not the admin.
+    error ADMIN_ONLY();
+
+    /// @dev Reverts if the caller is not the vetoer.
+    error VETOER_ONLY();
+
+    /// @dev Reverts if the vetoer has been burned
+    error VETOER_BURNED();
+
+    /// @dev Reverts if the caller is not the pending vetoer.
+    error PENDING_VETOER_ONLY();
+
+    /// @dev Reverts if the minimum quorum votes basis points are greater than the maximum quorum votes basis points.
+    error MIN_QUORUM_BPS_GREATER_THAN_MAX_QUORUM_BPS();
+
+    /// @dev Reverts if an unsafe cast to uint16 is attempted.
+    error UNSAFE_UINT16_CAST();
+
+    /// @dev Reverts if an attempt is made to veto an already executed proposal.
+    error CANT_VETO_EXECUTED_PROPOSAL();
+
+    /// @dev Reverts if an attempt is made to cancel an already executed proposal.
+    error CANT_CANCEL_EXECUTED_PROPOSAL();
+
+    /// @dev Reverts if the caller is not the proposer and the proposer's votes are still above the proposal threshold.
+    error PROPOSER_ABOVE_THRESHOLD();
+
+    /// @dev Reverts if the proposal ID is invalid (greater than the current proposal count).
+    error INVALID_PROPOSAL_ID();
+
+    /// @dev Reverts if an identical proposal action is already queued at the same eta.
+    error PROPOSAL_ACTION_ALREADY_QUEUED();
+
+    /// @dev Reverts if the proposal is not in the 'Queued' state when attempting to execute.
+    error PROPOSAL_NOT_QUEUED();
+
+    /// @dev Reverts if the signatory is the zero address, indicating an invalid signature.
+    error INVALID_SIGNATURE();
+
+    ///                                                          ///
+    ///                           STATE                          ///
+    ///                                                          ///
+
     /// @notice The contract upgrade manager
     IRevolutionBuilder public immutable manager;
 
@@ -186,6 +304,10 @@ contract VerbsDAOStorageV1 is VerbsDAOProxyStorage {
 
     /// @notice The voting weight of the verbs token eg: owning (2) tokens gets you (2 * erc721TokenVotingWeight) votes
     uint256 public erc721TokenVotingWeight;
+
+    ///                                                          ///
+    ///                        CONSTANTS                         ///
+    ///                                                          ///
 
     struct Proposal {
         /// @notice Unique id for looking up a proposal

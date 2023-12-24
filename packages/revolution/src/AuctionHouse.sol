@@ -373,17 +373,18 @@ contract AuctionHouse is
 
                 //Transfer creator's share to the creator, for each creator, and build arrays for erc20TokenEmitter.buyToken
                 if (creatorsShare > 0 && entropyRateBps > 0) {
+                    ICultureIndex.CreatorBps[] memory creators = verbs.getArtPieceById(_auction.verbId).creators;
+                    uint entropyRateAmount = creatorsShare * entropyRateBps;
                     for (uint256 i = 0; i < numCreators; i++) {
-                        ICultureIndex.CreatorBps memory creator = verbs.getArtPieceById(_auction.verbId).creators[i];
-                        vrgdaReceivers[i] = creator.creator;
-                        vrgdaSplits[i] = creator.bps;
+                        vrgdaReceivers[i] = creators[i].creator;
+                        vrgdaSplits[i] = creators[i].bps;
 
                         //Calculate paymentAmount for specific creator based on BPS splits - same as multiplying by creatorDirectPayment
-                        uint256 paymentAmount = (creatorsShare * entropyRateBps * creator.bps) / (10_000 * 10_000);
+                        uint256 paymentAmount = (entropyRateAmount * creators[i].bps) / (10_000 * 10_000);
                         ethPaidToCreators += paymentAmount;
 
                         //Transfer creator's share to the creator
-                        _safeTransferETHWithFallback(creator.creator, paymentAmount);
+                        _safeTransferETHWithFallback(creators[i].creator, paymentAmount);
                     }
                 }
 

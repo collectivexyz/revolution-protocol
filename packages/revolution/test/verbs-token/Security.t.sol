@@ -133,7 +133,7 @@ contract TokenSecurityTest is VerbsTokenTestSuite {
         address attacker = address(new ReentrancyAttackContractGeneral(address(erc721Token)));
 
         // Simulate a reentrancy attack for burn
-        vm.expectRevert("Sender is not the minter");
+        vm.expectRevert(abi.encodeWithSignature("NOT_MINTER()"));
         ReentrancyAttackContractGeneral(attacker).attackBurn();
     }
 
@@ -169,6 +169,10 @@ contract TokenSecurityTest is VerbsTokenTestSuite {
     }
 
     function testEventEmission() public {
+        address creatorAddress = address(0x1);
+        ICultureIndex.CreatorBps[] memory creators = new ICultureIndex.CreatorBps[](1);
+        creators[0] = ICultureIndex.CreatorBps({ creator: creatorAddress, bps: 10_000 });
+
         // Check that the PieceCreated event was emitted with correct parameters
         vm.expectEmit(true, true, true, true);
         emit ICultureIndexEvents.PieceCreated(
@@ -183,12 +187,9 @@ contract TokenSecurityTest is VerbsTokenTestSuite {
                 mediaType: ICultureIndex.MediaType.IMAGE
             }),
             0,
-            0
+            0,
+            creators
         );
-
-        // Check that the PieceCreatorAdded event was emitted with correct parameters
-        vm.expectEmit(true, true, true, true);
-        emit ICultureIndexEvents.PieceCreatorAdded(0, address(0x1), address(dao), 10000);
 
         createDefaultArtPiece();
     }

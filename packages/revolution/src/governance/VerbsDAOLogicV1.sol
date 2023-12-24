@@ -131,22 +131,6 @@ contract VerbsDAOLogicV1 is
     bytes32 public constant BALLOT_TYPEHASH = keccak256("Ballot(uint256 proposalId,uint8 support)");
 
     ///                                                          ///
-    ///                           ERRORS                         ///
-    ///                                                          ///
-
-    /// @dev Introduced these errors to reduce contract size, to avoid deployment failure
-    error AdminOnly();
-    error InvalidMinQuorumVotesBPS();
-    error InvalidMaxQuorumVotesBPS();
-    error MinQuorumBPSGreaterThanMaxQuorumBPS();
-    error UnsafeUint16Cast();
-    error VetoerOnly();
-    error PendingVetoerOnly();
-    error VetoerBurned();
-    error CantVetoExecutedProposal();
-    error CantCancelExecutedProposal();
-
-    ///                                                          ///
     ///                         CONSTRUCTOR                      ///
     ///                                                          ///
 
@@ -172,24 +156,26 @@ contract VerbsDAOLogicV1 is
         address erc20Token_,
         IRevolutionBuilder.GovParams calldata govParams_
     ) public virtual initializer {
-        require(msg.sender == address(manager), "DAO::initialize: only the manager can initialize");
-        require(executor_ != address(0), "DAO::initialize: invalid executor address");
-        require(erc721Token_ != address(0), "DAO::initialize: invalid erc721 address");
-        require(erc20Token_ != address(0), "DAO::initialize: invalid erc20 address");
-        require(
-            govParams_.votingPeriod >= MIN_VOTING_PERIOD && govParams_.votingPeriod <= MAX_VOTING_PERIOD,
-            "DAO::initialize: invalid voting period"
-        );
-        require(
-            govParams_.votingDelay >= MIN_VOTING_DELAY && govParams_.votingDelay <= MAX_VOTING_DELAY,
-            "DAO::initialize: invalid voting delay"
-        );
-        require(
-            govParams_.proposalThresholdBPS >= MIN_PROPOSAL_THRESHOLD_BPS &&
-                govParams_.proposalThresholdBPS <= MAX_PROPOSAL_THRESHOLD_BPS,
-            "DAO::initialize: invalid proposal threshold bps"
-        );
-        require(govParams_.erc721TokenVotingWeight > 0, "DAO::initialize: invalid erc721 token voting weight");
+        if (msg.sender != address(manager)) revert NOT_MANAGER();
+
+        if (executor_ == address(0)) revert INVALID_EXECUTOR_ADDRESS();
+
+        if (erc721Token_ == address(0)) revert INVALID_ERC721_ADDRESS();
+
+        if (erc20Token_ == address(0)) revert INVALID_ERC20_ADDRESS();
+
+        if (govParams_.votingPeriod < MIN_VOTING_PERIOD || govParams_.votingPeriod > MAX_VOTING_PERIOD)
+            revert INVALID_VOTING_PERIOD();
+
+        if (govParams_.votingDelay < MIN_VOTING_DELAY || govParams_.votingDelay > MAX_VOTING_DELAY)
+            revert INVALID_VOTING_DELAY();
+
+        if (
+            govParams_.proposalThresholdBPS < MIN_PROPOSAL_THRESHOLD_BPS ||
+            govParams_.proposalThresholdBPS > MAX_PROPOSAL_THRESHOLD_BPS
+        ) revert INVALID_PROPOSAL_THRESHOLD_BPS();
+
+        if (govParams_.erc721TokenVotingWeight <= 0) revert INVALID_ERC721_VOTING_WEIGHT();
 
         // Initialize EIP-712 support
         __EIP712_init(govParams_.daoName, "1");
@@ -253,30 +239,24 @@ contract VerbsDAOLogicV1 is
 
         temp.proposalThreshold = bps2Uint(proposalThresholdBPS, temp.totalWeightedSupply);
 
-        require(
-            getTotalVotes(msg.sender, block.number - 1) > temp.proposalThreshold,
-            "DAO::propose: proposer votes below proposal threshold"
-        );
-        require(
-            targets.length == values.length &&
-                targets.length == signatures.length &&
-                targets.length == calldatas.length,
-            "DAO::propose: proposal function information parity mismatch"
-        );
-        require(targets.length != 0, "DAO::propose: must provide actions");
-        require(targets.length <= proposalMaxOperations, "DAO::propose: too many actions");
+        if (getTotalVotes(msg.sender, block.number - 1) <= temp.proposalThreshold)
+            revert PROPOSER_VOTES_BELOW_THRESHOLD();
+
+        if (
+            targets.length != values.length || targets.length != signatures.length || targets.length != calldatas.length
+        ) revert PROPOSAL_FUNCTION_PARITY_MISMATCH();
+
+        if (targets.length == 0) revert NO_ACTIONS_PROVIDED();
+
+        if (targets.length > proposalMaxOperations) revert TOO_MANY_ACTIONS();
 
         temp.latestProposalId = latestProposalIds[msg.sender];
         if (temp.latestProposalId != 0) {
             ProposalState proposersLatestProposalState = state(temp.latestProposalId);
-            require(
-                proposersLatestProposalState != ProposalState.Active,
-                "DAO::propose: one live proposal per proposer, found an already active proposal"
-            );
-            require(
-                proposersLatestProposalState != ProposalState.Pending,
-                "DAO::propose: one live proposal per proposer, found an already pending proposal"
-            );
+
+            if (proposersLatestProposalState == ProposalState.Active) revert ACTIVE_PROPOSAL_EXISTS();
+
+            if (proposersLatestProposalState == ProposalState.Pending) revert PENDING_PROPOSAL_EXISTS();
         }
 
         temp.startBlock = block.number + votingDelay;
@@ -344,10 +324,8 @@ contract VerbsDAOLogicV1 is
      * @param proposalId The id of the proposal to queue
      */
     function queue(uint256 proposalId) external {
-        require(
-            state(proposalId) == ProposalState.Succeeded,
-            "DAO::queue: proposal can only be queued if it is succeeded"
-        );
+        if (state(proposalId) != ProposalState.Succeeded) revert PROPOSAL_NOT_SUCCEEDED();
+
         Proposal storage proposal = _proposals[proposalId];
         uint256 eta = block.timestamp + timelock.delay();
         for (uint256 i = 0; i < proposal.targets.length; i++) {
@@ -370,10 +348,9 @@ contract VerbsDAOLogicV1 is
         bytes memory data,
         uint256 eta
     ) internal {
-        require(
-            !timelock.queuedTransactions(keccak256(abi.encode(target, value, signature, data, eta))),
-            "DAO::queueOrRevertInternal: identical proposal action already queued at eta"
-        );
+        if (timelock.queuedTransactions(keccak256(abi.encode(target, value, signature, data, eta)))) {
+            revert PROPOSAL_ACTION_ALREADY_QUEUED();
+        }
         timelock.queueTransaction(target, value, signature, data, eta);
     }
 
@@ -382,10 +359,8 @@ contract VerbsDAOLogicV1 is
      * @param proposalId The id of the proposal to execute
      */
     function execute(uint256 proposalId) external {
-        require(
-            state(proposalId) == ProposalState.Queued,
-            "DAO::execute: proposal can only be executed if it is queued"
-        );
+        if (state(proposalId) != ProposalState.Queued) revert PROPOSAL_NOT_QUEUED();
+
         Proposal storage proposal = _proposals[proposalId];
         proposal.executed = true;
         for (uint256 i = 0; i < proposal.targets.length; i++) {
@@ -443,15 +418,16 @@ contract VerbsDAOLogicV1 is
      */
     function cancel(uint256 proposalId) external {
         if (state(proposalId) == ProposalState.Executed) {
-            revert CantCancelExecutedProposal();
+            revert CANT_CANCEL_EXECUTED_PROPOSAL();
         }
 
         Proposal storage proposal = _proposals[proposalId];
-        require(
-            msg.sender == proposal.proposer ||
-                getTotalVotes(proposal.proposer, block.number - 1) <= proposal.proposalThreshold,
-            "DAO::cancel: proposer above threshold"
-        );
+        if (
+            msg.sender != proposal.proposer &&
+            getTotalVotes(proposal.proposer, block.number - 1) > proposal.proposalThreshold
+        ) {
+            revert PROPOSER_ABOVE_THRESHOLD();
+        }
 
         proposal.canceled = true;
         for (uint256 i = 0; i < proposal.targets.length; i++) {
@@ -473,15 +449,15 @@ contract VerbsDAOLogicV1 is
      */
     function veto(uint256 proposalId) external {
         if (vetoer == address(0)) {
-            revert VetoerBurned();
+            revert VETOER_BURNED();
         }
 
         if (msg.sender != vetoer) {
-            revert VetoerOnly();
+            revert VETOER_ONLY();
         }
 
         if (state(proposalId) == ProposalState.Executed) {
-            revert CantVetoExecutedProposal();
+            revert CANT_VETO_EXECUTED_PROPOSAL();
         }
 
         Proposal storage proposal = _proposals[proposalId];
@@ -540,7 +516,8 @@ contract VerbsDAOLogicV1 is
      * @return Proposal state
      */
     function state(uint256 proposalId) public view returns (ProposalState) {
-        require(proposalCount >= proposalId, "DAO::state: invalid proposal id");
+        if (proposalCount < proposalId) revert INVALID_PROPOSAL_ID();
+
         Proposal storage proposal = _proposals[proposalId];
         if (proposal.vetoed) {
             return ProposalState.Vetoed;
@@ -666,7 +643,7 @@ contract VerbsDAOLogicV1 is
         bytes32 structHash = keccak256(abi.encode(BALLOT_TYPEHASH, proposalId, support));
         bytes32 digest = keccak256(abi.encodePacked("\x19\x01", domainSeparator, structHash));
         address signatory = ecrecover(digest, v, r, s);
-        require(signatory != address(0), "DAO::castVoteBySig: invalid signature");
+        if (signatory == address(0)) revert INVALID_SIGNATURE();
         emit VoteCast(signatory, proposalId, support, castVoteInternal(signatory, proposalId, support), "");
     }
 
@@ -678,11 +655,11 @@ contract VerbsDAOLogicV1 is
      * @return The number of votes cast
      */
     function castVoteInternal(address voter, uint256 proposalId, uint8 support) internal returns (uint256) {
-        require(state(proposalId) == ProposalState.Active, "DAO::castVoteInternal: voting is closed");
-        require(support <= 2, "DAO::castVoteInternal: invalid vote type");
+        if (state(proposalId) != ProposalState.Active) revert VOTING_CLOSED();
+        if (support > 2) revert INVALID_VOTE_TYPE();
         Proposal storage proposal = _proposals[proposalId];
         Receipt storage receipt = proposal.receipts[voter];
-        require(receipt.hasVoted == false, "DAO::castVoteInternal: voter already voted");
+        if (receipt.hasVoted) revert VOTER_ALREADY_VOTED();
 
         /// @notice: Unlike GovernerBravo, votes are considered from the block the proposal was created in order to normalize quorumVotes and proposalThreshold metrics
         uint256 votes = getTotalVotes(voter, proposalCreationBlock(proposal));
@@ -708,12 +685,11 @@ contract VerbsDAOLogicV1 is
      */
     function _setVotingDelay(uint256 newVotingDelay) external {
         if (msg.sender != admin) {
-            revert AdminOnly();
+            revert ADMIN_ONLY();
         }
-        require(
-            newVotingDelay >= MIN_VOTING_DELAY && newVotingDelay <= MAX_VOTING_DELAY,
-            "DAO::_setVotingDelay: invalid voting delay"
-        );
+
+        if (newVotingDelay < MIN_VOTING_DELAY || newVotingDelay > MAX_VOTING_DELAY) revert INVALID_VOTING_DELAY();
+
         uint256 oldVotingDelay = votingDelay;
         votingDelay = newVotingDelay;
 
@@ -726,12 +702,11 @@ contract VerbsDAOLogicV1 is
      */
     function _setVotingPeriod(uint256 newVotingPeriod) external {
         if (msg.sender != admin) {
-            revert AdminOnly();
+            revert ADMIN_ONLY();
         }
-        require(
-            newVotingPeriod >= MIN_VOTING_PERIOD && newVotingPeriod <= MAX_VOTING_PERIOD,
-            "DAO::_setVotingPeriod: invalid voting period"
-        );
+
+        if (newVotingPeriod < MIN_VOTING_PERIOD || newVotingPeriod > MAX_VOTING_PERIOD) revert INVALID_VOTING_PERIOD();
+
         uint256 oldVotingPeriod = votingPeriod;
         votingPeriod = newVotingPeriod;
 
@@ -745,13 +720,13 @@ contract VerbsDAOLogicV1 is
      */
     function _setProposalThresholdBPS(uint256 newProposalThresholdBPS) external {
         if (msg.sender != admin) {
-            revert AdminOnly();
+            revert ADMIN_ONLY();
         }
-        require(
-            newProposalThresholdBPS >= MIN_PROPOSAL_THRESHOLD_BPS &&
-                newProposalThresholdBPS <= MAX_PROPOSAL_THRESHOLD_BPS,
-            "DAO::_setProposalThreshold: invalid proposal threshold bps"
-        );
+
+        if (
+            newProposalThresholdBPS < MIN_PROPOSAL_THRESHOLD_BPS || newProposalThresholdBPS > MAX_PROPOSAL_THRESHOLD_BPS
+        ) revert INVALID_PROPOSAL_THRESHOLD_BPS();
+
         uint256 oldProposalThresholdBPS = proposalThresholdBPS;
         proposalThresholdBPS = newProposalThresholdBPS;
 
@@ -766,19 +741,18 @@ contract VerbsDAOLogicV1 is
      */
     function _setMinQuorumVotesBPS(uint16 newMinQuorumVotesBPS) external {
         if (msg.sender != admin) {
-            revert AdminOnly();
+            revert ADMIN_ONLY();
         }
         DynamicQuorumParams memory params = getDynamicQuorumParamsAt(block.number);
 
-        require(
-            newMinQuorumVotesBPS >= MIN_QUORUM_VOTES_BPS_LOWER_BOUND &&
-                newMinQuorumVotesBPS <= MIN_QUORUM_VOTES_BPS_UPPER_BOUND,
-            "DAO::_setMinQuorumVotesBPS: invalid min quorum votes bps"
-        );
-        require(
-            newMinQuorumVotesBPS <= params.maxQuorumVotesBPS,
-            "DAO::_setMinQuorumVotesBPS: min quorum votes bps greater than max"
-        );
+        if (
+            newMinQuorumVotesBPS < MIN_QUORUM_VOTES_BPS_LOWER_BOUND ||
+            newMinQuorumVotesBPS > MIN_QUORUM_VOTES_BPS_UPPER_BOUND
+        ) {
+            revert INVALID_MIN_QUORUM_VOTES_BPS();
+        }
+
+        if (newMinQuorumVotesBPS > params.maxQuorumVotesBPS) revert MIN_QUORUM_EXCEEDS_MAX();
 
         uint16 oldMinQuorumVotesBPS = params.minQuorumVotesBPS;
         params.minQuorumVotesBPS = newMinQuorumVotesBPS;
@@ -796,18 +770,13 @@ contract VerbsDAOLogicV1 is
      */
     function _setMaxQuorumVotesBPS(uint16 newMaxQuorumVotesBPS) external {
         if (msg.sender != admin) {
-            revert AdminOnly();
+            revert ADMIN_ONLY();
         }
         DynamicQuorumParams memory params = getDynamicQuorumParamsAt(block.number);
 
-        require(
-            newMaxQuorumVotesBPS <= MAX_QUORUM_VOTES_BPS_UPPER_BOUND,
-            "DAO::_setMaxQuorumVotesBPS: invalid max quorum votes bps"
-        );
-        require(
-            params.minQuorumVotesBPS <= newMaxQuorumVotesBPS,
-            "DAO::_setMaxQuorumVotesBPS: min quorum votes bps greater than max"
-        );
+        if (newMaxQuorumVotesBPS > MAX_QUORUM_VOTES_BPS_UPPER_BOUND) revert INVALID_MAX_QUORUM_VOTES_BPS();
+
+        if (params.minQuorumVotesBPS > newMaxQuorumVotesBPS) revert MAX_QUORUM_EXCEEDS_MIN();
 
         uint16 oldMaxQuorumVotesBPS = params.maxQuorumVotesBPS;
         params.maxQuorumVotesBPS = newMaxQuorumVotesBPS;
@@ -823,7 +792,7 @@ contract VerbsDAOLogicV1 is
      */
     function _setQuorumCoefficient(uint32 newQuorumCoefficient) external {
         if (msg.sender != admin) {
-            revert AdminOnly();
+            revert ADMIN_ONLY();
         }
         DynamicQuorumParams memory params = getDynamicQuorumParamsAt(block.number);
 
@@ -851,19 +820,19 @@ contract VerbsDAOLogicV1 is
         uint32 newQuorumCoefficient
     ) public {
         if (msg.sender != admin) {
-            revert AdminOnly();
+            revert ADMIN_ONLY();
         }
         if (
             newMinQuorumVotesBPS < MIN_QUORUM_VOTES_BPS_LOWER_BOUND ||
             newMinQuorumVotesBPS > MIN_QUORUM_VOTES_BPS_UPPER_BOUND
         ) {
-            revert InvalidMinQuorumVotesBPS();
+            revert INVALID_MIN_QUORUM_VOTES_BPS();
         }
         if (newMaxQuorumVotesBPS > MAX_QUORUM_VOTES_BPS_UPPER_BOUND) {
-            revert InvalidMaxQuorumVotesBPS();
+            revert INVALID_MAX_QUORUM_VOTES_BPS();
         }
         if (newMinQuorumVotesBPS > newMaxQuorumVotesBPS) {
-            revert MinQuorumBPSGreaterThanMaxQuorumBPS();
+            revert MIN_QUORUM_BPS_GREATER_THAN_MAX_QUORUM_BPS();
         }
 
         DynamicQuorumParams memory oldParams = getDynamicQuorumParamsAt(block.number);
@@ -882,7 +851,7 @@ contract VerbsDAOLogicV1 is
 
     function _withdraw() external returns (uint256, bool) {
         if (msg.sender != admin) {
-            revert AdminOnly();
+            revert ADMIN_ONLY();
         }
 
         uint256 amount = address(this).balance;
@@ -900,7 +869,7 @@ contract VerbsDAOLogicV1 is
      */
     function _setPendingAdmin(address newPendingAdmin) external {
         // Check caller = admin
-        require(msg.sender == admin, "DAO::_setPendingAdmin: admin only");
+        if (msg.sender != admin) revert ADMIN_ONLY();
 
         // Save current value, if any, for inclusion in log
         address oldPendingAdmin = pendingAdmin;
@@ -918,7 +887,7 @@ contract VerbsDAOLogicV1 is
      */
     function _acceptAdmin() external {
         // Check caller is pendingAdmin and pendingAdmin ≠ address(0)
-        require(msg.sender == pendingAdmin && msg.sender != address(0), "DAO::_acceptAdmin: pending admin only");
+        if (msg.sender != pendingAdmin || msg.sender == address(0)) revert PENDING_ADMIN_ONLY();
 
         // Save current values for inclusion in log
         address oldAdmin = admin;
@@ -940,7 +909,7 @@ contract VerbsDAOLogicV1 is
      */
     function _setPendingVetoer(address newPendingVetoer) public {
         if (msg.sender != vetoer) {
-            revert VetoerOnly();
+            revert VETOER_ONLY();
         }
 
         emit NewPendingVetoer(pendingVetoer, newPendingVetoer);
@@ -950,7 +919,7 @@ contract VerbsDAOLogicV1 is
 
     function _acceptVetoer() external {
         if (msg.sender != pendingVetoer) {
-            revert PendingVetoerOnly();
+            revert PENDING_VETOER_ONLY();
         }
 
         // Update vetoer
@@ -968,7 +937,7 @@ contract VerbsDAOLogicV1 is
      */
     function _burnVetoPower() public {
         // Check caller is vetoer
-        require(msg.sender == vetoer, "DAO::_burnVetoPower: vetoer only");
+        if (msg.sender != vetoer) revert VETOER_ONLY();
 
         // Update vetoer to 0x0
         emit NewVetoer(vetoer, address(0));
@@ -1147,7 +1116,7 @@ contract VerbsDAOLogicV1 is
 
     function safe16(uint256 n) internal pure returns (uint16) {
         if (n > type(uint16).max) {
-            revert UnsafeUint16Cast();
+            revert UNSAFE_UINT16_CAST();
         }
         return uint16(n);
     }

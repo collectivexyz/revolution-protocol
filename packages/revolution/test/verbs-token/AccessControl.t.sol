@@ -47,11 +47,8 @@ contract TokenAccessControlTest is VerbsTokenTestSuite {
         address nonMinter = address(0xABC); // This is an arbitrary address
         vm.startPrank(nonMinter);
 
-        try erc721Token.mint() {
-            fail("Should revert on non-minter mint");
-        } catch Error(string memory reason) {
-            assertEq(reason, "Sender is not the minter");
-        }
+        vm.expectRevert(abi.encodeWithSignature("NOT_MINTER()"));
+        erc721Token.mint();
 
         vm.stopPrank();
     }
@@ -173,11 +170,8 @@ contract TokenAccessControlTest is VerbsTokenTestSuite {
         // Try to burn token as a non-minter
         address nonMinter = address(0xABC);
         vm.startPrank(nonMinter);
-        try erc721Token.burn(tokenId) {
-            fail("Non-minter should not be able to burn tokens");
-        } catch Error(string memory reason) {
-            assertEq(reason, "Sender is not the minter");
-        }
+        vm.expectRevert(abi.encodeWithSignature("NOT_MINTER()"));
+        erc721Token.burn(tokenId);
         vm.stopPrank();
     }
 
@@ -194,7 +188,7 @@ contract TokenAccessControlTest is VerbsTokenTestSuite {
     function testLockMinter() public {
         erc721Token.lockMinter();
         assertTrue(erc721Token.isMinterLocked(), "Minter should be locked");
-        vm.expectRevert("Minter is locked");
+        vm.expectRevert(abi.encodeWithSignature("MINTER_LOCKED()"));
         erc721Token.setMinter(address(0x456));
     }
 
@@ -209,7 +203,7 @@ contract TokenAccessControlTest is VerbsTokenTestSuite {
         vm.startPrank(address(dao));
         // Lock the minter and attempt to change it, expecting a revert
         erc721Token.lockMinter();
-        vm.expectRevert("Minter is locked");
+        vm.expectRevert(abi.encodeWithSignature("MINTER_LOCKED()"));
         erc721Token.setMinter(address(0x3));
     }
 
@@ -229,7 +223,7 @@ contract TokenAccessControlTest is VerbsTokenTestSuite {
 
         // Lock the descriptor and attempt to change it, expecting a revert
         erc721Token.lockDescriptor();
-        vm.expectRevert("Descriptor is locked");
+        vm.expectRevert(abi.encodeWithSignature("DESCRIPTOR_LOCKED()"));
         erc721Token.setDescriptor(IDescriptor(newDescriptor));
     }
 
@@ -241,7 +235,7 @@ contract TokenAccessControlTest is VerbsTokenTestSuite {
 
         erc721Token.lockDescriptor();
         assertTrue(erc721Token.isDescriptorLocked(), "Descriptor should be locked");
-        vm.expectRevert("Descriptor is locked");
+        vm.expectRevert(abi.encodeWithSignature("DESCRIPTOR_LOCKED()"));
         erc721Token.setDescriptor(IDescriptor(address(0xABC)));
     }
 
@@ -253,7 +247,7 @@ contract TokenAccessControlTest is VerbsTokenTestSuite {
 
         erc721Token.lockCultureIndex();
         assertTrue(erc721Token.isCultureIndexLocked(), "CultureIndex should be locked");
-        vm.expectRevert("CultureIndex is locked");
+        vm.expectRevert(abi.encodeWithSignature("CULTURE_INDEX_LOCKED()"));
         erc721Token.setCultureIndex(ICultureIndex(address(0x101112)));
     }
 }

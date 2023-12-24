@@ -168,7 +168,6 @@ contract CultureIndex is
      * @return Returns the unique ID of the newly created art piece.
      *
      * Emits a {PieceCreated} event for the newly created piece.
-     * Emits a {PieceCreatorAdded} event for each creator added to the piece.
      *
      * Requirements:
      * - `metadata` must include name, description, and image. Animation URL is optional.
@@ -206,12 +205,7 @@ contract CultureIndex is
             newPiece.creators.push(creatorArray[i]);
         }
 
-        emit PieceCreated(pieceId, msg.sender, metadata, newPiece.quorumVotes, newPiece.totalVotesSupply);
-
-        // Emit an event for each creator
-        for (uint i; i < creatorArrayLength; i++) {
-            emit PieceCreatorAdded(pieceId, creatorArray[i].creator, msg.sender, creatorArray[i].bps);
-        }
+        emit PieceCreated(pieceId, msg.sender, metadata, newPiece.quorumVotes, newPiece.totalVotesSupply, creatorArray);
 
         return newPiece.pieceId;
     }

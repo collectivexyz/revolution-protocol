@@ -60,7 +60,7 @@ contract VerbsToken is
     uint256 private _currentVerbId;
 
     // IPFS content hash of contract-level metadata
-    string private _contractURIHash = "QmQzDwaZ7yQxHHs7sQQenJVB89riTSacSGcJRv9jtHPuz5";
+    string private _contractURIHash;
 
     // The Verb art pieces
     mapping(uint256 => ICultureIndex.ArtPiece) public artPieces;
@@ -73,7 +73,7 @@ contract VerbsToken is
      * @notice Require that the minter has not been locked.
      */
     modifier whenMinterNotLocked() {
-        require(!isMinterLocked, "Minter is locked");
+        if (isMinterLocked) revert MINTER_LOCKED();
         _;
     }
 
@@ -81,7 +81,7 @@ contract VerbsToken is
      * @notice Require that the CultureIndex has not been locked.
      */
     modifier whenCultureIndexNotLocked() {
-        require(!isCultureIndexLocked, "CultureIndex is locked");
+        if (isCultureIndexLocked) revert CULTURE_INDEX_LOCKED();
         _;
     }
 
@@ -89,7 +89,7 @@ contract VerbsToken is
      * @notice Require that the descriptor has not been locked.
      */
     modifier whenDescriptorNotLocked() {
-        require(!isDescriptorLocked, "Descriptor is locked");
+        if (isDescriptorLocked) revert DESCRIPTOR_LOCKED();
         _;
     }
 
@@ -97,7 +97,7 @@ contract VerbsToken is
      * @notice Require that the sender is the minter.
      */
     modifier onlyMinter() {
-        require(msg.sender == minter, "Sender is not the minter");
+        if (msg.sender != minter) revert NOT_MINTER();
         _;
     }
 
@@ -134,10 +134,10 @@ contract VerbsToken is
         address _cultureIndex,
         IRevolutionBuilder.ERC721TokenParams memory _erc721TokenParams
     ) external initializer {
-        require(msg.sender == address(manager), "Only manager can initialize");
+        if (msg.sender != address(manager)) revert ONLY_MANAGER_CAN_INITIALIZE();
 
-        require(_minter != address(0), "Minter cannot be zero address");
-        require(_initialOwner != address(0), "Initial owner cannot be zero address");
+        if (_minter == address(0)) revert ADDRESS_ZERO();
+        if (_initialOwner == address(0)) revert ADDRESS_ZERO();
 
         // Initialize the reentrancy guard
         __ReentrancyGuard_init();
@@ -207,7 +207,7 @@ contract VerbsToken is
      * @dev Only callable by the owner when not locked.
      */
     function setMinter(address _minter) external override onlyOwner nonReentrant whenMinterNotLocked {
-        require(_minter != address(0), "Minter cannot be zero address");
+        if (_minter == address(0)) revert ADDRESS_ZERO();
         minter = _minter;
 
         emit MinterUpdated(_minter);
@@ -271,7 +271,7 @@ contract VerbsToken is
      * @return The ArtPiece struct associated with the given ID.
      */
     function getArtPieceById(uint256 verbId) public view returns (ICultureIndex.ArtPiece memory) {
-        require(verbId <= _currentVerbId, "Invalid piece ID");
+        if (verbId > _currentVerbId) revert INVALID_PIECE_ID();
         return artPieces[verbId];
     }
 
@@ -280,13 +280,10 @@ contract VerbsToken is
      */
     function _mintTo(address to) internal returns (uint256) {
         ICultureIndex.ArtPiece memory artPiece = cultureIndex.getTopVotedPiece();
+        uint256 artPieceCreatorCount = artPiece.creators.length;
 
-        // Check-Effects-Interactions Pattern
         // Perform all checks
-        require(
-            artPiece.creators.length <= cultureIndex.MAX_NUM_CREATORS(),
-            "Creator array must not be > MAX_NUM_CREATORS"
-        );
+        if (artPieceCreatorCount > cultureIndex.MAX_NUM_CREATORS()) revert TOO_MANY_CREATORS();
 
         // Use try/catch to handle potential failure
         try cultureIndex.dropTopVotedPiece() returns (ICultureIndex.ArtPiece memory _artPiece) {
@@ -303,7 +300,7 @@ contract VerbsToken is
             newPiece.quorumVotes = artPiece.quorumVotes;
             newPiece.totalVotesSupply = artPiece.totalVotesSupply;
 
-            for (uint i = 0; i < artPiece.creators.length; i++) {
+            for (uint i = 0; i < artPieceCreatorCount; i++) {
                 newPiece.creators.push(artPiece.creators[i]);
             }
 
@@ -327,6 +324,6 @@ contract VerbsToken is
     /// @param _newImpl The new implementation address
     function _authorizeUpgrade(address _newImpl) internal view override onlyOwner {
         // Ensure the implementation is valid
-        require(manager.isRegisteredUpgrade(_getImplementation(), _newImpl), "Invalid upgrade");
+        if (!manager.isRegisteredUpgrade(_getImplementation(), _newImpl)) revert INVALID_UPGRADE(_newImpl);
     }
 }

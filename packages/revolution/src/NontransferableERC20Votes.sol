@@ -25,7 +25,15 @@ import { EIP712Upgradeable } from "@openzeppelin/contracts-upgradeable/utils/cry
 import { IRevolutionBuilder } from "./interfaces/IRevolutionBuilder.sol";
 
 contract NontransferableERC20Votes is Initializable, ERC20VotesUpgradeable, Ownable2StepUpgradeable {
+    ///                                                          ///
+    ///                         IMMUTABLES                       ///
+    ///                                                          ///
+
+    /// @dev Revert if transfer is attempted. This is a nontransferable token.
     error TRANSFER_NOT_ALLOWED();
+
+    /// @dev Revert if not the manager
+    error ONLY_MANAGER();
 
     ///                                                          ///
     ///                         IMMUTABLES                       ///
@@ -64,7 +72,7 @@ contract NontransferableERC20Votes is Initializable, ERC20VotesUpgradeable, Owna
         address _initialOwner,
         IRevolutionBuilder.ERC20TokenParams calldata _erc20TokenParams
     ) external initializer {
-        require(msg.sender == address(manager), "Only manager can initialize");
+        if (msg.sender != address(manager)) revert ONLY_MANAGER();
 
         __NontransferableERC20Votes_init(_initialOwner, _erc20TokenParams.name, _erc20TokenParams.symbol);
     }
