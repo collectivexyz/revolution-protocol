@@ -45,6 +45,15 @@ interface IAuctionHouse {
     /// @dev Reverts if bps is greater than 10,000.
     error INVALID_BPS();
 
+    /// @dev Reverts if the creator rate is below the minimum required creator rate basis points.
+    error CREATOR_RATE_TOO_LOW();
+
+    /// @dev Reverts if the new minimum creator rate is not greater than the previous minimum creator rate.
+    error MIN_CREATOR_RATE_NOT_INCREASED();
+
+    /// @dev Reverts if the minimum creator rate is not less than or equal to the creator rate.
+    error MIN_CREATOR_RATE_ABOVE_CREATOR_RATE();
+
     struct Auction {
         // ID for the Verb (ERC721 token ID)
         uint256 verbId;

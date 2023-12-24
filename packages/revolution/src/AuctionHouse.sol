@@ -212,10 +212,8 @@ contract AuctionHouse is
      * @param _creatorRateBps New creator rate in basis points.
      */
     function setCreatorRateBps(uint256 _creatorRateBps) external onlyOwner {
-        require(
-            _creatorRateBps >= minCreatorRateBps,
-            "Creator rate must be greater than or equal to minCreatorRateBps"
-        );
+        if (_creatorRateBps < minCreatorRateBps) revert CREATOR_RATE_TOO_LOW();
+
         if (_creatorRateBps > 10_000) revert INVALID_BPS();
         creatorRateBps = _creatorRateBps;
 
@@ -228,14 +226,13 @@ contract AuctionHouse is
      * @param _minCreatorRateBps New minimum creator rate in basis points.
      */
     function setMinCreatorRateBps(uint256 _minCreatorRateBps) external onlyOwner {
-        require(_minCreatorRateBps <= creatorRateBps, "Min creator rate must be less than or equal to creator rate");
+        // require(_minCreatorRateBps <= creatorRateBps, "Min creator rate must be less than or equal to creator rate");
+        if (_minCreatorRateBps > creatorRateBps) revert MIN_CREATOR_RATE_ABOVE_CREATOR_RATE();
+
         if (_minCreatorRateBps > 10_000) revert INVALID_BPS();
 
         //ensure new min rate cannot be lower than previous min rate
-        require(
-            _minCreatorRateBps > minCreatorRateBps,
-            "Min creator rate must be greater than previous minCreatorRateBps"
-        );
+        if (_minCreatorRateBps <= minCreatorRateBps) revert MIN_CREATOR_RATE_NOT_INCREASED();
 
         minCreatorRateBps = _minCreatorRateBps;
 
