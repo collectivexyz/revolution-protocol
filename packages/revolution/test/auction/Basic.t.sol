@@ -203,7 +203,7 @@ contract AuctionHouseBasicTest is AuctionHouseTest {
         vm.stopPrank();
 
         // try to bid with bidder address(0) first and expect revert
-        vm.expectRevert("Bidder cannot be zero address");
+        vm.expectRevert(abi.encodeWithSignature("ADDRESS_ZERO()"));
         vm.startPrank(address(1));
         auction.createBid{ value: bidAmount }(0, address(0)); // Assuming the first auction's verbId is 0
 

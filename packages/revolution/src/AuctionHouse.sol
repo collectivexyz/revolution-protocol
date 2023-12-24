@@ -93,7 +93,7 @@ contract AuctionHouse is
 
     /// @param _manager The contract upgrade manager address
     constructor(address _manager) payable initializer {
-        if (_manager == address(0)) revert ZERO_ADDRESS();
+        if (_manager == address(0)) revert ADDRESS_ZERO();
         manager = IRevolutionBuilder(_manager);
     }
 
@@ -119,7 +119,7 @@ contract AuctionHouse is
         IRevolutionBuilder.AuctionParams calldata _auctionParams
     ) external initializer {
         if (msg.sender != address(manager)) revert NOT_MANAGER();
-        if (_weth == address(0)) revert ZERO_ADDRESS();
+        if (_weth == address(0)) revert ADDRESS_ZERO();
 
         __Pausable_init();
         __ReentrancyGuard_init();
@@ -173,15 +173,11 @@ contract AuctionHouse is
         IAuctionHouse.Auction memory _auction = auction;
 
         //require bidder is valid address
-        if (bidder == address(0)) revert ZERO_ADDRESS();
-        require(_auction.verbId == verbId, "Verb not up for auction");
-        //slither-disable-next-line timestamp
-        require(block.timestamp < _auction.endTime, "Auction expired");
-        require(msg.value >= reservePrice, "Must send at least reservePrice");
-        require(
-            msg.value >= _auction.amount + ((_auction.amount * minBidIncrementPercentage) / 100),
-            "Must send more than last bid by minBidIncrementPercentage amount"
-        );
+        if (bidder == address(0)) revert ADDRESS_ZERO();
+        if (_auction.verbId != verbId) revert INVALID_VERB_ID();
+        if (block.timestamp >= _auction.endTime) revert AUCTION_EXPIRED();
+        if (msg.value < reservePrice) revert BELOW_RESERVE_PRICE();
+        if (msg.value < _auction.amount + ((_auction.amount * minBidIncrementPercentage) / 100)) revert BID_TOO_LOW();
 
         address payable lastBidder = _auction.bidder;
 
