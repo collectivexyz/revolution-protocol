@@ -330,10 +330,11 @@ contract AuctionHouse is
     function _settleAuction() internal {
         IAuctionHouse.Auction memory _auction = auction;
 
-        require(_auction.startTime != 0, "Auction hasn't begun");
-        require(!_auction.settled, "Auction has already been settled");
-        //slither-disable-next-line timestamp
-        require(block.timestamp >= _auction.endTime, "Auction hasn't completed");
+        if (_auction.startTime == 0) revert AUCTION_NOT_BEGUN();
+        if (_auction.settled) revert AUCTION_ALREADY_SETTLED();
+
+        // //slither-disable-next-line timestamp
+        if (block.timestamp < _auction.endTime) revert AUCTION_NOT_COMPLETED();
 
         auction.settled = true;
 

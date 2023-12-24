@@ -54,6 +54,15 @@ interface IAuctionHouse {
     /// @dev Reverts if the minimum creator rate is not less than or equal to the creator rate.
     error MIN_CREATOR_RATE_ABOVE_CREATOR_RATE();
 
+    /// @dev Reverts if the auction start time is not set, indicating the auction hasn't begun.
+    error AUCTION_NOT_BEGUN();
+
+    /// @dev Reverts if the auction has already been settled.
+    error AUCTION_ALREADY_SETTLED();
+
+    /// @dev Reverts if the auction has not yet completed based on the current block timestamp.
+    error AUCTION_NOT_COMPLETED();
+
     struct Auction {
         // ID for the Verb (ERC721 token ID)
         uint256 verbId;
