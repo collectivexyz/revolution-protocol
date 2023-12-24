@@ -172,24 +172,26 @@ contract VerbsDAOLogicV1 is
         address erc20Token_,
         IRevolutionBuilder.GovParams calldata govParams_
     ) public virtual initializer {
-        require(msg.sender == address(manager), "DAO::initialize: only the manager can initialize");
-        require(executor_ != address(0), "DAO::initialize: invalid executor address");
-        require(erc721Token_ != address(0), "DAO::initialize: invalid erc721 address");
-        require(erc20Token_ != address(0), "DAO::initialize: invalid erc20 address");
-        require(
-            govParams_.votingPeriod >= MIN_VOTING_PERIOD && govParams_.votingPeriod <= MAX_VOTING_PERIOD,
-            "DAO::initialize: invalid voting period"
-        );
-        require(
-            govParams_.votingDelay >= MIN_VOTING_DELAY && govParams_.votingDelay <= MAX_VOTING_DELAY,
-            "DAO::initialize: invalid voting delay"
-        );
-        require(
-            govParams_.proposalThresholdBPS >= MIN_PROPOSAL_THRESHOLD_BPS &&
-                govParams_.proposalThresholdBPS <= MAX_PROPOSAL_THRESHOLD_BPS,
-            "DAO::initialize: invalid proposal threshold bps"
-        );
-        require(govParams_.erc721TokenVotingWeight > 0, "DAO::initialize: invalid erc721 token voting weight");
+        if (msg.sender != address(manager)) revert NOT_MANAGER();
+
+        if (executor_ == address(0)) revert INVALID_EXECUTOR_ADDRESS();
+
+        if (erc721Token_ == address(0)) revert INVALID_ERC721_ADDRESS();
+
+        if (erc20Token_ == address(0)) revert INVALID_ERC20_ADDRESS();
+
+        if (govParams_.votingPeriod < MIN_VOTING_PERIOD || govParams_.votingPeriod > MAX_VOTING_PERIOD)
+            revert INVALID_VOTING_PERIOD();
+
+        if (govParams_.votingDelay < MIN_VOTING_DELAY || govParams_.votingDelay > MAX_VOTING_DELAY)
+            revert INVALID_VOTING_DELAY();
+
+        if (
+            govParams_.proposalThresholdBPS < MIN_PROPOSAL_THRESHOLD_BPS ||
+            govParams_.proposalThresholdBPS > MAX_PROPOSAL_THRESHOLD_BPS
+        ) revert INVALID_PROPOSAL_THRESHOLD_BPS();
+
+        if (govParams_.erc721TokenVotingWeight <= 0) revert INVALID_ERC721_VOTING_WEIGHT();
 
         // Initialize EIP-712 support
         __EIP712_init(govParams_.daoName, "1");

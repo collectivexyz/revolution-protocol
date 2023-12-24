@@ -143,6 +143,34 @@ contract VerbsDAOProxyStorage {
  * VerbsDAOStorageVX.
  */
 contract VerbsDAOStorageV1 is VerbsDAOProxyStorage {
+    ///                                                          ///
+    ///                           ERRORS                         ///
+    ///                                                          ///
+
+    /// @dev Reverts if the caller is not the manager.
+    error NOT_MANAGER();
+
+    /// @dev Reverts if the provided executor address is invalid (zero address).
+    error INVALID_EXECUTOR_ADDRESS();
+
+    /// @dev Reverts if the provided ERC721 token address is invalid (zero address).
+    error INVALID_ERC721_ADDRESS();
+
+    /// @dev Reverts if the provided ERC20 token address is invalid (zero address).
+    error INVALID_ERC20_ADDRESS();
+
+    /// @dev Reverts if the voting period is outside the allowed range.
+    error INVALID_VOTING_PERIOD();
+
+    /// @dev Reverts if the voting delay is outside the allowed range.
+    error INVALID_VOTING_DELAY();
+
+    /// @dev Reverts if the proposal threshold basis points are outside the allowed range.
+    error INVALID_PROPOSAL_THRESHOLD_BPS();
+
+    /// @dev Reverts if the ERC721 token voting weight is invalid (non-positive).
+    error INVALID_ERC721_VOTING_WEIGHT();
+
     /// @notice The contract upgrade manager
     IRevolutionBuilder public immutable manager;
 
