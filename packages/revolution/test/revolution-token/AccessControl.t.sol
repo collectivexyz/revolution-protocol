@@ -2,8 +2,8 @@
 pragma solidity ^0.8.22;
 
 import { Test } from "forge-std/Test.sol";
-import { VerbsToken } from "../../src/VerbsToken.sol";
-import { IVerbsToken } from "../../src/interfaces/IVerbsToken.sol";
+import { RevolutionToken } from "../../src/RevolutionToken.sol";
+import { IRevolutionToken } from "../../src/interfaces/IRevolutionToken.sol";
 import { IDescriptor } from "../../src/interfaces/IDescriptor.sol";
 import { ICultureIndex } from "../../src/interfaces/ICultureIndex.sol";
 import { Strings } from "@openzeppelin/contracts/utils/Strings.sol";
@@ -12,12 +12,12 @@ import { MockERC20 } from "../mock/MockERC20.sol";
 import { Descriptor } from "../../src/Descriptor.sol";
 import "../utils/Base64Decode.sol";
 import "../utils/JsmnSolLib.sol";
-import { VerbsTokenTestSuite } from "./VerbsToken.t.sol";
+import { RevolutionTokenTestSuite } from "./RevolutionToken.t.sol";
 import { ERC1967Proxy } from "../../src/libs/proxy/ERC1967Proxy.sol";
 
-/// @title VerbsTokenTest
-/// @dev The test suite for the VerbsToken contract
-contract TokenAccessControlTest is VerbsTokenTestSuite {
+/// @title RevolutionTokenTest
+/// @dev The test suite for the RevolutionToken contract
+contract TokenAccessControlTest is RevolutionTokenTestSuite {
     /// @dev Tests that non-owners cannot call dropTopVotedPiece on CultureIndex
     function testNonOwnerCannotCallDropTopVotedPiece() public {
         // Assuming the CultureIndex is already set up and there are some pieces with votes
@@ -179,7 +179,7 @@ contract TokenAccessControlTest is VerbsTokenTestSuite {
     function testSetMinter() public {
         address newMinter = address(0x123);
         vm.expectEmit(true, true, true, true);
-        emit IVerbsToken.MinterUpdated(newMinter);
+        emit IRevolutionToken.MinterUpdated(newMinter);
         erc721Token.setMinter(newMinter);
         assertEq(erc721Token.minter(), newMinter, "Minter should be updated to new minter");
     }

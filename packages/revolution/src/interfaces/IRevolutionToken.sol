@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: GPL-3.0
 
-/// @title Interface for VerbsToken
+/// @title Interface for RevolutionToken
 
 /*********************************
  * ░░░░░░░░░░░░░░░░░░░░░░░░░░░░░ *
@@ -22,7 +22,7 @@ import { IDescriptorMinimal } from "./IDescriptorMinimal.sol";
 import { ICultureIndex } from "./ICultureIndex.sol";
 import { IRevolutionBuilder } from "./IRevolutionBuilder.sol";
 
-interface IVerbsToken is IERC721 {
+interface IRevolutionToken is IERC721 {
     ///                                                          ///
     ///                           ERRORS                         ///
     ///                                                          ///

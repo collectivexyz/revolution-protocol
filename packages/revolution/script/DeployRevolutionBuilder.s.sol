@@ -6,7 +6,7 @@ import { Script } from "forge-std/Script.sol";
 import { Strings } from "@openzeppelin/contracts/utils/Strings.sol";
 
 import { IRevolutionBuilder, RevolutionBuilder } from "../src/builder/RevolutionBuilder.sol";
-import { IVerbsToken, VerbsToken } from "../src/VerbsToken.sol";
+import { IRevolutionToken, RevolutionToken } from "../src/RevolutionToken.sol";
 import { Descriptor } from "../src/Descriptor.sol";
 import { IAuctionHouse, AuctionHouse } from "../src/AuctionHouse.sol";
 import { VerbsDAOLogicV1 } from "../src/governance/VerbsDAOLogicV1.sol";
@@ -111,7 +111,7 @@ contract DeployContracts is Script {
     }
 
     function deployOtherContracts(address protocolRewards, address rewardsRecipient) private {
-        deployedContracts.erc721TokenImpl = address(new VerbsToken(address(deployedContracts.builderProxy)));
+        deployedContracts.erc721TokenImpl = address(new RevolutionToken(address(deployedContracts.builderProxy)));
         deployedContracts.descriptorImpl = address(new Descriptor(address(deployedContracts.builderProxy)));
         deployedContracts.auctionImpl = address(new AuctionHouse(address(deployedContracts.builderProxy)));
         deployedContracts.executorImpl = address(new DAOExecutor(address(deployedContracts.builderProxy)));

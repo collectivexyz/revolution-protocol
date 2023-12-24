@@ -5,7 +5,7 @@ import { Test } from "forge-std/Test.sol";
 
 import { IRevolutionBuilder } from "../src/interfaces/IRevolutionBuilder.sol";
 import { RevolutionBuilder } from "../src/builder/RevolutionBuilder.sol";
-import { VerbsToken, IVerbsToken } from "../src/VerbsToken.sol";
+import { RevolutionToken, IRevolutionToken } from "../src/RevolutionToken.sol";
 import { Descriptor } from "../src/Descriptor.sol";
 import { IAuctionHouse, AuctionHouse } from "../src/AuctionHouse.sol";
 import { VerbsDAOLogicV1 } from "../src/governance/VerbsDAOLogicV1.sol";
@@ -93,7 +93,7 @@ contract RevolutionBuilderTest is Test {
             address(new ERC1967Proxy(managerImpl0, abi.encodeWithSignature("initialize(address)", revolutionDAO)))
         );
 
-        erc721TokenImpl = address(new VerbsToken(address(manager)));
+        erc721TokenImpl = address(new RevolutionToken(address(manager)));
         descriptorImpl = address(new Descriptor(address(manager)));
         auctionImpl = address(new AuctionHouse(address(manager)));
         executorImpl = address(new DAOExecutor(address(manager)));
@@ -264,7 +264,7 @@ contract RevolutionBuilderTest is Test {
     ///                       DAO DEPLOY UTILS                   ///
     ///                                                          ///
 
-    VerbsToken internal erc721Token;
+    RevolutionToken internal erc721Token;
     Descriptor internal descriptor;
     AuctionHouse internal auction;
     DAOExecutor internal executor;
@@ -317,7 +317,7 @@ contract RevolutionBuilderTest is Test {
             _PointsEmitterParams
         );
 
-        erc721Token = VerbsToken(_addresses.erc721Token);
+        erc721Token = RevolutionToken(_addresses.erc721Token);
         descriptor = Descriptor(_addresses.descriptor);
         auction = AuctionHouse(_addresses.auction);
         executor = DAOExecutor(payable(_addresses.executor));

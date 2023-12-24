@@ -2,8 +2,8 @@
 pragma solidity ^0.8.22;
 
 import { Test } from "forge-std/Test.sol";
-import { VerbsToken } from "../../src/VerbsToken.sol";
-import { IVerbsToken } from "../../src/interfaces/IVerbsToken.sol";
+import { RevolutionToken } from "../../src/RevolutionToken.sol";
+import { IRevolutionToken } from "../../src/interfaces/IRevolutionToken.sol";
 import { IDescriptorMinimal } from "../../src/interfaces/IDescriptorMinimal.sol";
 import { ICultureIndex } from "../../src/interfaces/ICultureIndex.sol";
 import { Strings } from "@openzeppelin/contracts/utils/Strings.sol";
@@ -13,11 +13,11 @@ import { Descriptor } from "../../src/Descriptor.sol";
 import { RevolutionPoints } from "../../src/RevolutionPoints.sol";
 import "../utils/Base64Decode.sol";
 import "../utils/JsmnSolLib.sol";
-import { VerbsTokenTestSuite } from "./VerbsToken.t.sol";
+import { RevolutionTokenTestSuite } from "./RevolutionToken.t.sol";
 
-/// @title VerbsTokenTest
-/// @dev The test suite for the VerbsToken contract
-contract TokenMintingTest is VerbsTokenTestSuite {
+/// @title RevolutionTokenTest
+/// @dev The test suite for the RevolutionToken contract
+contract TokenMintingTest is RevolutionTokenTestSuite {
     /// @dev Ensures the dropped art piece is equivalent to the top-voted piece
     function testDroppedArtPieceMatchesTopVoted() public {
         vm.stopPrank();
@@ -209,7 +209,7 @@ contract TokenMintingTest is VerbsTokenTestSuite {
 
         vm.expectEmit(true, true, true, true);
 
-        emit IVerbsToken.VerbCreated(0, expectedArtPiece);
+        emit IRevolutionToken.VerbCreated(0, expectedArtPiece);
 
         erc721Token.mint();
     }
@@ -223,7 +223,7 @@ contract TokenMintingTest is VerbsTokenTestSuite {
         uint256 tokenId = erc721Token.mint();
 
         vm.expectEmit(true, true, true, true);
-        emit IVerbsToken.VerbBurned(tokenId);
+        emit IRevolutionToken.VerbBurned(tokenId);
 
         erc721Token.burn(tokenId);
         assertEq(erc721Token.totalSupply(), 0, "Total supply should be 0 after burning");

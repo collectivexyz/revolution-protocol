@@ -6,7 +6,7 @@ import { CultureIndex } from "../../src/culture-index/CultureIndex.sol";
 import { MockERC20 } from "../mock/MockERC20.sol";
 import { ICultureIndex } from "../../src/interfaces/ICultureIndex.sol";
 import { RevolutionPoints } from "../../src/RevolutionPoints.sol";
-import { VerbsToken } from "../../src/VerbsToken.sol";
+import { RevolutionToken } from "../../src/RevolutionToken.sol";
 import { IDescriptorMinimal } from "../../src/interfaces/IDescriptorMinimal.sol";
 import { RevolutionBuilderTest } from "../RevolutionBuilder.t.sol";
 

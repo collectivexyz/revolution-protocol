@@ -26,7 +26,7 @@ import { Ownable2StepUpgradeable } from "@openzeppelin/contracts-upgradeable/acc
 
 import { RevolutionBuilderStorageV1 } from "./storage/RevolutionBuilderStorageV1.sol";
 import { IRevolutionBuilder } from "../interfaces/IRevolutionBuilder.sol";
-import { IVerbsToken } from "../interfaces/IVerbsToken.sol";
+import { IRevolutionToken } from "../interfaces/IRevolutionToken.sol";
 import { IDescriptor } from "../interfaces/IDescriptor.sol";
 import { IAuctionHouse } from "../interfaces/IAuctionHouse.sol";
 import { IDAOExecutor } from "../interfaces/IDAOExecutor.sol";
@@ -182,7 +182,7 @@ contract RevolutionBuilder is
             admin: daoAddressesByToken[erc721Token].cultureIndex
         });
 
-        IVerbsToken(erc721Token).initialize({
+        IRevolutionToken(erc721Token).initialize({
             minter: daoAddressesByToken[erc721Token].auction,
             descriptor: daoAddressesByToken[erc721Token].descriptor,
             initialOwner: daoAddressesByToken[erc721Token].dao,

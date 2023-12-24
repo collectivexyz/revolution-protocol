@@ -188,7 +188,7 @@ contract VerbsDAOLogicV1 is
         emit ProposalThresholdBPSSet(proposalThresholdBPS, govParams_.proposalThresholdBPS);
 
         timelock = IDAOExecutor(executor_);
-        verbs = VerbsTokenLike(erc721Token_);
+        verbs = RevolutionTokenLike(erc721Token_);
         points = PointsLike(revolutionPoints_);
         vetoer = govParams_.vetoer;
         votingPeriod = govParams_.votingPeriod;

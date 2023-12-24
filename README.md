@@ -111,7 +111,7 @@ Publishing happens in the following steps:
 
 Instead of [auctioning](https://nouns.wtf/) off a generative PFP like Nouns, anyone can upload art pieces to the [CultureIndex](https://github.com/collectivexyz/revolution-protocol/blob/main/packages/revolution/src/CultureIndex.sol) contract, and the community votes on their favorite art pieces.
 
-The top piece is auctioned off every day as an ERC721 [VerbsToken](https://github.com/collectivexyz/revolution-protocol/blob/main/packages/revolution/src/VerbsToken.sol) via the [AuctionHouse](https://github.com/collectivexyz/revolution-protocol/blob/main/packages/revolution/src/AuctionHouse.sol).
+The top piece is auctioned off every day as an ERC721 [RevolutionToken](https://github.com/collectivexyz/revolution-protocol/blob/main/packages/revolution/src/RevolutionToken.sol) via the [AuctionHouse](https://github.com/collectivexyz/revolution-protocol/blob/main/packages/revolution/src/AuctionHouse.sol).
 
 The auction proceeds are split with the creator(s) of the art piece, and the rest is sent to the owner of the auction contract. The winner of the auction receives an ERC721 of the art piece. The creator receives an amount of RevolutionPoints and a share of the winning bid.
 
@@ -129,13 +129,13 @@ The art piece votes data is stored in [**MaxHeap.sol**](https://github.com/colle
 
 The contract has a function called **dropTopVotedPiece**, only callable by the owner, which pops (removes) the top voted item from the **MaxHeap** and returns it.
 
-## VerbsToken
+## RevolutionToken
 
-[**VerbsToken.sol**](https://github.com/collectivexyz/revolution-protocol/blob/main/packages/revolution/src/VerbsToken.sol) is a fork of the [NounsToken](https://github.com/nounsDAO/nouns-monorepo/blob/master/packages/nouns-contracts/contracts/NounsToken.sol) contract. **VerbsToken** owns the **CultureIndex**. When calling **mint()** on the **VerbsToken**, the contract calls **dropTopVotedPiece** on **CultureIndex**, and creates an ERC721 with metadata based on the dropped art piece data from the **CultureIndex**.
+[**RevolutionToken.sol**](https://github.com/collectivexyz/revolution-protocol/blob/main/packages/revolution/src/RevolutionToken.sol) is a fork of the [NounsToken](https://github.com/nounsDAO/nouns-monorepo/blob/master/packages/nouns-contracts/contracts/NounsToken.sol) contract. **RevolutionToken** owns the **CultureIndex**. When calling **mint()** on the **RevolutionToken**, the contract calls **dropTopVotedPiece** on **CultureIndex**, and creates an ERC721 with metadata based on the dropped art piece data from the **CultureIndex**.
 
 ## AuctionHouse
 
-[**AuctionHouse.sol**](https://github.com/collectivexyz/revolution-protocol/blob/main/packages/revolution/src/AuctionHouse.sol) is a fork of the [NounsAuctionHouse](https://github.com/nounsDAO/nouns-monorepo/blob/master/packages/nouns-contracts/contracts/NounsAuctionHouse.sol) contract, that mints **VerbsToken**s. Additionally, the **AuctionHouse** splits auction proceeds (the winning bid) with the creator(s) of the art piece that is minted.
+[**AuctionHouse.sol**](https://github.com/collectivexyz/revolution-protocol/blob/main/packages/revolution/src/AuctionHouse.sol) is a fork of the [NounsAuctionHouse](https://github.com/nounsDAO/nouns-monorepo/blob/master/packages/nouns-contracts/contracts/NounsAuctionHouse.sol) contract, that mints **RevolutionToken**s. Additionally, the **AuctionHouse** splits auction proceeds (the winning bid) with the creator(s) of the art piece that is minted.
 
 <img width="882" alt="Screenshot 2023-12-06 at 11 25 27 AM" src="https://github.com/collectivexyz/revolution-protocol/blob/main/readme-img/vrb-auction.png">
 
@@ -213,7 +213,7 @@ For all contracts - only the RevolutionBuilder manager should be able to initial
 
 ### CultureIndex
 
-- Anything uploaded to the CultureIndex should always be mintable by the VerbsToken contract and not disrupt the VerbsToken contract in any way.
+- Anything uploaded to the CultureIndex should always be mintable by the RevolutionToken contract and not disrupt the RevolutionToken contract in any way.
 
 - The voting weights calculated must be solely based on the ERC721 and RevolutionPoints balance of the account that casts the vote.
 
@@ -229,15 +229,15 @@ For all contracts - only the RevolutionBuilder manager should be able to initial
 
 - An art piece that has not met quorum cannot be dropped.
 
-### VerbsToken
+### RevolutionToken
 
-- VerbsToken should only mint art pieces from the CultureIndex.
+- RevolutionToken should only mint art pieces from the CultureIndex.
 
-- VerbsToken should always mint the top voted art piece in the CultureIndex.
+- RevolutionToken should always mint the top voted art piece in the CultureIndex.
 
 ### AuctionHouse
 
-- AuctionHouse should only auction off tokens from the VerbsToken.
+- AuctionHouse should only auction off tokens from the RevolutionToken.
 - The owner of the auction should always receive it's share of ether (minus creatorRateBps share).
 
 ### VRGDA

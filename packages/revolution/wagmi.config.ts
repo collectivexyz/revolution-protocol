@@ -17,7 +17,7 @@ export default defineConfig({
         "VRGDAC",
         "Descriptor",
         "MaxHeap",
-        "VerbsToken",
+        "RevolutionToken",
         "VerbsDAOLogicV1",
       ].map((contractName) => `${contractName}.json`),
     }),

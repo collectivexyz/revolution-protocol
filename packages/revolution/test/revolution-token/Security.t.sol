@@ -2,9 +2,9 @@
 pragma solidity ^0.8.22;
 
 import { Test } from "forge-std/Test.sol";
-import { VerbsToken } from "../../src/VerbsToken.sol";
+import { RevolutionToken } from "../../src/RevolutionToken.sol";
 import { ICultureIndex, ICultureIndexEvents } from "../../src/interfaces/ICultureIndex.sol";
-import { IVerbsToken } from "../../src/interfaces/IVerbsToken.sol";
+import { IRevolutionToken } from "../../src/interfaces/IRevolutionToken.sol";
 import { IDescriptorMinimal } from "../../src/interfaces/IDescriptorMinimal.sol";
 import { ICultureIndex } from "../../src/interfaces/ICultureIndex.sol";
 import { Strings } from "@openzeppelin/contracts/utils/Strings.sol";
@@ -13,11 +13,11 @@ import { MockERC20 } from "../mock/MockERC20.sol";
 import { Descriptor } from "../../src/Descriptor.sol";
 import "../utils/Base64Decode.sol";
 import "../utils/JsmnSolLib.sol";
-import { VerbsTokenTestSuite } from "./VerbsToken.t.sol";
+import { RevolutionTokenTestSuite } from "./RevolutionToken.t.sol";
 
-/// @title VerbsTokenTest
-/// @dev The test suite for the VerbsToken contract
-contract TokenSecurityTest is VerbsTokenTestSuite {
+/// @title RevolutionTokenTest
+/// @dev The test suite for the RevolutionToken contract
+contract TokenSecurityTest is RevolutionTokenTestSuite {
     /// @dev Tests the creator array limit for minting
     function testCreatorArrayLimit() public {
         // Create an art piece with creators more than the limit (assuming the limit is 100)
@@ -241,10 +241,10 @@ contract TokenSecurityTest is VerbsTokenTestSuite {
 
 // Helper mock contract to simulate reentrancy for other functions
 contract ReentrancyAttackContractGeneral {
-    VerbsToken private verbsToken;
+    RevolutionToken private verbsToken;
 
     constructor(address _verbsToken) {
-        verbsToken = VerbsToken(_verbsToken);
+        verbsToken = RevolutionToken(_verbsToken);
     }
 
     function attackBurn() public {
@@ -266,10 +266,10 @@ contract CultureIndexMock {
 
 // Helper mock contract to simulate reentrancy attack
 contract ReentrancyAttackContract {
-    VerbsToken private verbsToken;
+    RevolutionToken private verbsToken;
 
     constructor(address _verbsToken) {
-        verbsToken = VerbsToken(_verbsToken);
+        verbsToken = RevolutionToken(_verbsToken);
     }
 
     function attack() public {

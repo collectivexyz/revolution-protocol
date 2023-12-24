@@ -2,8 +2,8 @@
 pragma solidity ^0.8.22;
 
 import { Test } from "forge-std/Test.sol";
-import { VerbsToken } from "../../src/VerbsToken.sol";
-import { IVerbsToken } from "../../src/interfaces/IVerbsToken.sol";
+import { RevolutionToken } from "../../src/RevolutionToken.sol";
+import { IRevolutionToken } from "../../src/interfaces/IRevolutionToken.sol";
 import { IDescriptorMinimal } from "../../src/interfaces/IDescriptorMinimal.sol";
 import { ICultureIndex, ICultureIndexEvents } from "../../src/interfaces/ICultureIndex.sol";
 import { Strings } from "@openzeppelin/contracts/utils/Strings.sol";
@@ -12,11 +12,11 @@ import { MockERC20 } from "../mock/MockERC20.sol";
 import { Descriptor } from "../../src/Descriptor.sol";
 import "../utils/Base64Decode.sol";
 import "../utils/JsmnSolLib.sol";
-import { VerbsTokenTestSuite } from "./VerbsToken.t.sol";
+import { RevolutionTokenTestSuite } from "./RevolutionToken.t.sol";
 
-/// @title VerbsTokenTest
-/// @dev The test suite for the VerbsToken contract
-contract TokenBasicTest is VerbsTokenTestSuite {
+/// @title RevolutionTokenTest
+/// @dev The test suite for the RevolutionToken contract
+contract TokenBasicTest is RevolutionTokenTestSuite {
     /// @dev Tests token metadata integrity after minting
     function testTokenMetadataIntegrity() public {
         // Create an art piece and mint a token
@@ -58,17 +58,17 @@ contract TokenBasicTest is VerbsTokenTestSuite {
         assertEq(image, metadata.image, "Token image does not match expected image URL");
     }
 
-    /// @dev Tests the symbol of the VerbsToken
+    /// @dev Tests the symbol of the RevolutionToken
     function testSymbol() public {
         assertEq(erc721Token.symbol(), tokenSymbol, "Symbol should be VRBS");
     }
 
-    /// @dev Tests the name of the VerbsToken
+    /// @dev Tests the name of the RevolutionToken
     function testName() public {
         assertEq(erc721Token.name(), tokenName, "Name should be Vrbs");
     }
 
-    /// @dev Tests the contract URI of the VerbsToken
+    /// @dev Tests the contract URI of the RevolutionToken
     function testContractURI() public {
         assertEq(
             erc721Token.contractURI(),

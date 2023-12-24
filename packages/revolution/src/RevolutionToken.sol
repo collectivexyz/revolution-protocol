@@ -27,11 +27,11 @@ import { VersionedContract } from "./version/VersionedContract.sol";
 import { ERC721CheckpointableUpgradeable } from "./base/ERC721CheckpointableUpgradeable.sol";
 import { IDescriptorMinimal } from "./interfaces/IDescriptorMinimal.sol";
 import { ICultureIndex } from "./interfaces/ICultureIndex.sol";
-import { IVerbsToken } from "./interfaces/IVerbsToken.sol";
+import { IRevolutionToken } from "./interfaces/IRevolutionToken.sol";
 import { IRevolutionBuilder } from "./interfaces/IRevolutionBuilder.sol";
 
-contract VerbsToken is
-    IVerbsToken,
+contract RevolutionToken is
+    IRevolutionToken,
     VersionedContract,
     UUPS,
     Ownable2StepUpgradeable,

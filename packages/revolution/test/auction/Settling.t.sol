@@ -4,7 +4,7 @@ pragma solidity ^0.8.22;
 import { AuctionHouseTest } from "./AuctionHouse.t.sol";
 import { IERC20 } from "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import { ICultureIndex } from "../../src/interfaces/ICultureIndex.sol";
-import { IVerbsToken } from "../../src/interfaces/IVerbsToken.sol";
+import { IRevolutionToken } from "../../src/interfaces/IRevolutionToken.sol";
 import { MockWETH } from "../mock/MockWETH.sol";
 import { toDaysWadUnsafe } from "../../src/libs/SignedWadMath.sol";
 
@@ -93,7 +93,7 @@ contract AuctionHouseSettleTest is AuctionHouseTest {
 
         // Assuming erc721Token.burn is called for auctions with no bids
         vm.expectEmit(true, true, true, true);
-        emit IVerbsToken.VerbBurned(verbId);
+        emit IRevolutionToken.VerbBurned(verbId);
 
         auction.settleCurrentAndCreateNewAuction();
     }

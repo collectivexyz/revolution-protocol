@@ -159,7 +159,7 @@ contract ERC1967Proxy is IERC1967Upgrade, Proxy, ERC1967Upgrade {
     }
 }
 
-interface VerbsTokenLike {
+interface RevolutionTokenLike {
     function getPastVotes(address account, uint256 blockNumber) external view returns (uint96);
 
     function totalSupply() external view returns (uint256);
@@ -2010,7 +2010,7 @@ contract VerbsDAOStorageV1 is VerbsDAOProxyStorage {
     IDAOExecutor public timelock;
 
     /// @notice The address of the Verbs ERC721 tokens
-    VerbsTokenLike public verbs;
+    RevolutionTokenLike public verbs;
 
     /// @notice The address of the ERC20 points
     PointsLike public points;

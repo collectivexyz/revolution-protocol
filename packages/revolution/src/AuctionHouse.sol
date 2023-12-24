@@ -26,7 +26,7 @@ pragma solidity ^0.8.22;
 import { PausableUpgradeable } from "@openzeppelin/contracts-upgradeable/utils/PausableUpgradeable.sol";
 import { ReentrancyGuardUpgradeable } from "@openzeppelin/contracts-upgradeable/utils/ReentrancyGuardUpgradeable.sol";
 import { IAuctionHouse } from "./interfaces/IAuctionHouse.sol";
-import { IVerbsToken } from "./interfaces/IVerbsToken.sol";
+import { IRevolutionToken } from "./interfaces/IRevolutionToken.sol";
 import { IWETH } from "./interfaces/IWETH.sol";
 import { IRevolutionPointsEmitter } from "./interfaces/IRevolutionPointsEmitter.sol";
 import { ICultureIndex } from "./interfaces/ICultureIndex.sol";
@@ -45,7 +45,7 @@ contract AuctionHouse is
     Ownable2StepUpgradeable
 {
     // The Verbs ERC721 token contract
-    IVerbsToken public verbs;
+    IRevolutionToken public verbs;
 
     // The RevolutionPoints emitter contract
     IRevolutionPointsEmitter public revolutionPointsEmitter;
@@ -84,7 +84,7 @@ contract AuctionHouse is
     /// @notice The contract upgrade manager
     IRevolutionBuilder public immutable manager;
 
-    // TODO investigate this - The minimum gas threshold for creating an auction (minting VerbsToken)
+    // TODO investigate this - The minimum gas threshold for creating an auction (minting RevolutionToken)
     uint32 public constant MIN_TOKEN_MINT_GAS_THRESHOLD = 750_000;
 
     ///                                                          ///
@@ -129,7 +129,7 @@ contract AuctionHouse is
 
         if (_auctionParams.creatorRateBps < _auctionParams.minCreatorRateBps) revert CREATOR_RATE_TOO_LOW();
 
-        verbs = IVerbsToken(_erc721Token);
+        verbs = IRevolutionToken(_erc721Token);
         revolutionPointsEmitter = IRevolutionPointsEmitter(_revolutionPointsEmitter);
         timeBuffer = _auctionParams.timeBuffer;
         reservePrice = _auctionParams.reservePrice;
