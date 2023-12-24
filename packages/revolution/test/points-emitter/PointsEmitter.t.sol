@@ -291,7 +291,10 @@ contract ERC20PointsEmitterTest is RevolutionBuilderTest {
 
         IRevolutionPoints(governanceToken).initialize({
             initialOwner: address(emitter1),
-            revolutionPointsParams: IRevolutionBuilder.ERC20TokenParams({ name: "Revolution Governance", symbol: "GOV" })
+            revolutionPointsParams: IRevolutionBuilder.ERC20TokenParams({
+                name: "Revolution Governance",
+                symbol: "GOV"
+            })
         });
 
         vm.deal(address(21), 100000 ether);
@@ -774,7 +777,10 @@ contract ERC20PointsEmitterTest is RevolutionBuilderTest {
 
         IRevolutionPoints(governanceToken).initialize({
             initialOwner: address(emitter2),
-            revolutionPointsParams: IRevolutionBuilder.ERC20TokenParams({ name: "Revolution Governance", symbol: "GOV" })
+            revolutionPointsParams: IRevolutionBuilder.ERC20TokenParams({
+                name: "Revolution Governance",
+                symbol: "GOV"
+            })
         });
 
         vm.deal(address(this), 100000 ether);
