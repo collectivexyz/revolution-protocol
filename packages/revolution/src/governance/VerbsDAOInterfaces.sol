@@ -254,6 +254,9 @@ contract VerbsDAOStorageV1 is VerbsDAOProxyStorage {
     /// @dev Reverts if the proposal is not in the 'Queued' state when attempting to execute.
     error PROPOSAL_NOT_QUEUED();
 
+    /// @dev Reverts if the signatory is the zero address, indicating an invalid signature.
+    error INVALID_SIGNATURE();
+
     ///                                                          ///
     ///                           STATE                          ///
     ///                                                          ///

@@ -643,7 +643,7 @@ contract VerbsDAOLogicV1 is
         bytes32 structHash = keccak256(abi.encode(BALLOT_TYPEHASH, proposalId, support));
         bytes32 digest = keccak256(abi.encodePacked("\x19\x01", domainSeparator, structHash));
         address signatory = ecrecover(digest, v, r, s);
-        require(signatory != address(0), "DAO::castVoteBySig: invalid signature");
+        if (signatory == address(0)) revert INVALID_SIGNATURE();
         emit VoteCast(signatory, proposalId, support, castVoteInternal(signatory, proposalId, support), "");
     }
 
@@ -687,10 +687,9 @@ contract VerbsDAOLogicV1 is
         if (msg.sender != admin) {
             revert ADMIN_ONLY();
         }
-        require(
-            newVotingDelay >= MIN_VOTING_DELAY && newVotingDelay <= MAX_VOTING_DELAY,
-            "DAO::_setVotingDelay: invalid voting delay"
-        );
+
+        if (newVotingDelay < MIN_VOTING_DELAY || newVotingDelay > MAX_VOTING_DELAY) revert INVALID_VOTING_DELAY();
+
         uint256 oldVotingDelay = votingDelay;
         votingDelay = newVotingDelay;
 
