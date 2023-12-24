@@ -23,6 +23,13 @@
 | erc721VotingTokenWeight | uint256                                                           | 13   | 0      | 32    | src/culture-index/CultureIndex.sol:CultureIndex |
 
 =======================
+➡ RevolutionPoints
+=======================
+
+| Name | Type | Slot | Offset | Bytes | Contract |
+|------|------|------|--------|-------|----------|
+
+=======================
 ➡ RevolutionPointsEmitter
 =======================
 
