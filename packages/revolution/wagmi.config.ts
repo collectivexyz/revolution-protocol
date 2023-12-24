@@ -13,7 +13,7 @@ export default defineConfig({
         "AuctionHouse",
         "RevolutionBuilder",
         "RevolutionPointsEmitter",
-        "NontransferableERC20Votes",
+        "RevolutionPoints",
         "VRGDAC",
         "Descriptor",
         "MaxHeap",

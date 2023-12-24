@@ -3,10 +3,10 @@ pragma solidity ^0.8.22;
 
 import { Ownable2StepUpgradeable } from "@openzeppelin/contracts-upgradeable/access/Ownable2StepUpgradeable.sol";
 import { ReentrancyGuardUpgradeable } from "@openzeppelin/contracts-upgradeable/utils/ReentrancyGuardUpgradeable.sol";
-import { IRevolutionBuilder } from "./interfaces/IRevolutionBuilder.sol";
+import { IRevolutionBuilder } from "../interfaces/IRevolutionBuilder.sol";
 
-import { UUPS } from "./libs/proxy/UUPS.sol";
-import { VersionedContract } from "./version/VersionedContract.sol";
+import { UUPS } from "../libs/proxy/UUPS.sol";
+import { VersionedContract } from "../version/VersionedContract.sol";
 
 /// @title MaxHeap implementation in Solidity
 /// @dev This contract implements a Max Heap data structure with basic operations

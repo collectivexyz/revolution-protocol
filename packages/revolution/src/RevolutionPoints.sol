@@ -24,7 +24,7 @@ import { EIP712Upgradeable } from "@openzeppelin/contracts-upgradeable/utils/cry
 
 import { IRevolutionBuilder } from "./interfaces/IRevolutionBuilder.sol";
 
-contract NontransferableERC20Votes is Initializable, ERC20VotesUpgradeable, Ownable2StepUpgradeable {
+contract RevolutionPoints is Initializable, ERC20VotesUpgradeable, Ownable2StepUpgradeable {
     ///                                                          ///
     ///                         IMMUTABLES                       ///
     ///                                                          ///
@@ -47,7 +47,7 @@ contract NontransferableERC20Votes is Initializable, ERC20VotesUpgradeable, Owna
     ///                                                          ///
 
     /// @param _manager The contract upgrade manager address
-    constructor(address _manager) payable initializer {
+    constructor(address _manager) initializer {
         manager = IRevolutionBuilder(_manager);
     }
 
@@ -55,7 +55,7 @@ contract NontransferableERC20Votes is Initializable, ERC20VotesUpgradeable, Owna
     ///                         INITIALIZER                      ///
     ///                                                          ///
 
-    function __NontransferableERC20Votes_init(
+    function __RevolutionPoints_init(
         address _initialOwner,
         string calldata _name,
         string calldata _symbol
@@ -67,14 +67,14 @@ contract NontransferableERC20Votes is Initializable, ERC20VotesUpgradeable, Owna
 
     /// @notice Initializes a DAO's ERC-20 governance token contract
     /// @param _initialOwner The address of the initial owner
-    /// @param _erc20TokenParams The params of the token
+    /// @param _revolutionPointsParams The params of the token
     function initialize(
         address _initialOwner,
-        IRevolutionBuilder.ERC20TokenParams calldata _erc20TokenParams
+        IRevolutionBuilder.PointsParams calldata _revolutionPointsParams
     ) external initializer {
         if (msg.sender != address(manager)) revert ONLY_MANAGER();
 
-        __NontransferableERC20Votes_init(_initialOwner, _erc20TokenParams.name, _erc20TokenParams.symbol);
+        __RevolutionPoints_init(_initialOwner, _revolutionPointsParams.name, _revolutionPointsParams.symbol);
     }
 
     /**

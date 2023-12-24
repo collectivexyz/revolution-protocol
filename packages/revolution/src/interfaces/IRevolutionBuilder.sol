@@ -20,7 +20,7 @@ interface IRevolutionBuilder is IUUPS {
     /// @param dao The dao address
     /// @param cultureIndex The cultureIndex address
     /// @param revolutionPointsEmitter The RevolutionPointsEmitter address
-    /// @param erc20Token The dao address
+    /// @param revolutionPoints The dao address
     /// @param maxHeap The maxHeap address
     event DAODeployed(
         address erc721Token,
@@ -30,7 +30,7 @@ interface IRevolutionBuilder is IUUPS {
         address dao,
         address cultureIndex,
         address revolutionPointsEmitter,
-        address erc20Token,
+        address revolutionPoints,
         address maxHeap
     );
 
@@ -56,7 +56,7 @@ interface IRevolutionBuilder is IUUPS {
         string executor;
         string dao;
         string cultureIndex;
-        string erc20Token;
+        string revolutionPoints;
         string revolutionPointsEmitter;
         string maxHeap;
     }
@@ -110,24 +110,24 @@ interface IRevolutionBuilder is IUUPS {
         VerbsDAOStorageV1.DynamicQuorumParams dynamicQuorumParams;
     }
 
-    /// @notice The ERC-20 token parameters
+    /// @notice The RevolutionPoints ERC-20 token parameters
     /// @param name The token name
     /// @param symbol The token symbol
-    struct ERC20TokenParams {
+    struct PointsParams {
         string name;
         string symbol;
     }
 
-    /// @notice The ERC-20 token emitter VRGDA parameters
+    /// @notice The RevolutionPoints ERC-20 emitter VRGDA parameters
     /// @param vrgdaParams // The VRGDA parameters
     /// @param creatorsAddress // The address to send creator payments to
-    struct RevolutionPointsEmitterParams {
+    struct PointsEmitterParams {
         VRGDAParams vrgdaParams;
         PointsEmitterCreatorParams creatorParams;
         address creatorsAddress;
     }
 
-    /// @notice The ERC-20 token emitter VRGDA parameters
+    /// @notice The ERC-20 points emitter VRGDA parameters
     /// @param targetPrice // The target price for a token if sold on pace, scaled by 1e18.
     /// @param priceDecayPercent // The percent the price decays per unit of time with no sales, scaled by 1e18.
     /// @param tokensPerTimeUnit // The number of tokens to target selling in 1 full unit of time, scaled by 1e18.
@@ -137,7 +137,7 @@ interface IRevolutionBuilder is IUUPS {
         int256 tokensPerTimeUnit;
     }
 
-    /// @notice The ERC-20 token emitter creator parameters
+    /// @notice The ERC-20 points emitter creator parameters
     /// @param creatorRateBps The creator rate basis points of each auction - the share of the winning bid that is reserved for the creator
     /// @param entropyRateBps The entropy rate basis points of each auction - the portion of the creator's share that is directly sent to the creator in ETH
     struct PointsEmitterCreatorParams {
@@ -184,8 +184,8 @@ interface IRevolutionBuilder is IUUPS {
     /// @notice The cultureIndex implementation address
     function cultureIndexImpl() external view returns (address);
 
-    /// @notice The erc20Token implementation address
-    function erc20TokenImpl() external view returns (address);
+    /// @notice The revolutionPoints implementation address
+    function revolutionPointsImpl() external view returns (address);
 
     /// @notice The maxHeap implementation address
     function maxHeapImpl() external view returns (address);
@@ -197,8 +197,8 @@ interface IRevolutionBuilder is IUUPS {
     /// @param auctionParams The auction settings
     /// @param govParams The governance settings
     /// @param cultureIndexParams The CultureIndex settings
-    /// @param erc20TokenParams The ERC-20 token settings
-    /// @param revolutionPointsEmitterParams The ERC-20 token emitter settings
+    /// @param pointsParams The RevolutionPoints token settings
+    /// @param pointsEmitterParams The RevolutionPoints emitter settings
     function deploy(
         address initialOwner,
         address weth,
@@ -206,8 +206,8 @@ interface IRevolutionBuilder is IUUPS {
         AuctionParams calldata auctionParams,
         GovParams calldata govParams,
         CultureIndexParams calldata cultureIndexParams,
-        ERC20TokenParams calldata erc20TokenParams,
-        RevolutionPointsEmitterParams calldata revolutionPointsEmitterParams
+        PointsParams calldata pointsParams,
+        PointsEmitterParams calldata pointsEmitterParams
     ) external returns (RevolutionBuilderTypesV1.DAOAddresses memory);
 
     /// @notice A DAO's remaining contract addresses from its token address
@@ -223,7 +223,7 @@ interface IRevolutionBuilder is IUUPS {
             address executor,
             address dao,
             address cultureIndex,
-            address erc20Token,
+            address revolutionPoints,
             address revolutionPointsEmitter,
             address maxHeap
         );

@@ -5,15 +5,15 @@ import { Test } from "forge-std/Test.sol";
 import { unsafeWadDiv, toDaysWadUnsafe } from "../../src/libs/SignedWadMath.sol";
 import { RevolutionPointsEmitter } from "../../src/RevolutionPointsEmitter.sol";
 import { IRevolutionPointsEmitter } from "../../src/interfaces/IRevolutionPointsEmitter.sol";
-import { NontransferableERC20Votes } from "../../src/NontransferableERC20Votes.sol";
+import { RevolutionPoints } from "../../src/RevolutionPoints.sol";
 import { RevolutionProtocolRewards } from "@cobuild/protocol-rewards/src/RevolutionProtocolRewards.sol";
 import { wadDiv } from "../../src/libs/SignedWadMath.sol";
 import { IRevolutionBuilder } from "../../src/interfaces/IRevolutionBuilder.sol";
 import { RevolutionBuilderTest } from "../RevolutionBuilder.t.sol";
-import { INontransferableERC20Votes } from "../../src/interfaces/INontransferableERC20Votes.sol";
+import { IRevolutionPoints } from "../../src/interfaces/IRevolutionPoints.sol";
 import { ERC1967Proxy } from "../../src/libs/proxy/ERC1967Proxy.sol";
 
-contract ERC20PointsEmitterTest is RevolutionBuilderTest {
+contract PointsEmitterTest is RevolutionBuilderTest {
     event Log(string, uint);
 
     // 1,000 tokens per day is the target emission
@@ -33,7 +33,7 @@ contract ERC20PointsEmitterTest is RevolutionBuilderTest {
 
         int256 priceDecayPercent = 1e18 / 10;
 
-        super.setRevolutionPointsEmitterParams(
+        super.setPointsEmitterParams(
             oneFullTokenTargetPrice,
             priceDecayPercent,
             int256(1e18 * tokensPerTimeUnit),
@@ -69,10 +69,10 @@ contract ERC20PointsEmitterTest is RevolutionBuilderTest {
         vm.deal(address(this), 100000 ether);
 
         emit log_address(revolutionPointsEmitter.creatorsAddress());
-        emit log_uint(erc20Token.balanceOf(revolutionPointsEmitter.creatorsAddress()));
+        emit log_uint(revolutionPoints.balanceOf(revolutionPointsEmitter.creatorsAddress()));
 
         //expect balance to start out at 0
-        assertEq(erc20Token.balanceOf(revolutionPointsEmitter.creatorsAddress()), 0, "Balance should start at 0");
+        assertEq(revolutionPoints.balanceOf(revolutionPointsEmitter.creatorsAddress()), 0, "Balance should start at 0");
 
         address[] memory recipients = new address[](1);
         recipients[0] = address(1);
@@ -81,7 +81,7 @@ contract ERC20PointsEmitterTest is RevolutionBuilderTest {
         bps[0] = 10_000;
 
         //expect recipient0 balance to start out at 0
-        assertEq(erc20Token.balanceOf(address(1)), 0, "Balance should start at 0");
+        assertEq(revolutionPoints.balanceOf(address(1)), 0, "Balance should start at 0");
 
         //get msg value remaining
         uint256 msgValueRemaining = 1 ether - revolutionPointsEmitter.computeTotalReward(1 ether);
@@ -111,21 +111,21 @@ contract ERC20PointsEmitterTest is RevolutionBuilderTest {
         );
 
         //log creatorsAddress balance
-        emit log_uint(erc20Token.balanceOf(revolutionPointsEmitter.creatorsAddress()));
+        emit log_uint(revolutionPoints.balanceOf(revolutionPointsEmitter.creatorsAddress()));
 
         //assert that creatorsAddress balance is correct
         assertEq(
-            uint(erc20Token.balanceOf(revolutionPointsEmitter.creatorsAddress())),
+            uint(revolutionPoints.balanceOf(revolutionPointsEmitter.creatorsAddress())),
             uint(expectedAmountForCreators),
             "Creators should have correct balance"
         );
 
         //log recipient0 balance
-        emit log_uint(erc20Token.balanceOf(address(1)));
+        emit log_uint(revolutionPoints.balanceOf(address(1)));
 
         // assert that recipient0 balance is correct
         assertEq(
-            uint(erc20Token.balanceOf(address(1))),
+            uint(revolutionPoints.balanceOf(address(1))),
             uint(expectedAmountForRecipient0),
             "Recipient0 should have correct balance"
         );
@@ -262,7 +262,7 @@ contract ERC20PointsEmitterTest is RevolutionBuilderTest {
     }
 
     function testTransferTokenContractOwnership() public {
-        // makes a token emitter with one nontransferableerc20
+        // makes a points emitter with one revolution points contract
         // makes a second with the same one
         // ensures that the second cannot mint and calling buyGovernance fails
         // transfers ownership to the second
@@ -272,7 +272,7 @@ contract ERC20PointsEmitterTest is RevolutionBuilderTest {
 
         RevolutionProtocolRewards protocolRewards = new RevolutionProtocolRewards();
 
-        address governanceToken = address(new ERC1967Proxy(erc20TokenImpl, ""));
+        address governanceToken = address(new ERC1967Proxy(revolutionPointsImpl, ""));
 
         address emitter1 = address(new ERC1967Proxy(revolutionPointsEmitterImpl, ""));
 
@@ -280,7 +280,7 @@ contract ERC20PointsEmitterTest is RevolutionBuilderTest {
         IRevolutionPointsEmitter(emitter1).initialize({
             initialOwner: owner,
             weth: address(weth),
-            erc20Token: address(governanceToken),
+            revolutionPoints: address(governanceToken),
             vrgdac: address(revolutionPointsEmitter.vrgdac()),
             creatorsAddress: creatorsAddress,
             creatorParams: IRevolutionBuilder.PointsEmitterCreatorParams({
@@ -289,9 +289,9 @@ contract ERC20PointsEmitterTest is RevolutionBuilderTest {
             })
         });
 
-        INontransferableERC20Votes(governanceToken).initialize({
+        IRevolutionPoints(governanceToken).initialize({
             initialOwner: address(emitter1),
-            erc20TokenParams: IRevolutionBuilder.ERC20TokenParams({ name: "Revolution Governance", symbol: "GOV" })
+            revolutionPointsParams: IRevolutionBuilder.PointsParams({ name: "Revolution Governance", symbol: "GOV" })
         });
 
         vm.deal(address(21), 100000 ether);
@@ -319,7 +319,7 @@ contract ERC20PointsEmitterTest is RevolutionBuilderTest {
         IRevolutionPointsEmitter(emitter2).initialize({
             initialOwner: owner,
             weth: address(weth),
-            erc20Token: address(governanceToken),
+            revolutionPoints: address(governanceToken),
             vrgdac: address(revolutionPointsEmitter.vrgdac()),
             creatorsAddress: creatorsAddress,
             creatorParams: IRevolutionBuilder.PointsEmitterCreatorParams({
@@ -329,11 +329,11 @@ contract ERC20PointsEmitterTest is RevolutionBuilderTest {
         });
 
         vm.startPrank(address(emitter1));
-        NontransferableERC20Votes(governanceToken).transferOwnership(address(emitter2));
+        RevolutionPoints(governanceToken).transferOwnership(address(emitter2));
 
         vm.startPrank(address(emitter2));
         //accept ownership transfer
-        NontransferableERC20Votes(governanceToken).acceptOwnership();
+        RevolutionPoints(governanceToken).acceptOwnership();
 
         vm.startPrank(address(48));
         vm.deal(address(48), 100000 ether);
@@ -650,7 +650,7 @@ contract ERC20PointsEmitterTest is RevolutionBuilderTest {
         assertEq(int(emittedWad), expectedBuyerAmount, "Emitted amount should match expected amount");
         // //emitted should match supply
         assertEq(
-            int(emittedWad) + int(erc20Token.balanceOf(revolutionPointsEmitter.creatorsAddress())),
+            int(emittedWad) + int(revolutionPoints.balanceOf(revolutionPointsEmitter.creatorsAddress())),
             totalSupplyAfterValidPurchase,
             "Emitted amount should match total supply"
         );
@@ -755,7 +755,7 @@ contract ERC20PointsEmitterTest is RevolutionBuilderTest {
         // Deploy the malicious owner contract
         MaliciousOwner maliciousOwner = new MaliciousOwner(address(revolutionPointsEmitter));
 
-        address governanceToken = address(new ERC1967Proxy(erc20TokenImpl, ""));
+        address governanceToken = address(new ERC1967Proxy(revolutionPointsImpl, ""));
 
         address emitter2 = address(new ERC1967Proxy(revolutionPointsEmitterImpl, ""));
 
@@ -763,7 +763,7 @@ contract ERC20PointsEmitterTest is RevolutionBuilderTest {
         IRevolutionPointsEmitter(emitter2).initialize({
             initialOwner: address(maliciousOwner),
             weth: address(weth),
-            erc20Token: address(governanceToken),
+            revolutionPoints: address(governanceToken),
             vrgdac: address(revolutionPointsEmitter.vrgdac()),
             creatorsAddress: creatorsAddress,
             creatorParams: IRevolutionBuilder.PointsEmitterCreatorParams({
@@ -772,9 +772,9 @@ contract ERC20PointsEmitterTest is RevolutionBuilderTest {
             })
         });
 
-        INontransferableERC20Votes(governanceToken).initialize({
+        IRevolutionPoints(governanceToken).initialize({
             initialOwner: address(emitter2),
-            erc20TokenParams: IRevolutionBuilder.ERC20TokenParams({ name: "Revolution Governance", symbol: "GOV" })
+            revolutionPointsParams: IRevolutionBuilder.PointsParams({ name: "Revolution Governance", symbol: "GOV" })
         });
 
         vm.deal(address(this), 100000 ether);
@@ -928,7 +928,7 @@ contract ERC20PointsEmitterTest is RevolutionBuilderTest {
 
         RevolutionProtocolRewards protocolRewards = new RevolutionProtocolRewards();
 
-        address governanceToken = address(new ERC1967Proxy(erc20TokenImpl, ""));
+        address governanceToken = address(new ERC1967Proxy(revolutionPointsImpl, ""));
 
         address emitter1 = address(new ERC1967Proxy(revolutionPointsEmitterImpl, ""));
 
@@ -939,7 +939,7 @@ contract ERC20PointsEmitterTest is RevolutionBuilderTest {
         IRevolutionPointsEmitter(emitter1).initialize({
             initialOwner: owner,
             weth: address(weth),
-            erc20Token: address(governanceToken),
+            revolutionPoints: address(governanceToken),
             vrgdac: vrgdac,
             creatorsAddress: creatorsAddress,
             creatorParams: IRevolutionBuilder.PointsEmitterCreatorParams({

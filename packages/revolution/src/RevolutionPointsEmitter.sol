@@ -10,7 +10,7 @@ import { IWETH } from "./interfaces/IWETH.sol";
 import { VRGDAC } from "./libs/VRGDAC.sol";
 import { toDaysWadUnsafe } from "./libs/SignedWadMath.sol";
 import { Strings } from "@openzeppelin/contracts/utils/Strings.sol";
-import { NontransferableERC20Votes } from "./NontransferableERC20Votes.sol";
+import { RevolutionPoints } from "./RevolutionPoints.sol";
 import { IRevolutionPointsEmitter } from "./interfaces/IRevolutionPointsEmitter.sol";
 
 import { IRevolutionBuilder } from "./interfaces/IRevolutionBuilder.sol";
@@ -26,7 +26,7 @@ contract RevolutionPointsEmitter is
     address public WETH;
 
     // The token that is being minted.
-    NontransferableERC20Votes public token;
+    RevolutionPoints public token;
 
     // The VRGDA contract
     VRGDAC public vrgdac;
@@ -79,24 +79,24 @@ contract RevolutionPointsEmitter is
     ///                                                          ///
 
     /**
-     * @notice Initialize the token emitter
-     * @param _initialOwner The initial owner of the token emitter
+     * @notice Initialize the points emitter
+     * @param _initialOwner The initial owner of the points emitter
      * @param _weth The address of the WETH contract
-     * @param _erc20Token The ERC-20 token contract address
+     * @param _revolutionPoints The ERC-20 token contract address
      * @param _vrgdac The VRGDA contract address
      * @param _creatorsAddress The address to pay the creator reward to
      */
     function initialize(
         address _initialOwner,
         address _weth,
-        address _erc20Token,
+        address _revolutionPoints,
         address _vrgdac,
         address _creatorsAddress,
         IRevolutionBuilder.PointsEmitterCreatorParams calldata _creatorParams
     ) external initializer {
         if (msg.sender != address(manager)) revert NOT_MANAGER();
         if (_initialOwner == address(0)) revert ADDRESS_ZERO();
-        if (_erc20Token == address(0)) revert ADDRESS_ZERO();
+        if (_revolutionPoints == address(0)) revert ADDRESS_ZERO();
         if (_vrgdac == address(0)) revert ADDRESS_ZERO();
         if (_creatorsAddress == address(0)) revert ADDRESS_ZERO();
         if (_weth == address(0)) revert ADDRESS_ZERO();
@@ -112,7 +112,7 @@ contract RevolutionPointsEmitter is
 
         creatorsAddress = _creatorsAddress;
         vrgdac = VRGDAC(_vrgdac);
-        token = NontransferableERC20Votes(_erc20Token);
+        token = RevolutionPoints(_revolutionPoints);
         creatorRateBps = _creatorParams.creatorRateBps;
         entropyRateBps = _creatorParams.entropyRateBps;
         WETH = _weth;
@@ -150,7 +150,7 @@ contract RevolutionPointsEmitter is
     }
 
     /**
-     * @notice Unpause the token emitter.
+     * @notice Unpause the points emitter.
      * @dev This function can only be called by the owner when the
      * contract is paused.
      */

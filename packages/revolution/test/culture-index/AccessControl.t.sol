@@ -66,8 +66,8 @@ contract CultureIndexAccessControlTest is CultureIndexTestSuite {
         vm.stopPrank();
 
         vm.startPrank(address(revolutionPointsEmitter));
-        erc20Token.mint(address(0x21), quorumBps * 10);
-        erc20Token.mint(address(this), ((quorumBps / 2) * (quorumBps)) / 10_000);
+        revolutionPoints.mint(address(0x21), quorumBps * 10);
+        revolutionPoints.mint(address(this), ((quorumBps / 2) * (quorumBps)) / 10_000);
 
         // Create an art piece
         uint256 pieceId = createDefaultArtPiece();

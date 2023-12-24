@@ -312,7 +312,7 @@ contract AuctionHouseSettleTest is AuctionHouseTest {
         uint256[] memory governanceTokenBalancesBefore = new uint256[](creatorAddresses.length);
         for (uint256 i = 0; i < creatorAddresses.length; i++) {
             balancesBefore[i] = address(creatorAddresses[i]).balance;
-            governanceTokenBalancesBefore[i] = erc20Token.balanceOf(creatorAddresses[i]);
+            governanceTokenBalancesBefore[i] = revolutionPoints.balanceOf(creatorAddresses[i]);
             mockWETHBalancesBefore[i] = MockWETH(payable(weth)).balanceOf(creatorAddresses[i]);
         }
 
@@ -339,7 +339,7 @@ contract AuctionHouseSettleTest is AuctionHouseTest {
             );
 
             assertEq(
-                erc20Token.balanceOf(creatorAddresses[i]) - governanceTokenBalancesBefore[i],
+                revolutionPoints.balanceOf(creatorAddresses[i]) - governanceTokenBalancesBefore[i],
                 uint256((expectedGovernanceTokenPayout * creatorBps[i]) / 10_000),
                 "Incorrect governance token payout for creator"
             );
@@ -429,7 +429,7 @@ contract AuctionHouseSettleTest is AuctionHouseTest {
         );
 
         assertEq(
-            erc20Token.balanceOf(address(0x1)),
+            revolutionPoints.balanceOf(address(0x1)),
             expectedGovernanceTokens,
             "Creator did not receive the correct amount of governance tokens"
         );

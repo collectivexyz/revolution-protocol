@@ -10,7 +10,7 @@ import { VersionedContract } from "../version/VersionedContract.sol";
 import { IRevolutionBuilder } from "../interfaces/IRevolutionBuilder.sol";
 
 import { ERC20VotesUpgradeable } from "../base/erc20/ERC20VotesUpgradeable.sol";
-import { MaxHeap } from "../MaxHeap.sol";
+import { MaxHeap } from "./MaxHeap.sol";
 import { ICultureIndex } from "../interfaces/ICultureIndex.sol";
 import { CultureIndexStorageV1 } from "./storage/CultureIndexStorageV1.sol";
 
@@ -63,7 +63,7 @@ contract CultureIndex is
 
     /**
      * @notice Initializes a token's metadata descriptor
-     * @param _erc20VotingToken The address of the ERC20 voting token, commonly referred to as "points"
+     * @param _revolutionPoints The address of the RevolutionPoints
      * @param _erc721VotingToken The address of the ERC721 voting token, commonly the dropped art pieces
      * @param _initialOwner The owner of the contract, allowed to drop pieces. Commonly updated to the AuctionHouse
      * @param _maxHeap The address of the max heap contract
@@ -71,7 +71,7 @@ contract CultureIndex is
      * @param _cultureIndexParams The CultureIndex settings
      */
     function initialize(
-        address _erc20VotingToken,
+        address _revolutionPoints,
         address _erc721VotingToken,
         address _initialOwner,
         address _maxHeap,
@@ -82,7 +82,7 @@ contract CultureIndex is
 
         if (_cultureIndexParams.quorumVotesBPS > MAX_QUORUM_VOTES_BPS) revert INVALID_QUORUM_BPS();
         if (_cultureIndexParams.erc721VotingTokenWeight <= 0) revert INVALID_ERC721_VOTING_WEIGHT();
-        if (_erc20VotingToken == address(0)) revert ADDRESS_ZERO();
+        if (_revolutionPoints == address(0)) revert ADDRESS_ZERO();
         if (_erc721VotingToken == address(0)) revert ADDRESS_ZERO();
         if (_initialOwner == address(0)) revert ADDRESS_ZERO();
 
@@ -94,7 +94,7 @@ contract CultureIndex is
 
         __ReentrancyGuard_init();
 
-        erc20VotingToken = ERC20VotesUpgradeable(_erc20VotingToken);
+        revolutionPoints = ERC20VotesUpgradeable(_revolutionPoints);
         erc721VotingToken = ERC721CheckpointableUpgradeable(_erc721VotingToken);
         erc721VotingTokenWeight = _cultureIndexParams.erc721VotingTokenWeight;
         name = _cultureIndexParams.name;
@@ -192,10 +192,10 @@ contract CultureIndex is
 
         newPiece.pieceId = pieceId;
         newPiece.totalVotesSupply = _calculateVoteWeight(
-            erc20VotingToken.totalSupply(),
+            revolutionPoints.totalSupply(),
             erc721VotingToken.totalSupply()
         );
-        newPiece.totalERC20Supply = erc20VotingToken.totalSupply();
+        newPiece.totalPointsSupply = revolutionPoints.totalSupply();
         newPiece.metadata = metadata;
         newPiece.sponsor = msg.sender;
         newPiece.creationBlock = block.number;
@@ -240,22 +240,22 @@ contract CultureIndex is
 
     /**
      * @notice Calculates the vote weight of a voter.
-     * @param erc20Balance The ERC20 balance of the voter.
+     * @param pointsBalance The RevolutionPoints balance of the voter.
      * @param erc721Balance The ERC721 balance of the voter.
      * @return The vote weight of the voter.
      */
-    function _calculateVoteWeight(uint256 erc20Balance, uint256 erc721Balance) internal view returns (uint256) {
-        return erc20Balance + (erc721Balance * erc721VotingTokenWeight);
+    function _calculateVoteWeight(uint256 pointsBalance, uint256 erc721Balance) internal view returns (uint256) {
+        return pointsBalance + (erc721Balance * erc721VotingTokenWeight);
     }
 
     function _getVotes(address account) internal view returns (uint256) {
-        return _calculateVoteWeight(erc20VotingToken.getVotes(account), erc721VotingToken.getVotes(account));
+        return _calculateVoteWeight(revolutionPoints.getVotes(account), erc721VotingToken.getVotes(account));
     }
 
     function _getPastVotes(address account, uint256 blockNumber) internal view returns (uint256) {
         return
             _calculateVoteWeight(
-                erc20VotingToken.getPastVotes(account, blockNumber),
+                revolutionPoints.getPastVotes(account, blockNumber),
                 erc721VotingToken.getPastVotes(account, blockNumber)
             );
     }
@@ -464,12 +464,12 @@ contract CultureIndex is
     }
 
     /**
-     * @notice Current quorum votes using ERC721 Total Supply, ERC721 Vote Weight, and ERC20 Total Supply
+     * @notice Current quorum votes using ERC721 Total Supply, ERC721 Vote Weight, and RevolutionPoints Total Supply
      * Differs from `GovernerBravo` which uses fixed amount
      */
     function quorumVotes() public view returns (uint256) {
         return
-            (quorumVotesBPS * _calculateVoteWeight(erc20VotingToken.totalSupply(), erc721VotingToken.totalSupply())) /
+            (quorumVotesBPS * _calculateVoteWeight(revolutionPoints.totalSupply(), erc721VotingToken.totalSupply())) /
             10_000;
     }
 

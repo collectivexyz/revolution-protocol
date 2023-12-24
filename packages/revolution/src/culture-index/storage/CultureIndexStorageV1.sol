@@ -2,7 +2,7 @@
 pragma solidity 0.8.22;
 
 import { ICultureIndex } from "../../interfaces/ICultureIndex.sol";
-import { MaxHeap } from "../../MaxHeap.sol";
+import { MaxHeap } from "../MaxHeap.sol";
 import { ERC20VotesUpgradeable } from "../../base/erc20/ERC20VotesUpgradeable.sol";
 import { ERC721CheckpointableUpgradeable } from "../../base/ERC721CheckpointableUpgradeable.sol";
 
@@ -17,7 +17,7 @@ contract CultureIndexStorageV1 {
     MaxHeap public maxHeap;
 
     // The ERC20 token used for voting
-    ERC20VotesUpgradeable public erc20VotingToken;
+    ERC20VotesUpgradeable public revolutionPoints;
 
     // The ERC721 token used for voting
     ERC721CheckpointableUpgradeable public erc721VotingToken;

@@ -4,11 +4,11 @@ pragma solidity 0.8.22;
 import "../ProtocolRewardsTest.sol";
 import { RewardsSettings } from "../../src/abstract/RewardSplits.sol";
 import { MockWETH } from "../mock/MockWETH.sol";
-import { NontransferableERC20Votes, IRevolutionPointsEmitter, IRevolutionBuilder, VRGDAC, ERC1967Proxy, RevolutionPointsEmitter } from "../utils/PointsEmitterLibrary.sol";
+import { RevolutionPoints, IRevolutionPointsEmitter, IRevolutionBuilder, VRGDAC, ERC1967Proxy, RevolutionPointsEmitter } from "../utils/PointsEmitterLibrary.sol";
 
 contract PointsEmitterRewardsTest is ProtocolRewardsTest {
     RevolutionPointsEmitter mockPointsEmitter;
-    NontransferableERC20Votes internal erc20Token;
+    RevolutionPoints internal revolutionPoints;
 
     address creatorsAddress;
     address vrgdac;
@@ -28,13 +28,13 @@ contract PointsEmitterRewardsTest is ProtocolRewardsTest {
             new RevolutionPointsEmitter(address(this), address(protocolRewards), revolution)
         );
 
-        erc20Token = new NontransferableERC20Votes(address(this), "Revolution Governance", "GOV");
+        revolutionPoints = new RevolutionPoints(address(this), "Revolution Governance", "GOV");
 
         address mockPointsEmitterAddress = address(new ERC1967Proxy(revolutionPointsEmitterImpl, ""));
 
         IRevolutionPointsEmitter(mockPointsEmitterAddress).initialize({
             initialOwner: address(this),
-            erc20Token: address(erc20Token),
+            revolutionPoints: address(revolutionPoints),
             vrgdac: vrgdac,
             creatorsAddress: creatorsAddress,
             creatorParams: IRevolutionBuilder.PointsEmitterCreatorParams({
@@ -44,7 +44,7 @@ contract PointsEmitterRewardsTest is ProtocolRewardsTest {
             weth: address(new MockWETH())
         });
 
-        erc20Token.transferOwnership(mockPointsEmitterAddress);
+        revolutionPoints.transferOwnership(mockPointsEmitterAddress);
 
         vm.label(mockPointsEmitterAddress, "MOCK_POINTSEMITTER");
 
@@ -97,11 +97,7 @@ contract PointsEmitterRewardsTest is ProtocolRewardsTest {
         bool shouldExpectRevert = msgValue <= mockPointsEmitter.minPurchaseAmount() ||
             msgValue >= mockPointsEmitter.maxPurchaseAmount();
 
-        NontransferableERC20Votes govToken2 = new NontransferableERC20Votes(
-            address(this),
-            "Revolution Governance",
-            "GOV"
-        );
+        RevolutionPoints govToken2 = new RevolutionPoints(address(this), "Revolution Governance", "GOV");
 
         address mockPointsEmitterImpl = address(
             new RevolutionPointsEmitter(address(this), address(protocolRewards), revolution)
@@ -111,7 +107,7 @@ contract PointsEmitterRewardsTest is ProtocolRewardsTest {
 
         IRevolutionPointsEmitter(mockPointsEmitterAddress).initialize({
             initialOwner: address(this),
-            erc20Token: address(govToken2),
+            revolutionPoints: address(govToken2),
             vrgdac: vrgdac,
             creatorsAddress: creatorsAddress,
             creatorParams: IRevolutionBuilder.PointsEmitterCreatorParams({

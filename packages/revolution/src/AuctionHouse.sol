@@ -47,7 +47,7 @@ contract AuctionHouse is
     // The Verbs ERC721 token contract
     IVerbsToken public verbs;
 
-    // The ERC20 governance token
+    // The RevolutionPoints emitter contract
     IRevolutionPointsEmitter public revolutionPointsEmitter;
 
     // The address of the WETH contract
@@ -106,7 +106,7 @@ contract AuctionHouse is
      * populate configuration values, and pause the contract.
      * @dev This function can only be called once.
      * @param _erc721Token The address of the Verbs ERC721 token contract.
-     * @param _revolutionPointsEmitter The address of the ERC-20 token emitter contract.
+     * @param _revolutionPointsEmitter The address of the ERC-20 points emitter contract.
      * @param _initialOwner The address of the owner.
      * @param _weth The address of the WETH contract
      * @param _auctionParams The auction params for auctions.

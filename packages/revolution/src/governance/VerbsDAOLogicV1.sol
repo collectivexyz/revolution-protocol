@@ -147,13 +147,13 @@ contract VerbsDAOLogicV1 is
      * @notice Used to initialize the contract during delegator contructor
      * @param executor_ The address of the DAOExecutor
      * @param erc721Token_ The address of the ERC-721 token
-     * @param erc20Token_ The address of the ERC-20 token
+     * @param revolutionPoints_ The address of the ERC-20 token
      * @param govParams_ The initial governance parameters
      */
     function initialize(
         address executor_,
         address erc721Token_,
-        address erc20Token_,
+        address revolutionPoints_,
         IRevolutionBuilder.GovParams calldata govParams_
     ) public virtual initializer {
         if (msg.sender != address(manager)) revert NOT_MANAGER();
@@ -162,7 +162,7 @@ contract VerbsDAOLogicV1 is
 
         if (erc721Token_ == address(0)) revert INVALID_ERC721_ADDRESS();
 
-        if (erc20Token_ == address(0)) revert INVALID_ERC20_ADDRESS();
+        if (revolutionPoints_ == address(0)) revert INVALID_ERC20_ADDRESS();
 
         if (govParams_.votingPeriod < MIN_VOTING_PERIOD || govParams_.votingPeriod > MAX_VOTING_PERIOD)
             revert INVALID_VOTING_PERIOD();
@@ -189,7 +189,7 @@ contract VerbsDAOLogicV1 is
 
         timelock = IDAOExecutor(executor_);
         verbs = VerbsTokenLike(erc721Token_);
-        points = PointsLike(erc20Token_);
+        points = PointsLike(revolutionPoints_);
         vetoer = govParams_.vetoer;
         votingPeriod = govParams_.votingPeriod;
         votingDelay = govParams_.votingDelay;
@@ -207,7 +207,7 @@ contract VerbsDAOLogicV1 is
 
     struct ProposalTemp {
         uint256 totalWeightedSupply;
-        uint256 erc20PointsSupply;
+        uint256 revolutionPointsSupply;
         uint256 verbsTokenSupply;
         uint256 proposalThreshold;
         uint256 latestProposalId;
@@ -234,7 +234,7 @@ contract VerbsDAOLogicV1 is
         ProposalTemp memory temp;
 
         temp.totalWeightedSupply = _getWeightedTotalSupply();
-        temp.erc20PointsSupply = points.totalSupply();
+        temp.revolutionPointsSupply = points.totalSupply();
         temp.verbsTokenSupply = verbs.totalSupply();
 
         temp.proposalThreshold = bps2Uint(proposalThresholdBPS, temp.totalWeightedSupply);
@@ -282,7 +282,7 @@ contract VerbsDAOLogicV1 is
         newProposal.vetoed = false;
         newProposal.totalWeightedSupply = temp.totalWeightedSupply;
         newProposal.verbsTokenSupply = temp.verbsTokenSupply;
-        newProposal.erc20PointsSupply = temp.erc20PointsSupply;
+        newProposal.revolutionPointsSupply = temp.revolutionPointsSupply;
         newProposal.creationBlock = block.number;
 
         latestProposalIds[newProposal.proposer] = newProposal.id;
@@ -383,9 +383,9 @@ contract VerbsDAOLogicV1 is
     function getTotalVotes(address account, uint256 blockNumber) public view returns (uint256) {
         uint256 verbsTokenAccountVotes = verbs.getPastVotes(account, blockNumber);
 
-        uint256 erc20PointsAccountVotes = points.getPastVotes(account, blockNumber);
+        uint256 revolutionPointsAccountVotes = points.getPastVotes(account, blockNumber);
 
-        return (verbsTokenAccountVotes * erc721TokenVotingWeight) + erc20PointsAccountVotes;
+        return (verbsTokenAccountVotes * erc721TokenVotingWeight) + revolutionPointsAccountVotes;
     }
 
     /**
@@ -394,9 +394,9 @@ contract VerbsDAOLogicV1 is
     function _getWeightedTotalSupply() internal view returns (uint256) {
         uint256 verbsTokenSupply = verbs.totalSupply();
 
-        uint256 erc20PointsSupply = points.totalSupply();
+        uint256 revolutionPointsSupply = points.totalSupply();
 
-        return (verbsTokenSupply * erc721TokenVotingWeight) + erc20PointsSupply;
+        return (verbsTokenSupply * erc721TokenVotingWeight) + revolutionPointsSupply;
     }
 
     /**

@@ -5,7 +5,7 @@ import { Test } from "forge-std/Test.sol";
 import { CultureIndex } from "../../src/culture-index/CultureIndex.sol";
 import { MockERC20 } from "../mock/MockERC20.sol";
 import { ICultureIndex, ICultureIndexEvents } from "../../src/interfaces/ICultureIndex.sol";
-import { NontransferableERC20Votes } from "../../src/NontransferableERC20Votes.sol";
+import { RevolutionPoints } from "../../src/RevolutionPoints.sol";
 import { CultureIndexTestSuite } from "./CultureIndex.t.sol";
 import { ERC721CheckpointableUpgradeable } from "../../src/base/ERC721CheckpointableUpgradeable.sol";
 
@@ -74,7 +74,7 @@ contract CultureIndexVotingSignaturesTest is CultureIndexTestSuite {
         //mint offchainVoterWeight to offchainVoter
         uint256 offchainVoterWeight = 100;
         vm.startPrank(address(revolutionPointsEmitter));
-        erc20Token.mint(offchainVoter, offchainVoterWeight);
+        revolutionPoints.mint(offchainVoter, offchainVoterWeight);
         vm.stopPrank();
 
         vm.startPrank(address(this));
@@ -160,7 +160,7 @@ contract CultureIndexVotingSignaturesTest is CultureIndexTestSuite {
         // mint offchainVoterWeight to offchainVoter
         uint256 offchainVoterWeight = 100;
         vm.startPrank(address(revolutionPointsEmitter));
-        erc20Token.mint(offchainVoter, offchainVoterWeight);
+        revolutionPoints.mint(offchainVoter, offchainVoterWeight);
 
         vm.roll(block.number + 1);
 
@@ -223,7 +223,7 @@ contract CultureIndexVotingSignaturesTest is CultureIndexTestSuite {
 
         //mint tokens finally
         vm.startPrank(address(revolutionPointsEmitter));
-        erc20Token.mint(offchainVoter, 100);
+        revolutionPoints.mint(offchainVoter, 100);
 
         vm.roll(block.number + 1);
 

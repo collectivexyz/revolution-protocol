@@ -13,8 +13,8 @@ import { VerbsDAOLogicV1 } from "../src/governance/VerbsDAOLogicV1.sol";
 import { DAOExecutor } from "../src/governance/DAOExecutor.sol";
 import { CultureIndex } from "../src/culture-index/CultureIndex.sol";
 import { RevolutionProtocolRewards } from "@cobuild/protocol-rewards/src/RevolutionProtocolRewards.sol";
-import { MaxHeap } from "../src/MaxHeap.sol";
-import { NontransferableERC20Votes } from "../src/NontransferableERC20Votes.sol";
+import { MaxHeap } from "../src/culture-index/MaxHeap.sol";
+import { RevolutionPoints } from "../src/RevolutionPoints.sol";
 import { RevolutionPointsEmitter } from "../src/RevolutionPointsEmitter.sol";
 import { IDAOExecutor } from "../src/governance/VerbsDAOInterfaces.sol";
 import { ERC1967Proxy } from "../src/libs/proxy/ERC1967Proxy.sol";
@@ -33,7 +33,7 @@ contract DeployContracts is Script {
         address daoImpl;
         address cultureIndexImpl;
         address maxHeapImpl;
-        address nontransferableERC20Impl;
+        address revolutionPointsImpl;
         address revolutionPointsEmitterImpl;
         address builderImpl;
     }
@@ -93,7 +93,7 @@ contract DeployContracts is Script {
                 deployedContracts.executorImpl,
                 deployedContracts.daoImpl,
                 deployedContracts.cultureIndexImpl,
-                deployedContracts.nontransferableERC20Impl,
+                deployedContracts.revolutionPointsImpl,
                 deployedContracts.revolutionPointsEmitterImpl,
                 deployedContracts.maxHeapImpl
             )
@@ -118,9 +118,7 @@ contract DeployContracts is Script {
         deployedContracts.daoImpl = address(new VerbsDAOLogicV1(address(deployedContracts.builderProxy)));
         deployedContracts.cultureIndexImpl = address(new CultureIndex(address(deployedContracts.builderProxy)));
         deployedContracts.maxHeapImpl = address(new MaxHeap(address(deployedContracts.builderProxy)));
-        deployedContracts.nontransferableERC20Impl = address(
-            new NontransferableERC20Votes(address(deployedContracts.builderProxy))
-        );
+        deployedContracts.revolutionPointsImpl = address(new RevolutionPoints(address(deployedContracts.builderProxy)));
         deployedContracts.revolutionPointsEmitterImpl = address(
             new RevolutionPointsEmitter(address(deployedContracts.builderProxy), protocolRewards, rewardsRecipient)
         );
@@ -170,18 +168,13 @@ contract DeployContracts is Script {
         );
         vm.writeLine(
             filePath,
-            string(
-                abi.encodePacked(
-                    "Nontransferable ERC20 implementation: ",
-                    addressToString(deployedContracts.nontransferableERC20Impl)
-                )
-            )
+            string(abi.encodePacked("Points implementation: ", addressToString(deployedContracts.revolutionPointsImpl)))
         );
         vm.writeLine(
             filePath,
             string(
                 abi.encodePacked(
-                    "ERC20 Token Emitter implementation: ",
+                    "PointsEmitter implementation: ",
                     addressToString(deployedContracts.revolutionPointsEmitterImpl)
                 )
             )

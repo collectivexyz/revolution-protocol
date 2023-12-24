@@ -91,10 +91,10 @@ interface IRevolutionPointsEmitter {
     );
 
     /**
-     * @notice Initialize the token emitter
-     * @param initialOwner The initial owner of the token emitter
+     * @notice Initialize the points emitter
+     * @param initialOwner The initial owner of the points emitter
      * @param weth The address of the WETH contract.
-     * @param erc20Token The ERC-20 token contract address
+     * @param revolutionPoints The ERC-20 token contract address
      * @param vrgdac The VRGDA contract address
      * @param creatorsAddress The address of the creators
      * @param creatorParams The creator and entropy rate parameters
@@ -102,7 +102,7 @@ interface IRevolutionPointsEmitter {
     function initialize(
         address initialOwner,
         address weth,
-        address erc20Token,
+        address revolutionPoints,
         address vrgdac,
         address creatorsAddress,
         IRevolutionBuilder.PointsEmitterCreatorParams calldata creatorParams

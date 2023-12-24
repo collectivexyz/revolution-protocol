@@ -5,7 +5,7 @@ import { Test } from "forge-std/Test.sol";
 import { CultureIndex } from "../../src/culture-index/CultureIndex.sol";
 import { MockERC20 } from "../mock/MockERC20.sol";
 import { ICultureIndex } from "../../src/interfaces/ICultureIndex.sol";
-import { NontransferableERC20Votes } from "../../src/NontransferableERC20Votes.sol";
+import { RevolutionPoints } from "../../src/RevolutionPoints.sol";
 import { VerbsToken } from "../../src/VerbsToken.sol";
 import { IDescriptorMinimal } from "../../src/interfaces/IDescriptorMinimal.sol";
 import { RevolutionBuilderTest } from "../RevolutionBuilder.t.sol";
@@ -25,7 +25,7 @@ contract CultureIndexTestSuite is RevolutionBuilderTest {
         super.setUp();
         super.setMockParams();
 
-        super.setERC20TokenParams("Revolution Governance", "GOV");
+        super.setPointsParams("Revolution Governance", "GOV");
 
         super.setCultureIndexParams("Vrbs", "Our community Vrbs. Must be 32x32.", 10, 200, 0);
 
@@ -37,8 +37,8 @@ contract CultureIndexTestSuite is RevolutionBuilderTest {
         vm.startPrank(address(dao));
 
         // // Create new test instances acting as different voters
-        voter1Test = new CultureIndexVotingTest(address(cultureIndex), address(erc20Token));
-        voter2Test = new CultureIndexVotingTest(address(cultureIndex), address(erc20Token));
+        voter1Test = new CultureIndexVotingTest(address(cultureIndex), address(revolutionPoints));
+        voter2Test = new CultureIndexVotingTest(address(cultureIndex), address(revolutionPoints));
     }
 
     //returns metadata and creators in a tuple
@@ -145,11 +145,11 @@ contract CultureIndexTestSuite is RevolutionBuilderTest {
 
 contract CultureIndexVotingTest is Test {
     CultureIndex public cultureIndex;
-    NontransferableERC20Votes public govToken;
+    RevolutionPoints public govToken;
 
     constructor(address _cultureIndex, address _votingToken) {
         cultureIndex = CultureIndex(_cultureIndex);
-        govToken = NontransferableERC20Votes(_votingToken);
+        govToken = RevolutionPoints(_votingToken);
     }
 
     // Utility function to create a new art piece and return its ID
