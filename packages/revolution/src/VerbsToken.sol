@@ -134,10 +134,10 @@ contract VerbsToken is
         address _cultureIndex,
         IRevolutionBuilder.ERC721TokenParams memory _erc721TokenParams
     ) external initializer {
-        require(msg.sender == address(manager), "Only manager can initialize");
+        if (msg.sender != address(manager)) revert ONLY_MANAGER_CAN_INITIALIZE();
 
-        require(_minter != address(0), "Minter cannot be zero address");
-        require(_initialOwner != address(0), "Initial owner cannot be zero address");
+        if (_minter == address(0)) revert MINTER_ZERO_ADDRESS();
+        if (_initialOwner == address(0)) revert INITIAL_OWNER_ZERO_ADDRESS();
 
         // Initialize the reentrancy guard
         __ReentrancyGuard_init();

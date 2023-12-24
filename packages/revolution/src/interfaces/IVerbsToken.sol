@@ -39,6 +39,15 @@ interface IVerbsToken is IERC721 {
     /// @dev Reverts if the sender is not the minter.
     error NOT_MINTER();
 
+    /// @dev Reverts if the caller is not the manager.
+    error ONLY_MANAGER_CAN_INITIALIZE();
+
+    /// @dev Reverts if the minter address is the zero address.
+    error MINTER_ZERO_ADDRESS();
+
+    /// @dev Reverts if the initial owner address is the zero address.
+    error INITIAL_OWNER_ZERO_ADDRESS();
+
     ///                                                          ///
     ///                           EVENTS                         ///
     ///                                                          ///
