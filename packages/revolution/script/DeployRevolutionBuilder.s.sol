@@ -168,18 +168,13 @@ contract DeployContracts is Script {
         );
         vm.writeLine(
             filePath,
-            string(
-                abi.encodePacked(
-                    "Nontransferable ERC20 implementation: ",
-                    addressToString(deployedContracts.revolutionPointsImpl)
-                )
-            )
+            string(abi.encodePacked("Points implementation: ", addressToString(deployedContracts.revolutionPointsImpl)))
         );
         vm.writeLine(
             filePath,
             string(
                 abi.encodePacked(
-                    "ERC20 Token Emitter implementation: ",
+                    "PointsEmitter implementation: ",
                     addressToString(deployedContracts.revolutionPointsEmitterImpl)
                 )
             )

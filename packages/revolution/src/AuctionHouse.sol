@@ -47,7 +47,7 @@ contract AuctionHouse is
     // The Verbs ERC721 token contract
     IVerbsToken public verbs;
 
-    // The ERC20 governance token
+    // The RevolutionPoints emitter contract
     IRevolutionPointsEmitter public revolutionPointsEmitter;
 
     // The address of the WETH contract

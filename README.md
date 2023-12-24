@@ -113,15 +113,15 @@ Instead of [auctioning](https://nouns.wtf/) off a generative PFP like Nouns, any
 
 The top piece is auctioned off every day as an ERC721 [VerbsToken](https://github.com/collectivexyz/revolution-protocol/blob/main/packages/revolution/src/VerbsToken.sol) via the [AuctionHouse](https://github.com/collectivexyz/revolution-protocol/blob/main/packages/revolution/src/AuctionHouse.sol).
 
-The auction proceeds are split with the creator(s) of the art piece, and the rest is sent to the owner of the auction contract. The winner of the auction receives an ERC721 of the art piece. The creator receives an amount of ERC20 governance tokens and a share of the winning bid.
+The auction proceeds are split with the creator(s) of the art piece, and the rest is sent to the owner of the auction contract. The winner of the auction receives an ERC721 of the art piece. The creator receives an amount of RevolutionPoints and a share of the winning bid.
 
-The ERC20 tokens the creator receives is calculated by the [RevolutionPointsEmitter](https://github.com/collectivexyz/revolution-protocol/blob/main/packages/revolution/src/RevolutionPointsEmitter.sol). Both the ERC721 and the ERC20 governance token have voting power to vote on art pieces in the **CultureIndex**.
+The RevolutionPoints the creator receives is calculated by the [RevolutionPointsEmitter](https://github.com/collectivexyz/revolution-protocol/blob/main/packages/revolution/src/RevolutionPointsEmitter.sol). Both the ERC721 and the RevolutionPoints have voting power to vote on art pieces in the **CultureIndex**.
 
 # relevant contracts
 
 ## CultureIndex
 
-[**CultureIndex.sol**](https://github.com/collectivexyz/revolution-protocol/blob/main/packages/revolution/src/CultureIndex.sol) is a directory of uploaded art pieces that anyone can add media to. Owners of an ERC721 or ERC20 can vote weighted by their balance on any given art piece.
+[**CultureIndex.sol**](https://github.com/collectivexyz/revolution-protocol/blob/main/packages/revolution/src/CultureIndex.sol) is a directory of uploaded art pieces that anyone can add media to. Owners of an ERC721 or RevolutionPoints can vote weighted by their balance on any given art piece.
 
 <img width="817" alt="culture index" src="https://github.com/collectivexyz/revolution-protocol/blob/main/readme-img/culture-index.png">
 
@@ -153,11 +153,11 @@ The **entropyRateBps** defines the proportion of the _creator's share_ that is s
 direct creator payment = (creator_share * entropyRateBps) / 10_000
 ```
 
-The remaining amount of the _creator's share_ is sent to the [RevolutionPointsEmitter](https://github.com/collectivexyz/revolution-protocol/blob/main/packages/revolution/src/RevolutionPointsEmitter.sol) contract's **buyToken** function to buy the creator ERC20 governance tokens, according to a linear token emission schedule.
+The remaining amount of the _creator's share_ is sent to the [RevolutionPointsEmitter](https://github.com/collectivexyz/revolution-protocol/blob/main/packages/revolution/src/RevolutionPointsEmitter.sol) contract's **buyToken** function to buy the creator RevolutionPoints, according to a linear token emission schedule.
 
 ## RevolutionPointsEmitter
 
-**[RevolutionPointsEmitter.sol](https://github.com/collectivexyz/revolution-protocol/blob/main/packages/revolution/src/RevolutionPointsEmitter.sol)** is a linear [VRGDA](https://www.paradigm.xyz/2022/08/vrgda) that mints an ERC20 token when the payable **buyToken** function is called, and enables anyone to purchase the ERC20 governance token at any time. A portion of value spent on buying the ERC20 tokens is paid to creators and to a protocol rewards contract.
+**[RevolutionPointsEmitter.sol](https://github.com/collectivexyz/revolution-protocol/blob/main/packages/revolution/src/RevolutionPointsEmitter.sol)** is a linear [VRGDA](https://www.paradigm.xyz/2022/08/vrgda) that mints RevolutionPoints when the payable **buyToken** function is called, and enables anyone to purchase RevolutionPoints at any time. A portion of value spent on buying the RevolutionPoints is paid to creators and to a protocol rewards contract.
 
 ### Creator payment
 
@@ -169,7 +169,7 @@ A fixed percentage of the value sent to the **buyToken** function is paid to the
 
 ## VRGDA
 
-The RevolutionPointsEmitter utilizes a VRGDA to emit ERC20 tokens at a predictable rate. You can read more about VRGDA's [here](https://www.paradigm.xyz/2022/08/vrgda), and view the implementation for selling NFTs [here](https://github.com/transmissions11/VRGDAs). Basically, a VRGDA contract dynamically adjusts the price of a token to adhere to a specific issuance schedule. If the emission is ahead of schedule, the price increases exponentially. If it is behind schedule, the price of each token decreases by some constant decay rate.
+The RevolutionPointsEmitter utilizes a VRGDA to emit RevolutionPoints at a predictable rate. You can read more about VRGDA's [here](https://www.paradigm.xyz/2022/08/vrgda), and view the implementation for selling NFTs [here](https://github.com/transmissions11/VRGDAs). Basically, a VRGDA contract dynamically adjusts the price of a token to adhere to a specific issuance schedule. If the emission is ahead of schedule, the price increases exponentially. If it is behind schedule, the price of each token decreases by some constant decay rate.
 
 <img width="903" alt="Screenshot 2023-12-05 at 8 31 54 PM" src="https://github.com/collectivexyz/revolution-protocol/blob/main/readme-img/vrgda.png">
 
@@ -203,19 +203,19 @@ For all contracts - only the RevolutionBuilder manager should be able to initial
 
 ### Creator payments
 
-- The RevolutionPointsEmitter and AuctionHouse should always pay creators (ETH or ERC20) in accordance with the creatorRateBps and entropyRateBps calculation.
+- The RevolutionPointsEmitter and AuctionHouse should always pay creators (ETH or RevolutionPoints) in accordance with the creatorRateBps and entropyRateBps calculation.
 
 - The AuctionHouse should always pay only creator(s) of the CultureIndex art piece being auctioned and the owner.
 
 - The RevolutionPointsEmitter should always pay the `creatorsAddress`.
 
-- ETH and ERC20 transfer functions are secure and protected with reentrancy checks / math errors.
+- ETH and RevolutionPoints transfer functions are secure and protected with reentrancy checks / math errors.
 
 ### CultureIndex
 
 - Anything uploaded to the CultureIndex should always be mintable by the VerbsToken contract and not disrupt the VerbsToken contract in any way.
 
-- The voting weights calculated must be solely based on the ERC721 and ERC20 balance of the account that casts the vote.
+- The voting weights calculated must be solely based on the ERC721 and RevolutionPoints balance of the account that casts the vote.
 
 - Accounts should not be able to vote more than once on the same art piece with the same ERC721 token in the CultureIndex.
 
@@ -248,7 +248,7 @@ For all contracts - only the RevolutionBuilder manager should be able to initial
 
 - The owner and creatorsAddress should not be able to buy tokens.
 
-- The distribution of ERC20 governance tokens should be in accordance with the defined linear emission schedule.
+- The distribution of RevolutionPoints should be in accordance with the defined linear emission schedule.
 
 - The RevolutionPointsEmitter should always pay protocol rewards assuming enough ETH was paid to the buyToken function.
 
@@ -258,16 +258,16 @@ For all contracts - only the RevolutionBuilder manager should be able to initial
 
 ### VRGDAC
 
-The Token Emitter utilizes a continuous VRGDA ([VRGDAC.sol](https://github.com/collectivexyz/revolution-protocol/blob/main/packages/revolution/src/libs/VRGDAC.sol)) to facilitate ERC20 token purchases. Given an amount of ether to pay, it will return the number of tokens to sell (`YtoX`), and given an amount of tokens to buy, will return the cost (`XtoY`) where X is the ERC20 token and Y is ether. The original VRGDAC implementation is [here](https://gist.github.com/transmissions11/485a6e2deb89236202bd2f59796262fd).
+The Points Emitter utilizes a continuous VRGDA ([VRGDAC.sol](https://github.com/collectivexyz/revolution-protocol/blob/main/packages/revolution/src/libs/VRGDAC.sol)) to enable RevolutionPoints purchases. Given an amount of ether to pay, it will return the number of tokens to sell (`YtoX`), and given an amount of tokens to buy, will return the cost (`XtoY`) where X is the RevolutionPoints token and Y is ether. The original VRGDAC implementation is [here](https://gist.github.com/transmissions11/485a6e2deb89236202bd2f59796262fd).
 
 In order to get the amount of tokens to emit given a payment of ether (`YtoX` in [VRGDAC.sol](https://github.com/collectivexyz/revolution-protocol/blob/main/packages/revolution/src/libs/VRGDAC.sol)), we first take the integral of the linear VRGDA pricing function [p(x)](https://www.paradigm.xyz/2022/08/vrgda).
 
 <img width="487" alt="Screenshot 2023-12-05 at 9 21 59 PM" src="https://github.com/collectivexyz/revolution-protocol/blob/main/readme-img/vrgda-c-integral.png">
 
-Then - we can get the cost of a specific number of tokens (`XtoY` in [VRGDAC.sol](https://github.com/collectivexyz/revolution-protocol/blob/main/packages/revolution/src/libs/VRGDAC.sol)) by doing `p_integral(x_start+x_bought) - p_integral(x_start)` where `x_start` is the current supply of the ERC20 and `x_bought` is the amount of tokens you wish to purchase.
+Then - we can get the cost of a specific number of tokens (`XtoY` in [VRGDAC.sol](https://github.com/collectivexyz/revolution-protocol/blob/main/packages/revolution/src/libs/VRGDAC.sol)) by doing `p_integral(x_start+x_bought) - p_integral(x_start)` where `x_start` is the current supply of the RevolutionPoints token and `x_bought` is the amount of tokens you wish to purchase.
 
 We can then solve for `x_bought` using a handy python [solver](https://github.com/collectivexyz/revolution-protocol/blob/main/packages/revolution/script/solve.py) to find `YtoX`, allowing us to pass in an amount of ether and receive an amount of tokens to sell.
 
 <img width="1727" alt="Screenshot 2023-12-05 at 8 34 22 PM" src="https://github.com/collectivexyz/revolution-protocol/blob/main/readme-img/vrgdac-graph.png">
 
-The green line is the pricing function p(x) for a linear VRGDA. The red line is the integral of p(x), and the purple line signifies the amount of ERC20 tokens you'd receive given a payment in ether (YtoX). The relevant functions and integrals for the VRGDAC are available here: https://www.desmos.com/calculator/im67z1tate.
+The green line is the pricing function p(x) for a linear VRGDA. The red line is the integral of p(x), and the purple line signifies the amount of RevolutionPoints you'd receive given a payment in ether (YtoX). The relevant functions and integrals for the VRGDAC are available here: https://www.desmos.com/calculator/im67z1tate.
