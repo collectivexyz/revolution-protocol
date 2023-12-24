@@ -60,6 +60,16 @@ contract Descriptor is IDescriptor, VersionedContract, UUPS, Ownable2StepUpgrade
     IRevolutionBuilder private immutable manager;
 
     ///                                                          ///
+    ///                           ERRORS                         ///
+    ///                                                          ///
+
+    /// @dev Reverts if the function caller is not the manager.
+    error NOT_MANAGER();
+
+    /// @dev Reverts if address 0 is passed but not allowed
+    error ADDRESS_ZERO();
+
+    ///                                                          ///
     ///                         CONSTRUCTOR                      ///
     ///                                                          ///
 
@@ -76,12 +86,10 @@ contract Descriptor is IDescriptor, VersionedContract, UUPS, Ownable2StepUpgrade
     /// @param _initialOwner The address of the initial owner
     /// @param _tokenNamePrefix The prefix for the token name eg: "Vrb" -> Vrb 1
     function initialize(address _initialOwner, string calldata _tokenNamePrefix) external initializer {
-        require(msg.sender == address(manager), "Only manager can initialize");
-
         // Ensure the caller is the contract manager
-        require(msg.sender == address(manager), "Only manager can initialize");
+        if (msg.sender != address(manager)) revert NOT_MANAGER();
 
-        require(_initialOwner != address(0), "Initial owner cannot be zero address");
+        if (_initialOwner == address(0)) revert ADDRESS_ZERO();
 
         // Setup ownable
         __Ownable_init(_initialOwner);
