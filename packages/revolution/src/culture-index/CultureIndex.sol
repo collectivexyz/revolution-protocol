@@ -63,7 +63,7 @@ contract CultureIndex is
 
     /**
      * @notice Initializes a token's metadata descriptor
-     * @param _revolutionPoints The address of the ERC20 voting token, commonly referred to as "points"
+     * @param _revolutionPoints The address of the RevolutionPoints
      * @param _erc721VotingToken The address of the ERC721 voting token, commonly the dropped art pieces
      * @param _initialOwner The owner of the contract, allowed to drop pieces. Commonly updated to the AuctionHouse
      * @param _maxHeap The address of the max heap contract
@@ -464,7 +464,7 @@ contract CultureIndex is
     }
 
     /**
-     * @notice Current quorum votes using ERC721 Total Supply, ERC721 Vote Weight, and ERC20 Total Supply
+     * @notice Current quorum votes using ERC721 Total Supply, ERC721 Vote Weight, and RevolutionPoints Total Supply
      * Differs from `GovernerBravo` which uses fixed amount
      */
     function quorumVotes() public view returns (uint256) {
