@@ -10,7 +10,7 @@ import { VersionedContract } from "../version/VersionedContract.sol";
 import { IRevolutionBuilder } from "../interfaces/IRevolutionBuilder.sol";
 
 import { ERC20VotesUpgradeable } from "../base/erc20/ERC20VotesUpgradeable.sol";
-import { MaxHeap } from "../MaxHeap.sol";
+import { MaxHeap } from "./MaxHeap.sol";
 import { ICultureIndex } from "../interfaces/ICultureIndex.sol";
 import { CultureIndexStorageV1 } from "./storage/CultureIndexStorageV1.sol";
 

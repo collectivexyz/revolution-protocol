@@ -13,7 +13,7 @@ import { VerbsDAOLogicV1 } from "../src/governance/VerbsDAOLogicV1.sol";
 import { DAOExecutor } from "../src/governance/DAOExecutor.sol";
 import { CultureIndex } from "../src/culture-index/CultureIndex.sol";
 import { RevolutionProtocolRewards } from "@cobuild/protocol-rewards/src/RevolutionProtocolRewards.sol";
-import { MaxHeap } from "../src/MaxHeap.sol";
+import { MaxHeap } from "../src/culture-index/MaxHeap.sol";
 import { RevolutionPoints } from "../src/RevolutionPoints.sol";
 import { RevolutionPointsEmitter } from "../src/RevolutionPointsEmitter.sol";
 import { IDAOExecutor } from "../src/governance/VerbsDAOInterfaces.sol";

@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.22;
 
-import { MaxHeap } from "../../src/MaxHeap.sol";
+import { MaxHeap } from "../../src/culture-index/MaxHeap.sol";
 import { RevolutionBuilderTest } from "../RevolutionBuilder.t.sol";
 import { ERC1967Proxy } from "../../src/libs/proxy/ERC1967Proxy.sol";
 

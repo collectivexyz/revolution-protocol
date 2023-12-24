@@ -2,7 +2,7 @@
 pragma solidity 0.8.22;
 
 import { ICultureIndex } from "../../interfaces/ICultureIndex.sol";
-import { MaxHeap } from "../../MaxHeap.sol";
+import { MaxHeap } from "../MaxHeap.sol";
 import { ERC20VotesUpgradeable } from "../../base/erc20/ERC20VotesUpgradeable.sol";
 import { ERC721CheckpointableUpgradeable } from "../../base/ERC721CheckpointableUpgradeable.sol";
 
