@@ -280,9 +280,10 @@ contract VerbsToken is
      */
     function _mintTo(address to) internal returns (uint256) {
         ICultureIndex.ArtPiece memory artPiece = cultureIndex.getTopVotedPiece();
+        uint256 artPieceCreatorCount = artPiece.creators.length;
 
         // Perform all checks
-        if (artPiece.creators.length > cultureIndex.MAX_NUM_CREATORS()) revert TOO_MANY_CREATORS();
+        if (artPieceCreatorCount > cultureIndex.MAX_NUM_CREATORS()) revert TOO_MANY_CREATORS();
 
         // Use try/catch to handle potential failure
         try cultureIndex.dropTopVotedPiece() returns (ICultureIndex.ArtPiece memory _artPiece) {
@@ -299,7 +300,7 @@ contract VerbsToken is
             newPiece.quorumVotes = artPiece.quorumVotes;
             newPiece.totalVotesSupply = artPiece.totalVotesSupply;
 
-            for (uint i = 0; i < artPiece.creators.length; i++) {
+            for (uint i = 0; i < artPieceCreatorCount; i++) {
                 newPiece.creators.push(artPiece.creators[i]);
             }
 
