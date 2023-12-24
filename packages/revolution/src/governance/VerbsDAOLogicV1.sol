@@ -348,10 +348,9 @@ contract VerbsDAOLogicV1 is
         bytes memory data,
         uint256 eta
     ) internal {
-        require(
-            !timelock.queuedTransactions(keccak256(abi.encode(target, value, signature, data, eta))),
-            "DAO::queueOrRevertInternal: identical proposal action already queued at eta"
-        );
+        if (timelock.queuedTransactions(keccak256(abi.encode(target, value, signature, data, eta)))) {
+            revert PROPOSAL_ACTION_ALREADY_QUEUED();
+        }
         timelock.queueTransaction(target, value, signature, data, eta);
     }
 
@@ -360,10 +359,8 @@ contract VerbsDAOLogicV1 is
      * @param proposalId The id of the proposal to execute
      */
     function execute(uint256 proposalId) external {
-        require(
-            state(proposalId) == ProposalState.Queued,
-            "DAO::execute: proposal can only be executed if it is queued"
-        );
+        if (state(proposalId) != ProposalState.Queued) revert PROPOSAL_NOT_QUEUED();
+
         Proposal storage proposal = _proposals[proposalId];
         proposal.executed = true;
         for (uint256 i = 0; i < proposal.targets.length; i++) {

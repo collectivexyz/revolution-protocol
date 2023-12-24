@@ -248,6 +248,12 @@ contract VerbsDAOStorageV1 is VerbsDAOProxyStorage {
     /// @dev Reverts if the proposal ID is invalid (greater than the current proposal count).
     error INVALID_PROPOSAL_ID();
 
+    /// @dev Reverts if an identical proposal action is already queued at the same eta.
+    error PROPOSAL_ACTION_ALREADY_QUEUED();
+
+    /// @dev Reverts if the proposal is not in the 'Queued' state when attempting to execute.
+    error PROPOSAL_NOT_QUEUED();
+
     ///                                                          ///
     ///                           STATE                          ///
     ///                                                          ///
