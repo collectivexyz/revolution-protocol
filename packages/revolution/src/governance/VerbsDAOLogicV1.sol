@@ -793,14 +793,9 @@ contract VerbsDAOLogicV1 is
         }
         DynamicQuorumParams memory params = getDynamicQuorumParamsAt(block.number);
 
-        require(
-            newMaxQuorumVotesBPS <= MAX_QUORUM_VOTES_BPS_UPPER_BOUND,
-            "DAO::_setMaxQuorumVotesBPS: invalid max quorum votes bps"
-        );
-        require(
-            params.minQuorumVotesBPS <= newMaxQuorumVotesBPS,
-            "DAO::_setMaxQuorumVotesBPS: min quorum votes bps greater than max"
-        );
+        if (newMaxQuorumVotesBPS > MAX_QUORUM_VOTES_BPS_UPPER_BOUND) revert INVALID_MAX_QUORUM_VOTES_BPS();
+
+        if (params.minQuorumVotesBPS > newMaxQuorumVotesBPS) revert MAX_QUORUM_EXCEEDS_MIN();
 
         uint16 oldMaxQuorumVotesBPS = params.maxQuorumVotesBPS;
         params.maxQuorumVotesBPS = newMaxQuorumVotesBPS;

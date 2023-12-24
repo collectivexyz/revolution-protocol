@@ -207,6 +207,12 @@ contract VerbsDAOStorageV1 is VerbsDAOProxyStorage {
     /// @dev Reverts if the new minimum quorum votes basis points exceed the maximum quorum votes basis points.
     error MIN_QUORUM_EXCEEDS_MAX();
 
+    /// @dev Reverts if the new maximum quorum votes basis points exceed the upper bound.
+    error INVALID_MAX_QUORUM_VOTES_BPS();
+
+    /// @dev Reverts if the minimum quorum votes basis points are greater than the new maximum quorum votes basis points.
+    error MAX_QUORUM_EXCEEDS_MIN();
+
     /// @notice The contract upgrade manager
     IRevolutionBuilder public immutable manager;
 
