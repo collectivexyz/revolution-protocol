@@ -10,13 +10,13 @@ interface IVerbsDAO {
      * @notice Used to initialize the contract during delegator contructor
      * @param executor The address of the DAOExecutor
      * @param erc721Token The address of the ERC-721 token
-     * @param erc20Token The address of the ERC-20 token
+     * @param revolutionPoints The address of the ERC-20 token
      * @param govParams The initial governance parameters
      */
     function initialize(
         address executor,
         address erc721Token,
-        address erc20Token,
+        address revolutionPoints,
         IRevolutionBuilder.GovParams calldata govParams
     ) external;
 }

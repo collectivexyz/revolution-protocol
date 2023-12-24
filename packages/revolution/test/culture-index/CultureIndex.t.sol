@@ -37,8 +37,8 @@ contract CultureIndexTestSuite is RevolutionBuilderTest {
         vm.startPrank(address(dao));
 
         // // Create new test instances acting as different voters
-        voter1Test = new CultureIndexVotingTest(address(cultureIndex), address(erc20Token));
-        voter2Test = new CultureIndexVotingTest(address(cultureIndex), address(erc20Token));
+        voter1Test = new CultureIndexVotingTest(address(cultureIndex), address(revolutionPoints));
+        voter2Test = new CultureIndexVotingTest(address(cultureIndex), address(revolutionPoints));
     }
 
     //returns metadata and creators in a tuple

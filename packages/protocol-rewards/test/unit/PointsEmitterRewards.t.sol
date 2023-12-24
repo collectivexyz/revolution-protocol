@@ -8,7 +8,7 @@ import { RevolutionPoints, IRevolutionPointsEmitter, IRevolutionBuilder, VRGDAC,
 
 contract PointsEmitterRewardsTest is ProtocolRewardsTest {
     RevolutionPointsEmitter mockPointsEmitter;
-    RevolutionPoints internal erc20Token;
+    RevolutionPoints internal revolutionPoints;
 
     address creatorsAddress;
     address vrgdac;
@@ -28,13 +28,13 @@ contract PointsEmitterRewardsTest is ProtocolRewardsTest {
             new RevolutionPointsEmitter(address(this), address(protocolRewards), revolution)
         );
 
-        erc20Token = new RevolutionPoints(address(this), "Revolution Governance", "GOV");
+        revolutionPoints = new RevolutionPoints(address(this), "Revolution Governance", "GOV");
 
         address mockPointsEmitterAddress = address(new ERC1967Proxy(revolutionPointsEmitterImpl, ""));
 
         IRevolutionPointsEmitter(mockPointsEmitterAddress).initialize({
             initialOwner: address(this),
-            erc20Token: address(erc20Token),
+            revolutionPoints: address(revolutionPoints),
             vrgdac: vrgdac,
             creatorsAddress: creatorsAddress,
             creatorParams: IRevolutionBuilder.PointsEmitterCreatorParams({
@@ -44,7 +44,7 @@ contract PointsEmitterRewardsTest is ProtocolRewardsTest {
             weth: address(new MockWETH())
         });
 
-        erc20Token.transferOwnership(mockPointsEmitterAddress);
+        revolutionPoints.transferOwnership(mockPointsEmitterAddress);
 
         vm.label(mockPointsEmitterAddress, "MOCK_POINTSEMITTER");
 
@@ -107,7 +107,7 @@ contract PointsEmitterRewardsTest is ProtocolRewardsTest {
 
         IRevolutionPointsEmitter(mockPointsEmitterAddress).initialize({
             initialOwner: address(this),
-            erc20Token: address(govToken2),
+            revolutionPoints: address(govToken2),
             vrgdac: vrgdac,
             creatorsAddress: creatorsAddress,
             creatorParams: IRevolutionBuilder.PointsEmitterCreatorParams({

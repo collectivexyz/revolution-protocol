@@ -223,7 +223,7 @@ interface RevolutionBuilderTypesV1 {
         /// @notice Address for deployed auction contract
         address revolutionPointsEmitter;
         /// @notice Address for deployed auction contract
-        address erc20Token;
+        address revolutionPoints;
         /// @notice Address for deployed cultureIndex contract
         address cultureIndex;
         /// @notice Address for deployed executor (treasury) contract
@@ -1312,7 +1312,7 @@ interface IRevolutionPointsEmitter {
      * @notice Initialize the points emitter
      * @param initialOwner The initial owner of the points emitter
      * @param weth The address of the WETH contract.
-     * @param erc20Token The ERC-20 token contract address
+     * @param revolutionPoints The ERC-20 token contract address
      * @param vrgdac The VRGDA contract address
      * @param creatorsAddress The address of the creators
      * @param creatorParams The creator and entropy rate parameters
@@ -1320,7 +1320,7 @@ interface IRevolutionPointsEmitter {
     function initialize(
         address initialOwner,
         address weth,
-        address erc20Token,
+        address revolutionPoints,
         address vrgdac,
         address creatorsAddress,
         IRevolutionBuilder.PointsEmitterCreatorParams calldata creatorParams
@@ -1746,7 +1746,7 @@ interface IRevolutionBuilder is IUUPS {
     /// @param dao The dao address
     /// @param cultureIndex The cultureIndex address
     /// @param revolutionPointsEmitter The RevolutionPointsEmitter address
-    /// @param erc20Token The dao address
+    /// @param revolutionPoints The dao address
     /// @param maxHeap The maxHeap address
     event DAODeployed(
         address erc721Token,
@@ -1756,7 +1756,7 @@ interface IRevolutionBuilder is IUUPS {
         address dao,
         address cultureIndex,
         address revolutionPointsEmitter,
-        address erc20Token,
+        address revolutionPoints,
         address maxHeap
     );
 
@@ -1782,7 +1782,7 @@ interface IRevolutionBuilder is IUUPS {
         string executor;
         string dao;
         string cultureIndex;
-        string erc20Token;
+        string revolutionPoints;
         string revolutionPointsEmitter;
         string maxHeap;
     }
@@ -1910,7 +1910,7 @@ interface IRevolutionBuilder is IUUPS {
     /// @notice The cultureIndex implementation address
     function cultureIndexImpl() external view returns (address);
 
-    /// @notice The erc20Token implementation address
+    /// @notice The revolutionPoints implementation address
     function erc20TokenImpl() external view returns (address);
 
     /// @notice The maxHeap implementation address
@@ -1949,7 +1949,7 @@ interface IRevolutionBuilder is IUUPS {
             address executor,
             address dao,
             address cultureIndex,
-            address erc20Token,
+            address revolutionPoints,
             address revolutionPointsEmitter,
             address maxHeap
         );

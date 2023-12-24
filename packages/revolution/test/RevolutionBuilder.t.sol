@@ -270,7 +270,7 @@ contract RevolutionBuilderTest is Test {
     DAOExecutor internal executor;
     VerbsDAOLogicV1 internal dao;
     CultureIndex internal cultureIndex;
-    RevolutionPoints internal erc20Token;
+    RevolutionPoints internal revolutionPoints;
     RevolutionPointsEmitter internal revolutionPointsEmitter;
     MaxHeap internal maxHeap;
 
@@ -323,7 +323,7 @@ contract RevolutionBuilderTest is Test {
         executor = DAOExecutor(payable(_addresses.executor));
         dao = VerbsDAOLogicV1(payable(_addresses.dao));
         cultureIndex = CultureIndex(_addresses.cultureIndex);
-        erc20Token = RevolutionPoints(_addresses.erc20Token);
+        revolutionPoints = RevolutionPoints(_addresses.revolutionPoints);
         revolutionPointsEmitter = RevolutionPointsEmitter(_addresses.revolutionPointsEmitter);
         maxHeap = MaxHeap(_addresses.maxHeap);
 
@@ -333,7 +333,7 @@ contract RevolutionBuilderTest is Test {
         vm.label(address(executor), "EXECUTOR");
         vm.label(address(dao), "DAO");
         vm.label(address(cultureIndex), "CULTURE_INDEX");
-        vm.label(address(erc20Token), "ERC20TOKEN");
+        vm.label(address(revolutionPoints), "ERC20TOKEN");
         vm.label(address(revolutionPointsEmitter), "ERC20TOKEN_EMITTER");
         vm.label(address(maxHeap), "MAX_HEAP");
     }

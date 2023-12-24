@@ -342,7 +342,7 @@ contract CultureIndexArtPieceTest is CultureIndexTestSuite {
         cultureIndex.acceptOwnership();
 
         vm.startPrank(address(revolutionPointsEmitter));
-        erc20Token.mint(address(this), erc20Supply);
+        revolutionPoints.mint(address(this), erc20Supply);
 
         // Create an art piece
         uint256 pieceId = createDefaultArtPiece();
@@ -369,7 +369,7 @@ contract CultureIndexArtPieceTest is CultureIndexTestSuite {
         erc721Token.mint();
 
         vm.startPrank(address(revolutionPointsEmitter));
-        erc20Token.mint(address(this), erc20Supply);
+        revolutionPoints.mint(address(this), erc20Supply);
 
         vm.roll(block.number + 1);
 

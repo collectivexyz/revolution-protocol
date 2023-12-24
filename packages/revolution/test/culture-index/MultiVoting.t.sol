@@ -12,8 +12,8 @@ contract CultureIndexVotingTestManager is CultureIndexTestSuite {
 
         // Mint tokens to the test contracts (acting as voters)
         vm.startPrank(address(revolutionPointsEmitter));
-        erc20Token.mint(address(voter1Test), 100);
-        erc20Token.mint(address(voter2Test), 200);
+        revolutionPoints.mint(address(voter1Test), 100);
+        revolutionPoints.mint(address(voter2Test), 200);
 
         vm.roll(block.number + 1); // advance block for vote snapshotting
 
@@ -40,7 +40,7 @@ contract CultureIndexVotingTestManager is CultureIndexTestSuite {
 
         // Mint tokens to a test contract (acting as a voter)
         vm.startPrank(address(revolutionPointsEmitter));
-        erc20Token.mint(address(voter1Test), 100);
+        revolutionPoints.mint(address(voter1Test), 100);
         vm.roll(block.number + 1); // advance block for vote snapshotting
 
         // Call vote from the same test instance for both pieces

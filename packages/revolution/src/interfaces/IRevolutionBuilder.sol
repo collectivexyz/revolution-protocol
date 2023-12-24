@@ -20,7 +20,7 @@ interface IRevolutionBuilder is IUUPS {
     /// @param dao The dao address
     /// @param cultureIndex The cultureIndex address
     /// @param revolutionPointsEmitter The RevolutionPointsEmitter address
-    /// @param erc20Token The dao address
+    /// @param revolutionPoints The dao address
     /// @param maxHeap The maxHeap address
     event DAODeployed(
         address erc721Token,
@@ -30,7 +30,7 @@ interface IRevolutionBuilder is IUUPS {
         address dao,
         address cultureIndex,
         address revolutionPointsEmitter,
-        address erc20Token,
+        address revolutionPoints,
         address maxHeap
     );
 
@@ -56,7 +56,7 @@ interface IRevolutionBuilder is IUUPS {
         string executor;
         string dao;
         string cultureIndex;
-        string erc20Token;
+        string revolutionPoints;
         string revolutionPointsEmitter;
         string maxHeap;
     }
@@ -184,7 +184,7 @@ interface IRevolutionBuilder is IUUPS {
     /// @notice The cultureIndex implementation address
     function cultureIndexImpl() external view returns (address);
 
-    /// @notice The erc20Token implementation address
+    /// @notice The revolutionPoints implementation address
     function erc20TokenImpl() external view returns (address);
 
     /// @notice The maxHeap implementation address
@@ -223,7 +223,7 @@ interface IRevolutionBuilder is IUUPS {
             address executor,
             address dao,
             address cultureIndex,
-            address erc20Token,
+            address revolutionPoints,
             address revolutionPointsEmitter,
             address maxHeap
         );
