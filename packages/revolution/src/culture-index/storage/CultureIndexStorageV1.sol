@@ -17,7 +17,7 @@ contract CultureIndexStorageV1 {
     MaxHeap public maxHeap;
 
     // The ERC20 token used for voting
-    ERC20VotesUpgradeable public erc20VotingToken;
+    ERC20VotesUpgradeable public revolutionPoints;
 
     // The ERC721 token used for voting
     ERC721CheckpointableUpgradeable public erc721VotingToken;

@@ -21,7 +21,7 @@ contract CultureIndexVotingBasicTest is CultureIndexTestSuite {
 
         // Mock the ERC20 and ERC721 token balances
         vm.mockCall(
-            address(cultureIndex.erc20VotingToken()),
+            address(cultureIndex.revolutionPoints()),
             abi.encodeWithSelector(revolutionPoints.getVotes.selector, voter),
             abi.encode(erc20Weight)
         );

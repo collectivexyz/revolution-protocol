@@ -94,7 +94,7 @@ contract CultureIndex is
 
         __ReentrancyGuard_init();
 
-        erc20VotingToken = ERC20VotesUpgradeable(_erc20VotingToken);
+        revolutionPoints = ERC20VotesUpgradeable(_erc20VotingToken);
         erc721VotingToken = ERC721CheckpointableUpgradeable(_erc721VotingToken);
         erc721VotingTokenWeight = _cultureIndexParams.erc721VotingTokenWeight;
         name = _cultureIndexParams.name;
@@ -192,10 +192,10 @@ contract CultureIndex is
 
         newPiece.pieceId = pieceId;
         newPiece.totalVotesSupply = _calculateVoteWeight(
-            erc20VotingToken.totalSupply(),
+            revolutionPoints.totalSupply(),
             erc721VotingToken.totalSupply()
         );
-        newPiece.totalERC20Supply = erc20VotingToken.totalSupply();
+        newPiece.totalERC20Supply = revolutionPoints.totalSupply();
         newPiece.metadata = metadata;
         newPiece.sponsor = msg.sender;
         newPiece.creationBlock = block.number;
@@ -249,13 +249,13 @@ contract CultureIndex is
     }
 
     function _getVotes(address account) internal view returns (uint256) {
-        return _calculateVoteWeight(erc20VotingToken.getVotes(account), erc721VotingToken.getVotes(account));
+        return _calculateVoteWeight(revolutionPoints.getVotes(account), erc721VotingToken.getVotes(account));
     }
 
     function _getPastVotes(address account, uint256 blockNumber) internal view returns (uint256) {
         return
             _calculateVoteWeight(
-                erc20VotingToken.getPastVotes(account, blockNumber),
+                revolutionPoints.getPastVotes(account, blockNumber),
                 erc721VotingToken.getPastVotes(account, blockNumber)
             );
     }
@@ -469,7 +469,7 @@ contract CultureIndex is
      */
     function quorumVotes() public view returns (uint256) {
         return
-            (quorumVotesBPS * _calculateVoteWeight(erc20VotingToken.totalSupply(), erc721VotingToken.totalSupply())) /
+            (quorumVotesBPS * _calculateVoteWeight(revolutionPoints.totalSupply(), erc721VotingToken.totalSupply())) /
             10_000;
     }
 

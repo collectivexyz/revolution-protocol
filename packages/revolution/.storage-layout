@@ -9,7 +9,7 @@
 |-------------------------|-------------------------------------------------------------------|------|--------|-------|-------------------------------------------------|
 | nonces                  | mapping(address => uint256)                                       | 0    | 0      | 32    | src/culture-index/CultureIndex.sol:CultureIndex |
 | maxHeap                 | contract MaxHeap                                                  | 1    | 0      | 20    | src/culture-index/CultureIndex.sol:CultureIndex |
-| erc20VotingToken        | contract ERC20VotesUpgradeable                                    | 2    | 0      | 20    | src/culture-index/CultureIndex.sol:CultureIndex |
+| revolutionPoints        | contract ERC20VotesUpgradeable                                    | 2    | 0      | 20    | src/culture-index/CultureIndex.sol:CultureIndex |
 | erc721VotingToken       | contract ERC721CheckpointableUpgradeable                          | 3    | 0      | 20    | src/culture-index/CultureIndex.sol:CultureIndex |
 | minVoteWeight           | uint256                                                           | 4    | 0      | 32    | src/culture-index/CultureIndex.sol:CultureIndex |
 | quorumVotesBPS          | uint256                                                           | 5    | 0      | 32    | src/culture-index/CultureIndex.sol:CultureIndex |
