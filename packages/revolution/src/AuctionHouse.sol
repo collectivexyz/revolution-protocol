@@ -28,7 +28,7 @@ import { ReentrancyGuardUpgradeable } from "@openzeppelin/contracts-upgradeable/
 import { IAuctionHouse } from "./interfaces/IAuctionHouse.sol";
 import { IVerbsToken } from "./interfaces/IVerbsToken.sol";
 import { IWETH } from "./interfaces/IWETH.sol";
-import { IERC20TokenEmitter } from "./interfaces/IERC20TokenEmitter.sol";
+import { IRevolutionPointsEmitter } from "./interfaces/IRevolutionPointsEmitter.sol";
 import { ICultureIndex } from "./interfaces/ICultureIndex.sol";
 import { IRevolutionBuilder } from "./interfaces/IRevolutionBuilder.sol";
 import { Ownable2StepUpgradeable } from "@openzeppelin/contracts-upgradeable/access/Ownable2StepUpgradeable.sol";
@@ -48,7 +48,7 @@ contract AuctionHouse is
     IVerbsToken public verbs;
 
     // The ERC20 governance token
-    IERC20TokenEmitter public erc20TokenEmitter;
+    IRevolutionPointsEmitter public erc20TokenEmitter;
 
     // The address of the WETH contract
     address public WETH;
@@ -130,7 +130,7 @@ contract AuctionHouse is
         if (_auctionParams.creatorRateBps < _auctionParams.minCreatorRateBps) revert CREATOR_RATE_TOO_LOW();
 
         verbs = IVerbsToken(_erc721Token);
-        erc20TokenEmitter = IERC20TokenEmitter(_erc20TokenEmitter);
+        erc20TokenEmitter = IRevolutionPointsEmitter(_erc20TokenEmitter);
         timeBuffer = _auctionParams.timeBuffer;
         reservePrice = _auctionParams.reservePrice;
         minBidIncrementPercentage = _auctionParams.minBidIncrementPercentage;
@@ -388,12 +388,12 @@ contract AuctionHouse is
                     }
                 }
 
-                //Buy token from ERC20TokenEmitter for all the creators
+                //Buy token from RevolutionPointsEmitter for all the creators
                 if (creatorsShare > ethPaidToCreators) {
                     creatorTokensEmitted = erc20TokenEmitter.buyToken{ value: creatorsShare - ethPaidToCreators }(
                         vrgdaReceivers,
                         vrgdaSplits,
-                        IERC20TokenEmitter.ProtocolRewardAddresses({
+                        IRevolutionPointsEmitter.ProtocolRewardAddresses({
                             builder: address(0),
                             purchaseReferral: address(0),
                             deployer: deployer

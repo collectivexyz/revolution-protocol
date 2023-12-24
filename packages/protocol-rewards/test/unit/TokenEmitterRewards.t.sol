@@ -4,10 +4,10 @@ pragma solidity 0.8.22;
 import "../ProtocolRewardsTest.sol";
 import { RewardsSettings } from "../../src/abstract/RewardSplits.sol";
 import { MockWETH } from "../mock/MockWETH.sol";
-import { NontransferableERC20Votes, IERC20TokenEmitter, IRevolutionBuilder, VRGDAC, ERC1967Proxy, ERC20TokenEmitter } from "../utils/TokenEmitterLibrary.sol";
+import { NontransferableERC20Votes, IRevolutionPointsEmitter, IRevolutionBuilder, VRGDAC, ERC1967Proxy, RevolutionPointsEmitter } from "../utils/TokenEmitterLibrary.sol";
 
 contract TokenEmitterRewardsTest is ProtocolRewardsTest {
-    ERC20TokenEmitter mockTokenEmitter;
+    RevolutionPointsEmitter mockTokenEmitter;
     NontransferableERC20Votes internal erc20Token;
 
     address creatorsAddress;
@@ -25,14 +25,14 @@ contract TokenEmitterRewardsTest is ProtocolRewardsTest {
         vrgdac = address(new VRGDAC(1e11, 1e17, 1e22));
 
         address erc20TokenEmitterImpl = address(
-            new ERC20TokenEmitter(address(this), address(protocolRewards), revolution)
+            new RevolutionPointsEmitter(address(this), address(protocolRewards), revolution)
         );
 
         erc20Token = new NontransferableERC20Votes(address(this), "Revolution Governance", "GOV");
 
         address mockTokenEmitterAddress = address(new ERC1967Proxy(erc20TokenEmitterImpl, ""));
 
-        IERC20TokenEmitter(mockTokenEmitterAddress).initialize({
+        IRevolutionPointsEmitter(mockTokenEmitterAddress).initialize({
             initialOwner: address(this),
             erc20Token: address(erc20Token),
             vrgdac: vrgdac,
@@ -48,7 +48,7 @@ contract TokenEmitterRewardsTest is ProtocolRewardsTest {
 
         vm.label(mockTokenEmitterAddress, "MOCK_TOKENEMITTER");
 
-        mockTokenEmitter = ERC20TokenEmitter(mockTokenEmitterAddress);
+        mockTokenEmitter = RevolutionPointsEmitter(mockTokenEmitterAddress);
     }
 
     function testDeposit(uint256 msgValue) public {
@@ -70,11 +70,12 @@ contract TokenEmitterRewardsTest is ProtocolRewardsTest {
             vm.expectRevert();
         }
 
-        IERC20TokenEmitter.ProtocolRewardAddresses memory rewardAddrs = IERC20TokenEmitter.ProtocolRewardAddresses({
-            builder: builderReferral,
-            purchaseReferral: purchaseReferral,
-            deployer: deployer
-        });
+        IRevolutionPointsEmitter.ProtocolRewardAddresses memory rewardAddrs = IRevolutionPointsEmitter
+            .ProtocolRewardAddresses({
+                builder: builderReferral,
+                purchaseReferral: purchaseReferral,
+                deployer: deployer
+            });
 
         mockTokenEmitter.buyToken{ value: msgValue }(addresses, bps, rewardAddrs);
 
@@ -103,12 +104,12 @@ contract TokenEmitterRewardsTest is ProtocolRewardsTest {
         );
 
         address mockTokenEmitterImpl = address(
-            new ERC20TokenEmitter(address(this), address(protocolRewards), revolution)
+            new RevolutionPointsEmitter(address(this), address(protocolRewards), revolution)
         );
 
         address mockTokenEmitterAddress = address(new ERC1967Proxy(mockTokenEmitterImpl, ""));
 
-        IERC20TokenEmitter(mockTokenEmitterAddress).initialize({
+        IRevolutionPointsEmitter(mockTokenEmitterAddress).initialize({
             initialOwner: address(this),
             erc20Token: address(govToken2),
             vrgdac: vrgdac,
@@ -120,7 +121,7 @@ contract TokenEmitterRewardsTest is ProtocolRewardsTest {
             weth: address(new MockWETH())
         });
 
-        mockTokenEmitter = ERC20TokenEmitter(mockTokenEmitterAddress);
+        mockTokenEmitter = RevolutionPointsEmitter(mockTokenEmitterAddress);
 
         govToken2.transferOwnership(address(mockTokenEmitter));
 
@@ -140,7 +141,7 @@ contract TokenEmitterRewardsTest is ProtocolRewardsTest {
         mockTokenEmitter.buyToken{ value: msgValue }(
             addresses,
             bps,
-            IERC20TokenEmitter.ProtocolRewardAddresses({
+            IRevolutionPointsEmitter.ProtocolRewardAddresses({
                 builder: builderReferral,
                 purchaseReferral: address(0),
                 deployer: deployer

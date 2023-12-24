@@ -62,7 +62,7 @@ Run the tests with and generate a gas report.
 cd packages/revolution && pnpm run write-gas-report
 ```
 
-Gas optimizations around the CultureIndex `createPiece` and `vote` functionality, the [MaxHeap](https://github.com/collectivexyz/revolution-protocol/blob/main/packages/revolution/src/MaxHeap.sol) and [`buyToken`](https://github.com/collectivexyz/revolution-protocol/blob/main/packages/revolution/src/ERC20TokenEmitter.sol) should be prioritized.
+Gas optimizations around the CultureIndex `createPiece` and `vote` functionality, the [MaxHeap](https://github.com/collectivexyz/revolution-protocol/blob/main/packages/revolution/src/MaxHeap.sol) and [`buyToken`](https://github.com/collectivexyz/revolution-protocol/blob/main/packages/revolution/src/RevolutionPointsEmitter.sol) should be prioritized.
 
 ## Slither
 
@@ -115,7 +115,7 @@ The top piece is auctioned off every day as an ERC721 [VerbsToken](https://githu
 
 The auction proceeds are split with the creator(s) of the art piece, and the rest is sent to the owner of the auction contract. The winner of the auction receives an ERC721 of the art piece. The creator receives an amount of ERC20 governance tokens and a share of the winning bid.
 
-The ERC20 tokens the creator receives is calculated by the [ERC20TokenEmitter](https://github.com/collectivexyz/revolution-protocol/blob/main/packages/revolution/src/ERC20TokenEmitter.sol). Both the ERC721 and the ERC20 governance token have voting power to vote on art pieces in the **CultureIndex**.
+The ERC20 tokens the creator receives is calculated by the [RevolutionPointsEmitter](https://github.com/collectivexyz/revolution-protocol/blob/main/packages/revolution/src/RevolutionPointsEmitter.sol). Both the ERC721 and the ERC20 governance token have voting power to vote on art pieces in the **CultureIndex**.
 
 # relevant contracts
 
@@ -153,15 +153,15 @@ The **entropyRateBps** defines the proportion of the _creator's share_ that is s
 direct creator payment = (creator_share * entropyRateBps) / 10_000
 ```
 
-The remaining amount of the _creator's share_ is sent to the [ERC20TokenEmitter](https://github.com/collectivexyz/revolution-protocol/blob/main/packages/revolution/src/ERC20TokenEmitter.sol) contract's **buyToken** function to buy the creator ERC20 governance tokens, according to a linear token emission schedule.
+The remaining amount of the _creator's share_ is sent to the [RevolutionPointsEmitter](https://github.com/collectivexyz/revolution-protocol/blob/main/packages/revolution/src/RevolutionPointsEmitter.sol) contract's **buyToken** function to buy the creator ERC20 governance tokens, according to a linear token emission schedule.
 
-## ERC20TokenEmitter
+## RevolutionPointsEmitter
 
-**[ERC20TokenEmitter.sol](https://github.com/collectivexyz/revolution-protocol/blob/main/packages/revolution/src/ERC20TokenEmitter.sol)** is a linear [VRGDA](https://www.paradigm.xyz/2022/08/vrgda) that mints an ERC20 token when the payable **buyToken** function is called, and enables anyone to purchase the ERC20 governance token at any time. A portion of value spent on buying the ERC20 tokens is paid to creators and to a protocol rewards contract.
+**[RevolutionPointsEmitter.sol](https://github.com/collectivexyz/revolution-protocol/blob/main/packages/revolution/src/RevolutionPointsEmitter.sol)** is a linear [VRGDA](https://www.paradigm.xyz/2022/08/vrgda) that mints an ERC20 token when the payable **buyToken** function is called, and enables anyone to purchase the ERC20 governance token at any time. A portion of value spent on buying the ERC20 tokens is paid to creators and to a protocol rewards contract.
 
 ### Creator payment
 
-The ERC20TokenEmitter has a **creatorRateBps** and **entropyRateBps** that function the same as the **AuctionHouse** contract's. Whenever a **buyToken** purchase of governance tokens is made, a **creatorRateBps** portion of the proceeds is reserved for the **creatorsAddress** set in the contract, with direct payment calculated according to the **entropyRateBps**.
+The RevolutionPointsEmitter has a **creatorRateBps** and **entropyRateBps** that function the same as the **AuctionHouse** contract's. Whenever a **buyToken** purchase of governance tokens is made, a **creatorRateBps** portion of the proceeds is reserved for the **creatorsAddress** set in the contract, with direct payment calculated according to the **entropyRateBps**.
 
 ### Protocol rewards
 
@@ -169,7 +169,7 @@ A fixed percentage of the value sent to the **buyToken** function is paid to the
 
 ## VRGDA
 
-The ERC20TokenEmitter utilizes a VRGDA to emit ERC20 tokens at a predictable rate. You can read more about VRGDA's [here](https://www.paradigm.xyz/2022/08/vrgda), and view the implementation for selling NFTs [here](https://github.com/transmissions11/VRGDAs). Basically, a VRGDA contract dynamically adjusts the price of a token to adhere to a specific issuance schedule. If the emission is ahead of schedule, the price increases exponentially. If it is behind schedule, the price of each token decreases by some constant decay rate.
+The RevolutionPointsEmitter utilizes a VRGDA to emit ERC20 tokens at a predictable rate. You can read more about VRGDA's [here](https://www.paradigm.xyz/2022/08/vrgda), and view the implementation for selling NFTs [here](https://github.com/transmissions11/VRGDAs). Basically, a VRGDA contract dynamically adjusts the price of a token to adhere to a specific issuance schedule. If the emission is ahead of schedule, the price increases exponentially. If it is behind schedule, the price of each token decreases by some constant decay rate.
 
 <img width="903" alt="Screenshot 2023-12-05 at 8 31 54 PM" src="https://github.com/collectivexyz/revolution-protocol/blob/main/readme-img/vrgda.png">
 
@@ -203,11 +203,11 @@ For all contracts - only the RevolutionBuilder manager should be able to initial
 
 ### Creator payments
 
-- The ERC20TokenEmitter and AuctionHouse should always pay creators (ETH or ERC20) in accordance with the creatorRateBps and entropyRateBps calculation.
+- The RevolutionPointsEmitter and AuctionHouse should always pay creators (ETH or ERC20) in accordance with the creatorRateBps and entropyRateBps calculation.
 
 - The AuctionHouse should always pay only creator(s) of the CultureIndex art piece being auctioned and the owner.
 
-- The ERC20TokenEmitter should always pay the `creatorsAddress`.
+- The RevolutionPointsEmitter should always pay the `creatorsAddress`.
 
 - ETH and ERC20 transfer functions are secure and protected with reentrancy checks / math errors.
 
@@ -244,13 +244,13 @@ For all contracts - only the RevolutionBuilder manager should be able to initial
 
 - The VRGDAC should always exponentially increase the price of tokens if the supply is ahead of schedule.
 
-### ERC20TokenEmitter
+### RevolutionPointsEmitter
 
 - The owner and creatorsAddress should not be able to buy tokens.
 
 - The distribution of ERC20 governance tokens should be in accordance with the defined linear emission schedule.
 
-- The ERC20TokenEmitter should always pay protocol rewards assuming enough ETH was paid to the buyToken function.
+- The RevolutionPointsEmitter should always pay protocol rewards assuming enough ETH was paid to the buyToken function.
 
 - The owner should always receive it's share of ether (minus creatorRateBps and protocol rewards share).
 

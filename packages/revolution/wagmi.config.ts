@@ -12,7 +12,7 @@ export default defineConfig({
         "CultureIndex",
         "AuctionHouse",
         "RevolutionBuilder",
-        "ERC20TokenEmitter",
+        "RevolutionPointsEmitter",
         "NontransferableERC20Votes",
         "VRGDAC",
         "Descriptor",

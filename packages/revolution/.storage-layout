@@ -23,19 +23,19 @@
 | erc721VotingTokenWeight | uint256                                                           | 13   | 0      | 32    | src/culture-index/CultureIndex.sol:CultureIndex |
 
 =======================
-➡ ERC20TokenEmitter
+➡ RevolutionPointsEmitter
 =======================
 
 | Name            | Type                               | Slot | Offset | Bytes | Contract                                    |
 |-----------------|------------------------------------|------|--------|-------|---------------------------------------------|
-| WETH            | address                            | 0    | 0      | 20    | src/ERC20TokenEmitter.sol:ERC20TokenEmitter |
-| token           | contract NontransferableERC20Votes | 1    | 0      | 20    | src/ERC20TokenEmitter.sol:ERC20TokenEmitter |
-| vrgdac          | contract VRGDAC                    | 2    | 0      | 20    | src/ERC20TokenEmitter.sol:ERC20TokenEmitter |
-| startTime       | uint256                            | 3    | 0      | 32    | src/ERC20TokenEmitter.sol:ERC20TokenEmitter |
-| emittedTokenWad | int256                             | 4    | 0      | 32    | src/ERC20TokenEmitter.sol:ERC20TokenEmitter |
-| creatorRateBps  | uint256                            | 5    | 0      | 32    | src/ERC20TokenEmitter.sol:ERC20TokenEmitter |
-| entropyRateBps  | uint256                            | 6    | 0      | 32    | src/ERC20TokenEmitter.sol:ERC20TokenEmitter |
-| creatorsAddress | address                            | 7    | 0      | 20    | src/ERC20TokenEmitter.sol:ERC20TokenEmitter |
+| WETH            | address                            | 0    | 0      | 20    | src/RevolutionPointsEmitter.sol:RevolutionPointsEmitter |
+| token           | contract NontransferableERC20Votes | 1    | 0      | 20    | src/RevolutionPointsEmitter.sol:RevolutionPointsEmitter |
+| vrgdac          | contract VRGDAC                    | 2    | 0      | 20    | src/RevolutionPointsEmitter.sol:RevolutionPointsEmitter |
+| startTime       | uint256                            | 3    | 0      | 32    | src/RevolutionPointsEmitter.sol:RevolutionPointsEmitter |
+| emittedTokenWad | int256                             | 4    | 0      | 32    | src/RevolutionPointsEmitter.sol:RevolutionPointsEmitter |
+| creatorRateBps  | uint256                            | 5    | 0      | 32    | src/RevolutionPointsEmitter.sol:RevolutionPointsEmitter |
+| entropyRateBps  | uint256                            | 6    | 0      | 32    | src/RevolutionPointsEmitter.sol:RevolutionPointsEmitter |
+| creatorsAddress | address                            | 7    | 0      | 20    | src/RevolutionPointsEmitter.sol:RevolutionPointsEmitter |
 
 =======================
 ➡ AuctionHouse
@@ -44,7 +44,7 @@
 | Name                      | Type                         | Slot | Offset | Bytes | Contract                          |
 |---------------------------|------------------------------|------|--------|-------|-----------------------------------|
 | verbs                     | contract IVerbsToken         | 0    | 0      | 20    | src/AuctionHouse.sol:AuctionHouse |
-| erc20TokenEmitter         | contract IERC20TokenEmitter  | 1    | 0      | 20    | src/AuctionHouse.sol:AuctionHouse |
+| erc20TokenEmitter         | contract IRevolutionPointsEmitter  | 1    | 0      | 20    | src/AuctionHouse.sol:AuctionHouse |
 | WETH                      | address                      | 2    | 0      | 20    | src/AuctionHouse.sol:AuctionHouse |
 | timeBuffer                | uint256                      | 3    | 0      | 32    | src/AuctionHouse.sol:AuctionHouse |
 | reservePrice              | uint256                      | 4    | 0      | 32    | src/AuctionHouse.sol:AuctionHouse |

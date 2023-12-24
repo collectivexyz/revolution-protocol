@@ -11,12 +11,12 @@ import { VRGDAC } from "./libs/VRGDAC.sol";
 import { toDaysWadUnsafe } from "./libs/SignedWadMath.sol";
 import { Strings } from "@openzeppelin/contracts/utils/Strings.sol";
 import { NontransferableERC20Votes } from "./NontransferableERC20Votes.sol";
-import { IERC20TokenEmitter } from "./interfaces/IERC20TokenEmitter.sol";
+import { IRevolutionPointsEmitter } from "./interfaces/IRevolutionPointsEmitter.sol";
 
 import { IRevolutionBuilder } from "./interfaces/IRevolutionBuilder.sol";
 
-contract ERC20TokenEmitter is
-    IERC20TokenEmitter,
+contract RevolutionPointsEmitter is
+    IRevolutionPointsEmitter,
     ReentrancyGuardUpgradeable,
     TokenEmitterRewards,
     Ownable2StepUpgradeable,

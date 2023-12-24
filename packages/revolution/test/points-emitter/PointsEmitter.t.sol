@@ -3,8 +3,8 @@ pragma solidity ^0.8.22;
 
 import { Test } from "forge-std/Test.sol";
 import { unsafeWadDiv, toDaysWadUnsafe } from "../../src/libs/SignedWadMath.sol";
-import { ERC20TokenEmitter } from "../../src/ERC20TokenEmitter.sol";
-import { IERC20TokenEmitter } from "../../src/interfaces/IERC20TokenEmitter.sol";
+import { RevolutionPointsEmitter } from "../../src/RevolutionPointsEmitter.sol";
+import { IRevolutionPointsEmitter } from "../../src/interfaces/IRevolutionPointsEmitter.sol";
 import { NontransferableERC20Votes } from "../../src/NontransferableERC20Votes.sol";
 import { RevolutionProtocolRewards } from "@cobuild/protocol-rewards/src/RevolutionProtocolRewards.sol";
 import { wadDiv } from "../../src/libs/SignedWadMath.sol";
@@ -33,7 +33,7 @@ contract ERC20TokenEmitterTest is RevolutionBuilderTest {
 
         int256 priceDecayPercent = 1e18 / 10;
 
-        super.setERC20TokenEmitterParams(
+        super.setRevolutionPointsEmitterParams(
             oneFullTokenTargetPrice,
             priceDecayPercent,
             int256(1e18 * tokensPerTimeUnit),
@@ -103,7 +103,7 @@ contract ERC20TokenEmitterTest is RevolutionBuilderTest {
         erc20TokenEmitter.buyToken{ value: 1 ether }(
             recipients,
             bps,
-            IERC20TokenEmitter.ProtocolRewardAddresses({
+            IRevolutionPointsEmitter.ProtocolRewardAddresses({
                 builder: address(0),
                 purchaseReferral: address(0),
                 deployer: address(0)
@@ -154,7 +154,7 @@ contract ERC20TokenEmitterTest is RevolutionBuilderTest {
         erc20TokenEmitter.buyToken{ value: 1 ether }(
             recipients,
             bps,
-            IERC20TokenEmitter.ProtocolRewardAddresses({
+            IRevolutionPointsEmitter.ProtocolRewardAddresses({
                 builder: address(0),
                 purchaseReferral: address(0),
                 deployer: address(0)
@@ -200,7 +200,7 @@ contract ERC20TokenEmitterTest is RevolutionBuilderTest {
         erc20TokenEmitter.buyToken{ value: 1 ether }(
             recipients,
             bps,
-            IERC20TokenEmitter.ProtocolRewardAddresses({
+            IRevolutionPointsEmitter.ProtocolRewardAddresses({
                 builder: address(0),
                 purchaseReferral: address(1),
                 deployer: address(0)
@@ -230,7 +230,7 @@ contract ERC20TokenEmitterTest is RevolutionBuilderTest {
         erc20TokenEmitter.buyToken{ value: 1e18 }(
             recipients,
             bps,
-            IERC20TokenEmitter.ProtocolRewardAddresses({
+            IRevolutionPointsEmitter.ProtocolRewardAddresses({
                 builder: address(0),
                 purchaseReferral: address(0),
                 deployer: address(0)
@@ -253,7 +253,7 @@ contract ERC20TokenEmitterTest is RevolutionBuilderTest {
         erc20TokenEmitter.buyToken{ value: 1e18 }(
             recipients,
             bps,
-            IERC20TokenEmitter.ProtocolRewardAddresses({
+            IRevolutionPointsEmitter.ProtocolRewardAddresses({
                 builder: address(0),
                 purchaseReferral: address(0),
                 deployer: address(0)
@@ -277,7 +277,7 @@ contract ERC20TokenEmitterTest is RevolutionBuilderTest {
         address emitter1 = address(new ERC1967Proxy(erc20TokenEmitterImpl, ""));
 
         vm.startPrank(address(manager));
-        IERC20TokenEmitter(emitter1).initialize({
+        IRevolutionPointsEmitter(emitter1).initialize({
             initialOwner: owner,
             weth: address(weth),
             erc20Token: address(governanceToken),
@@ -303,10 +303,10 @@ contract ERC20TokenEmitterTest is RevolutionBuilderTest {
         bps[0] = 10_000;
 
         vm.startPrank(address(21));
-        IERC20TokenEmitter(emitter1).buyToken{ value: 1e18 }(
+        IRevolutionPointsEmitter(emitter1).buyToken{ value: 1e18 }(
             recipients,
             bps,
-            IERC20TokenEmitter.ProtocolRewardAddresses({
+            IRevolutionPointsEmitter.ProtocolRewardAddresses({
                 builder: address(0),
                 purchaseReferral: address(0),
                 deployer: address(0)
@@ -316,7 +316,7 @@ contract ERC20TokenEmitterTest is RevolutionBuilderTest {
         address emitter2 = address(new ERC1967Proxy(erc20TokenEmitterImpl, ""));
 
         vm.startPrank(address(manager));
-        IERC20TokenEmitter(emitter2).initialize({
+        IRevolutionPointsEmitter(emitter2).initialize({
             initialOwner: owner,
             weth: address(weth),
             erc20Token: address(governanceToken),
@@ -337,10 +337,10 @@ contract ERC20TokenEmitterTest is RevolutionBuilderTest {
 
         vm.startPrank(address(48));
         vm.deal(address(48), 100000 ether);
-        IERC20TokenEmitter(emitter2).buyToken{ value: 1e18 }(
+        IRevolutionPointsEmitter(emitter2).buyToken{ value: 1e18 }(
             recipients,
             bps,
-            IERC20TokenEmitter.ProtocolRewardAddresses({
+            IRevolutionPointsEmitter.ProtocolRewardAddresses({
                 builder: address(0),
                 purchaseReferral: address(0),
                 deployer: address(0)
@@ -387,7 +387,7 @@ contract ERC20TokenEmitterTest is RevolutionBuilderTest {
         uint256 tokensSold = erc20TokenEmitter.buyToken{ value: valueToSend }(
             recipients,
             bps,
-            IERC20TokenEmitter.ProtocolRewardAddresses({
+            IRevolutionPointsEmitter.ProtocolRewardAddresses({
                 builder: address(0),
                 purchaseReferral: address(0),
                 deployer: address(0)
@@ -449,7 +449,7 @@ contract ERC20TokenEmitterTest is RevolutionBuilderTest {
         erc20TokenEmitter.buyToken{ value: 1e18 }(
             recipients,
             bps,
-            IERC20TokenEmitter.ProtocolRewardAddresses({
+            IRevolutionPointsEmitter.ProtocolRewardAddresses({
                 builder: address(0),
                 purchaseReferral: address(0),
                 deployer: address(0)
@@ -473,7 +473,7 @@ contract ERC20TokenEmitterTest is RevolutionBuilderTest {
         erc20TokenEmitter.buyToken{ value: 1e18 }(
             firstRecipients,
             bps,
-            IERC20TokenEmitter.ProtocolRewardAddresses({
+            IRevolutionPointsEmitter.ProtocolRewardAddresses({
                 builder: address(0),
                 purchaseReferral: address(0),
                 deployer: address(0)
@@ -483,7 +483,7 @@ contract ERC20TokenEmitterTest is RevolutionBuilderTest {
         erc20TokenEmitter.buyToken{ value: 1e18 }(
             secondRecipients,
             bps,
-            IERC20TokenEmitter.ProtocolRewardAddresses({
+            IRevolutionPointsEmitter.ProtocolRewardAddresses({
                 builder: address(0),
                 purchaseReferral: address(0),
                 deployer: address(0)
@@ -525,7 +525,7 @@ contract ERC20TokenEmitterTest is RevolutionBuilderTest {
         erc20TokenEmitter.buyToken{ value: 1e18 }(
             recipients,
             bps,
-            IERC20TokenEmitter.ProtocolRewardAddresses({
+            IRevolutionPointsEmitter.ProtocolRewardAddresses({
                 builder: address(0),
                 purchaseReferral: address(0),
                 deployer: address(0)
@@ -566,7 +566,7 @@ contract ERC20TokenEmitterTest is RevolutionBuilderTest {
         erc20TokenEmitter.buyToken{ value: 0 }(
             recipients,
             bps,
-            IERC20TokenEmitter.ProtocolRewardAddresses({
+            IRevolutionPointsEmitter.ProtocolRewardAddresses({
                 builder: address(0),
                 purchaseReferral: address(1),
                 deployer: address(0)
@@ -589,7 +589,7 @@ contract ERC20TokenEmitterTest is RevolutionBuilderTest {
         erc20TokenEmitter.buyToken{ value: 1e18 }(
             recipients,
             bps,
-            IERC20TokenEmitter.ProtocolRewardAddresses({
+            IRevolutionPointsEmitter.ProtocolRewardAddresses({
                 builder: address(1),
                 purchaseReferral: address(1),
                 deployer: address(0)
@@ -638,7 +638,7 @@ contract ERC20TokenEmitterTest is RevolutionBuilderTest {
         uint emittedWad = erc20TokenEmitter.buyToken{ value: 1e18 }(
             recipients,
             correctBps,
-            IERC20TokenEmitter.ProtocolRewardAddresses({
+            IRevolutionPointsEmitter.ProtocolRewardAddresses({
                 builder: address(0),
                 purchaseReferral: address(0),
                 deployer: address(0)
@@ -672,7 +672,7 @@ contract ERC20TokenEmitterTest is RevolutionBuilderTest {
         erc20TokenEmitter.buyToken{ value: 1e18 }(
             recipients,
             incorrectBps,
-            IERC20TokenEmitter.ProtocolRewardAddresses({
+            IRevolutionPointsEmitter.ProtocolRewardAddresses({
                 builder: address(0),
                 purchaseReferral: address(0),
                 deployer: address(0)
@@ -729,7 +729,7 @@ contract ERC20TokenEmitterTest is RevolutionBuilderTest {
         erc20TokenEmitter.buyToken{ value: 1e18 }(
             recipients,
             bps,
-            IERC20TokenEmitter.ProtocolRewardAddresses({
+            IRevolutionPointsEmitter.ProtocolRewardAddresses({
                 builder: address(0),
                 purchaseReferral: address(0),
                 deployer: address(0)
@@ -740,7 +740,7 @@ contract ERC20TokenEmitterTest is RevolutionBuilderTest {
         erc20TokenEmitter.buyToken{ value: 1e18 }(
             recipients,
             bps,
-            IERC20TokenEmitter.ProtocolRewardAddresses({
+            IRevolutionPointsEmitter.ProtocolRewardAddresses({
                 builder: address(0),
                 purchaseReferral: address(0),
                 deployer: address(0)
@@ -760,7 +760,7 @@ contract ERC20TokenEmitterTest is RevolutionBuilderTest {
         address emitter2 = address(new ERC1967Proxy(erc20TokenEmitterImpl, ""));
 
         vm.startPrank(address(manager));
-        IERC20TokenEmitter(emitter2).initialize({
+        IRevolutionPointsEmitter(emitter2).initialize({
             initialOwner: address(maliciousOwner),
             weth: address(weth),
             erc20Token: address(governanceToken),
@@ -785,10 +785,10 @@ contract ERC20TokenEmitterTest is RevolutionBuilderTest {
         uint256[] memory bps = new uint256[](1);
         bps[0] = 10_000;
         vm.expectRevert();
-        IERC20TokenEmitter(emitter2).buyToken{ value: 1e18 }(
+        IRevolutionPointsEmitter(emitter2).buyToken{ value: 1e18 }(
             recipients,
             bps,
-            IERC20TokenEmitter.ProtocolRewardAddresses({
+            IRevolutionPointsEmitter.ProtocolRewardAddresses({
                 builder: address(0),
                 purchaseReferral: address(0),
                 deployer: address(0)
@@ -829,7 +829,7 @@ contract ERC20TokenEmitterTest is RevolutionBuilderTest {
         erc20TokenEmitter.buyToken{ value: expectedVolume }(
             recipients,
             bps,
-            IERC20TokenEmitter.ProtocolRewardAddresses({
+            IRevolutionPointsEmitter.ProtocolRewardAddresses({
                 builder: address(0),
                 purchaseReferral: address(0),
                 deployer: address(0)
@@ -839,7 +839,7 @@ contract ERC20TokenEmitterTest is RevolutionBuilderTest {
         erc20TokenEmitter.buyToken{ value: payment }(
             recipients,
             bps,
-            IERC20TokenEmitter.ProtocolRewardAddresses({
+            IRevolutionPointsEmitter.ProtocolRewardAddresses({
                 builder: address(0),
                 purchaseReferral: address(0),
                 deployer: address(0)
@@ -936,7 +936,7 @@ contract ERC20TokenEmitterTest is RevolutionBuilderTest {
 
         vm.startPrank(address(manager));
         vm.expectRevert(abi.encodeWithSignature("INVALID_BPS()"));
-        IERC20TokenEmitter(emitter1).initialize({
+        IRevolutionPointsEmitter(emitter1).initialize({
             initialOwner: owner,
             weth: address(weth),
             erc20Token: address(governanceToken),
@@ -951,11 +951,11 @@ contract ERC20TokenEmitterTest is RevolutionBuilderTest {
 }
 
 contract MaliciousOwner {
-    ERC20TokenEmitter erc20TokenEmitter;
+    RevolutionPointsEmitter erc20TokenEmitter;
     bool public reentryAttempted;
 
     constructor(address _emitter) {
-        erc20TokenEmitter = ERC20TokenEmitter(_emitter);
+        erc20TokenEmitter = RevolutionPointsEmitter(_emitter);
         reentryAttempted = false;
     }
 
@@ -971,7 +971,7 @@ contract MaliciousOwner {
         erc20TokenEmitter.buyToken{ value: msg.value }(
             recipients,
             bps,
-            IERC20TokenEmitter.ProtocolRewardAddresses({
+            IRevolutionPointsEmitter.ProtocolRewardAddresses({
                 builder: address(0),
                 purchaseReferral: address(0),
                 deployer: address(0)

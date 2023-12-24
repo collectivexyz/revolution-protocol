@@ -19,7 +19,7 @@ interface IRevolutionBuilder is IUUPS {
     /// @param executor The executor address
     /// @param dao The dao address
     /// @param cultureIndex The cultureIndex address
-    /// @param erc20TokenEmitter The ERC20TokenEmitter address
+    /// @param erc20TokenEmitter The RevolutionPointsEmitter address
     /// @param erc20Token The dao address
     /// @param maxHeap The maxHeap address
     event DAODeployed(
@@ -121,7 +121,7 @@ interface IRevolutionBuilder is IUUPS {
     /// @notice The ERC-20 token emitter VRGDA parameters
     /// @param vrgdaParams // The VRGDA parameters
     /// @param creatorsAddress // The address to send creator payments to
-    struct ERC20TokenEmitterParams {
+    struct RevolutionPointsEmitterParams {
         VRGDAParams vrgdaParams;
         TokenEmitterCreatorParams creatorParams;
         address creatorsAddress;
@@ -207,7 +207,7 @@ interface IRevolutionBuilder is IUUPS {
         GovParams calldata govParams,
         CultureIndexParams calldata cultureIndexParams,
         ERC20TokenParams calldata erc20TokenParams,
-        ERC20TokenEmitterParams calldata erc20TokenEmitterParams
+        RevolutionPointsEmitterParams calldata erc20TokenEmitterParams
     ) external returns (RevolutionBuilderTypesV1.DAOAddresses memory);
 
     /// @notice A DAO's remaining contract addresses from its token address

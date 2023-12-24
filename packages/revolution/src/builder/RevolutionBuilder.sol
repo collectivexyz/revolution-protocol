@@ -33,7 +33,7 @@ import { IDAOExecutor } from "../interfaces/IDAOExecutor.sol";
 import { IVerbsDAO } from "../interfaces/IVerbsDAO.sol";
 import { ICultureIndex } from "../interfaces/ICultureIndex.sol";
 import { IMaxHeap } from "../interfaces/IMaxHeap.sol";
-import { IERC20TokenEmitter } from "../interfaces/IERC20TokenEmitter.sol";
+import { IRevolutionPointsEmitter } from "../interfaces/IRevolutionPointsEmitter.sol";
 import { INontransferableERC20Votes } from "../interfaces/INontransferableERC20Votes.sol";
 import { VRGDAC } from "../libs/VRGDAC.sol";
 
@@ -144,7 +144,7 @@ contract RevolutionBuilder is
         GovParams calldata _govParams,
         CultureIndexParams calldata _cultureIndexParams,
         ERC20TokenParams calldata _erc20TokenParams,
-        ERC20TokenEmitterParams calldata _erc20TokenEmitterParams
+        RevolutionPointsEmitterParams calldata _erc20TokenEmitterParams
     ) external returns (DAOAddresses memory) {
         require(_initialOwner != address(0), "Initial owner cannot be 0x0");
 
@@ -217,7 +217,7 @@ contract RevolutionBuilder is
             erc20TokenParams: _erc20TokenParams
         });
 
-        IERC20TokenEmitter(daoAddressesByToken[erc721Token].erc20TokenEmitter).initialize({
+        IRevolutionPointsEmitter(daoAddressesByToken[erc721Token].erc20TokenEmitter).initialize({
             erc20Token: daoAddressesByToken[erc721Token].erc20Token,
             initialOwner: daoAddressesByToken[erc721Token].dao,
             weth: _weth,
