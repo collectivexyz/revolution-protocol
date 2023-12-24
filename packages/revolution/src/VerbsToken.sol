@@ -136,8 +136,8 @@ contract VerbsToken is
     ) external initializer {
         if (msg.sender != address(manager)) revert ONLY_MANAGER_CAN_INITIALIZE();
 
-        if (_minter == address(0)) revert MINTER_ZERO_ADDRESS();
-        if (_initialOwner == address(0)) revert INITIAL_OWNER_ZERO_ADDRESS();
+        if (_minter == address(0)) revert ADDRESS_ZERO();
+        if (_initialOwner == address(0)) revert ADDRESS_ZERO();
 
         // Initialize the reentrancy guard
         __ReentrancyGuard_init();
@@ -207,7 +207,7 @@ contract VerbsToken is
      * @dev Only callable by the owner when not locked.
      */
     function setMinter(address _minter) external override onlyOwner nonReentrant whenMinterNotLocked {
-        require(_minter != address(0), "Minter cannot be zero address");
+        if (_minter == address(0)) revert ADDRESS_ZERO();
         minter = _minter;
 
         emit MinterUpdated(_minter);
@@ -271,7 +271,7 @@ contract VerbsToken is
      * @return The ArtPiece struct associated with the given ID.
      */
     function getArtPieceById(uint256 verbId) public view returns (ICultureIndex.ArtPiece memory) {
-        require(verbId <= _currentVerbId, "Invalid piece ID");
+        if (verbId > _currentVerbId) revert INVALID_PIECE_ID();
         return artPieces[verbId];
     }
 
@@ -281,12 +281,8 @@ contract VerbsToken is
     function _mintTo(address to) internal returns (uint256) {
         ICultureIndex.ArtPiece memory artPiece = cultureIndex.getTopVotedPiece();
 
-        // Check-Effects-Interactions Pattern
         // Perform all checks
-        require(
-            artPiece.creators.length <= cultureIndex.MAX_NUM_CREATORS(),
-            "Creator array must not be > MAX_NUM_CREATORS"
-        );
+        if (artPiece.creators.length > cultureIndex.MAX_NUM_CREATORS()) revert TOO_MANY_CREATORS();
 
         // Use try/catch to handle potential failure
         try cultureIndex.dropTopVotedPiece() returns (ICultureIndex.ArtPiece memory _artPiece) {
@@ -327,6 +323,6 @@ contract VerbsToken is
     /// @param _newImpl The new implementation address
     function _authorizeUpgrade(address _newImpl) internal view override onlyOwner {
         // Ensure the implementation is valid
-        require(manager.isRegisteredUpgrade(_getImplementation(), _newImpl), "Invalid upgrade");
+        if (!manager.isRegisteredUpgrade(_getImplementation(), _newImpl)) revert INVALID_UPGRADE(_newImpl);
     }
 }

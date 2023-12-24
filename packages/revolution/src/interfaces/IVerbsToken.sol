@@ -27,6 +27,12 @@ interface IVerbsToken is IERC721 {
     ///                           ERRORS                         ///
     ///                                                          ///
 
+    /// @dev Reverts if the verb ID is invalid (greater than the current verb ID).
+    error INVALID_PIECE_ID();
+
+    /// @dev Reverts if the number of creators for an art piece exceeds the maximum allowed.
+    error TOO_MANY_CREATORS();
+
     /// @dev Reverts if the minter is locked.
     error MINTER_LOCKED();
 
@@ -42,11 +48,8 @@ interface IVerbsToken is IERC721 {
     /// @dev Reverts if the caller is not the manager.
     error ONLY_MANAGER_CAN_INITIALIZE();
 
-    /// @dev Reverts if the minter address is the zero address.
-    error MINTER_ZERO_ADDRESS();
-
-    /// @dev Reverts if the initial owner address is the zero address.
-    error INITIAL_OWNER_ZERO_ADDRESS();
+    /// @dev Reverts if an address is the zero address.
+    error ADDRESS_ZERO();
 
     ///                                                          ///
     ///                           EVENTS                         ///
