@@ -322,9 +322,9 @@ contract VerbsToken is
     ///                         TOKEN UPGRADE                    ///
     ///                                                          ///
 
-    // /// @notice Ensures the caller is authorized to upgrade the contract and that the new implementation is valid
-    // /// @dev This function is called in `upgradeTo` & `upgradeToAndCall`
-    // /// @param _newImpl The new implementation address
+    /// @notice Ensures the caller is authorized to upgrade the contract and that the new implementation is valid
+    /// @dev This function is called in `upgradeTo` & `upgradeToAndCall`
+    /// @param _newImpl The new implementation address
     function _authorizeUpgrade(address _newImpl) internal view override onlyOwner {
         // Ensure the implementation is valid
         require(manager.isRegisteredUpgrade(_getImplementation(), _newImpl), "Invalid upgrade");
