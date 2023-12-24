@@ -262,7 +262,7 @@ contract ERC20PointsEmitterTest is RevolutionBuilderTest {
     }
 
     function testTransferTokenContractOwnership() public {
-        // makes a token emitter with one nontransferableerc20
+        // makes a points emitter with one revolution points contract
         // makes a second with the same one
         // ensures that the second cannot mint and calling buyGovernance fails
         // transfers ownership to the second

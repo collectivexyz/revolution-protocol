@@ -135,7 +135,7 @@ contract RevolutionBuilder is
     /// @param _govParams The governance settings
     /// @param _cultureIndexParams The culture index settings
     /// @param _erc20TokenParams The ERC-20 token settings
-    /// @param _revolutionPointsEmitterParams The ERC-20 token emitter settings
+    /// @param _revolutionPointsEmitterParams The ERC-20 points emitter settings
     function deploy(
         address _initialOwner,
         address _weth,
@@ -266,7 +266,7 @@ contract RevolutionBuilder is
     /// @return dao DAO deployed address
     /// @return cultureIndex CultureIndex deployed address
     /// @return erc20Token ERC-20 token deployed address
-    /// @return revolutionPointsEmitter ERC-20 token emitter deployed address
+    /// @return revolutionPointsEmitter ERC-20 points emitter deployed address
     /// @return maxHeap MaxHeap deployed address
     function getAddresses(
         address _token

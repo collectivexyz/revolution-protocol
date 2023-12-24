@@ -1309,8 +1309,8 @@ interface IRevolutionPointsEmitter {
     );
 
     /**
-     * @notice Initialize the token emitter
-     * @param initialOwner The initial owner of the token emitter
+     * @notice Initialize the points emitter
+     * @param initialOwner The initial owner of the points emitter
      * @param weth The address of the WETH contract.
      * @param erc20Token The ERC-20 token contract address
      * @param vrgdac The VRGDA contract address
@@ -1391,8 +1391,8 @@ contract RevolutionPointsEmitter is
     ///                                                          ///
 
     /**
-     * @notice Initialize the token emitter
-     * @param _initialOwner The initial owner of the token emitter
+     * @notice Initialize the points emitter
+     * @param _initialOwner The initial owner of the points emitter
      * @param _weth The address of the WETH contract
      * @param _erc20Token The ERC-20 token contract address
      * @param _vrgdac The VRGDA contract address
@@ -1462,7 +1462,7 @@ contract RevolutionPointsEmitter is
     }
 
     /**
-     * @notice Unpause the token emitter.
+     * @notice Unpause the points emitter.
      * @dev This function can only be called by the owner when the
      * contract is paused.
      */
@@ -1844,7 +1844,7 @@ interface IRevolutionBuilder is IUUPS {
         string symbol;
     }
 
-    /// @notice The ERC-20 token emitter VRGDA parameters
+    /// @notice The ERC-20 points emitter VRGDA parameters
     /// @param vrgdaParams // The VRGDA parameters
     /// @param creatorsAddress // The address to send creator payments to
     struct RevolutionPointsEmitterParams {
@@ -1853,7 +1853,7 @@ interface IRevolutionBuilder is IUUPS {
         address creatorsAddress;
     }
 
-    /// @notice The ERC-20 token emitter VRGDA parameters
+    /// @notice The ERC-20 points emitter VRGDA parameters
     /// @param targetPrice // The target price for a token if sold on pace, scaled by 1e18.
     /// @param priceDecayPercent // The percent the price decays per unit of time with no sales, scaled by 1e18.
     /// @param tokensPerTimeUnit // The number of tokens to target selling in 1 full unit of time, scaled by 1e18.
@@ -1863,7 +1863,7 @@ interface IRevolutionBuilder is IUUPS {
         int256 tokensPerTimeUnit;
     }
 
-    /// @notice The ERC-20 token emitter creator parameters
+    /// @notice The ERC-20 points emitter creator parameters
     /// @param creatorRateBps The creator rate basis points of each auction - the share of the winning bid that is reserved for the creator
     /// @param entropyRateBps The entropy rate basis points of each auction - the portion of the creator's share that is directly sent to the creator in ETH
     struct PointsEmitterCreatorParams {
@@ -1924,7 +1924,7 @@ interface IRevolutionBuilder is IUUPS {
     /// @param govParams The governance settings
     /// @param cultureIndexParams The CultureIndex settings
     /// @param erc20TokenParams The ERC-20 token settings
-    /// @param revolutionPointsEmitterParams The ERC-20 token emitter settings
+    /// @param revolutionPointsEmitterParams The ERC-20 points emitter settings
     function deploy(
         address initialOwner,
         address weth,

@@ -79,8 +79,8 @@ contract RevolutionPointsEmitter is
     ///                                                          ///
 
     /**
-     * @notice Initialize the token emitter
-     * @param _initialOwner The initial owner of the token emitter
+     * @notice Initialize the points emitter
+     * @param _initialOwner The initial owner of the points emitter
      * @param _weth The address of the WETH contract
      * @param _erc20Token The ERC-20 token contract address
      * @param _vrgdac The VRGDA contract address
@@ -150,7 +150,7 @@ contract RevolutionPointsEmitter is
     }
 
     /**
-     * @notice Unpause the token emitter.
+     * @notice Unpause the points emitter.
      * @dev This function can only be called by the owner when the
      * contract is paused.
      */
