@@ -70,7 +70,7 @@ contract RevolutionPoints is Initializable, ERC20VotesUpgradeable, Ownable2StepU
     /// @param _revolutionPointsParams The params of the token
     function initialize(
         address _initialOwner,
-        IRevolutionBuilder.ERC20TokenParams calldata _revolutionPointsParams
+        IRevolutionBuilder.PointsParams calldata _revolutionPointsParams
     ) external initializer {
         if (msg.sender != address(manager)) revert ONLY_MANAGER();
 

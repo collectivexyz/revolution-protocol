@@ -127,7 +127,7 @@ contract RevolutionBuilder is
     ///                           DAO DEPLOY                     ///
     ///                                                          ///
 
-    /// @notice Deploys a DAO with custom token, auction, emitter, erc20, and governance settings
+    /// @notice Deploys a DAO with custom token, auction, emitter, revolution points, and governance settings
     /// @param _initialOwner The initial owner address
     /// @param _weth The WETH address
     /// @param _erc721TokenParams The ERC-721 token settings
@@ -143,8 +143,8 @@ contract RevolutionBuilder is
         AuctionParams calldata _auctionParams,
         GovParams calldata _govParams,
         CultureIndexParams calldata _cultureIndexParams,
-        ERC20TokenParams calldata _revolutionPointsParams,
-        RevolutionPointsEmitterParams calldata _revolutionPointsEmitterParams
+        PointsParams calldata _revolutionPointsParams,
+        PointsEmitterParams calldata _revolutionPointsEmitterParams
     ) external returns (DAOAddresses memory) {
         require(_initialOwner != address(0), "Initial owner cannot be 0x0");
 

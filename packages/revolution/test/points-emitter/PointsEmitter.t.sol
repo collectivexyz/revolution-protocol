@@ -13,7 +13,7 @@ import { RevolutionBuilderTest } from "../RevolutionBuilder.t.sol";
 import { IRevolutionPoints } from "../../src/interfaces/IRevolutionPoints.sol";
 import { ERC1967Proxy } from "../../src/libs/proxy/ERC1967Proxy.sol";
 
-contract ERC20PointsEmitterTest is RevolutionBuilderTest {
+contract PointsEmitterTest is RevolutionBuilderTest {
     event Log(string, uint);
 
     // 1,000 tokens per day is the target emission
@@ -33,7 +33,7 @@ contract ERC20PointsEmitterTest is RevolutionBuilderTest {
 
         int256 priceDecayPercent = 1e18 / 10;
 
-        super.setRevolutionPointsEmitterParams(
+        super.setPointsEmitterParams(
             oneFullTokenTargetPrice,
             priceDecayPercent,
             int256(1e18 * tokensPerTimeUnit),
@@ -291,10 +291,7 @@ contract ERC20PointsEmitterTest is RevolutionBuilderTest {
 
         IRevolutionPoints(governanceToken).initialize({
             initialOwner: address(emitter1),
-            revolutionPointsParams: IRevolutionBuilder.ERC20TokenParams({
-                name: "Revolution Governance",
-                symbol: "GOV"
-            })
+            revolutionPointsParams: IRevolutionBuilder.PointsParams({ name: "Revolution Governance", symbol: "GOV" })
         });
 
         vm.deal(address(21), 100000 ether);
@@ -777,10 +774,7 @@ contract ERC20PointsEmitterTest is RevolutionBuilderTest {
 
         IRevolutionPoints(governanceToken).initialize({
             initialOwner: address(emitter2),
-            revolutionPointsParams: IRevolutionBuilder.ERC20TokenParams({
-                name: "Revolution Governance",
-                symbol: "GOV"
-            })
+            revolutionPointsParams: IRevolutionBuilder.PointsParams({ name: "Revolution Governance", symbol: "GOV" })
         });
 
         vm.deal(address(this), 100000 ether);

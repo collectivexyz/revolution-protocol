@@ -195,7 +195,7 @@ contract CultureIndex is
             revolutionPoints.totalSupply(),
             erc721VotingToken.totalSupply()
         );
-        newPiece.totalERC20Supply = revolutionPoints.totalSupply();
+        newPiece.totalPointsSupply = revolutionPoints.totalSupply();
         newPiece.metadata = metadata;
         newPiece.sponsor = msg.sender;
         newPiece.creationBlock = block.number;
@@ -240,12 +240,12 @@ contract CultureIndex is
 
     /**
      * @notice Calculates the vote weight of a voter.
-     * @param erc20Balance The ERC20 balance of the voter.
+     * @param pointsBalance The RevolutionPoints balance of the voter.
      * @param erc721Balance The ERC721 balance of the voter.
      * @return The vote weight of the voter.
      */
-    function _calculateVoteWeight(uint256 erc20Balance, uint256 erc721Balance) internal view returns (uint256) {
-        return erc20Balance + (erc721Balance * erc721VotingTokenWeight);
+    function _calculateVoteWeight(uint256 pointsBalance, uint256 erc721Balance) internal view returns (uint256) {
+        return pointsBalance + (erc721Balance * erc721VotingTokenWeight);
     }
 
     function _getVotes(address account) internal view returns (uint256) {

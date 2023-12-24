@@ -1839,7 +1839,7 @@ interface IRevolutionBuilder is IUUPS {
     /// @notice The ERC-20 token parameters
     /// @param name The token name
     /// @param symbol The token symbol
-    struct ERC20TokenParams {
+    struct PointsParams {
         string name;
         string symbol;
     }
@@ -1847,7 +1847,7 @@ interface IRevolutionBuilder is IUUPS {
     /// @notice The ERC-20 points emitter VRGDA parameters
     /// @param vrgdaParams // The VRGDA parameters
     /// @param creatorsAddress // The address to send creator payments to
-    struct RevolutionPointsEmitterParams {
+    struct PointsEmitterParams {
         VRGDAParams vrgdaParams;
         PointsEmitterCreatorParams creatorParams;
         address creatorsAddress;
@@ -1932,8 +1932,8 @@ interface IRevolutionBuilder is IUUPS {
         AuctionParams calldata auctionParams,
         GovParams calldata govParams,
         CultureIndexParams calldata cultureIndexParams,
-        ERC20TokenParams calldata revolutionPointsParams,
-        RevolutionPointsEmitterParams calldata revolutionPointsEmitterParams
+        PointsParams calldata revolutionPointsParams,
+        PointsEmitterParams calldata revolutionPointsEmitterParams
     ) external returns (RevolutionBuilderTypesV1.DAOAddresses memory);
 
     /// @notice A DAO's remaining contract addresses from its token address

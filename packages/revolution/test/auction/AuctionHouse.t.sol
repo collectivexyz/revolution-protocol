@@ -26,7 +26,7 @@ contract AuctionHouseTest is RevolutionBuilderTest {
         super.setUp();
         super.setMockParams();
 
-        super.setERC20TokenParams("Revolution Governance", "GOV");
+        super.setPointsParams("Revolution Governance", "GOV");
 
         super.setCultureIndexParams("Vrbs", "Our community Vrbs. Must be 32x32.", 10, 200, 0);
 

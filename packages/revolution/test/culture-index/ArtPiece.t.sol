@@ -329,8 +329,8 @@ contract CultureIndexArtPieceTest is CultureIndexTestSuite {
         cultureIndex.createPiece(metadata, creators);
     }
 
-    function testArtPieceCreationAndVoting(uint256 erc20Supply, uint256 quorumVotesBPS) public {
-        vm.assume(erc20Supply > 0 && erc20Supply < 2 ** 200);
+    function testArtPieceCreationAndVoting(uint256 pointsSupply, uint256 quorumVotesBPS) public {
+        vm.assume(pointsSupply > 0 && pointsSupply < 2 ** 200);
         vm.assume(quorumVotesBPS <= cultureIndex.MAX_QUORUM_VOTES_BPS());
 
         // Set the quorum BPS
@@ -342,14 +342,14 @@ contract CultureIndexArtPieceTest is CultureIndexTestSuite {
         cultureIndex.acceptOwnership();
 
         vm.startPrank(address(revolutionPointsEmitter));
-        revolutionPoints.mint(address(this), erc20Supply);
+        revolutionPoints.mint(address(this), pointsSupply);
 
         // Create an art piece
         uint256 pieceId = createDefaultArtPiece();
         CultureIndex.ArtPiece memory piece = cultureIndex.getPieceById(pieceId);
 
         // Check initial values
-        uint256 expectedTotalVotesSupply = erc20Supply;
+        uint256 expectedTotalVotesSupply = pointsSupply;
         uint256 expectedQuorumVotes = (quorumVotesBPS * expectedTotalVotesSupply) / 10_000;
         assertEq(piece.quorumVotes, expectedQuorumVotes, "Quorum votes should be set correctly on creation");
         assertEq(
@@ -357,7 +357,7 @@ contract CultureIndexArtPieceTest is CultureIndexTestSuite {
             expectedTotalVotesSupply,
             "Total votes supply should be set correctly on creation"
         );
-        assertEq(piece.totalERC20Supply, erc20Supply, "Total ERC20 supply should be set correctly on creation");
+        assertEq(piece.totalPointsSupply, pointsSupply, "Total Points supply should be set correctly on creation");
 
         vm.roll(block.number + 1);
         // Cast votes
@@ -369,19 +369,19 @@ contract CultureIndexArtPieceTest is CultureIndexTestSuite {
         erc721Token.mint();
 
         vm.startPrank(address(revolutionPointsEmitter));
-        revolutionPoints.mint(address(this), erc20Supply);
+        revolutionPoints.mint(address(this), pointsSupply);
 
         vm.roll(block.number + 1);
 
         CultureIndex.ArtPiece memory newPiece = cultureIndex.getPieceById(createDefaultArtPiece());
         emit log_named_uint("newPiece.quorumVotes", newPiece.quorumVotes);
-        emit log_named_uint("erc20Supply", erc20Supply);
+        emit log_named_uint("pointsSupply", pointsSupply);
         emit log_named_uint(
             "1e18 * cultureIndex.erc721VotingTokenWeight()",
             1e18 * cultureIndex.erc721VotingTokenWeight()
         );
 
-        uint256 expectedTotalVotesSupply2 = erc20Supply * 2 + cultureIndex.erc721VotingTokenWeight();
+        uint256 expectedTotalVotesSupply2 = pointsSupply * 2 + cultureIndex.erc721VotingTokenWeight();
         emit log_named_uint("expectedTotalVotesSupply2", expectedTotalVotesSupply2);
         uint256 expectedQuorumVotes2 = (quorumVotesBPS * (expectedTotalVotesSupply2)) / 10_000;
         assertEq(newPiece.quorumVotes, expectedQuorumVotes2, "Quorum votes should be set correctly on second creation");
@@ -391,9 +391,9 @@ contract CultureIndexArtPieceTest is CultureIndexTestSuite {
             "Total votes supply should be set correctly on second creation"
         );
         assertEq(
-            newPiece.totalERC20Supply,
-            erc20Supply * 2,
-            "Total ERC20 supply should be set correctly on second creation"
+            newPiece.totalPointsSupply,
+            pointsSupply * 2,
+            "Total Points supply should be set correctly on second creation"
         );
     }
 }

@@ -5,14 +5,14 @@ import { Test } from "forge-std/Test.sol";
 import { RevolutionPoints } from "../../src/RevolutionPoints.sol";
 import { RevolutionBuilderTest } from "../RevolutionBuilder.t.sol";
 
-contract NontransferableERC20TestSuite is RevolutionBuilderTest {
+contract PointsTestSuite is RevolutionBuilderTest {
     event Log(string, uint);
 
     function setUp() public override {
         super.setUp();
         super.setMockParams();
 
-        super.setERC20TokenParams("Revolution Governance", "GOV");
+        super.setPointsParams("Revolution Governance", "GOV");
 
         super.setCultureIndexParams("Vrbs", "Our community Vrbs. Must be 32x32.", 10, 200, 0);
 

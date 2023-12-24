@@ -207,7 +207,7 @@ contract VerbsDAOLogicV1 is
 
     struct ProposalTemp {
         uint256 totalWeightedSupply;
-        uint256 erc20PointsSupply;
+        uint256 revolutionPointsSupply;
         uint256 verbsTokenSupply;
         uint256 proposalThreshold;
         uint256 latestProposalId;
@@ -234,7 +234,7 @@ contract VerbsDAOLogicV1 is
         ProposalTemp memory temp;
 
         temp.totalWeightedSupply = _getWeightedTotalSupply();
-        temp.erc20PointsSupply = points.totalSupply();
+        temp.revolutionPointsSupply = points.totalSupply();
         temp.verbsTokenSupply = verbs.totalSupply();
 
         temp.proposalThreshold = bps2Uint(proposalThresholdBPS, temp.totalWeightedSupply);
@@ -282,7 +282,7 @@ contract VerbsDAOLogicV1 is
         newProposal.vetoed = false;
         newProposal.totalWeightedSupply = temp.totalWeightedSupply;
         newProposal.verbsTokenSupply = temp.verbsTokenSupply;
-        newProposal.erc20PointsSupply = temp.erc20PointsSupply;
+        newProposal.revolutionPointsSupply = temp.revolutionPointsSupply;
         newProposal.creationBlock = block.number;
 
         latestProposalIds[newProposal.proposer] = newProposal.id;
@@ -383,9 +383,9 @@ contract VerbsDAOLogicV1 is
     function getTotalVotes(address account, uint256 blockNumber) public view returns (uint256) {
         uint256 verbsTokenAccountVotes = verbs.getPastVotes(account, blockNumber);
 
-        uint256 erc20PointsAccountVotes = points.getPastVotes(account, blockNumber);
+        uint256 revolutionPointsAccountVotes = points.getPastVotes(account, blockNumber);
 
-        return (verbsTokenAccountVotes * erc721TokenVotingWeight) + erc20PointsAccountVotes;
+        return (verbsTokenAccountVotes * erc721TokenVotingWeight) + revolutionPointsAccountVotes;
     }
 
     /**
@@ -394,9 +394,9 @@ contract VerbsDAOLogicV1 is
     function _getWeightedTotalSupply() internal view returns (uint256) {
         uint256 verbsTokenSupply = verbs.totalSupply();
 
-        uint256 erc20PointsSupply = points.totalSupply();
+        uint256 revolutionPointsSupply = points.totalSupply();
 
-        return (verbsTokenSupply * erc721TokenVotingWeight) + erc20PointsSupply;
+        return (verbsTokenSupply * erc721TokenVotingWeight) + revolutionPointsSupply;
     }
 
     /**

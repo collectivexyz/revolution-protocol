@@ -349,7 +349,7 @@ contract VerbsDAOStorageV1 is VerbsDAOProxyStorage {
         /// @notice The total weighted supply at the time of proposal creation
         uint256 totalWeightedSupply;
         /// @notice The total supply of points at the time of proposal creation
-        uint256 erc20PointsSupply;
+        uint256 revolutionPointsSupply;
         /// @notice The total supply of verbs at the time of proposal creation
         uint256 verbsTokenSupply;
         /// @notice The block at which this proposal was created

@@ -200,7 +200,7 @@ contract TokenMintingTest is VerbsTokenTestSuite {
             isDropped: true,
             creationBlock: block.number,
             quorumVotes: 0,
-            totalERC20Supply: 0,
+            totalPointsSupply: 0,
             totalVotesSupply: 0
         });
 

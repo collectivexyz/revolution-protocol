@@ -110,18 +110,18 @@ interface IRevolutionBuilder is IUUPS {
         VerbsDAOStorageV1.DynamicQuorumParams dynamicQuorumParams;
     }
 
-    /// @notice The ERC-20 token parameters
+    /// @notice The RevolutionPoints ERC-20 token parameters
     /// @param name The token name
     /// @param symbol The token symbol
-    struct ERC20TokenParams {
+    struct PointsParams {
         string name;
         string symbol;
     }
 
-    /// @notice The ERC-20 points emitter VRGDA parameters
+    /// @notice The RevolutionPoints ERC-20 emitter VRGDA parameters
     /// @param vrgdaParams // The VRGDA parameters
     /// @param creatorsAddress // The address to send creator payments to
-    struct RevolutionPointsEmitterParams {
+    struct PointsEmitterParams {
         VRGDAParams vrgdaParams;
         PointsEmitterCreatorParams creatorParams;
         address creatorsAddress;
@@ -197,8 +197,8 @@ interface IRevolutionBuilder is IUUPS {
     /// @param auctionParams The auction settings
     /// @param govParams The governance settings
     /// @param cultureIndexParams The CultureIndex settings
-    /// @param revolutionPointsParams The ERC-20 token settings
-    /// @param revolutionPointsEmitterParams The ERC-20 points emitter settings
+    /// @param pointsParams The RevolutionPoints token settings
+    /// @param pointsEmitterParams The RevolutionPoints emitter settings
     function deploy(
         address initialOwner,
         address weth,
@@ -206,8 +206,8 @@ interface IRevolutionBuilder is IUUPS {
         AuctionParams calldata auctionParams,
         GovParams calldata govParams,
         CultureIndexParams calldata cultureIndexParams,
-        ERC20TokenParams calldata revolutionPointsParams,
-        RevolutionPointsEmitterParams calldata revolutionPointsEmitterParams
+        PointsParams calldata pointsParams,
+        PointsEmitterParams calldata pointsEmitterParams
     ) external returns (RevolutionBuilderTypesV1.DAOAddresses memory);
 
     /// @notice A DAO's remaining contract addresses from its token address
