@@ -1394,21 +1394,21 @@ contract RevolutionPointsEmitter is
      * @notice Initialize the points emitter
      * @param _initialOwner The initial owner of the points emitter
      * @param _weth The address of the WETH contract
-     * @param _erc20Token The ERC-20 token contract address
+     * @param _revolutionPoints The ERC-20 token contract address
      * @param _vrgdac The VRGDA contract address
      * @param _creatorsAddress The address to pay the creator reward to
      */
     function initialize(
         address _initialOwner,
         address _weth,
-        address _erc20Token,
+        address _revolutionPoints,
         address _vrgdac,
         address _creatorsAddress,
         IRevolutionBuilder.PointsEmitterCreatorParams calldata _creatorParams
     ) external initializer {
         if (msg.sender != address(manager)) revert NOT_MANAGER();
         if (_initialOwner == address(0)) revert ADDRESS_ZERO();
-        if (_erc20Token == address(0)) revert ADDRESS_ZERO();
+        if (_revolutionPoints == address(0)) revert ADDRESS_ZERO();
         if (_vrgdac == address(0)) revert ADDRESS_ZERO();
         if (_creatorsAddress == address(0)) revert ADDRESS_ZERO();
         if (_weth == address(0)) revert ADDRESS_ZERO();
@@ -1424,7 +1424,7 @@ contract RevolutionPointsEmitter is
 
         creatorsAddress = _creatorsAddress;
         vrgdac = VRGDAC(_vrgdac);
-        token = RevolutionPoints(_erc20Token);
+        token = RevolutionPoints(_revolutionPoints);
         creatorRateBps = _creatorParams.creatorRateBps;
         entropyRateBps = _creatorParams.entropyRateBps;
         WETH = _weth;
@@ -1911,7 +1911,7 @@ interface IRevolutionBuilder is IUUPS {
     function cultureIndexImpl() external view returns (address);
 
     /// @notice The revolutionPoints implementation address
-    function erc20TokenImpl() external view returns (address);
+    function revolutionPointsImpl() external view returns (address);
 
     /// @notice The maxHeap implementation address
     function maxHeapImpl() external view returns (address);
@@ -1923,7 +1923,7 @@ interface IRevolutionBuilder is IUUPS {
     /// @param auctionParams The auction settings
     /// @param govParams The governance settings
     /// @param cultureIndexParams The CultureIndex settings
-    /// @param erc20TokenParams The ERC-20 token settings
+    /// @param revolutionPointsParams The ERC-20 token settings
     /// @param revolutionPointsEmitterParams The ERC-20 points emitter settings
     function deploy(
         address initialOwner,
@@ -1932,7 +1932,7 @@ interface IRevolutionBuilder is IUUPS {
         AuctionParams calldata auctionParams,
         GovParams calldata govParams,
         CultureIndexParams calldata cultureIndexParams,
-        ERC20TokenParams calldata erc20TokenParams,
+        ERC20TokenParams calldata revolutionPointsParams,
         RevolutionPointsEmitterParams calldata revolutionPointsEmitterParams
     ) external returns (RevolutionBuilderTypesV1.DAOAddresses memory);
 

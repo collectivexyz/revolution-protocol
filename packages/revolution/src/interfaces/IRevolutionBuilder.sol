@@ -185,7 +185,7 @@ interface IRevolutionBuilder is IUUPS {
     function cultureIndexImpl() external view returns (address);
 
     /// @notice The revolutionPoints implementation address
-    function erc20TokenImpl() external view returns (address);
+    function revolutionPointsImpl() external view returns (address);
 
     /// @notice The maxHeap implementation address
     function maxHeapImpl() external view returns (address);
@@ -197,7 +197,7 @@ interface IRevolutionBuilder is IUUPS {
     /// @param auctionParams The auction settings
     /// @param govParams The governance settings
     /// @param cultureIndexParams The CultureIndex settings
-    /// @param erc20TokenParams The ERC-20 token settings
+    /// @param revolutionPointsParams The ERC-20 token settings
     /// @param revolutionPointsEmitterParams The ERC-20 points emitter settings
     function deploy(
         address initialOwner,
@@ -206,7 +206,7 @@ interface IRevolutionBuilder is IUUPS {
         AuctionParams calldata auctionParams,
         GovParams calldata govParams,
         CultureIndexParams calldata cultureIndexParams,
-        ERC20TokenParams calldata erc20TokenParams,
+        ERC20TokenParams calldata revolutionPointsParams,
         RevolutionPointsEmitterParams calldata revolutionPointsEmitterParams
     ) external returns (RevolutionBuilderTypesV1.DAOAddresses memory);
 

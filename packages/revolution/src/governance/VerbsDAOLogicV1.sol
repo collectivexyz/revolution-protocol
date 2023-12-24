@@ -147,13 +147,13 @@ contract VerbsDAOLogicV1 is
      * @notice Used to initialize the contract during delegator contructor
      * @param executor_ The address of the DAOExecutor
      * @param erc721Token_ The address of the ERC-721 token
-     * @param erc20Token_ The address of the ERC-20 token
+     * @param revolutionPoints_ The address of the ERC-20 token
      * @param govParams_ The initial governance parameters
      */
     function initialize(
         address executor_,
         address erc721Token_,
-        address erc20Token_,
+        address revolutionPoints_,
         IRevolutionBuilder.GovParams calldata govParams_
     ) public virtual initializer {
         if (msg.sender != address(manager)) revert NOT_MANAGER();
@@ -162,7 +162,7 @@ contract VerbsDAOLogicV1 is
 
         if (erc721Token_ == address(0)) revert INVALID_ERC721_ADDRESS();
 
-        if (erc20Token_ == address(0)) revert INVALID_ERC20_ADDRESS();
+        if (revolutionPoints_ == address(0)) revert INVALID_ERC20_ADDRESS();
 
         if (govParams_.votingPeriod < MIN_VOTING_PERIOD || govParams_.votingPeriod > MAX_VOTING_PERIOD)
             revert INVALID_VOTING_PERIOD();
@@ -189,7 +189,7 @@ contract VerbsDAOLogicV1 is
 
         timelock = IDAOExecutor(executor_);
         verbs = VerbsTokenLike(erc721Token_);
-        points = PointsLike(erc20Token_);
+        points = PointsLike(revolutionPoints_);
         vetoer = govParams_.vetoer;
         votingPeriod = govParams_.votingPeriod;
         votingDelay = govParams_.votingDelay;

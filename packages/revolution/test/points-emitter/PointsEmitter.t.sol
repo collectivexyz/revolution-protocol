@@ -272,7 +272,7 @@ contract ERC20PointsEmitterTest is RevolutionBuilderTest {
 
         RevolutionProtocolRewards protocolRewards = new RevolutionProtocolRewards();
 
-        address governanceToken = address(new ERC1967Proxy(erc20TokenImpl, ""));
+        address governanceToken = address(new ERC1967Proxy(revolutionPointsImpl, ""));
 
         address emitter1 = address(new ERC1967Proxy(revolutionPointsEmitterImpl, ""));
 
@@ -291,7 +291,7 @@ contract ERC20PointsEmitterTest is RevolutionBuilderTest {
 
         IRevolutionPoints(governanceToken).initialize({
             initialOwner: address(emitter1),
-            erc20TokenParams: IRevolutionBuilder.ERC20TokenParams({ name: "Revolution Governance", symbol: "GOV" })
+            revolutionPointsParams: IRevolutionBuilder.ERC20TokenParams({ name: "Revolution Governance", symbol: "GOV" })
         });
 
         vm.deal(address(21), 100000 ether);
@@ -755,7 +755,7 @@ contract ERC20PointsEmitterTest is RevolutionBuilderTest {
         // Deploy the malicious owner contract
         MaliciousOwner maliciousOwner = new MaliciousOwner(address(revolutionPointsEmitter));
 
-        address governanceToken = address(new ERC1967Proxy(erc20TokenImpl, ""));
+        address governanceToken = address(new ERC1967Proxy(revolutionPointsImpl, ""));
 
         address emitter2 = address(new ERC1967Proxy(revolutionPointsEmitterImpl, ""));
 
@@ -774,7 +774,7 @@ contract ERC20PointsEmitterTest is RevolutionBuilderTest {
 
         IRevolutionPoints(governanceToken).initialize({
             initialOwner: address(emitter2),
-            erc20TokenParams: IRevolutionBuilder.ERC20TokenParams({ name: "Revolution Governance", symbol: "GOV" })
+            revolutionPointsParams: IRevolutionBuilder.ERC20TokenParams({ name: "Revolution Governance", symbol: "GOV" })
         });
 
         vm.deal(address(this), 100000 ether);
@@ -928,7 +928,7 @@ contract ERC20PointsEmitterTest is RevolutionBuilderTest {
 
         RevolutionProtocolRewards protocolRewards = new RevolutionProtocolRewards();
 
-        address governanceToken = address(new ERC1967Proxy(erc20TokenImpl, ""));
+        address governanceToken = address(new ERC1967Proxy(revolutionPointsImpl, ""));
 
         address emitter1 = address(new ERC1967Proxy(revolutionPointsEmitterImpl, ""));
 

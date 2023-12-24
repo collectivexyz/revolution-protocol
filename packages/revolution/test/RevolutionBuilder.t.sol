@@ -37,7 +37,7 @@ contract RevolutionBuilderTest is Test {
     address internal auctionImpl;
     address internal executorImpl;
     address internal daoImpl;
-    address internal erc20TokenImpl;
+    address internal revolutionPointsImpl;
     address internal revolutionPointsEmitterImpl;
     address internal cultureIndexImpl;
     address internal maxHeapImpl;
@@ -98,7 +98,7 @@ contract RevolutionBuilderTest is Test {
         auctionImpl = address(new AuctionHouse(address(manager)));
         executorImpl = address(new DAOExecutor(address(manager)));
         daoImpl = address(new VerbsDAOLogicV1(address(manager)));
-        erc20TokenImpl = address(new RevolutionPoints(address(manager)));
+        revolutionPointsImpl = address(new RevolutionPoints(address(manager)));
         revolutionPointsEmitterImpl = address(
             new RevolutionPointsEmitter(address(manager), address(protocolRewards), revolutionDAO)
         );
@@ -113,7 +113,7 @@ contract RevolutionBuilderTest is Test {
                 executorImpl,
                 daoImpl,
                 cultureIndexImpl,
-                erc20TokenImpl,
+                revolutionPointsImpl,
                 revolutionPointsEmitterImpl,
                 maxHeapImpl
             )
@@ -131,7 +131,7 @@ contract RevolutionBuilderTest is Test {
     IRevolutionBuilder.AuctionParams internal auctionParams;
     IRevolutionBuilder.GovParams internal govParams;
     IRevolutionBuilder.CultureIndexParams internal cultureIndexParams;
-    IRevolutionBuilder.ERC20TokenParams internal erc20TokenParams;
+    IRevolutionBuilder.ERC20TokenParams internal revolutionPointsParams;
     IRevolutionBuilder.RevolutionPointsEmitterParams internal revolutionPointsEmitterParams;
 
     function setMockERC721TokenParams() internal virtual {
@@ -233,7 +233,7 @@ contract RevolutionBuilderTest is Test {
     }
 
     function setERC20TokenParams(string memory _name, string memory _symbol) internal virtual {
-        erc20TokenParams = IRevolutionBuilder.ERC20TokenParams({ name: _name, symbol: _symbol });
+        revolutionPointsParams = IRevolutionBuilder.ERC20TokenParams({ name: _name, symbol: _symbol });
     }
 
     function setMockRevolutionPointsEmitterParams() internal virtual {
@@ -291,7 +291,7 @@ contract RevolutionBuilderTest is Test {
             auctionParams,
             govParams,
             cultureIndexParams,
-            erc20TokenParams,
+            revolutionPointsParams,
             revolutionPointsEmitterParams
         );
     }

@@ -82,21 +82,21 @@ contract RevolutionPointsEmitter is
      * @notice Initialize the points emitter
      * @param _initialOwner The initial owner of the points emitter
      * @param _weth The address of the WETH contract
-     * @param _erc20Token The ERC-20 token contract address
+     * @param _revolutionPoints The ERC-20 token contract address
      * @param _vrgdac The VRGDA contract address
      * @param _creatorsAddress The address to pay the creator reward to
      */
     function initialize(
         address _initialOwner,
         address _weth,
-        address _erc20Token,
+        address _revolutionPoints,
         address _vrgdac,
         address _creatorsAddress,
         IRevolutionBuilder.PointsEmitterCreatorParams calldata _creatorParams
     ) external initializer {
         if (msg.sender != address(manager)) revert NOT_MANAGER();
         if (_initialOwner == address(0)) revert ADDRESS_ZERO();
-        if (_erc20Token == address(0)) revert ADDRESS_ZERO();
+        if (_revolutionPoints == address(0)) revert ADDRESS_ZERO();
         if (_vrgdac == address(0)) revert ADDRESS_ZERO();
         if (_creatorsAddress == address(0)) revert ADDRESS_ZERO();
         if (_weth == address(0)) revert ADDRESS_ZERO();
@@ -112,7 +112,7 @@ contract RevolutionPointsEmitter is
 
         creatorsAddress = _creatorsAddress;
         vrgdac = VRGDAC(_vrgdac);
-        token = RevolutionPoints(_erc20Token);
+        token = RevolutionPoints(_revolutionPoints);
         creatorRateBps = _creatorParams.creatorRateBps;
         entropyRateBps = _creatorParams.entropyRateBps;
         WETH = _weth;
