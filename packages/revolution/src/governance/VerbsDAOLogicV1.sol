@@ -672,11 +672,11 @@ contract VerbsDAOLogicV1 is
      * @return The number of votes cast
      */
     function castVoteInternal(address voter, uint256 proposalId, uint8 support) internal returns (uint256) {
-        require(state(proposalId) == ProposalState.Active, "DAO::castVoteInternal: voting is closed");
-        require(support <= 2, "DAO::castVoteInternal: invalid vote type");
+        if (state(proposalId) != ProposalState.Active) revert VOTING_CLOSED();
+        if (support > 2) revert INVALID_VOTE_TYPE();
         Proposal storage proposal = _proposals[proposalId];
         Receipt storage receipt = proposal.receipts[voter];
-        require(receipt.hasVoted == false, "DAO::castVoteInternal: voter already voted");
+        if (receipt.hasVoted) revert VOTER_ALREADY_VOTED();
 
         /// @notice: Unlike GovernerBravo, votes are considered from the block the proposal was created in order to normalize quorumVotes and proposalThreshold metrics
         uint256 votes = getTotalVotes(voter, proposalCreationBlock(proposal));

@@ -192,6 +192,15 @@ contract VerbsDAOStorageV1 is VerbsDAOProxyStorage {
     /// @dev Reverts if the proposal is not in the 'Succeeded' state when attempting to queue.
     error PROPOSAL_NOT_SUCCEEDED();
 
+    /// @dev Reverts if the proposal is not currently in an active state for voting.
+    error VOTING_CLOSED();
+
+    /// @dev Reverts if an invalid vote type is provided (vote type must be within a certain range).
+    error INVALID_VOTE_TYPE();
+
+    /// @dev Reverts if the voter has already cast a vote for the proposal.
+    error VOTER_ALREADY_VOTED();
+
     /// @notice The contract upgrade manager
     IRevolutionBuilder public immutable manager;
 
