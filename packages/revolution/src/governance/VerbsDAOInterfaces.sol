@@ -183,6 +183,12 @@ contract VerbsDAOStorageV1 is VerbsDAOProxyStorage {
     /// @dev Reverts if the number of actions in the proposal exceeds the maximum allowed.
     error TOO_MANY_ACTIONS();
 
+    /// @dev Reverts if the proposer already has an active proposal.
+    error ACTIVE_PROPOSAL_EXISTS();
+
+    /// @dev Reverts if the proposer already has a pending proposal.
+    error PENDING_PROPOSAL_EXISTS();
+
     /// @notice The contract upgrade manager
     IRevolutionBuilder public immutable manager;
 

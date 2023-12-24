@@ -269,14 +269,10 @@ contract VerbsDAOLogicV1 is
         temp.latestProposalId = latestProposalIds[msg.sender];
         if (temp.latestProposalId != 0) {
             ProposalState proposersLatestProposalState = state(temp.latestProposalId);
-            require(
-                proposersLatestProposalState != ProposalState.Active,
-                "DAO::propose: one live proposal per proposer, found an already active proposal"
-            );
-            require(
-                proposersLatestProposalState != ProposalState.Pending,
-                "DAO::propose: one live proposal per proposer, found an already pending proposal"
-            );
+
+            if (proposersLatestProposalState == ProposalState.Active) revert ACTIVE_PROPOSAL_EXISTS();
+
+            if (proposersLatestProposalState == ProposalState.Pending) revert PENDING_PROPOSAL_EXISTS();
         }
 
         temp.startBlock = block.number + votingDelay;
