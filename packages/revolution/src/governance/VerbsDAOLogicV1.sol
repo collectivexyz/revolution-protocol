@@ -340,10 +340,8 @@ contract VerbsDAOLogicV1 is
      * @param proposalId The id of the proposal to queue
      */
     function queue(uint256 proposalId) external {
-        require(
-            state(proposalId) == ProposalState.Succeeded,
-            "DAO::queue: proposal can only be queued if it is succeeded"
-        );
+        if (state(proposalId) != ProposalState.Succeeded) revert PROPOSAL_NOT_SUCCEEDED();
+
         Proposal storage proposal = _proposals[proposalId];
         uint256 eta = block.timestamp + timelock.delay();
         for (uint256 i = 0; i < proposal.targets.length; i++) {

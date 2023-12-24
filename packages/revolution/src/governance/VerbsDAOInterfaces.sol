@@ -189,6 +189,9 @@ contract VerbsDAOStorageV1 is VerbsDAOProxyStorage {
     /// @dev Reverts if the proposer already has a pending proposal.
     error PENDING_PROPOSAL_EXISTS();
 
+    /// @dev Reverts if the proposal is not in the 'Succeeded' state when attempting to queue.
+    error PROPOSAL_NOT_SUCCEEDED();
+
     /// @notice The contract upgrade manager
     IRevolutionBuilder public immutable manager;
 
