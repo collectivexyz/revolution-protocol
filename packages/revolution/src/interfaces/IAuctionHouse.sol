@@ -20,6 +20,16 @@ pragma solidity ^0.8.22;
 import { IRevolutionBuilder } from "./IRevolutionBuilder.sol";
 
 interface IAuctionHouse {
+    ///                                                          ///
+    ///                           ERRORS                         ///
+    ///                                                          ///
+
+    /// @dev Reverts if the function caller is not the manager.
+    error NOT_MANAGER();
+
+    /// @dev Reverts if address 0 is passed but not allowed
+    error ADDRESS_ZERO();
+
     struct Auction {
         // ID for the Verb (ERC721 token ID)
         uint256 verbId;

@@ -93,6 +93,7 @@ contract AuctionHouse is
 
     /// @param _manager The contract upgrade manager address
     constructor(address _manager) payable initializer {
+        if (_manager == address(0)) revert ZERO_ADDRESS();
         manager = IRevolutionBuilder(_manager);
     }
 
@@ -117,8 +118,8 @@ contract AuctionHouse is
         address _weth,
         IRevolutionBuilder.AuctionParams calldata _auctionParams
     ) external initializer {
-        require(msg.sender == address(manager), "Only manager can initialize");
-        require(_weth != address(0), "WETH cannot be zero address");
+        if (msg.sender != address(manager)) revert NOT_MANAGER();
+        if (_weth == address(0)) revert ZERO_ADDRESS();
 
         __Pausable_init();
         __ReentrancyGuard_init();
@@ -172,7 +173,7 @@ contract AuctionHouse is
         IAuctionHouse.Auction memory _auction = auction;
 
         //require bidder is valid address
-        require(bidder != address(0), "Bidder cannot be zero address");
+        if (bidder == address(0)) revert ZERO_ADDRESS();
         require(_auction.verbId == verbId, "Verb not up for auction");
         //slither-disable-next-line timestamp
         require(block.timestamp < _auction.endTime, "Auction expired");
