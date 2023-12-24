@@ -63,6 +63,9 @@ interface IAuctionHouse {
     /// @dev Reverts if the auction has not yet completed based on the current block timestamp.
     error AUCTION_NOT_COMPLETED();
 
+    /// @dev Reverts if the remaining gas is insufficient for creating an auction.
+    error INSUFFICIENT_GAS_FOR_AUCTION();
+
     struct Auction {
         // ID for the Verb (ERC721 token ID)
         uint256 verbId;

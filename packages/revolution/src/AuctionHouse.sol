@@ -127,10 +127,7 @@ contract AuctionHouse is
 
         _pause();
 
-        require(
-            _auctionParams.creatorRateBps >= _auctionParams.minCreatorRateBps,
-            "Creator rate must be greater than or equal to the creator rate"
-        );
+        if (_auctionParams.creatorRateBps < _auctionParams.minCreatorRateBps) revert CREATOR_RATE_TOO_LOW();
 
         verbs = IVerbsToken(_erc721Token);
         erc20TokenEmitter = IERC20TokenEmitter(_erc20TokenEmitter);
@@ -226,7 +223,6 @@ contract AuctionHouse is
      * @param _minCreatorRateBps New minimum creator rate in basis points.
      */
     function setMinCreatorRateBps(uint256 _minCreatorRateBps) external onlyOwner {
-        // require(_minCreatorRateBps <= creatorRateBps, "Min creator rate must be less than or equal to creator rate");
         if (_minCreatorRateBps > creatorRateBps) revert MIN_CREATOR_RATE_ABOVE_CREATOR_RATE();
 
         if (_minCreatorRateBps > 10_000) revert INVALID_BPS();
@@ -302,7 +298,7 @@ contract AuctionHouse is
      */
     function _createAuction() internal {
         // Check if there's enough gas to safely execute token.mint() and subsequent operations
-        require(gasleft() >= MIN_TOKEN_MINT_GAS_THRESHOLD, "Insufficient gas for creating auction");
+        if (gasleft() < MIN_TOKEN_MINT_GAS_THRESHOLD) revert INSUFFICIENT_GAS_FOR_AUCTION();
 
         try verbs.mint() returns (uint256 verbId) {
             uint256 startTime = block.timestamp;
