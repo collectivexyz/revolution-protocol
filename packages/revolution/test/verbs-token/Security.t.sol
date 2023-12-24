@@ -133,7 +133,7 @@ contract TokenSecurityTest is VerbsTokenTestSuite {
         address attacker = address(new ReentrancyAttackContractGeneral(address(erc721Token)));
 
         // Simulate a reentrancy attack for burn
-        vm.expectRevert("Sender is not the minter");
+        vm.expectRevert(abi.encodeWithSignature("NOT_MINTER()"));
         ReentrancyAttackContractGeneral(attacker).attackBurn();
     }
 
