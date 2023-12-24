@@ -68,14 +68,22 @@ Gas optimizations around the CultureIndex `createPiece` and `vote` functionality
 
 #### Revolution contracts
 
-```
-cd packages/revolution && slither src --checklist --show-ignored-findings --filter-paths "@openzeppelin|ERC721|Votes.sol" --config-file="../../.github/config/slither.config.json"
+Go into the Revolution directory (`cd packages/revolution`).
+
+If `slither .` doesn't work, consider the following command:
+
+```bash
+slither src --checklist --show-ignored-findings --filter-paths "@openzeppelin|ERC721|Votes.sol|VotesUpgradeable.sol|ERC20Upgradeable.sol" --config-file="../../slither.config.json"
 ```
 
 #### Protocol rewards
 
-```
-cd packages/protocol-rewards && slither src --checklist --show-ignored-findings --filter-paths "@openzeppelin"
+Go into the Protocol rewards directory (`cd packages/protocol-rewards`).
+
+If `slither .` doesn't work, consider the following command:
+
+```bash
+slither src --checklist --show-ignored-findings --filter-paths "@openzeppelin" --config-file="../../slither.config.json"
 ```
 
 # Developer Workflow

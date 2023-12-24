@@ -224,7 +224,6 @@ contract AuctionHouseSettleTest is AuctionHouseTest {
     }
 
     function getTokenQuoteForEtherHelper(uint256 etherAmount, int256 supply) public view returns (int gainedX) {
-        require(etherAmount > 0, "Ether amount must be greater than 0");
         // Note: By using toDaysWadUnsafe(block.timestamp - startTime) we are establishing that 1 "unit of time" is 1 day.
         // solhint-disable-next-line not-rely-on-time
         return

@@ -4,6 +4,40 @@ pragma solidity ^0.8.22;
 import { IRevolutionBuilder } from "./IRevolutionBuilder.sol";
 
 interface IERC20TokenEmitter {
+    ///                                                          ///
+    ///                           ERRORS                         ///
+    ///                                                          ///
+
+    /// @dev Reverts if the function caller is not the manager.
+    error NOT_MANAGER();
+
+    /// @dev Reverts if address 0 is passed but not allowed
+    error ADDRESS_ZERO();
+
+    /// @dev Reverts if invalid BPS is passed
+    error INVALID_BPS();
+
+    /// @dev Reverts if BPS does not add up to 10_000
+    error INVALID_BPS_SUM();
+
+    /// @dev Reverts if payment amount is 0
+    error INVALID_PAYMENT();
+
+    /// @dev Reverts if amount is 0
+    error INVALID_AMOUNT();
+
+    /// @dev Reverts if there is an array length mismatch
+    error PARALLEL_ARRAYS_REQUIRED();
+
+    /// @dev Reverts if the buyToken sender is the owner or creatorsAddress
+    error FUNDS_RECIPIENT_CANNOT_BUY_TOKENS();
+
+    /// @dev Reverts if insufficient balance to transfer
+    error INSUFFICIENT_BALANCE();
+
+    /// @dev Reverts if the WETH transfer fails
+    error WETH_TRANSFER_FAILED();
+
     struct ProtocolRewardAddresses {
         address builder;
         address purchaseReferral;
@@ -21,6 +55,8 @@ interface IERC20TokenEmitter {
         uint[] calldata bps,
         ProtocolRewardAddresses calldata protocolRewardsRecipients
     ) external payable returns (uint);
+
+    function WETH() external view returns (address);
 
     function totalSupply() external view returns (uint);
 
@@ -57,6 +93,7 @@ interface IERC20TokenEmitter {
     /**
      * @notice Initialize the token emitter
      * @param initialOwner The initial owner of the token emitter
+     * @param weth The address of the WETH contract.
      * @param erc20Token The ERC-20 token contract address
      * @param vrgdac The VRGDA contract address
      * @param creatorsAddress The address of the creators
@@ -64,6 +101,7 @@ interface IERC20TokenEmitter {
      */
     function initialize(
         address initialOwner,
+        address weth,
         address erc20Token,
         address vrgdac,
         address creatorsAddress,

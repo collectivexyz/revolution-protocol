@@ -3,6 +3,7 @@ pragma solidity 0.8.22;
 
 import "../ProtocolRewardsTest.sol";
 import { RewardsSettings } from "../../src/abstract/RewardSplits.sol";
+import { MockWETH } from "../mock/MockWETH.sol";
 import { NontransferableERC20Votes, IERC20TokenEmitter, IRevolutionBuilder, VRGDAC, ERC1967Proxy, ERC20TokenEmitter } from "../utils/TokenEmitterLibrary.sol";
 
 contract TokenEmitterRewardsTest is ProtocolRewardsTest {
@@ -39,7 +40,8 @@ contract TokenEmitterRewardsTest is ProtocolRewardsTest {
             creatorParams: IRevolutionBuilder.TokenEmitterCreatorParams({
                 creatorRateBps: 1_000,
                 entropyRateBps: 5_000
-            })
+            }),
+            weth: address(new MockWETH())
         });
 
         erc20Token.transferOwnership(mockTokenEmitterAddress);
@@ -114,7 +116,8 @@ contract TokenEmitterRewardsTest is ProtocolRewardsTest {
             creatorParams: IRevolutionBuilder.TokenEmitterCreatorParams({
                 creatorRateBps: 1_000,
                 entropyRateBps: 5_000
-            })
+            }),
+            weth: address(new MockWETH())
         });
 
         mockTokenEmitter = ERC20TokenEmitter(mockTokenEmitterAddress);

@@ -220,6 +220,7 @@ contract RevolutionBuilder is
         IERC20TokenEmitter(daoAddressesByToken[erc721Token].erc20TokenEmitter).initialize({
             erc20Token: daoAddressesByToken[erc721Token].erc20Token,
             initialOwner: daoAddressesByToken[erc721Token].dao,
+            weth: _weth,
             vrgdac: vrgdac,
             creatorsAddress: _erc20TokenEmitterParams.creatorsAddress,
             creatorParams: _erc20TokenEmitterParams.creatorParams
