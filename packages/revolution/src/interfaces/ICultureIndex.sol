@@ -22,13 +22,15 @@ interface ICultureIndexEvents {
      * @param metadata Metadata associated with the art piece.
      * @param quorumVotes The quorum votes for the piece.
      * @param totalVotesSupply The total votes supply for the piece.
+     * @param creators Creators of the art piece.
      */
     event PieceCreated(
         uint256 indexed pieceId,
         address indexed sponsor,
         ICultureIndex.ArtPieceMetadata metadata,
         uint256 quorumVotes,
-        uint256 totalVotesSupply
+        uint256 totalVotesSupply,
+        ICultureIndex.CreatorBps[] creators
     );
 
     /**
@@ -46,20 +48,6 @@ interface ICultureIndexEvents {
      * @param totalWeight Total weight of votes for the piece after the new vote.
      */
     event VoteCast(uint256 indexed pieceId, address indexed voter, uint256 weight, uint256 totalWeight);
-
-    /**
-     * @dev The events emitted for the respective creators of a piece
-     * @param pieceId Unique identifier for the piece being voted for.
-     * @param creatorAddress Address of the creator.
-     * @param sponsor Address that put the piece onchain.
-     * @param bps Basis points of the creator.
-     */
-    event PieceCreatorAdded(
-        uint256 indexed pieceId,
-        address indexed creatorAddress,
-        address indexed sponsor,
-        uint256 bps
-    );
 
     // @notice Emitted when quorum votes basis points is set
     event QuorumVotesBPSSet(uint256 oldQuorumVotesBPS, uint256 newQuorumVotesBPS);
