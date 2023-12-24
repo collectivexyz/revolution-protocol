@@ -8,7 +8,7 @@ import { wadExp, wadLn, wadMul, wadDiv, unsafeWadDiv, wadPow } from "./SignedWad
 /// @author FrankieIsLost <frankie@paradigm.xyz>
 /// @author Dan Robinson <dan@paradigm.xyz>
 /// @notice Sell tokens roughly according to an issuance schedule.
-contract VRGDAC {
+abstract contract VRGDAC {
     /*//////////////////////////////////////////////////////////////
                             VRGDA PARAMETERS
     //////////////////////////////////////////////////////////////*/
