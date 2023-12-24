@@ -147,6 +147,8 @@ contract VerbsDAOStorageV1 is VerbsDAOProxyStorage {
     ///                           ERRORS                         ///
     ///                                                          ///
 
+    /// @dev Introduced these errors to reduce contract size, to avoid deployment failure
+
     /// @dev Reverts if the caller is not the manager.
     error NOT_MANAGER();
 
@@ -212,6 +214,33 @@ contract VerbsDAOStorageV1 is VerbsDAOProxyStorage {
 
     /// @dev Reverts if the minimum quorum votes basis points are greater than the new maximum quorum votes basis points.
     error MAX_QUORUM_EXCEEDS_MIN();
+
+    /// @dev Reverts if the caller is not the pending admin or is the zero address.
+    error PENDING_ADMIN_ONLY();
+
+    /// @dev Reverts if the caller is not the admin.
+    error ADMIN_ONLY();
+
+    /// @dev Reverts if the caller is not the vetoer.
+    error VETOER_ONLY();
+
+    /// @dev Reverts if the vetoer has been burned
+    error VETOER_BURNED();
+
+    /// @dev Reverts if the caller is not the pending vetoer.
+    error PENDING_VETOER_ONLY();
+
+    /// @dev Reverts if the minimum quorum votes basis points are greater than the maximum quorum votes basis points.
+    error MIN_QUORUM_BPS_GREATER_THAN_MAX_QUORUM_BPS();
+
+    /// @dev Reverts if an unsafe cast to uint16 is attempted.
+    error UNSAFE_UINT16_CAST();
+
+    /// @dev Reverts if an attempt is made to veto an already executed proposal.
+    error CANT_VETO_EXECUTED_PROPOSAL();
+
+    /// @dev Reverts if an attempt is made to cancel an already executed proposal.
+    error CANT_CANCEL_EXECUTED_PROPOSAL();
 
     /// @notice The contract upgrade manager
     IRevolutionBuilder public immutable manager;

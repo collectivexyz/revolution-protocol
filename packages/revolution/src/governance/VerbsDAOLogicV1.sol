@@ -131,22 +131,6 @@ contract VerbsDAOLogicV1 is
     bytes32 public constant BALLOT_TYPEHASH = keccak256("Ballot(uint256 proposalId,uint8 support)");
 
     ///                                                          ///
-    ///                           ERRORS                         ///
-    ///                                                          ///
-
-    /// @dev Introduced these errors to reduce contract size, to avoid deployment failure
-    error AdminOnly();
-    error InvalidMinQuorumVotesBPS();
-    error InvalidMaxQuorumVotesBPS();
-    error MinQuorumBPSGreaterThanMaxQuorumBPS();
-    error UnsafeUint16Cast();
-    error VetoerOnly();
-    error PendingVetoerOnly();
-    error VetoerBurned();
-    error CantVetoExecutedProposal();
-    error CantCancelExecutedProposal();
-
-    ///                                                          ///
     ///                         CONSTRUCTOR                      ///
     ///                                                          ///
 
@@ -437,7 +421,7 @@ contract VerbsDAOLogicV1 is
      */
     function cancel(uint256 proposalId) external {
         if (state(proposalId) == ProposalState.Executed) {
-            revert CantCancelExecutedProposal();
+            revert CANT_CANCEL_EXECUTED_PROPOSAL();
         }
 
         Proposal storage proposal = _proposals[proposalId];
@@ -467,15 +451,15 @@ contract VerbsDAOLogicV1 is
      */
     function veto(uint256 proposalId) external {
         if (vetoer == address(0)) {
-            revert VetoerBurned();
+            revert VETOER_BURNED();
         }
 
         if (msg.sender != vetoer) {
-            revert VetoerOnly();
+            revert VETOER_ONLY();
         }
 
         if (state(proposalId) == ProposalState.Executed) {
-            revert CantVetoExecutedProposal();
+            revert CANT_VETO_EXECUTED_PROPOSAL();
         }
 
         Proposal storage proposal = _proposals[proposalId];
@@ -702,7 +686,7 @@ contract VerbsDAOLogicV1 is
      */
     function _setVotingDelay(uint256 newVotingDelay) external {
         if (msg.sender != admin) {
-            revert AdminOnly();
+            revert ADMIN_ONLY();
         }
         require(
             newVotingDelay >= MIN_VOTING_DELAY && newVotingDelay <= MAX_VOTING_DELAY,
@@ -720,7 +704,7 @@ contract VerbsDAOLogicV1 is
      */
     function _setVotingPeriod(uint256 newVotingPeriod) external {
         if (msg.sender != admin) {
-            revert AdminOnly();
+            revert ADMIN_ONLY();
         }
         require(
             newVotingPeriod >= MIN_VOTING_PERIOD && newVotingPeriod <= MAX_VOTING_PERIOD,
@@ -739,7 +723,7 @@ contract VerbsDAOLogicV1 is
      */
     function _setProposalThresholdBPS(uint256 newProposalThresholdBPS) external {
         if (msg.sender != admin) {
-            revert AdminOnly();
+            revert ADMIN_ONLY();
         }
         require(
             newProposalThresholdBPS >= MIN_PROPOSAL_THRESHOLD_BPS &&
@@ -760,7 +744,7 @@ contract VerbsDAOLogicV1 is
      */
     function _setMinQuorumVotesBPS(uint16 newMinQuorumVotesBPS) external {
         if (msg.sender != admin) {
-            revert AdminOnly();
+            revert ADMIN_ONLY();
         }
         DynamicQuorumParams memory params = getDynamicQuorumParamsAt(block.number);
 
@@ -789,7 +773,7 @@ contract VerbsDAOLogicV1 is
      */
     function _setMaxQuorumVotesBPS(uint16 newMaxQuorumVotesBPS) external {
         if (msg.sender != admin) {
-            revert AdminOnly();
+            revert ADMIN_ONLY();
         }
         DynamicQuorumParams memory params = getDynamicQuorumParamsAt(block.number);
 
@@ -811,7 +795,7 @@ contract VerbsDAOLogicV1 is
      */
     function _setQuorumCoefficient(uint32 newQuorumCoefficient) external {
         if (msg.sender != admin) {
-            revert AdminOnly();
+            revert ADMIN_ONLY();
         }
         DynamicQuorumParams memory params = getDynamicQuorumParamsAt(block.number);
 
@@ -839,19 +823,19 @@ contract VerbsDAOLogicV1 is
         uint32 newQuorumCoefficient
     ) public {
         if (msg.sender != admin) {
-            revert AdminOnly();
+            revert ADMIN_ONLY();
         }
         if (
             newMinQuorumVotesBPS < MIN_QUORUM_VOTES_BPS_LOWER_BOUND ||
             newMinQuorumVotesBPS > MIN_QUORUM_VOTES_BPS_UPPER_BOUND
         ) {
-            revert InvalidMinQuorumVotesBPS();
+            revert INVALID_MIN_QUORUM_VOTES_BPS();
         }
         if (newMaxQuorumVotesBPS > MAX_QUORUM_VOTES_BPS_UPPER_BOUND) {
-            revert InvalidMaxQuorumVotesBPS();
+            revert INVALID_MAX_QUORUM_VOTES_BPS();
         }
         if (newMinQuorumVotesBPS > newMaxQuorumVotesBPS) {
-            revert MinQuorumBPSGreaterThanMaxQuorumBPS();
+            revert MIN_QUORUM_BPS_GREATER_THAN_MAX_QUORUM_BPS();
         }
 
         DynamicQuorumParams memory oldParams = getDynamicQuorumParamsAt(block.number);
@@ -870,7 +854,7 @@ contract VerbsDAOLogicV1 is
 
     function _withdraw() external returns (uint256, bool) {
         if (msg.sender != admin) {
-            revert AdminOnly();
+            revert ADMIN_ONLY();
         }
 
         uint256 amount = address(this).balance;
@@ -888,7 +872,7 @@ contract VerbsDAOLogicV1 is
      */
     function _setPendingAdmin(address newPendingAdmin) external {
         // Check caller = admin
-        require(msg.sender == admin, "DAO::_setPendingAdmin: admin only");
+        if (msg.sender != admin) revert ADMIN_ONLY();
 
         // Save current value, if any, for inclusion in log
         address oldPendingAdmin = pendingAdmin;
@@ -906,7 +890,7 @@ contract VerbsDAOLogicV1 is
      */
     function _acceptAdmin() external {
         // Check caller is pendingAdmin and pendingAdmin ≠ address(0)
-        require(msg.sender == pendingAdmin && msg.sender != address(0), "DAO::_acceptAdmin: pending admin only");
+        if (msg.sender != pendingAdmin || msg.sender == address(0)) revert PENDING_ADMIN_ONLY();
 
         // Save current values for inclusion in log
         address oldAdmin = admin;
@@ -928,7 +912,7 @@ contract VerbsDAOLogicV1 is
      */
     function _setPendingVetoer(address newPendingVetoer) public {
         if (msg.sender != vetoer) {
-            revert VetoerOnly();
+            revert VETOER_ONLY();
         }
 
         emit NewPendingVetoer(pendingVetoer, newPendingVetoer);
@@ -938,7 +922,7 @@ contract VerbsDAOLogicV1 is
 
     function _acceptVetoer() external {
         if (msg.sender != pendingVetoer) {
-            revert PendingVetoerOnly();
+            revert PENDING_VETOER_ONLY();
         }
 
         // Update vetoer
@@ -1135,7 +1119,7 @@ contract VerbsDAOLogicV1 is
 
     function safe16(uint256 n) internal pure returns (uint16) {
         if (n > type(uint16).max) {
-            revert UnsafeUint16Cast();
+            revert UNSAFE_UINT16_CAST();
         }
         return uint16(n);
     }
