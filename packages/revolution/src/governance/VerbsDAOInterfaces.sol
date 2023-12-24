@@ -245,6 +245,9 @@ contract VerbsDAOStorageV1 is VerbsDAOProxyStorage {
     /// @dev Reverts if the caller is not the proposer and the proposer's votes are still above the proposal threshold.
     error PROPOSER_ABOVE_THRESHOLD();
 
+    /// @dev Reverts if the proposal ID is invalid (greater than the current proposal count).
+    error INVALID_PROPOSAL_ID();
+
     ///                                                          ///
     ///                           STATE                          ///
     ///                                                          ///

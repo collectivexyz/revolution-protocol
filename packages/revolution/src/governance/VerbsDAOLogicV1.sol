@@ -519,7 +519,8 @@ contract VerbsDAOLogicV1 is
      * @return Proposal state
      */
     function state(uint256 proposalId) public view returns (ProposalState) {
-        require(proposalCount >= proposalId, "DAO::state: invalid proposal id");
+        if (proposalCount < proposalId) revert INVALID_PROPOSAL_ID();
+
         Proposal storage proposal = _proposals[proposalId];
         if (proposal.vetoed) {
             return ProposalState.Vetoed;
