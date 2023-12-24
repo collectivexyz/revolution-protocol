@@ -47,7 +47,7 @@ contract RevolutionPoints is Initializable, ERC20VotesUpgradeable, Ownable2StepU
     ///                                                          ///
 
     /// @param _manager The contract upgrade manager address
-    constructor(address _manager) payable initializer {
+    constructor(address _manager) initializer {
         manager = IRevolutionBuilder(_manager);
     }
 

@@ -26,16 +26,16 @@
 ➡ RevolutionPointsEmitter
 =======================
 
-| Name            | Type                               | Slot | Offset | Bytes | Contract                                                |
-|-----------------|------------------------------------|------|--------|-------|---------------------------------------------------------|
-| WETH            | address                            | 0    | 0      | 20    | src/RevolutionPointsEmitter.sol:RevolutionPointsEmitter |
+| Name            | Type                      | Slot | Offset | Bytes | Contract                                                |
+|-----------------|---------------------------|------|--------|-------|---------------------------------------------------------|
+| WETH            | address                   | 0    | 0      | 20    | src/RevolutionPointsEmitter.sol:RevolutionPointsEmitter |
 | token           | contract RevolutionPoints | 1    | 0      | 20    | src/RevolutionPointsEmitter.sol:RevolutionPointsEmitter |
-| vrgdac          | contract VRGDAC                    | 2    | 0      | 20    | src/RevolutionPointsEmitter.sol:RevolutionPointsEmitter |
-| startTime       | uint256                            | 3    | 0      | 32    | src/RevolutionPointsEmitter.sol:RevolutionPointsEmitter |
-| emittedTokenWad | int256                             | 4    | 0      | 32    | src/RevolutionPointsEmitter.sol:RevolutionPointsEmitter |
-| creatorRateBps  | uint256                            | 5    | 0      | 32    | src/RevolutionPointsEmitter.sol:RevolutionPointsEmitter |
-| entropyRateBps  | uint256                            | 6    | 0      | 32    | src/RevolutionPointsEmitter.sol:RevolutionPointsEmitter |
-| creatorsAddress | address                            | 7    | 0      | 20    | src/RevolutionPointsEmitter.sol:RevolutionPointsEmitter |
+| vrgdac          | contract VRGDAC           | 2    | 0      | 20    | src/RevolutionPointsEmitter.sol:RevolutionPointsEmitter |
+| startTime       | uint256                   | 3    | 0      | 32    | src/RevolutionPointsEmitter.sol:RevolutionPointsEmitter |
+| emittedTokenWad | int256                    | 4    | 0      | 32    | src/RevolutionPointsEmitter.sol:RevolutionPointsEmitter |
+| creatorRateBps  | uint256                   | 5    | 0      | 32    | src/RevolutionPointsEmitter.sol:RevolutionPointsEmitter |
+| entropyRateBps  | uint256                   | 6    | 0      | 32    | src/RevolutionPointsEmitter.sol:RevolutionPointsEmitter |
+| creatorsAddress | address                   | 7    | 0      | 20    | src/RevolutionPointsEmitter.sol:RevolutionPointsEmitter |
 
 =======================
 ➡ AuctionHouse
@@ -59,13 +59,13 @@
 ➡ MaxHeap
 =======================
 
-| Name            | Type                        | Slot | Offset | Bytes | Contract                |
-|-----------------|-----------------------------|------|--------|-------|-------------------------|
-| admin           | address                     | 0    | 0      | 20    | src/MaxHeap.sol:MaxHeap |
-| heap            | mapping(uint256 => uint256) | 1    | 0      | 32    | src/MaxHeap.sol:MaxHeap |
-| size            | uint256                     | 2    | 0      | 32    | src/MaxHeap.sol:MaxHeap |
-| valueMapping    | mapping(uint256 => uint256) | 3    | 0      | 32    | src/MaxHeap.sol:MaxHeap |
-| positionMapping | mapping(uint256 => uint256) | 4    | 0      | 32    | src/MaxHeap.sol:MaxHeap |
+| Name            | Type                        | Slot | Offset | Bytes | Contract                              |
+|-----------------|-----------------------------|------|--------|-------|---------------------------------------|
+| admin           | address                     | 0    | 0      | 20    | src/culture-index/MaxHeap.sol:MaxHeap |
+| heap            | mapping(uint256 => uint256) | 1    | 0      | 32    | src/culture-index/MaxHeap.sol:MaxHeap |
+| size            | uint256                     | 2    | 0      | 32    | src/culture-index/MaxHeap.sol:MaxHeap |
+| valueMapping    | mapping(uint256 => uint256) | 3    | 0      | 32    | src/culture-index/MaxHeap.sol:MaxHeap |
+| positionMapping | mapping(uint256 => uint256) | 4    | 0      | 32    | src/culture-index/MaxHeap.sol:MaxHeap |
 
 =======================
 ➡ VerbsToken
