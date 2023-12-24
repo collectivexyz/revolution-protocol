@@ -922,7 +922,7 @@ contract ERC20PointsEmitterTest is RevolutionBuilderTest {
         assertGt(priceAfterManyDays, 0, "Price should never hit zero");
     }
 
-    //ensure when creating new tokenemitter, that INVALID_BPS is thrown if > 10_000
+    //ensure when creating new points emitter, that INVALID_BPS is thrown if > 10_000
     function test_bpsInitialization() public {
         address owner = address(0x123);
 

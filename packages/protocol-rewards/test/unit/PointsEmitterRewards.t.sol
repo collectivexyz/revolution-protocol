@@ -46,7 +46,7 @@ contract PointsEmitterRewardsTest is ProtocolRewardsTest {
 
         erc20Token.transferOwnership(mockPointsEmitterAddress);
 
-        vm.label(mockPointsEmitterAddress, "MOCK_TOKENEMITTER");
+        vm.label(mockPointsEmitterAddress, "MOCK_POINTSEMITTER");
 
         mockPointsEmitter = RevolutionPointsEmitter(mockPointsEmitterAddress);
     }
