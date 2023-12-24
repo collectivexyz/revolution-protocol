@@ -242,6 +242,13 @@ contract VerbsDAOStorageV1 is VerbsDAOProxyStorage {
     /// @dev Reverts if an attempt is made to cancel an already executed proposal.
     error CANT_CANCEL_EXECUTED_PROPOSAL();
 
+    /// @dev Reverts if the caller is not the proposer and the proposer's votes are still above the proposal threshold.
+    error PROPOSER_ABOVE_THRESHOLD();
+
+    ///                                                          ///
+    ///                           STATE                          ///
+    ///                                                          ///
+
     /// @notice The contract upgrade manager
     IRevolutionBuilder public immutable manager;
 
@@ -285,6 +292,10 @@ contract VerbsDAOStorageV1 is VerbsDAOProxyStorage {
 
     /// @notice The voting weight of the verbs token eg: owning (2) tokens gets you (2 * erc721TokenVotingWeight) votes
     uint256 public erc721TokenVotingWeight;
+
+    ///                                                          ///
+    ///                        CONSTANTS                         ///
+    ///                                                          ///
 
     struct Proposal {
         /// @notice Unique id for looking up a proposal

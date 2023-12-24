@@ -425,11 +425,12 @@ contract VerbsDAOLogicV1 is
         }
 
         Proposal storage proposal = _proposals[proposalId];
-        require(
-            msg.sender == proposal.proposer ||
-                getTotalVotes(proposal.proposer, block.number - 1) <= proposal.proposalThreshold,
-            "DAO::cancel: proposer above threshold"
-        );
+        if (
+            msg.sender != proposal.proposer &&
+            getTotalVotes(proposal.proposer, block.number - 1) > proposal.proposalThreshold
+        ) {
+            revert PROPOSER_ABOVE_THRESHOLD();
+        }
 
         proposal.canceled = true;
         for (uint256 i = 0; i < proposal.targets.length; i++) {
