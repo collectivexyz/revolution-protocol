@@ -13,7 +13,7 @@ import { MockERC20 } from "../mock/MockERC20.sol";
 import { Descriptor } from "../../src/Descriptor.sol";
 import "../utils/Base64Decode.sol";
 import "../utils/JsmnSolLib.sol";
-import { NontransferableERC20Votes } from "../../src/NontransferableERC20Votes.sol";
+import { RevolutionPoints } from "../../src/RevolutionPoints.sol";
 import { RevolutionBuilderTest } from "../RevolutionBuilder.t.sol";
 
 /// @title VerbsTokenTestSuite

@@ -12,7 +12,7 @@ import { IDescriptorMinimal } from "../../src/interfaces/IDescriptorMinimal.sol"
 import { ICultureIndex, ICultureIndexEvents } from "../../src/interfaces/ICultureIndex.sol";
 import { IAuctionHouse } from "../../src/interfaces/IAuctionHouse.sol";
 import { IERC20 } from "@openzeppelin/contracts/token/ERC20/IERC20.sol";
-import { NontransferableERC20Votes } from "../../src/NontransferableERC20Votes.sol";
+import { RevolutionPoints } from "../../src/RevolutionPoints.sol";
 import { RevolutionPointsEmitter } from "../../src/RevolutionPointsEmitter.sol";
 import { IRevolutionPointsEmitter } from "../../src/interfaces/IRevolutionPointsEmitter.sol";
 import { wadMul, wadDiv } from "../../src/libs/SignedWadMath.sol";

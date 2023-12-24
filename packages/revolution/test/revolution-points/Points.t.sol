@@ -2,7 +2,7 @@
 pragma solidity ^0.8.22;
 
 import { Test } from "forge-std/Test.sol";
-import { NontransferableERC20Votes } from "../../src/NontransferableERC20Votes.sol";
+import { RevolutionPoints } from "../../src/RevolutionPoints.sol";
 import { RevolutionBuilderTest } from "../RevolutionBuilder.t.sol";
 
 contract NontransferableERC20TestSuite is RevolutionBuilderTest {

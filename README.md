@@ -189,7 +189,7 @@ You can read more about the implementation on [Paradigm's site](https://www.para
 
 For all contracts - only the RevolutionBuilder manager should be able to initialize and upgrade them.
 
-### NontransferableERC20Votes
+### RevolutionPoints
 
 - Only the owner should be able to directly mint tokens.
 

@@ -5,12 +5,12 @@ import { Test } from "forge-std/Test.sol";
 import { unsafeWadDiv, toDaysWadUnsafe } from "../../src/libs/SignedWadMath.sol";
 import { RevolutionPointsEmitter } from "../../src/RevolutionPointsEmitter.sol";
 import { IRevolutionPointsEmitter } from "../../src/interfaces/IRevolutionPointsEmitter.sol";
-import { NontransferableERC20Votes } from "../../src/NontransferableERC20Votes.sol";
+import { RevolutionPoints } from "../../src/RevolutionPoints.sol";
 import { RevolutionProtocolRewards } from "@cobuild/protocol-rewards/src/RevolutionProtocolRewards.sol";
 import { wadDiv } from "../../src/libs/SignedWadMath.sol";
 import { IRevolutionBuilder } from "../../src/interfaces/IRevolutionBuilder.sol";
 import { RevolutionBuilderTest } from "../RevolutionBuilder.t.sol";
-import { INontransferableERC20Votes } from "../../src/interfaces/INontransferableERC20Votes.sol";
+import { IRevolutionPoints } from "../../src/interfaces/IRevolutionPoints.sol";
 import { ERC1967Proxy } from "../../src/libs/proxy/ERC1967Proxy.sol";
 
 contract ERC20PointsEmitterTest is RevolutionBuilderTest {
@@ -289,7 +289,7 @@ contract ERC20PointsEmitterTest is RevolutionBuilderTest {
             })
         });
 
-        INontransferableERC20Votes(governanceToken).initialize({
+        IRevolutionPoints(governanceToken).initialize({
             initialOwner: address(emitter1),
             erc20TokenParams: IRevolutionBuilder.ERC20TokenParams({ name: "Revolution Governance", symbol: "GOV" })
         });
@@ -329,11 +329,11 @@ contract ERC20PointsEmitterTest is RevolutionBuilderTest {
         });
 
         vm.startPrank(address(emitter1));
-        NontransferableERC20Votes(governanceToken).transferOwnership(address(emitter2));
+        RevolutionPoints(governanceToken).transferOwnership(address(emitter2));
 
         vm.startPrank(address(emitter2));
         //accept ownership transfer
-        NontransferableERC20Votes(governanceToken).acceptOwnership();
+        RevolutionPoints(governanceToken).acceptOwnership();
 
         vm.startPrank(address(48));
         vm.deal(address(48), 100000 ether);
@@ -772,7 +772,7 @@ contract ERC20PointsEmitterTest is RevolutionBuilderTest {
             })
         });
 
-        INontransferableERC20Votes(governanceToken).initialize({
+        IRevolutionPoints(governanceToken).initialize({
             initialOwner: address(emitter2),
             erc20TokenParams: IRevolutionBuilder.ERC20TokenParams({ name: "Revolution Governance", symbol: "GOV" })
         });

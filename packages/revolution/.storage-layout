@@ -29,7 +29,7 @@
 | Name            | Type                               | Slot | Offset | Bytes | Contract                                                |
 |-----------------|------------------------------------|------|--------|-------|---------------------------------------------------------|
 | WETH            | address                            | 0    | 0      | 20    | src/RevolutionPointsEmitter.sol:RevolutionPointsEmitter |
-| token           | contract NontransferableERC20Votes | 1    | 0      | 20    | src/RevolutionPointsEmitter.sol:RevolutionPointsEmitter |
+| token           | contract RevolutionPoints | 1    | 0      | 20    | src/RevolutionPointsEmitter.sol:RevolutionPointsEmitter |
 | vrgdac          | contract VRGDAC                    | 2    | 0      | 20    | src/RevolutionPointsEmitter.sol:RevolutionPointsEmitter |
 | startTime       | uint256                            | 3    | 0      | 32    | src/RevolutionPointsEmitter.sol:RevolutionPointsEmitter |
 | emittedTokenWad | int256                             | 4    | 0      | 32    | src/RevolutionPointsEmitter.sol:RevolutionPointsEmitter |

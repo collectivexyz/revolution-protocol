@@ -5,7 +5,7 @@ import { Test } from "forge-std/Test.sol";
 import { CultureIndex } from "../../src/culture-index/CultureIndex.sol";
 import { MockERC20 } from "../mock/MockERC20.sol";
 import { ICultureIndex, ICultureIndexEvents } from "../../src/interfaces/ICultureIndex.sol";
-import { NontransferableERC20Votes } from "../../src/NontransferableERC20Votes.sol";
+import { RevolutionPoints } from "../../src/RevolutionPoints.sol";
 import { CultureIndexTestSuite } from "./CultureIndex.t.sol";
 import { ERC721CheckpointableUpgradeable } from "../../src/base/ERC721CheckpointableUpgradeable.sol";
 

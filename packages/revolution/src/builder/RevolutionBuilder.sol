@@ -34,7 +34,7 @@ import { IVerbsDAO } from "../interfaces/IVerbsDAO.sol";
 import { ICultureIndex } from "../interfaces/ICultureIndex.sol";
 import { IMaxHeap } from "../interfaces/IMaxHeap.sol";
 import { IRevolutionPointsEmitter } from "../interfaces/IRevolutionPointsEmitter.sol";
-import { INontransferableERC20Votes } from "../interfaces/INontransferableERC20Votes.sol";
+import { IRevolutionPoints } from "../interfaces/IRevolutionPoints.sol";
 import { VRGDAC } from "../libs/VRGDAC.sol";
 
 import { ERC1967Proxy } from "../libs/proxy/ERC1967Proxy.sol";
@@ -212,7 +212,7 @@ contract RevolutionBuilder is
             weth: _weth
         });
 
-        INontransferableERC20Votes(daoAddressesByToken[erc721Token].erc20Token).initialize({
+        IRevolutionPoints(daoAddressesByToken[erc721Token].erc20Token).initialize({
             initialOwner: daoAddressesByToken[erc721Token].revolutionPointsEmitter,
             erc20TokenParams: _erc20TokenParams
         });

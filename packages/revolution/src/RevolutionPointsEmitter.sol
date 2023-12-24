@@ -10,7 +10,7 @@ import { IWETH } from "./interfaces/IWETH.sol";
 import { VRGDAC } from "./libs/VRGDAC.sol";
 import { toDaysWadUnsafe } from "./libs/SignedWadMath.sol";
 import { Strings } from "@openzeppelin/contracts/utils/Strings.sol";
-import { NontransferableERC20Votes } from "./NontransferableERC20Votes.sol";
+import { RevolutionPoints } from "./RevolutionPoints.sol";
 import { IRevolutionPointsEmitter } from "./interfaces/IRevolutionPointsEmitter.sol";
 
 import { IRevolutionBuilder } from "./interfaces/IRevolutionBuilder.sol";
@@ -26,7 +26,7 @@ contract RevolutionPointsEmitter is
     address public WETH;
 
     // The token that is being minted.
-    NontransferableERC20Votes public token;
+    RevolutionPoints public token;
 
     // The VRGDA contract
     VRGDAC public vrgdac;
@@ -112,7 +112,7 @@ contract RevolutionPointsEmitter is
 
         creatorsAddress = _creatorsAddress;
         vrgdac = VRGDAC(_vrgdac);
-        token = NontransferableERC20Votes(_erc20Token);
+        token = RevolutionPoints(_erc20Token);
         creatorRateBps = _creatorParams.creatorRateBps;
         entropyRateBps = _creatorParams.entropyRateBps;
         WETH = _weth;

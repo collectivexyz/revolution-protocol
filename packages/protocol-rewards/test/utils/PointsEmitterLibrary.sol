@@ -1118,7 +1118,7 @@ contract VRGDAC {
     }
 }
 
-contract NontransferableERC20Votes is Ownable, ERC20Votes {
+contract RevolutionPoints is Ownable, ERC20Votes {
     mapping(address account => uint256) private _balances;
 
     uint256 private _totalSupply;
@@ -1338,7 +1338,7 @@ contract RevolutionPointsEmitter is
     address public WETH;
 
     // The token that is being minted.
-    NontransferableERC20Votes public token;
+    RevolutionPoints public token;
 
     // The VRGDA contract
     VRGDAC public vrgdac;
@@ -1424,7 +1424,7 @@ contract RevolutionPointsEmitter is
 
         creatorsAddress = _creatorsAddress;
         vrgdac = VRGDAC(_vrgdac);
-        token = NontransferableERC20Votes(_erc20Token);
+        token = RevolutionPoints(_erc20Token);
         creatorRateBps = _creatorParams.creatorRateBps;
         entropyRateBps = _creatorParams.entropyRateBps;
         WETH = _weth;

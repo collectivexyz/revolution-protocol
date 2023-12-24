@@ -24,7 +24,7 @@ import { EIP712Upgradeable } from "@openzeppelin/contracts-upgradeable/utils/cry
 
 import { IRevolutionBuilder } from "./interfaces/IRevolutionBuilder.sol";
 
-contract NontransferableERC20Votes is Initializable, ERC20VotesUpgradeable, Ownable2StepUpgradeable {
+contract RevolutionPoints is Initializable, ERC20VotesUpgradeable, Ownable2StepUpgradeable {
     ///                                                          ///
     ///                         IMMUTABLES                       ///
     ///                                                          ///
@@ -55,7 +55,7 @@ contract NontransferableERC20Votes is Initializable, ERC20VotesUpgradeable, Owna
     ///                         INITIALIZER                      ///
     ///                                                          ///
 
-    function __NontransferableERC20Votes_init(
+    function __RevolutionPoints_init(
         address _initialOwner,
         string calldata _name,
         string calldata _symbol
@@ -74,7 +74,7 @@ contract NontransferableERC20Votes is Initializable, ERC20VotesUpgradeable, Owna
     ) external initializer {
         if (msg.sender != address(manager)) revert ONLY_MANAGER();
 
-        __NontransferableERC20Votes_init(_initialOwner, _erc20TokenParams.name, _erc20TokenParams.symbol);
+        __RevolutionPoints_init(_initialOwner, _erc20TokenParams.name, _erc20TokenParams.symbol);
     }
 
     /**
