@@ -34,7 +34,7 @@ contract DeployContracts is Script {
         address cultureIndexImpl;
         address maxHeapImpl;
         address nontransferableERC20Impl;
-        address erc20TokenEmitterImpl;
+        address revolutionPointsEmitterImpl;
         address builderImpl;
     }
 
@@ -94,7 +94,7 @@ contract DeployContracts is Script {
                 deployedContracts.daoImpl,
                 deployedContracts.cultureIndexImpl,
                 deployedContracts.nontransferableERC20Impl,
-                deployedContracts.erc20TokenEmitterImpl,
+                deployedContracts.revolutionPointsEmitterImpl,
                 deployedContracts.maxHeapImpl
             )
         );
@@ -121,7 +121,7 @@ contract DeployContracts is Script {
         deployedContracts.nontransferableERC20Impl = address(
             new NontransferableERC20Votes(address(deployedContracts.builderProxy))
         );
-        deployedContracts.erc20TokenEmitterImpl = address(
+        deployedContracts.revolutionPointsEmitterImpl = address(
             new RevolutionPointsEmitter(address(deployedContracts.builderProxy), protocolRewards, rewardsRecipient)
         );
     }
@@ -182,7 +182,7 @@ contract DeployContracts is Script {
             string(
                 abi.encodePacked(
                     "ERC20 Token Emitter implementation: ",
-                    addressToString(deployedContracts.erc20TokenEmitterImpl)
+                    addressToString(deployedContracts.revolutionPointsEmitterImpl)
                 )
             )
         );

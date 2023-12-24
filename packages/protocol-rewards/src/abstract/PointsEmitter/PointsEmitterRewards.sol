@@ -3,7 +3,7 @@ pragma solidity 0.8.22;
 
 import { RewardSplits } from "../RewardSplits.sol";
 
-abstract contract TokenEmitterRewards is RewardSplits {
+abstract contract PointsEmitterRewards is RewardSplits {
     constructor(
         address _protocolRewards,
         address _revolutionRewardRecipient

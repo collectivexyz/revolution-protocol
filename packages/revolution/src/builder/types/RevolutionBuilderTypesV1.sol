@@ -12,7 +12,7 @@ interface RevolutionBuilderTypesV1 {
         /// @notice Address for deployed auction contract
         address auction;
         /// @notice Address for deployed auction contract
-        address erc20TokenEmitter;
+        address revolutionPointsEmitter;
         /// @notice Address for deployed auction contract
         address erc20Token;
         /// @notice Address for deployed cultureIndex contract

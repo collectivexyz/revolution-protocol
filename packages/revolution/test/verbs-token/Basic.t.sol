@@ -248,7 +248,7 @@ contract TokenBasicTest is VerbsTokenTestSuite {
 
         // We assume govToken is the token used for voting, and voter has enough balance
         vm.stopPrank();
-        vm.startPrank(address(erc20TokenEmitter));
+        vm.startPrank(address(revolutionPointsEmitter));
         erc20Token.mint(voter, voteWeight);
 
         vm.roll(block.number + 1);
@@ -293,7 +293,7 @@ contract TokenBasicTest is VerbsTokenTestSuite {
 
         // Give the voter some tokens and allow them to vote
         vm.stopPrank();
-        vm.startPrank(address(erc20TokenEmitter));
+        vm.startPrank(address(revolutionPointsEmitter));
         erc20Token.mint(voter, voteWeight);
         vm.roll(block.number + 1);
 
@@ -323,7 +323,7 @@ contract TokenBasicTest is VerbsTokenTestSuite {
 
         // Give the voter some tokens
         vm.stopPrank();
-        vm.startPrank(address(erc20TokenEmitter));
+        vm.startPrank(address(revolutionPointsEmitter));
         erc20Token.mint(voter, voteWeight);
         vm.roll(block.number + 1);
 
@@ -345,7 +345,7 @@ contract TokenBasicTest is VerbsTokenTestSuite {
 
         // Give the voter some tokens and vote on both pieces
         vm.stopPrank();
-        vm.startPrank(address(erc20TokenEmitter));
+        vm.startPrank(address(revolutionPointsEmitter));
         erc20Token.mint(voter, firstPieceVoteWeight);
 
         // Vote on the first piece
@@ -353,7 +353,7 @@ contract TokenBasicTest is VerbsTokenTestSuite {
         vm.roll(block.number + 1);
         cultureIndex.vote(firstArtPieceId);
 
-        vm.startPrank(address(erc20TokenEmitter));
+        vm.startPrank(address(revolutionPointsEmitter));
         erc20Token.mint(voter, secondPieceVoteWeight);
 
         // Vote on the second piece with a higher weight
@@ -389,7 +389,7 @@ contract TokenBasicTest is VerbsTokenTestSuite {
         // Vote on the piece to make it the top voted
         address voter = address(0x7);
         vm.stopPrank();
-        vm.startPrank(address(erc20TokenEmitter));
+        vm.startPrank(address(revolutionPointsEmitter));
         erc20Token.mint(voter, 100);
         vm.roll(block.number + 1);
         vm.startPrank(voter);
@@ -425,7 +425,7 @@ contract TokenBasicTest is VerbsTokenTestSuite {
         uint256 voteWeight = 100;
 
         vm.stopPrank();
-        vm.startPrank(address(erc20TokenEmitter));
+        vm.startPrank(address(revolutionPointsEmitter));
         erc20Token.mint(voter, voteWeight);
         vm.roll(block.number + 1);
 

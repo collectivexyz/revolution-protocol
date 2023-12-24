@@ -105,6 +105,6 @@ interface IRevolutionPointsEmitter {
         address erc20Token,
         address vrgdac,
         address creatorsAddress,
-        IRevolutionBuilder.TokenEmitterCreatorParams calldata creatorParams
+        IRevolutionBuilder.PointsEmitterCreatorParams calldata creatorParams
     ) external;
 }

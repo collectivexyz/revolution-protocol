@@ -22,7 +22,7 @@ contract TokenMintingTest is VerbsTokenTestSuite {
     function testDroppedArtPieceMatchesTopVoted() public {
         vm.stopPrank();
 
-        vm.startPrank(address(erc20TokenEmitter));
+        vm.startPrank(address(revolutionPointsEmitter));
         erc20Token.mint(address(this), 10);
 
         // Create a new art piece and simulate it being the top voted piece
@@ -145,7 +145,7 @@ contract TokenMintingTest is VerbsTokenTestSuite {
     function testMintingIncrement(uint200 voteWeight) public {
         vm.assume(voteWeight < type(uint200).max / 2);
         vm.stopPrank();
-        vm.startPrank(address(erc20TokenEmitter));
+        vm.startPrank(address(revolutionPointsEmitter));
         erc20Token.mint(address(1), 10000);
 
         erc20Token.mint(address(this), voteWeight);
@@ -247,7 +247,7 @@ contract TokenMintingTest is VerbsTokenTestSuite {
         // Create a new piece and simulate it being the top voted piece
         uint256 pieceId = createDefaultArtPiece(); // This function should exist within the test contract
 
-        vm.startPrank(address(erc20TokenEmitter));
+        vm.startPrank(address(revolutionPointsEmitter));
         erc20Token.mint(address(this), 10);
 
         // ensure vote snapshot is taken

@@ -23,7 +23,7 @@ contract NontransferableERC20TestSuite is RevolutionBuilderTest {
         // Setup: Mint some tokens to an account
         address account1 = address(0x1);
         uint256 mintAmount = 1000 * 1e18;
-        vm.startPrank(address(erc20TokenEmitter));
+        vm.startPrank(address(revolutionPointsEmitter));
         erc20Token.mint(account1, mintAmount);
         assertEq(erc20Token.balanceOf(account1), mintAmount, "Minting failed");
 
@@ -42,7 +42,7 @@ contract NontransferableERC20TestSuite is RevolutionBuilderTest {
 
     function testApprovalRestrictions() public {
         // Setup: Use two accounts
-        address owner = address(erc20TokenEmitter);
+        address owner = address(revolutionPointsEmitter);
         address spender = address(0x2);
 
         // Attempt to approve spender by the owner
@@ -71,7 +71,7 @@ contract NontransferableERC20TestSuite is RevolutionBuilderTest {
         assertEq(erc20Token.balanceOf(account), 0, "Non-owner should not be able to mint");
 
         // Minting by the owner
-        vm.startPrank(address(erc20TokenEmitter));
+        vm.startPrank(address(revolutionPointsEmitter));
         erc20Token.mint(account, mintAmount);
         vm.stopPrank();
 
@@ -85,7 +85,7 @@ contract NontransferableERC20TestSuite is RevolutionBuilderTest {
         uint256 mintAmount = 1000 * 1e18;
 
         // Mint tokens to the owner
-        vm.startPrank(address(erc20TokenEmitter));
+        vm.startPrank(address(revolutionPointsEmitter));
         erc20Token.mint(address(this), mintAmount);
         vm.stopPrank();
 
@@ -115,7 +115,7 @@ contract NontransferableERC20TestSuite is RevolutionBuilderTest {
         address account2 = address(0x8);
 
         // Mint tokens to different accounts
-        vm.startPrank(address(erc20TokenEmitter));
+        vm.startPrank(address(revolutionPointsEmitter));
         erc20Token.mint(account1, mintAmount1);
         erc20Token.mint(account2, mintAmount1 / 10);
         vm.stopPrank();
@@ -143,7 +143,7 @@ contract NontransferableERC20TestSuite is RevolutionBuilderTest {
         vm.stopPrank();
 
         // Minting by the owner
-        vm.startPrank(address(erc20TokenEmitter));
+        vm.startPrank(address(revolutionPointsEmitter));
         erc20Token.mint(address(1), mintAmount);
         vm.stopPrank();
 
@@ -154,7 +154,7 @@ contract NontransferableERC20TestSuite is RevolutionBuilderTest {
     function testEdgeCases() public {
         // Minting an excessive amount of tokens (overflow check)
         uint256 excessiveAmount = type(uint256).max;
-        vm.startPrank(address(erc20TokenEmitter));
+        vm.startPrank(address(revolutionPointsEmitter));
         vm.expectRevert();
         erc20Token.mint(address(1), excessiveAmount);
         vm.stopPrank();

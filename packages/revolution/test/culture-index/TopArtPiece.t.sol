@@ -18,7 +18,7 @@ contract CultureIndexArtPieceTest is CultureIndexTestSuite {
 
         // Mint tokens to the test contracts (acting as voters)
         vm.stopPrank();
-        vm.startPrank(address(erc20TokenEmitter));
+        vm.startPrank(address(revolutionPointsEmitter));
 
         erc20Token.mint(address(voter1Test), 100);
         erc20Token.mint(address(voter2Test), 200);
@@ -51,7 +51,7 @@ contract CultureIndexArtPieceTest is CultureIndexTestSuite {
 
         // Mint tokens to voter1
         vm.stopPrank();
-        vm.startPrank(address(erc20TokenEmitter));
+        vm.startPrank(address(revolutionPointsEmitter));
         erc20Token.mint(address(voter1Test), 100);
 
         vm.roll(block.number + 1); // roll block number to enable voting snapshot
@@ -69,7 +69,7 @@ contract CultureIndexArtPieceTest is CultureIndexTestSuite {
 
         // Mint tokens to the test contracts (acting as voters)
         vm.stopPrank();
-        vm.startPrank(address(erc20TokenEmitter));
+        vm.startPrank(address(revolutionPointsEmitter));
         erc20Token.mint(address(voter1Test), 100);
         erc20Token.mint(address(voter2Test), 200);
 
@@ -88,7 +88,7 @@ contract CultureIndexArtPieceTest is CultureIndexTestSuite {
     function testPopTopVotedPiece() public {
         uint256 firstPieceId = voter1Test.createDefaultArtPiece();
         vm.stopPrank();
-        vm.startPrank(address(erc20TokenEmitter));
+        vm.startPrank(address(revolutionPointsEmitter));
         erc20Token.mint(address(voter1Test), 100);
 
         vm.roll(block.number + 1); // roll block number to enable voting snapshot
@@ -105,7 +105,7 @@ contract CultureIndexArtPieceTest is CultureIndexTestSuite {
         uint256 secondPieceId = voter2Test.createDefaultArtPiece();
 
         vm.stopPrank();
-        vm.startPrank(address(erc20TokenEmitter));
+        vm.startPrank(address(revolutionPointsEmitter));
         erc20Token.mint(address(voter1Test), 100);
         erc20Token.mint(address(voter2Test), 200);
         vm.roll(block.number + 1); // roll block number to enable voting snapshot
@@ -126,7 +126,7 @@ contract CultureIndexArtPieceTest is CultureIndexTestSuite {
     /// @dev Tests that log gas required to vote on a piece isn't out of control as heap grows
     function testGasForLargeVotes() public {
         vm.stopPrank();
-        vm.startPrank(address(erc20TokenEmitter));
+        vm.startPrank(address(revolutionPointsEmitter));
         erc20Token.mint(address(voter1Test), 100);
         erc20Token.mint(address(voter2Test), 200);
         vm.roll(block.number + 1); // roll block number to enable voting snapshot
@@ -155,7 +155,7 @@ contract CultureIndexArtPieceTest is CultureIndexTestSuite {
             voter1Test.createDefaultArtPiece();
         }
         vm.stopPrank();
-        vm.startPrank(address(erc20TokenEmitter));
+        vm.startPrank(address(revolutionPointsEmitter));
         erc20Token.mint(address(voter1Test), 100);
         erc20Token.mint(address(voter2Test), 200);
         vm.roll(block.number + 1); // roll block number to enable voting snapshot
@@ -164,7 +164,7 @@ contract CultureIndexArtPieceTest is CultureIndexTestSuite {
         for (uint i = 5_002; i < 25_000; i++) {
             voter1Test.voteForPiece(i);
             vm.stopPrank();
-            vm.startPrank(address(erc20TokenEmitter));
+            vm.startPrank(address(revolutionPointsEmitter));
             erc20Token.mint(address(voter1Test), i);
             erc20Token.mint(address(voter2Test), i * 2);
 
@@ -193,7 +193,7 @@ contract CultureIndexArtPieceTest is CultureIndexTestSuite {
 
         // Create a set number of pieces and log the gas used for the last creation.
         vm.stopPrank();
-        vm.startPrank(address(erc20TokenEmitter));
+        vm.startPrank(address(revolutionPointsEmitter));
         //vote on all pieces
         for (uint i = 1; i < 5_000; i++) {
             erc20Token.mint(address(voter1Test), i + 1);
@@ -219,7 +219,7 @@ contract CultureIndexArtPieceTest is CultureIndexTestSuite {
     function testGasForPopTopVotedPiece() public {
         // Create and vote on a set number of pieces.
         vm.stopPrank();
-        vm.startPrank(address(erc20TokenEmitter));
+        vm.startPrank(address(revolutionPointsEmitter));
         for (uint i = 0; i < 5_000; i++) {
             uint256 pieceId = voter1Test.createDefaultArtPiece();
             erc20Token.mint(address(voter1Test), i * 2 + 1);
@@ -238,7 +238,7 @@ contract CultureIndexArtPieceTest is CultureIndexTestSuite {
         emit log_uint(gasUsed);
 
         vm.stopPrank();
-        vm.startPrank(address(erc20TokenEmitter));
+        vm.startPrank(address(revolutionPointsEmitter));
         // Create and vote on another set of pieces.
         for (uint i = 0; i < 25_000; i++) {
             uint256 pieceId = voter1Test.createDefaultArtPiece();
@@ -261,7 +261,7 @@ contract CultureIndexArtPieceTest is CultureIndexTestSuite {
 
     function testDropTopVotedPieceSequentialOrder() public {
         vm.stopPrank();
-        vm.startPrank(address(erc20TokenEmitter));
+        vm.startPrank(address(revolutionPointsEmitter));
         // Create some pieces and vote on them
         uint256 pieceId1 = voter1Test.createDefaultArtPiece();
         erc20Token.mint(address(voter1Test), 10);
@@ -292,7 +292,7 @@ contract CultureIndexArtPieceTest is CultureIndexTestSuite {
     /// @dev Ensure that the dropTopVotedPiece function behaves correctly when there are no more pieces to drop
     function testDropTopVotedPieceWithNoMorePieces() public {
         vm.stopPrank();
-        vm.startPrank(address(erc20TokenEmitter));
+        vm.startPrank(address(revolutionPointsEmitter));
         // Create and vote on a single piece
         uint256 pieceId = voter1Test.createDefaultArtPiece();
         erc20Token.mint(address(voter1Test), 10);

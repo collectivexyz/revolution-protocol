@@ -67,19 +67,20 @@ contract AuctionHouseSettleTest is AuctionHouseTest {
             10_000 /
             10_000;
 
-        uint256 feeAmount = erc20TokenEmitter.computeTotalReward(etherToSpendOnGovernanceTotal);
+        uint256 feeAmount = revolutionPointsEmitter.computeTotalReward(etherToSpendOnGovernanceTotal);
 
         uint msgValueRemaining = etherToSpendOnGovernanceTotal - feeAmount;
 
-        uint tokenEmitterValueGrants = (msgValueRemaining * erc20TokenEmitter.creatorRateBps()) / 10_000;
-        uint tokenEmitterValueGrantsDirect = (tokenEmitterValueGrants * erc20TokenEmitter.entropyRateBps()) / 10_000;
-        uint tokenEmitterValueGrantsGov = tokenEmitterValueGrants - tokenEmitterValueGrantsDirect;
+        uint pointsEmitterValueGrants = (msgValueRemaining * revolutionPointsEmitter.creatorRateBps()) / 10_000;
+        uint pointsEmitterValueGrantsDirect = (pointsEmitterValueGrants * revolutionPointsEmitter.entropyRateBps()) /
+            10_000;
+        uint pointsEmitterValueGrantsGov = pointsEmitterValueGrants - pointsEmitterValueGrantsDirect;
 
-        uint tokenEmitterValueOwner = msgValueRemaining - tokenEmitterValueGrants;
+        uint pointsEmitterValueOwner = msgValueRemaining - pointsEmitterValueGrants;
 
         assertEq(
             address(dao).balance,
-            auctioneerPayment + tokenEmitterValueOwner + tokenEmitterValueGrantsGov,
+            auctioneerPayment + pointsEmitterValueOwner + pointsEmitterValueGrantsGov,
             "Bid amount minus entropy should be transferred to the auction house owner"
         );
     }
@@ -106,9 +107,9 @@ contract AuctionHouseSettleTest is AuctionHouseTest {
     }
 
     function testTransferFailureAndFallbackToWETH(uint256 amount) public {
-        vm.assume(amount > erc20TokenEmitter.minPurchaseAmount());
+        vm.assume(amount > revolutionPointsEmitter.minPurchaseAmount());
         vm.assume(amount > auction.reservePrice());
-        vm.assume(amount < erc20TokenEmitter.maxPurchaseAmount());
+        vm.assume(amount < revolutionPointsEmitter.maxPurchaseAmount());
 
         createDefaultArtPiece();
         auction.unpause();
@@ -182,9 +183,9 @@ contract AuctionHouseSettleTest is AuctionHouseTest {
     }
 
     function testTransferToContractWithoutReceiveOrFallback(uint256 amount) public {
-        vm.assume(amount > erc20TokenEmitter.minPurchaseAmount());
+        vm.assume(amount > revolutionPointsEmitter.minPurchaseAmount());
         vm.assume(amount > auction.reservePrice());
-        vm.assume(amount < erc20TokenEmitter.maxPurchaseAmount());
+        vm.assume(amount < revolutionPointsEmitter.maxPurchaseAmount());
 
         createDefaultArtPiece();
         auction.unpause();
@@ -227,8 +228,8 @@ contract AuctionHouseSettleTest is AuctionHouseTest {
         // Note: By using toDaysWadUnsafe(block.timestamp - startTime) we are establishing that 1 "unit of time" is 1 day.
         // solhint-disable-next-line not-rely-on-time
         return
-            erc20TokenEmitter.vrgdac().yToX({
-                timeSinceStart: toDaysWadUnsafe(block.timestamp - erc20TokenEmitter.startTime()),
+            revolutionPointsEmitter.vrgdac().yToX({
+                timeSinceStart: toDaysWadUnsafe(block.timestamp - revolutionPointsEmitter.startTime()),
                 sold: supply,
                 amount: int(etherAmount)
             });
@@ -239,14 +240,16 @@ contract AuctionHouseSettleTest is AuctionHouseTest {
         uint creatorsGovernancePayment = (creatorsAuctionShare * (10_000 - auction.entropyRateBps())) / 10_000;
 
         uint msgValueRemaining = creatorsGovernancePayment -
-            erc20TokenEmitter.computeTotalReward(creatorsGovernancePayment);
+            revolutionPointsEmitter.computeTotalReward(creatorsGovernancePayment);
 
-        uint grantsShare = (msgValueRemaining * erc20TokenEmitter.creatorRateBps()) / 10_000;
+        uint grantsShare = (msgValueRemaining * revolutionPointsEmitter.creatorRateBps()) / 10_000;
         uint buyersShare = msgValueRemaining - grantsShare;
-        uint grantsDirectPayment = (grantsShare * erc20TokenEmitter.entropyRateBps()) / 10_000;
+        uint grantsDirectPayment = (grantsShare * revolutionPointsEmitter.entropyRateBps()) / 10_000;
         uint grantsGovernancePayment = grantsShare - grantsDirectPayment;
 
-        int expectedGrantsGovernanceTokenPayout = erc20TokenEmitter.getTokenQuoteForEther(grantsGovernancePayment);
+        int expectedGrantsGovernanceTokenPayout = revolutionPointsEmitter.getTokenQuoteForEther(
+            grantsGovernancePayment
+        );
 
         return uint256(getTokenQuoteForEtherHelper(buyersShare, expectedGrantsGovernanceTokenPayout));
     }
@@ -256,11 +259,11 @@ contract AuctionHouseSettleTest is AuctionHouseTest {
         uint creatorsGovernancePayment = (creatorsAuctionShare * (10_000 - auction.entropyRateBps())) / 10_000;
 
         uint msgValueRemaining = creatorsGovernancePayment -
-            erc20TokenEmitter.computeTotalReward(creatorsGovernancePayment);
+            revolutionPointsEmitter.computeTotalReward(creatorsGovernancePayment);
 
-        uint grantsShare = (msgValueRemaining * erc20TokenEmitter.creatorRateBps()) / 10_000;
+        uint grantsShare = (msgValueRemaining * revolutionPointsEmitter.creatorRateBps()) / 10_000;
         uint buyersShare = msgValueRemaining - grantsShare;
-        return (grantsShare * erc20TokenEmitter.entropyRateBps()) / 10_000;
+        return (grantsShare * revolutionPointsEmitter.entropyRateBps()) / 10_000;
     }
 
     function testSettlingAuctionWithMultipleCreators(uint8 nCreators) public {
@@ -353,9 +356,9 @@ contract AuctionHouseSettleTest is AuctionHouseTest {
     }
 
     function testSettlingAuctionWithWinningBidAndCreatorPayout(uint256 bidAmount) public {
-        vm.assume(bidAmount > erc20TokenEmitter.minPurchaseAmount());
+        vm.assume(bidAmount > revolutionPointsEmitter.minPurchaseAmount());
         vm.assume(bidAmount > auction.reservePrice());
-        vm.assume(bidAmount < erc20TokenEmitter.maxPurchaseAmount());
+        vm.assume(bidAmount < revolutionPointsEmitter.maxPurchaseAmount());
 
         uint256 verbId = createArtPiece(
             "Art Piece",
@@ -388,7 +391,7 @@ contract AuctionHouseSettleTest is AuctionHouseTest {
         uint256 creatorGovernancePayment = creatorPayment - creatorDirectPayment;
 
         //Get expected protocol fee amount
-        uint256 feeAmount = erc20TokenEmitter.computeTotalReward(creatorGovernancePayment);
+        uint256 feeAmount = revolutionPointsEmitter.computeTotalReward(creatorGovernancePayment);
 
         vm.warp(block.timestamp + auction.duration() + 1); // Fast forward time to end the auction
 

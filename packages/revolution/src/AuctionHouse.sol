@@ -48,7 +48,7 @@ contract AuctionHouse is
     IVerbsToken public verbs;
 
     // The ERC20 governance token
-    IRevolutionPointsEmitter public erc20TokenEmitter;
+    IRevolutionPointsEmitter public revolutionPointsEmitter;
 
     // The address of the WETH contract
     address public WETH;
@@ -106,14 +106,14 @@ contract AuctionHouse is
      * populate configuration values, and pause the contract.
      * @dev This function can only be called once.
      * @param _erc721Token The address of the Verbs ERC721 token contract.
-     * @param _erc20TokenEmitter The address of the ERC-20 token emitter contract.
+     * @param _revolutionPointsEmitter The address of the ERC-20 token emitter contract.
      * @param _initialOwner The address of the owner.
      * @param _weth The address of the WETH contract
      * @param _auctionParams The auction params for auctions.
      */
     function initialize(
         address _erc721Token,
-        address _erc20TokenEmitter,
+        address _revolutionPointsEmitter,
         address _initialOwner,
         address _weth,
         IRevolutionBuilder.AuctionParams calldata _auctionParams
@@ -130,7 +130,7 @@ contract AuctionHouse is
         if (_auctionParams.creatorRateBps < _auctionParams.minCreatorRateBps) revert CREATOR_RATE_TOO_LOW();
 
         verbs = IVerbsToken(_erc721Token);
-        erc20TokenEmitter = IRevolutionPointsEmitter(_erc20TokenEmitter);
+        revolutionPointsEmitter = IRevolutionPointsEmitter(_revolutionPointsEmitter);
         timeBuffer = _auctionParams.timeBuffer;
         reservePrice = _auctionParams.reservePrice;
         minBidIncrementPercentage = _auctionParams.minBidIncrementPercentage;
@@ -362,7 +362,7 @@ contract AuctionHouse is
                 uint256 numCreators = verbs.getArtPieceById(_auction.verbId).creators.length;
                 address deployer = verbs.getArtPieceById(_auction.verbId).sponsor;
 
-                //Build arrays for erc20TokenEmitter.buyToken
+                //Build arrays for revolutionPointsEmitter.buyToken
                 uint256[] memory vrgdaSplits = new uint256[](numCreators);
                 address[] memory vrgdaReceivers = new address[](numCreators);
 
@@ -371,7 +371,7 @@ contract AuctionHouse is
 
                 uint256 ethPaidToCreators = 0;
 
-                //Transfer creator's share to the creator, for each creator, and build arrays for erc20TokenEmitter.buyToken
+                //Transfer creator's share to the creator, for each creator, and build arrays for revolutionPointsEmitter.buyToken
                 if (creatorsShare > 0 && entropyRateBps > 0) {
                     ICultureIndex.CreatorBps[] memory creators = verbs.getArtPieceById(_auction.verbId).creators;
                     uint entropyRateAmount = creatorsShare * entropyRateBps;
@@ -390,7 +390,7 @@ contract AuctionHouse is
 
                 //Buy token from RevolutionPointsEmitter for all the creators
                 if (creatorsShare > ethPaidToCreators) {
-                    creatorTokensEmitted = erc20TokenEmitter.buyToken{ value: creatorsShare - ethPaidToCreators }(
+                    creatorTokensEmitted = revolutionPointsEmitter.buyToken{ value: creatorsShare - ethPaidToCreators }(
                         vrgdaReceivers,
                         vrgdaSplits,
                         IRevolutionPointsEmitter.ProtocolRewardAddresses({

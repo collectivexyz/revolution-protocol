@@ -70,7 +70,7 @@ contract CultureIndexVotingBasicTest is CultureIndexTestSuite {
 
         // Voter1 votes for piece1
         vm.stopPrank();
-        vm.startPrank(address(erc20TokenEmitter));
+        vm.startPrank(address(revolutionPointsEmitter));
         erc20Token.mint(voter1, 100);
         vm.roll(block.number + 1); // Roll forward to ensure votes are snapshotted
 
@@ -81,7 +81,7 @@ contract CultureIndexVotingBasicTest is CultureIndexTestSuite {
         uint256 pieceId2 = createDefaultArtPiece();
 
         // Voter2 votes for piece2 with higher weight
-        vm.startPrank(address(erc20TokenEmitter));
+        vm.startPrank(address(revolutionPointsEmitter));
         erc20Token.mint(voter2, 200);
         vm.roll(block.number + 2); // Roll forward to ensure votes are snapshotted
 
@@ -140,7 +140,7 @@ contract CultureIndexVotingBasicTest is CultureIndexTestSuite {
 
         // Set initial token balance and cast vote
         vm.stopPrank();
-        vm.startPrank(address(erc20TokenEmitter));
+        vm.startPrank(address(revolutionPointsEmitter));
         erc20Token.mint(voter, voteWeight);
         vm.startPrank(voter);
         vm.roll(block.number + 1);
@@ -148,7 +148,7 @@ contract CultureIndexVotingBasicTest is CultureIndexTestSuite {
         cultureIndex.vote(pieceId);
         vm.stopPrank();
 
-        vm.startPrank(address(erc20TokenEmitter));
+        vm.startPrank(address(revolutionPointsEmitter));
         erc20Token.mint(voter, voteWeight);
 
         vm.startPrank(address(auction));
@@ -182,7 +182,7 @@ contract CultureIndexVotingBasicTest is CultureIndexTestSuite {
         uint256 invalidPieceId = 99999; // Assume this is an invalid ID
         address voter = address(0x1);
         vm.stopPrank();
-        vm.startPrank(address(erc20TokenEmitter));
+        vm.startPrank(address(revolutionPointsEmitter));
         erc20Token.mint(voter, 100);
 
         vm.startPrank(voter);
@@ -201,7 +201,7 @@ contract CultureIndexVotingBasicTest is CultureIndexTestSuite {
 
         // Set initial token balances
         vm.stopPrank();
-        vm.startPrank(address(erc20TokenEmitter));
+        vm.startPrank(address(revolutionPointsEmitter));
         erc20Token.mint(voter, initialErc20Weight);
 
         vm.startPrank(address(auction));
@@ -216,7 +216,7 @@ contract CultureIndexVotingBasicTest is CultureIndexTestSuite {
         // Change token balances
         uint256 updateErc20Weight = 100; // Increased ERC20 weight
 
-        vm.startPrank(address(erc20TokenEmitter));
+        vm.startPrank(address(revolutionPointsEmitter));
         erc20Token.mint(voter, updateErc20Weight);
 
         vm.startPrank(address(auction));
@@ -265,7 +265,7 @@ contract CultureIndexVotingBasicTest is CultureIndexTestSuite {
 
         // Mint some tokens to the voter
         vm.stopPrank();
-        vm.startPrank(address(erc20TokenEmitter));
+        vm.startPrank(address(revolutionPointsEmitter));
         erc20Token.mint(address(this), 100);
 
         vm.roll(block.number + 1); // Roll forward to ensure votes are snapshotted
@@ -289,7 +289,7 @@ contract CultureIndexVotingBasicTest is CultureIndexTestSuite {
         pieceIds[0] = createDefaultArtPiece();
         pieceIds[1] = createDefaultArtPiece();
         vm.stopPrank();
-        vm.startPrank(address(erc20TokenEmitter));
+        vm.startPrank(address(revolutionPointsEmitter));
         erc20Token.mint(address(this), 200);
         vm.roll(block.number + 1); // Roll forward to ensure votes are snapshotted
 
@@ -310,7 +310,7 @@ contract CultureIndexVotingBasicTest is CultureIndexTestSuite {
         pieceIds[0] = 999; // Invalid pieceId
         pieceIds[1] = createDefaultArtPiece(); // Valid pieceId
         vm.stopPrank();
-        vm.startPrank(address(erc20TokenEmitter));
+        vm.startPrank(address(revolutionPointsEmitter));
         erc20Token.mint(address(this), 200);
         vm.roll(block.number + 1); // Roll forward to ensure votes are snapshotted
 
@@ -322,7 +322,7 @@ contract CultureIndexVotingBasicTest is CultureIndexTestSuite {
     function testBatchVotingFailsIfAlreadyVoted() public {
         uint256 pieceId = createDefaultArtPiece();
         vm.stopPrank();
-        vm.startPrank(address(erc20TokenEmitter));
+        vm.startPrank(address(revolutionPointsEmitter));
         erc20Token.mint(address(this), 100);
         vm.roll(block.number + 1); // Roll forward to ensure votes are snapshotted
 
@@ -340,7 +340,7 @@ contract CultureIndexVotingBasicTest is CultureIndexTestSuite {
     function testBatchVotingFailsIfPieceDropped() public {
         uint256 pieceId = createDefaultArtPiece();
         vm.stopPrank();
-        vm.startPrank(address(erc20TokenEmitter));
+        vm.startPrank(address(revolutionPointsEmitter));
         erc20Token.mint(address(this), 100);
         vm.roll(block.number + 1); // Roll forward to ensure votes are snapshotted
 
@@ -375,7 +375,7 @@ contract CultureIndexVotingBasicTest is CultureIndexTestSuite {
 
         // Mint enough tokens for voting
         vm.stopPrank();
-        vm.startPrank(address(erc20TokenEmitter));
+        vm.startPrank(address(revolutionPointsEmitter));
         erc20Token.mint(address(this), 100 * 100); // Mint enough tokens (e.g., 100 tokens per vote)
         vm.roll(block.number + 1); // Roll forward to ensure votes are snapshotted
 
@@ -399,7 +399,7 @@ contract CultureIndexVotingBasicTest is CultureIndexTestSuite {
             batchPieceIds[i] = createDefaultArtPiece(); // Setup each art piece
         }
         vm.stopPrank();
-        vm.startPrank(address(erc20TokenEmitter));
+        vm.startPrank(address(revolutionPointsEmitter));
         erc20Token.mint(address(this), 100 * 100); // Mint enough tokens (e.g., 100 tokens per vote)
         vm.roll(block.number + 1); // Roll forward to ensure votes are snapshotted
 
@@ -439,7 +439,7 @@ contract CultureIndexVotingBasicTest is CultureIndexTestSuite {
 
         // Mint some tokens to the voter
         vm.stopPrank();
-        vm.startPrank(address(erc20TokenEmitter));
+        vm.startPrank(address(revolutionPointsEmitter));
         erc20Token.mint(address(this), 100);
         vm.roll(block.number + 1); // Roll forward to ensure votes are snapshotted
 
@@ -508,7 +508,7 @@ contract CultureIndexVotingBasicTest is CultureIndexTestSuite {
 
         // Mint some tokens to the voter
         vm.stopPrank();
-        vm.startPrank(address(erc20TokenEmitter));
+        vm.startPrank(address(revolutionPointsEmitter));
         erc20Token.mint(address(this), 200);
         vm.roll(block.number + 1); // Roll forward to ensure votes are snapshotted
 
@@ -573,7 +573,7 @@ contract CultureIndexVotingBasicTest is CultureIndexTestSuite {
 
         // Mint tokens and vote
         vm.stopPrank();
-        vm.startPrank(address(erc20TokenEmitter));
+        vm.startPrank(address(revolutionPointsEmitter));
         erc20Token.mint(address(this), 100);
         vm.roll(block.number + 1); // Roll forward to ensure votes are snapshotted
 
@@ -595,7 +595,7 @@ contract CultureIndexVotingBasicTest is CultureIndexTestSuite {
     function testInvalidPieceID() public {
         // Mint some tokens to the voter
         vm.stopPrank();
-        vm.startPrank(address(erc20TokenEmitter));
+        vm.startPrank(address(revolutionPointsEmitter));
         erc20Token.mint(address(this), 100);
         vm.roll(block.number + 1); // Roll forward to ensure votes are snapshotted
 
@@ -614,9 +614,9 @@ contract CultureIndexVotingBasicTest is CultureIndexTestSuite {
     function testCannotVoteOnDroppedPiece() public {
         uint256 newPieceId = createDefaultArtPiece();
         vm.stopPrank();
-        vm.startPrank(address(erc20TokenEmitter));
+        vm.startPrank(address(revolutionPointsEmitter));
         vm.stopPrank();
-        vm.startPrank(address(erc20TokenEmitter));
+        vm.startPrank(address(revolutionPointsEmitter));
         erc20Token.mint(address(this), 100);
         vm.roll(block.number + 1); // Roll forward to ensure votes are snapshotted
 
@@ -633,7 +633,7 @@ contract CultureIndexVotingBasicTest is CultureIndexTestSuite {
         vm.assume(erc20Balance > 0);
         vm.assume(erc721Balance < 1_000);
         vm.stopPrank();
-        vm.startPrank(address(erc20TokenEmitter));
+        vm.startPrank(address(revolutionPointsEmitter));
         erc20Token.mint(address(auction), erc20Balance);
 
         vm.startPrank(address(this));
@@ -669,7 +669,7 @@ contract CultureIndexVotingBasicTest is CultureIndexTestSuite {
         cultureIndex._setQuorumVotesBPS(quorumBPS);
 
         // Set the ERC20 and ERC721 total supplies
-        vm.startPrank(address(erc20TokenEmitter));
+        vm.startPrank(address(revolutionPointsEmitter));
         erc20Token.mint(address(this), erc20TotalSupply);
 
         vm.roll(block.number + 1);

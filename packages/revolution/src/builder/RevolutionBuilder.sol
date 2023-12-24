@@ -71,8 +71,8 @@ contract RevolutionBuilder is
     /// @notice The dao implementation address
     address public immutable daoImpl;
 
-    /// @notice The erc20TokenEmitter implementation address
-    address public immutable erc20TokenEmitterImpl;
+    /// @notice The revolutionPointsEmitter implementation address
+    address public immutable revolutionPointsEmitterImpl;
 
     /// @notice The cultureIndex implementation address
     address public immutable cultureIndexImpl;
@@ -95,7 +95,7 @@ contract RevolutionBuilder is
         address _daoImpl,
         address _cultureIndexImpl,
         address _erc20TokenImpl,
-        address _erc20TokenEmitterImpl,
+        address _revolutionPointsEmitterImpl,
         address _maxHeapImpl
     ) payable initializer {
         erc721TokenImpl = _erc721TokenImpl;
@@ -105,7 +105,7 @@ contract RevolutionBuilder is
         daoImpl = _daoImpl;
         cultureIndexImpl = _cultureIndexImpl;
         erc20TokenImpl = _erc20TokenImpl;
-        erc20TokenEmitterImpl = _erc20TokenEmitterImpl;
+        revolutionPointsEmitterImpl = _revolutionPointsEmitterImpl;
         maxHeapImpl = _maxHeapImpl;
     }
 
@@ -135,7 +135,7 @@ contract RevolutionBuilder is
     /// @param _govParams The governance settings
     /// @param _cultureIndexParams The culture index settings
     /// @param _erc20TokenParams The ERC-20 token settings
-    /// @param _erc20TokenEmitterParams The ERC-20 token emitter settings
+    /// @param _revolutionPointsEmitterParams The ERC-20 token emitter settings
     function deploy(
         address _initialOwner,
         address _weth,
@@ -144,7 +144,7 @@ contract RevolutionBuilder is
         GovParams calldata _govParams,
         CultureIndexParams calldata _cultureIndexParams,
         ERC20TokenParams calldata _erc20TokenParams,
-        RevolutionPointsEmitterParams calldata _erc20TokenEmitterParams
+        RevolutionPointsEmitterParams calldata _revolutionPointsEmitterParams
     ) external returns (DAOAddresses memory) {
         require(_initialOwner != address(0), "Initial owner cannot be 0x0");
 
@@ -154,9 +154,9 @@ contract RevolutionBuilder is
         // Deploy the VRGDAC contract
         address vrgdac = address(
             new VRGDAC(
-                _erc20TokenEmitterParams.vrgdaParams.targetPrice,
-                _erc20TokenEmitterParams.vrgdaParams.priceDecayPercent,
-                _erc20TokenEmitterParams.vrgdaParams.tokensPerTimeUnit
+                _revolutionPointsEmitterParams.vrgdaParams.targetPrice,
+                _revolutionPointsEmitterParams.vrgdaParams.priceDecayPercent,
+                _revolutionPointsEmitterParams.vrgdaParams.tokensPerTimeUnit
             )
         );
 
@@ -169,7 +169,7 @@ contract RevolutionBuilder is
             auction: address(new ERC1967Proxy{ salt: salt }(auctionImpl, "")),
             executor: address(new ERC1967Proxy{ salt: salt }(executorImpl, "")),
             dao: address(new ERC1967Proxy{ salt: salt }(daoImpl, "")),
-            erc20TokenEmitter: address(new ERC1967Proxy{ salt: salt }(erc20TokenEmitterImpl, "")),
+            revolutionPointsEmitter: address(new ERC1967Proxy{ salt: salt }(revolutionPointsEmitterImpl, "")),
             cultureIndex: address(new ERC1967Proxy{ salt: salt }(cultureIndexImpl, "")),
             erc20Token: address(new ERC1967Proxy{ salt: salt }(erc20TokenImpl, "")),
             erc721Token: erc721Token,
@@ -206,24 +206,24 @@ contract RevolutionBuilder is
 
         IAuctionHouse(daoAddressesByToken[erc721Token].auction).initialize({
             erc721Token: daoAddressesByToken[erc721Token].erc721Token,
-            erc20TokenEmitter: daoAddressesByToken[erc721Token].erc20TokenEmitter,
+            revolutionPointsEmitter: daoAddressesByToken[erc721Token].revolutionPointsEmitter,
             initialOwner: daoAddressesByToken[erc721Token].dao,
             auctionParams: _auctionParams,
             weth: _weth
         });
 
         INontransferableERC20Votes(daoAddressesByToken[erc721Token].erc20Token).initialize({
-            initialOwner: daoAddressesByToken[erc721Token].erc20TokenEmitter,
+            initialOwner: daoAddressesByToken[erc721Token].revolutionPointsEmitter,
             erc20TokenParams: _erc20TokenParams
         });
 
-        IRevolutionPointsEmitter(daoAddressesByToken[erc721Token].erc20TokenEmitter).initialize({
+        IRevolutionPointsEmitter(daoAddressesByToken[erc721Token].revolutionPointsEmitter).initialize({
             erc20Token: daoAddressesByToken[erc721Token].erc20Token,
             initialOwner: daoAddressesByToken[erc721Token].dao,
             weth: _weth,
             vrgdac: vrgdac,
-            creatorsAddress: _erc20TokenEmitterParams.creatorsAddress,
-            creatorParams: _erc20TokenEmitterParams.creatorParams
+            creatorsAddress: _revolutionPointsEmitterParams.creatorsAddress,
+            creatorParams: _revolutionPointsEmitterParams.creatorParams
         });
 
         IDAOExecutor(daoAddressesByToken[erc721Token].executor).initialize({
@@ -244,7 +244,7 @@ contract RevolutionBuilder is
             auction: daoAddressesByToken[erc721Token].auction,
             executor: daoAddressesByToken[erc721Token].executor,
             dao: daoAddressesByToken[erc721Token].dao,
-            erc20TokenEmitter: daoAddressesByToken[erc721Token].erc20TokenEmitter,
+            revolutionPointsEmitter: daoAddressesByToken[erc721Token].revolutionPointsEmitter,
             cultureIndex: daoAddressesByToken[erc721Token].cultureIndex,
             erc20Token: daoAddressesByToken[erc721Token].erc20Token,
             maxHeap: daoAddressesByToken[erc721Token].maxHeap
@@ -266,7 +266,7 @@ contract RevolutionBuilder is
     /// @return dao DAO deployed address
     /// @return cultureIndex CultureIndex deployed address
     /// @return erc20Token ERC-20 token deployed address
-    /// @return erc20TokenEmitter ERC-20 token emitter deployed address
+    /// @return revolutionPointsEmitter ERC-20 token emitter deployed address
     /// @return maxHeap MaxHeap deployed address
     function getAddresses(
         address _token
@@ -281,7 +281,7 @@ contract RevolutionBuilder is
             address dao,
             address cultureIndex,
             address erc20Token,
-            address erc20TokenEmitter,
+            address revolutionPointsEmitter,
             address maxHeap
         )
     {
@@ -294,7 +294,7 @@ contract RevolutionBuilder is
 
         cultureIndex = addresses.cultureIndex;
         erc20Token = addresses.erc20Token;
-        erc20TokenEmitter = addresses.erc20TokenEmitter;
+        revolutionPointsEmitter = addresses.revolutionPointsEmitter;
         maxHeap = addresses.maxHeap;
     }
 
@@ -347,7 +347,7 @@ contract RevolutionBuilder is
             address dao,
             address cultureIndex,
             address erc20Token,
-            address erc20TokenEmitter,
+            address revolutionPointsEmitter,
             address maxHeap
         ) = getAddresses(token);
         return
@@ -359,7 +359,7 @@ contract RevolutionBuilder is
                 dao: _safeGetVersion(dao),
                 erc20Token: _safeGetVersion(erc20Token),
                 cultureIndex: _safeGetVersion(cultureIndex),
-                erc20TokenEmitter: _safeGetVersion(erc20TokenEmitter),
+                revolutionPointsEmitter: _safeGetVersion(revolutionPointsEmitter),
                 maxHeap: _safeGetVersion(maxHeap)
             });
     }
@@ -374,7 +374,7 @@ contract RevolutionBuilder is
                 dao: _safeGetVersion(daoImpl),
                 cultureIndex: _safeGetVersion(cultureIndexImpl),
                 erc20Token: _safeGetVersion(erc20TokenImpl),
-                erc20TokenEmitter: _safeGetVersion(erc20TokenEmitterImpl),
+                revolutionPointsEmitter: _safeGetVersion(revolutionPointsEmitterImpl),
                 maxHeap: _safeGetVersion(maxHeapImpl)
             });
     }

@@ -165,7 +165,7 @@ The RevolutionPointsEmitter has a **creatorRateBps** and **entropyRateBps** that
 
 ### Protocol rewards
 
-A fixed percentage of the value sent to the **buyToken** function is paid to the **TokenEmitterRewards** contract. The rewards setup is modeled after Zora's _fixed_ [protocol rewards](https://github.com/ourzora/zora-protocol/tree/main/packages/protocol-rewards). The key difference is that instead of a _fixed_ amount of ETH being split between the builder, referrer, deployer, and architect, the **TokenEmitterRewards** system splits a percentage of the value to relevant parties.
+A fixed percentage of the value sent to the **buyToken** function is paid to the **PointsEmitterRewards** contract. The rewards setup is modeled after Zora's _fixed_ [protocol rewards](https://github.com/ourzora/zora-protocol/tree/main/packages/protocol-rewards). The key difference is that instead of a _fixed_ amount of ETH being split between the builder, referrer, deployer, and architect, the **PointsEmitterRewards** system splits a percentage of the value to relevant parties.
 
 ## VRGDA
 

@@ -26,8 +26,8 @@
 ➡ RevolutionPointsEmitter
 =======================
 
-| Name            | Type                               | Slot | Offset | Bytes | Contract                                    |
-|-----------------|------------------------------------|------|--------|-------|---------------------------------------------|
+| Name            | Type                               | Slot | Offset | Bytes | Contract                                                |
+|-----------------|------------------------------------|------|--------|-------|---------------------------------------------------------|
 | WETH            | address                            | 0    | 0      | 20    | src/RevolutionPointsEmitter.sol:RevolutionPointsEmitter |
 | token           | contract NontransferableERC20Votes | 1    | 0      | 20    | src/RevolutionPointsEmitter.sol:RevolutionPointsEmitter |
 | vrgdac          | contract VRGDAC                    | 2    | 0      | 20    | src/RevolutionPointsEmitter.sol:RevolutionPointsEmitter |
@@ -41,19 +41,19 @@
 ➡ AuctionHouse
 =======================
 
-| Name                      | Type                         | Slot | Offset | Bytes | Contract                          |
-|---------------------------|------------------------------|------|--------|-------|-----------------------------------|
-| verbs                     | contract IVerbsToken         | 0    | 0      | 20    | src/AuctionHouse.sol:AuctionHouse |
-| erc20TokenEmitter         | contract IRevolutionPointsEmitter  | 1    | 0      | 20    | src/AuctionHouse.sol:AuctionHouse |
-| WETH                      | address                      | 2    | 0      | 20    | src/AuctionHouse.sol:AuctionHouse |
-| timeBuffer                | uint256                      | 3    | 0      | 32    | src/AuctionHouse.sol:AuctionHouse |
-| reservePrice              | uint256                      | 4    | 0      | 32    | src/AuctionHouse.sol:AuctionHouse |
-| minBidIncrementPercentage | uint8                        | 5    | 0      | 1     | src/AuctionHouse.sol:AuctionHouse |
-| creatorRateBps            | uint256                      | 6    | 0      | 32    | src/AuctionHouse.sol:AuctionHouse |
-| minCreatorRateBps         | uint256                      | 7    | 0      | 32    | src/AuctionHouse.sol:AuctionHouse |
-| entropyRateBps            | uint256                      | 8    | 0      | 32    | src/AuctionHouse.sol:AuctionHouse |
-| duration                  | uint256                      | 9    | 0      | 32    | src/AuctionHouse.sol:AuctionHouse |
-| auction                   | struct IAuctionHouse.Auction | 10   | 0      | 160   | src/AuctionHouse.sol:AuctionHouse |
+| Name                      | Type                              | Slot | Offset | Bytes | Contract                          |
+|---------------------------|-----------------------------------|------|--------|-------|-----------------------------------|
+| verbs                     | contract IVerbsToken              | 0    | 0      | 20    | src/AuctionHouse.sol:AuctionHouse |
+| revolutionPointsEmitter   | contract IRevolutionPointsEmitter | 1    | 0      | 20    | src/AuctionHouse.sol:AuctionHouse |
+| WETH                      | address                           | 2    | 0      | 20    | src/AuctionHouse.sol:AuctionHouse |
+| timeBuffer                | uint256                           | 3    | 0      | 32    | src/AuctionHouse.sol:AuctionHouse |
+| reservePrice              | uint256                           | 4    | 0      | 32    | src/AuctionHouse.sol:AuctionHouse |
+| minBidIncrementPercentage | uint8                             | 5    | 0      | 1     | src/AuctionHouse.sol:AuctionHouse |
+| creatorRateBps            | uint256                           | 6    | 0      | 32    | src/AuctionHouse.sol:AuctionHouse |
+| minCreatorRateBps         | uint256                           | 7    | 0      | 32    | src/AuctionHouse.sol:AuctionHouse |
+| entropyRateBps            | uint256                           | 8    | 0      | 32    | src/AuctionHouse.sol:AuctionHouse |
+| duration                  | uint256                           | 9    | 0      | 32    | src/AuctionHouse.sol:AuctionHouse |
+| auction                   | struct IAuctionHouse.Auction      | 10   | 0      | 160   | src/AuctionHouse.sol:AuctionHouse |
 
 =======================
 ➡ MaxHeap

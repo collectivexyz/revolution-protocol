@@ -73,7 +73,7 @@ contract CultureIndexVotingSignaturesTest is CultureIndexTestSuite {
 
         //mint offchainVoterWeight to offchainVoter
         uint256 offchainVoterWeight = 100;
-        vm.startPrank(address(erc20TokenEmitter));
+        vm.startPrank(address(revolutionPointsEmitter));
         erc20Token.mint(offchainVoter, offchainVoterWeight);
         vm.stopPrank();
 
@@ -159,7 +159,7 @@ contract CultureIndexVotingSignaturesTest is CultureIndexTestSuite {
 
         // mint offchainVoterWeight to offchainVoter
         uint256 offchainVoterWeight = 100;
-        vm.startPrank(address(erc20TokenEmitter));
+        vm.startPrank(address(revolutionPointsEmitter));
         erc20Token.mint(offchainVoter, offchainVoterWeight);
 
         vm.roll(block.number + 1);
@@ -222,7 +222,7 @@ contract CultureIndexVotingSignaturesTest is CultureIndexTestSuite {
         cultureIndex.voteForManyWithSig(offchainVoter, invalidPieceIds, deadline, v, r, s);
 
         //mint tokens finally
-        vm.startPrank(address(erc20TokenEmitter));
+        vm.startPrank(address(revolutionPointsEmitter));
         erc20Token.mint(offchainVoter, 100);
 
         vm.roll(block.number + 1);
