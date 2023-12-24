@@ -171,6 +171,18 @@ contract VerbsDAOStorageV1 is VerbsDAOProxyStorage {
     /// @dev Reverts if the ERC721 token voting weight is invalid (non-positive).
     error INVALID_ERC721_VOTING_WEIGHT();
 
+    /// @dev Reverts if the proposer's votes are below the proposal threshold.
+    error PROPOSER_VOTES_BELOW_THRESHOLD();
+
+    /// @dev Reverts if the lengths of proposal arrays (targets, values, signatures, calldatas) do not match.
+    error PROPOSAL_FUNCTION_PARITY_MISMATCH();
+
+    /// @dev Reverts if no actions are provided in the proposal.
+    error NO_ACTIONS_PROVIDED();
+
+    /// @dev Reverts if the number of actions in the proposal exceeds the maximum allowed.
+    error TOO_MANY_ACTIONS();
+
     /// @notice The contract upgrade manager
     IRevolutionBuilder public immutable manager;
 

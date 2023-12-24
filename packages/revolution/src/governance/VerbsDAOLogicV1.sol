@@ -255,18 +255,16 @@ contract VerbsDAOLogicV1 is
 
         temp.proposalThreshold = bps2Uint(proposalThresholdBPS, temp.totalWeightedSupply);
 
-        require(
-            getTotalVotes(msg.sender, block.number - 1) > temp.proposalThreshold,
-            "DAO::propose: proposer votes below proposal threshold"
-        );
-        require(
-            targets.length == values.length &&
-                targets.length == signatures.length &&
-                targets.length == calldatas.length,
-            "DAO::propose: proposal function information parity mismatch"
-        );
-        require(targets.length != 0, "DAO::propose: must provide actions");
-        require(targets.length <= proposalMaxOperations, "DAO::propose: too many actions");
+        if (getTotalVotes(msg.sender, block.number - 1) <= temp.proposalThreshold)
+            revert PROPOSER_VOTES_BELOW_THRESHOLD();
+
+        if (
+            targets.length != values.length || targets.length != signatures.length || targets.length != calldatas.length
+        ) revert PROPOSAL_FUNCTION_PARITY_MISMATCH();
+
+        if (targets.length == 0) revert NO_ACTIONS_PROVIDED();
+
+        if (targets.length > proposalMaxOperations) revert TOO_MANY_ACTIONS();
 
         temp.latestProposalId = latestProposalIds[msg.sender];
         if (temp.latestProposalId != 0) {
