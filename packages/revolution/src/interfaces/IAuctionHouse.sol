@@ -42,6 +42,9 @@ interface IAuctionHouse {
     /// @dev Reverts if the bid is not sufficiently higher than the last bid based on the minimum bid increment percentage.
     error BID_TOO_LOW();
 
+    /// @dev Reverts if bps is greater than 10,000.
+    error INVALID_BPS();
+
     struct Auction {
         // ID for the Verb (ERC721 token ID)
         uint256 verbId;

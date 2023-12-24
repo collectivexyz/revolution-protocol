@@ -216,7 +216,7 @@ contract AuctionHouse is
             _creatorRateBps >= minCreatorRateBps,
             "Creator rate must be greater than or equal to minCreatorRateBps"
         );
-        require(_creatorRateBps <= 10_000, "Creator rate must be less than or equal to 10_000");
+        if (_creatorRateBps > 10_000) revert INVALID_BPS();
         creatorRateBps = _creatorRateBps;
 
         emit CreatorRateBpsUpdated(_creatorRateBps);
@@ -229,7 +229,7 @@ contract AuctionHouse is
      */
     function setMinCreatorRateBps(uint256 _minCreatorRateBps) external onlyOwner {
         require(_minCreatorRateBps <= creatorRateBps, "Min creator rate must be less than or equal to creator rate");
-        require(_minCreatorRateBps <= 10_000, "Min creator rate must be less than or equal to 10_000");
+        if (_minCreatorRateBps > 10_000) revert INVALID_BPS();
 
         //ensure new min rate cannot be lower than previous min rate
         require(
@@ -248,7 +248,7 @@ contract AuctionHouse is
      * @param _entropyRateBps New entropy rate in basis points.
      */
     function setEntropyRateBps(uint256 _entropyRateBps) external onlyOwner {
-        require(_entropyRateBps <= 10_000, "Entropy rate must be less than or equal to 10_000");
+        if (_entropyRateBps > 10_000) revert INVALID_BPS();
 
         entropyRateBps = _entropyRateBps;
         emit EntropyRateBpsUpdated(_entropyRateBps);

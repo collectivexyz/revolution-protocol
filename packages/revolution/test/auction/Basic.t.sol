@@ -68,7 +68,7 @@ contract AuctionHouseBasicTest is AuctionHouseTest {
         uint256 oldEntropyRateBps = auction.entropyRateBps();
 
         // Attempt to set an invalid entropy rate
-        vm.expectRevert("Entropy rate must be less than or equal to 10_000");
+        vm.expectRevert(abi.encodeWithSignature("INVALID_BPS()"));
         auction.setEntropyRateBps(invalidEntropyRateBps);
 
         // Assert that the rate was not updated
@@ -86,7 +86,7 @@ contract AuctionHouseBasicTest is AuctionHouseTest {
 
     function testSetMinCreatorRateBps(uint256 newMinCreatorRateBps, uint256 creatorRateBps) public {
         if (creatorRateBps > 10_000) {
-            vm.expectRevert("Creator rate must be less than or equal to 10_000");
+            vm.expectRevert(abi.encodeWithSignature("INVALID_BPS()"));
         } else if (creatorRateBps < auction.minCreatorRateBps()) {
             vm.expectRevert("Creator rate must be greater than or equal to minCreatorRateBps");
         } else {
