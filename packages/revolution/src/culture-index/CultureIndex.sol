@@ -63,7 +63,7 @@ contract CultureIndex is
 
     /**
      * @notice Initializes a token's metadata descriptor
-     * @param _erc20VotingToken The address of the ERC20 voting token, commonly referred to as "points"
+     * @param _revolutionPoints The address of the ERC20 voting token, commonly referred to as "points"
      * @param _erc721VotingToken The address of the ERC721 voting token, commonly the dropped art pieces
      * @param _initialOwner The owner of the contract, allowed to drop pieces. Commonly updated to the AuctionHouse
      * @param _maxHeap The address of the max heap contract
@@ -71,7 +71,7 @@ contract CultureIndex is
      * @param _cultureIndexParams The CultureIndex settings
      */
     function initialize(
-        address _erc20VotingToken,
+        address _revolutionPoints,
         address _erc721VotingToken,
         address _initialOwner,
         address _maxHeap,
@@ -82,7 +82,7 @@ contract CultureIndex is
 
         if (_cultureIndexParams.quorumVotesBPS > MAX_QUORUM_VOTES_BPS) revert INVALID_QUORUM_BPS();
         if (_cultureIndexParams.erc721VotingTokenWeight <= 0) revert INVALID_ERC721_VOTING_WEIGHT();
-        if (_erc20VotingToken == address(0)) revert ADDRESS_ZERO();
+        if (_revolutionPoints == address(0)) revert ADDRESS_ZERO();
         if (_erc721VotingToken == address(0)) revert ADDRESS_ZERO();
         if (_initialOwner == address(0)) revert ADDRESS_ZERO();
 
@@ -94,7 +94,7 @@ contract CultureIndex is
 
         __ReentrancyGuard_init();
 
-        revolutionPoints = ERC20VotesUpgradeable(_erc20VotingToken);
+        revolutionPoints = ERC20VotesUpgradeable(_revolutionPoints);
         erc721VotingToken = ERC721CheckpointableUpgradeable(_erc721VotingToken);
         erc721VotingTokenWeight = _cultureIndexParams.erc721VotingTokenWeight;
         name = _cultureIndexParams.name;
