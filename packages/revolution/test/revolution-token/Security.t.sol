@@ -241,15 +241,15 @@ contract TokenSecurityTest is RevolutionTokenTestSuite {
 
 // Helper mock contract to simulate reentrancy for other functions
 contract ReentrancyAttackContractGeneral {
-    RevolutionToken private verbsToken;
+    RevolutionToken private revolutionToken;
 
-    constructor(address _verbsToken) {
-        verbsToken = RevolutionToken(_verbsToken);
+    constructor(address _revolutionToken) {
+        revolutionToken = RevolutionToken(_revolutionToken);
     }
 
     function attackBurn() public {
-        uint256 tokenId = verbsToken.mint();
-        verbsToken.burn(tokenId); // Attempt to re-enter here
+        uint256 tokenId = revolutionToken.mint();
+        revolutionToken.burn(tokenId); // Attempt to re-enter here
     }
 
     // Implement fallback or receive function that calls burn again
@@ -266,14 +266,14 @@ contract CultureIndexMock {
 
 // Helper mock contract to simulate reentrancy attack
 contract ReentrancyAttackContract {
-    RevolutionToken private verbsToken;
+    RevolutionToken private revolutionToken;
 
-    constructor(address _verbsToken) {
-        verbsToken = RevolutionToken(_verbsToken);
+    constructor(address _revolutionToken) {
+        revolutionToken = RevolutionToken(_revolutionToken);
     }
 
     function attack() public {
-        verbsToken.mint();
-        verbsToken.mint(); // This should fail if reentrancy guard is in place
+        revolutionToken.mint();
+        revolutionToken.mint(); // This should fail if reentrancy guard is in place
     }
 }

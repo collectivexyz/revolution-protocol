@@ -208,7 +208,7 @@ contract VerbsDAOLogicV1 is
     struct ProposalTemp {
         uint256 totalWeightedSupply;
         uint256 revolutionPointsSupply;
-        uint256 verbsTokenSupply;
+        uint256 revolutionTokenSupply;
         uint256 proposalThreshold;
         uint256 latestProposalId;
         uint256 startBlock;
@@ -235,7 +235,7 @@ contract VerbsDAOLogicV1 is
 
         temp.totalWeightedSupply = _getWeightedTotalSupply();
         temp.revolutionPointsSupply = points.totalSupply();
-        temp.verbsTokenSupply = verbs.totalSupply();
+        temp.revolutionTokenSupply = verbs.totalSupply();
 
         temp.proposalThreshold = bps2Uint(proposalThresholdBPS, temp.totalWeightedSupply);
 
@@ -281,7 +281,7 @@ contract VerbsDAOLogicV1 is
         newProposal.executed = false;
         newProposal.vetoed = false;
         newProposal.totalWeightedSupply = temp.totalWeightedSupply;
-        newProposal.verbsTokenSupply = temp.verbsTokenSupply;
+        newProposal.revolutionTokenSupply = temp.revolutionTokenSupply;
         newProposal.revolutionPointsSupply = temp.revolutionPointsSupply;
         newProposal.creationBlock = block.number;
 
@@ -381,22 +381,22 @@ contract VerbsDAOLogicV1 is
      * @param blockNumber The block number to get the votes at
      */
     function getTotalVotes(address account, uint256 blockNumber) public view returns (uint256) {
-        uint256 verbsTokenAccountVotes = verbs.getPastVotes(account, blockNumber);
+        uint256 revolutionTokenAccountVotes = verbs.getPastVotes(account, blockNumber);
 
         uint256 revolutionPointsAccountVotes = points.getPastVotes(account, blockNumber);
 
-        return (verbsTokenAccountVotes * erc721TokenVotingWeight) + revolutionPointsAccountVotes;
+        return (revolutionTokenAccountVotes * erc721TokenVotingWeight) + revolutionPointsAccountVotes;
     }
 
     /**
      * @notice Calculates the total supply of votes based on the current Verb token and points supply and the Verbs token voting weight
      */
     function _getWeightedTotalSupply() internal view returns (uint256) {
-        uint256 verbsTokenSupply = verbs.totalSupply();
+        uint256 revolutionTokenSupply = verbs.totalSupply();
 
         uint256 revolutionPointsSupply = points.totalSupply();
 
-        return (verbsTokenSupply * erc721TokenVotingWeight) + revolutionPointsSupply;
+        return (revolutionTokenSupply * erc721TokenVotingWeight) + revolutionPointsSupply;
     }
 
     /**
