@@ -326,10 +326,11 @@ contract AuctionHouse is
     function _settleAuction() internal {
         IAuctionHouse.Auction memory _auction = auction;
 
+        //slither-disable-next-line incorrect-equality
         if (_auction.startTime == 0) revert AUCTION_NOT_BEGUN();
         if (_auction.settled) revert AUCTION_ALREADY_SETTLED();
 
-        // //slither-disable-next-line timestamp
+        //slither-disable-next-line timestamp
         if (block.timestamp < _auction.endTime) revert AUCTION_NOT_COMPLETED();
 
         auction.settled = true;
