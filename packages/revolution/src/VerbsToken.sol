@@ -60,7 +60,7 @@ contract VerbsToken is
     uint256 private _currentVerbId;
 
     // IPFS content hash of contract-level metadata
-    string private _contractURIHash = "QmQzDwaZ7yQxHHs7sQQenJVB89riTSacSGcJRv9jtHPuz5";
+    string private _contractURIHash;
 
     // The Verb art pieces
     mapping(uint256 => ICultureIndex.ArtPiece) public artPieces;
@@ -73,7 +73,7 @@ contract VerbsToken is
      * @notice Require that the minter has not been locked.
      */
     modifier whenMinterNotLocked() {
-        require(!isMinterLocked, "Minter is locked");
+        if (isMinterLocked) revert MINTER_LOCKED();
         _;
     }
 
@@ -81,7 +81,7 @@ contract VerbsToken is
      * @notice Require that the CultureIndex has not been locked.
      */
     modifier whenCultureIndexNotLocked() {
-        require(!isCultureIndexLocked, "CultureIndex is locked");
+        if (isCultureIndexLocked) revert CULTURE_INDEX_LOCKED();
         _;
     }
 
@@ -89,7 +89,7 @@ contract VerbsToken is
      * @notice Require that the descriptor has not been locked.
      */
     modifier whenDescriptorNotLocked() {
-        require(!isDescriptorLocked, "Descriptor is locked");
+        if (isDescriptorLocked) revert DESCRIPTOR_LOCKED();
         _;
     }
 
@@ -97,7 +97,7 @@ contract VerbsToken is
      * @notice Require that the sender is the minter.
      */
     modifier onlyMinter() {
-        require(msg.sender == minter, "Sender is not the minter");
+        if (msg.sender != minter) revert NOT_MINTER();
         _;
     }
 

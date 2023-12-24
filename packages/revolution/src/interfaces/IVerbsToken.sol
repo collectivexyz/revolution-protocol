@@ -23,6 +23,26 @@ import { ICultureIndex } from "./ICultureIndex.sol";
 import { IRevolutionBuilder } from "./IRevolutionBuilder.sol";
 
 interface IVerbsToken is IERC721 {
+    ///                                                          ///
+    ///                           ERRORS                         ///
+    ///                                                          ///
+
+    /// @dev Reverts if the minter is locked.
+    error MINTER_LOCKED();
+
+    /// @dev Reverts if the CultureIndex is locked.
+    error CULTURE_INDEX_LOCKED();
+
+    /// @dev Reverts if the descriptor is locked.
+    error DESCRIPTOR_LOCKED();
+
+    /// @dev Reverts if the sender is not the minter.
+    error NOT_MINTER();
+
+    ///                                                          ///
+    ///                           EVENTS                         ///
+    ///                                                          ///
+
     event VerbCreated(uint256 indexed tokenId, ICultureIndex.ArtPiece artPiece);
 
     event VerbBurned(uint256 indexed tokenId);
@@ -38,6 +58,10 @@ interface IVerbsToken is IERC721 {
     event CultureIndexUpdated(ICultureIndex cultureIndex);
 
     event CultureIndexLocked();
+
+    ///                                                          ///
+    ///                         FUNCTIONS                        ///
+    ///                                                          ///
 
     function mint() external returns (uint256);
 
