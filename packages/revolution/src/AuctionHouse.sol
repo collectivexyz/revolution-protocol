@@ -93,6 +93,7 @@ contract AuctionHouse is
 
     /// @param _manager The contract upgrade manager address
     constructor(address _manager) payable initializer {
+        if (_manager == address(0)) revert ADDRESS_ZERO();
         manager = IRevolutionBuilder(_manager);
     }
 
@@ -117,8 +118,8 @@ contract AuctionHouse is
         address _weth,
         IRevolutionBuilder.AuctionParams calldata _auctionParams
     ) external initializer {
-        require(msg.sender == address(manager), "Only manager can initialize");
-        require(_weth != address(0), "WETH cannot be zero address");
+        if (msg.sender != address(manager)) revert NOT_MANAGER();
+        if (_weth == address(0)) revert ADDRESS_ZERO();
 
         __Pausable_init();
         __ReentrancyGuard_init();
@@ -126,10 +127,7 @@ contract AuctionHouse is
 
         _pause();
 
-        require(
-            _auctionParams.creatorRateBps >= _auctionParams.minCreatorRateBps,
-            "Creator rate must be greater than or equal to the creator rate"
-        );
+        if (_auctionParams.creatorRateBps < _auctionParams.minCreatorRateBps) revert CREATOR_RATE_TOO_LOW();
 
         verbs = IVerbsToken(_erc721Token);
         erc20TokenEmitter = IERC20TokenEmitter(_erc20TokenEmitter);
@@ -172,15 +170,11 @@ contract AuctionHouse is
         IAuctionHouse.Auction memory _auction = auction;
 
         //require bidder is valid address
-        require(bidder != address(0), "Bidder cannot be zero address");
-        require(_auction.verbId == verbId, "Verb not up for auction");
-        //slither-disable-next-line timestamp
-        require(block.timestamp < _auction.endTime, "Auction expired");
-        require(msg.value >= reservePrice, "Must send at least reservePrice");
-        require(
-            msg.value >= _auction.amount + ((_auction.amount * minBidIncrementPercentage) / 100),
-            "Must send more than last bid by minBidIncrementPercentage amount"
-        );
+        if (bidder == address(0)) revert ADDRESS_ZERO();
+        if (_auction.verbId != verbId) revert INVALID_VERB_ID();
+        if (block.timestamp >= _auction.endTime) revert AUCTION_EXPIRED();
+        if (msg.value < reservePrice) revert BELOW_RESERVE_PRICE();
+        if (msg.value < _auction.amount + ((_auction.amount * minBidIncrementPercentage) / 100)) revert BID_TOO_LOW();
 
         address payable lastBidder = _auction.bidder;
 
@@ -215,11 +209,9 @@ contract AuctionHouse is
      * @param _creatorRateBps New creator rate in basis points.
      */
     function setCreatorRateBps(uint256 _creatorRateBps) external onlyOwner {
-        require(
-            _creatorRateBps >= minCreatorRateBps,
-            "Creator rate must be greater than or equal to minCreatorRateBps"
-        );
-        require(_creatorRateBps <= 10_000, "Creator rate must be less than or equal to 10_000");
+        if (_creatorRateBps < minCreatorRateBps) revert CREATOR_RATE_TOO_LOW();
+
+        if (_creatorRateBps > 10_000) revert INVALID_BPS();
         creatorRateBps = _creatorRateBps;
 
         emit CreatorRateBpsUpdated(_creatorRateBps);
@@ -231,14 +223,12 @@ contract AuctionHouse is
      * @param _minCreatorRateBps New minimum creator rate in basis points.
      */
     function setMinCreatorRateBps(uint256 _minCreatorRateBps) external onlyOwner {
-        require(_minCreatorRateBps <= creatorRateBps, "Min creator rate must be less than or equal to creator rate");
-        require(_minCreatorRateBps <= 10_000, "Min creator rate must be less than or equal to 10_000");
+        if (_minCreatorRateBps > creatorRateBps) revert MIN_CREATOR_RATE_ABOVE_CREATOR_RATE();
+
+        if (_minCreatorRateBps > 10_000) revert INVALID_BPS();
 
         //ensure new min rate cannot be lower than previous min rate
-        require(
-            _minCreatorRateBps > minCreatorRateBps,
-            "Min creator rate must be greater than previous minCreatorRateBps"
-        );
+        if (_minCreatorRateBps <= minCreatorRateBps) revert MIN_CREATOR_RATE_NOT_INCREASED();
 
         minCreatorRateBps = _minCreatorRateBps;
 
@@ -251,7 +241,7 @@ contract AuctionHouse is
      * @param _entropyRateBps New entropy rate in basis points.
      */
     function setEntropyRateBps(uint256 _entropyRateBps) external onlyOwner {
-        require(_entropyRateBps <= 10_000, "Entropy rate must be less than or equal to 10_000");
+        if (_entropyRateBps > 10_000) revert INVALID_BPS();
 
         entropyRateBps = _entropyRateBps;
         emit EntropyRateBpsUpdated(_entropyRateBps);
@@ -308,7 +298,7 @@ contract AuctionHouse is
      */
     function _createAuction() internal {
         // Check if there's enough gas to safely execute token.mint() and subsequent operations
-        require(gasleft() >= MIN_TOKEN_MINT_GAS_THRESHOLD, "Insufficient gas for creating auction");
+        if (gasleft() < MIN_TOKEN_MINT_GAS_THRESHOLD) revert INSUFFICIENT_GAS_FOR_AUCTION();
 
         try verbs.mint() returns (uint256 verbId) {
             uint256 startTime = block.timestamp;
@@ -336,10 +326,12 @@ contract AuctionHouse is
     function _settleAuction() internal {
         IAuctionHouse.Auction memory _auction = auction;
 
-        require(_auction.startTime != 0, "Auction hasn't begun");
-        require(!_auction.settled, "Auction has already been settled");
+        //slither-disable-next-line incorrect-equality
+        if (_auction.startTime == 0) revert AUCTION_NOT_BEGUN();
+        if (_auction.settled) revert AUCTION_ALREADY_SETTLED();
+
         //slither-disable-next-line timestamp
-        require(block.timestamp >= _auction.endTime, "Auction hasn't completed");
+        if (block.timestamp < _auction.endTime) revert AUCTION_NOT_COMPLETED();
 
         auction.settled = true;
 

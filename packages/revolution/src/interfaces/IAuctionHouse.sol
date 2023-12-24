@@ -20,6 +20,52 @@ pragma solidity ^0.8.22;
 import { IRevolutionBuilder } from "./IRevolutionBuilder.sol";
 
 interface IAuctionHouse {
+    ///                                                          ///
+    ///                           ERRORS                         ///
+    ///                                                          ///
+
+    /// @dev Reverts if the function caller is not the manager.
+    error NOT_MANAGER();
+
+    /// @dev Reverts if address 0 is passed but not allowed
+    error ADDRESS_ZERO();
+
+    /// @dev Reverts if the verb ID does not match the auction's verb ID.
+    error INVALID_VERB_ID();
+
+    /// @dev Reverts if the auction has already expired.
+    error AUCTION_EXPIRED();
+
+    /// @dev Reverts if the sent value is less than the reserve price.
+    error BELOW_RESERVE_PRICE();
+
+    /// @dev Reverts if the bid is not sufficiently higher than the last bid based on the minimum bid increment percentage.
+    error BID_TOO_LOW();
+
+    /// @dev Reverts if bps is greater than 10,000.
+    error INVALID_BPS();
+
+    /// @dev Reverts if the creator rate is below the minimum required creator rate basis points.
+    error CREATOR_RATE_TOO_LOW();
+
+    /// @dev Reverts if the new minimum creator rate is not greater than the previous minimum creator rate.
+    error MIN_CREATOR_RATE_NOT_INCREASED();
+
+    /// @dev Reverts if the minimum creator rate is not less than or equal to the creator rate.
+    error MIN_CREATOR_RATE_ABOVE_CREATOR_RATE();
+
+    /// @dev Reverts if the auction start time is not set, indicating the auction hasn't begun.
+    error AUCTION_NOT_BEGUN();
+
+    /// @dev Reverts if the auction has already been settled.
+    error AUCTION_ALREADY_SETTLED();
+
+    /// @dev Reverts if the auction has not yet completed based on the current block timestamp.
+    error AUCTION_NOT_COMPLETED();
+
+    /// @dev Reverts if the remaining gas is insufficient for creating an auction.
+    error INSUFFICIENT_GAS_FOR_AUCTION();
+
     struct Auction {
         // ID for the Verb (ERC721 token ID)
         uint256 verbId;

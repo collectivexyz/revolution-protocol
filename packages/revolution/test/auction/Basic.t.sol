@@ -68,7 +68,7 @@ contract AuctionHouseBasicTest is AuctionHouseTest {
         uint256 oldEntropyRateBps = auction.entropyRateBps();
 
         // Attempt to set an invalid entropy rate
-        vm.expectRevert("Entropy rate must be less than or equal to 10_000");
+        vm.expectRevert(abi.encodeWithSignature("INVALID_BPS()"));
         auction.setEntropyRateBps(invalidEntropyRateBps);
 
         // Assert that the rate was not updated
@@ -86,9 +86,9 @@ contract AuctionHouseBasicTest is AuctionHouseTest {
 
     function testSetMinCreatorRateBps(uint256 newMinCreatorRateBps, uint256 creatorRateBps) public {
         if (creatorRateBps > 10_000) {
-            vm.expectRevert("Creator rate must be less than or equal to 10_000");
+            vm.expectRevert(abi.encodeWithSignature("INVALID_BPS()"));
         } else if (creatorRateBps < auction.minCreatorRateBps()) {
-            vm.expectRevert("Creator rate must be greater than or equal to minCreatorRateBps");
+            vm.expectRevert(abi.encodeWithSignature("CREATOR_RATE_TOO_LOW()"));
         } else {
             // Expect an event emission
             vm.expectEmit(true, true, true, true);
@@ -98,9 +98,9 @@ contract AuctionHouseBasicTest is AuctionHouseTest {
 
         //if newMinCreatorRate is greater than creatorRateBps, then expect error
         if (newMinCreatorRateBps > auction.creatorRateBps()) {
-            vm.expectRevert("Min creator rate must be less than or equal to creator rate");
+            vm.expectRevert(abi.encodeWithSignature("MIN_CREATOR_RATE_ABOVE_CREATOR_RATE()"));
         } else if (newMinCreatorRateBps <= auction.minCreatorRateBps()) {
-            vm.expectRevert("Min creator rate must be greater than previous minCreatorRateBps");
+            vm.expectRevert(abi.encodeWithSignature("MIN_CREATOR_RATE_NOT_INCREASED()"));
         } else {
             // Expect an event emission
             vm.expectEmit(true, true, true, true);
@@ -130,7 +130,7 @@ contract AuctionHouseBasicTest is AuctionHouseTest {
 
         // Attempt to set an invalid minimum creator rate
         if (uint256(invalidMinCreatorRateBps) <= auction.minCreatorRateBps()) {
-            vm.expectRevert("Min creator rate must be greater than previous minCreatorRateBps");
+            vm.expectRevert(abi.encodeWithSignature("MIN_CREATOR_RATE_NOT_INCREASED()"));
         } else if (uint256(invalidMinCreatorRateBps) > 10_000) {
             vm.expectRevert("Min creator rate must be less than or equal to 10_000");
         }
@@ -141,7 +141,7 @@ contract AuctionHouseBasicTest is AuctionHouseTest {
         vm.assume(lowerMinCreatorRateBps < auction.minCreatorRateBps());
 
         // Attempt to set a lower minimum creator rate than the current one
-        vm.expectRevert("Min creator rate must be greater than previous minCreatorRateBps");
+        vm.expectRevert(abi.encodeWithSignature("MIN_CREATOR_RATE_NOT_INCREASED()"));
         auction.setMinCreatorRateBps(lowerMinCreatorRateBps);
     }
 
@@ -203,7 +203,7 @@ contract AuctionHouseBasicTest is AuctionHouseTest {
         vm.stopPrank();
 
         // try to bid with bidder address(0) first and expect revert
-        vm.expectRevert("Bidder cannot be zero address");
+        vm.expectRevert(abi.encodeWithSignature("ADDRESS_ZERO()"));
         vm.startPrank(address(1));
         auction.createBid{ value: bidAmount }(0, address(0)); // Assuming the first auction's verbId is 0
 
