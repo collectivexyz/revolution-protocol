@@ -142,8 +142,7 @@ contract MaxHeap is VersionedContract, UUPS, Ownable2StepUpgradeable, Reentrancy
     /// @param value The value to insert
     function insert(uint256 itemId, uint256 value) public onlyAdmin {
         heap[size] = itemId;
-        items[itemId].value = value; // Update the value
-        items[itemId].heapIndex = size; // Update the heap index
+        items[itemId] = Item({ value: value, heapIndex: size }); // Update the value and heap index of the new item
 
         uint256 current = size;
         while (current != 0 && items[heap[current]].value > items[heap[parent(current)]].value) {
