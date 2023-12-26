@@ -98,12 +98,12 @@ interface IRevolutionToken is IERC721 {
     /// @param initialOwner The address of the initial owner
     /// @param descriptor The address of the token URI descriptor
     /// @param cultureIndex The address of the CultureIndex contract
-    /// @param erc721TokenParams The name, symbol, and contract metadata of the token
+    /// @param revolutionTokenParams The name, symbol, and contract metadata of the token
     function initialize(
         address minter,
         address initialOwner,
         address descriptor,
         address cultureIndex,
-        IRevolutionBuilder.ERC721TokenParams memory erc721TokenParams
+        IRevolutionBuilder.RevolutionTokenParams memory revolutionTokenParams
     ) external;
 }

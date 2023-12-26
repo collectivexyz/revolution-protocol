@@ -10,7 +10,7 @@
 | nonces                  | mapping(address => uint256)                                       | 0    | 0      | 32    | src/culture-index/CultureIndex.sol:CultureIndex |
 | maxHeap                 | contract MaxHeap                                                  | 1    | 0      | 20    | src/culture-index/CultureIndex.sol:CultureIndex |
 | revolutionPoints        | contract ERC20VotesUpgradeable                                    | 2    | 0      | 20    | src/culture-index/CultureIndex.sol:CultureIndex |
-| erc721VotingToken       | contract ERC721CheckpointableUpgradeable                          | 3    | 0      | 20    | src/culture-index/CultureIndex.sol:CultureIndex |
+| revolutionToken       | contract ERC721CheckpointableUpgradeable                          | 3    | 0      | 20    | src/culture-index/CultureIndex.sol:CultureIndex |
 | minVoteWeight           | uint256                                                           | 4    | 0      | 32    | src/culture-index/CultureIndex.sol:CultureIndex |
 | quorumVotesBPS          | uint256                                                           | 5    | 0      | 32    | src/culture-index/CultureIndex.sol:CultureIndex |
 | name                    | string                                                            | 6    | 0      | 32    | src/culture-index/CultureIndex.sol:CultureIndex |
@@ -20,7 +20,7 @@
 | votes                   | mapping(uint256 => mapping(address => struct ICultureIndex.Vote)) | 10   | 0      | 32    | src/culture-index/CultureIndex.sol:CultureIndex |
 | totalVoteWeights        | mapping(uint256 => uint256)                                       | 11   | 0      | 32    | src/culture-index/CultureIndex.sol:CultureIndex |
 | dropperAdmin            | address                                                           | 12   | 0      | 20    | src/culture-index/CultureIndex.sol:CultureIndex |
-| erc721VotingTokenWeight | uint256                                                           | 13   | 0      | 32    | src/culture-index/CultureIndex.sol:CultureIndex |
+| revolutionTokenVoteWeight | uint256                                                           | 13   | 0      | 32    | src/culture-index/CultureIndex.sol:CultureIndex |
 
 =======================
 ➡ RevolutionPoints
@@ -50,7 +50,7 @@
 
 | Name                      | Type                              | Slot | Offset | Bytes | Contract                          |
 |---------------------------|-----------------------------------|------|--------|-------|-----------------------------------|
-| verbs                     | contract IRevolutionToken         | 0    | 0      | 20    | src/AuctionHouse.sol:AuctionHouse |
+| revolutionToken           | contract IRevolutionToken         | 0    | 0      | 20    | src/AuctionHouse.sol:AuctionHouse |
 | revolutionPointsEmitter   | contract IRevolutionPointsEmitter | 1    | 0      | 20    | src/AuctionHouse.sol:AuctionHouse |
 | WETH                      | address                           | 2    | 0      | 20    | src/AuctionHouse.sol:AuctionHouse |
 | timeBuffer                | uint256                           | 3    | 0      | 32    | src/AuctionHouse.sol:AuctionHouse |

@@ -336,9 +336,9 @@ contract CultureIndexArtPieceTest is CultureIndexTestSuite {
         // Set the quorum BPS
         cultureIndex._setQuorumVotesBPS(quorumVotesBPS);
 
-        cultureIndex.transferOwnership(address(erc721Token));
+        cultureIndex.transferOwnership(address(revolutionToken));
 
-        vm.startPrank(address(erc721Token));
+        vm.startPrank(address(revolutionToken));
         cultureIndex.acceptOwnership();
 
         vm.startPrank(address(revolutionPointsEmitter));
@@ -366,7 +366,7 @@ contract CultureIndexArtPieceTest is CultureIndexTestSuite {
 
         // Mint token and govTokens, create a new piece and check fields
         vm.startPrank(address(auction));
-        erc721Token.mint();
+        revolutionToken.mint();
 
         vm.startPrank(address(revolutionPointsEmitter));
         revolutionPoints.mint(address(this), pointsSupply);
@@ -377,11 +377,11 @@ contract CultureIndexArtPieceTest is CultureIndexTestSuite {
         emit log_named_uint("newPiece.quorumVotes", newPiece.quorumVotes);
         emit log_named_uint("pointsSupply", pointsSupply);
         emit log_named_uint(
-            "1e18 * cultureIndex.erc721VotingTokenWeight()",
-            1e18 * cultureIndex.erc721VotingTokenWeight()
+            "1e18 * cultureIndex.revolutionTokenVoteWeight()",
+            1e18 * cultureIndex.revolutionTokenVoteWeight()
         );
 
-        uint256 expectedTotalVotesSupply2 = pointsSupply * 2 + cultureIndex.erc721VotingTokenWeight();
+        uint256 expectedTotalVotesSupply2 = pointsSupply * 2 + cultureIndex.revolutionTokenVoteWeight();
         emit log_named_uint("expectedTotalVotesSupply2", expectedTotalVotesSupply2);
         uint256 expectedQuorumVotes2 = (quorumVotesBPS * (expectedTotalVotesSupply2)) / 10_000;
         assertEq(newPiece.quorumVotes, expectedQuorumVotes2, "Quorum votes should be set correctly on second creation");

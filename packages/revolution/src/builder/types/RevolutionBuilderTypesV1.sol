@@ -22,7 +22,7 @@ interface RevolutionBuilderTypesV1 {
         /// @notice Address for deployed DAO contract
         address dao;
         /// @notice Address for deployed ERC-721 token contract
-        address erc721Token;
+        address revolutionToken;
         /// @notice Address for deployed MaxHeap contract
         address maxHeap;
     }

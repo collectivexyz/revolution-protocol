@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: GPL-3.0
 
-/// @title The Verbs ERC-721 token
+/// @title The Revolution ERC-721 token
 
 /*********************************
  * ░░░░░░░░░░░░░░░░░░░░░░░░░░░░░ *
@@ -38,10 +38,10 @@ contract RevolutionToken is
     ReentrancyGuardUpgradeable,
     ERC721CheckpointableUpgradeable
 {
-    // An address who has permissions to mint Verbs
+    // An address who has permissions to mint Revolution Tokens
     address public minter;
 
-    // The Verbs token URI descriptor
+    // The Revolution Token URI descriptor
     IDescriptorMinimal public descriptor;
 
     // The CultureIndex contract
@@ -126,13 +126,13 @@ contract RevolutionToken is
     /// @param _initialOwner The address of the initial owner
     /// @param _descriptor The address of the token URI descriptor
     /// @param _cultureIndex The address of the CultureIndex contract
-    /// @param _erc721TokenParams The name, symbol, and contract metadata of the token
+    /// @param _revolutionTokenParams The name, symbol, and contract metadata of the token
     function initialize(
         address _minter,
         address _initialOwner,
         address _descriptor,
         address _cultureIndex,
-        IRevolutionBuilder.ERC721TokenParams memory _erc721TokenParams
+        IRevolutionBuilder.RevolutionTokenParams memory _revolutionTokenParams
     ) external initializer {
         if (msg.sender != address(manager)) revert ONLY_MANAGER_CAN_INITIALIZE();
 
@@ -146,8 +146,8 @@ contract RevolutionToken is
         __Ownable_init(_initialOwner);
 
         // Initialize the ERC-721 token
-        __ERC721_init(_erc721TokenParams.name, _erc721TokenParams.symbol);
-        _contractURIHash = _erc721TokenParams.contractURIHash;
+        __ERC721_init(_revolutionTokenParams.name, _revolutionTokenParams.symbol);
+        _contractURIHash = _revolutionTokenParams.contractURIHash;
 
         // Set the contracts
         minter = _minter;

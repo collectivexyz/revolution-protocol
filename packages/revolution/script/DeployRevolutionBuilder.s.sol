@@ -9,14 +9,14 @@ import { IRevolutionBuilder, RevolutionBuilder } from "../src/builder/Revolution
 import { IRevolutionToken, RevolutionToken } from "../src/RevolutionToken.sol";
 import { Descriptor } from "../src/Descriptor.sol";
 import { IAuctionHouse, AuctionHouse } from "../src/AuctionHouse.sol";
-import { VerbsDAOLogicV1 } from "../src/governance/VerbsDAOLogicV1.sol";
+import { RevolutionDAOLogicV1 } from "../src/governance/RevolutionDAOLogicV1.sol";
 import { DAOExecutor } from "../src/governance/DAOExecutor.sol";
 import { CultureIndex } from "../src/culture-index/CultureIndex.sol";
 import { RevolutionProtocolRewards } from "@cobuild/protocol-rewards/src/RevolutionProtocolRewards.sol";
 import { MaxHeap } from "../src/culture-index/MaxHeap.sol";
 import { RevolutionPoints } from "../src/RevolutionPoints.sol";
 import { RevolutionPointsEmitter } from "../src/RevolutionPointsEmitter.sol";
-import { IDAOExecutor } from "../src/governance/VerbsDAOInterfaces.sol";
+import { IDAOExecutor } from "../src/governance/RevolutionDAOInterfaces.sol";
 import { ERC1967Proxy } from "../src/libs/proxy/ERC1967Proxy.sol";
 
 contract DeployContracts is Script {
@@ -26,7 +26,7 @@ contract DeployContracts is Script {
         address protocolRewards;
         address builderImpl0;
         address builderProxy;
-        address erc721TokenImpl;
+        address revolutionTokenImpl;
         address descriptorImpl;
         address auctionImpl;
         address executorImpl;
@@ -87,7 +87,7 @@ contract DeployContracts is Script {
 
         deployedContracts.builderImpl = address(
             new RevolutionBuilder(
-                deployedContracts.erc721TokenImpl,
+                deployedContracts.revolutionTokenImpl,
                 deployedContracts.descriptorImpl,
                 deployedContracts.auctionImpl,
                 deployedContracts.executorImpl,
@@ -111,11 +111,11 @@ contract DeployContracts is Script {
     }
 
     function deployOtherContracts(address protocolRewards, address rewardsRecipient) private {
-        deployedContracts.erc721TokenImpl = address(new RevolutionToken(address(deployedContracts.builderProxy)));
+        deployedContracts.revolutionTokenImpl = address(new RevolutionToken(address(deployedContracts.builderProxy)));
         deployedContracts.descriptorImpl = address(new Descriptor(address(deployedContracts.builderProxy)));
         deployedContracts.auctionImpl = address(new AuctionHouse(address(deployedContracts.builderProxy)));
         deployedContracts.executorImpl = address(new DAOExecutor(address(deployedContracts.builderProxy)));
-        deployedContracts.daoImpl = address(new VerbsDAOLogicV1(address(deployedContracts.builderProxy)));
+        deployedContracts.daoImpl = address(new RevolutionDAOLogicV1(address(deployedContracts.builderProxy)));
         deployedContracts.cultureIndexImpl = address(new CultureIndex(address(deployedContracts.builderProxy)));
         deployedContracts.maxHeapImpl = address(new MaxHeap(address(deployedContracts.builderProxy)));
         deployedContracts.revolutionPointsImpl = address(new RevolutionPoints(address(deployedContracts.builderProxy)));
@@ -134,7 +134,12 @@ contract DeployContracts is Script {
         );
         vm.writeLine(
             filePath,
-            string(abi.encodePacked("ERC721Token implementation: ", addressToString(deployedContracts.erc721TokenImpl)))
+            string(
+                abi.encodePacked(
+                    "RevolutionToken implementation: ",
+                    addressToString(deployedContracts.revolutionTokenImpl)
+                )
+            )
         );
         vm.writeLine(
             filePath,
@@ -191,7 +196,7 @@ contract DeployContracts is Script {
         console2.log("");
 
         console2.log("~~~~~~~~~~ TOKEN IMPL ~~~~~~~~~~~");
-        console2.logAddress(deployedContracts.erc721TokenImpl);
+        console2.logAddress(deployedContracts.revolutionTokenImpl);
 
         console2.log("~~~~~~~~~~ DESCRIPTOR IMPL ~~~~~~~~~~~");
         console2.logAddress(deployedContracts.descriptorImpl);

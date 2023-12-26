@@ -30,7 +30,7 @@ import { IRevolutionToken } from "../interfaces/IRevolutionToken.sol";
 import { IDescriptor } from "../interfaces/IDescriptor.sol";
 import { IAuctionHouse } from "../interfaces/IAuctionHouse.sol";
 import { IDAOExecutor } from "../interfaces/IDAOExecutor.sol";
-import { IVerbsDAO } from "../interfaces/IVerbsDAO.sol";
+import { IRevolutionDAO } from "../interfaces/IRevolutionDAO.sol";
 import { ICultureIndex } from "../interfaces/ICultureIndex.sol";
 import { IMaxHeap } from "../interfaces/IMaxHeap.sol";
 import { IRevolutionPointsEmitter } from "../interfaces/IRevolutionPointsEmitter.sol";
@@ -57,7 +57,7 @@ contract RevolutionBuilder is
     ///                                                          ///
 
     /// @notice The token implementation address
-    address public immutable erc721TokenImpl;
+    address public immutable revolutionTokenImpl;
 
     /// @notice The descriptor implementation address
     address public immutable descriptorImpl;
@@ -88,7 +88,7 @@ contract RevolutionBuilder is
     ///                                                          ///
 
     constructor(
-        address _erc721TokenImpl,
+        address _revolutionTokenImpl,
         address _descriptorImpl,
         address _auctionImpl,
         address _executorImpl,
@@ -98,7 +98,7 @@ contract RevolutionBuilder is
         address _revolutionPointsEmitterImpl,
         address _maxHeapImpl
     ) payable initializer {
-        erc721TokenImpl = _erc721TokenImpl;
+        revolutionTokenImpl = _revolutionTokenImpl;
         descriptorImpl = _descriptorImpl;
         auctionImpl = _auctionImpl;
         executorImpl = _executorImpl;
@@ -130,7 +130,7 @@ contract RevolutionBuilder is
     /// @notice Deploys a DAO with custom token, auction, emitter, revolution points, and governance settings
     /// @param _initialOwner The initial owner address
     /// @param _weth The WETH address
-    /// @param _erc721TokenParams The ERC-721 token settings
+    /// @param _revolutionTokenParams The ERC-721 token settings
     /// @param _auctionParams The auction settings
     /// @param _govParams The governance settings
     /// @param _cultureIndexParams The culture index settings
@@ -139,7 +139,7 @@ contract RevolutionBuilder is
     function deploy(
         address _initialOwner,
         address _weth,
-        ERC721TokenParams calldata _erc721TokenParams,
+        RevolutionTokenParams calldata _revolutionTokenParams,
         AuctionParams calldata _auctionParams,
         GovParams calldata _govParams,
         CultureIndexParams calldata _cultureIndexParams,
@@ -149,7 +149,7 @@ contract RevolutionBuilder is
         require(_initialOwner != address(0), "Initial owner cannot be 0x0");
 
         // Deploy the DAO's ERC-721 governance token
-        address erc721Token = address(new ERC1967Proxy(erc721TokenImpl, ""));
+        address revolutionToken = address(new ERC1967Proxy(revolutionTokenImpl, ""));
 
         // Deploy the VRGDAC contract
         address vrgdac = address(
@@ -161,10 +161,10 @@ contract RevolutionBuilder is
         );
 
         // Use the token address to precompute the DAO's remaining addresses
-        bytes32 salt = bytes32(uint256(uint160(erc721Token)) << 96);
+        bytes32 salt = bytes32(uint256(uint160(revolutionToken)) << 96);
 
         // Deploy the remaining DAO contracts
-        daoAddressesByToken[erc721Token] = DAOAddresses({
+        daoAddressesByToken[revolutionToken] = DAOAddresses({
             descriptor: address(new ERC1967Proxy{ salt: salt }(descriptorImpl, "")),
             auction: address(new ERC1967Proxy{ salt: salt }(auctionImpl, "")),
             executor: address(new ERC1967Proxy{ salt: salt }(executorImpl, "")),
@@ -172,85 +172,85 @@ contract RevolutionBuilder is
             revolutionPointsEmitter: address(new ERC1967Proxy{ salt: salt }(revolutionPointsEmitterImpl, "")),
             cultureIndex: address(new ERC1967Proxy{ salt: salt }(cultureIndexImpl, "")),
             revolutionPoints: address(new ERC1967Proxy{ salt: salt }(revolutionPointsImpl, "")),
-            erc721Token: erc721Token,
+            revolutionToken: revolutionToken,
             maxHeap: address(new ERC1967Proxy{ salt: salt }(maxHeapImpl, ""))
         });
 
         // Initialize each instance with the provided settings
-        IMaxHeap(daoAddressesByToken[erc721Token].maxHeap).initialize({
-            initialOwner: daoAddressesByToken[erc721Token].dao,
-            admin: daoAddressesByToken[erc721Token].cultureIndex
+        IMaxHeap(daoAddressesByToken[revolutionToken].maxHeap).initialize({
+            initialOwner: daoAddressesByToken[revolutionToken].dao,
+            admin: daoAddressesByToken[revolutionToken].cultureIndex
         });
 
-        IRevolutionToken(erc721Token).initialize({
-            minter: daoAddressesByToken[erc721Token].auction,
-            descriptor: daoAddressesByToken[erc721Token].descriptor,
-            initialOwner: daoAddressesByToken[erc721Token].dao,
-            cultureIndex: daoAddressesByToken[erc721Token].cultureIndex,
-            erc721TokenParams: _erc721TokenParams
+        IRevolutionToken(revolutionToken).initialize({
+            minter: daoAddressesByToken[revolutionToken].auction,
+            descriptor: daoAddressesByToken[revolutionToken].descriptor,
+            initialOwner: daoAddressesByToken[revolutionToken].dao,
+            cultureIndex: daoAddressesByToken[revolutionToken].cultureIndex,
+            revolutionTokenParams: _revolutionTokenParams
         });
 
-        IDescriptor(daoAddressesByToken[erc721Token].descriptor).initialize({
-            initialOwner: daoAddressesByToken[erc721Token].dao,
-            tokenNamePrefix: _erc721TokenParams.tokenNamePrefix
+        IDescriptor(daoAddressesByToken[revolutionToken].descriptor).initialize({
+            initialOwner: daoAddressesByToken[revolutionToken].dao,
+            tokenNamePrefix: _revolutionTokenParams.tokenNamePrefix
         });
 
-        ICultureIndex(daoAddressesByToken[erc721Token].cultureIndex).initialize({
-            revolutionPoints: daoAddressesByToken[erc721Token].revolutionPoints,
-            erc721VotingToken: daoAddressesByToken[erc721Token].erc721Token,
-            initialOwner: daoAddressesByToken[erc721Token].dao,
-            dropperAdmin: daoAddressesByToken[erc721Token].erc721Token,
+        ICultureIndex(daoAddressesByToken[revolutionToken].cultureIndex).initialize({
+            revolutionPoints: daoAddressesByToken[revolutionToken].revolutionPoints,
+            revolutionToken: daoAddressesByToken[revolutionToken].revolutionToken,
+            initialOwner: daoAddressesByToken[revolutionToken].dao,
+            dropperAdmin: daoAddressesByToken[revolutionToken].revolutionToken,
             cultureIndexParams: _cultureIndexParams,
-            maxHeap: daoAddressesByToken[erc721Token].maxHeap
+            maxHeap: daoAddressesByToken[revolutionToken].maxHeap
         });
 
-        IAuctionHouse(daoAddressesByToken[erc721Token].auction).initialize({
-            erc721Token: daoAddressesByToken[erc721Token].erc721Token,
-            revolutionPointsEmitter: daoAddressesByToken[erc721Token].revolutionPointsEmitter,
-            initialOwner: daoAddressesByToken[erc721Token].dao,
+        IAuctionHouse(daoAddressesByToken[revolutionToken].auction).initialize({
+            revolutionToken: daoAddressesByToken[revolutionToken].revolutionToken,
+            revolutionPointsEmitter: daoAddressesByToken[revolutionToken].revolutionPointsEmitter,
+            initialOwner: daoAddressesByToken[revolutionToken].dao,
             auctionParams: _auctionParams,
             weth: _weth
         });
 
-        IRevolutionPoints(daoAddressesByToken[erc721Token].revolutionPoints).initialize({
-            initialOwner: daoAddressesByToken[erc721Token].revolutionPointsEmitter,
+        IRevolutionPoints(daoAddressesByToken[revolutionToken].revolutionPoints).initialize({
+            initialOwner: daoAddressesByToken[revolutionToken].revolutionPointsEmitter,
             revolutionPointsParams: _revolutionPointsParams
         });
 
-        IRevolutionPointsEmitter(daoAddressesByToken[erc721Token].revolutionPointsEmitter).initialize({
-            revolutionPoints: daoAddressesByToken[erc721Token].revolutionPoints,
-            initialOwner: daoAddressesByToken[erc721Token].dao,
+        IRevolutionPointsEmitter(daoAddressesByToken[revolutionToken].revolutionPointsEmitter).initialize({
+            revolutionPoints: daoAddressesByToken[revolutionToken].revolutionPoints,
+            initialOwner: daoAddressesByToken[revolutionToken].dao,
             weth: _weth,
             vrgdac: vrgdac,
             creatorsAddress: _revolutionPointsEmitterParams.creatorsAddress,
             creatorParams: _revolutionPointsEmitterParams.creatorParams
         });
 
-        IDAOExecutor(daoAddressesByToken[erc721Token].executor).initialize({
-            admin: daoAddressesByToken[erc721Token].dao,
+        IDAOExecutor(daoAddressesByToken[revolutionToken].executor).initialize({
+            admin: daoAddressesByToken[revolutionToken].dao,
             timelockDelay: _govParams.timelockDelay
         });
 
-        IVerbsDAO(daoAddressesByToken[erc721Token].dao).initialize({
-            executor: daoAddressesByToken[erc721Token].executor,
-            erc721Token: daoAddressesByToken[erc721Token].erc721Token,
-            revolutionPoints: daoAddressesByToken[erc721Token].revolutionPoints,
+        IRevolutionDAO(daoAddressesByToken[revolutionToken].dao).initialize({
+            executor: daoAddressesByToken[revolutionToken].executor,
+            revolutionToken: daoAddressesByToken[revolutionToken].revolutionToken,
+            revolutionPoints: daoAddressesByToken[revolutionToken].revolutionPoints,
             govParams: _govParams
         });
 
         emit DAODeployed({
-            erc721Token: daoAddressesByToken[erc721Token].erc721Token,
-            descriptor: daoAddressesByToken[erc721Token].descriptor,
-            auction: daoAddressesByToken[erc721Token].auction,
-            executor: daoAddressesByToken[erc721Token].executor,
-            dao: daoAddressesByToken[erc721Token].dao,
-            revolutionPointsEmitter: daoAddressesByToken[erc721Token].revolutionPointsEmitter,
-            cultureIndex: daoAddressesByToken[erc721Token].cultureIndex,
-            revolutionPoints: daoAddressesByToken[erc721Token].revolutionPoints,
-            maxHeap: daoAddressesByToken[erc721Token].maxHeap
+            revolutionToken: daoAddressesByToken[revolutionToken].revolutionToken,
+            descriptor: daoAddressesByToken[revolutionToken].descriptor,
+            auction: daoAddressesByToken[revolutionToken].auction,
+            executor: daoAddressesByToken[revolutionToken].executor,
+            dao: daoAddressesByToken[revolutionToken].dao,
+            revolutionPointsEmitter: daoAddressesByToken[revolutionToken].revolutionPointsEmitter,
+            cultureIndex: daoAddressesByToken[revolutionToken].cultureIndex,
+            revolutionPoints: daoAddressesByToken[revolutionToken].revolutionPoints,
+            maxHeap: daoAddressesByToken[revolutionToken].maxHeap
         });
 
-        return daoAddressesByToken[erc721Token];
+        return daoAddressesByToken[revolutionToken];
     }
 
     ///                                                          ///
@@ -259,7 +259,7 @@ contract RevolutionBuilder is
 
     /// @notice A DAO's contract addresses from its token
     /// @param _token The ERC-721 token address
-    /// @return erc721Token ERC-721 token deployed address
+    /// @return revolutionToken ERC-721 token deployed address
     /// @return descriptor Descriptor deployed address
     /// @return auction Auction deployed address
     /// @return executor Executor deployed address
@@ -274,7 +274,7 @@ contract RevolutionBuilder is
         public
         view
         returns (
-            address erc721Token,
+            address revolutionToken,
             address descriptor,
             address auction,
             address executor,
@@ -340,7 +340,7 @@ contract RevolutionBuilder is
 
     function getDAOVersions(address token) external view returns (DAOVersionInfo memory) {
         (
-            address erc721Token,
+            address revolutionToken,
             address descriptor,
             address auction,
             address executor,
@@ -352,7 +352,7 @@ contract RevolutionBuilder is
         ) = getAddresses(token);
         return
             DAOVersionInfo({
-                erc721Token: _safeGetVersion(erc721Token),
+                revolutionToken: _safeGetVersion(revolutionToken),
                 descriptor: _safeGetVersion(descriptor),
                 auction: _safeGetVersion(auction),
                 executor: _safeGetVersion(executor),
@@ -367,7 +367,7 @@ contract RevolutionBuilder is
     function getLatestVersions() external view returns (DAOVersionInfo memory) {
         return
             DAOVersionInfo({
-                erc721Token: _safeGetVersion(erc721TokenImpl),
+                revolutionToken: _safeGetVersion(revolutionTokenImpl),
                 descriptor: _safeGetVersion(descriptorImpl),
                 auction: _safeGetVersion(auctionImpl),
                 executor: _safeGetVersion(executorImpl),

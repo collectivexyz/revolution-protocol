@@ -105,14 +105,14 @@ contract AuctionHouse is
      * @notice Initialize the auction house and base contracts,
      * populate configuration values, and pause the contract.
      * @dev This function can only be called once.
-     * @param _erc721Token The address of the Revolution ERC721 token contract.
+     * @param _revolutionToken The address of the Revolution ERC721 token contract.
      * @param _revolutionPointsEmitter The address of the ERC-20 points emitter contract.
      * @param _initialOwner The address of the owner.
      * @param _weth The address of the WETH contract
      * @param _auctionParams The auction params for auctions.
      */
     function initialize(
-        address _erc721Token,
+        address _revolutionToken,
         address _revolutionPointsEmitter,
         address _initialOwner,
         address _weth,
@@ -129,7 +129,7 @@ contract AuctionHouse is
 
         if (_auctionParams.creatorRateBps < _auctionParams.minCreatorRateBps) revert CREATOR_RATE_TOO_LOW();
 
-        revolutionToken = IRevolutionToken(_erc721Token);
+        revolutionToken = IRevolutionToken(_revolutionToken);
         revolutionPointsEmitter = IRevolutionPointsEmitter(_revolutionPointsEmitter);
         timeBuffer = _auctionParams.timeBuffer;
         reservePrice = _auctionParams.reservePrice;

@@ -8,13 +8,13 @@ import { RevolutionBuilder } from "../src/builder/RevolutionBuilder.sol";
 import { RevolutionToken, IRevolutionToken } from "../src/RevolutionToken.sol";
 import { Descriptor } from "../src/Descriptor.sol";
 import { IAuctionHouse, AuctionHouse } from "../src/AuctionHouse.sol";
-import { VerbsDAOLogicV1 } from "../src/governance/VerbsDAOLogicV1.sol";
+import { RevolutionDAOLogicV1 } from "../src/governance/RevolutionDAOLogicV1.sol";
 import { DAOExecutor } from "../src/governance/DAOExecutor.sol";
 import { CultureIndex } from "../src/culture-index/CultureIndex.sol";
 import { RevolutionPoints } from "../src/RevolutionPoints.sol";
 import { RevolutionPointsEmitter } from "../src/RevolutionPointsEmitter.sol";
 import { MaxHeap } from "../src/culture-index/MaxHeap.sol";
-import { VerbsDAOStorageV1 } from "../src/governance/VerbsDAOInterfaces.sol";
+import { RevolutionDAOStorageV1 } from "../src/governance/RevolutionDAOInterfaces.sol";
 import { RevolutionProtocolRewards } from "@cobuild/protocol-rewards/src/RevolutionProtocolRewards.sol";
 import { RevolutionBuilderTypesV1 } from "../src/builder/types/RevolutionBuilderTypesV1.sol";
 
@@ -32,7 +32,7 @@ contract RevolutionBuilderTest is Test {
 
     address internal managerImpl0;
     address internal managerImpl;
-    address internal erc721TokenImpl;
+    address internal revolutionTokenImpl;
     address internal descriptorImpl;
     address internal auctionImpl;
     address internal executorImpl;
@@ -93,11 +93,11 @@ contract RevolutionBuilderTest is Test {
             address(new ERC1967Proxy(managerImpl0, abi.encodeWithSignature("initialize(address)", revolutionDAO)))
         );
 
-        erc721TokenImpl = address(new RevolutionToken(address(manager)));
+        revolutionTokenImpl = address(new RevolutionToken(address(manager)));
         descriptorImpl = address(new Descriptor(address(manager)));
         auctionImpl = address(new AuctionHouse(address(manager)));
         executorImpl = address(new DAOExecutor(address(manager)));
-        daoImpl = address(new VerbsDAOLogicV1(address(manager)));
+        daoImpl = address(new RevolutionDAOLogicV1(address(manager)));
         revolutionPointsImpl = address(new RevolutionPoints(address(manager)));
         revolutionPointsEmitterImpl = address(
             new RevolutionPointsEmitter(address(manager), address(protocolRewards), revolutionDAO)
@@ -107,7 +107,7 @@ contract RevolutionBuilderTest is Test {
 
         managerImpl = address(
             new RevolutionBuilder(
-                erc721TokenImpl,
+                revolutionTokenImpl,
                 descriptorImpl,
                 auctionImpl,
                 executorImpl,
@@ -127,24 +127,24 @@ contract RevolutionBuilderTest is Test {
     ///                     DAO CUSTOMIZATION UTILS              ///
     ///                                                          ///
 
-    IRevolutionBuilder.ERC721TokenParams internal erc721TokenParams;
+    IRevolutionBuilder.RevolutionTokenParams internal revolutionTokenParams;
     IRevolutionBuilder.AuctionParams internal auctionParams;
     IRevolutionBuilder.GovParams internal govParams;
     IRevolutionBuilder.CultureIndexParams internal cultureIndexParams;
     IRevolutionBuilder.PointsParams internal revolutionPointsParams;
     IRevolutionBuilder.PointsEmitterParams internal revolutionPointsEmitterParams;
 
-    function setMockERC721TokenParams() internal virtual {
-        setERC721TokenParams("Mock Token", "MOCK", "Qmew7TdyGnj6YRUjQR68sUJN3239MYXRD8uxowxF6rGK8j", "Mock");
+    function setMockRevolutionTokenParams() internal virtual {
+        setRevolutionTokenParams("Mock Token", "MOCK", "Qmew7TdyGnj6YRUjQR68sUJN3239MYXRD8uxowxF6rGK8j", "Mock");
     }
 
-    function setERC721TokenParams(
+    function setRevolutionTokenParams(
         string memory _name,
         string memory _symbol,
         string memory _contractURI,
         string memory _tokenNamePrefix
     ) internal virtual {
-        erc721TokenParams = IRevolutionBuilder.ERC721TokenParams({
+        revolutionTokenParams = IRevolutionBuilder.RevolutionTokenParams({
             name: _name,
             symbol: _symbol,
             contractURIHash: _contractURI,
@@ -186,7 +186,7 @@ contract RevolutionBuilderTest is Test {
         uint256 _votingPeriod,
         uint256 proposalThresholdBPS,
         address _vetoer,
-        uint256 _erc721VotingTokenWeight,
+        uint256 _revolutionTokenVoteWeight,
         uint16 minQuorumVotesBPS,
         uint16 maxQuorumVotesBPS,
         uint16 quorumCoefficient,
@@ -198,8 +198,8 @@ contract RevolutionBuilderTest is Test {
             votingPeriod: _votingPeriod,
             proposalThresholdBPS: proposalThresholdBPS,
             vetoer: _vetoer,
-            erc721TokenVotingWeight: _erc721VotingTokenWeight,
-            dynamicQuorumParams: VerbsDAOStorageV1.DynamicQuorumParams({
+            revolutionTokenVoteWeight: _revolutionTokenVoteWeight,
+            dynamicQuorumParams: RevolutionDAOStorageV1.DynamicQuorumParams({
                 minQuorumVotesBPS: minQuorumVotesBPS,
                 maxQuorumVotesBPS: maxQuorumVotesBPS,
                 quorumCoefficient: quorumCoefficient
@@ -215,14 +215,14 @@ contract RevolutionBuilderTest is Test {
     function setCultureIndexParams(
         string memory _name,
         string memory _description,
-        uint256 _erc721VotingTokenWeight,
+        uint256 _revolutionTokenVoteWeight,
         uint256 _quorumVotesBPS,
         uint256 _minVoteWeight
     ) internal virtual {
         cultureIndexParams = IRevolutionBuilder.CultureIndexParams({
             name: _name,
             description: _description,
-            erc721VotingTokenWeight: _erc721VotingTokenWeight,
+            revolutionTokenVoteWeight: _revolutionTokenVoteWeight,
             quorumVotesBPS: _quorumVotesBPS,
             minVoteWeight: _minVoteWeight
         });
@@ -264,18 +264,18 @@ contract RevolutionBuilderTest is Test {
     ///                       DAO DEPLOY UTILS                   ///
     ///                                                          ///
 
-    RevolutionToken internal erc721Token;
+    RevolutionToken internal revolutionToken;
     Descriptor internal descriptor;
     AuctionHouse internal auction;
     DAOExecutor internal executor;
-    VerbsDAOLogicV1 internal dao;
+    RevolutionDAOLogicV1 internal dao;
     CultureIndex internal cultureIndex;
     RevolutionPoints internal revolutionPoints;
     RevolutionPointsEmitter internal revolutionPointsEmitter;
     MaxHeap internal maxHeap;
 
     function setMockParams() internal virtual {
-        setMockERC721TokenParams();
+        setMockRevolutionTokenParams();
         setMockAuctionParams();
         setMockGovParams();
         setMockCultureIndexParams();
@@ -287,7 +287,7 @@ contract RevolutionBuilderTest is Test {
         deploy(
             founder,
             weth,
-            erc721TokenParams,
+            revolutionTokenParams,
             auctionParams,
             govParams,
             cultureIndexParams,
@@ -299,7 +299,7 @@ contract RevolutionBuilderTest is Test {
     function deploy(
         address _initialOwner,
         address _weth,
-        IRevolutionBuilder.ERC721TokenParams memory _ERC721TokenParams,
+        IRevolutionBuilder.RevolutionTokenParams memory _RevolutionTokenParams,
         IRevolutionBuilder.AuctionParams memory _auctionParams,
         IRevolutionBuilder.GovParams memory _govParams,
         IRevolutionBuilder.CultureIndexParams memory _cultureIndexParams,
@@ -309,7 +309,7 @@ contract RevolutionBuilderTest is Test {
         RevolutionBuilderTypesV1.DAOAddresses memory _addresses = manager.deploy(
             _initialOwner,
             _weth,
-            _ERC721TokenParams,
+            _RevolutionTokenParams,
             _auctionParams,
             _govParams,
             _cultureIndexParams,
@@ -317,17 +317,17 @@ contract RevolutionBuilderTest is Test {
             _PointsEmitterParams
         );
 
-        erc721Token = RevolutionToken(_addresses.erc721Token);
+        revolutionToken = RevolutionToken(_addresses.revolutionToken);
         descriptor = Descriptor(_addresses.descriptor);
         auction = AuctionHouse(_addresses.auction);
         executor = DAOExecutor(payable(_addresses.executor));
-        dao = VerbsDAOLogicV1(payable(_addresses.dao));
+        dao = RevolutionDAOLogicV1(payable(_addresses.dao));
         cultureIndex = CultureIndex(_addresses.cultureIndex);
         revolutionPoints = RevolutionPoints(_addresses.revolutionPoints);
         revolutionPointsEmitter = RevolutionPointsEmitter(_addresses.revolutionPointsEmitter);
         maxHeap = MaxHeap(_addresses.maxHeap);
 
-        vm.label(address(erc721Token), "ERC721TOKEN");
+        vm.label(address(revolutionToken), "ERC721TOKEN");
         vm.label(address(descriptor), "DESCRIPTOR");
         vm.label(address(auction), "AUCTION");
         vm.label(address(executor), "EXECUTOR");

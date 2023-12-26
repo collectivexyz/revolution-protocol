@@ -18,7 +18,7 @@ export default defineConfig({
         "Descriptor",
         "MaxHeap",
         "RevolutionToken",
-        "VerbsDAOLogicV1",
+        "RevolutionDAOLogicV1",
       ].map((contractName) => `${contractName}.json`),
     }),
   ],

@@ -266,7 +266,7 @@ contract CultureIndexVotingSignaturesTest is CultureIndexTestSuite {
         cultureIndex.voteForManyWithSig(offchainVoter, pieceIds, deadline, v, r, s);
 
         // dropTopVotedPiece
-        vm.startPrank(address(erc721Token));
+        vm.startPrank(address(revolutionToken));
         cultureIndex.dropTopVotedPiece();
 
         // vote again with different address and expect "Piece has already been dropped"

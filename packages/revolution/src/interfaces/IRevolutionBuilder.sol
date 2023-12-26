@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: MIT
 pragma solidity 0.8.22;
 
-import { VerbsDAOStorageV1 } from "../governance/VerbsDAOInterfaces.sol";
+import { RevolutionDAOStorageV1 } from "../governance/RevolutionDAOInterfaces.sol";
 import { IUUPS } from "./IUUPS.sol";
 import { RevolutionBuilderTypesV1 } from "../builder/types/RevolutionBuilderTypesV1.sol";
 
@@ -13,7 +13,7 @@ interface IRevolutionBuilder is IUUPS {
     ///                                                          ///
 
     /// @notice Emitted when a DAO is deployed
-    /// @param erc721Token The ERC-721 token address
+    /// @param revolutionToken The ERC-721 token address
     /// @param descriptor The descriptor renderer address
     /// @param auction The auction address
     /// @param executor The executor address
@@ -23,7 +23,7 @@ interface IRevolutionBuilder is IUUPS {
     /// @param revolutionPoints The dao address
     /// @param maxHeap The maxHeap address
     event DAODeployed(
-        address erc721Token,
+        address revolutionToken,
         address descriptor,
         address auction,
         address executor,
@@ -50,7 +50,7 @@ interface IRevolutionBuilder is IUUPS {
 
     /// @notice DAO Version Information information struct
     struct DAOVersionInfo {
-        string erc721Token;
+        string revolutionToken;
         string descriptor;
         string auction;
         string executor;
@@ -65,7 +65,7 @@ interface IRevolutionBuilder is IUUPS {
     /// @param name The token name
     /// @param symbol The token symbol
     /// @param contractURIHash The IPFS content hash of the contract-level metadata
-    struct ERC721TokenParams {
+    struct RevolutionTokenParams {
         string name;
         string symbol;
         string contractURIHash;
@@ -96,7 +96,7 @@ interface IRevolutionBuilder is IUUPS {
     /// @param votingPeriod The time period to vote on a proposal
     /// @param proposalThresholdBPS The basis points of the token supply required to create a proposal
     /// @param vetoer The address authorized to veto proposals (address(0) if none desired)
-    /// @param erc721TokenVotingWeight The voting weight of the individual ERC721 tokens, normally a large multiple of 1e18 eg: (100 * 1e18) to match up with daily emission of ERC20 points (which normally have 18 decimals)
+    /// @param revolutionTokenVoteWeight The voting weight of the individual Revolution tokens, normally a large multiple of 1e18 eg: (100 * 1e18) to match up with daily emission of ERC20 points (which normally have 18 decimals)
     /// @param daoName The name of the DAO
     /// @param dynamicQuorumParams The dynamic quorum parameters
     struct GovParams {
@@ -105,9 +105,9 @@ interface IRevolutionBuilder is IUUPS {
         uint256 votingPeriod;
         uint256 proposalThresholdBPS;
         address vetoer;
-        uint256 erc721TokenVotingWeight;
+        uint256 revolutionTokenVoteWeight;
         string daoName;
-        VerbsDAOStorageV1.DynamicQuorumParams dynamicQuorumParams;
+        RevolutionDAOStorageV1.DynamicQuorumParams dynamicQuorumParams;
     }
 
     /// @notice The RevolutionPoints ERC-20 token parameters
@@ -148,13 +148,13 @@ interface IRevolutionBuilder is IUUPS {
     /// @notice The CultureIndex parameters
     /// @param name The name of the culture index
     /// @param description A description for the culture index, can include rules for uploads etc.
-    /// @param erc721VotingTokenWeight The voting weight of the individual ERC721 tokens. Normally a large multiple to match up with daily emission of ERC20 points to match up with daily emission of ERC20 points (which normally have 18 decimals)
+    /// @param revolutionTokenVoteWeight The voting weight of the individual Revolution ERC721 tokens. Normally a large multiple to match up with daily emission of ERC20 points to match up with daily emission of ERC20 points (which normally have 18 decimals)
     /// @param quorumVotesBPS The initial quorum votes threshold in basis points
     /// @param minVoteWeight The minimum vote weight in basis points that a voter must have to be able to vote.
     struct CultureIndexParams {
         string name;
         string description;
-        uint256 erc721VotingTokenWeight;
+        uint256 revolutionTokenVoteWeight;
         uint256 quorumVotesBPS;
         uint256 minVoteWeight;
     }
@@ -164,7 +164,7 @@ interface IRevolutionBuilder is IUUPS {
     ///                                                          ///
 
     /// @notice The token implementation address
-    function erc721TokenImpl() external view returns (address);
+    function revolutionTokenImpl() external view returns (address);
 
     /// @notice The descriptor renderer implementation address
     function descriptorImpl() external view returns (address);
@@ -193,7 +193,7 @@ interface IRevolutionBuilder is IUUPS {
     /// @notice Deploys a DAO with custom token, auction, and governance settings
     /// @param initialOwner The initial owner address
     /// @param weth The WETH address
-    /// @param erc721TokenParams The ERC-721 token settings
+    /// @param revolutionTokenParams The Revolution ERC-721 token settings
     /// @param auctionParams The auction settings
     /// @param govParams The governance settings
     /// @param cultureIndexParams The CultureIndex settings
@@ -202,7 +202,7 @@ interface IRevolutionBuilder is IUUPS {
     function deploy(
         address initialOwner,
         address weth,
-        ERC721TokenParams calldata erc721TokenParams,
+        RevolutionTokenParams calldata revolutionTokenParams,
         AuctionParams calldata auctionParams,
         GovParams calldata govParams,
         CultureIndexParams calldata cultureIndexParams,
@@ -217,7 +217,7 @@ interface IRevolutionBuilder is IUUPS {
     )
         external
         returns (
-            address erc721Token,
+            address revolutionToken,
             address descriptor,
             address auction,
             address executor,

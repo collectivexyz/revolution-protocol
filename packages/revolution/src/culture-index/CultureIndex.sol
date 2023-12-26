@@ -38,7 +38,7 @@ contract CultureIndex is
     uint256 public constant MAX_NUM_CREATORS = 100;
 
     // The weight of the 721 voting token
-    uint256 public erc721VotingTokenWeight;
+    uint256 public revolutionTokenVoteWeight;
 
     /// @notice The maximum settable quorum votes basis points
     uint256 public constant MAX_QUORUM_VOTES_BPS = 6_000; // 6,000 basis points or 60%
@@ -64,7 +64,7 @@ contract CultureIndex is
     /**
      * @notice Initializes a token's metadata descriptor
      * @param _revolutionPoints The address of the RevolutionPoints
-     * @param _erc721VotingToken The address of the ERC721 voting token, commonly the dropped art pieces
+     * @param _revolutionToken The address of the ERC721 voting token, commonly the dropped art pieces
      * @param _initialOwner The owner of the contract, allowed to drop pieces. Commonly updated to the AuctionHouse
      * @param _maxHeap The address of the max heap contract
      * @param _dropperAdmin The address that can drop new art pieces
@@ -72,7 +72,7 @@ contract CultureIndex is
      */
     function initialize(
         address _revolutionPoints,
-        address _erc721VotingToken,
+        address _revolutionToken,
         address _initialOwner,
         address _maxHeap,
         address _dropperAdmin,
@@ -81,9 +81,9 @@ contract CultureIndex is
         if (msg.sender != address(manager)) revert NOT_MANAGER();
 
         if (_cultureIndexParams.quorumVotesBPS > MAX_QUORUM_VOTES_BPS) revert INVALID_QUORUM_BPS();
-        if (_cultureIndexParams.erc721VotingTokenWeight <= 0) revert INVALID_ERC721_VOTING_WEIGHT();
+        if (_cultureIndexParams.revolutionTokenVoteWeight <= 0) revert INVALID_ERC721_VOTING_WEIGHT();
         if (_revolutionPoints == address(0)) revert ADDRESS_ZERO();
-        if (_erc721VotingToken == address(0)) revert ADDRESS_ZERO();
+        if (_revolutionToken == address(0)) revert ADDRESS_ZERO();
         if (_initialOwner == address(0)) revert ADDRESS_ZERO();
 
         // Setup ownable
@@ -95,8 +95,8 @@ contract CultureIndex is
         __ReentrancyGuard_init();
 
         revolutionPoints = ERC20VotesUpgradeable(_revolutionPoints);
-        erc721VotingToken = ERC721CheckpointableUpgradeable(_erc721VotingToken);
-        erc721VotingTokenWeight = _cultureIndexParams.erc721VotingTokenWeight;
+        revolutionToken = ERC721CheckpointableUpgradeable(_revolutionToken);
+        revolutionTokenVoteWeight = _cultureIndexParams.revolutionTokenVoteWeight;
         name = _cultureIndexParams.name;
         description = _cultureIndexParams.description;
         quorumVotesBPS = _cultureIndexParams.quorumVotesBPS;
@@ -191,10 +191,7 @@ contract CultureIndex is
         ArtPiece storage newPiece = pieces[pieceId];
 
         newPiece.pieceId = pieceId;
-        newPiece.totalVotesSupply = _calculateVoteWeight(
-            revolutionPoints.totalSupply(),
-            erc721VotingToken.totalSupply()
-        );
+        newPiece.totalVotesSupply = _calculateVoteWeight(revolutionPoints.totalSupply(), revolutionToken.totalSupply());
         newPiece.totalPointsSupply = revolutionPoints.totalSupply();
         newPiece.metadata = metadata;
         newPiece.sponsor = msg.sender;
@@ -245,18 +242,18 @@ contract CultureIndex is
      * @return The vote weight of the voter.
      */
     function _calculateVoteWeight(uint256 pointsBalance, uint256 erc721Balance) internal view returns (uint256) {
-        return pointsBalance + (erc721Balance * erc721VotingTokenWeight);
+        return pointsBalance + (erc721Balance * revolutionTokenVoteWeight);
     }
 
     function _getVotes(address account) internal view returns (uint256) {
-        return _calculateVoteWeight(revolutionPoints.getVotes(account), erc721VotingToken.getVotes(account));
+        return _calculateVoteWeight(revolutionPoints.getVotes(account), revolutionToken.getVotes(account));
     }
 
     function _getPastVotes(address account, uint256 blockNumber) internal view returns (uint256) {
         return
             _calculateVoteWeight(
                 revolutionPoints.getPastVotes(account, blockNumber),
-                erc721VotingToken.getPastVotes(account, blockNumber)
+                revolutionToken.getPastVotes(account, blockNumber)
             );
     }
 
@@ -469,7 +466,7 @@ contract CultureIndex is
      */
     function quorumVotes() public view returns (uint256) {
         return
-            (quorumVotesBPS * _calculateVoteWeight(revolutionPoints.totalSupply(), erc721VotingToken.totalSupply())) /
+            (quorumVotesBPS * _calculateVoteWeight(revolutionPoints.totalSupply(), revolutionToken.totalSupply())) /
             10_000;
     }
 

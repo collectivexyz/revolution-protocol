@@ -28,7 +28,7 @@ contract RevolutionTokenTestSuite is RevolutionBuilderTest {
         super.setUp();
         super.setMockParams();
 
-        super.setERC721TokenParams(tokenName, tokenSymbol, "https://example.com/token/", tokenNamePrefix);
+        super.setRevolutionTokenParams(tokenName, tokenSymbol, "https://example.com/token/", tokenNamePrefix);
 
         super.setCultureIndexParams("Vrbs", "Our community Vrbs. Must be 32x32.", 10, 200, 0);
 

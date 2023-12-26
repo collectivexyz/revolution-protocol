@@ -82,7 +82,7 @@ contract CultureIndexAccessControlTest is CultureIndexTestSuite {
 
         // Attempt to drop the top-voted piece and expect it to fail
         vm.expectRevert(abi.encodeWithSignature("DOES_NOT_MEET_QUORUM()"));
-        vm.startPrank(address(erc721Token));
+        vm.startPrank(address(revolutionToken));
         cultureIndex.dropTopVotedPiece();
 
         // Additional votes to meet/exceed the quorum
@@ -91,7 +91,7 @@ contract CultureIndexAccessControlTest is CultureIndexTestSuite {
         vm.stopPrank();
 
         // Attempt to drop the top-voted piece, should succeed
-        vm.startPrank(address(erc721Token));
+        vm.startPrank(address(revolutionToken));
         ICultureIndex.ArtPiece memory droppedPiece = cultureIndex.dropTopVotedPiece();
         assertTrue(droppedPiece.isDropped, "Top voted piece should be dropped");
     }

@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: BSD-3-Clause
 
-/// @title The Verbs DAO logic version 1
+/// @title The Revolution DAO logic version 1
 
 /*********************************
  * ░░░░░░░░░░░░░░░░░░░░░░░░░░░░░ *
@@ -16,7 +16,7 @@
  *********************************/
 
 // LICENSE
-// VerbsDAOLogicV1.sol is a modified version of Compound Lab's GovernorBravoDelegate.sol:
+// RevolutionDAOLogicV1.sol is a modified version of Compound Lab's GovernorBravoDelegate.sol:
 // https://github.com/compound-finance/compound-protocol/blob/b9b14038612d846b83f8a009a82c38974ff2dcfe/contracts/Governance/GovernorBravoDelegate.sol
 //
 // GovernorBravoDelegate.sol source code Copyright 2020 Compound Labs, Inc. licensed under the BSD-3-Clause license.
@@ -27,7 +27,7 @@
 // MODIFICATIONS
 // See NounsDAOLogicV1 for initial GovernorBravoDelegate modifications.
 
-// VerbsDAOLogicV1 adds:
+// RevolutionDAOLogicV1 adds:
 // - `quorumParamsCheckpoints`, which store dynamic quorum parameters checkpoints
 // to be used when calculating the dynamic quorum.
 // - `_setDynamicQuorumParams(DynamicQuorumParams memory params)`, which allows the
@@ -47,7 +47,7 @@
 // quorum for a specific proposal.
 // - `proposals(uint256 proposalId)` instead of the implicit getter, to avoid stack-too-deep error
 //
-// VerbsDAOLogicV1 removes:
+// RevolutionDAOLogicV1 removes:
 // - `quorumVotes()` has been replaced by `quorumVotes(uint256 proposalId)`.
 
 pragma solidity ^0.8.22;
@@ -57,19 +57,19 @@ import { Ownable2StepUpgradeable } from "@openzeppelin/contracts-upgradeable/acc
 import { UUPS } from "../libs/proxy/UUPS.sol";
 import { VersionedContract } from "../version/VersionedContract.sol";
 
-import "./VerbsDAOInterfaces.sol";
-import { IVerbsDAO } from "../interfaces/IVerbsDAO.sol";
+import "./RevolutionDAOInterfaces.sol";
+import { IRevolutionDAO } from "../interfaces/IRevolutionDAO.sol";
 import { IRevolutionBuilder } from "../interfaces/IRevolutionBuilder.sol";
 import { EIP712Upgradeable } from "@openzeppelin/contracts-upgradeable/utils/cryptography/EIP712Upgradeable.sol";
 
-contract VerbsDAOLogicV1 is
-    IVerbsDAO,
+contract RevolutionDAOLogicV1 is
+    IRevolutionDAO,
     VersionedContract,
     Ownable2StepUpgradeable,
     UUPS,
     EIP712Upgradeable,
-    VerbsDAOEvents,
-    VerbsDAOStorageV1
+    RevolutionDAOEvents,
+    RevolutionDAOStorageV1
 {
     ///                                                          ///
     ///                         IMMUTABLES                       ///
@@ -146,13 +146,13 @@ contract VerbsDAOLogicV1 is
     /**
      * @notice Used to initialize the contract during delegator contructor
      * @param executor_ The address of the DAOExecutor
-     * @param erc721Token_ The address of the ERC-721 token
+     * @param revolutionToken_ The address of the ERC-721 token
      * @param revolutionPoints_ The address of the ERC-20 token
      * @param govParams_ The initial governance parameters
      */
     function initialize(
         address executor_,
-        address erc721Token_,
+        address revolutionToken_,
         address revolutionPoints_,
         IRevolutionBuilder.GovParams calldata govParams_
     ) public virtual initializer {
@@ -160,7 +160,7 @@ contract VerbsDAOLogicV1 is
 
         if (executor_ == address(0)) revert INVALID_EXECUTOR_ADDRESS();
 
-        if (erc721Token_ == address(0)) revert INVALID_ERC721_ADDRESS();
+        if (revolutionToken_ == address(0)) revert INVALID_ERC721_ADDRESS();
 
         if (revolutionPoints_ == address(0)) revert INVALID_ERC20_ADDRESS();
 
@@ -175,7 +175,7 @@ contract VerbsDAOLogicV1 is
             govParams_.proposalThresholdBPS > MAX_PROPOSAL_THRESHOLD_BPS
         ) revert INVALID_PROPOSAL_THRESHOLD_BPS();
 
-        if (govParams_.erc721TokenVotingWeight <= 0) revert INVALID_ERC721_VOTING_WEIGHT();
+        if (govParams_.revolutionTokenVoteWeight <= 0) revert INVALID_ERC721_VOTING_WEIGHT();
 
         // Initialize EIP-712 support
         __EIP712_init(govParams_.daoName, "1");
@@ -188,13 +188,13 @@ contract VerbsDAOLogicV1 is
         emit ProposalThresholdBPSSet(proposalThresholdBPS, govParams_.proposalThresholdBPS);
 
         timelock = IDAOExecutor(executor_);
-        verbs = RevolutionTokenLike(erc721Token_);
-        points = PointsLike(revolutionPoints_);
+        revolutionToken = RevolutionTokenLike(revolutionToken_);
+        revolutionPoints = PointsLike(revolutionPoints_);
         vetoer = govParams_.vetoer;
         votingPeriod = govParams_.votingPeriod;
         votingDelay = govParams_.votingDelay;
         proposalThresholdBPS = govParams_.proposalThresholdBPS;
-        erc721TokenVotingWeight = govParams_.erc721TokenVotingWeight;
+        revolutionTokenVoteWeight = govParams_.revolutionTokenVoteWeight;
         name = govParams_.daoName;
 
         // TODO set these dynamic quorum params
@@ -234,8 +234,8 @@ contract VerbsDAOLogicV1 is
         ProposalTemp memory temp;
 
         temp.totalWeightedSupply = _getWeightedTotalSupply();
-        temp.revolutionPointsSupply = points.totalSupply();
-        temp.revolutionTokenSupply = verbs.totalSupply();
+        temp.revolutionPointsSupply = revolutionPoints.totalSupply();
+        temp.revolutionTokenSupply = revolutionToken.totalSupply();
 
         temp.proposalThreshold = bps2Uint(proposalThresholdBPS, temp.totalWeightedSupply);
 
@@ -381,22 +381,22 @@ contract VerbsDAOLogicV1 is
      * @param blockNumber The block number to get the votes at
      */
     function getTotalVotes(address account, uint256 blockNumber) public view returns (uint256) {
-        uint256 revolutionTokenAccountVotes = verbs.getPastVotes(account, blockNumber);
+        uint256 revolutionTokenAccountVotes = revolutionToken.getPastVotes(account, blockNumber);
 
-        uint256 revolutionPointsAccountVotes = points.getPastVotes(account, blockNumber);
+        uint256 revolutionPointsAccountVotes = revolutionPoints.getPastVotes(account, blockNumber);
 
-        return (revolutionTokenAccountVotes * erc721TokenVotingWeight) + revolutionPointsAccountVotes;
+        return (revolutionTokenAccountVotes * revolutionTokenVoteWeight) + revolutionPointsAccountVotes;
     }
 
     /**
-     * @notice Calculates the total supply of votes based on the current Verb token and points supply and the Verbs token voting weight
+     * @notice Calculates the total supply of votes based on the current Verb token and points supply and the Revolution token voting weight
      */
     function _getWeightedTotalSupply() internal view returns (uint256) {
-        uint256 revolutionTokenSupply = verbs.totalSupply();
+        uint256 revolutionTokenSupply = revolutionToken.totalSupply();
 
-        uint256 revolutionPointsSupply = points.totalSupply();
+        uint256 revolutionPointsSupply = revolutionPoints.totalSupply();
 
-        return (revolutionTokenSupply * erc721TokenVotingWeight) + revolutionPointsSupply;
+        return (revolutionTokenSupply * revolutionTokenVoteWeight) + revolutionPointsSupply;
     }
 
     /**
@@ -406,7 +406,7 @@ contract VerbsDAOLogicV1 is
      *
      * NOTE: This information is only used for _display_ purposes: it in
      * no way affects any of the arithmetic of the contract, including
-     * {IVerbsDAOLogicV1-getTotalVotes}.
+     * {IRevolutionDAOLogicV1-getTotalVotes}.
      */
     function voteDecimals() public pure returns (uint256) {
         return 18;
@@ -989,7 +989,7 @@ contract VerbsDAOLogicV1 is
      *       quorumCoefficient * againstVotesBPS
      * @dev Note the coefficient is a fixed point integer with 6 decimals
      * @param againstVotes Number of against-votes in the proposal
-     * @param totalWeightedSupply The total weighted supply of Verbs and Points at the time of proposal creation
+     * @param totalWeightedSupply The total weighted supply of Revolution and Points at the time of proposal creation
      * @param params Configurable parameters for calculating the quorum based on againstVotes. See `DynamicQuorumParams` definition for additional details.
      * @return quorumVotes The required quorum
      */

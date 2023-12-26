@@ -39,10 +39,10 @@ contract TokenMintingTest is RevolutionTokenTestSuite {
 
         // Mint a token
         vm.startPrank(address(auction));
-        uint256 tokenId = erc721Token.mint();
+        uint256 tokenId = revolutionToken.mint();
 
         // Fetch the dropped art piece associated with the minted token
-        ICultureIndex.ArtPiece memory droppedArtPiece = erc721Token.getArtPieceById(tokenId);
+        ICultureIndex.ArtPiece memory droppedArtPiece = revolutionToken.getArtPieceById(tokenId);
 
         // Now compare the relevant fields of topVotedPieceBeforeMint and droppedArtPiece
         assertEq(droppedArtPiece.pieceId, topVotedPieceBeforeMint.pieceId, "Piece ID should match");
@@ -95,7 +95,7 @@ contract TokenMintingTest is RevolutionTokenTestSuite {
 
         // Try to remove max and expect to fail
         vm.expectRevert(abi.encodeWithSignature("CULTURE_INDEX_EMPTY()"));
-        erc721Token.mint();
+        revolutionToken.mint();
     }
 
     /// @dev Tests basic minting
@@ -106,11 +106,11 @@ contract TokenMintingTest is RevolutionTokenTestSuite {
         createDefaultArtPiece();
 
         // Mint a token
-        uint256 tokenId = erc721Token.mint();
+        uint256 tokenId = revolutionToken.mint();
 
         // Validate the token
-        uint256 totalSupply = erc721Token.totalSupply();
-        assertEq(erc721Token.ownerOf(tokenId), address(auction), "The contract should own the newly minted token");
+        uint256 totalSupply = revolutionToken.totalSupply();
+        assertEq(revolutionToken.ownerOf(tokenId), address(auction), "The contract should own the newly minted token");
         assertEq(tokenId, 0, "First token ID should be 1");
         assertEq(totalSupply, 1, "Total supply should be 1");
     }
@@ -119,12 +119,16 @@ contract TokenMintingTest is RevolutionTokenTestSuite {
     function testMintToItself() public {
         createDefaultArtPiece();
 
-        uint256 initialTotalSupply = erc721Token.totalSupply();
+        uint256 initialTotalSupply = revolutionToken.totalSupply();
         vm.stopPrank();
         vm.startPrank(address(auction));
-        uint256 newTokenId = erc721Token.mint();
-        assertEq(erc721Token.totalSupply(), initialTotalSupply + 1, "One new token should have been minted");
-        assertEq(erc721Token.ownerOf(newTokenId), address(auction), "The contract should own the newly minted token");
+        uint256 newTokenId = revolutionToken.mint();
+        assertEq(revolutionToken.totalSupply(), initialTotalSupply + 1, "One new token should have been minted");
+        assertEq(
+            revolutionToken.ownerOf(newTokenId),
+            address(auction),
+            "The contract should own the newly minted token"
+        );
     }
 
     /// @dev Tests burning a verb token
@@ -134,10 +138,10 @@ contract TokenMintingTest is RevolutionTokenTestSuite {
         vm.stopPrank();
         vm.startPrank(address(auction));
 
-        uint256 tokenId = erc721Token.mint();
-        uint256 initialTotalSupply = erc721Token.totalSupply();
-        erc721Token.burn(tokenId);
-        uint256 newTotalSupply = erc721Token.totalSupply();
+        uint256 tokenId = revolutionToken.mint();
+        uint256 initialTotalSupply = revolutionToken.totalSupply();
+        revolutionToken.burn(tokenId);
+        uint256 newTotalSupply = revolutionToken.totalSupply();
         assertEq(newTotalSupply, initialTotalSupply - 1, "Total supply should decrease by 1 after burning");
     }
 
@@ -166,9 +170,9 @@ contract TokenMintingTest is RevolutionTokenTestSuite {
 
         vm.startPrank(address(auction));
         if (shouldRevertMint) vm.expectRevert("dropTopVotedPiece failed");
-        uint256 tokenId1 = erc721Token.mint();
+        uint256 tokenId1 = revolutionToken.mint();
         if (!shouldRevertMint)
-            assertEq(erc721Token.totalSupply(), tokenId1 + 1, "CurrentVerbId should increment after first mint");
+            assertEq(revolutionToken.totalSupply(), tokenId1 + 1, "CurrentVerbId should increment after first mint");
 
         vm.startPrank(address(this));
         if (voteWeight == 0) vm.expectRevert(abi.encodeWithSignature("WEIGHT_TOO_LOW()"));
@@ -176,9 +180,9 @@ contract TokenMintingTest is RevolutionTokenTestSuite {
 
         vm.startPrank(address(auction));
         if (shouldRevertMint) vm.expectRevert("dropTopVotedPiece failed");
-        uint256 tokenId2 = erc721Token.mint();
+        uint256 tokenId2 = revolutionToken.mint();
         if (!shouldRevertMint)
-            assertEq(erc721Token.totalSupply(), tokenId2 + 1, "CurrentVerbId should increment after second mint");
+            assertEq(revolutionToken.totalSupply(), tokenId2 + 1, "CurrentVerbId should increment after second mint");
     }
 
     /// @dev Checks if the VerbCreated event is emitted with correct parameters on minting
@@ -211,7 +215,7 @@ contract TokenMintingTest is RevolutionTokenTestSuite {
 
         emit IRevolutionToken.VerbCreated(0, expectedArtPiece);
 
-        erc721Token.mint();
+        revolutionToken.mint();
     }
 
     /// @dev Tests the burn function.
@@ -220,14 +224,14 @@ contract TokenMintingTest is RevolutionTokenTestSuite {
         vm.startPrank(address(auction));
         //create piece
         createDefaultArtPiece();
-        uint256 tokenId = erc721Token.mint();
+        uint256 tokenId = revolutionToken.mint();
 
         vm.expectEmit(true, true, true, true);
         emit IRevolutionToken.VerbBurned(tokenId);
 
-        erc721Token.burn(tokenId);
-        assertEq(erc721Token.totalSupply(), 0, "Total supply should be 0 after burning");
-        assertEq(erc721Token.balanceOf(address(auction)), 0, "Auction should not own any tokens after burning");
+        revolutionToken.burn(tokenId);
+        assertEq(revolutionToken.totalSupply(), 0, "Total supply should be 0 after burning");
+        assertEq(revolutionToken.balanceOf(address(auction)), 0, "Auction should not own any tokens after burning");
     }
 
     /// @dev Validates that the token URI is correctly set and retrieved
@@ -235,11 +239,15 @@ contract TokenMintingTest is RevolutionTokenTestSuite {
         vm.stopPrank();
         vm.startPrank(address(auction));
         uint256 artPieceId = createDefaultArtPiece();
-        uint256 tokenId = erc721Token.mint();
+        uint256 tokenId = revolutionToken.mint();
         (, ICultureIndex.ArtPieceMetadata memory metadata, , , , , , ) = cultureIndex.pieces(artPieceId);
         // Assuming the descriptor returns a fixed URI for the given tokenId
         string memory expectedTokenURI = descriptor.tokenURI(tokenId, metadata);
-        assertEq(erc721Token.tokenURI(tokenId), expectedTokenURI, "Token URI should be correctly set and retrieved");
+        assertEq(
+            revolutionToken.tokenURI(tokenId),
+            expectedTokenURI,
+            "Token URI should be correctly set and retrieved"
+        );
     }
 
     /// @dev Ensures minting fetches and associates the top-voted piece from CultureIndex
@@ -258,10 +266,10 @@ contract TokenMintingTest is RevolutionTokenTestSuite {
 
         // Mint a token
         vm.startPrank(address(auction));
-        uint256 tokenId = erc721Token.mint();
+        uint256 tokenId = revolutionToken.mint();
 
         // Validate the token is associated with the top voted piece
-        (uint256 mintedPieceId, , , , , , , ) = erc721Token.artPieces(tokenId);
+        (uint256 mintedPieceId, , , , , , , ) = revolutionToken.artPieces(tokenId);
         assertEq(mintedPieceId, pieceId, "Minted token should be associated with the top voted piece");
     }
 }

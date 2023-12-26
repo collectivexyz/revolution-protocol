@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: BSD-3-Clause
 
-/// @title The Verbs DAO executor
+/// @title The Revolution DAO executor
 
 /*********************************
  * ░░░░░░░░░░░░░░░░░░░░░░░░░░░░░ *
@@ -26,7 +26,7 @@
 //
 // MODIFICATIONS
 // DAOExecutor.sol modifies Timelock to use Solidity 0.8.x receive(), fallback(), and built-in over/underflow protection
-// This contract acts as executor of Verbs DAO governance and its treasury, so it has been modified to accept ETH.
+// This contract acts as executor of Revolution DAO governance and its treasury, so it has been modified to accept ETH.
 
 pragma solidity ^0.8.22;
 
