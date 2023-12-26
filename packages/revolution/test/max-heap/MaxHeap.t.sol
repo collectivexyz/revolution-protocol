@@ -29,6 +29,46 @@ contract MaxHeapTestSuite is RevolutionBuilderTest {
         vm.startPrank(address(cultureIndex));
     }
 
+    function testOldHeapEntriesNotRemoved() public {
+        uint popped;
+        uint value;
+
+        maxHeap.insert(0, 4);
+        maxHeap.insert(1, 3);
+        maxHeap.insert(2, 2);
+        /*
+            0
+           / \
+          1   2        
+        */
+        // heap contains 3 items; we extract maximum one
+        (popped, value) = maxHeap.extractMax();
+        assert(popped == 0 && value == 4);
+        /*
+            1
+           / -
+          2   2        
+        */
+        // heap contains 2 items; we decrease value of 1 and in effect, 1 is removed from the heap
+        maxHeap.updateValue(1, 1);
+        /*
+            2
+           / -
+          2   1        
+        */
+        (popped, value) = maxHeap.extractMax();
+        assert(popped == 2 && value == 2);
+        /*
+            2
+           - -
+          2   1        
+        */
+
+        // 2 will be the maximum value for the second time
+        (popped, value) = maxHeap.extractMax();
+        assert(popped == 1 && value == 1);
+    }
+
     /// @dev Tests that only the owner can call updateValue
     function testUpdateValueOnlyOwner() public {
         maxHeap.insert(1, 10); // Setup a state with an element
