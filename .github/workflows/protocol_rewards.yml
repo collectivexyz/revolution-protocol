@@ -10,7 +10,6 @@ jobs:
       package_folder: packages/protocol-rewards
 
   test:
-    needs: build
     uses: ./.github/workflows/test.yml
     with:
       package_folder: packages/protocol-rewards
