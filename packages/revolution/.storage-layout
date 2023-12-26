@@ -66,13 +66,12 @@
 ➡ MaxHeap
 =======================
 
-| Name            | Type                        | Slot | Offset | Bytes | Contract                              |
-|-----------------|-----------------------------|------|--------|-------|---------------------------------------|
-| admin           | address                     | 0    | 0      | 20    | src/culture-index/MaxHeap.sol:MaxHeap |
-| heap            | mapping(uint256 => uint256) | 1    | 0      | 32    | src/culture-index/MaxHeap.sol:MaxHeap |
-| size            | uint256                     | 2    | 0      | 32    | src/culture-index/MaxHeap.sol:MaxHeap |
-| valueMapping    | mapping(uint256 => uint256) | 3    | 0      | 32    | src/culture-index/MaxHeap.sol:MaxHeap |
-| positionMapping | mapping(uint256 => uint256) | 4    | 0      | 32    | src/culture-index/MaxHeap.sol:MaxHeap |
+| Name  | Type                                    | Slot | Offset | Bytes | Contract                              |
+|-------|-----------------------------------------|------|--------|-------|---------------------------------------|
+| admin | address                                 | 0    | 0      | 20    | src/culture-index/MaxHeap.sol:MaxHeap |
+| heap  | mapping(uint256 => uint256)             | 1    | 0      | 32    | src/culture-index/MaxHeap.sol:MaxHeap |
+| size  | uint256                                 | 2    | 0      | 32    | src/culture-index/MaxHeap.sol:MaxHeap |
+| items | mapping(uint256 => struct MaxHeap.Item) | 3    | 0      | 32    | src/culture-index/MaxHeap.sol:MaxHeap |
 
 =======================
 ➡ RevolutionToken
