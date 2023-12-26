@@ -121,8 +121,8 @@ contract MaxHeap is VersionedContract, UUPS, Ownable2StepUpgradeable, Reentrancy
         uint256 right = 2 * pos + 2;
 
         uint256 posValue = items[heap[pos]].value;
-        uint256 leftValue = items[heap[left]].value;
-        uint256 rightValue = items[heap[right]].value;
+        uint256 leftValue = left < size ? items[heap[left]].value : 0;
+        uint256 rightValue = right < size ? items[heap[right]].value : 0;
 
         if (pos >= (size / 2) && pos <= size) return;
 
@@ -183,8 +183,10 @@ contract MaxHeap is VersionedContract, UUPS, Ownable2StepUpgradeable, Reentrancy
         //itemId of the node with the max value
         uint256 popped = heap[0];
 
-        //set the root node to the farthest leaf
+        //set the root node to the farthest leaf and decrement size
         heap[0] = heap[--size];
+        // update the items mapping
+        items[heap[0]].heapIndex = 0;
 
         //maintain heap property
         maxHeapify(0);
