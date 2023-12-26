@@ -241,7 +241,7 @@ contract AuctionHouseBasicTest is AuctionHouseTest {
         auction.settleCurrentAndCreateNewAuction(); // This will settle the current auction and create a new one
 
         // Expect 21 to be the owner of the verb
-        assertEq(erc721Token.ownerOf(verbId), address(21), "Verb should be transferred to bidder param");
+        assertEq(revolutionToken.ownerOf(verbId), address(21), "Verb should be transferred to bidder param");
     }
 
     function testAuctionCreation() public {
@@ -315,7 +315,7 @@ contract AuctionHouseBasicTest is AuctionHouseTest {
             (, , , , , bool settled) = auction.auction();
             assertEq(settled, false, "Auction should not be settled because new one created");
         } else {
-            assertEq(erc721Token.ownerOf(verbId), address(1), "Verb should be transferred to the auction house");
+            assertEq(revolutionToken.ownerOf(verbId), address(1), "Verb should be transferred to the auction house");
         }
     }
 
@@ -325,7 +325,7 @@ contract AuctionHouseBasicTest is AuctionHouseTest {
 
     //     (uint256 verbId, , , uint256 endTime, , ) = auction.auction();
     //     assertEq(
-    //         erc721Token.ownerOf(verbId),
+    //         revolutionToken.ownerOf(verbId),
     //         address(auction),
     //         "Verb should be transferred to the auction house"
     //     );

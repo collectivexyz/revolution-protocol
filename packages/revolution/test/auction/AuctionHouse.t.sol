@@ -4,8 +4,8 @@ pragma solidity ^0.8.22;
 import { Test } from "forge-std/Test.sol";
 import { AuctionHouse } from "../../src/AuctionHouse.sol";
 import { MockERC20 } from "../mock/MockERC20.sol";
-import { VerbsToken } from "../../src/VerbsToken.sol";
-import { IVerbsToken } from "../../src/interfaces/IVerbsToken.sol";
+import { RevolutionToken } from "../../src/RevolutionToken.sol";
+import { IRevolutionToken } from "../../src/interfaces/IRevolutionToken.sol";
 import { Descriptor } from "../../src/Descriptor.sol";
 import { CultureIndex } from "../../src/culture-index/CultureIndex.sol";
 import { IDescriptorMinimal } from "../../src/interfaces/IDescriptorMinimal.sol";
@@ -30,7 +30,7 @@ contract AuctionHouseTest is RevolutionBuilderTest {
 
         super.setCultureIndexParams("Vrbs", "Our community Vrbs. Must be 32x32.", 10, 200, 0);
 
-        super.setERC721TokenParams("Vrbs", "VRBS", "QmQzDwaZ7yQxHHs7sQQenJVB89riTSacSGcJRv9jtHPuz5", "Vrb");
+        super.setRevolutionTokenParams("Vrbs", "VRBS", "QmQzDwaZ7yQxHHs7sQQenJVB89riTSacSGcJRv9jtHPuz5", "Vrb");
 
         super.setAuctionParams(
             15 minutes, // timeBuffer

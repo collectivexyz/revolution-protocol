@@ -6,7 +6,7 @@ import { CultureIndex } from "../../src/culture-index/CultureIndex.sol";
 import { MockERC20 } from "../mock/MockERC20.sol";
 import { ICultureIndex } from "../../src/interfaces/ICultureIndex.sol";
 import { RevolutionPoints } from "../../src/RevolutionPoints.sol";
-import { VerbsToken } from "../../src/VerbsToken.sol";
+import { RevolutionToken } from "../../src/RevolutionToken.sol";
 import { IDescriptorMinimal } from "../../src/interfaces/IDescriptorMinimal.sol";
 import { RevolutionBuilderTest } from "../RevolutionBuilder.t.sol";
 
@@ -29,7 +29,7 @@ contract CultureIndexTestSuite is RevolutionBuilderTest {
 
         super.setCultureIndexParams("Vrbs", "Our community Vrbs. Must be 32x32.", 10, 200, 0);
 
-        super.setERC721TokenParams("Vrbs", "VRBS", "QmQzDwaZ7yQxHHs7sQQenJVB89riTSacSGcJRv9jtHPuz5", "Vrb");
+        super.setRevolutionTokenParams("Vrbs", "VRBS", "QmQzDwaZ7yQxHHs7sQQenJVB89riTSacSGcJRv9jtHPuz5", "Vrb");
 
         super.deployMock();
 

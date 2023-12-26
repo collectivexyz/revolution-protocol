@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: BSD-3-Clause
 
-/// @title Verbs DAO Logic interfaces and events
+/// @title Revolution DAO Logic interfaces and events
 
 /*********************************
  * ░░░░░░░░░░░░░░░░░░░░░░░░░░░░░ *
@@ -16,7 +16,7 @@
  *********************************/
 
 // LICENSE
-// VerbsDAOInterfaces.sol is a modified version of Compound Lab's GovernorBravoInterfaces.sol:
+// RevolutionDAOInterfaces.sol is a modified version of Compound Lab's GovernorBravoInterfaces.sol:
 // https://github.com/compound-finance/compound-protocol/blob/b9b14038612d846b83f8a009a82c38974ff2dcfe/contracts/Governance/GovernorBravoInterfaces.sol
 //
 // GovernorBravoInterfaces.sol source code Copyright 2020 Compound Labs, Inc. licensed under the BSD-3-Clause license.
@@ -25,15 +25,15 @@
 // Additional conditions of BSD-3-Clause can be found here: https://opensource.org/licenses/BSD-3-Clause
 //
 // MODIFICATIONS
-// VerbsDAOEvents, VerbsDAOProxyStorage, VerbsDAOStorageV1 add support for changes made by Verbs DAO to GovernorBravo.sol
-// See VerbsDAOLogicV1.sol for more details.
+// RevolutionDAOEvents, RevolutionDAOProxyStorage, RevolutionDAOStorageV1 add support for changes made by Revolution DAO to GovernorBravo.sol
+// See RevolutionDAOLogicV1.sol for more details.
 
 import { IDAOExecutor } from "../interfaces/IDAOExecutor.sol";
 import { IRevolutionBuilder } from "../interfaces/IRevolutionBuilder.sol";
 
 pragma solidity 0.8.22;
 
-contract VerbsDAOEvents {
+contract RevolutionDAOEvents {
     /// @notice An event emitted when a new proposal is created
     event ProposalCreated(
         uint256 id,
@@ -125,7 +125,7 @@ contract VerbsDAOEvents {
     event NewPendingVetoer(address oldPendingVetoer, address newPendingVetoer);
 }
 
-contract VerbsDAOProxyStorage {
+contract RevolutionDAOProxyStorage {
     /// @notice Administrator for this contract
     address public admin;
 
@@ -138,11 +138,11 @@ contract VerbsDAOProxyStorage {
 
 /**
  * @title Storage for Governor Bravo Delegate
- * @notice For future upgrades, do not change VerbsDAOStorageV1. Create a new
- * contract which implements VerbsDAOStorageV1 and following the naming convention
- * VerbsDAOStorageVX.
+ * @notice For future upgrades, do not change RevolutionDAOStorageV1. Create a new
+ * contract which implements RevolutionDAOStorageV1 and following the naming convention
+ * RevolutionDAOStorageVX.
  */
-contract VerbsDAOStorageV1 is VerbsDAOProxyStorage {
+contract RevolutionDAOStorageV1 is RevolutionDAOProxyStorage {
     ///                                                          ///
     ///                           ERRORS                         ///
     ///                                                          ///
@@ -282,14 +282,14 @@ contract VerbsDAOStorageV1 is VerbsDAOProxyStorage {
     /// @notice The total number of proposals
     uint256 public proposalCount;
 
-    /// @notice The address of the Verbs DAO Executor DAOExecutor
+    /// @notice The address of the Revolution DAO Executor DAOExecutor
     IDAOExecutor public timelock;
 
-    /// @notice The address of the Verbs ERC721 tokens
-    VerbsTokenLike public verbs;
+    /// @notice The address of the Revolution ERC721 tokens
+    RevolutionTokenLike public revolutionToken;
 
-    /// @notice The address of the Verbs ERC20 points
-    PointsLike public points;
+    /// @notice The address of the Revolution ERC20 points
+    PointsLike public revolutionPoints;
 
     /// @notice The official record of all proposals ever proposed
     mapping(uint256 => Proposal) internal _proposals;
@@ -302,8 +302,8 @@ contract VerbsDAOStorageV1 is VerbsDAOProxyStorage {
     /// @notice Pending new vetoer
     address public pendingVetoer;
 
-    /// @notice The voting weight of the verbs token eg: owning (2) tokens gets you (2 * erc721TokenVotingWeight) votes
-    uint256 public erc721TokenVotingWeight;
+    /// @notice The voting weight of the revolution token eg: owning (2) tokens gets you (2 * tokenVotingWeight) votes
+    uint256 public revolutionTokenVoteWeight;
 
     ///                                                          ///
     ///                        CONSTANTS                         ///
@@ -350,8 +350,8 @@ contract VerbsDAOStorageV1 is VerbsDAOProxyStorage {
         uint256 totalWeightedSupply;
         /// @notice The total supply of points at the time of proposal creation
         uint256 revolutionPointsSupply;
-        /// @notice The total supply of verbs at the time of proposal creation
-        uint256 verbsTokenSupply;
+        /// @notice The total supply of revolution at the time of proposal creation
+        uint256 revolutionTokenSupply;
         /// @notice The block at which this proposal was created
         uint256 creationBlock;
     }
@@ -431,7 +431,7 @@ contract VerbsDAOStorageV1 is VerbsDAOProxyStorage {
     }
 }
 
-interface VerbsTokenLike {
+interface RevolutionTokenLike {
     function getPastVotes(address account, uint256 blockNumber) external view returns (uint96);
 
     function totalSupply() external view returns (uint256);

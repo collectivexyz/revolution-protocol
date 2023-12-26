@@ -2,8 +2,8 @@
 pragma solidity ^0.8.22;
 
 import { Test } from "forge-std/Test.sol";
-import { VerbsToken } from "../../src/VerbsToken.sol";
-import { IVerbsToken } from "../../src/interfaces/IVerbsToken.sol";
+import { RevolutionToken } from "../../src/RevolutionToken.sol";
+import { IRevolutionToken } from "../../src/interfaces/IRevolutionToken.sol";
 import { IDescriptorMinimal } from "../../src/interfaces/IDescriptorMinimal.sol";
 
 import { ICultureIndex } from "../../src/interfaces/ICultureIndex.sol";
@@ -16,19 +16,19 @@ import "../utils/JsmnSolLib.sol";
 import { RevolutionPoints } from "../../src/RevolutionPoints.sol";
 import { RevolutionBuilderTest } from "../RevolutionBuilder.t.sol";
 
-/// @title VerbsTokenTestSuite
-/// @dev The base test suite for the VerbsToken contract
-contract VerbsTokenTestSuite is RevolutionBuilderTest {
+/// @title RevolutionTokenTestSuite
+/// @dev The base test suite for the RevolutionToken contract
+contract RevolutionTokenTestSuite is RevolutionBuilderTest {
     string public tokenNamePrefix = "Vrb";
     string public tokenName = "Vrbs";
     string public tokenSymbol = "VRBS";
 
-    /// @dev Sets up a new VerbsToken instance before each test
+    /// @dev Sets up a new RevolutionToken instance before each test
     function setUp() public override {
         super.setUp();
         super.setMockParams();
 
-        super.setERC721TokenParams(tokenName, tokenSymbol, "https://example.com/token/", tokenNamePrefix);
+        super.setRevolutionTokenParams(tokenName, tokenSymbol, "https://example.com/token/", tokenNamePrefix);
 
         super.setCultureIndexParams("Vrbs", "Our community Vrbs. Must be 32x32.", 10, 200, 0);
 

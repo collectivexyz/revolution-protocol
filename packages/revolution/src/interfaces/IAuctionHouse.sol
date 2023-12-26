@@ -129,14 +129,14 @@ interface IAuctionHouse {
 
     /**
      * @notice Initialize the auction house and base contracts.
-     * @param erc721Token The address of the Verbs ERC721 token contract.
+     * @param revolutionToken The address of the Revolution ERC721 token contract.
      * @param revolutionPointsEmitter The address of the ERC-20 points emitter contract.
      * @param initialOwner The address of the owner.
      * @param weth The address of the WETH contract.
      * @param auctionParams The auction params for auctions.
      */
     function initialize(
-        address erc721Token,
+        address revolutionToken,
         address revolutionPointsEmitter,
         address initialOwner,
         address weth,

@@ -290,7 +290,7 @@ interface ICultureIndex is ICultureIndexEvents {
     /**
      * @notice Initializes a token's metadata descriptor
      * @param revolutionPoints The address of the revolution points
-     * @param erc721VotingToken The address of the ERC721 voting token, commonly the dropped art pieces
+     * @param revolutionToken The address of the ERC721 voting token, commonly the dropped art pieces
      * @param initialOwner The owner of the contract, allowed to drop pieces. Commonly updated to the AuctionHouse
      * @param maxHeap The address of the max heap contract
      * @param dropperAdmin The address that can drop new art pieces
@@ -298,7 +298,7 @@ interface ICultureIndex is ICultureIndexEvents {
      */
     function initialize(
         address revolutionPoints,
-        address erc721VotingToken,
+        address revolutionToken,
         address initialOwner,
         address maxHeap,
         address dropperAdmin,

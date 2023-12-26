@@ -94,7 +94,7 @@ contract CultureIndexArtPieceTest is CultureIndexTestSuite {
         vm.roll(block.number + 1); // roll block number to enable voting snapshot
 
         voter1Test.voteForPiece(firstPieceId);
-        vm.startPrank(address(erc721Token));
+        vm.startPrank(address(revolutionToken));
 
         ICultureIndex.ArtPiece memory poppedPiece = cultureIndex.dropTopVotedPiece();
         assertEq(poppedPiece.pieceId, firstPieceId, "Popped piece should be the first piece");
@@ -113,7 +113,7 @@ contract CultureIndexArtPieceTest is CultureIndexTestSuite {
         voter1Test.voteForPiece(firstPieceId);
         voter2Test.voteForPiece(secondPieceId);
 
-        vm.startPrank(address(erc721Token));
+        vm.startPrank(address(revolutionToken));
 
         ICultureIndex.ArtPiece memory poppedPiece = cultureIndex.dropTopVotedPiece();
         //assert its the second piece
@@ -228,7 +228,7 @@ contract CultureIndexArtPieceTest is CultureIndexTestSuite {
             voter1Test.voteForPiece(pieceId);
         }
 
-        vm.startPrank(address(erc721Token));
+        vm.startPrank(address(revolutionToken));
 
         // Pop the top voted piece and log the gas used.
         uint256 startGas = gasleft();
@@ -248,7 +248,7 @@ contract CultureIndexArtPieceTest is CultureIndexTestSuite {
             voter1Test.voteForPiece(pieceId);
         }
 
-        vm.startPrank(address(erc721Token));
+        vm.startPrank(address(revolutionToken));
 
         // Pop the top voted piece and log the gas used.
         startGas = gasleft();
@@ -276,7 +276,7 @@ contract CultureIndexArtPieceTest is CultureIndexTestSuite {
         voter1Test.voteForPiece(pieceId2);
 
         // Drop the top voted piece
-        vm.startPrank(address(erc721Token));
+        vm.startPrank(address(revolutionToken));
         ICultureIndex.ArtPiece memory artPiece2 = cultureIndex.dropTopVotedPiece();
 
         // Verify that the dropped piece is correctly indexed
@@ -299,7 +299,7 @@ contract CultureIndexArtPieceTest is CultureIndexTestSuite {
         vm.roll(block.number + 1); // roll block number to enable voting snapshot
         voter1Test.voteForPiece(pieceId);
 
-        vm.startPrank(address(erc721Token));
+        vm.startPrank(address(revolutionToken));
 
         // Drop the top voted piece
         cultureIndex.dropTopVotedPiece();

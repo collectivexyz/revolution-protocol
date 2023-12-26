@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: GPL-3.0
 
-/// @title Interface for VerbsToken
+/// @title Interface for RevolutionToken
 
 /*********************************
  * ░░░░░░░░░░░░░░░░░░░░░░░░░░░░░ *
@@ -22,7 +22,7 @@ import { IDescriptorMinimal } from "./IDescriptorMinimal.sol";
 import { ICultureIndex } from "./ICultureIndex.sol";
 import { IRevolutionBuilder } from "./IRevolutionBuilder.sol";
 
-interface IVerbsToken is IERC721 {
+interface IRevolutionToken is IERC721 {
     ///                                                          ///
     ///                           ERRORS                         ///
     ///                                                          ///
@@ -98,12 +98,12 @@ interface IVerbsToken is IERC721 {
     /// @param initialOwner The address of the initial owner
     /// @param descriptor The address of the token URI descriptor
     /// @param cultureIndex The address of the CultureIndex contract
-    /// @param erc721TokenParams The name, symbol, and contract metadata of the token
+    /// @param revolutionTokenParams The name, symbol, and contract metadata of the token
     function initialize(
         address minter,
         address initialOwner,
         address descriptor,
         address cultureIndex,
-        IRevolutionBuilder.ERC721TokenParams memory erc721TokenParams
+        IRevolutionBuilder.RevolutionTokenParams memory revolutionTokenParams
     ) external;
 }

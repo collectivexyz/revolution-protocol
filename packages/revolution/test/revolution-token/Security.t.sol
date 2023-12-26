@@ -2,9 +2,9 @@
 pragma solidity ^0.8.22;
 
 import { Test } from "forge-std/Test.sol";
-import { VerbsToken } from "../../src/VerbsToken.sol";
+import { RevolutionToken } from "../../src/RevolutionToken.sol";
 import { ICultureIndex, ICultureIndexEvents } from "../../src/interfaces/ICultureIndex.sol";
-import { IVerbsToken } from "../../src/interfaces/IVerbsToken.sol";
+import { IRevolutionToken } from "../../src/interfaces/IRevolutionToken.sol";
 import { IDescriptorMinimal } from "../../src/interfaces/IDescriptorMinimal.sol";
 import { ICultureIndex } from "../../src/interfaces/ICultureIndex.sol";
 import { Strings } from "@openzeppelin/contracts/utils/Strings.sol";
@@ -13,11 +13,11 @@ import { MockERC20 } from "../mock/MockERC20.sol";
 import { Descriptor } from "../../src/Descriptor.sol";
 import "../utils/Base64Decode.sol";
 import "../utils/JsmnSolLib.sol";
-import { VerbsTokenTestSuite } from "./VerbsToken.t.sol";
+import { RevolutionTokenTestSuite } from "./RevolutionToken.t.sol";
 
-/// @title VerbsTokenTest
-/// @dev The test suite for the VerbsToken contract
-contract TokenSecurityTest is VerbsTokenTestSuite {
+/// @title RevolutionTokenTest
+/// @dev The test suite for the RevolutionToken contract
+contract TokenSecurityTest is RevolutionTokenTestSuite {
     /// @dev Tests the creator array limit for minting
     function testCreatorArrayLimit() public {
         // Create an art piece with creators more than the limit (assuming the limit is 100)
@@ -54,7 +54,7 @@ contract TokenSecurityTest is VerbsTokenTestSuite {
         createDefaultArtPiece();
 
         // Simulate a reentrancy attack by calling mint within a call to mint
-        address attacker = address(new ReentrancyAttackContract(address(erc721Token)));
+        address attacker = address(new ReentrancyAttackContract(address(revolutionToken)));
         vm.startPrank(attacker);
 
         bool reentrancyOccurred = false;
@@ -76,24 +76,24 @@ contract TokenSecurityTest is VerbsTokenTestSuite {
 
         createDefaultArtPiece();
 
-        uint256 tokenId = erc721Token.mint();
+        uint256 tokenId = revolutionToken.mint();
 
         address spender = address(0xABC);
         address to = address(0xDEF);
 
         // Attempt to transfer without approval as owner
-        erc721Token.transferFrom(address(auction), to, tokenId);
+        revolutionToken.transferFrom(address(auction), to, tokenId);
 
         vm.startPrank(to);
 
         // Approve spender and attempt to transfer as spender
-        erc721Token.approve(spender, tokenId);
+        revolutionToken.approve(spender, tokenId);
         vm.stopPrank();
 
         vm.startPrank(spender);
 
         bool transferWithApprovalFailed = false;
-        try erc721Token.transferFrom(to, address(this), tokenId) {
+        try revolutionToken.transferFrom(to, address(this), tokenId) {
             // Transfer should succeed
         } catch {
             transferWithApprovalFailed = true;
@@ -110,27 +110,27 @@ contract TokenSecurityTest is VerbsTokenTestSuite {
 
         // These should all fail when called by an unauthorized address
         vm.expectRevert();
-        erc721Token.setMinter(unauthorizedAddress);
+        revolutionToken.setMinter(unauthorizedAddress);
 
         vm.expectRevert();
-        erc721Token.lockMinter();
+        revolutionToken.lockMinter();
 
         vm.expectRevert();
-        erc721Token.setDescriptor(IDescriptorMinimal(unauthorizedAddress));
+        revolutionToken.setDescriptor(IDescriptorMinimal(unauthorizedAddress));
 
         vm.expectRevert();
-        erc721Token.lockDescriptor();
+        revolutionToken.lockDescriptor();
 
         vm.expectRevert();
-        erc721Token.setCultureIndex(ICultureIndex(unauthorizedAddress));
+        revolutionToken.setCultureIndex(ICultureIndex(unauthorizedAddress));
 
         vm.expectRevert();
-        erc721Token.lockCultureIndex();
+        revolutionToken.lockCultureIndex();
     }
 
     function testReentrancyOtherFunctions() public {
         createDefaultArtPiece();
-        address attacker = address(new ReentrancyAttackContractGeneral(address(erc721Token)));
+        address attacker = address(new ReentrancyAttackContractGeneral(address(revolutionToken)));
 
         // Simulate a reentrancy attack for burn
         vm.expectRevert(abi.encodeWithSignature("NOT_MINTER()"));
@@ -219,20 +219,20 @@ contract TokenSecurityTest is VerbsTokenTestSuite {
 
         // Mock the CultureIndex to simulate dropTopVotedPiece failure
         address cultureIndexMock = address(new CultureIndexMock());
-        erc721Token.setCultureIndex(ICultureIndex(cultureIndexMock));
+        revolutionToken.setCultureIndex(ICultureIndex(cultureIndexMock));
 
         // Store current verbId before test
         uint256 supplyBefore = 0;
 
         bool dropTopVotedPieceFailed = false;
-        try erc721Token.mint() {
+        try revolutionToken.mint() {
             fail("dropTopVotedPiece failure should have caused _mintTo to revert");
         } catch {
             dropTopVotedPieceFailed = true;
         }
 
         // Verify verbId has not incremented after failure
-        uint256 totalSupply = erc721Token.totalSupply();
+        uint256 totalSupply = revolutionToken.totalSupply();
         assertEq(supplyBefore, totalSupply, "verbId should not increment after failure");
 
         assertTrue(dropTopVotedPieceFailed, "_mintTo should revert if dropTopVotedPiece fails");
@@ -241,15 +241,15 @@ contract TokenSecurityTest is VerbsTokenTestSuite {
 
 // Helper mock contract to simulate reentrancy for other functions
 contract ReentrancyAttackContractGeneral {
-    VerbsToken private verbsToken;
+    RevolutionToken private revolutionToken;
 
-    constructor(address _verbsToken) {
-        verbsToken = VerbsToken(_verbsToken);
+    constructor(address _revolutionToken) {
+        revolutionToken = RevolutionToken(_revolutionToken);
     }
 
     function attackBurn() public {
-        uint256 tokenId = verbsToken.mint();
-        verbsToken.burn(tokenId); // Attempt to re-enter here
+        uint256 tokenId = revolutionToken.mint();
+        revolutionToken.burn(tokenId); // Attempt to re-enter here
     }
 
     // Implement fallback or receive function that calls burn again
@@ -266,14 +266,14 @@ contract CultureIndexMock {
 
 // Helper mock contract to simulate reentrancy attack
 contract ReentrancyAttackContract {
-    VerbsToken private verbsToken;
+    RevolutionToken private revolutionToken;
 
-    constructor(address _verbsToken) {
-        verbsToken = VerbsToken(_verbsToken);
+    constructor(address _revolutionToken) {
+        revolutionToken = RevolutionToken(_revolutionToken);
     }
 
     function attack() public {
-        verbsToken.mint();
-        verbsToken.mint(); // This should fail if reentrancy guard is in place
+        revolutionToken.mint();
+        revolutionToken.mint(); // This should fail if reentrancy guard is in place
     }
 }

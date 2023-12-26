@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: GPL-3.0
 
-/// @title The Verbs DAO auction house
+/// @title A Revolution auction house
 
 /*********************************
  * ░░░░░░░░░░░░░░░░░░░░░░░░░░░░░ *
@@ -26,7 +26,7 @@ pragma solidity ^0.8.22;
 import { PausableUpgradeable } from "@openzeppelin/contracts-upgradeable/utils/PausableUpgradeable.sol";
 import { ReentrancyGuardUpgradeable } from "@openzeppelin/contracts-upgradeable/utils/ReentrancyGuardUpgradeable.sol";
 import { IAuctionHouse } from "./interfaces/IAuctionHouse.sol";
-import { IVerbsToken } from "./interfaces/IVerbsToken.sol";
+import { IRevolutionToken } from "./interfaces/IRevolutionToken.sol";
 import { IWETH } from "./interfaces/IWETH.sol";
 import { IRevolutionPointsEmitter } from "./interfaces/IRevolutionPointsEmitter.sol";
 import { ICultureIndex } from "./interfaces/ICultureIndex.sol";
@@ -44,8 +44,8 @@ contract AuctionHouse is
     ReentrancyGuardUpgradeable,
     Ownable2StepUpgradeable
 {
-    // The Verbs ERC721 token contract
-    IVerbsToken public verbs;
+    // The Revolution ERC721 token contract
+    IRevolutionToken public revolutionToken;
 
     // The RevolutionPoints emitter contract
     IRevolutionPointsEmitter public revolutionPointsEmitter;
@@ -84,7 +84,7 @@ contract AuctionHouse is
     /// @notice The contract upgrade manager
     IRevolutionBuilder public immutable manager;
 
-    // TODO investigate this - The minimum gas threshold for creating an auction (minting VerbsToken)
+    // TODO investigate this - The minimum gas threshold for creating an auction (minting RevolutionToken)
     uint32 public constant MIN_TOKEN_MINT_GAS_THRESHOLD = 750_000;
 
     ///                                                          ///
@@ -105,14 +105,14 @@ contract AuctionHouse is
      * @notice Initialize the auction house and base contracts,
      * populate configuration values, and pause the contract.
      * @dev This function can only be called once.
-     * @param _erc721Token The address of the Verbs ERC721 token contract.
+     * @param _revolutionToken The address of the Revolution ERC721 token contract.
      * @param _revolutionPointsEmitter The address of the ERC-20 points emitter contract.
      * @param _initialOwner The address of the owner.
      * @param _weth The address of the WETH contract
      * @param _auctionParams The auction params for auctions.
      */
     function initialize(
-        address _erc721Token,
+        address _revolutionToken,
         address _revolutionPointsEmitter,
         address _initialOwner,
         address _weth,
@@ -129,7 +129,7 @@ contract AuctionHouse is
 
         if (_auctionParams.creatorRateBps < _auctionParams.minCreatorRateBps) revert CREATOR_RATE_TOO_LOW();
 
-        verbs = IVerbsToken(_erc721Token);
+        revolutionToken = IRevolutionToken(_revolutionToken);
         revolutionPointsEmitter = IRevolutionPointsEmitter(_revolutionPointsEmitter);
         timeBuffer = _auctionParams.timeBuffer;
         reservePrice = _auctionParams.reservePrice;
@@ -194,7 +194,7 @@ contract AuctionHouse is
     }
 
     /**
-     * @notice Pause the Verbs auction house.
+     * @notice Pause the Revolution auction house.
      * @dev This function can only be called by the owner when the
      * contract is unpaused. While no new auctions can be started when paused,
      * anyone can settle an ongoing auction.
@@ -248,7 +248,7 @@ contract AuctionHouse is
     }
 
     /**
-     * @notice Unpause the Verbs auction house.
+     * @notice Unpause the Revolution auction house.
      * @dev This function can only be called by the owner when the
      * contract is paused. If required, this function will start a new auction.
      */
@@ -300,7 +300,7 @@ contract AuctionHouse is
         // Check if there's enough gas to safely execute token.mint() and subsequent operations
         if (gasleft() < MIN_TOKEN_MINT_GAS_THRESHOLD) revert INSUFFICIENT_GAS_FOR_AUCTION();
 
-        try verbs.mint() returns (uint256 verbId) {
+        try revolutionToken.mint() returns (uint256 verbId) {
             uint256 startTime = block.timestamp;
             uint256 endTime = startTime + duration;
 
@@ -344,13 +344,13 @@ contract AuctionHouse is
             }
 
             // And then burn the Noun
-            verbs.burn(_auction.verbId);
+            revolutionToken.burn(_auction.verbId);
         } else {
             //If no one has bid, burn the Verb
             if (_auction.bidder == address(0))
-                verbs.burn(_auction.verbId);
+                revolutionToken.burn(_auction.verbId);
                 //If someone has bid, transfer the Verb to the winning bidder
-            else verbs.transferFrom(address(this), _auction.bidder, _auction.verbId);
+            else revolutionToken.transferFrom(address(this), _auction.bidder, _auction.verbId);
 
             if (_auction.amount > 0) {
                 // Ether going to owner of the auction
@@ -359,8 +359,8 @@ contract AuctionHouse is
                 //Total amount of ether going to creator
                 uint256 creatorsShare = _auction.amount - auctioneerPayment;
 
-                uint256 numCreators = verbs.getArtPieceById(_auction.verbId).creators.length;
-                address deployer = verbs.getArtPieceById(_auction.verbId).sponsor;
+                uint256 numCreators = revolutionToken.getArtPieceById(_auction.verbId).creators.length;
+                address deployer = revolutionToken.getArtPieceById(_auction.verbId).sponsor;
 
                 //Build arrays for revolutionPointsEmitter.buyToken
                 uint256[] memory vrgdaSplits = new uint256[](numCreators);
@@ -373,7 +373,9 @@ contract AuctionHouse is
 
                 //Transfer creator's share to the creator, for each creator, and build arrays for revolutionPointsEmitter.buyToken
                 if (creatorsShare > 0 && entropyRateBps > 0) {
-                    ICultureIndex.CreatorBps[] memory creators = verbs.getArtPieceById(_auction.verbId).creators;
+                    ICultureIndex.CreatorBps[] memory creators = revolutionToken
+                        .getArtPieceById(_auction.verbId)
+                        .creators;
                     uint entropyRateAmount = creatorsShare * entropyRateBps;
                     for (uint256 i = 0; i < numCreators; i++) {
                         vrgdaReceivers[i] = creators[i].creator;

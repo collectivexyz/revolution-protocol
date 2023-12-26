@@ -2,8 +2,8 @@
 pragma solidity ^0.8.22;
 
 import { Test } from "forge-std/Test.sol";
-import { VerbsToken } from "../../src/VerbsToken.sol";
-import { IVerbsToken } from "../../src/interfaces/IVerbsToken.sol";
+import { RevolutionToken } from "../../src/RevolutionToken.sol";
+import { IRevolutionToken } from "../../src/interfaces/IRevolutionToken.sol";
 import { IDescriptorMinimal } from "../../src/interfaces/IDescriptorMinimal.sol";
 import { ICultureIndex, ICultureIndexEvents } from "../../src/interfaces/ICultureIndex.sol";
 import { Strings } from "@openzeppelin/contracts/utils/Strings.sol";
@@ -12,11 +12,11 @@ import { MockERC20 } from "../mock/MockERC20.sol";
 import { Descriptor } from "../../src/Descriptor.sol";
 import "../utils/Base64Decode.sol";
 import "../utils/JsmnSolLib.sol";
-import { VerbsTokenTestSuite } from "./VerbsToken.t.sol";
+import { RevolutionTokenTestSuite } from "./RevolutionToken.t.sol";
 
-/// @title VerbsTokenTest
-/// @dev The test suite for the VerbsToken contract
-contract TokenBasicTest is VerbsTokenTestSuite {
+/// @title RevolutionTokenTest
+/// @dev The test suite for the RevolutionToken contract
+contract TokenBasicTest is RevolutionTokenTestSuite {
     /// @dev Tests token metadata integrity after minting
     function testTokenMetadataIntegrity() public {
         // Create an art piece and mint a token
@@ -24,10 +24,10 @@ contract TokenBasicTest is VerbsTokenTestSuite {
 
         vm.stopPrank();
         vm.startPrank(address(auction));
-        uint256 tokenId = erc721Token.mint();
+        uint256 tokenId = revolutionToken.mint();
 
         // Retrieve the token metadata URI
-        string memory tokenURI = erc721Token.tokenURI(tokenId);
+        string memory tokenURI = revolutionToken.tokenURI(tokenId);
 
         emit log_string(tokenURI);
 
@@ -58,30 +58,30 @@ contract TokenBasicTest is VerbsTokenTestSuite {
         assertEq(image, metadata.image, "Token image does not match expected image URL");
     }
 
-    /// @dev Tests the symbol of the VerbsToken
+    /// @dev Tests the symbol of the RevolutionToken
     function testSymbol() public {
-        assertEq(erc721Token.symbol(), tokenSymbol, "Symbol should be VRBS");
+        assertEq(revolutionToken.symbol(), tokenSymbol, "Symbol should be VRBS");
     }
 
-    /// @dev Tests the name of the VerbsToken
+    /// @dev Tests the name of the RevolutionToken
     function testName() public {
-        assertEq(erc721Token.name(), tokenName, "Name should be Vrbs");
+        assertEq(revolutionToken.name(), tokenName, "Name should be Vrbs");
     }
 
-    /// @dev Tests the contract URI of the VerbsToken
+    /// @dev Tests the contract URI of the RevolutionToken
     function testContractURI() public {
         assertEq(
-            erc721Token.contractURI(),
-            string(abi.encodePacked("ipfs://", erc721TokenParams.contractURIHash)),
+            revolutionToken.contractURI(),
+            string(abi.encodePacked("ipfs://", revolutionTokenParams.contractURIHash)),
             "Contract URI should match"
         );
     }
 
     /// @dev Tests the initial state of the contract variables
     function testInitialVariablesState() public {
-        address minter = erc721Token.minter();
-        address descriptorAddress = address(erc721Token.descriptor());
-        address cultureIndexAddress = address(erc721Token.cultureIndex());
+        address minter = revolutionToken.minter();
+        address descriptorAddress = address(revolutionToken.descriptor());
+        address cultureIndexAddress = address(revolutionToken.cultureIndex());
 
         assertEq(minter, address(auction), "Initial minter should be the auction");
         assertEq(descriptorAddress, address(descriptor), "Initial descriptor should be set correctly");
@@ -94,9 +94,9 @@ contract TokenBasicTest is VerbsTokenTestSuite {
 
         vm.stopPrank();
         vm.startPrank(address(auction));
-        uint256 tokenId = erc721Token.mint();
+        uint256 tokenId = revolutionToken.mint();
 
-        (uint256 recordedPieceId, , , , , , , ) = erc721Token.artPieces(tokenId);
+        (uint256 recordedPieceId, , , , , , , ) = revolutionToken.artPieces(tokenId);
 
         // Validate the token's associated art piece
         assertEq(recordedPieceId, artPieceId, "Minted token should be associated with the correct art piece");
@@ -319,7 +319,7 @@ contract TokenBasicTest is VerbsTokenTestSuite {
         vm.startPrank(address(auction));
 
         // Simulate dropping the piece
-        erc721Token.mint(); // Replace with your actual function to mark a piece as dropped
+        revolutionToken.mint(); // Replace with your actual function to mark a piece as dropped
 
         // Give the voter some tokens
         vm.stopPrank();
@@ -398,7 +398,7 @@ contract TokenBasicTest is VerbsTokenTestSuite {
 
         vm.startPrank(address(auction));
         // Act
-        erc721Token.mint();
+        revolutionToken.mint();
 
         // Assert
         ICultureIndex.ArtPiece memory piece = cultureIndex.getPieceById(artPieceId);
@@ -414,7 +414,7 @@ contract TokenBasicTest is VerbsTokenTestSuite {
 
         // Act & Assert
         vm.expectRevert(abi.encodeWithSignature("CULTURE_INDEX_EMPTY()"));
-        erc721Token.mint();
+        revolutionToken.mint();
     }
 
     /// @dev Tests that voting on a non-existent art piece is rejected.
@@ -513,8 +513,8 @@ contract TokenBasicTest is VerbsTokenTestSuite {
         createDefaultArtPiece();
 
         uint256 preMintPieceId = cultureIndex.topVotedPieceId();
-        uint256 tokenId = erc721Token.mint();
-        (uint256 pieceId, , , , , , , ) = erc721Token.artPieces(tokenId);
+        uint256 tokenId = revolutionToken.mint();
+        (uint256 pieceId, , , , , , , ) = revolutionToken.artPieces(tokenId);
 
         assertTrue(pieceId == preMintPieceId, "Art piece ID should match top voted piece ID before minting");
     }

@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: GPL-3.0
 
-/// @title Common interface for Descriptor versions, as used by VerbsToken
+/// @title Common interface for Descriptor versions, as used by RevolutionToken
 
 /*********************************
  * ░░░░░░░░░░░░░░░░░░░░░░░░░░░░░ *

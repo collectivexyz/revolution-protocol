@@ -20,7 +20,7 @@ contract CultureIndexStorageV1 {
     ERC20VotesUpgradeable public revolutionPoints;
 
     // The ERC721 token used for voting
-    ERC721CheckpointableUpgradeable public erc721VotingToken;
+    ERC721CheckpointableUpgradeable public revolutionToken;
 
     /// @notice The minimum vote weight required in order to vote
     uint256 public minVoteWeight;

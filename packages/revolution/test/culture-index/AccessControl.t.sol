@@ -2,8 +2,8 @@
 pragma solidity ^0.8.22;
 
 import { Test } from "forge-std/Test.sol";
-import { VerbsToken } from "../../src/VerbsToken.sol";
-import { IVerbsToken } from "../../src/interfaces/IVerbsToken.sol";
+import { RevolutionToken } from "../../src/RevolutionToken.sol";
+import { IRevolutionToken } from "../../src/interfaces/IRevolutionToken.sol";
 import { IDescriptorMinimal } from "../../src/interfaces/IDescriptorMinimal.sol";
 import { ICultureIndex, ICultureIndexEvents } from "../../src/interfaces/ICultureIndex.sol";
 import { Strings } from "@openzeppelin/contracts/utils/Strings.sol";
@@ -15,8 +15,8 @@ import "../utils/JsmnSolLib.sol";
 import { CultureIndexTestSuite } from "./CultureIndex.t.sol";
 import { ERC721CheckpointableUpgradeable } from "../../src/base/ERC721CheckpointableUpgradeable.sol";
 
-/// @title VerbsTokenTest
-/// @dev The test suite for the VerbsToken contract
+/// @title RevolutionTokenTest
+/// @dev The test suite for the RevolutionToken contract
 contract CultureIndexAccessControlTest is CultureIndexTestSuite {
     function testSetQuorumVotesBPSWithinRange(uint104 newQuorumBPS) public {
         vm.assume(newQuorumBPS <= cultureIndex.MAX_QUORUM_VOTES_BPS());
@@ -82,7 +82,7 @@ contract CultureIndexAccessControlTest is CultureIndexTestSuite {
 
         // Attempt to drop the top-voted piece and expect it to fail
         vm.expectRevert(abi.encodeWithSignature("DOES_NOT_MEET_QUORUM()"));
-        vm.startPrank(address(erc721Token));
+        vm.startPrank(address(revolutionToken));
         cultureIndex.dropTopVotedPiece();
 
         // Additional votes to meet/exceed the quorum
@@ -91,7 +91,7 @@ contract CultureIndexAccessControlTest is CultureIndexTestSuite {
         vm.stopPrank();
 
         // Attempt to drop the top-voted piece, should succeed
-        vm.startPrank(address(erc721Token));
+        vm.startPrank(address(revolutionToken));
         ICultureIndex.ArtPiece memory droppedPiece = cultureIndex.dropTopVotedPiece();
         assertTrue(droppedPiece.isDropped, "Top voted piece should be dropped");
     }

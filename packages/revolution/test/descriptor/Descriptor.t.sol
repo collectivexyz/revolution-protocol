@@ -16,7 +16,7 @@ contract DescriptorTest is RevolutionBuilderTest {
         super.setUp();
         super.setMockParams();
 
-        super.setERC721TokenParams("Mock", "MOCK", "https://example.com/token/", tokenNamePrefix);
+        super.setRevolutionTokenParams("Mock", "MOCK", "https://example.com/token/", tokenNamePrefix);
 
         super.deployMock();
 

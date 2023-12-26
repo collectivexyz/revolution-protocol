@@ -159,7 +159,7 @@ contract ERC1967Proxy is IERC1967Upgrade, Proxy, ERC1967Upgrade {
     }
 }
 
-interface VerbsTokenLike {
+interface RevolutionTokenLike {
     function getPastVotes(address account, uint256 blockNumber) external view returns (uint96);
 
     function totalSupply() external view returns (uint256);
@@ -231,7 +231,7 @@ interface RevolutionBuilderTypesV1 {
         /// @notice Address for deployed DAO contract
         address dao;
         /// @notice Address for deployed ERC-721 token contract
-        address erc721Token;
+        address revolutionToken;
         /// @notice Address for deployed MaxHeap contract
         address maxHeap;
     }
@@ -1739,7 +1739,7 @@ interface IRevolutionBuilder is IUUPS {
     ///                                                          ///
 
     /// @notice Emitted when a DAO is deployed
-    /// @param erc721Token The ERC-721 token address
+    /// @param revolutionToken The ERC-721 token address
     /// @param descriptor The descriptor renderer address
     /// @param auction The auction address
     /// @param executor The executor address
@@ -1749,7 +1749,7 @@ interface IRevolutionBuilder is IUUPS {
     /// @param revolutionPoints The dao address
     /// @param maxHeap The maxHeap address
     event DAODeployed(
-        address erc721Token,
+        address revolutionToken,
         address descriptor,
         address auction,
         address executor,
@@ -1776,7 +1776,7 @@ interface IRevolutionBuilder is IUUPS {
 
     /// @notice DAO Version Information information struct
     struct DAOVersionInfo {
-        string erc721Token;
+        string revolutionToken;
         string descriptor;
         string auction;
         string executor;
@@ -1791,7 +1791,7 @@ interface IRevolutionBuilder is IUUPS {
     /// @param name The token name
     /// @param symbol The token symbol
     /// @param contractURIHash The IPFS content hash of the contract-level metadata
-    struct ERC721TokenParams {
+    struct RevolutionTokenParams {
         string name;
         string symbol;
         string contractURIHash;
@@ -1822,7 +1822,7 @@ interface IRevolutionBuilder is IUUPS {
     /// @param votingPeriod The time period to vote on a proposal
     /// @param proposalThresholdBPS The basis points of the token supply required to create a proposal
     /// @param vetoer The address authorized to veto proposals (address(0) if none desired)
-    /// @param erc721TokenVotingWeight The voting weight of the individual ERC721 tokens
+    /// @param revolutionTokenVoteWeight The voting weight of the individual ERC721 tokens
     /// @param daoName The name of the DAO
     /// @param dynamicQuorumParams The dynamic quorum parameters
     struct GovParams {
@@ -1831,9 +1831,9 @@ interface IRevolutionBuilder is IUUPS {
         uint256 votingPeriod;
         uint256 proposalThresholdBPS;
         address vetoer;
-        uint256 erc721TokenVotingWeight;
+        uint256 revolutionTokenVoteWeight;
         string daoName;
-        VerbsDAOStorageV1.DynamicQuorumParams dynamicQuorumParams;
+        RevolutionDAOStorageV1.DynamicQuorumParams dynamicQuorumParams;
     }
 
     /// @notice The ERC-20 token parameters
@@ -1874,13 +1874,13 @@ interface IRevolutionBuilder is IUUPS {
     /// @notice The CultureIndex parameters
     /// @param name The name of the culture index
     /// @param description A description for the culture index, can include rules for uploads etc.
-    /// @param erc721VotingTokenWeight The voting weight of the individual ERC721 tokens. Normally a large multiple to match up with daily emission of ERC20 points
+    /// @param revolutionTokenVoteWeight The voting weight of the individual ERC721 tokens. Normally a large multiple to match up with daily emission of ERC20 points
     /// @param quorumVotesBPS The initial quorum votes threshold in basis points
     /// @param minVoteWeight The minimum vote weight in basis points that a voter must have to be able to vote.
     struct CultureIndexParams {
         string name;
         string description;
-        uint256 erc721VotingTokenWeight;
+        uint256 revolutionTokenVoteWeight;
         uint256 quorumVotesBPS;
         uint256 minVoteWeight;
     }
@@ -1890,7 +1890,7 @@ interface IRevolutionBuilder is IUUPS {
     ///                                                          ///
 
     /// @notice The token implementation address
-    function erc721TokenImpl() external view returns (address);
+    function revolutionTokenImpl() external view returns (address);
 
     /// @notice The descriptor renderer implementation address
     function descriptorImpl() external view returns (address);
@@ -1919,7 +1919,7 @@ interface IRevolutionBuilder is IUUPS {
     /// @notice Deploys a DAO with custom token, auction, and governance settings
     /// @param initialOwner The initial owner address
     /// @param weth The WETH address
-    /// @param erc721TokenParams The ERC-721 token settings
+    /// @param revolutionTokenParams The ERC-721 token settings
     /// @param auctionParams The auction settings
     /// @param govParams The governance settings
     /// @param cultureIndexParams The CultureIndex settings
@@ -1928,7 +1928,7 @@ interface IRevolutionBuilder is IUUPS {
     function deploy(
         address initialOwner,
         address weth,
-        ERC721TokenParams calldata erc721TokenParams,
+        RevolutionTokenParams calldata revolutionTokenParams,
         AuctionParams calldata auctionParams,
         GovParams calldata govParams,
         CultureIndexParams calldata cultureIndexParams,
@@ -1943,7 +1943,7 @@ interface IRevolutionBuilder is IUUPS {
     )
         external
         returns (
-            address erc721Token,
+            address revolutionToken,
             address descriptor,
             address auction,
             address executor,
@@ -1970,7 +1970,7 @@ interface IRevolutionBuilder is IUUPS {
     function removeUpgrade(address baseImpl, address upgradeImpl) external;
 }
 
-contract VerbsDAOProxyStorage {
+contract RevolutionDAOProxyStorage {
     /// @notice Administrator for this contract
     address public admin;
 
@@ -1983,11 +1983,11 @@ contract VerbsDAOProxyStorage {
 
 /**
  * @title Storage for Governor Bravo Delegate
- * @notice For future upgrades, do not change VerbsDAOStorageV1. Create a new
- * contract which implements VerbsDAOStorageV1 and following the naming convention
- * VerbsDAOStorageVX.
+ * @notice For future upgrades, do not change RevolutionDAOStorageV1. Create a new
+ * contract which implements RevolutionDAOStorageV1 and following the naming convention
+ * RevolutionDAOStorageVX.
  */
-contract VerbsDAOStorageV1 is VerbsDAOProxyStorage {
+contract RevolutionDAOStorageV1 is RevolutionDAOProxyStorage {
     /// @notice Vetoer who has the ability to veto any proposal
     address public vetoer;
 
@@ -2006,14 +2006,14 @@ contract VerbsDAOStorageV1 is VerbsDAOProxyStorage {
     /// @notice The total number of proposals
     uint256 public proposalCount;
 
-    /// @notice The address of the Verbs DAO Executor DAOExecutor
+    /// @notice The address of the Revolution DAO Executor DAOExecutor
     IDAOExecutor public timelock;
 
-    /// @notice The address of the Verbs ERC721 tokens
-    VerbsTokenLike public verbs;
+    /// @notice The address of the Revolution ERC721 tokens
+    RevolutionTokenLike public revolutionToken;
 
     /// @notice The address of the ERC20 points
-    PointsLike public points;
+    PointsLike public revolutionPoints;
 
     /// @notice The official record of all proposals ever proposed
     mapping(uint256 => Proposal) internal _proposals;
@@ -2026,8 +2026,8 @@ contract VerbsDAOStorageV1 is VerbsDAOProxyStorage {
     /// @notice Pending new vetoer
     address public pendingVetoer;
 
-    /// @notice The voting weight of the verbs token eg: owning (2) tokens gets you (2 * erc721TokenVotingWeight) votes
-    uint256 public erc721TokenVotingWeight;
+    /// @notice The voting weight of the Revolution ERC721 token eg: owning (2) tokens gets you (2 * revolutionTokenVoteWeight) votes
+    uint256 public revolutionTokenVoteWeight;
 
     struct Proposal {
         /// @notice Unique id for looking up a proposal
