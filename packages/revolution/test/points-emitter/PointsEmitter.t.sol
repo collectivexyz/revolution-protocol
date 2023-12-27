@@ -12,6 +12,7 @@ import { IRevolutionBuilder } from "../../src/interfaces/IRevolutionBuilder.sol"
 import { RevolutionBuilderTest } from "../RevolutionBuilder.t.sol";
 import { IRevolutionPoints } from "../../src/interfaces/IRevolutionPoints.sol";
 import { ERC1967Proxy } from "../../src/libs/proxy/ERC1967Proxy.sol";
+import { console2 } from "forge-std/console2.sol";
 
 contract PointsEmitterTest is RevolutionBuilderTest {
     event Log(string, uint);
@@ -767,6 +768,66 @@ contract PointsEmitterTest is RevolutionBuilderTest {
                 deployer: address(0)
             })
         );
+    }
+
+    function testBuyTokenTotalVal() public {
+        vm.startPrank(address(0));
+
+        address[] memory recipients = new address[](1);
+        recipients[0] = address(1);
+
+        uint256[] memory bps = new uint256[](1);
+        bps[0] = 10_000;
+
+        vm.deal(address(0), 100000 ether);
+
+        vm.stopPrank();
+        // set setCreatorsAddress
+        vm.prank(address(dao));
+        revolutionPointsEmitter.setCreatorsAddress(address(100));
+
+        // change creatorRateBps to 0
+        vm.prank(address(dao));
+        revolutionPointsEmitter.setCreatorRateBps(0);
+
+        // set entropyRateBps to 0
+        vm.prank(address(dao));
+        revolutionPointsEmitter.setEntropyRateBps(0);
+
+        vm.startPrank(address(0));
+
+        revolutionPointsEmitter.buyToken{ value: 1e18 }(
+            recipients,
+            bps,
+            IRevolutionPointsEmitter.ProtocolRewardAddresses({
+                builder: address(0),
+                purchaseReferral: address(0),
+                deployer: address(0)
+            })
+        );
+
+        // save treasury ETH balance
+        uint256 treasuryEthBalance = address(revolutionPointsEmitter.owner()).balance;
+        // save buyer token balance
+        uint256 buyerTokenBalance = revolutionPointsEmitter.balanceOf(address(1));
+
+        console2.log("treasuryEthBalance: ", treasuryEthBalance);
+        console2.log("buyerTokenBalance: ", buyerTokenBalance);
+
+        // save protocol fees
+        uint256 protocolFees = (1e18 * 250) / 10_000;
+
+        console2.log("protocolFees: ", protocolFees);
+
+        // convert token balances to ETH
+        uint256 buyerTokenBalanceEth = uint256(revolutionPointsEmitter.buyTokenQuote(buyerTokenBalance));
+
+        console2.log("buyerTokenBalanceEth: ", buyerTokenBalanceEth);
+
+        console2.log("total: ", treasuryEthBalance + protocolFees + buyerTokenBalanceEth);
+
+        // Sent in ETH should be almost equal (account for precision/rounding) to total ETH plus token value in ETH
+        assertGt(1e18 * 2, treasuryEthBalance + protocolFees + buyerTokenBalanceEth, "");
     }
 
     function testBuyTokenReentrancy() public {

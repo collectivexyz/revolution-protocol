@@ -39,10 +39,9 @@
 | token           | contract RevolutionPoints | 1    | 0      | 20    | src/RevolutionPointsEmitter.sol:RevolutionPointsEmitter |
 | vrgdac          | contract VRGDAC           | 2    | 0      | 20    | src/RevolutionPointsEmitter.sol:RevolutionPointsEmitter |
 | startTime       | uint256                   | 3    | 0      | 32    | src/RevolutionPointsEmitter.sol:RevolutionPointsEmitter |
-| emittedTokenWad | int256                    | 4    | 0      | 32    | src/RevolutionPointsEmitter.sol:RevolutionPointsEmitter |
-| creatorRateBps  | uint256                   | 5    | 0      | 32    | src/RevolutionPointsEmitter.sol:RevolutionPointsEmitter |
-| entropyRateBps  | uint256                   | 6    | 0      | 32    | src/RevolutionPointsEmitter.sol:RevolutionPointsEmitter |
-| creatorsAddress | address                   | 7    | 0      | 20    | src/RevolutionPointsEmitter.sol:RevolutionPointsEmitter |
+| creatorRateBps  | uint256                   | 4    | 0      | 32    | src/RevolutionPointsEmitter.sol:RevolutionPointsEmitter |
+| entropyRateBps  | uint256                   | 5    | 0      | 32    | src/RevolutionPointsEmitter.sol:RevolutionPointsEmitter |
+| creatorsAddress | address                   | 6    | 0      | 20    | src/RevolutionPointsEmitter.sol:RevolutionPointsEmitter |
 
 =======================
 ➡ AuctionHouse
