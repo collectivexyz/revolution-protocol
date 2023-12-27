@@ -132,7 +132,7 @@ contract RevolutionToken is
         address _initialOwner,
         address _descriptor,
         address _cultureIndex,
-        IRevolutionBuilder.RevolutionTokenParams memory _revolutionTokenParams
+        IRevolutionBuilder.RevolutionTokenParams calldata _revolutionTokenParams
     ) external initializer {
         if (msg.sender != address(manager)) revert ONLY_MANAGER_CAN_INITIALIZE();
 
