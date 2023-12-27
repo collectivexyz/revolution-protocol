@@ -88,7 +88,7 @@ contract MaxHeap is VersionedContract, UUPS, Ownable2StepUpgradeable, Reentrancy
     /// @notice the number of items in the heap
     uint256 public size = 0;
 
-    /// @notice composite mapping of the heap position (index in the heap) and value of a specific item in the heap
+    /// @notice composite mapping of the heap position (index in the heap) and priority value of a specific item in the heap
     /// To enable value updates and indexing on external itemIds
     /// key = itemId
     struct Item {
@@ -175,7 +175,7 @@ contract MaxHeap is VersionedContract, UUPS, Ownable2StepUpgradeable, Reentrancy
 
     /// @notice Extract the maximum element from the heap
     /// @dev The function will revert if the heap is empty
-    /// The value and position mapping will also be cleared
+    /// The values for the popped node are removed from the items mapping
     /// @return The maximum element from the heap
     function extractMax() external onlyAdmin returns (uint256, uint256) {
         if (size == 0) revert EMPTY_HEAP();
@@ -192,7 +192,7 @@ contract MaxHeap is VersionedContract, UUPS, Ownable2StepUpgradeable, Reentrancy
         // set the root node to the farthest leaf node and decrement the size
         heap[0] = heap[--size];
 
-        // update the heap index for the swapped in leaf node
+        // update the heap index for the previously farthest leaf node
         items[heap[0]].heapIndex = 0;
 
         //delete the farthest leaf node
