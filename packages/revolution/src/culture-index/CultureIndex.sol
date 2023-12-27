@@ -122,11 +122,11 @@ contract CultureIndex is
      * - The corresponding media data must not be empty.
      */
     function validateMediaType(ArtPieceMetadata calldata metadata) internal pure {
-        if (uint8(metadata.mediaType) == 0 || uint8(metadata.mediaType) > 5) revert INVALID_MEDIA_TYPE();
+        if (uint8(metadata.mediaType) > 3) revert INVALID_MEDIA_TYPE();
 
         if (metadata.mediaType == MediaType.IMAGE) {
             if (bytes(metadata.image).length == 0) revert INVALID_MEDIA_METADATA();
-        } else if (metadata.mediaType == MediaType.ANIMATION) {
+        } else if (metadata.mediaType == MediaType.ANIMATION || metadata.mediaType == MediaType.AUDIO) {
             if (bytes(metadata.animationUrl).length == 0) revert INVALID_MEDIA_METADATA();
         } else if (metadata.mediaType == MediaType.TEXT) {
             if (bytes(metadata.text).length == 0) revert INVALID_MEDIA_METADATA();
