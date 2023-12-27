@@ -76,7 +76,7 @@ contract CultureIndex is
         address _initialOwner,
         address _maxHeap,
         address _dropperAdmin,
-        IRevolutionBuilder.CultureIndexParams memory _cultureIndexParams
+        IRevolutionBuilder.CultureIndexParams calldata _cultureIndexParams
     ) external initializer {
         if (msg.sender != address(manager)) revert NOT_MANAGER();
 
@@ -347,11 +347,11 @@ contract CultureIndex is
     /// @param r R component of signatures
     /// @param s S component of signatures
     function batchVoteForManyWithSig(
-        address[] memory from,
+        address[] calldata from,
         uint256[][] calldata pieceIds,
-        uint256[] memory deadline,
-        uint8[] memory v,
-        bytes32[] memory r,
+        uint256[] calldata deadline,
+        uint8[] calldata v,
+        bytes32[] calldata r,
         bytes32[] memory s
     ) external nonReentrant {
         uint256 len = from.length;
