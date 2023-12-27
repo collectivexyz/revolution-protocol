@@ -37,6 +37,13 @@ contract CultureIndex is
     // Constant for max number of creators
     uint256 public constant MAX_NUM_CREATORS = 100;
 
+    // Constant for art piece metadata
+    uint256 public constant MAX_NAME_LENGTH = 100;
+    uint256 public constant MAX_DESCRIPTION_LENGTH = 1000;
+    uint256 public constant MAX_IMAGE_LENGTH = 21_000;
+    uint256 public constant MAX_ANIMATION_URL_LENGTH = 21_000;
+    uint256 public constant MAX_TEXT_LENGTH = 42_000;
+
     // The weight of the 721 voting token
     uint256 public revolutionTokenVoteWeight;
 
@@ -132,8 +139,21 @@ contract CultureIndex is
             if (bytes(metadata.text).length == 0) revert INVALID_MEDIA_METADATA();
         }
 
+        // ensure all fields of metadata are within reasonable bounds
+        if (bytes(metadata.description).length > MAX_DESCRIPTION_LENGTH) revert INVALID_MEDIA_METADATA();
+
+        // permit reasonable SVG images
+        if (bytes(metadata.image).length > MAX_IMAGE_LENGTH) revert INVALID_MEDIA_METADATA();
+
+        // assume animation is always an ipfs hash
+        if (bytes(metadata.animationUrl).length > MAX_ANIMATION_URL_LENGTH) revert INVALID_MEDIA_METADATA();
+
+        // permit reasonable text
+        if (bytes(metadata.text).length > MAX_TEXT_LENGTH) revert INVALID_MEDIA_METADATA();
+
         //ensure name is set
-        if (bytes(metadata.name).length == 0) revert INVALID_MEDIA_METADATA();
+        if (bytes(metadata.name).length == 0 || bytes(metadata.name).length > MAX_NAME_LENGTH)
+            revert INVALID_MEDIA_METADATA();
     }
 
     /**
