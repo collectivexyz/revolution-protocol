@@ -751,6 +751,24 @@ contract PointsEmitterTest is RevolutionBuilderTest {
         assert(secondAmountDifference <= 2 * revolutionPointsEmitter.totalSupply());
     }
 
+    function test_purchaseBounds(int256 amount) public {
+        vm.assume(
+            amount <= int(revolutionPointsEmitter.minPurchaseAmount()) ||
+                amount >= int(revolutionPointsEmitter.maxPurchaseAmount())
+        );
+
+        vm.expectRevert();
+        revolutionPointsEmitter.buyToken{ value: uint256(amount) }(
+            new address[](1),
+            new uint256[](1),
+            IRevolutionPointsEmitter.ProtocolRewardAddresses({
+                builder: address(0),
+                purchaseReferral: address(1),
+                deployer: address(0)
+            })
+        );
+    }
+
     function testBuyTokenReentrancy() public {
         // Deploy the malicious owner contract
         MaliciousOwner maliciousOwner = new MaliciousOwner(address(revolutionPointsEmitter));
