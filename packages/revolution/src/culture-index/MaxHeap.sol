@@ -121,8 +121,8 @@ contract MaxHeap is VersionedContract, UUPS, Ownable2StepUpgradeable, Reentrancy
         uint256 right = 2 * pos + 2;
 
         uint256 posValue = items[heap[pos]].value;
-        uint256 leftValue = left < size ? items[heap[left]].value : 0;
-        uint256 rightValue = right < size ? items[heap[right]].value : 0;
+        uint256 leftValue = items[heap[left]].value;
+        uint256 rightValue = items[heap[right]].value;
 
         if (pos >= (size / 2) && pos <= size) return;
 
@@ -180,18 +180,28 @@ contract MaxHeap is VersionedContract, UUPS, Ownable2StepUpgradeable, Reentrancy
     function extractMax() external onlyAdmin returns (uint256, uint256) {
         if (size == 0) revert EMPTY_HEAP();
 
-        //itemId of the node with the max value
+        // itemId of the node with the max value at the root of the heap
         uint256 popped = heap[0];
 
-        //set the root node to the farthest leaf and decrement size
+        // get priority value of the popped node
+        uint returnValue = items[popped].value;
+
+        // remove popped node values from the items mapping for the popped node
+        delete items[popped];
+
+        // set the root node to the farthest leaf node and decrement the size
         heap[0] = heap[--size];
-        // update the items mapping
+
+        // update the heap index for the swapped in leaf node
         items[heap[0]].heapIndex = 0;
+
+        //delete the farthest leaf node
+        delete heap[size];
 
         //maintain heap property
         maxHeapify(0);
 
-        return (popped, items[popped].value);
+        return (popped, returnValue);
     }
 
     /// @notice Get the maximum element from the heap
