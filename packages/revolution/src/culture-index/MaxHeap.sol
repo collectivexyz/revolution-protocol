@@ -184,7 +184,7 @@ contract MaxHeap is VersionedContract, UUPS, Ownable2StepUpgradeable, Reentrancy
         uint256 popped = heap[0];
 
         // get priority value of the popped node
-        uint returnValue = items[popped].value;
+        uint256 returnValue = items[popped].value;
 
         // remove popped node values from the items mapping for the popped node
         delete items[popped];
