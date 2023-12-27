@@ -55,16 +55,16 @@ contract VRGDAC {
         int256 soldDifference = wadMul(perTimeUnit, timeSinceStart) - sold;
         unchecked {
             return
-                wadMul(
-                    perTimeUnit,
-                    wadDiv(
+                wadDiv(
+                    wadMul(
+                        perTimeUnit,
                         wadLn(
                             wadDiv(
                                 wadMul(
                                     targetPrice,
                                     wadMul(
                                         perTimeUnit,
-                                        wadExp(wadMul(soldDifference, wadDiv(decayConstant, perTimeUnit)))
+                                        wadExp(wadDiv(wadMul(soldDifference, decayConstant), perTimeUnit))
                                     )
                                 ),
                                 wadMul(
@@ -75,9 +75,9 @@ contract VRGDAC {
                                     )
                                 ) - wadMul(amount, decayConstant)
                             )
-                        ),
-                        decayConstant
-                    )
+                        )
+                    ),
+                    decayConstant
                 );
         }
     }
