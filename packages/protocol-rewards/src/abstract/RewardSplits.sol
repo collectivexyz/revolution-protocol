@@ -10,8 +10,15 @@ struct RewardsSettings {
     uint256 revolutionReward;
 }
 
+interface IRewardSplits {
+    /// @dev from RewardSplits
+    function minPurchaseAmount() external view returns (uint256);
+
+    function maxPurchaseAmount() external view returns (uint256);
+}
+
 /// @notice Common logic for Revolution RevolutionPointsEmitter contracts for protocol reward splits & deposits
-abstract contract RewardSplits {
+abstract contract RewardSplits is IRewardSplits {
     error INVALID_ETH_AMOUNT();
 
     // 2.5% total

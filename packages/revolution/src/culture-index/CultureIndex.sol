@@ -417,7 +417,7 @@ contract CultureIndex is
 
         address recoveredAddress = ecrecover(digest, v, r, s);
 
-        // Ensure to address is not 0
+        // Ensure from address is not 0
         if (from == address(0)) revert ADDRESS_ZERO();
 
         // Ensure signature is valid

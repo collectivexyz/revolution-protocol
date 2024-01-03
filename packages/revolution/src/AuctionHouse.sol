@@ -373,10 +373,20 @@ contract AuctionHouse is
 
                 //Transfer creator's share to the creator, for each creator, and build arrays for revolutionPointsEmitter.buyToken
                 if (creatorsShare > 0 && entropyRateBps > 0) {
+                    //Get the creators of the Verb
                     ICultureIndex.CreatorBps[] memory creators = revolutionToken
                         .getArtPieceById(_auction.verbId)
                         .creators;
+
+                    //Calculate the amount to be paid to the creators
                     uint entropyRateAmount = creatorsShare * entropyRateBps;
+
+                    //If the amount to be paid to the creators is less than the minimum purchase amount for points
+                    if ((creatorsShare - (entropyRateAmount / 10_000)) <= revolutionPointsEmitter.minPurchaseAmount()) {
+                        //Set the amount to the full creators share, so creators are paid fully in ETH
+                        entropyRateAmount = creatorsShare * 10_000;
+                    }
+
                     for (uint256 i = 0; i < numCreators; i++) {
                         vrgdaReceivers[i] = creators[i].creator;
                         vrgdaSplits[i] = creators[i].bps;

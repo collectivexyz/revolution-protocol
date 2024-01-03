@@ -82,7 +82,7 @@ contract VRGDAC {
         }
     }
 
-    // given # of tokens sold, returns integral of price p(x) = p0 * (1 - k)^(x/r)
+    // given # of tokens sold, returns integral of price p(x) = p0 * (1 - k)^(t - x/r)
     function pIntegral(int256 timeSinceStart, int256 sold) internal view returns (int256) {
         return
             wadDiv(
