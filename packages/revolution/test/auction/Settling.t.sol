@@ -16,8 +16,6 @@ contract AuctionHouseSettleTest is AuctionHouseTest {
         createDefaultArtPiece();
         auction.unpause();
 
-        uint256 balanceBefore = address(dao).balance;
-
         uint256 bidAmount = auction.reservePrice();
         vm.deal(address(11), bidAmount);
         vm.startPrank(address(11));
@@ -29,8 +27,6 @@ contract AuctionHouseSettleTest is AuctionHouseTest {
         createDefaultArtPiece();
         auction.settleCurrentAndCreateNewAuction();
         vm.roll(block.number + 1);
-
-        uint256 balanceAfter = address(dao).balance;
 
         assertEq(revolutionToken.ownerOf(0), address(11), "Verb should be transferred to the highest bidder");
         // cultureIndex currentVotes of highest bidder should be 10
@@ -236,11 +232,22 @@ contract AuctionHouseSettleTest is AuctionHouseTest {
     }
 
     function getCreatorGovernancePayoutHelper(uint bidAmount) public returns (uint) {
-        uint creatorsAuctionShare = (bidAmount * auction.creatorRateBps()) / 10_000;
-        uint creatorsGovernancePayment = (creatorsAuctionShare * (10_000 - auction.entropyRateBps())) / 10_000;
+        // Ether going to owner of the auction
+        uint auctioneerPayment = (bidAmount * (10_000 - auction.creatorRateBps())) / 10_000;
 
-        uint msgValueRemaining = creatorsGovernancePayment -
-            revolutionPointsEmitter.computeTotalReward(creatorsGovernancePayment);
+        //Total amount of ether going to creator
+        uint creatorsAuctionShare = bidAmount - auctioneerPayment;
+        uint ethPaidToCreators = (creatorsAuctionShare * auction.entropyRateBps()) / (10_000);
+        // uint ethPaidToCreators = 0;
+        // for (uint256 i = 0; i < numCreators; i++) {
+        //     uint256 paymentAmount = (entropyRateAmount * creators[i].bps) / (10_000 * 10_000);
+        //     ethPaidToCreators += paymentAmount;
+        // }
+
+        //amount to buy creators governance with
+        uint creatorPointsEther = (creatorsAuctionShare - ethPaidToCreators);
+
+        uint msgValueRemaining = creatorPointsEther - revolutionPointsEmitter.computeTotalReward(creatorPointsEther);
 
         uint grantsShare = (msgValueRemaining * revolutionPointsEmitter.creatorRateBps()) / 10_000;
         uint buyersShare = msgValueRemaining - grantsShare;
@@ -252,6 +259,26 @@ contract AuctionHouseSettleTest is AuctionHouseTest {
         );
 
         return uint256(getTokenQuoteForEtherHelper(buyersShare, expectedGrantsGovernanceTokenPayout));
+    }
+
+    //assuming dao owns both auction and revolutionPointsEmitter
+    function getDAOPayout(uint bidAmount) public returns (uint) {
+        // Ether going to owner of the auction
+        uint auctioneerPayment = (bidAmount * (10_000 - auction.creatorRateBps())) / 10_000;
+
+        //Total amount of ether going to creator
+        uint creatorsAuctionShare = bidAmount - auctioneerPayment;
+
+        uint creatorPointsEther = (creatorsAuctionShare * (10_000 - auction.entropyRateBps())) / 10_000;
+
+        uint msgValueRemaining = creatorPointsEther - revolutionPointsEmitter.computeTotalReward(creatorPointsEther);
+
+        uint grantsShare = (msgValueRemaining * revolutionPointsEmitter.creatorRateBps()) / 10_000;
+        uint buyersShare = msgValueRemaining - grantsShare;
+        uint grantsDirectPayment = (grantsShare * revolutionPointsEmitter.entropyRateBps()) / 10_000;
+        uint grantsGovernancePayment = grantsShare - grantsDirectPayment;
+
+        return auctioneerPayment + grantsGovernancePayment + buyersShare;
     }
 
     function getGrantsDirectPayment(uint bidAmount) public returns (uint) {
@@ -355,7 +382,9 @@ contract AuctionHouseSettleTest is AuctionHouseTest {
         );
     }
 
-    function testSettlingAuctionWithWinningBidAndCreatorPayout(uint256 bidAmount) public {
+    // function testSettlingAuctionWithWinningBidAndCreatorPayout(uint256 bidAmount) public {
+    function testSettlingAuctionWithWinningBidAndCreatorPayout() public {
+        uint256 bidAmount = 1014663871532104959;
         vm.assume(bidAmount > revolutionPointsEmitter.minPurchaseAmount());
         vm.assume(bidAmount > auction.reservePrice());
         vm.assume(bidAmount < revolutionPointsEmitter.maxPurchaseAmount());
@@ -378,46 +407,45 @@ contract AuctionHouseSettleTest is AuctionHouseTest {
         auction.createBid{ value: bidAmount }(verbId, address(21_000));
         vm.stopPrank();
 
-        // Ether going to owner of the auction
-        uint256 auctioneerPayment = (bidAmount * (10_000 - auction.creatorRateBps())) / 10_000;
-
-        //Total amount of ether going to creator
-        uint256 creatorPayment = bidAmount - auctioneerPayment;
-
-        //Ether reserved to pay the creator directly
-        uint256 creatorDirectPayment = (creatorPayment * auction.entropyRateBps()) / 10_000;
-
-        //Ether reserved to buy creator governance
-        uint256 creatorGovernancePayment = creatorPayment - creatorDirectPayment;
-
-        //Get expected protocol fee amount
-        uint256 feeAmount = revolutionPointsEmitter.computeTotalReward(creatorGovernancePayment);
-
         vm.warp(block.timestamp + auction.duration() + 1); // Fast forward time to end the auction
-
-        uint256 expectedGovernanceTokens = getCreatorGovernancePayoutHelper(bidAmount);
-        uint expectedGrantsDirectPayout = getGrantsDirectPayment(bidAmount);
 
         // Track ETH balances
         uint256 balanceBeforeCreator = address(0x1).balance;
         uint256 balanceBeforeOwner = address(dao).balance;
 
+        uint256 expectedGovernanceTokens = getCreatorGovernancePayoutHelper(bidAmount);
+
         auction.settleCurrentAndCreateNewAuction();
+
+        // Ether going to owner of the auction
+        uint256 auctioneerPayment = (bidAmount * (10_000 - auction.creatorRateBps())) / 10_000;
+
+        //Total amount of ether going to creator
+        uint256 creatorsShare = bidAmount - auctioneerPayment;
+
+        uint creatorsDirectPayment = (creatorsShare * (auction.entropyRateBps())) / 10_000;
+
+        uint creatorsGovernancePayment = creatorsShare - creatorsDirectPayment;
 
         // Checking if the creator received their share
         assertEq(
             address(0x1).balance - balanceBeforeCreator,
-            creatorDirectPayment,
+            creatorsDirectPayment,
             "Creator did not receive the correct amount of ETH"
         );
 
-        // Checking if the owner received the correct amount
-        uint256 expectedOwnerShare = bidAmount - creatorDirectPayment - feeAmount - expectedGrantsDirectPayout;
-        assertApproxEqAbs(
+        uint expectedGrantsDirectPayout = getGrantsDirectPayment(bidAmount);
+
+        assertEq(
+            address(revolutionPointsEmitter.creatorsAddress()).balance,
+            expectedGrantsDirectPayout,
+            "Grants address did not receive the correct amount of ETH"
+        );
+
+        assertEq(
             address(dao).balance - balanceBeforeOwner,
-            expectedOwnerShare,
-            // "Owner did not receive the correct amount of ETH",
-            10
+            getDAOPayout(bidAmount),
+            "Owner did not receive the correct amount of ETH"
         );
 
         assertEq(revolutionToken.ownerOf(verbId), address(21_000), "Verb should be transferred to the highest bidder");

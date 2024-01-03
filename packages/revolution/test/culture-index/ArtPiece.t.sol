@@ -176,26 +176,6 @@ contract CultureIndexArtPieceTest is CultureIndexTestSuite {
     }
 
     /**
-     * @dev Test case to validate art piece creation with an invalid media type
-     */
-    function testInvalidMediaType() public {
-        ICultureIndex.ArtPieceMetadata memory metadata = ICultureIndex.ArtPieceMetadata({
-            name: "Invalid Media Type",
-            description: "Invalid Piece",
-            mediaType: ICultureIndex.MediaType.NONE,
-            image: "",
-            text: "",
-            animationUrl: ""
-        });
-
-        ICultureIndex.CreatorBps[] memory creators = new ICultureIndex.CreatorBps[](1);
-        creators[0] = ICultureIndex.CreatorBps({ creator: address(0x1), bps: 10000 });
-
-        vm.expectRevert(abi.encodeWithSignature("INVALID_MEDIA_TYPE()"));
-        cultureIndex.createPiece(metadata, creators);
-    }
-
-    /**
      * @dev Test case to validate art piece creation with missing media data
      */
     function testMissingMediaDataImage() public {

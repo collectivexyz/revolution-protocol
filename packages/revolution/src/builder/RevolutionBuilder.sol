@@ -238,7 +238,7 @@ contract RevolutionBuilder is
             govParams: _govParams
         });
 
-        emit DAODeployed({
+        emit RevolutionDeployed({
             revolutionToken: daoAddressesByToken[revolutionToken].revolutionToken,
             descriptor: daoAddressesByToken[revolutionToken].descriptor,
             auction: daoAddressesByToken[revolutionToken].auction,

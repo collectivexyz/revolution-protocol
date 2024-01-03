@@ -122,12 +122,10 @@ interface ICultureIndex is ICultureIndexEvents {
 
     // Enum representing different media types for art pieces.
     enum MediaType {
-        NONE,
         IMAGE,
         ANIMATION,
         AUDIO,
-        TEXT,
-        OTHER
+        TEXT
     }
 
     // Struct defining metadata for an art piece.
