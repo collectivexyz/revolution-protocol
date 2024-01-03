@@ -66,12 +66,8 @@ contract CultureIndexVotingSignaturesTest is CultureIndexTestSuite {
         cultureIndex.voteForManyWithSig(address(0), pieceIds, deadline, v, r, s);
     }
 
-    function testVoteForManyWithSig() public {
-        uint256[] memory pieceIds = new uint256[](1);
-        pieceIds[0] = createDefaultArtPiece();
-
-        uint256 nonce = cultureIndex.nonces(offchainVoter);
-        uint256 deadline = block.timestamp + 1 days;
+    function test_VoteForManyWithSig() public {
+        vm.stopPrank();
 
         //mint offchainVoterWeight to offchainVoter
         uint256 offchainVoterWeight = 100;
@@ -81,6 +77,12 @@ contract CultureIndexVotingSignaturesTest is CultureIndexTestSuite {
 
         vm.startPrank(address(this));
         vm.roll(block.number + 1);
+
+        uint256[] memory pieceIds = new uint256[](1);
+        pieceIds[0] = createDefaultArtPiece();
+
+        uint256 nonce = cultureIndex.nonces(offchainVoter);
+        uint256 deadline = block.timestamp + 1 days;
 
         bytes32 voteHash = keccak256(
             abi.encode(
@@ -165,18 +167,19 @@ contract CultureIndexVotingSignaturesTest is CultureIndexTestSuite {
     }
 
     function testRevert_InvalidReplay() public {
-        uint256[] memory pieceIds = new uint256[](1);
-        pieceIds[0] = createDefaultArtPiece();
-
-        uint256 nonce = cultureIndex.nonces(offchainVoter);
-        uint256 deadline = block.timestamp + 1 days;
-
+        vm.stopPrank();
         // mint offchainVoterWeight to offchainVoter
         uint256 offchainVoterWeight = 100;
         vm.startPrank(address(revolutionPointsEmitter));
         revolutionPoints.mint(offchainVoter, offchainVoterWeight);
 
         vm.roll(block.number + 1);
+
+        uint256[] memory pieceIds = new uint256[](1);
+        pieceIds[0] = createDefaultArtPiece();
+
+        uint256 nonce = cultureIndex.nonces(offchainVoter);
+        uint256 deadline = block.timestamp + 1 days;
 
         vm.startPrank(address(offchainVoter));
         bytes32 voteHash = keccak256(
@@ -227,6 +230,13 @@ contract CultureIndexVotingSignaturesTest is CultureIndexTestSuite {
     }
 
     function testRevert_InvalidVotes() public {
+        vm.stopPrank();
+        //mint tokens finally
+        vm.startPrank(address(revolutionPointsEmitter));
+        revolutionPoints.mint(offchainVoter, 100);
+
+        vm.roll(block.number + 1);
+
         uint256[] memory pieceIds = new uint256[](1);
         pieceIds[0] = createDefaultArtPiece();
 
@@ -252,12 +262,6 @@ contract CultureIndexVotingSignaturesTest is CultureIndexTestSuite {
 
         vm.expectRevert(abi.encodeWithSignature("INVALID_PIECE_ID()"));
         cultureIndex.voteForManyWithSig(offchainVoter, invalidPieceIds, deadline, v, r, s);
-
-        //mint tokens finally
-        vm.startPrank(address(revolutionPointsEmitter));
-        revolutionPoints.mint(offchainVoter, 100);
-
-        vm.roll(block.number + 1);
 
         // vote correctly but expect "Weight must be greater than minVoteWeight"
         nonce = cultureIndex.nonces(funVoterGuy);

@@ -324,6 +324,8 @@ contract CultureIndexArtPieceTest is CultureIndexTestSuite {
         vm.startPrank(address(revolutionPointsEmitter));
         revolutionPoints.mint(address(this), pointsSupply);
 
+        vm.roll(block.number + 1);
+
         // Create an art piece
         uint256 pieceId = createDefaultArtPiece();
         CultureIndex.ArtPiece memory piece = cultureIndex.getPieceById(pieceId);

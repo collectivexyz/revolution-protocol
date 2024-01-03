@@ -240,9 +240,8 @@ contract TokenBasicTest is RevolutionTokenTestSuite {
     }
 
     /// @dev Tests that voting on an art piece increments the totalVoteWeights and votes mapping correctly.
-    function testVotingOnArtPiece() public {
+    function test_VotingOnArtPiece() public {
         // Arrange
-        uint256 artPieceId = createDefaultArtPiece();
         address voter = address(0x2);
         uint256 voteWeight = 100;
 
@@ -252,6 +251,8 @@ contract TokenBasicTest is RevolutionTokenTestSuite {
         revolutionPoints.mint(voter, voteWeight);
 
         vm.roll(block.number + 1);
+
+        uint256 artPieceId = createDefaultArtPiece();
 
         uint256 initialTotalVoteWeight = cultureIndex.totalVoteWeights(artPieceId);
 
@@ -287,7 +288,6 @@ contract TokenBasicTest is RevolutionTokenTestSuite {
     /// @dev Tests that a voter cannot vote for a piece more than once.
     function testDoubleVotingRestriction() public {
         // Arrange
-        uint256 artPieceId = createDefaultArtPiece();
         address voter = address(0x4);
         uint256 voteWeight = 50;
 
@@ -296,6 +296,8 @@ contract TokenBasicTest is RevolutionTokenTestSuite {
         vm.startPrank(address(revolutionPointsEmitter));
         revolutionPoints.mint(voter, voteWeight);
         vm.roll(block.number + 1);
+
+        uint256 artPieceId = createDefaultArtPiece();
 
         // First vote
         vm.startPrank(voter);
@@ -334,9 +336,8 @@ contract TokenBasicTest is RevolutionTokenTestSuite {
     }
 
     /// @dev Tests that getTopVotedPiece returns the correct art piece.
-    function testGetTopVotedPiece() public {
+    function test_GetTopVotedPiece() public {
         // Arrange
-        uint256 firstArtPieceId = createDefaultArtPiece();
 
         // Assign vote weights
         uint256 firstPieceVoteWeight = 100;
@@ -351,10 +352,14 @@ contract TokenBasicTest is RevolutionTokenTestSuite {
         // Vote on the first piece
         vm.startPrank(voter);
         vm.roll(block.number + 1);
+
+        uint256 firstArtPieceId = createDefaultArtPiece();
+
         cultureIndex.vote(firstArtPieceId);
 
         vm.startPrank(address(revolutionPointsEmitter));
         revolutionPoints.mint(voter, secondPieceVoteWeight);
+        vm.roll(block.number + 1);
 
         // Vote on the second piece with a higher weight
         uint256 secondArtPieceId = createArtPiece(
@@ -367,7 +372,6 @@ contract TokenBasicTest is RevolutionTokenTestSuite {
             address(0x2),
             10000
         );
-        vm.roll(block.number + 1);
         vm.startPrank(voter);
         cultureIndex.vote(secondArtPieceId);
 
@@ -383,15 +387,17 @@ contract TokenBasicTest is RevolutionTokenTestSuite {
     }
 
     /// @dev Tests that dropTopVotedPiece updates the isDropped flag of the art piece.
-    function testDropTopVotedPiece() public {
+    function test_DropTopVotedPiece() public {
         // Arrange
-        uint256 artPieceId = createDefaultArtPiece();
         // Vote on the piece to make it the top voted
         address voter = address(0x7);
         vm.stopPrank();
         vm.startPrank(address(revolutionPointsEmitter));
         revolutionPoints.mint(voter, 100);
         vm.roll(block.number + 1);
+
+        uint256 artPieceId = createDefaultArtPiece();
+
         vm.startPrank(voter);
         cultureIndex.vote(artPieceId);
         vm.stopPrank();
