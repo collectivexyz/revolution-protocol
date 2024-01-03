@@ -106,7 +106,7 @@ contract Descriptor is IDescriptor, VersionedContract, UUPS, Ownable2StepUpgrade
         bytes memory strBytes = bytes(str);
         uint8 quotesCount = 0;
         uint256 len = strBytes.length;
-        for (uint256 i = 0; i < len; i++) {
+        for (uint256 i = 0; i < len; ) {
             if (strBytes[i] == '"') {
                 quotesCount++;
             } else if (strBytes[i] == "\\") {
@@ -114,11 +114,15 @@ contract Descriptor is IDescriptor, VersionedContract, UUPS, Ownable2StepUpgrade
             } else if (strBytes[i] == "'") {
                 quotesCount++;
             }
+
+            unchecked {
+                ++i;
+            }
         }
         if (quotesCount > 0) {
             bytes memory escapedBytes = new bytes(len + (quotesCount));
             uint256 index;
-            for (uint8 i = 0; i < len; i++) {
+            for (uint8 i = 0; i < len; ) {
                 if (strBytes[i] == '"') {
                     escapedBytes[index++] = "\\";
                 } else if (strBytes[i] == "\\") {
@@ -127,6 +131,10 @@ contract Descriptor is IDescriptor, VersionedContract, UUPS, Ownable2StepUpgrade
                     escapedBytes[index++] = "\\";
                 }
                 escapedBytes[index++] = strBytes[i];
+
+                unchecked {
+                    ++i;
+                }
             }
             return string(escapedBytes);
         }

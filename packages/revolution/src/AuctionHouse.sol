@@ -387,7 +387,7 @@ contract AuctionHouse is
                         entropyRateAmount = creatorsShare * 10_000;
                     }
 
-                    for (uint256 i = 0; i < numCreators; i++) {
+                    for (uint256 i = 0; i < numCreators; ) {
                         vrgdaReceivers[i] = creators[i].creator;
                         vrgdaSplits[i] = creators[i].bps;
 
@@ -397,6 +397,10 @@ contract AuctionHouse is
 
                         //Transfer creator's share to the creator
                         _safeTransferETHWithFallback(creators[i].creator, paymentAmount);
+
+                        unchecked {
+                            ++i;
+                        }
                     }
                 }
 

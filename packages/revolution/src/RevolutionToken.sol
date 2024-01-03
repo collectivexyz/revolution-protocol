@@ -300,8 +300,12 @@ contract RevolutionToken is
             newPiece.quorumVotes = artPiece.quorumVotes;
             newPiece.totalVotesSupply = artPiece.totalVotesSupply;
 
-            for (uint i = 0; i < artPieceCreatorCount; i++) {
+            for (uint i = 0; i < artPieceCreatorCount; ) {
                 newPiece.creators.push(artPiece.creators[i]);
+
+                unchecked {
+                    ++i;
+                }
             }
 
             _mint(to, verbId);

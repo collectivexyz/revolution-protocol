@@ -215,9 +215,13 @@ contract CultureIndex is
         if (creatorArrayLength > MAX_NUM_CREATORS) revert MAX_NUM_CREATORS_EXCEEDED();
 
         uint256 totalBps;
-        for (uint i; i < creatorArrayLength; i++) {
+        for (uint i; i < creatorArrayLength; ) {
             if (creatorArray[i].creator == address(0)) revert ADDRESS_ZERO();
             totalBps += creatorArray[i].bps;
+
+            unchecked {
+                ++i;
+            }
         }
 
         if (totalBps != 10_000) revert INVALID_BPS_SUM();
@@ -262,8 +266,12 @@ contract CultureIndex is
         newPiece.creationBlock = block.number;
         newPiece.quorumVotes = (quorumVotesBPS * newPiece.totalVotesSupply) / 10_000;
 
-        for (uint i; i < creatorArrayLength; i++) {
+        for (uint i; i < creatorArrayLength; ) {
             newPiece.creators.push(creatorArray[i]);
+
+            unchecked {
+                ++i;
+            }
         }
 
         emit PieceCreated(pieceId, msg.sender, metadata, newPiece.quorumVotes, newPiece.totalVotesSupply, creatorArray);
@@ -377,8 +385,12 @@ contract CultureIndex is
      */
     function _voteForMany(uint256[] calldata pieceIds, address from) internal {
         uint256 len = pieceIds.length;
-        for (uint256 i; i < len; i++) {
+        for (uint256 i; i < len; ) {
             _vote(pieceIds[i], from);
+
+            unchecked {
+                ++i;
+            }
         }
     }
 
@@ -423,12 +435,20 @@ contract CultureIndex is
         if (len != pieceIds.length || len != deadline.length || len != v.length || len != r.length || len != s.length)
             revert ARRAY_LENGTH_MISMATCH();
 
-        for (uint256 i; i < len; i++) {
+        for (uint256 i; i < len; ) {
             if (!_verifyVoteSignature(from[i], pieceIds[i], deadline[i], v[i], r[i], s[i])) revert INVALID_SIGNATURE();
+
+            unchecked {
+                ++i;
+            }
         }
 
-        for (uint256 i; i < len; i++) {
+        for (uint256 i; i < len; ) {
             _voteForMany(pieceIds[i], from[i]);
+
+            unchecked {
+                ++i;
+            }
         }
     }
 
