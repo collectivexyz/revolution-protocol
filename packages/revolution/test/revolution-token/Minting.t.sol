@@ -19,17 +19,17 @@ import { RevolutionTokenTestSuite } from "./RevolutionToken.t.sol";
 /// @dev The test suite for the RevolutionToken contract
 contract TokenMintingTest is RevolutionTokenTestSuite {
     /// @dev Ensures the dropped art piece is equivalent to the top-voted piece
-    function testDroppedArtPieceMatchesTopVoted() public {
+    function test_DroppedArtPieceMatchesTopVoted() public {
         vm.stopPrank();
 
         vm.startPrank(address(revolutionPointsEmitter));
         revolutionPoints.mint(address(this), 10);
 
-        // Create a new art piece and simulate it being the top voted piece
-        uint256 pieceId = createDefaultArtPiece();
-
         // ensure vote snapshot is taken
         vm.roll(block.number + 1);
+
+        // Create a new art piece and simulate it being the top voted piece
+        uint256 pieceId = createDefaultArtPiece();
 
         vm.startPrank(address(this));
         cultureIndex.vote(pieceId); // Simulate voting for the piece to make it top-voted
@@ -146,7 +146,7 @@ contract TokenMintingTest is RevolutionTokenTestSuite {
     }
 
     /// @dev Ensures _currentVerbId increments correctly after each mint
-    function testMintingIncrement(uint200 voteWeight) public {
+    function test_MintingIncrement(uint200 voteWeight) public {
         vm.assume(voteWeight < type(uint200).max / 2);
         vm.stopPrank();
         vm.startPrank(address(revolutionPointsEmitter));
@@ -154,11 +154,11 @@ contract TokenMintingTest is RevolutionTokenTestSuite {
 
         revolutionPoints.mint(address(this), voteWeight);
 
-        uint256 pieceId1 = createDefaultArtPiece();
-        uint256 pieceId2 = createDefaultArtPiece();
-
         // ensure vote snapshot is taken
         vm.roll(block.number + 1);
+
+        uint256 pieceId1 = createDefaultArtPiece();
+        uint256 pieceId2 = createDefaultArtPiece();
 
         vm.startPrank(address(this));
         if (voteWeight == 0) vm.expectRevert(abi.encodeWithSignature("WEIGHT_TOO_LOW()"));
@@ -251,15 +251,16 @@ contract TokenMintingTest is RevolutionTokenTestSuite {
     }
 
     /// @dev Ensures minting fetches and associates the top-voted piece from CultureIndex
-    function testTopVotedPieceMinting() public {
-        // Create a new piece and simulate it being the top voted piece
-        uint256 pieceId = createDefaultArtPiece(); // This function should exist within the test contract
-
+    function test_TopVotedPieceMinting() public {
+        vm.stopPrank();
         vm.startPrank(address(revolutionPointsEmitter));
         revolutionPoints.mint(address(this), 10);
 
         // ensure vote snapshot is taken
         vm.roll(block.number + 1);
+
+        // Create a new piece and simulate it being the top voted piece
+        uint256 pieceId = createDefaultArtPiece(); // This function should exist within the test contract
 
         vm.startPrank(address(this));
         cultureIndex.vote(pieceId); // Assuming vote function exists and we cast 10 votes
