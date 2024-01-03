@@ -115,12 +115,6 @@ contract Descriptor is IDescriptor, VersionedContract, UUPS, Ownable2StepUpgrade
                 quotesCount++;
             } else if (strBytes[i] == "'") {
                 quotesCount++;
-            } else if (strBytes[i] == "\n") {
-                quotesCount++;
-            } else if (strBytes[i] == "\r") {
-                quotesCount++;
-            } else if (strBytes[i] == "\x00") {
-                quotesCount++;
             }
         }
         if (quotesCount > 0) {
@@ -132,10 +126,6 @@ contract Descriptor is IDescriptor, VersionedContract, UUPS, Ownable2StepUpgrade
                 } else if (strBytes[i] == "\\") {
                     escapedBytes[index++] = "\\";
                 } else if (strBytes[i] == "'") {
-                    escapedBytes[index++] = "\\";
-                } else if (strBytes[i] == "\n") {
-                    escapedBytes[index++] = "\\";
-                } else if (strBytes[i] == "\r") {
                     escapedBytes[index++] = "\\";
                 }
                 escapedBytes[index++] = strBytes[i];
