@@ -290,7 +290,8 @@ contract CultureIndex is
         if (pieces[pieceId].isDropped) revert ALREADY_DROPPED();
         if (votes[pieceId][voter].voterAddress != address(0)) revert ALREADY_VOTED();
 
-        uint256 weight = _getPastVotes(voter, pieces[pieceId].creationBlock);
+        // Use the previous block number to calculate the vote weight to prevent flash attacks
+        uint256 weight = _getPastVotes(voter, pieces[pieceId].creationBlock - 1);
         if (weight <= minVoteWeight) revert WEIGHT_TOO_LOW();
 
         votes[pieceId][voter] = Vote(voter, weight);
