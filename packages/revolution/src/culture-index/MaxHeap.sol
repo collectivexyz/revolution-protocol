@@ -82,7 +82,7 @@ contract MaxHeap is VersionedContract, UUPS, Ownable2StepUpgradeable, Reentrancy
         __ReentrancyGuard_init();
     }
 
-    /// @notice Struct to represent an item in the heap by it's itemId: key = index in heap (the *size* incremented) | value = itemId
+    /// @notice Mapping to represent an item in the heap by it's itemId: key = index in heap (the *size* incremented) | value = itemId
     mapping(uint256 => uint256) public heap;
 
     /// @notice the number of items in the heap
