@@ -110,8 +110,11 @@ contract JsonInjectionAttackTest is DescriptorTest {
     function _substring(string memory str, uint256 startIndex, uint256 endIndex) internal pure returns (string memory) {
         bytes memory strBytes = bytes(str);
         bytes memory result = new bytes(endIndex - startIndex);
-        for (uint256 i = startIndex; i < endIndex; i++) {
+        for (uint256 i = startIndex; i < endIndex; ) {
             result[i - startIndex] = strBytes[i];
+            unchecked {
+                ++i;
+            }
         }
         return string(result);
     }

@@ -154,6 +154,240 @@ contract CultureIndexArtMetadataTest is CultureIndexTestSuite {
         cultureIndex.createPiece(metadata, creators);
     }
 
+    function test__InvalidImagePrefix() public {
+        (
+            CultureIndex.ArtPieceMetadata memory metadata,
+            ICultureIndex.CreatorBps[] memory creators
+        ) = createArtPieceTuple(
+                "Valid Name",
+                "Valid Description",
+                ICultureIndex.MediaType.IMAGE,
+                "ipfz://",
+                "",
+                "", //invalid animation URL
+                address(0x1),
+                10000
+            );
+        vm.expectRevert(abi.encodeWithSignature("INVALID_MEDIA_METADATA()"));
+        cultureIndex.createPiece(metadata, creators);
+    }
+
+    function test__ValidImagePrefixIpfs() public {
+        (
+            CultureIndex.ArtPieceMetadata memory metadata,
+            ICultureIndex.CreatorBps[] memory creators
+        ) = createArtPieceTuple(
+                "Valid Name",
+                "Valid Description",
+                ICultureIndex.MediaType.IMAGE,
+                "ipfs://",
+                "",
+                "", //invalid animation URL
+                address(0x1),
+                10000
+            );
+
+        cultureIndex.createPiece(metadata, creators);
+    }
+
+    function test__ValidImagePrefixSvg() public {
+        (
+            CultureIndex.ArtPieceMetadata memory metadata,
+            ICultureIndex.CreatorBps[] memory creators
+        ) = createArtPieceTuple(
+                "Valid Name",
+                "Valid Description",
+                ICultureIndex.MediaType.IMAGE,
+                "data:image/svg+xml;base64,",
+                "",
+                "", //invalid animation URL
+                address(0x1),
+                10000
+            );
+
+        cultureIndex.createPiece(metadata, creators);
+    }
+
+    function test__InvalidBothHashesAnimation() public {
+        (
+            CultureIndex.ArtPieceMetadata memory metadata,
+            ICultureIndex.CreatorBps[] memory creators
+        ) = createArtPieceTuple(
+                "Valid Name",
+                "Valid Description",
+                ICultureIndex.MediaType.ANIMATION,
+                "ipfz://bafybeigofz5ao63vehylvbgx5ikcjfualns4xpx5gmibdojeaydq7khviy", //invalid animation URL
+                "",
+                "ipfz://bafybeigofz5ao63vehylvbgx5ikcjfualns4xpx5gmibdojeaydq7khviy", //invalid animation URL
+                address(0x1),
+                10000
+            );
+        vm.expectRevert(abi.encodeWithSignature("INVALID_MEDIA_METADATA()"));
+        cultureIndex.createPiece(metadata, creators);
+    }
+
+    function test__InvalidBothHashesImage() public {
+        (
+            CultureIndex.ArtPieceMetadata memory metadata,
+            ICultureIndex.CreatorBps[] memory creators
+        ) = createArtPieceTuple(
+                "Valid Name",
+                "Valid Description",
+                ICultureIndex.MediaType.IMAGE,
+                "ipfz://bafybeigofz5ao63vehylvbgx5ikcjfualns4xpx5gmibdojeaydq7khviy", //invalid animation URL
+                "",
+                "ipfz://bafybeigofz5ao63vehylvbgx5ikcjfualns4xpx5gmibdojeaydq7khviy", //invalid animation URL
+                address(0x1),
+                10000
+            );
+        vm.expectRevert(abi.encodeWithSignature("INVALID_MEDIA_METADATA()"));
+        cultureIndex.createPiece(metadata, creators);
+    }
+
+    function test__ValidHashesAnimation_SVG() public {
+        (
+            CultureIndex.ArtPieceMetadata memory metadata,
+            ICultureIndex.CreatorBps[] memory creators
+        ) = createArtPieceTuple(
+                "Valid Name",
+                "Valid Description",
+                ICultureIndex.MediaType.ANIMATION,
+                "data:image/svg+xml;base64,", //invalid animation URL
+                "",
+                "ipfs://bafybeigofz5ao63vehylvbgx5ikcjfualns4xpx5gmibdojeaydq7khviy", //invalid animation URL
+                address(0x1),
+                10000
+            );
+
+        cultureIndex.createPiece(metadata, creators);
+    }
+
+    function test__InvalidOneHashImage_1() public {
+        (
+            CultureIndex.ArtPieceMetadata memory metadata,
+            ICultureIndex.CreatorBps[] memory creators
+        ) = createArtPieceTuple(
+                "Valid Name",
+                "Valid Description",
+                ICultureIndex.MediaType.IMAGE,
+                "ipfz://bafybeigofz5ao63vehylvbgx5ikcjfualns4xpx5gmibdojeaydq7khviy", //invalid animation URL
+                "",
+                "ipfs://bafybeigofz5ao63vehylvbgx5ikcjfualns4xpx5gmibdojeaydq7khviy", //invalid animation URL
+                address(0x1),
+                10000
+            );
+        vm.expectRevert(abi.encodeWithSignature("INVALID_MEDIA_METADATA()"));
+        cultureIndex.createPiece(metadata, creators);
+    }
+
+    function test__InvalidOneHashImage_2() public {
+        (
+            CultureIndex.ArtPieceMetadata memory metadata,
+            ICultureIndex.CreatorBps[] memory creators
+        ) = createArtPieceTuple(
+                "Valid Name",
+                "Valid Description",
+                ICultureIndex.MediaType.IMAGE,
+                "ipfs://bafybeigofz5ao63vehylvbgx5ikcjfualns4xpx5gmibdojeaydq7khviy", //invalid animation URL
+                "",
+                "ipfz://bafybeigofz5ao63vehylvbgx5ikcjfualns4xpx5gmibdojeaydq7khviy", //invalid animation URL
+                address(0x1),
+                10000
+            );
+        vm.expectRevert(abi.encodeWithSignature("INVALID_MEDIA_METADATA()"));
+        cultureIndex.createPiece(metadata, creators);
+    }
+
+    function test__InvalidOneHashAnimation_1() public {
+        (
+            CultureIndex.ArtPieceMetadata memory metadata,
+            ICultureIndex.CreatorBps[] memory creators
+        ) = createArtPieceTuple(
+                "Valid Name",
+                "Valid Description",
+                ICultureIndex.MediaType.ANIMATION,
+                "ipfz://bafybeigofz5ao63vehylvbgx5ikcjfualns4xpx5gmibdojeaydq7khviy", //invalid animation URL
+                "",
+                "ipfs://bafybeigofz5ao63vehylvbgx5ikcjfualns4xpx5gmibdojeaydq7khviy", //invalid animation URL
+                address(0x1),
+                10000
+            );
+        vm.expectRevert(abi.encodeWithSignature("INVALID_MEDIA_METADATA()"));
+        cultureIndex.createPiece(metadata, creators);
+    }
+
+    function test__InvalidOneHashAnimation_2() public {
+        (
+            CultureIndex.ArtPieceMetadata memory metadata,
+            ICultureIndex.CreatorBps[] memory creators
+        ) = createArtPieceTuple(
+                "Valid Name",
+                "Valid Description",
+                ICultureIndex.MediaType.ANIMATION,
+                "ipfs://bafybeigofz5ao63vehylvbgx5ikcjfualns4xpx5gmibdojeaydq7khviy", //invalid animation URL
+                "",
+                "ipfz://bafybeigofz5ao63vehylvbgx5ikcjfualns4xpx5gmibdojeaydq7khviy", //invalid animation URL
+                address(0x1),
+                10000
+            );
+        vm.expectRevert(abi.encodeWithSignature("INVALID_MEDIA_METADATA()"));
+        cultureIndex.createPiece(metadata, creators);
+    }
+
+    function test__InvalidImagePrefixFullHash() public {
+        (
+            CultureIndex.ArtPieceMetadata memory metadata,
+            ICultureIndex.CreatorBps[] memory creators
+        ) = createArtPieceTuple(
+                "Valid Name",
+                "Valid Description",
+                ICultureIndex.MediaType.ANIMATION,
+                "ipfz://bafybeigofz5ao63vehylvbgx5ikcjfualns4xpx5gmibdojeaydq7khviy", //invalid animation URL
+                "",
+                "",
+                address(0x1),
+                10000
+            );
+        vm.expectRevert(abi.encodeWithSignature("INVALID_MEDIA_METADATA()"));
+        cultureIndex.createPiece(metadata, creators);
+    }
+
+    function test__InvalidAnimationPrefixFullHash() public {
+        (
+            CultureIndex.ArtPieceMetadata memory metadata,
+            ICultureIndex.CreatorBps[] memory creators
+        ) = createArtPieceTuple(
+                "Valid Name",
+                "Valid Description",
+                ICultureIndex.MediaType.ANIMATION,
+                "",
+                "",
+                "ipfz://bafybeigofz5ao63vehylvbgx5ikcjfualns4xpx5gmibdojeaydq7khviy", //invalid animation URL
+                address(0x1),
+                10000
+            );
+        vm.expectRevert(abi.encodeWithSignature("INVALID_MEDIA_METADATA()"));
+        cultureIndex.createPiece(metadata, creators);
+    }
+
+    function test__InvalidAnimationPrefix() public {
+        (
+            CultureIndex.ArtPieceMetadata memory metadata,
+            ICultureIndex.CreatorBps[] memory creators
+        ) = createArtPieceTuple(
+                "Valid Name",
+                "Valid Description",
+                ICultureIndex.MediaType.ANIMATION,
+                "",
+                "",
+                "ipfz://", //invalid animation URL
+                address(0x1),
+                10000
+            );
+        vm.expectRevert(abi.encodeWithSignature("INVALID_MEDIA_METADATA()"));
+        cultureIndex.createPiece(metadata, creators);
+    }
+
     function test__MissingMediaDataText() public {
         (
             CultureIndex.ArtPieceMetadata memory metadata,

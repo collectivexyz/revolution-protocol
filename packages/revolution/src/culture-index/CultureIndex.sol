@@ -27,6 +27,8 @@ contract CultureIndex is
     EIP712Upgradeable,
     CultureIndexStorageV1
 {
+    using Strings for uint256;
+
     ///                                                          ///
     ///                         IMMUTABLES                       ///
     ///                                                          ///
@@ -117,8 +119,34 @@ contract CultureIndex is
     }
 
     ///                                                          ///
-    ///                         MODIFIERS                        ///
+    ///                         FUNCTIONS                        ///
     ///                                                          ///
+
+    /**
+     *  Returns the substring of a string.
+     * @param str The string to substring.
+     * @param startIndex The starting index of the substring.
+     * @param endIndex The ending index of the substring.
+     *
+     * Requirements:
+     * - The `startIndex` must be less than the `endIndex`.
+     * - The `endIndex` must be less than the length of the string.
+     */
+    function _substring(string memory str, uint256 startIndex, uint256 endIndex) internal pure returns (string memory) {
+        //verify lengths are valid
+        if (startIndex >= endIndex) revert INVALID_MEDIA_METADATA();
+        if (endIndex > bytes(str).length) revert INVALID_MEDIA_METADATA();
+
+        bytes memory strBytes = bytes(str);
+        bytes memory result = new bytes(endIndex - startIndex);
+        for (uint256 i = startIndex; i < endIndex; ) {
+            result[i - startIndex] = strBytes[i];
+            unchecked {
+                ++i;
+            }
+        }
+        return string(result);
+    }
 
     /**
      *  Validates the media type and associated data.
@@ -150,6 +178,22 @@ contract CultureIndex is
 
         // permit reasonable text
         if (bytes(metadata.text).length > MAX_TEXT_LENGTH) revert INVALID_MEDIA_METADATA();
+
+        string memory ipfsPrefix = "ipfs://";
+        string memory svgPrefix = "data:image/svg+xml;base64,";
+
+        // ensure animation url starts with ipfs://
+        if (
+            bytes(metadata.animationUrl).length > 0 &&
+            !Strings.equal(_substring(metadata.animationUrl, 0, 7), (ipfsPrefix))
+        ) revert INVALID_MEDIA_METADATA();
+
+        // ensure image url starts with ipfs:// or data:image/svg+xml;base64,
+        if (
+            bytes(metadata.image).length > 0 &&
+            !Strings.equal(_substring(metadata.image, 0, 7), (ipfsPrefix)) &&
+            !Strings.equal(_substring(metadata.image, 0, 26), (svgPrefix))
+        ) revert INVALID_MEDIA_METADATA();
 
         //ensure name is set
         if (bytes(metadata.name).length == 0 || bytes(metadata.name).length > MAX_NAME_LENGTH)
