@@ -100,7 +100,9 @@ contract Descriptor is IDescriptor, VersionedContract, UUPS, Ownable2StepUpgrade
     }
 
     /**
-     * @notice From Uniswap V3 - used to remove special characters before calling `constructTokenURI`
+     * @notice Altered from Uniswap V3 - used to remove special characters before calling `constructTokenURI`
+     The output is a valid Javascript expression, so can be parsed by Javascript's eval builtin (after being wrapped in parentheses) or by JSON.parse. Specifically, the output will not contain any string literals with embedded JS newlines (U+2028 Paragraph separator or U+2029 Line separator).
+
      */
     function escape(string memory str) internal pure returns (string memory) {
         bytes memory strBytes = bytes(str);
@@ -109,6 +111,16 @@ contract Descriptor is IDescriptor, VersionedContract, UUPS, Ownable2StepUpgrade
         for (uint256 i = 0; i < len; i++) {
             if (strBytes[i] == '"') {
                 quotesCount++;
+            } else if (strBytes[i] == "\\") {
+                quotesCount++;
+            } else if (strBytes[i] == "'") {
+                quotesCount++;
+            } else if (strBytes[i] == "\n") {
+                quotesCount++;
+            } else if (strBytes[i] == "\r") {
+                quotesCount++;
+            } else if (strBytes[i] == "\x00") {
+                quotesCount++;
             }
         }
         if (quotesCount > 0) {
@@ -116,6 +128,14 @@ contract Descriptor is IDescriptor, VersionedContract, UUPS, Ownable2StepUpgrade
             uint256 index;
             for (uint8 i = 0; i < len; i++) {
                 if (strBytes[i] == '"') {
+                    escapedBytes[index++] = "\\";
+                } else if (strBytes[i] == "\\") {
+                    escapedBytes[index++] = "\\";
+                } else if (strBytes[i] == "'") {
+                    escapedBytes[index++] = "\\";
+                } else if (strBytes[i] == "\n") {
+                    escapedBytes[index++] = "\\";
+                } else if (strBytes[i] == "\r") {
                     escapedBytes[index++] = "\\";
                 }
                 escapedBytes[index++] = strBytes[i];
