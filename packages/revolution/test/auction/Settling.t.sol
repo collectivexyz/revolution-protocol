@@ -295,7 +295,7 @@ contract AuctionHouseSettleTest is AuctionHouseTest {
 
     function testSettlingAuctionWithMultipleCreators(uint8 nCreators) public {
         vm.assume(nCreators > 2);
-        vm.assume(nCreators < 100);
+        vm.assume(nCreators < cultureIndex.MAX_NUM_CREATORS());
 
         address[] memory creatorAddresses = new address[](nCreators);
         uint256[] memory creatorBps = new uint256[](nCreators);
@@ -497,6 +497,77 @@ contract AuctionHouseSettleTest is AuctionHouseTest {
         uint256 creatorsShare = bidAmount - auctioneerPayment;
 
         assertEq(address(0x1).balance, creatorsShare);
+    }
+
+    // create an auction with a piece of art with given number of creators and finish it
+    function _createAndFinishAuction() internal {
+        uint nCreators = cultureIndex.MAX_NUM_CREATORS();
+        address[] memory creatorAddresses = new address[](nCreators);
+        uint256[] memory creatorBps = new uint256[](nCreators);
+        uint256 totalBps = 0;
+        address[] memory creators = new address[](nCreators);
+        for (uint i = 0; i < nCreators; i++) {
+            creators[i] = address(uint160(0x1234 + i));
+        }
+
+        for (uint256 i = 0; i < nCreators; i++) {
+            creatorAddresses[i] = address(creators[i]);
+            if (i == nCreators - 1) {
+                creatorBps[i] = 10_000 - totalBps;
+            } else {
+                creatorBps[i] = (10_000) / (nCreators - 1);
+            }
+            totalBps += creatorBps[i];
+        }
+
+        // create the initial art piece
+        uint256 verbId = createArtPieceMultiCreator(
+            "Multi Creator Art",
+            "An art piece with multiple creators",
+            ICultureIndex.MediaType.IMAGE,
+            "ipfs://multi-creator-art",
+            "",
+            "",
+            creatorAddresses,
+            creatorBps
+        );
+
+        vm.startPrank(auction.owner());
+        auction.unpause();
+        vm.stopPrank();
+
+        uint256 bidAmount = auction.reservePrice();
+        vm.deal(address(creators[nCreators - 1]), bidAmount + 1 ether);
+        vm.startPrank(address(creators[nCreators - 1]));
+        auction.createBid{ value: bidAmount }(verbId, address(creators[nCreators - 1]));
+        vm.stopPrank();
+
+        vm.warp(block.timestamp + auction.duration() + 1); // Fast forward time to end the auction
+
+        // create another art piece so that it's possible to create next auction
+        createArtPieceMultiCreator(
+            "Multi Creator Art",
+            "An art piece with multiple creators",
+            ICultureIndex.MediaType.IMAGE,
+            "ipfs://multi-creator-art",
+            "",
+            "",
+            creatorAddresses,
+            creatorBps
+        );
+    }
+
+    function testDOS4() public {
+        vm.startPrank(cultureIndex.owner());
+        cultureIndex._setQuorumVotesBPS(0);
+        vm.stopPrank();
+
+        _createAndFinishAuction();
+
+        assertFalse(auction.paused());
+        // 2 900 000 will be enough to perform the attack
+        auction.settleCurrentAndCreateNewAuction{ gas: 2_900_000 }();
+        assertFalse(auction.paused());
     }
 }
 
