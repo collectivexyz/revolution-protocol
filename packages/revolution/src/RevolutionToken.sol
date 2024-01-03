@@ -271,7 +271,7 @@ contract RevolutionToken is
      * @return The ArtPiece struct associated with the given ID.
      */
     function getArtPieceById(uint256 verbId) public view returns (ICultureIndex.ArtPiece memory) {
-        if (verbId > _currentVerbId) revert INVALID_PIECE_ID();
+        if (verbId >= _currentVerbId) revert INVALID_PIECE_ID();
         return artPieces[verbId];
     }
 
