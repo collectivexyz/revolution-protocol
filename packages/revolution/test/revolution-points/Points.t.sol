@@ -4,6 +4,8 @@ pragma solidity ^0.8.22;
 import { Test } from "forge-std/Test.sol";
 import { RevolutionPoints } from "../../src/RevolutionPoints.sol";
 import { RevolutionBuilderTest } from "../RevolutionBuilder.t.sol";
+import { IRevolutionBuilder } from "../../src/interfaces/IRevolutionBuilder.sol";
+import { Ownable2StepUpgradeable } from "@openzeppelin/contracts-upgradeable/access/Ownable2StepUpgradeable.sol";
 
 contract PointsTestSuite is RevolutionBuilderTest {
     event Log(string, uint);
@@ -158,5 +160,29 @@ contract PointsTestSuite is RevolutionBuilderTest {
         vm.expectRevert();
         revolutionPoints.mint(address(1), excessiveAmount);
         vm.stopPrank();
+    }
+
+    function testOwnershipTransferAndManagerRevert() public {
+        // Attempt to initialize contract by a non-manager account
+        address nonManager = address(0x10);
+        IRevolutionBuilder.PointsParams memory params = IRevolutionBuilder.PointsParams("Test Token", "TST");
+        vm.startPrank(nonManager);
+        vm.expectRevert(abi.encodeWithSignature("InvalidInitialization()"));
+        revolutionPoints.initialize(nonManager, params);
+        vm.stopPrank();
+
+        // Transfer ownership and test minting by new owner
+        address newOwner = address(0x11);
+        vm.startPrank(address(revolutionPointsEmitter));
+        Ownable2StepUpgradeable(address(revolutionPoints)).transferOwnership(newOwner);
+        vm.stopPrank();
+
+        vm.startPrank(newOwner);
+
+        //accept ownership
+        Ownable2StepUpgradeable(address(revolutionPoints)).acceptOwnership();
+        revolutionPoints.mint(address(1), 100 * 1e18);
+        vm.stopPrank();
+        assertEq(revolutionPoints.balanceOf(address(1)), 100 * 1e18, "New owner should be able to mint");
     }
 }
