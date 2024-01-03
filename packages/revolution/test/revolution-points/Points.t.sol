@@ -182,7 +182,11 @@ contract PointsTestSuite is RevolutionBuilderTest {
         //accept ownership
         Ownable2StepUpgradeable(address(revolutionPoints)).acceptOwnership();
         revolutionPoints.mint(address(1), 100 * 1e18);
-        vm.stopPrank();
         assertEq(revolutionPoints.balanceOf(address(1)), 100 * 1e18, "New owner should be able to mint");
+
+        //ensure minting to address(0) is not allowed
+        vm.expectRevert();
+        revolutionPoints.mint(address(0), 100 * 1e18);
+        vm.stopPrank();
     }
 }
