@@ -406,7 +406,11 @@ contract CultureIndex is
 
         bytes32 voteHash;
 
-        voteHash = keccak256(abi.encode(VOTE_TYPEHASH, from, pieceIds, nonces[from]++, deadline));
+        // Derive and return the vote hash as specified by EIP-712.
+
+        voteHash = keccak256(
+            abi.encode(VOTE_TYPEHASH, from, keccak256(abi.encodePacked(pieceIds)), nonces[from]++, deadline)
+        );
 
         bytes32 digest = _hashTypedDataV4(voteHash);
 
