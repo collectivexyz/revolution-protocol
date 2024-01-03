@@ -462,6 +462,42 @@ contract AuctionHouseSettleTest is AuctionHouseTest {
             "Creator did not receive the correct amount of governance tokens"
         );
     }
+
+    function test_EntropyPecentCannotLeadToDos() public {
+        //set entropy to 9999
+        auction.setEntropyRateBps(9999);
+        //set reserve price to 0.005 ether
+        uint bidAmount = 0.005 ether;
+        auction.setReservePrice(bidAmount);
+
+        uint256 verbId = createDefaultArtPiece();
+
+        uint256 balance = 1 ether;
+        address alice = vm.addr(uint256(1001));
+        vm.deal(alice, balance);
+
+        auction.unpause();
+        vm.stopPrank();
+
+        vm.prank(alice);
+        auction.createBid{ value: bidAmount }(verbId, alice);
+
+        (, , , uint256 endTime, , ) = auction.auction();
+        vm.warp(endTime + 1);
+
+        auction.settleCurrentAndCreateNewAuction();
+
+        //ensure creator got no governance, but got ETH
+        assertEq(revolutionPoints.balanceOf(address(0x1)), 0);
+
+        // Ether going to owner of the auction
+        uint256 auctioneerPayment = (bidAmount * (10_000 - auction.creatorRateBps())) / 10_000;
+
+        //Total amount of ether going to creator
+        uint256 creatorsShare = bidAmount - auctioneerPayment;
+
+        assertEq(address(0x1).balance, creatorsShare);
+    }
 }
 
 contract ContractWithoutReceiveOrFallback {
