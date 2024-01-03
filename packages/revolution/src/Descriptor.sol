@@ -101,8 +101,6 @@ contract Descriptor is IDescriptor, VersionedContract, UUPS, Ownable2StepUpgrade
 
     /**
      * @notice Altered from Uniswap V3 - used to remove special characters before calling `constructTokenURI`
-     The output is a valid Javascript expression, so can be parsed by Javascript's eval builtin (after being wrapped in parentheses) or by JSON.parse. Specifically, the output will not contain any string literals with embedded JS newlines (U+2028 Paragraph separator or U+2029 Line separator).
-
      */
     function escape(string memory str) internal pure returns (string memory) {
         bytes memory strBytes = bytes(str);
