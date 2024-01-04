@@ -314,7 +314,6 @@ contract RevolutionToken is
 
             return verbId;
         } catch {
-            // Handle failure (e.g., revert, emit an event, set a flag, etc.)
             revert("dropTopVotedPiece failed");
         }
     }

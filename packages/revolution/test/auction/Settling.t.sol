@@ -294,7 +294,7 @@ contract AuctionHouseSettleTest is AuctionHouseTest {
     }
 
     function testSettlingAuctionWithMultipleCreators(uint8 nCreators) public {
-        vm.assume(nCreators > 2);
+        vm.assume(nCreators > 0);
         vm.assume(nCreators < cultureIndex.MAX_NUM_CREATORS());
 
         address[] memory creatorAddresses = new address[](nCreators);
@@ -557,7 +557,9 @@ contract AuctionHouseSettleTest is AuctionHouseTest {
         );
     }
 
-    function testDOS4() public {
+    //attempt to trigger an auction paused error with differing gas amounts
+    function test_DOS(uint gasUsed) public {
+        vm.assume(gasUsed > 900_000);
         vm.startPrank(cultureIndex.owner());
         cultureIndex._setQuorumVotesBPS(0);
         vm.stopPrank();
@@ -565,8 +567,12 @@ contract AuctionHouseSettleTest is AuctionHouseTest {
         _createAndFinishAuction();
 
         assertFalse(auction.paused());
-        // 2 900 000 will be enough to perform the attack
-        auction.settleCurrentAndCreateNewAuction{ gas: 2_900_000 }();
+
+        try auction.settleCurrentAndCreateNewAuction{ gas: gasUsed }() {
+            // if the auction is paused, this will fail
+            assertFalse(auction.paused());
+        } catch {}
+
         assertFalse(auction.paused());
     }
 }
