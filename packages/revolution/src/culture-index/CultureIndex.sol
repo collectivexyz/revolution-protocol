@@ -249,21 +249,26 @@ contract CultureIndex is
         /// @dev Insert the new piece into the max heap with 0 vote weight
         maxHeap.insert(pieceId, 0);
 
+        // Pull necessary data
+        uint256 totalPointsSupply = revolutionPoints.totalSupply();
+        uint256 totalVotesSupply = _calculateVoteWeight(totalPointsSupply, revolutionToken.totalSupply());
+
+        // Save art piece to storage mapping
         ArtPiece storage newPiece = pieces[pieceId];
 
         newPiece.pieceId = pieceId;
-        newPiece.totalVotesSupply = _calculateVoteWeight(revolutionPoints.totalSupply(), revolutionToken.totalSupply());
-        newPiece.totalPointsSupply = revolutionPoints.totalSupply();
+        newPiece.totalVotesSupply = totalVotesSupply;
+        newPiece.totalPointsSupply = totalPointsSupply;
         newPiece.metadata = metadata;
         newPiece.sponsor = msg.sender;
         newPiece.creationBlock = block.number;
-        newPiece.quorumVotes = (quorumVotesBPS * newPiece.totalVotesSupply) / 10_000;
+        newPiece.quorumVotes = (quorumVotesBPS * totalVotesSupply) / 10_000;
 
         for (uint i; i < creatorArrayLength; i++) {
             newPiece.creators.push(creatorArray[i]);
         }
 
-        emit PieceCreated(pieceId, msg.sender, metadata, newPiece.quorumVotes, newPiece.totalVotesSupply, creatorArray);
+        emit PieceCreated(pieceId, msg.sender, metadata, newPiece.quorumVotes, totalVotesSupply, creatorArray);
 
         return newPiece.pieceId;
     }

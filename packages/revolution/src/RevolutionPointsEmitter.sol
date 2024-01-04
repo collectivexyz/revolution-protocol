@@ -224,7 +224,7 @@ contract RevolutionPointsEmitter is
         }
 
         // Mint tokens to creators
-        if (totalTokensForCreators > 0 && creatorsAddress != address(0)) {
+        if (totalTokensForCreators > 0) {
             _mint(creatorsAddress, uint256(totalTokensForCreators));
         }
 
