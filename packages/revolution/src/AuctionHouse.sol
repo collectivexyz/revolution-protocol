@@ -85,7 +85,7 @@ contract AuctionHouse is
     IRevolutionBuilder public immutable manager;
 
     // The minimum gasleft() threshold for creating an auction (required to mint a RevolutionToken)
-    uint32 public constant MIN_TOKEN_MINT_GAS_THRESHOLD = 250_000;
+    uint32 public constant MIN_TOKEN_MINT_GAS_THRESHOLD = 400_000;
 
     ///                                                          ///
     ///                         CONSTRUCTOR                      ///
