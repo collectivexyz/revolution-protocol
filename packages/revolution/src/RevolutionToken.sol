@@ -62,8 +62,8 @@ contract RevolutionToken is
     // IPFS content hash of contract-level metadata
     string private _contractURIHash;
 
-    // The Verb art pieces
-    mapping(uint256 => ICultureIndex.ArtPiece) public artPieces;
+    // The CultureIndex art pieces mapping (verbId => artPiece ID)
+    mapping(uint256 => uint256) public artPieces;
 
     ///                                                          ///
     ///                          MODIFIERS                       ///
@@ -191,7 +191,7 @@ contract RevolutionToken is
      * @dev See {IERC721Metadata-tokenURI}.
      */
     function tokenURI(uint256 tokenId) public view override returns (string memory) {
-        return descriptor.tokenURI(tokenId, artPieces[tokenId].metadata);
+        return descriptor.tokenURI(tokenId, cultureIndex.getPieceById(artPieces[tokenId]).metadata);
     }
 
     /**
@@ -199,7 +199,7 @@ contract RevolutionToken is
      * with the JSON contents directly inlined.
      */
     function dataURI(uint256 tokenId) public view override returns (string memory) {
-        return descriptor.dataURI(tokenId, artPieces[tokenId].metadata);
+        return descriptor.dataURI(tokenId, cultureIndex.getPieceById(artPieces[tokenId]).metadata);
     }
 
     /**
@@ -270,43 +270,28 @@ contract RevolutionToken is
      * @param verbId The ID of the art piece.
      * @return The ArtPiece struct associated with the given ID.
      */
-    function getArtPieceById(uint256 verbId) public view returns (ICultureIndex.ArtPiece memory) {
+    function getArtPieceById(uint256 verbId) external view returns (ICultureIndex.ArtPiece memory) {
         if (verbId >= _currentVerbId) revert INVALID_PIECE_ID();
-        return artPieces[verbId];
+        return cultureIndex.getPieceById(artPieces[verbId]);
     }
+
+    event LogValue(string key, uint256 value);
 
     /**
      * @notice Mint a Verb with `verbId` to the provided `to` address. Pulls the top voted art piece from the CultureIndex.
      */
     function _mintTo(address to) internal returns (uint256) {
-        ICultureIndex.ArtPiece memory artPiece = cultureIndex.getTopVotedPiece();
-        uint256 artPieceCreatorCount = artPiece.creators.length;
-
-        // Perform all checks
-        if (artPieceCreatorCount > cultureIndex.MAX_NUM_CREATORS()) revert TOO_MANY_CREATORS();
-
+        emit LogValue("1()", gasleft());
         // Use try/catch to handle potential failure
-        try cultureIndex.dropTopVotedPiece() returns (ICultureIndex.ArtPiece memory _artPiece) {
-            artPiece = _artPiece;
+        try cultureIndex.dropTopVotedPiece() returns (ICultureIndex.ArtPieceCondensed memory artPiece) {
+            emit LogValue("2()", gasleft());
+
             uint256 verbId = _currentVerbId++;
+            emit LogValue("3()", gasleft());
 
-            ICultureIndex.ArtPiece storage newPiece = artPieces[verbId];
+            artPieces[verbId] = artPiece.pieceId;
 
-            newPiece.pieceId = artPiece.pieceId;
-            newPiece.metadata = artPiece.metadata;
-            newPiece.isDropped = artPiece.isDropped;
-            newPiece.sponsor = artPiece.sponsor;
-            newPiece.totalPointsSupply = artPiece.totalPointsSupply;
-            newPiece.quorumVotes = artPiece.quorumVotes;
-            newPiece.totalVotesSupply = artPiece.totalVotesSupply;
-
-            for (uint i = 0; i < artPieceCreatorCount; ) {
-                newPiece.creators.push(artPiece.creators[i]);
-
-                unchecked {
-                    ++i;
-                }
-            }
+            emit LogValue("4()", gasleft());
 
             _mint(to, verbId);
 

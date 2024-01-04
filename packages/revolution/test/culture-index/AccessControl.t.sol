@@ -94,7 +94,7 @@ contract CultureIndexAccessControlTest is CultureIndexTestSuite {
 
         // Attempt to drop the top-voted piece, should succeed
         vm.startPrank(address(revolutionToken));
-        ICultureIndex.ArtPiece memory droppedPiece = cultureIndex.dropTopVotedPiece();
-        assertTrue(droppedPiece.isDropped, "Top voted piece should be dropped");
+        ICultureIndex.ArtPieceCondensed memory droppedPiece = cultureIndex.dropTopVotedPiece();
+        assertTrue(cultureIndex.getPieceById(droppedPiece.pieceId).isDropped, "Top voted piece should be dropped");
     }
 }

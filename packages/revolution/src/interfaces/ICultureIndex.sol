@@ -168,6 +168,18 @@ interface ICultureIndex is ICultureIndexEvents {
         uint256 totalVotesSupply;
     }
 
+    /**
+     * @dev Struct defining an art piece for use in a token
+     *@param pieceId Unique identifier for the piece.
+     * @param creators Creators of the art piece.
+     * @param sponsor Address that created the piece.
+     */
+    struct ArtPieceCondensed {
+        uint256 pieceId;
+        CreatorBps[] creators;
+        address sponsor;
+    }
+
     // Constant for max number of creators
     function MAX_NUM_CREATORS() external view returns (uint256);
 
@@ -279,7 +291,7 @@ interface ICultureIndex is ICultureIndexEvents {
      * @dev This function also updates internal state to reflect the piece's dropped status.
      * @return The ArtPiece struct of the top voted piece that was just dropped.
      */
-    function dropTopVotedPiece() external returns (ArtPiece memory);
+    function dropTopVotedPiece() external returns (ArtPieceCondensed memory);
 
     function getVotes(address account) external view returns (uint256);
 

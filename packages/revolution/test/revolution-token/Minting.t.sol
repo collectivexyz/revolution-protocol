@@ -94,7 +94,7 @@ contract TokenMintingTest is RevolutionTokenTestSuite {
         vm.startPrank(address(auction));
 
         // Try to remove max and expect to fail
-        vm.expectRevert(abi.encodeWithSignature("CULTURE_INDEX_EMPTY()"));
+        vm.expectRevert("dropTopVotedPiece failed");
         revolutionToken.mint();
     }
 
@@ -196,16 +196,10 @@ contract TokenMintingTest is RevolutionTokenTestSuite {
         ICultureIndex.CreatorBps[] memory creators = new ICultureIndex.CreatorBps[](1);
         creators[0] = ICultureIndex.CreatorBps({ creator: address(0x1), bps: 10000 });
 
-        ICultureIndex.ArtPiece memory expectedArtPiece = ICultureIndex.ArtPiece({
+        ICultureIndex.ArtPieceCondensed memory expectedArtPiece = ICultureIndex.ArtPieceCondensed({
             pieceId: 0,
-            metadata: metadata,
             creators: creators,
-            sponsor: address(dao),
-            isDropped: true,
-            creationBlock: block.number,
-            quorumVotes: 0,
-            totalPointsSupply: 0,
-            totalVotesSupply: 0
+            sponsor: address(dao)
         });
 
         vm.stopPrank();
@@ -270,7 +264,7 @@ contract TokenMintingTest is RevolutionTokenTestSuite {
         uint256 tokenId = revolutionToken.mint();
 
         // Validate the token is associated with the top voted piece
-        (uint256 mintedPieceId, , , , , , , ) = revolutionToken.artPieces(tokenId);
+        uint256 mintedPieceId = revolutionToken.artPieces(tokenId);
         assertEq(mintedPieceId, pieceId, "Minted token should be associated with the top voted piece");
     }
 }

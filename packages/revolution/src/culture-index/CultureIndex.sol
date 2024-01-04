@@ -43,8 +43,8 @@ contract CultureIndex is
     uint256 public constant MAX_NAME_LENGTH = 100;
     uint256 public constant MAX_DESCRIPTION_LENGTH = 1000;
     uint256 public constant MAX_IMAGE_LENGTH = 21_000;
-    uint256 public constant MAX_ANIMATION_URL_LENGTH = 21_000;
-    uint256 public constant MAX_TEXT_LENGTH = 42_000;
+    uint256 public constant MAX_ANIMATION_URL_LENGTH = 1000;
+    uint256 public constant MAX_TEXT_LENGTH = 21_000;
 
     // The weight of the 721 voting token
     uint256 public revolutionTokenVoteWeight;
@@ -139,11 +139,8 @@ contract CultureIndex is
 
         bytes memory strBytes = bytes(str);
         bytes memory result = new bytes(endIndex - startIndex);
-        for (uint256 i = startIndex; i < endIndex; ) {
+        for (uint256 i = startIndex; i < endIndex; i++) {
             result[i - startIndex] = strBytes[i];
-            unchecked {
-                ++i;
-            }
         }
         return string(result);
     }
@@ -195,6 +192,10 @@ contract CultureIndex is
             !Strings.equal(_substring(metadata.image, 0, 26), (svgPrefix))
         ) revert INVALID_MEDIA_METADATA();
 
+        //ensure text starts with ipfs://
+        if (bytes(metadata.text).length > 0 && !Strings.equal(_substring(metadata.text, 0, 7), (ipfsPrefix)))
+            revert INVALID_MEDIA_METADATA();
+
         //ensure name is set
         if (bytes(metadata.name).length == 0 || bytes(metadata.name).length > MAX_NAME_LENGTH)
             revert INVALID_MEDIA_METADATA();
@@ -215,13 +216,9 @@ contract CultureIndex is
         if (creatorArrayLength > MAX_NUM_CREATORS) revert MAX_NUM_CREATORS_EXCEEDED();
 
         uint256 totalBps;
-        for (uint i; i < creatorArrayLength; ) {
+        for (uint i; i < creatorArrayLength; i++) {
             if (creatorArray[i].creator == address(0)) revert ADDRESS_ZERO();
             totalBps += creatorArray[i].bps;
-
-            unchecked {
-                ++i;
-            }
         }
 
         if (totalBps != 10_000) revert INVALID_BPS_SUM();
@@ -266,12 +263,8 @@ contract CultureIndex is
         newPiece.creationBlock = block.number;
         newPiece.quorumVotes = (quorumVotesBPS * newPiece.totalVotesSupply) / 10_000;
 
-        for (uint i; i < creatorArrayLength; ) {
+        for (uint i; i < creatorArrayLength; i++) {
             newPiece.creators.push(creatorArray[i]);
-
-            unchecked {
-                ++i;
-            }
         }
 
         emit PieceCreated(pieceId, msg.sender, metadata, newPiece.quorumVotes, newPiece.totalVotesSupply, creatorArray);
@@ -385,12 +378,8 @@ contract CultureIndex is
      */
     function _voteForMany(uint256[] calldata pieceIds, address from) internal {
         uint256 len = pieceIds.length;
-        for (uint256 i; i < len; ) {
+        for (uint256 i; i < len; i++) {
             _vote(pieceIds[i], from);
-
-            unchecked {
-                ++i;
-            }
         }
     }
 
@@ -435,20 +424,12 @@ contract CultureIndex is
         if (len != pieceIds.length || len != deadline.length || len != v.length || len != r.length || len != s.length)
             revert ARRAY_LENGTH_MISMATCH();
 
-        for (uint256 i; i < len; ) {
+        for (uint256 i; i < len; i++) {
             if (!_verifyVoteSignature(from[i], pieceIds[i], deadline[i], v[i], r[i], s[i])) revert INVALID_SIGNATURE();
-
-            unchecked {
-                ++i;
-            }
         }
 
-        for (uint256 i; i < len; ) {
+        for (uint256 i; i < len; i++) {
             _voteForMany(pieceIds[i], from[i]);
-
-            unchecked {
-                ++i;
-            }
         }
     }
 
@@ -559,25 +540,44 @@ contract CultureIndex is
             10_000;
     }
 
+    event LogValue(string key, uint256 value);
+
     /**
      * @notice Pulls and drops the top-voted piece.
      * @return The top voted piece
      */
-    function dropTopVotedPiece() public nonReentrant returns (ArtPiece memory) {
-        if (msg.sender != dropperAdmin) revert NOT_DROPPER_ADMIN();
+    function dropTopVotedPiece() public nonReentrant returns (ArtPieceCondensed memory) {
+        emit LogValue("c1()", gasleft());
 
-        ICultureIndex.ArtPiece memory piece = getTopVotedPiece();
-        if (totalVoteWeights[piece.pieceId] < piece.quorumVotes) revert DOES_NOT_MEET_QUORUM();
+        if (msg.sender != dropperAdmin) revert NOT_DROPPER_ADMIN();
+        emit LogValue("c2()", gasleft());
+
+        uint256 pieceId = topVotedPieceId();
+        emit LogValue("c3()", gasleft());
+
+        if (totalVoteWeights[pieceId] < pieces[pieceId].quorumVotes) revert DOES_NOT_MEET_QUORUM();
+
+        emit LogValue("c4()", gasleft());
 
         //set the piece as dropped
-        pieces[piece.pieceId].isDropped = true;
+        pieces[pieceId].isDropped = true;
+
+        emit LogValue("c5()", gasleft());
 
         //slither-disable-next-line unused-return
         maxHeap.extractMax();
+        emit LogValue("c6()", gasleft());
 
-        emit PieceDropped(piece.pieceId, msg.sender);
+        emit PieceDropped(pieceId, msg.sender);
 
-        return pieces[piece.pieceId];
+        emit LogValue("c7()", gasleft());
+
+        return
+            ICultureIndex.ArtPieceCondensed({
+                pieceId: pieceId,
+                creators: pieces[pieceId].creators,
+                sponsor: pieces[pieceId].sponsor
+            });
     }
 
     ///                                                          ///

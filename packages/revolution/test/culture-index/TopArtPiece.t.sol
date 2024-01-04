@@ -95,7 +95,7 @@ contract CultureIndexArtPieceTest is CultureIndexTestSuite {
         voter1Test.voteForPiece(firstPieceId);
         vm.startPrank(address(revolutionToken));
 
-        ICultureIndex.ArtPiece memory poppedPiece = cultureIndex.dropTopVotedPiece();
+        ICultureIndex.ArtPieceCondensed memory poppedPiece = cultureIndex.dropTopVotedPiece();
         assertEq(poppedPiece.pieceId, firstPieceId, "Popped piece should be the first piece");
     }
 
@@ -114,7 +114,7 @@ contract CultureIndexArtPieceTest is CultureIndexTestSuite {
 
         vm.startPrank(address(revolutionToken));
 
-        ICultureIndex.ArtPiece memory poppedPiece = cultureIndex.dropTopVotedPiece();
+        ICultureIndex.ArtPieceCondensed memory poppedPiece = cultureIndex.dropTopVotedPiece();
         //assert its the second piece
         assertEq(poppedPiece.pieceId, secondPieceId, "Popped piece should be the second piece");
 
@@ -279,13 +279,13 @@ contract CultureIndexArtPieceTest is CultureIndexTestSuite {
 
         // Drop the top voted piece
         vm.startPrank(address(revolutionToken));
-        ICultureIndex.ArtPiece memory artPiece2 = cultureIndex.dropTopVotedPiece();
+        ICultureIndex.ArtPieceCondensed memory artPiece2 = cultureIndex.dropTopVotedPiece();
 
         // Verify that the dropped piece is correctly indexed
         assertEq(artPiece2.pieceId, pieceId2, "First dropped piece should be pieceId2");
 
         // Drop another top voted piece
-        ICultureIndex.ArtPiece memory artPiece1 = cultureIndex.dropTopVotedPiece();
+        ICultureIndex.ArtPieceCondensed memory artPiece1 = cultureIndex.dropTopVotedPiece();
 
         // Verify again
         assertEq(artPiece1.pieceId, pieceId1, "Second dropped piece should be pieceId1");

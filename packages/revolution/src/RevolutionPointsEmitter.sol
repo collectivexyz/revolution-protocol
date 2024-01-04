@@ -238,16 +238,12 @@ contract RevolutionPointsEmitter is
             : int(0);
 
         //Mint tokens to buyers
-        for (uint256 i = 0; i < addressesLength; ) {
+        for (uint256 i = 0; i < addressesLength; i++) {
             if (totalTokensForBuyers > 0) {
                 // transfer tokens to address
                 _mint(addresses[i], uint256((totalTokensForBuyers * int(basisPointSplits[i])) / 10_000));
             }
             bpsSum = bpsSum + basisPointSplits[i];
-
-            unchecked {
-                ++i;
-            }
         }
 
         if (bpsSum != 10_000) revert INVALID_BPS_SUM();

@@ -84,8 +84,8 @@ contract AuctionHouse is
     /// @notice The contract upgrade manager
     IRevolutionBuilder public immutable manager;
 
-    // TODO investigate this - The minimum gas threshold for creating an auction (minting RevolutionToken)
-    uint32 public constant MIN_TOKEN_MINT_GAS_THRESHOLD = 1_000_000;
+    // The minimum gasLeft() threshold for creating an auction (minting RevolutionToken)
+    uint32 public constant MIN_TOKEN_MINT_GAS_THRESHOLD = 100_000;
 
     ///                                                          ///
     ///                         CONSTRUCTOR                      ///
@@ -387,7 +387,7 @@ contract AuctionHouse is
                         entropyRateAmount = creatorsShare * 10_000;
                     }
 
-                    for (uint256 i = 0; i < numCreators; ) {
+                    for (uint256 i = 0; i < numCreators; i++) {
                         vrgdaReceivers[i] = creators[i].creator;
                         vrgdaSplits[i] = creators[i].bps;
 
@@ -397,10 +397,6 @@ contract AuctionHouse is
 
                         //Transfer creator's share to the creator
                         _safeTransferETHWithFallback(creators[i].creator, paymentAmount);
-
-                        unchecked {
-                            ++i;
-                        }
                     }
                 }
 
