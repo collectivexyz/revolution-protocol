@@ -41,9 +41,9 @@ contract CultureIndex is
 
     // Constant for art piece metadata
     uint256 public constant MAX_NAME_LENGTH = 100;
-    uint256 public constant MAX_DESCRIPTION_LENGTH = 1000;
+    uint256 public constant MAX_DESCRIPTION_LENGTH = 2100;
     uint256 public constant MAX_IMAGE_LENGTH = 21_000;
-    uint256 public constant MAX_ANIMATION_URL_LENGTH = 1000;
+    uint256 public constant MAX_ANIMATION_URL_LENGTH = 100;
     uint256 public constant MAX_TEXT_LENGTH = 67_112;
 
     // The weight of the 721 voting token
