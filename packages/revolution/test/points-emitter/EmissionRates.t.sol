@@ -289,4 +289,47 @@ contract EmissionRatesTest is PointsEmitterTest {
             "Recipient0 should have correct balance"
         );
     }
+
+    function test_BuyingFunctionBreaksAfterAPeriodOfTime(
+        uint256 creatorRate,
+        uint256 entropyRate,
+        uint256 randomTime
+    ) public {
+        randomTime = bound(randomTime, 300 days, 700 days);
+        uint256 currentTime = 1702801400;
+
+        // warp to a more realistic time
+        vm.warp(block.timestamp + currentTime);
+
+        // Assume valid rates
+        vm.assume(creatorRate <= 10000 && entropyRate <= 10000);
+
+        vm.startPrank(address(dao));
+        // Set creator and entropy rates
+        revolutionPointsEmitter.setCreatorRateBps(creatorRate);
+        revolutionPointsEmitter.setEntropyRateBps(entropyRate);
+        assertEq(revolutionPointsEmitter.creatorRateBps(), creatorRate, "Creator rate not set correctly");
+        assertEq(revolutionPointsEmitter.entropyRateBps(), entropyRate, "Entropy rate not set correctly");
+
+        // Setup for buying token
+        address[] memory recipients = new address[](1);
+        recipients[0] = address(1); // recipient address
+
+        uint256[] memory bps = new uint256[](1);
+        bps[0] = 10000; // 100% of the tokens to the recipient
+
+        uint256 valueToSend = 1 ether;
+
+        // Perform token purchase
+        vm.startPrank(address(this));
+        uint256 tokensSold = revolutionPointsEmitter.buyToken{ value: valueToSend }(
+            recipients,
+            bps,
+            IRevolutionPointsEmitter.ProtocolRewardAddresses({
+                builder: address(0),
+                purchaseReferral: address(0),
+                deployer: address(0)
+            })
+        );
+    }
 }
