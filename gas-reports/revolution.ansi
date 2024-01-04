@@ -1,5 +1,5 @@
 Compiling 162 files with 0.8.22
-Solc 0.8.22 finished in 656.22s
+Solc 0.8.22 finished in 660.51s
 Compiler run [33msuccessful with warnings:[0m
 [1;33mWarning (5740)[0m[1;37m: Unreachable code.[0m
    [34m-->[0m src/base/erc20/ERC20Upgradeable.sol:131:9:
@@ -182,27 +182,9 @@ Compiler run [33msuccessful with warnings:[0m
 [34m    |[0m     [1;33m^ (Relevant source part starts here and spans across multiple lines).[0m
 
 
-Running 2 tests for test/culture-index/MultiVoting.t.sol:CultureIndexVotingTestManager
-[32m[PASS][0m testVoteOnMultiplePieces() (gas: 1105721)
-[32m[PASS][0m testVotingWithDifferentWeights() (gas: 794468)
-Test result: [32mok[0m. [32m2[0m passed; [31m0[0m failed; [33m0[0m skipped; finished in 5.66ms
-
-Running 10 tests for test/revolution-token/Security.t.sol:TokenSecurityTest
-[32m[PASS][0m testApprovalChecks() (gas: 885644)
-[32m[PASS][0m testBasisPointsSum() (gas: 16745)
-[32m[PASS][0m testCreatorArrayLimit() (gas: 87530)
-[32m[PASS][0m testEventEmission() (gas: 333832)
-[31m[FAIL. Reason: assertion failed][0m testFunctionalityUnderMaximumLoad() (gas: 104502)
-[32m[PASS][0m testMintToDropTopVotedPieceFailure() (gas: 437628)
-[32m[PASS][0m testPrivilegeEscalation() (gas: 61010)
-[32m[PASS][0m testReentrancyOnMint() (gas: 458153)
-[32m[PASS][0m testReentrancyOtherFunctions() (gas: 458175)
-[32m[PASS][0m testZeroAddressInCreatorArray() (gas: 15354)
-Test result: [31mFAILED[0m. [32m9[0m passed; [31m1[0m failed; [33m0[0m skipped; finished in 7.20ms
-
 Running 1 test for test/descriptor/JsonInjection.t.sol:JsonInjectionAttackTest
 [32m[PASS][0m testTokenURIWithMixedMediaMetadata() (gas: 348041)
-Test result: [32mok[0m. [32m1[0m passed; [31m0[0m failed; [33m0[0m skipped; finished in 5.31ms
+Test result: [32mok[0m. [32m1[0m passed; [31m0[0m failed; [33m0[0m skipped; finished in 5.63ms
 
 Running 14 tests for test/revolution-token/AccessControl.t.sol:TokenAccessControlTest
 [32m[PASS][0m testBurningPermission() (gas: 706721)
@@ -219,17 +201,31 @@ Running 14 tests for test/revolution-token/AccessControl.t.sol:TokenAccessContro
 [32m[PASS][0m testRevertOnNonOwnerSettingContractURI() (gas: 18243)
 [32m[PASS][0m testSetContractURIByOwner() (gas: 23827)
 [32m[PASS][0m testSetMinter() (gas: 29888)
-Test result: [32mok[0m. [32m14[0m passed; [31m0[0m failed; [33m0[0m skipped; finished in 5.79ms
+Test result: [32mok[0m. [32m14[0m passed; [31m0[0m failed; [33m0[0m skipped; finished in 6.28ms
 
-Running 7 tests for test/culture-index/SignatureVoting.t.sol:CultureIndexVotingSignaturesTest
-[32m[PASS][0m testRevert_InvalidNonce() (gas: 374972)
-[32m[PASS][0m testRevert_InvalidReplay() (gas: 695860)
-[32m[PASS][0m testRevert_InvalidSigner() (gas: 375156)
-[32m[PASS][0m testRevert_InvalidVoteForManyWithSigToAddress() (gas: 377529)
-[32m[PASS][0m testRevert_InvalidVotes() (gas: 854682)
-[32m[PASS][0m testRevert_SigExpired() (gas: 346463)
-[32m[PASS][0m test_VoteForManyWithSig() (gas: 695609)
-Test result: [32mok[0m. [32m7[0m passed; [31m0[0m failed; [33m0[0m skipped; finished in 18.49ms
+Running 2 tests for test/culture-index/MultiVoting.t.sol:CultureIndexVotingTestManager
+[32m[PASS][0m testVoteOnMultiplePieces() (gas: 1105721)
+[32m[PASS][0m testVotingWithDifferentWeights() (gas: 794468)
+Test result: [32mok[0m. [32m2[0m passed; [31m0[0m failed; [33m0[0m skipped; finished in 7.31ms
+
+Running 16 tests for test/descriptor/UriData.t.sol:DescriptorURIDataTest
+[32m[PASS][0m testBaselineTokenURIWithDataURIEnabled() (gas: 81931)
+[32m[PASS][0m testDataURI() (gas: 72953)
+[32m[PASS][0m testGenericDataURI() (gas: 73682)
+[32m[PASS][0m testSetBaseURI() (gas: 40824)
+[32m[PASS][0m testSetBaseURIEvent() (gas: 42723)
+[32m[PASS][0m testSetBaseURI_AccessControl() (gas: 27425)
+[32m[PASS][0m testToggleDataURIEnabled() (gas: 17301)
+[32m[PASS][0m testToggleDataURIEnabledAccessControl() (gas: 17394)
+[32m[PASS][0m testToggleDataURIEnabledEvent() (gas: 19732)
+[32m[PASS][0m testTokenURIWithDataURIEnabled() (gas: 29591)
+[32m[PASS][0m testTokenURIWithFullMetadata() (gas: 342565)
+[32m[PASS][0m testTokenURIWithHTTPURL() (gas: 52203)
+[32m[PASS][0m testTokenURIWithMixedMediaMetadata() (gas: 346186)
+[32m[PASS][0m testTokenURIWithOnlyImageMetadata() (gas: 208320)
+[32m[PASS][0m testTransferOwnership() (gas: 34295)
+[32m[PASS][0m testTransferOwnershipAccessControl() (gas: 27962)
+Test result: [32mok[0m. [32m16[0m passed; [31m0[0m failed; [33m0[0m skipped; finished in 15.04ms
 
 Running 13 tests for test/max-heap/MaxHeap.t.sol:MaxHeapTestSuite
 [32m[PASS][0m testCannotRemoveMaxWhenEmpty() (gas: 18223)
@@ -245,12 +241,7 @@ Running 13 tests for test/max-heap/MaxHeap.t.sol:MaxHeapTestSuite
 [32m[PASS][0m testOldHeapEntriesNotRemoved() (gas: 220824)
 [32m[PASS][0m testRemoveMax() (gas: 211820)
 [32m[PASS][0m testUpdateValueOnlyOwner() (gas: 90531)
-Test result: [32mok[0m. [32m13[0m passed; [31m0[0m failed; [33m0[0m skipped; finished in 5.44ms
-
-Running 2 tests for test/auction/Minting.t.sol:AuctionHouseMintTest
-[32m[PASS][0m testBehaviorOnMintFailureDuringAuctionCreation() (gas: 77433)
-[32m[PASS][0m testMintFailureDueToEmptyNFTList() (gas: 68723)
-Test result: [32mok[0m. [32m2[0m passed; [31m0[0m failed; [33m0[0m skipped; finished in 3.69ms
+Test result: [32mok[0m. [32m13[0m passed; [31m0[0m failed; [33m0[0m skipped; finished in 5.21ms
 
 Running 9 tests for test/revolution-points/Points.t.sol:PointsTestSuite
 [32m[PASS][0m testAccessControl() (gas: 172759)
@@ -258,11 +249,44 @@ Running 9 tests for test/revolution-points/Points.t.sol:PointsTestSuite
 [32m[PASS][0m testEdgeCases() (gas: 65276)
 [32m[PASS][0m testMintingBehavior() (gas: 175756)
 [32m[PASS][0m testOwnershipTransferAndManagerRevert() (gas: 189235)
-[32m[PASS][0m testSupplyInvariants(uint256) (runs: 256, μ: 231252, ~: 246738)
+[32m[PASS][0m testSupplyInvariants(uint256) (runs: 256, μ: 229319, ~: 246738)
 [32m[PASS][0m testTokenMetadata() (gas: 21992)
 [32m[PASS][0m testTransferRestrictions() (gas: 171594)
 [32m[PASS][0m testVotingAndDelegation() (gas: 242717)
-Test result: [32mok[0m. [32m9[0m passed; [31m0[0m failed; [33m0[0m skipped; finished in 40.19ms
+Test result: [32mok[0m. [32m9[0m passed; [31m0[0m failed; [33m0[0m skipped; finished in 39.12ms
+
+Running 17 tests for test/max-heap/Updates.t.sol:MaxHeapUpdateTestSuite
+[32m[PASS][0m testCannotRemoveMaxWhenEmpty() (gas: 18267)
+[32m[PASS][0m testExtractMaxOnlyOwner() (gas: 71465)
+[32m[PASS][0m testHeapEmptyAfterAllRemoved() (gas: 143022)
+[32m[PASS][0m testHeapProperty() (gas: 509460)
+[32m[PASS][0m testHeapify() (gas: 324745)
+[32m[PASS][0m testHeapifyOnNonRoot() (gas: 346450)
+[32m[PASS][0m testInitialInsertAndMax() (gas: 224961)
+[32m[PASS][0m testInsert() (gas: 223833)
+[32m[PASS][0m testInsertDuplicateValues() (gas: 224105)
+[32m[PASS][0m testInsertOnlyOwner() (gas: 95635)
+[32m[PASS][0m testOldHeapEntriesNotRemove2() (gas: 269852)
+[32m[PASS][0m testOldHeapEntriesNotRemoved() (gas: 220860)
+[32m[PASS][0m testRemoveMax() (gas: 211890)
+[32m[PASS][0m testUpdateValueDecrease() (gas: 227710)
+[32m[PASS][0m testUpdateValueIncrease() (gas: 224354)
+[32m[PASS][0m testUpdateValueOnlyOwner() (gas: 90531)
+[32m[PASS][0m testUpdateValueWithHeapify() (gas: 366458)
+Test result: [32mok[0m. [32m17[0m passed; [31m0[0m failed; [33m0[0m skipped; finished in 5.58ms
+
+Running 10 tests for test/revolution-token/Security.t.sol:TokenSecurityTest
+[32m[PASS][0m testApprovalChecks() (gas: 885644)
+[32m[PASS][0m testBasisPointsSum() (gas: 16745)
+[32m[PASS][0m testCreatorArrayLimit() (gas: 87530)
+[32m[PASS][0m testEventEmission() (gas: 333832)
+[32m[PASS][0m testFunctionalityUnderMaximumLoad() (gas: 756039)
+[32m[PASS][0m testMintToDropTopVotedPieceFailure() (gas: 437628)
+[32m[PASS][0m testPrivilegeEscalation() (gas: 61010)
+[32m[PASS][0m testReentrancyOnMint() (gas: 458153)
+[32m[PASS][0m testReentrancyOtherFunctions() (gas: 458175)
+[32m[PASS][0m testZeroAddressInCreatorArray() (gas: 15354)
+Test result: [32mok[0m. [32m10[0m passed; [31m0[0m failed; [33m0[0m skipped; finished in 5.69ms
 
 Running 21 tests for test/culture-index/Metadata.t.sol:CultureIndexArtMetadataTest
 [32m[PASS][0m test__ExceedingAnimationLength() (gas: 3607920)
@@ -286,26 +310,53 @@ Running 21 tests for test/culture-index/Metadata.t.sol:CultureIndexArtMetadataTe
 [32m[PASS][0m test__ValidHashesAnimation_SVG() (gas: 436497)
 [32m[PASS][0m test__ValidImagePrefixIpfs() (gas: 319162)
 [32m[PASS][0m test__ValidImagePrefixSvg() (gas: 325791)
-Test result: [32mok[0m. [32m21[0m passed; [31m0[0m failed; [33m0[0m skipped; finished in 68.75ms
+Test result: [32mok[0m. [32m21[0m passed; [31m0[0m failed; [33m0[0m skipped; finished in 83.61ms
 
-Running 16 tests for test/descriptor/UriData.t.sol:DescriptorURIDataTest
-[32m[PASS][0m testBaselineTokenURIWithDataURIEnabled() (gas: 81931)
-[32m[PASS][0m testDataURI() (gas: 72953)
-[32m[PASS][0m testGenericDataURI() (gas: 73682)
-[32m[PASS][0m testSetBaseURI() (gas: 40824)
-[32m[PASS][0m testSetBaseURIEvent() (gas: 42723)
-[32m[PASS][0m testSetBaseURI_AccessControl() (gas: 27425)
-[32m[PASS][0m testToggleDataURIEnabled() (gas: 17301)
-[32m[PASS][0m testToggleDataURIEnabledAccessControl() (gas: 17394)
-[32m[PASS][0m testToggleDataURIEnabledEvent() (gas: 19732)
-[32m[PASS][0m testTokenURIWithDataURIEnabled() (gas: 29591)
-[32m[PASS][0m testTokenURIWithFullMetadata() (gas: 342565)
-[32m[PASS][0m testTokenURIWithHTTPURL() (gas: 52203)
-[32m[PASS][0m testTokenURIWithMixedMediaMetadata() (gas: 346186)
-[32m[PASS][0m testTokenURIWithOnlyImageMetadata() (gas: 208320)
-[32m[PASS][0m testTransferOwnership() (gas: 34295)
-[32m[PASS][0m testTransferOwnershipAccessControl() (gas: 27962)
-Test result: [32mok[0m. [32m16[0m passed; [31m0[0m failed; [33m0[0m skipped; finished in 8.42ms
+Running 2 tests for test/auction/Minting.t.sol:AuctionHouseMintTest
+[32m[PASS][0m testBehaviorOnMintFailureDuringAuctionCreation() (gas: 77433)
+[32m[PASS][0m testMintFailureDueToEmptyNFTList() (gas: 68723)
+Test result: [32mok[0m. [32m2[0m passed; [31m0[0m failed; [33m0[0m skipped; finished in 4.17ms
+
+Running 4 tests for test/culture-index/AccessControl.t.sol:CultureIndexAccessControlTest
+[32m[PASS][0m testDropTopVotedPieceOnlyIfQuorumIsMet(uint256) (runs: 256, μ: 801105, ~: 801105)
+[32m[PASS][0m testRevertNonOwnerSetQuorumVotesBPS() (gas: 16998)
+[32m[PASS][0m testSetQuorumVotesBPSOutsideRange(uint104) (runs: 256, μ: 26763, ~: 26763)
+[32m[PASS][0m testSetQuorumVotesBPSWithinRange(uint104) (runs: 256, μ: 28031, ~: 28650)
+Test result: [32mok[0m. [32m4[0m passed; [31m0[0m failed; [33m0[0m skipped; finished in 173.59ms
+
+Running 14 tests for test/culture-index/ArtPiece.t.sol:CultureIndexArtPieceTest
+[32m[PASS][0m testArtPieceCreationAndVoting(uint256,uint256) (runs: 256, μ: 1548213, ~: 1559021)
+[32m[PASS][0m testCreatePiece() (gas: 335697)
+[32m[PASS][0m testCreatePieceWithMultipleCreators() (gas: 381002)
+[32m[PASS][0m testCreatePieceWithMultipleCreatorsInvalidBPS() (gas: 19967)
+[32m[PASS][0m testCreatorArrayLengthConstraint() (gas: 90029)
+[32m[PASS][0m testExcessiveTotalBasisPoints() (gas: 19519)
+[32m[PASS][0m testFirstPieceId() (gas: 318932)
+[32m[PASS][0m testInvalidCreatorAddress() (gas: 18839)
+[32m[PASS][0m testMissingMediaDataAnimation() (gas: 19759)
+[32m[PASS][0m testMissingMediaDataImage() (gas: 19801)
+[32m[PASS][0m testMissingMediaDataText() (gas: 19709)
+[32m[PASS][0m testMissingName() (gas: 19693)
+[32m[PASS][0m testPieceIDIncrement() (gas: 608214)
+[32m[PASS][0m testTooFewTotalBasisPoints() (gas: 18991)
+Test result: [32mok[0m. [32m14[0m passed; [31m0[0m failed; [33m0[0m skipped; finished in 285.75ms
+
+Running 1 test for test/vrgdac/VRGDAC.t.sol:PointsTestSuite
+[32m[PASS][0m test_noNegatives(int256) (runs: 256, μ: 501522, ~: 501522)
+Test result: [32mok[0m. [32m1[0m passed; [31m0[0m failed; [33m0[0m skipped; finished in 275.79ms
+
+Running 10 tests for test/revolution-token/Minting.t.sol:TokenMintingTest
+[32m[PASS][0m testBurn() (gas: 706348)
+[32m[PASS][0m testBurnFunction() (gas: 708818)
+[32m[PASS][0m testMint() (gas: 749620)
+[32m[PASS][0m testMintToItself() (gas: 750835)
+[32m[PASS][0m testMintWithNoPieces() (gas: 47761)
+[32m[PASS][0m testMintingEvent() (gas: 770555)
+[32m[PASS][0m testTokenURI() (gas: 852978)
+[32m[PASS][0m test_DroppedArtPieceMatchesTopVoted() (gas: 1090000)
+[32m[PASS][0m test_MintingIncrement(uint200) (runs: 256, μ: 1846706, ~: 1997872)
+[32m[PASS][0m test_TopVotedPieceMinting() (gas: 1067660)
+Test result: [32mok[0m. [32m10[0m passed; [31m0[0m failed; [33m0[0m skipped; finished in 258.56ms
 
 Running 21 tests for test/revolution-token/Basic.t.sol:TokenBasicTest
 [32m[PASS][0m testContractURI() (gas: 19001)
@@ -329,115 +380,14 @@ Running 21 tests for test/revolution-token/Basic.t.sol:TokenBasicTest
 [32m[PASS][0m test_DropTopVotedPiece() (gas: 1110876)
 [32m[PASS][0m test_GetTopVotedPiece() (gas: 1158447)
 [32m[PASS][0m test_VotingOnArtPiece() (gas: 639632)
-Test result: [32mok[0m. [32m21[0m passed; [31m0[0m failed; [33m0[0m skipped; finished in 9.06ms
-
-Running 4 tests for test/culture-index/AccessControl.t.sol:CultureIndexAccessControlTest
-[32m[PASS][0m testDropTopVotedPieceOnlyIfQuorumIsMet(uint256) (runs: 256, μ: 801105, ~: 801105)
-[32m[PASS][0m testRevertNonOwnerSetQuorumVotesBPS() (gas: 16998)
-[32m[PASS][0m testSetQuorumVotesBPSOutsideRange(uint104) (runs: 256, μ: 26763, ~: 26763)
-[32m[PASS][0m testSetQuorumVotesBPSWithinRange(uint104) (runs: 256, μ: 28031, ~: 28650)
-Test result: [32mok[0m. [32m4[0m passed; [31m0[0m failed; [33m0[0m skipped; finished in 209.85ms
-
-Running 14 tests for test/culture-index/ArtPiece.t.sol:CultureIndexArtPieceTest
-[32m[PASS][0m testArtPieceCreationAndVoting(uint256,uint256) (runs: 256, μ: 1543029, ~: 1559021)
-[32m[PASS][0m testCreatePiece() (gas: 335697)
-[32m[PASS][0m testCreatePieceWithMultipleCreators() (gas: 381002)
-[32m[PASS][0m testCreatePieceWithMultipleCreatorsInvalidBPS() (gas: 19967)
-[32m[PASS][0m testCreatorArrayLengthConstraint() (gas: 90029)
-[32m[PASS][0m testExcessiveTotalBasisPoints() (gas: 19519)
-[32m[PASS][0m testFirstPieceId() (gas: 318932)
-[32m[PASS][0m testInvalidCreatorAddress() (gas: 18839)
-[32m[PASS][0m testMissingMediaDataAnimation() (gas: 19759)
-[32m[PASS][0m testMissingMediaDataImage() (gas: 19801)
-[32m[PASS][0m testMissingMediaDataText() (gas: 19709)
-[32m[PASS][0m testMissingName() (gas: 19693)
-[32m[PASS][0m testPieceIDIncrement() (gas: 608214)
-[32m[PASS][0m testTooFewTotalBasisPoints() (gas: 18991)
-Test result: [32mok[0m. [32m14[0m passed; [31m0[0m failed; [33m0[0m skipped; finished in 268.37ms
-
-Running 10 tests for test/revolution-token/Minting.t.sol:TokenMintingTest
-[32m[PASS][0m testBurn() (gas: 706348)
-[32m[PASS][0m testBurnFunction() (gas: 708818)
-[32m[PASS][0m testMint() (gas: 749620)
-[32m[PASS][0m testMintToItself() (gas: 750835)
-[32m[PASS][0m testMintWithNoPieces() (gas: 47761)
-[32m[PASS][0m testMintingEvent() (gas: 770555)
-[32m[PASS][0m testTokenURI() (gas: 852978)
-[32m[PASS][0m test_DroppedArtPieceMatchesTopVoted() (gas: 1090000)
-[32m[PASS][0m test_MintingIncrement(uint200) (runs: 256, μ: 1813471, ~: 1997872)
-[32m[PASS][0m test_TopVotedPieceMinting() (gas: 1067660)
-Test result: [32mok[0m. [32m10[0m passed; [31m0[0m failed; [33m0[0m skipped; finished in 276.47ms
-
-Running 1 test for test/vrgdac/VRGDAC.t.sol:PointsTestSuite
-[32m[PASS][0m test_noNegatives(int256) (runs: 256, μ: 501522, ~: 501522)
-Test result: [32mok[0m. [32m1[0m passed; [31m0[0m failed; [33m0[0m skipped; finished in 299.49ms
-
-Running 17 tests for test/max-heap/Updates.t.sol:MaxHeapUpdateTestSuite
-[32m[PASS][0m testCannotRemoveMaxWhenEmpty() (gas: 18267)
-[32m[PASS][0m testExtractMaxOnlyOwner() (gas: 71465)
-[32m[PASS][0m testHeapEmptyAfterAllRemoved() (gas: 143022)
-[32m[PASS][0m testHeapProperty() (gas: 509460)
-[32m[PASS][0m testHeapify() (gas: 324745)
-[32m[PASS][0m testHeapifyOnNonRoot() (gas: 346450)
-[32m[PASS][0m testInitialInsertAndMax() (gas: 224961)
-[32m[PASS][0m testInsert() (gas: 223833)
-[32m[PASS][0m testInsertDuplicateValues() (gas: 224105)
-[32m[PASS][0m testInsertOnlyOwner() (gas: 95635)
-[32m[PASS][0m testOldHeapEntriesNotRemove2() (gas: 269852)
-[32m[PASS][0m testOldHeapEntriesNotRemoved() (gas: 220860)
-[32m[PASS][0m testRemoveMax() (gas: 211890)
-[32m[PASS][0m testUpdateValueDecrease() (gas: 227710)
-[32m[PASS][0m testUpdateValueIncrease() (gas: 224354)
-[32m[PASS][0m testUpdateValueOnlyOwner() (gas: 90531)
-[32m[PASS][0m testUpdateValueWithHeapify() (gas: 366458)
-Test result: [32mok[0m. [32m17[0m passed; [31m0[0m failed; [33m0[0m skipped; finished in 5.52ms
-
-Running 11 tests for test/auction/Settling.t.sol:AuctionHouseSettleTest
-[31m[FAIL. Reason: INSUFFICIENT_GAS_FOR_AUCTION()][0m testDOS4() (gas: 4250866)
-[32m[PASS][0m testSettlingAuctionPrematurely() (gas: 815021)
-[32m[PASS][0m testSettlingAuctionWithMultipleCreators(uint8) (runs: 256, μ: 1911873, ~: 1686425)
-[32m[PASS][0m testSettlingAuctionWithNoBids(uint8) (runs: 256, μ: 815034, ~: 815034)
-[32m[PASS][0m testSettlingAuctionWithWinningBidAndCreatorPayout() (gas: 1512614)
-[32m[PASS][0m testTransferFailureAndFallbackToWETH(uint256) (runs: 256, μ: 1577529, ~: 1577529)
-[32m[PASS][0m testTransferToContractWithoutReceiveOrFallback(uint256) (runs: 256, μ: 1562056, ~: 1562056)
-[32m[PASS][0m testTransferToEOA() (gas: 1489626)
-[32m[PASS][0m test_EntropyPecentCannotLeadToDos() (gas: 1086990)
-[32m[PASS][0m test_OwnerPayment(uint8) (runs: 256, μ: 2087891, ~: 2087891)
-[32m[PASS][0m test_VotesCount(uint8) (runs: 256, μ: 2088076, ~: 2088076)
-Test result: [31mFAILED[0m. [32m10[0m passed; [31m1[0m failed; [33m0[0m skipped; finished in 962.32ms
-
-Running 23 tests for test/culture-index/Voting.t.sol:CultureIndexVotingBasicTest
-[32m[PASS][0m testBatchVotingFailsForInvalidPieceIds() (gas: 540429)
-[32m[PASS][0m testBatchVotingFailsForZeroWeight() (gas: 344002)
-[32m[PASS][0m testBatchVotingFailsIfAlreadyVoted() (gas: 643060)
-[32m[PASS][0m testBatchVotingFailsIfPieceDropped() (gas: 635906)
-[32m[PASS][0m testBatchVotingSuccess() (gas: 1091108)
-[32m[PASS][0m testCalculateVoteWeight() (gas: 28537)
-[32m[PASS][0m testCalculateVoteWeights(uint200,uint40) (runs: 256, μ: 56903834, ~: 1966156)
-[32m[PASS][0m testCannotVoteOnDroppedPiece() (gas: 494684)
-[32m[PASS][0m testCannotVoteOnMultiplePiecesTwice() (gas: 1093826)
-[32m[PASS][0m testCannotVoteTwice() (gas: 641331)
-[32m[PASS][0m testCannotVoteWithoutTokens() (gas: 342030)
-[32m[PASS][0m testCannotVoteWithoutTokensMultiplePieces() (gas: 651238)
-[32m[PASS][0m testGasUsage() (gas: 126871537)
-[32m[PASS][0m testInvalidPieceID() (gas: 180581)
-[32m[PASS][0m testNoDoubleVotingAfterERC721Transfer() (gas: 1334977)
-[32m[PASS][0m testQuorumVotesCalculation(uint200,uint256) (runs: 256, μ: 29996418, ~: 1997369)
-[32m[PASS][0m testRejectVoteForInvalidPieceId() (gas: 181662)
-[32m[PASS][0m testVoteAfterTransferringTokens() (gas: 654270)
-[32m[PASS][0m testVoteWeightImpactOnTopVotedPiece() (gas: 1204918)
-[32m[PASS][0m testVoteWeightResetAfterTokenTransfer() (gas: 1137139)
-[32m[PASS][0m testVoteWeightWithChangingTokenBalances() (gas: 1511499)
-[32m[PASS][0m testVoteWithRevolutionToken() (gas: 429430)
-[32m[PASS][0m testVoting() (gas: 640629)
-Test result: [32mok[0m. [32m23[0m passed; [31m0[0m failed; [33m0[0m skipped; finished in 5.95s
+Test result: [32mok[0m. [32m21[0m passed; [31m0[0m failed; [33m0[0m skipped; finished in 9.17ms
 
 Running 23 tests for test/points-emitter/PointsEmitter.t.sol:PointsEmitterTest
 [32m[PASS][0m testBuyToken() (gas: 386705)
 [32m[PASS][0m testBuyTokenPriceIncreases() (gas: 530788)
 [32m[PASS][0m testBuyTokenReentrancy() (gas: 777858)
 [32m[PASS][0m testBuyTokenTotalVal() (gas: 292843)
-[32m[PASS][0m testBuyTokenWithDifferentRates(uint256,uint256) (runs: 256, μ: 409962, ~: 423882)
+[32m[PASS][0m testBuyTokenWithDifferentRates(uint256,uint256) (runs: 256, μ: 409352, ~: 423882)
 [32m[PASS][0m testBuyingLaterIsBetter() (gas: 67531)
 [32m[PASS][0m testBuyingTwiceAmountIsNotMoreThanTwiceEmittedTokens() (gas: 465505)
 [32m[PASS][0m testCannotBuyAsCreators() (gas: 36977)
@@ -449,14 +399,82 @@ Running 23 tests for test/points-emitter/PointsEmitter.t.sol:PointsEmitterTest
 [32m[PASS][0m testSetCreatorsAddress() (gas: 31295)
 [32m[PASS][0m testTotalBasisPoints() (gas: 582027)
 [32m[PASS][0m testTransferTokenContractOwnership() (gas: 2172023)
-[32m[PASS][0m test_OwnerBalance(uint256,uint256) (runs: 256, μ: 420115, ~: 420126)
+[32m[PASS][0m test_OwnerBalance(uint256,uint256) (runs: 256, μ: 420126, ~: 420126)
 [32m[PASS][0m test_PointsEmitterBalance(uint256,uint256) (runs: 256, μ: 392807, ~: 392807)
 [32m[PASS][0m test_bpsInitialization() (gas: 1048778)
-[32m[PASS][0m test_correctEmitted(uint256,uint256) (runs: 256, μ: 429754, ~: 432675)
-[32m[PASS][0m test_purchaseBounds(int256) (runs: 256, μ: 29531, ~: 28636)
+[32m[PASS][0m test_correctEmitted(uint256,uint256) (runs: 256, μ: 429292, ~: 432675)
+[32m[PASS][0m test_purchaseBounds(int256) (runs: 256, μ: 29770, ~: 35744)
 [32m[PASS][0m test_revertMismatchedLengthArrays() (gas: 34416)
 [32m[PASS][0m test_revertNoPayment() (gas: 27690)
-Test result: [32mok[0m. [32m23[0m passed; [31m0[0m failed; [33m0[0m skipped; finished in 6.10s
+Test result: [32mok[0m. [32m23[0m passed; [31m0[0m failed; [33m0[0m skipped; finished in 1.14s
+
+Running 11 tests for test/auction/Settling.t.sol:AuctionHouseSettleTest
+[32m[PASS][0m testSettlingAuctionPrematurely() (gas: 815021)
+[32m[PASS][0m testSettlingAuctionWithMultipleCreators(uint8) (runs: 256, μ: 1976099, ~: 1686425)
+[32m[PASS][0m testSettlingAuctionWithNoBids(uint8) (runs: 256, μ: 815034, ~: 815034)
+[32m[PASS][0m testSettlingAuctionWithWinningBidAndCreatorPayout() (gas: 1512614)
+[32m[PASS][0m testTransferFailureAndFallbackToWETH(uint256) (runs: 256, μ: 1577529, ~: 1577529)
+[32m[PASS][0m testTransferToContractWithoutReceiveOrFallback(uint256) (runs: 256, μ: 1562056, ~: 1562056)
+[32m[PASS][0m testTransferToEOA() (gas: 1489626)
+[32m[PASS][0m test_DOS(uint256) (runs: 256, μ: 4998684, ~: 5003440)
+[32m[PASS][0m test_EntropyPecentCannotLeadToDos() (gas: 1086990)
+[32m[PASS][0m test_OwnerPayment(uint8) (runs: 256, μ: 2087891, ~: 2087891)
+[32m[PASS][0m test_VotesCount(uint8) (runs: 256, μ: 2088076, ~: 2088076)
+Test result: [32mok[0m. [32m11[0m passed; [31m0[0m failed; [33m0[0m skipped; finished in 1.05s
+
+Running 23 tests for test/culture-index/Voting.t.sol:CultureIndexVotingBasicTest
+[32m[PASS][0m testBatchVotingFailsForInvalidPieceIds() (gas: 540429)
+[32m[PASS][0m testBatchVotingFailsForZeroWeight() (gas: 344002)
+[32m[PASS][0m testBatchVotingFailsIfAlreadyVoted() (gas: 643060)
+[32m[PASS][0m testBatchVotingFailsIfPieceDropped() (gas: 635906)
+[32m[PASS][0m testBatchVotingSuccess() (gas: 1091108)
+[32m[PASS][0m testCalculateVoteWeight() (gas: 28537)
+[32m[PASS][0m testCalculateVoteWeights(uint200,uint40) (runs: 256, μ: 42406031, ~: 1966156)
+[32m[PASS][0m testCannotVoteOnDroppedPiece() (gas: 494684)
+[32m[PASS][0m testCannotVoteOnMultiplePiecesTwice() (gas: 1093826)
+[32m[PASS][0m testCannotVoteTwice() (gas: 641331)
+[32m[PASS][0m testCannotVoteWithoutTokens() (gas: 342030)
+[32m[PASS][0m testCannotVoteWithoutTokensMultiplePieces() (gas: 651238)
+[32m[PASS][0m testGasUsage() (gas: 126871537)
+[32m[PASS][0m testInvalidPieceID() (gas: 180581)
+[32m[PASS][0m testNoDoubleVotingAfterERC721Transfer() (gas: 1334977)
+[32m[PASS][0m testQuorumVotesCalculation(uint200,uint256) (runs: 256, μ: 20314248, ~: 1997369)
+[32m[PASS][0m testRejectVoteForInvalidPieceId() (gas: 181662)
+[32m[PASS][0m testVoteAfterTransferringTokens() (gas: 654270)
+[32m[PASS][0m testVoteWeightImpactOnTopVotedPiece() (gas: 1204918)
+[32m[PASS][0m testVoteWeightResetAfterTokenTransfer() (gas: 1137139)
+[32m[PASS][0m testVoteWeightWithChangingTokenBalances() (gas: 1511499)
+[32m[PASS][0m testVoteWithRevolutionToken() (gas: 429430)
+[32m[PASS][0m testVoting() (gas: 640629)
+Test result: [32mok[0m. [32m23[0m passed; [31m0[0m failed; [33m0[0m skipped; finished in 4.57s
+
+Running 7 tests for test/culture-index/SignatureVoting.t.sol:CultureIndexVotingSignaturesTest
+[32m[PASS][0m testRevert_InvalidNonce() (gas: 374972)
+[32m[PASS][0m testRevert_InvalidReplay() (gas: 695860)
+[32m[PASS][0m testRevert_InvalidSigner() (gas: 375156)
+[32m[PASS][0m testRevert_InvalidVoteForManyWithSigToAddress() (gas: 377529)
+[32m[PASS][0m testRevert_InvalidVotes() (gas: 854682)
+[32m[PASS][0m testRevert_SigExpired() (gas: 346463)
+[32m[PASS][0m test_VoteForManyWithSig() (gas: 695609)
+Test result: [32mok[0m. [32m7[0m passed; [31m0[0m failed; [33m0[0m skipped; finished in 4.60s
+
+Running 15 tests for test/auction/Basic.t.sol:AuctionHouseBasicTest
+[32m[PASS][0m testAuctionCreation() (gas: 814835)
+[32m[PASS][0m testBidEventEmission() (gas: 877398)
+[32m[PASS][0m testBidForAnotherAccount() (gas: 1453086)
+[32m[PASS][0m testBiddingProcess(uint256) (runs: 256, μ: 1998505, ~: 2063843)
+[32m[PASS][0m testEventEmission(uint256,uint256) (runs: 256, μ: 37033, ~: 37033)
+[32m[PASS][0m testInitializationParameters() (gas: 35667)
+[32m[PASS][0m testMinCreatorRateLoweringRestriction(uint256) (runs: 256, μ: 22188, ~: 22188)
+[32m[PASS][0m testOwnerOnlyAccess() (gas: 26492)
+[32m[PASS][0m testSetEntropyRateBps(uint256) (runs: 256, μ: 24863, ~: 25370)
+[32m[PASS][0m testSetEntropyRateBpsInvalidValues(uint256) (runs: 256, μ: 27979, ~: 27979)
+[32m[PASS][0m testSetEntropyRateBpsRestrictToOwner() (gas: 17291)
+[32m[PASS][0m testSetMinCreatorRateBps(uint256,uint256) (runs: 256, μ: 32362, ~: 31774)
+[32m[PASS][0m testSetMinCreatorRateBpsInvalidValues(int256) (runs: 256, μ: 23609, ~: 23100)
+[32m[PASS][0m testSetMinCreatorRateBpsRestrictToOwner(uint256) (runs: 256, μ: 20129, ~: 20129)
+[32m[PASS][0m testValueUpdates(uint256,uint256) (runs: 256, μ: 37350, ~: 37361)
+Test result: [32mok[0m. [32m15[0m passed; [31m0[0m failed; [33m0[0m skipped; finished in 7.92s
 
 Running 10 tests for test/culture-index/TopArtPiece.t.sol:CultureIndexArtPieceTest
 [32m[PASS][0m testCorrectTopVotedPiece() (gas: 1195824)
@@ -469,25 +487,7 @@ Running 10 tests for test/culture-index/TopArtPiece.t.sol:CultureIndexArtPieceTe
 [32m[PASS][0m testPopTopVotedPiece() (gas: 636260)
 [32m[PASS][0m testRemovedPieceShouldBeReplaced() (gas: 1156917)
 [32m[PASS][0m testVoteAndVerifyTopVotedPiece() (gas: 1762806)
-Test result: [32mok[0m. [32m10[0m passed; [31m0[0m failed; [33m0[0m skipped; finished in 7.88s
-
-Running 15 tests for test/auction/Basic.t.sol:AuctionHouseBasicTest
-[32m[PASS][0m testAuctionCreation() (gas: 814835)
-[32m[PASS][0m testBidEventEmission() (gas: 877398)
-[32m[PASS][0m testBidForAnotherAccount() (gas: 1453086)
-[32m[PASS][0m testBiddingProcess(uint256) (runs: 256, μ: 1995892, ~: 2063843)
-[32m[PASS][0m testEventEmission(uint256,uint256) (runs: 256, μ: 37014, ~: 37033)
-[32m[PASS][0m testInitializationParameters() (gas: 35667)
-[32m[PASS][0m testMinCreatorRateLoweringRestriction(uint256) (runs: 256, μ: 22188, ~: 22188)
-[32m[PASS][0m testOwnerOnlyAccess() (gas: 26492)
-[32m[PASS][0m testSetEntropyRateBps(uint256) (runs: 256, μ: 24807, ~: 25370)
-[32m[PASS][0m testSetEntropyRateBpsInvalidValues(uint256) (runs: 256, μ: 27979, ~: 27979)
-[32m[PASS][0m testSetEntropyRateBpsRestrictToOwner() (gas: 17291)
-[32m[PASS][0m testSetMinCreatorRateBps(uint256,uint256) (runs: 256, μ: 32244, ~: 31774)
-[32m[PASS][0m testSetMinCreatorRateBpsInvalidValues(int256) (runs: 256, μ: 23560, ~: 23100)
-[32m[PASS][0m testSetMinCreatorRateBpsRestrictToOwner(uint256) (runs: 256, μ: 20129, ~: 20129)
-[32m[PASS][0m testValueUpdates(uint256,uint256) (runs: 256, μ: 37361, ~: 37361)
-Test result: [32mok[0m. [32m15[0m passed; [31m0[0m failed; [33m0[0m skipped; finished in 7.91s
+Test result: [32mok[0m. [32m10[0m passed; [31m0[0m failed; [33m0[0m skipped; finished in 7.94s
 | node_modules/@cobuild/protocol-rewards/src/RevolutionProtocolRewards.sol:RevolutionProtocolRewards contract |                 |       |        |       |         |
 |-------------------------------------------------------------------------------------------------------------|-----------------|-------|--------|-------|---------|
 | Deployment Cost                                                                                             | Deployment Size |       |        |       |         |
@@ -505,24 +505,24 @@ Test result: [32mok[0m. [32m15[0m passed; [31m0[0m failed; [33m0[0m skip
 | acceptOwnership                            | 4470            | 4470   | 4470   | 4470    | 3       |
 | auction                                    | 1190            | 1990   | 1190   | 9190    | 10      |
 | createBid                                  | 6688            | 48313  | 51282  | 53282   | 13      |
-| creatorRateBps                             | 262             | 738    | 262    | 2262    | 21      |
+| creatorRateBps                             | 262             | 893    | 262    | 2262    | 19      |
 | duration                                   | 284             | 450    | 284    | 2284    | 12      |
-| entropyRateBps                             | 1007            | 1540   | 1007   | 3007    | 15      |
+| entropyRateBps                             | 1007            | 1622   | 1007   | 3007    | 13      |
 | initialize                                 | 319420          | 319420 | 319420 | 319420  | 245     |
 | minBidIncrementPercentage                  | 2796            | 2796   | 2796   | 2796    | 1       |
-| minCreatorRateBps                          | 2504            | 2504   | 2504   | 2504    | 5       |
+| minCreatorRateBps                          | 2504            | 2504   | 2504   | 2504    | 4       |
 | owner                                      | 2759            | 2759   | 2759   | 2759    | 1       |
-| paused                                     | 571             | 571    | 571    | 571     | 2       |
-| reservePrice                               | 856             | 2141   | 2856   | 2856    | 14      |
-| setCreatorRateBps                          | 2995            | 7603   | 9139   | 9139    | 4       |
-| setEntropyRateBps                          | 2665            | 4962   | 4683   | 8687    | 8       |
-| setMinCreatorRateBps                       | 603             | 2648   | 2619   | 4750    | 4       |
+| paused                                     | 571             | 571    | 571    | 571     | 4       |
+| reservePrice                               | 856             | 2356   | 2856   | 2856    | 12      |
+| setCreatorRateBps                          | 2995            | 6601   | 7135   | 9139    | 4       |
+| setEntropyRateBps                          | 2665            | 5179   | 4683   | 8687    | 8       |
+| setMinCreatorRateBps                       | 2489            | 3148   | 2676   | 4750    | 4       |
 | setReservePrice                            | 6948            | 6948   | 6948   | 6948    | 1       |
 | settleAuction                              | 826             | 826    | 826    | 826     | 1       |
-| settleCurrentAndCreateNewAuction           | 49157           | 662897 | 593397 | 1574793 | 12      |
+| settleCurrentAndCreateNewAuction           | 49157           | 719911 | 590667 | 2384374 | 12      |
 | timeBuffer                                 | 2922            | 2922   | 2922   | 2922    | 1       |
 | transferOwnership                          | 24958           | 24958  | 24958  | 24958   | 3       |
-| unpause                                    | 50670           | 465087 | 480669 | 955664  | 17      |
+| unpause                                    | 50670           | 460628 | 480669 | 955664  | 17      |
 
 
 | src/Descriptor.sol:Descriptor contract |                 |       |        |       |         |
@@ -551,16 +551,16 @@ Test result: [32mok[0m. [32m15[0m passed; [31m0[0m failed; [33m0[0m skip
 | acceptOwnership                                    | 2177            | 3297   | 3297   | 4417   | 2       |
 | allowance                                          | 3111            | 3111   | 3111   | 3111   | 1       |
 | approve                                            | 277             | 277    | 277    | 277    | 1       |
-| balanceOf                                          | 698             | 1198   | 698    | 2698   | 36      |
+| balanceOf                                          | 698             | 1198   | 698    | 2698   | 32      |
 | decimals                                           | 247             | 247    | 247    | 247    | 1       |
 | delegate                                           | 74011           | 74011  | 74011  | 74011  | 1       |
-| getPastVotes                                       | 1544            | 3263   | 1855   | 5208   | 76251   |
+| getPastVotes                                       | 1544            | 3263   | 1855   | 5208   | 76248   |
 | getVotes                                           | 979             | 2060   | 2074   | 2979   | 14      |
 | initialize                                         | 2888            | 147146 | 147731 | 147731 | 248     |
-| mint                                               | 634             | 30155  | 9110   | 146010 | 75131   |
+| mint                                               | 634             | 30152  | 9110   | 146010 | 75128   |
 | name                                               | 2986            | 2986   | 2986   | 2986   | 1       |
 | symbol                                             | 3426            | 3426   | 3426   | 3426   | 1       |
-| totalSupply                                        | 306             | 307    | 306    | 2306   | 120698  |
+| totalSupply                                        | 306             | 307    | 306    | 2306   | 120692  |
 | transfer                                           | 739             | 739    | 739    | 739    | 2       |
 | transferOwnership                                  | 22870           | 24870  | 24870  | 26870  | 2       |
 
@@ -570,21 +570,21 @@ Test result: [32mok[0m. [32m15[0m passed; [31m0[0m failed; [33m0[0m skip
 | Deployment Cost                                                  | Deployment Size |        |        |         |         |
 | 1480339                                                          | 8034            |        |        |         |         |
 | Function Name                                                    | min             | avg    | median | max     | # calls |
-| balanceOf                                                        | 2095            | 2095   | 2095   | 2095    | 10      |
-| buyToken                                                         | 8033            | 293731 | 352902 | 1068905 | 31      |
+| balanceOf                                                        | 2095            | 2295   | 2095   | 4095    | 10      |
+| buyToken                                                         | 8033            | 287806 | 352650 | 1068905 | 31      |
 | buyTokenQuote                                                    | 8909            | 12409  | 8909   | 26409   | 5       |
 | computeTotalReward                                               | 913             | 913    | 913    | 913     | 12      |
 | creatorRateBps                                                   | 284             | 1284   | 1284   | 2284    | 8       |
 | creatorsAddress                                                  | 352             | 637    | 352    | 2352    | 14      |
 | entropyRateBps                                                   | 897             | 1897   | 1897   | 2897    | 8       |
-| getTokenQuoteForEther                                            | 6799            | 15632  | 15299  | 24299   | 15      |
+| getTokenQuoteForEther                                            | 704             | 14059  | 15299  | 24299   | 15      |
 | initialize                                                       | 24039           | 231175 | 232011 | 232011  | 249     |
-| maxPurchaseAmount                                                | 753             | 753    | 753    | 753     | 6       |
+| maxPurchaseAmount                                                | 753             | 753    | 753    | 753     | 7       |
 | minPurchaseAmount                                                | 599             | 599    | 599    | 599     | 18      |
 | owner                                                            | 693             | 1493   | 693    | 2693    | 10      |
-| setCreatorRateBps                                                | 5532            | 7038   | 6915   | 8915    | 5       |
+| setCreatorRateBps                                                | 5532            | 6681   | 6915   | 7132    | 5       |
 | setCreatorsAddress                                               | 993             | 8449   | 10658  | 11487   | 4       |
-| setEntropyRateBps                                                | 5339            | 6406   | 6673   | 6673    | 5       |
+| setEntropyRateBps                                                | 5339            | 6139   | 6673   | 6673    | 5       |
 | startTime                                                        | 570             | 570    | 570    | 570     | 5       |
 | totalSupply                                                      | 1354            | 1354   | 1354   | 1354    | 2       |
 | vrgdac                                                           | 682             | 1348   | 682    | 2682    | 9       |
@@ -602,8 +602,8 @@ Test result: [32mok[0m. [32m15[0m passed; [31m0[0m failed; [33m0[0m skip
 | contractURI                                      | 2153            | 2843   | 2153   | 4224   | 3       |
 | cultureIndex                                     | 990             | 2323   | 2990   | 2990   | 3       |
 | descriptor                                       | 528             | 1528   | 1528   | 2528   | 2       |
-| getArtPieceById                                  | 8143            | 9477   | 8143   | 15657  | 34      |
-| getPastVotes                                     | 1098            | 1099   | 1098   | 3098   | 76250   |
+| getArtPieceById                                  | 8143            | 9378   | 8143   | 15657  | 34      |
+| getPastVotes                                     | 1098            | 1099   | 1098   | 3098   | 76247   |
 | getVotes                                         | 1425            | 1601   | 1616   | 1616   | 13      |
 | initialize                                       | 209694          | 236855 | 254057 | 254057 | 245     |
 | isCultureIndexLocked                             | 918             | 918    | 918    | 918    | 1       |
@@ -612,7 +612,7 @@ Test result: [32mok[0m. [32m15[0m passed; [31m0[0m failed; [33m0[0m skip
 | lockCultureIndex                                 | 2457            | 2796   | 2457   | 3476   | 3       |
 | lockDescriptor                                   | 1709            | 3363   | 3618   | 4509   | 4       |
 | lockMinter                                       | 3102            | 6437   | 6883   | 8883   | 4       |
-| mint                                             | 2446            | 320193 | 418686 | 895681 | 61      |
+| mint                                             | 2446            | 321657 | 418686 | 895681 | 59      |
 | minter                                           | 352             | 1018   | 352    | 2352   | 3       |
 | name                                             | 3057            | 3057   | 3057   | 3057   | 1       |
 | ownerOf                                          | 1040            | 1040   | 1040   | 1040   | 9       |
@@ -622,8 +622,8 @@ Test result: [32mok[0m. [32m15[0m passed; [31m0[0m failed; [33m0[0m skip
 | setMinter                                        | 1650            | 8340   | 6858   | 14284  | 8       |
 | symbol                                           | 3893            | 3893   | 3893   | 3893   | 1       |
 | tokenURI                                         | 42859           | 48359  | 48359  | 53859  | 2       |
-| totalSupply                                      | 449             | 452    | 449    | 2449   | 60320   |
-| transferFrom                                     | 46506           | 68244  | 68556  | 86142  | 18      |
+| totalSupply                                      | 449             | 452    | 449    | 2449   | 60318   |
+| transferFrom                                     | 46506           | 68320  | 68556  | 86142  | 17      |
 
 
 | src/builder/RevolutionBuilder.sol:RevolutionBuilder contract |                 |         |         |         |         |
@@ -646,17 +646,17 @@ Test result: [32mok[0m. [32m15[0m passed; [31m0[0m failed; [33m0[0m skip
 | MAX_DESCRIPTION_LENGTH                                   | 856             | 856     | 856    | 856     | 1       |
 | MAX_IMAGE_LENGTH                                         | 382             | 382     | 382    | 382     | 1       |
 | MAX_NAME_LENGTH                                          | 746             | 746     | 746    | 746     | 1       |
-| MAX_NUM_CREATORS                                         | 834             | 834     | 834    | 834     | 47      |
+| MAX_NUM_CREATORS                                         | 834             | 834     | 834    | 834     | 56      |
 | MAX_QUORUM_VOTES_BPS                                     | 1010            | 1010    | 1010   | 1010    | 4       |
 | MAX_TEXT_LENGTH                                          | 438             | 438     | 438    | 438     | 1       |
 | VOTE_TYPEHASH                                            | 768             | 768     | 768    | 768     | 11      |
 | _setQuorumVotesBPS                                       | 2768            | 6094    | 5652   | 9064    | 7       |
 | acceptOwnership                                          | 4537            | 4537    | 4537   | 4537    | 1       |
-| createPiece                                              | 1382            | 344418  | 344635 | 761376  | 60344   |
-| dropTopVotedPiece                                        | 6603            | 25362   | 25529  | 65668   | 59      |
+| createPiece                                              | 1382            | 344429  | 344635 | 761376  | 60341   |
+| dropTopVotedPiece                                        | 6603            | 25645   | 25529  | 65668   | 57      |
 | dropperAdmin                                             | 2455            | 2455    | 2455   | 2455    | 1       |
 | getPieceById                                             | 8466            | 8591    | 8466   | 9092    | 5       |
-| getTopVotedPiece                                         | 3108            | 10547   | 11295  | 17444   | 62      |
+| getTopVotedPiece                                         | 3108            | 10604   | 11295  | 17444   | 60      |
 | getVote                                                  | 1957            | 2449    | 1957   | 5957    | 11      |
 | getVotes                                                 | 2270            | 6326    | 6598   | 7503    | 14      |
 | initialize                                               | 349808          | 349808  | 349808 | 349808  | 245     |
@@ -665,15 +665,15 @@ Test result: [32mok[0m. [32m15[0m passed; [31m0[0m failed; [33m0[0m skip
 | owner                                                    | 2950            | 2950    | 2950   | 2950    | 1       |
 | pieceCount                                               | 585             | 1585    | 1585   | 2585    | 2       |
 | pieces                                                   | 5984            | 5984    | 5984   | 5984    | 4       |
-| quorumVotes                                              | 3210            | 3210    | 3210   | 3210    | 1       |
+| quorumVotes                                              | 16210           | 16210   | 16210  | 16210   | 1       |
 | quorumVotesBPS                                           | 783             | 1583    | 783    | 2783    | 5       |
 | revolutionPoints                                         | 3181            | 3181    | 3181   | 3181    | 1       |
 | revolutionToken                                          | 2411            | 2411    | 2411   | 2411    | 2       |
-| revolutionTokenVoteWeight                                | 805             | 938     | 805    | 2805    | 15      |
+| revolutionTokenVoteWeight                                | 805             | 1071    | 805    | 2805    | 15      |
 | topVotedPieceId                                          | 3800            | 3800    | 3800   | 3800    | 7       |
 | totalVoteWeights                                         | 387             | 1053    | 387    | 2387    | 6       |
 | transferOwnership                                        | 25287           | 25287   | 25287  | 25287   | 1       |
-| vote                                                     | 3668            | 100001  | 100147 | 137456  | 76154   |
+| vote                                                     | 3668            | 100001  | 100147 | 137456  | 76151   |
 | voteForMany                                              | 4791            | 1662498 | 13004  | 9737594 | 6       |
 | voteForManyWithSig                                       | 6154            | 54083   | 36144  | 133982  | 12      |
 
@@ -683,12 +683,12 @@ Test result: [32mok[0m. [32m15[0m passed; [31m0[0m failed; [33m0[0m skip
 | Deployment Cost                                | Deployment Size |       |        |       |         |
 | 1025463                                        | 5464            |       |        |       |         |
 | Function Name                                  | min             | avg   | median | max   | # calls |
-| extractMax                                     | 541             | 7289  | 2552   | 47492 | 92      |
-| getMax                                         | 687             | 687   | 687    | 687   | 120     |
+| extractMax                                     | 541             | 7394  | 2552   | 47492 | 90      |
+| getMax                                         | 687             | 687   | 687    | 687   | 116     |
 | initialize                                     | 94997           | 94997 | 94997  | 94997 | 245     |
-| insert                                         | 2400            | 48435 | 48445  | 87535 | 60364   |
-| size                                           | 544             | 599   | 544    | 2544  | 145     |
-| updateValue                                    | 529             | 31117 | 23727  | 71398 | 76251   |
+| insert                                         | 2400            | 48436 | 48445  | 87535 | 60362   |
+| size                                           | 544             | 600   | 544    | 2544  | 141     |
+| updateValue                                    | 529             | 31117 | 23727  | 71398 | 76248   |
 
 
 | src/governance/DAOExecutor.sol:DAOExecutor contract |                 |       |        |       |         |
@@ -714,7 +714,7 @@ Test result: [32mok[0m. [32m15[0m passed; [31m0[0m failed; [33m0[0m skip
 | 445594                              | 3198            |      |        |      |         |
 | Function Name                       | min             | avg  | median | max  | # calls |
 | xToY                                | 6490            | 6490 | 6490   | 6490 | 5       |
-| yToX                                | 4039            | 4039 | 4039   | 4039 | 74      |
+| yToX                                | 4039            | 4039 | 4039   | 4039 | 72      |
 
 
 | src/libs/proxy/ERC1967Proxy.sol:ERC1967Proxy contract                                                               |                 |         |         |         |         |
@@ -726,7 +726,7 @@ Test result: [32mok[0m. [32m15[0m passed; [31m0[0m failed; [33m0[0m skip
 | MAX_DESCRIPTION_LENGTH                                                                                              | 5672            | 5672    | 5672    | 5672    | 1       |
 | MAX_IMAGE_LENGTH                                                                                                    | 5198            | 5198    | 5198    | 5198    | 1       |
 | MAX_NAME_LENGTH                                                                                                     | 5562            | 5562    | 5562    | 5562    | 1       |
-| MAX_NUM_CREATORS                                                                                                    | 1150            | 1245    | 1150    | 5650    | 47      |
+| MAX_NUM_CREATORS                                                                                                    | 1150            | 1310    | 1150    | 5650    | 56      |
 | MAX_QUORUM_VOTES_BPS                                                                                                | 1326            | 4701    | 5826    | 5826    | 4       |
 | MAX_TEXT_LENGTH                                                                                                     | 5254            | 5254    | 5254    | 5254    | 1       |
 | VOTE_TYPEHASH                                                                                                       | 1084            | 1084    | 1084    | 1084    | 11      |
@@ -738,16 +738,16 @@ Test result: [32mok[0m. [32m15[0m passed; [31m0[0m failed; [33m0[0m skip
 | approve                                                                                                             | 5100            | 14147   | 14147   | 23194   | 2       |
 | artPieces                                                                                                           | 8337            | 8337    | 8337    | 8337    | 3       |
 | auction                                                                                                             | 1530            | 2330    | 1530    | 9530    | 10      |
-| balanceOf                                                                                                           | 1017            | 1874    | 1017    | 7517    | 50      |
+| balanceOf                                                                                                           | 1017            | 1948    | 1017    | 7517    | 46      |
 | baseURI                                                                                                             | 1416            | 4629    | 4629    | 7842    | 2       |
 | burn                                                                                                                | 1039            | 17565   | 15751   | 46578   | 8       |
-| buyToken                                                                                                            | 0               | 276959  | 353014  | 1069378 | 33      |
+| buyToken                                                                                                            | 0               | 271392  | 351386  | 1069378 | 33      |
 | buyTokenQuote                                                                                                       | 9228            | 13628   | 9228    | 31228   | 5       |
 | computeTotalReward                                                                                                  | 1232            | 1607    | 1232    | 5732    | 12      |
 | contractURI                                                                                                         | 2475            | 4667    | 2475    | 9052    | 3       |
 | createBid                                                                                                           | 7011            | 48632   | 51601   | 53601   | 13      |
-| createPiece                                                                                                         | 2958            | 344851  | 345059  | 761916  | 60344   |
-| creatorRateBps                                                                                                      | 578             | 1825    | 578     | 7100    | 29      |
+| createPiece                                                                                                         | 2958            | 344862  | 345059  | 761916  | 60341   |
+| creatorRateBps                                                                                                      | 578             | 2158    | 600     | 7100    | 27      |
 | creatorsAddress                                                                                                     | 668             | 1275    | 668     | 7168    | 14      |
 | cultureIndex                                                                                                        | 1306            | 2639    | 3306    | 3306    | 3       |
 | dataURI                                                                                                             | 48772           | 48772   | 48772   | 48772   | 1       |
@@ -755,19 +755,19 @@ Test result: [32mok[0m. [32m15[0m passed; [31m0[0m failed; [33m0[0m skip
 | delegate                                                                                                            | 74327           | 74327   | 74327   | 74327   | 1       |
 | deploy                                                                                                              | 3272880         | 3300050 | 3317258 | 3317258 | 245     |
 | descriptor                                                                                                          | 844             | 1844    | 1844    | 2844    | 2       |
-| dropTopVotedPiece                                                                                                   | 6920            | 25735   | 25903   | 66042   | 59      |
+| dropTopVotedPiece                                                                                                   | 6920            | 26019   | 25903   | 66042   | 57      |
 | dropperAdmin                                                                                                        | 2771            | 2771    | 2771    | 2771    | 1       |
 | duration                                                                                                            | 600             | 766     | 600     | 2600    | 12      |
-| entropyRateBps                                                                                                      | 1213            | 2176    | 1323    | 7823    | 23      |
-| extractMax                                                                                                          | 858             | 7645    | 2808    | 47747   | 92      |
+| entropyRateBps                                                                                                      | 1213            | 2257    | 1323    | 7823    | 21      |
+| extractMax                                                                                                          | 858             | 7753    | 2808    | 47747   | 90      |
 | fallback                                                                                                            | 372             | 3372    | 4872    | 4872    | 33      |
 | genericDataURI                                                                                                      | 49732           | 49732   | 49732   | 49732   | 1       |
-| getArtPieceById                                                                                                     | 8613            | 9960    | 8613    | 16244   | 34      |
-| getMax                                                                                                              | 1006            | 1006    | 1006    | 1006    | 126     |
-| getPastVotes                                                                                                        | 0               | 2503    | 1866    | 5530    | 152502  |
+| getArtPieceById                                                                                                     | 8613            | 9859    | 8613    | 16244   | 34      |
+| getMax                                                                                                              | 1006            | 1006    | 1006    | 1006    | 122     |
+| getPastVotes                                                                                                        | 0               | 2503    | 1866    | 5530    | 152496  |
 | getPieceById                                                                                                        | 8936            | 9063    | 8936    | 9574    | 5       |
-| getTokenQuoteForEther                                                                                               | 7118            | 16551   | 15618   | 29118   | 15      |
-| getTopVotedPiece                                                                                                    | 3425            | 11278   | 11762   | 18925   | 62      |
+| getTokenQuoteForEther                                                                                               | 1024            | 14978   | 15618   | 29118   | 15      |
+| getTopVotedPiece                                                                                                    | 3425            | 11345   | 11762   | 18925   | 60      |
 | getVote                                                                                                             | 2282            | 3183    | 2282    | 8193    | 11      |
 | getVotes                                                                                                            | 0               | 3519    | 1935    | 7822    | 43      |
 | heap                                                                                                                | 652             | 652     | 652     | 652     | 2       |
@@ -780,7 +780,7 @@ Test result: [32mok[0m. [32m15[0m passed; [31m0[0m failed; [33m0[0m skip
 | initialize(address,address,address,address,address,(uint256,uint256))                                               | 24392           | 231524  | 232360  | 232360  | 249     |
 | initialize(address,string)                                                                                          | 95739           | 95739   | 95739   | 95739   | 246     |
 | initialize(address,uint256)                                                                                         | 68843           | 68843   | 68843   | 68843   | 245     |
-| insert                                                                                                              | 7223            | 48774   | 48764   | 87790   | 60394   |
+| insert                                                                                                              | 7223            | 48774   | 48764   | 87790   | 60392   |
 | isCultureIndexLocked                                                                                                | 1234            | 1234    | 1234    | 1234    | 1       |
 | isDataURIEnabled                                                                                                    | 883             | 4133    | 4133    | 7383    | 6       |
 | isDescriptorLocked                                                                                                  | 1608            | 1608    | 1608    | 1608    | 1       |
@@ -790,39 +790,39 @@ Test result: [32mok[0m. [32m15[0m passed; [31m0[0m failed; [33m0[0m skip
 | lockDescriptor                                                                                                      | 2022            | 4803    | 4822    | 7548    | 4       |
 | lockMinter                                                                                                          | 5196            | 10127   | 10809   | 13696   | 4       |
 | maxHeapifyTest                                                                                                      | 21190           | 23658   | 23658   | 26127   | 4       |
-| maxPurchaseAmount                                                                                                   | 1069            | 1069    | 1069    | 1069    | 6       |
+| maxPurchaseAmount                                                                                                   | 1069            | 1069    | 1069    | 1069    | 7       |
 | minBidIncrementPercentage                                                                                           | 3112            | 3112    | 3112    | 3112    | 1       |
-| minCreatorRateBps                                                                                                   | 2820            | 6420    | 7320    | 7320    | 5       |
+| minCreatorRateBps                                                                                                   | 2820            | 6195    | 7320    | 7320    | 4       |
 | minPurchaseAmount                                                                                                   | 915             | 4165    | 5415    | 5415    | 18      |
-| mint()                                                                                                              | 2763            | 320878  | 419002  | 895997  | 61      |
-| mint(address,uint256)                                                                                               | 960             | 30477   | 9429    | 150829  | 75131   |
+| mint()                                                                                                              | 2763            | 322354  | 419002  | 895997  | 59      |
+| mint(address,uint256)                                                                                               | 960             | 30474   | 9429    | 150829  | 75128   |
 | minter                                                                                                              | 668             | 2834    | 668     | 7168    | 3       |
 | name                                                                                                                | 1310            | 3392    | 3310    | 7879    | 13      |
 | nonces                                                                                                              | 1212            | 2848    | 3212    | 3212    | 11      |
 | owner                                                                                                               | 862             | 4261    | 4185    | 7766    | 14      |
 | ownerOf                                                                                                             | 1359            | 1359    | 1359    | 1359    | 9       |
-| paused                                                                                                              | 887             | 887     | 887     | 887     | 2       |
+| paused                                                                                                              | 887             | 887     | 887     | 887     | 4       |
 | pieceCount                                                                                                          | 901             | 4151    | 4151    | 7401    | 2       |
 | pieces                                                                                                              | 6423            | 6423    | 6423    | 6423    | 4       |
-| quorumVotes                                                                                                         | 3526            | 3526    | 3526    | 3526    | 1       |
+| quorumVotes                                                                                                         | 16526           | 16526   | 16526   | 16526   | 1       |
 | quorumVotesBPS                                                                                                      | 1099            | 3699    | 1099    | 7599    | 5       |
-| reservePrice                                                                                                        | 1172            | 3743    | 3172    | 7672    | 14      |
+| reservePrice                                                                                                        | 1172            | 4172    | 3172    | 7672    | 12      |
 | revolutionPoints                                                                                                    | 7997            | 7997    | 7997    | 7997    | 1       |
 | revolutionToken                                                                                                     | 2727            | 4977    | 4977    | 7227    | 2       |
-| revolutionTokenVoteWeight                                                                                           | 1121            | 1254    | 1121    | 3121    | 15      |
+| revolutionTokenVoteWeight                                                                                           | 1121            | 1387    | 1121    | 3121    | 15      |
 | setBaseURI                                                                                                          | 7564            | 23946   | 28324   | 31574   | 4       |
 | setContractURIHash                                                                                                  | 2124            | 9653    | 11278   | 13933   | 4       |
-| setCreatorRateBps                                                                                                   | 5785            | 8599    | 7818    | 13731   | 9       |
+| setCreatorRateBps                                                                                                   | 5785            | 8349    | 7818    | 10985   | 9       |
 | setCreatorsAddress                                                                                                  | 1316            | 11001   | 13193   | 16303   | 4       |
 | setCultureIndex                                                                                                     | 1213            | 7600    | 7596    | 16240   | 5       |
 | setDescriptor                                                                                                       | 3971            | 9492    | 6618    | 17887   | 6       |
-| setEntropyRateBps                                                                                                   | 2999            | 7141    | 6989    | 13503   | 13      |
-| setMinCreatorRateBps                                                                                                | 923             | 2968    | 2941    | 5070    | 4       |
+| setEntropyRateBps                                                                                                   | 2999            | 7241    | 6989    | 13503   | 13      |
+| setMinCreatorRateBps                                                                                                | 2812            | 3468    | 2996    | 5070    | 4       |
 | setMinter                                                                                                           | 1973            | 10347   | 7825    | 19100   | 8       |
 | setReservePrice                                                                                                     | 7264            | 7264    | 7264    | 7264    | 1       |
 | settleAuction                                                                                                       | 1143            | 1143    | 1143    | 1143    | 1       |
-| settleCurrentAndCreateNewAuction                                                                                    | 49408           | 665097  | 593710  | 1597810 | 12      |
-| size                                                                                                                | 860             | 1039    | 860     | 7360    | 145     |
+| settleCurrentAndCreateNewAuction                                                                                    | 49408           | 720219  | 590980  | 2384687 | 12      |
+| size                                                                                                                | 860             | 1044    | 860     | 7360    | 141     |
 | startTime                                                                                                           | 886             | 886     | 886     | 886     | 5       |
 | symbol                                                                                                              | 3748            | 6231    | 6231    | 8715    | 2       |
 | timeBuffer                                                                                                          | 3238            | 3238    | 3238    | 3238    | 1       |
@@ -830,15 +830,15 @@ Test result: [32mok[0m. [32m15[0m passed; [31m0[0m failed; [33m0[0m skip
 | tokenURI(uint256)                                                                                                   | 43214           | 48714   | 48714   | 54214   | 2       |
 | tokenURI(uint256,(string,string,uint8,string,string,string))                                                        | 4987            | 48284   | 43579   | 95670   | 10      |
 | topVotedPieceId                                                                                                     | 4116            | 4116    | 4116    | 4116    | 7       |
-| totalSupply                                                                                                         | 622             | 675     | 622     | 7265    | 181020  |
+| totalSupply                                                                                                         | 622             | 675     | 622     | 7265    | 181012  |
 | totalVoteWeights                                                                                                    | 706             | 1372    | 706     | 2706    | 6       |
 | transfer                                                                                                            | 1062            | 1062    | 1062    | 1062    | 2       |
-| transferFrom                                                                                                        | 46766           | 68508   | 68816   | 86467   | 18      |
+| transferFrom                                                                                                        | 46766           | 68584   | 68816   | 86467   | 17      |
 | transferOwnership                                                                                                   | 7649            | 24425   | 25274   | 31686   | 8       |
-| unpause                                                                                                             | 55483           | 468312  | 485482  | 955977  | 17      |
-| updateValue                                                                                                         | 852             | 31406   | 24046   | 71653   | 76254   |
+| unpause                                                                                                             | 55483           | 463853  | 485482  | 955977  | 17      |
+| updateValue                                                                                                         | 852             | 31406   | 24046   | 71653   | 76251   |
 | upgradeTo                                                                                                           | 5604            | 5604    | 5604    | 5604    | 245     |
-| vote                                                                                                                | 3988            | 100317  | 100463  | 137709  | 76154   |
+| vote                                                                                                                | 3988            | 100317  | 100463  | 137709  | 76151   |
 | voteForMany                                                                                                         | 5120            | 1662930 | 13336   | 9738533 | 6       |
 | voteForManyWithSig                                                                                                  | 6513            | 54441   | 36503   | 134337  | 12      |
 | vrgdac                                                                                                              | 998             | 2331    | 998     | 4998    | 9       |
@@ -889,7 +889,7 @@ Test result: [32mok[0m. [32m15[0m passed; [31m0[0m failed; [33m0[0m skip
 | Deployment Cost                          | Deployment Size |       |        |       |         |
 | 444882                                   | 2156            |       |        |       |         |
 | Function Name                            | min             | avg   | median | max   | # calls |
-| balanceOf                                | 560             | 1810  | 2560   | 2560  | 8       |
+| balanceOf                                | 560             | 1760  | 2560   | 2560  | 5       |
 | deposit                                  | 23999           | 23999 | 23999  | 23999 | 2       |
 | transfer                                 | 18485           | 18485 | 18485  | 18485 | 2       |
 
@@ -912,13 +912,4 @@ Test result: [32mok[0m. [32m15[0m passed; [31m0[0m failed; [33m0[0m skip
 
 
  
-Ran 21 test suites: [32m242[0m tests passed, [31m2[0m failed, [33m0[0m skipped (244 total tests)
-
-Failing tests:
-Encountered 1 failing test in test/auction/Settling.t.sol:AuctionHouseSettleTest
-[31m[FAIL. Reason: INSUFFICIENT_GAS_FOR_AUCTION()][0m testDOS4() (gas: 4250866)
-
-Encountered 1 failing test in test/revolution-token/Security.t.sol:TokenSecurityTest
-[31m[FAIL. Reason: assertion failed][0m testFunctionalityUnderMaximumLoad() (gas: 104502)
-
-Encountered a total of [31m2[0m failing tests, [32m242[0m tests succeeded
+Ran 21 test suites: [32m244[0m tests passed, [31m0[0m failed, [33m0[0m skipped (244 total tests)
