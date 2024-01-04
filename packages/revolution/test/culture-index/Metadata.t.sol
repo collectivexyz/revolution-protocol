@@ -30,7 +30,7 @@ contract CultureIndexArtMetadataTest is CultureIndexTestSuite {
                 longName,
                 "Valid Description",
                 ICultureIndex.MediaType.IMAGE,
-                "valid_image_link",
+                "ipfs://lajdslkajsdlkjaslkdj",
                 "",
                 "",
                 address(0x1),
@@ -162,7 +162,7 @@ contract CultureIndexArtMetadataTest is CultureIndexTestSuite {
                 "Valid Name",
                 "Valid Description",
                 ICultureIndex.MediaType.IMAGE,
-                "ipfz://",
+                "ipfz://alksjdalskdjalksjdlakjsd",
                 "",
                 "", //invalid animation URL
                 address(0x1),

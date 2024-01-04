@@ -110,6 +110,9 @@ interface ICultureIndex is ICultureIndexEvents {
     /// @dev Reverts if art piece metadata is invalid
     error INVALID_MEDIA_METADATA();
 
+    /// @dev Reverts if substring is invalid
+    error INVALID_SUBSTRING();
+
     /// @dev Reverts if bps does not sum to 10000
     error INVALID_BPS_SUM();
 

@@ -134,8 +134,8 @@ contract CultureIndex is
      */
     function _substring(string memory str, uint256 startIndex, uint256 endIndex) internal pure returns (string memory) {
         //verify lengths are valid
-        if (startIndex >= endIndex) revert INVALID_MEDIA_METADATA();
-        if (endIndex > bytes(str).length) revert INVALID_MEDIA_METADATA();
+        if (startIndex >= endIndex) revert INVALID_SUBSTRING();
+        if (endIndex > bytes(str).length) revert INVALID_SUBSTRING();
 
         bytes memory strBytes = bytes(str);
         bytes memory result = new bytes(endIndex - startIndex);
@@ -188,13 +188,9 @@ contract CultureIndex is
         // ensure image url starts with ipfs:// or data:image/svg+xml;base64,
         if (
             bytes(metadata.image).length > 0 &&
-            !Strings.equal(_substring(metadata.image, 0, 7), (ipfsPrefix)) &&
-            !Strings.equal(_substring(metadata.image, 0, 26), (svgPrefix))
+            !(Strings.equal(_substring(metadata.image, 0, 7), (ipfsPrefix)) ||
+                Strings.equal(_substring(metadata.image, 0, 26), (svgPrefix)))
         ) revert INVALID_MEDIA_METADATA();
-
-        //ensure text starts with ipfs://
-        if (bytes(metadata.text).length > 0 && !Strings.equal(_substring(metadata.text, 0, 7), (ipfsPrefix)))
-            revert INVALID_MEDIA_METADATA();
 
         //ensure name is set
         if (bytes(metadata.name).length == 0 || bytes(metadata.name).length > MAX_NAME_LENGTH)
