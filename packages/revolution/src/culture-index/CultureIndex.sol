@@ -37,7 +37,7 @@ contract CultureIndex is
     IRevolutionBuilder private immutable manager;
 
     // Constant for max number of creators
-    uint256 public constant MAX_NUM_CREATORS = 10;
+    uint256 public constant MAX_NUM_CREATORS = 100;
 
     // Constant for art piece metadata
     uint256 public constant MAX_NAME_LENGTH = 100;
