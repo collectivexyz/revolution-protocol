@@ -27,6 +27,8 @@ contract CultureIndex is
     EIP712Upgradeable,
     CultureIndexStorageV1
 {
+    using Strings for uint256;
+
     ///                                                          ///
     ///                         IMMUTABLES                       ///
     ///                                                          ///
@@ -39,10 +41,10 @@ contract CultureIndex is
 
     // Constant for art piece metadata
     uint256 public constant MAX_NAME_LENGTH = 100;
-    uint256 public constant MAX_DESCRIPTION_LENGTH = 1000;
+    uint256 public constant MAX_DESCRIPTION_LENGTH = 2100;
     uint256 public constant MAX_IMAGE_LENGTH = 21_000;
-    uint256 public constant MAX_ANIMATION_URL_LENGTH = 21_000;
-    uint256 public constant MAX_TEXT_LENGTH = 42_000;
+    uint256 public constant MAX_ANIMATION_URL_LENGTH = 100;
+    uint256 public constant MAX_TEXT_LENGTH = 67_112;
 
     // The weight of the 721 voting token
     uint256 public revolutionTokenVoteWeight;
@@ -117,8 +119,31 @@ contract CultureIndex is
     }
 
     ///                                                          ///
-    ///                         MODIFIERS                        ///
+    ///                         FUNCTIONS                        ///
     ///                                                          ///
+
+    /**
+     *  Returns the substring of a string.
+     * @param str The string to substring.
+     * @param startIndex The starting index of the substring.
+     * @param endIndex The ending index of the substring.
+     *
+     * Requirements:
+     * - The `startIndex` must be less than the `endIndex`.
+     * - The `endIndex` must be less than the length of the string.
+     */
+    function _substring(string memory str, uint256 startIndex, uint256 endIndex) internal pure returns (string memory) {
+        //verify lengths are valid
+        if (startIndex >= endIndex) revert INVALID_SUBSTRING();
+        if (endIndex > bytes(str).length) revert INVALID_SUBSTRING();
+
+        bytes memory strBytes = bytes(str);
+        bytes memory result = new bytes(endIndex - startIndex);
+        for (uint256 i = startIndex; i < endIndex; i++) {
+            result[i - startIndex] = strBytes[i];
+        }
+        return string(result);
+    }
 
     /**
      *  Validates the media type and associated data.
@@ -150,6 +175,22 @@ contract CultureIndex is
 
         // permit reasonable text
         if (bytes(metadata.text).length > MAX_TEXT_LENGTH) revert INVALID_MEDIA_METADATA();
+
+        string memory ipfsPrefix = "ipfs://";
+        string memory svgPrefix = "data:image/svg+xml;base64,";
+
+        // ensure animation url starts with ipfs://
+        if (
+            bytes(metadata.animationUrl).length > 0 &&
+            !Strings.equal(_substring(metadata.animationUrl, 0, 7), (ipfsPrefix))
+        ) revert INVALID_MEDIA_METADATA();
+
+        // ensure image url starts with ipfs:// or data:image/svg+xml;base64,
+        if (
+            bytes(metadata.image).length > 0 &&
+            !(Strings.equal(_substring(metadata.image, 0, 7), (ipfsPrefix)) ||
+                Strings.equal(_substring(metadata.image, 0, 26), (svgPrefix)))
+        ) revert INVALID_MEDIA_METADATA();
 
         //ensure name is set
         if (bytes(metadata.name).length == 0 || bytes(metadata.name).length > MAX_NAME_LENGTH)
@@ -208,23 +249,28 @@ contract CultureIndex is
         /// @dev Insert the new piece into the max heap with 0 vote weight
         maxHeap.insert(pieceId, 0);
 
+        // Pull necessary data
+        uint256 totalPointsSupply = revolutionPoints.totalSupply();
+        uint256 totalVotesSupply = _calculateVoteWeight(totalPointsSupply, revolutionToken.totalSupply());
+
+        // Save art piece to storage mapping
         ArtPiece storage newPiece = pieces[pieceId];
 
         newPiece.pieceId = pieceId;
-        newPiece.totalVotesSupply = _calculateVoteWeight(revolutionPoints.totalSupply(), revolutionToken.totalSupply());
-        newPiece.totalPointsSupply = revolutionPoints.totalSupply();
+        newPiece.totalVotesSupply = totalVotesSupply;
+        newPiece.totalPointsSupply = totalPointsSupply;
         newPiece.metadata = metadata;
         newPiece.sponsor = msg.sender;
         newPiece.creationBlock = block.number;
-        newPiece.quorumVotes = (quorumVotesBPS * newPiece.totalVotesSupply) / 10_000;
+        newPiece.quorumVotes = (quorumVotesBPS * totalVotesSupply) / 10_000;
 
         for (uint i; i < creatorArrayLength; i++) {
             newPiece.creators.push(creatorArray[i]);
         }
 
-        emit PieceCreated(pieceId, msg.sender, metadata, newPiece.quorumVotes, newPiece.totalVotesSupply, creatorArray);
+        emit PieceCreated(pieceId, msg.sender, metadata, newPiece.quorumVotes, totalVotesSupply, creatorArray);
 
-        return newPiece.pieceId;
+        return pieceId;
     }
 
     /**
@@ -499,21 +545,27 @@ contract CultureIndex is
      * @notice Pulls and drops the top-voted piece.
      * @return The top voted piece
      */
-    function dropTopVotedPiece() public nonReentrant returns (ArtPiece memory) {
+    function dropTopVotedPiece() public nonReentrant returns (ArtPieceCondensed memory) {
         if (msg.sender != dropperAdmin) revert NOT_DROPPER_ADMIN();
 
-        ICultureIndex.ArtPiece memory piece = getTopVotedPiece();
-        if (totalVoteWeights[piece.pieceId] < piece.quorumVotes) revert DOES_NOT_MEET_QUORUM();
+        uint256 pieceId = topVotedPieceId();
+
+        if (totalVoteWeights[pieceId] < pieces[pieceId].quorumVotes) revert DOES_NOT_MEET_QUORUM();
 
         //set the piece as dropped
-        pieces[piece.pieceId].isDropped = true;
+        pieces[pieceId].isDropped = true;
 
         //slither-disable-next-line unused-return
         maxHeap.extractMax();
 
-        emit PieceDropped(piece.pieceId, msg.sender);
+        emit PieceDropped(pieceId, msg.sender);
 
-        return pieces[piece.pieceId];
+        return
+            ICultureIndex.ArtPieceCondensed({
+                pieceId: pieceId,
+                creators: pieces[pieceId].creators,
+                sponsor: pieces[pieceId].sponsor
+            });
     }
 
     ///                                                          ///

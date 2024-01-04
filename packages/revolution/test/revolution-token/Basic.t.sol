@@ -96,7 +96,7 @@ contract TokenBasicTest is RevolutionTokenTestSuite {
         vm.startPrank(address(auction));
         uint256 tokenId = revolutionToken.mint();
 
-        (uint256 recordedPieceId, , , , , , , ) = revolutionToken.artPieces(tokenId);
+        uint256 recordedPieceId = revolutionToken.artPieces(tokenId);
 
         // Validate the token's associated art piece
         assertEq(recordedPieceId, artPieceId, "Minted token should be associated with the correct art piece");
@@ -419,7 +419,7 @@ contract TokenBasicTest is RevolutionTokenTestSuite {
         vm.startPrank(address(auction));
 
         // Act & Assert
-        vm.expectRevert(abi.encodeWithSignature("CULTURE_INDEX_EMPTY()"));
+        vm.expectRevert("dropTopVotedPiece failed");
         revolutionToken.mint();
     }
 
@@ -520,7 +520,7 @@ contract TokenBasicTest is RevolutionTokenTestSuite {
 
         uint256 preMintPieceId = cultureIndex.topVotedPieceId();
         uint256 tokenId = revolutionToken.mint();
-        (uint256 pieceId, , , , , , , ) = revolutionToken.artPieces(tokenId);
+        uint256 pieceId = revolutionToken.artPieces(tokenId);
 
         assertTrue(pieceId == preMintPieceId, "Art piece ID should match top voted piece ID before minting");
     }

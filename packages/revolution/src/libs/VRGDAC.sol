@@ -45,41 +45,35 @@ contract VRGDAC {
     // y to pay
     // given # of tokens sold and # to buy, returns amount to pay
     function xToY(int256 timeSinceStart, int256 sold, int256 amount) public view virtual returns (int256) {
-        unchecked {
-            return pIntegral(timeSinceStart, sold + amount) - pIntegral(timeSinceStart, sold);
-        }
+        return pIntegral(timeSinceStart, sold + amount) - pIntegral(timeSinceStart, sold);
     }
 
     // given amount to pay and amount sold so far, returns # of tokens to sell - raw form
     function yToX(int256 timeSinceStart, int256 sold, int256 amount) public view virtual returns (int256) {
         int256 soldDifference = wadMul(perTimeUnit, timeSinceStart) - sold;
-        unchecked {
-            return
-                wadDiv(
-                    wadMul(
-                        perTimeUnit,
-                        wadLn(
-                            wadDiv(
+
+        return
+            wadDiv(
+                wadMul(
+                    perTimeUnit,
+                    wadLn(
+                        wadDiv(
+                            wadMul(
+                                targetPrice,
+                                wadMul(perTimeUnit, wadExp(wadDiv(wadMul(soldDifference, decayConstant), perTimeUnit)))
+                            ),
+                            wadMul(
+                                targetPrice,
                                 wadMul(
-                                    targetPrice,
-                                    wadMul(
-                                        perTimeUnit,
-                                        wadExp(wadDiv(wadMul(soldDifference, decayConstant), perTimeUnit))
-                                    )
-                                ),
-                                wadMul(
-                                    targetPrice,
-                                    wadMul(
-                                        perTimeUnit,
-                                        wadPow(1e18 - priceDecayPercent, wadDiv(soldDifference, perTimeUnit))
-                                    )
-                                ) - wadMul(amount, decayConstant)
-                            )
+                                    perTimeUnit,
+                                    wadPow(1e18 - priceDecayPercent, wadDiv(soldDifference, perTimeUnit))
+                                )
+                            ) - wadMul(amount, decayConstant)
                         )
-                    ),
-                    decayConstant
-                );
-        }
+                    )
+                ),
+                decayConstant
+            );
     }
 
     // given # of tokens sold, returns integral of price p(x) = p0 * (1 - k)^(t - x/r)

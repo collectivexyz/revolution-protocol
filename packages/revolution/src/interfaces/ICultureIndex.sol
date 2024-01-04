@@ -110,6 +110,9 @@ interface ICultureIndex is ICultureIndexEvents {
     /// @dev Reverts if art piece metadata is invalid
     error INVALID_MEDIA_METADATA();
 
+    /// @dev Reverts if substring is invalid
+    error INVALID_SUBSTRING();
+
     /// @dev Reverts if bps does not sum to 10000
     error INVALID_BPS_SUM();
 
@@ -166,6 +169,18 @@ interface ICultureIndex is ICultureIndexEvents {
         uint256 quorumVotes;
         uint256 totalPointsSupply;
         uint256 totalVotesSupply;
+    }
+
+    /**
+     * @dev Struct defining an art piece for use in a token
+     *@param pieceId Unique identifier for the piece.
+     * @param creators Creators of the art piece.
+     * @param sponsor Address that created the piece.
+     */
+    struct ArtPieceCondensed {
+        uint256 pieceId;
+        CreatorBps[] creators;
+        address sponsor;
     }
 
     // Constant for max number of creators
@@ -279,7 +294,7 @@ interface ICultureIndex is ICultureIndexEvents {
      * @dev This function also updates internal state to reflect the piece's dropped status.
      * @return The ArtPiece struct of the top voted piece that was just dropped.
      */
-    function dropTopVotedPiece() external returns (ArtPiece memory);
+    function dropTopVotedPiece() external returns (ArtPieceCondensed memory);
 
     function getVotes(address account) external view returns (uint256);
 

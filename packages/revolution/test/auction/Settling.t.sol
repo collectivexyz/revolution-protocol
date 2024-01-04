@@ -294,8 +294,8 @@ contract AuctionHouseSettleTest is AuctionHouseTest {
     }
 
     function testSettlingAuctionWithMultipleCreators(uint8 nCreators) public {
-        vm.assume(nCreators > 2);
-        vm.assume(nCreators < 100);
+        vm.assume(nCreators > 0);
+        vm.assume(nCreators < cultureIndex.MAX_NUM_CREATORS());
 
         address[] memory creatorAddresses = new address[](nCreators);
         uint256[] memory creatorBps = new uint256[](nCreators);

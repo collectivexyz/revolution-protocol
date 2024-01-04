@@ -198,9 +198,13 @@ contract TokenSecurityTest is RevolutionTokenTestSuite {
         bool reverted = false;
 
         // Create an art piece with the maximum allowed number of creators
-        ICultureIndex.CreatorBps[] memory creators = new ICultureIndex.CreatorBps[](100);
+        ICultureIndex.CreatorBps[] memory creators = new ICultureIndex.CreatorBps[](cultureIndex.MAX_NUM_CREATORS());
+
         for (uint256 i = 0; i < creators.length; i++) {
-            creators[i] = ICultureIndex.CreatorBps({ creator: address(uint160(i + 1)), bps: 100 });
+            creators[i] = ICultureIndex.CreatorBps({
+                creator: address(uint160(i + 1)),
+                bps: 10_000 / cultureIndex.MAX_NUM_CREATORS()
+            });
         }
 
         try cultureIndex.createPiece(createDefaultMetadata(), creators) {
