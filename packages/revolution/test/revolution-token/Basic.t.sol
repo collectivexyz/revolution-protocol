@@ -419,7 +419,7 @@ contract TokenBasicTest is RevolutionTokenTestSuite {
         vm.startPrank(address(auction));
 
         // Act & Assert
-        vm.expectRevert(abi.encodeWithSignature("CULTURE_INDEX_EMPTY()"));
+        vm.expectRevert("dropTopVotedPiece failed");
         revolutionToken.mint();
     }
 
