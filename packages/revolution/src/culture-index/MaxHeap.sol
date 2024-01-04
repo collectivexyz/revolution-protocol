@@ -146,8 +146,9 @@ contract MaxHeap is VersionedContract, UUPS, Ownable2StepUpgradeable, Reentrancy
 
         uint256 current = size;
         while (current != 0 && items[heap[current]].value > items[heap[parent(current)]].value) {
-            swap(current, parent(current));
-            current = parent(current);
+            uint256 parentOfCurrent = parent(current);
+            swap(current, parentOfCurrent);
+            current = parentOfCurrent;
         }
         size++;
     }
