@@ -540,37 +540,24 @@ contract CultureIndex is
             10_000;
     }
 
-    event LogValue(string key, uint256 value);
-
     /**
      * @notice Pulls and drops the top-voted piece.
      * @return The top voted piece
      */
     function dropTopVotedPiece() public nonReentrant returns (ArtPieceCondensed memory) {
-        emit LogValue("c1()", gasleft());
-
         if (msg.sender != dropperAdmin) revert NOT_DROPPER_ADMIN();
-        emit LogValue("c2()", gasleft());
 
         uint256 pieceId = topVotedPieceId();
-        emit LogValue("c3()", gasleft());
 
         if (totalVoteWeights[pieceId] < pieces[pieceId].quorumVotes) revert DOES_NOT_MEET_QUORUM();
-
-        emit LogValue("c4()", gasleft());
 
         //set the piece as dropped
         pieces[pieceId].isDropped = true;
 
-        emit LogValue("c5()", gasleft());
-
         //slither-disable-next-line unused-return
         maxHeap.extractMax();
-        emit LogValue("c6()", gasleft());
 
         emit PieceDropped(pieceId, msg.sender);
-
-        emit LogValue("c7()", gasleft());
 
         return
             ICultureIndex.ArtPieceCondensed({

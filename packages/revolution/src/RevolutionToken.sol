@@ -275,23 +275,15 @@ contract RevolutionToken is
         return cultureIndex.getPieceById(artPieces[verbId]);
     }
 
-    event LogValue(string key, uint256 value);
-
     /**
      * @notice Mint a Verb with `verbId` to the provided `to` address. Pulls the top voted art piece from the CultureIndex.
      */
     function _mintTo(address to) internal returns (uint256) {
-        emit LogValue("1()", gasleft());
         // Use try/catch to handle potential failure
         try cultureIndex.dropTopVotedPiece() returns (ICultureIndex.ArtPieceCondensed memory artPiece) {
-            emit LogValue("2()", gasleft());
-
             uint256 verbId = _currentVerbId++;
-            emit LogValue("3()", gasleft());
 
             artPieces[verbId] = artPiece.pieceId;
-
-            emit LogValue("4()", gasleft());
 
             _mint(to, verbId);
 
