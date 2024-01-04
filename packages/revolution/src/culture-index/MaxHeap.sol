@@ -117,14 +117,14 @@ contract MaxHeap is VersionedContract, UUPS, Ownable2StepUpgradeable, Reentrancy
     /// @dev This ensures that the heap property is maintained
     /// @param pos The starting position for the heapify operation
     function maxHeapify(uint256 pos) internal {
+        if (pos >= (size / 2) && pos <= size) return;
+
         uint256 left = 2 * pos + 1;
-        uint256 right = 2 * pos + 2;
+        uint256 right = left + 1; // 2 * pos + 2, done to save gas
 
         uint256 posValue = items[heap[pos]].value;
         uint256 leftValue = left < size ? items[heap[left]].value : 0;
         uint256 rightValue = right < size ? items[heap[right]].value : 0;
-
-        if (pos >= (size / 2) && pos <= size) return;
 
         if (posValue < leftValue || posValue < rightValue) {
             if (leftValue > rightValue) {
