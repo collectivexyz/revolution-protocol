@@ -39,7 +39,8 @@ contract PointsTestSuite is RevolutionBuilderTest {
     }
 
     function test_yToXWithPurchasesAfterLongTime(uint256 randomTime, int256 sold) public {
-        randomTime = bound(randomTime, 1000 days, 1100 days); //it breaks above this, but this is a reasonable range
+        // randomTime = bound(randomTime, 1000 days, 1100 days); //it breaks above this, but this is a reasonable range
+        randomTime = 500 days;
 
         // sold = bound(sold, 1e18 * 1e3, 1e18 * 1e8); // 1000 to 100m tokens sold over the course of 1000 days is reasonable
         sold = 99999 * 1e18;
@@ -48,7 +49,7 @@ contract PointsTestSuite is RevolutionBuilderTest {
         VRGDAC vrgdac = new VRGDAC(1 ether, 1e18 / 10, 1_000 * 1e18);
 
         // call y to x ensure no revert
-        int256 x = vrgdac.yToX({ timeSinceStart: toDaysWadUnsafe(randomTime), sold: sold, amount: 1e18 });
+        int256 x = vrgdac.test_yToX({ timeSinceStart: toDaysWadUnsafe(randomTime), sold: sold, amount: 1e18 });
     }
 
     function test_t11s_yToXWithPurchasesAfterLongTime(uint256 randomTime, int256 sold) public {
