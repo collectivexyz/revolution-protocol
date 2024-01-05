@@ -95,18 +95,14 @@ contract VRGDAC {
         int256 sold,
         int256 amount
     ) public view virtual returns (int256) {
-        unchecked {
-            return
-                wadMul(
-                    -wadDiv(
-                        wadLn(
-                            1e18 - wadMul(amount, wadDiv(decayConstant, wadMul(perTimeUnit, p(timeSinceStart, sold))))
-                        ),
-                        decayConstant
-                    ),
-                    perTimeUnit
-                );
-        }
+        return
+            wadMul(
+                -wadDiv(
+                    wadLn(1e18 - wadMul(amount, wadDiv(decayConstant, wadMul(perTimeUnit, p(timeSinceStart, sold))))),
+                    decayConstant
+                ),
+                perTimeUnit
+            );
     }
 
     function p(int256 timeSinceStart, int256 sold) internal view returns (int256) {
