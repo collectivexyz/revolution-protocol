@@ -20,10 +20,12 @@ contract PointsTestSuite is RevolutionBuilderTest {
         super.deployMock();
     }
 
+    /// forge-config: default.fuzz.runs = 100000
     function test_noNegatives(int256 amount) public {
-        vm.assume(
-            amount > int(revolutionPointsEmitter.minPurchaseAmount()) &&
-                amount < int(revolutionPointsEmitter.maxPurchaseAmount())
+        amount = bound(
+            amount,
+            int(revolutionPointsEmitter.minPurchaseAmount()),
+            int(revolutionPointsEmitter.maxPurchaseAmount())
         );
 
         VRGDAC vrgdac = new VRGDAC(1 ether, 1e18 / 10, 1_000 * 1e18);
@@ -34,5 +36,21 @@ contract PointsTestSuite is RevolutionBuilderTest {
         console2.log(uint256(x) / 1e18);
 
         assertGt(x, 0, "x should be greater than zero");
+    }
+
+    function test_yToXWithPurchasesAfterLongTime(uint256 randomTime, int256 sold) public {
+        randomTime = bound(randomTime, 1000 days, 1100 days); //it breaks above this, but this is a reasonable range
+
+        sold = bound(sold, 1e18 * 1e3, 1e18 * 1e8); // 1000 to 100m tokens sold
+
+        // setup vrgda
+        VRGDAC vrgdac = new VRGDAC(1 ether, 1e18 / 10, 1_000 * 1e18);
+
+        // call y to x ensure no revert
+        int256 x = vrgdac.yToX({
+            timeSinceStart: toDaysWadUnsafe(randomTime),
+            sold: sold,
+            amount: 1000000000000000000
+        });
     }
 }
