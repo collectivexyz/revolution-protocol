@@ -88,4 +88,28 @@ contract VRGDAC {
                 decayConstant
             );
     }
+
+    // from https://gist.github.com/transmissions11/485a6e2deb89236202bd2f59796262fd
+    function yToX_t11s_Paradigm(
+        int256 timeSinceStart,
+        int256 sold,
+        int256 amount
+    ) public view virtual returns (int256) {
+        unchecked {
+            return
+                wadMul(
+                    -wadDiv(
+                        wadLn(
+                            1e18 - wadMul(amount, wadDiv(decayConstant, wadMul(perTimeUnit, p(timeSinceStart, sold))))
+                        ),
+                        decayConstant
+                    ),
+                    perTimeUnit
+                );
+        }
+    }
+
+    function p(int256 timeSinceStart, int256 sold) internal view returns (int256) {
+        return wadMul(targetPrice, wadPow(1e18 - priceDecayPercent, timeSinceStart - unsafeWadDiv(sold, perTimeUnit)));
+    }
 }
