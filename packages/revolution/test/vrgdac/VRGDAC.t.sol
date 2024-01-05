@@ -48,11 +48,7 @@ contract PointsTestSuite is RevolutionBuilderTest {
         VRGDAC vrgdac = new VRGDAC(1 ether, 1e18 / 10, 1_000 * 1e18);
 
         // call y to x ensure no revert
-        int256 x = vrgdac.yToX({
-            timeSinceStart: toDaysWadUnsafe(randomTime),
-            sold: sold,
-            amount: 1000000000000000000
-        });
+        int256 x = vrgdac.yToX({ timeSinceStart: toDaysWadUnsafe(randomTime), sold: sold, amount: 1e18 });
     }
 
     function test_t11s_yToXWithPurchasesAfterLongTime(uint256 randomTime, int256 sold) public {
@@ -65,10 +61,6 @@ contract PointsTestSuite is RevolutionBuilderTest {
         VRGDAC vrgdac = new VRGDAC(1 ether, 1e18 / 10, 1_000 * 1e18);
 
         // call y to x ensure no revert
-        int256 x = vrgdac.yToX_t11s_Paradigm({
-            timeSinceStart: toDaysWadUnsafe(randomTime),
-            sold: sold,
-            amount: 1000000000000000000
-        });
+        int256 x = vrgdac.yToX_t11s_Paradigm({ timeSinceStart: toDaysWadUnsafe(randomTime), sold: sold, amount: 1e18 });
     }
 }
