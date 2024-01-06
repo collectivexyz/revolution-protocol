@@ -38,18 +38,28 @@ contract PointsTestSuite is RevolutionBuilderTest {
         assertGt(x, 0, "x should be greater than zero");
     }
 
-    function test_yToXWithPurchasesAfterLongTime(uint256 randomTime, int256 sold) public {
-        // randomTime = bound(randomTime, 1000 days, 1100 days); //it breaks above this, but this is a reasonable range
-        randomTime = 365 days;
+    /// forge-config: default.fuzz.runs = 10000
+    function test_yToXWithPurchasesAfterLongTime(uint256 randomTime, uint256 sold) public {
+        randomTime = bound(randomTime, 100 days, 3650 days);
 
-        // sold = bound(sold, 1e18 * 1e3, 1e18 * 1e8); // 1000 to 100m tokens sold over the course of 1000 days is reasonable
-        // sold = 99999 * 1e18;
-        sold = 0;
+        uint256 perDayTarget = 1_000 * 1e18;
+        uint256 nDays = randomTime / 1 days;
+
+        emit log_named_uint("randomTime", randomTime);
+        emit log_named_uint("nDays", nDays);
+        emit log_named_uint("perDayTarget", perDayTarget / 1e18);
+
+        //bound sold to perDayTarget * nDays < 10% both ways
+        uint256 min = (perDayTarget * nDays * 9) / 10;
+        uint256 max = (perDayTarget * nDays * 11) / 10;
+        sold = bound(sold, min, max);
+
+        emit log_named_uint("sold", sold / 1e18);
 
         // setup vrgda
-        VRGDAC vrgdac = new VRGDAC(1 ether, 1e18 / 10, 1_000 * 1e18);
+        VRGDAC vrgdac = new VRGDAC(1 ether, 1e18 / 10, int(perDayTarget));
 
         // call y to x ensure no revert
-        int256 x = vrgdac.yToX({ timeSinceStart: toDaysWadUnsafe(randomTime), sold: sold, amount: 1e18 });
+        int256 x = vrgdac.yToX({ timeSinceStart: toDaysWadUnsafe(randomTime), sold: int(sold), amount: 1e18 });
     }
 }
