@@ -5,7 +5,7 @@ import { Test } from "forge-std/Test.sol";
 import { RevolutionPoints } from "../../src/RevolutionPoints.sol";
 import { RevolutionBuilderTest } from "../RevolutionBuilder.t.sol";
 import { VRGDAC } from "../../src/libs/VRGDAC.sol";
-import { toDaysWadUnsafe, unsafeWadDiv, wadLn, wadExp } from "../../src/libs/SignedWadMath.sol";
+import { toDaysWadUnsafe, unsafeWadDiv, wadLn, wadExp, wadMul } from "../../src/libs/SignedWadMath.sol";
 import { console2 } from "forge-std/console2.sol";
 
 contract PointsTestSuite is RevolutionBuilderTest {
@@ -38,7 +38,7 @@ contract PointsTestSuite is RevolutionBuilderTest {
         assertGt(x, 0, "x should be greater than zero");
     }
 
-    /// forge-config: default.fuzz.runs = 10000
+    /// forge-config: default.fuzz.runs = 21000
     function test_yToX_NoPurchasesAfterLongTime(int256 randomTime, int256 sold) public {
         randomTime = bound(randomTime, 10 days, 7665 days);
 
@@ -48,47 +48,46 @@ contract PointsTestSuite is RevolutionBuilderTest {
         int256 priceDecayPercent = 1e18 / 10;
         int256 targetPrice = 1 ether;
 
-        //bound sold to perTimeUnit * nDays < 40% both ways
-        int256 min = (perTimeUnit * nDays * 6) / 10;
+        //bound sold to perTimeUnit * nDays < 50% undersold
+        int256 min = (perTimeUnit * nDays * 5) / 10;
         sold = bound(sold, min, perTimeUnit * nDays);
-
-        emit log_named_int("sold", sold / 1e18);
 
         // setup vrgda
         VRGDAC vrgdac = new VRGDAC(targetPrice, priceDecayPercent, perTimeUnit);
 
         // call y to x ensure no revert
-        int256 x = vrgdac.yToX({ timeSinceStart: timeSinceStart, sold: sold, amount: 1e18 });
+        int256 x = vrgdac.yToX({ timeSinceStart: timeSinceStart, sold: sold, amount: targetPrice });
+
+        // ensure x is not negative even though there haven't been any sales in forever
+        assertGt(x, 0, "x should be greater than zero");
     }
 
-    // /// forge-config: default.fuzz.runs = 10000
-    // function test_yToXWithManyPurchasesAfterLongTime(int256 randomTime, int256 sold) public {
-    //     randomTime = bound(randomTime, 100 days, 3650 days);
+    /// forge-config: default.fuzz.runs = 21000
+    function test_yToX_ManyPurchasesAfterLongTime(int256 randomTime, int256 sold) public {
+        randomTime = bound(randomTime, 10 days, 7665 days);
 
-    //     int256 perTimeUnit = 1_000 * 1e18;
-    //     int256 nDays = randomTime / 1 days;
-    //     int256 timeSinceStart = toDaysWadUnsafe(uint(randomTime));
-    //     int256 priceDecayPercent = 1e18 / 10;
+        int256 perTimeUnit = 1_000 * 1e18;
+        int256 nDays = randomTime / 1 days;
+        int256 timeSinceStart = toDaysWadUnsafe(uint(randomTime));
+        int256 priceDecayPercent = 1e18 / 10;
+        int256 targetPrice = 1 ether;
 
-    //     emit log_named_int("nDays", nDays);
-    //     emit log_named_int("perTimeUnit", perTimeUnit / 1e18);
+        //bound sold to perTimeUnit * nDays < 50% oversold
+        int256 max = (perTimeUnit * nDays * 15) / 10;
+        sold = bound(sold, perTimeUnit * nDays, max);
 
-    //     //bound sold to perTimeUnit * nDays < 40% both ways
-    //     int256 min = (perTimeUnit * nDays * 6) / 10;
-    //     int256 max = (perTimeUnit * nDays * 14) / 10;
-    //     sold = bound(sold, min, max);
+        emit log_named_int("sold", sold / 1e18);
+        emit log_named_int("targetPrice", targetPrice / 1e18);
 
-    //     emit log_named_int("sold", sold / 1e18);
+        // setup vrgda
+        VRGDAC vrgdac = new VRGDAC(1 ether, priceDecayPercent, perTimeUnit);
 
-    //     // setup vrgda
-    //     VRGDAC vrgdac = new VRGDAC(1 ether, priceDecayPercent, perTimeUnit);
+        int256 wadExpParameter = (wadLn(1e18 - priceDecayPercent) *
+            (timeSinceStart - unsafeWadDiv(sold, perTimeUnit))) / 1e18; // when this overflows, we just want to floor / max it
 
-    //     int256 wadExpParameter = (wadLn(1e18 - priceDecayPercent) *
-    //         (timeSinceStart - unsafeWadDiv(sold, perTimeUnit))) / 1e18; // when this overflows, we just want to floor / max it
+        emit log_named_int("wadExpParameter", wadExpParameter);
 
-    //     emit log_named_int("wadExpParameter", wadExpParameter / 1e18);
-
-    //     // call y to x ensure no revert
-    //     int256 x = vrgdac.yToX({ timeSinceStart: timeSinceStart, sold: sold, amount: 1e18 });
-    // }
+        // call y to x ensure no revert
+        int256 x = vrgdac.yToX({ timeSinceStart: timeSinceStart, sold: sold, amount: targetPrice });
+    }
 }

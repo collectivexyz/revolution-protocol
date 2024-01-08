@@ -80,8 +80,7 @@ contract VRGDAC {
         // wadPow -> x ** y == e ** (ln(x) * y)
         // so ln(x) * y is what goes into wadExp per the SignedWadMath function
         // divide by 1e18 because wadMath
-        int256 wadExpParameter = (wadLn(1e18 - priceDecayPercent) *
-            (timeSinceStart - unsafeWadDiv(sold, perTimeUnit))) / 1e18; // when this overflows, we just want to floor / max it
+        int256 x = (wadLn(1e18 - priceDecayPercent) * (timeSinceStart - unsafeWadDiv(sold, perTimeUnit))) / 1e18; // when this overflows, we just want to floor / max it
 
         // We want to make sure that the wadExp parameter is not too large or too small
         // If it is too large or too small, we will sacrifice precision to keep the VRGDA functional
@@ -90,17 +89,26 @@ contract VRGDAC {
         // From SignedWadMath.sol by t11s //
 
         // When the result is < 0.5 we return zero. This happens when
-        // x <= floor(log(0.5e18) * 1e18) ~ -42e18
+        // x <= floor(log(0.5e18) * 1e18) ~ -40.7e18
         // When this case is reached, we want to return 1 instead of 0 to avoid breaking the VRGDA
         // Intuitively, when we are way behind schedule eg: not enough tokens sold, the price for them is tiny
-        if (wadExpParameter <= -40753384493332877003) return wadMul(targetPrice, 1);
+        // Instead of returning 0 as the price, we return 1
+        if (x <= -40753384493332877003) return wadMul(targetPrice, 1);
 
         // When the result is > (2**255 - 1) / 1e18 we can not represent it as an
         // int. This happens when x >= floor(log((2**255 - 1) / 1e18) * 1e18) ~ 135.
         // When this case is reached, we want to return the max possible value instead of reverting
         // Intuitively, when we are way ahead of schedule eg: too many tokens sold, the price for them is huge
-        // Need to make sure this doesn't overflow, given we're multiplying targetPrice * max int256,
-        // if (wadExpParameter >= 135305999368893231589) return type(int256).max / 1e18;
+        // Need to make sure this doesn't overflow, given we're multiplying targetPrice * maxPrice * perTimeUnit
+        // Solve for x where the overflow occurs according to the formula
+        // p_0 * (e ** x) = (2 ** 255 - 1)
+        // Divide by 1e18 to get the x value for wadExp
+        // x = ln( (2 ** 255 - 1) / targetPrice) / 1e18
+        if (x >= wadLn((type(int256).max / targetPrice) / 1e18)) {
+            // When ahead of schedule drastically
+            // Return the max possible price value given we are about to also multiply by perTimeUnit
+            return (type(int256).max / perTimeUnit);
+        }
 
         // Otherwise return the normal formula
         // p_0 * (1 - k) ** (t - x / r)
