@@ -21,6 +21,9 @@ contract VRGDAC {
 
     int256 public immutable priceDecayPercent;
 
+    // e ** x bound for the p function in wad form
+    int256 public immutable maxXBound;
+
     /// @notice Sets target price and per time unit price decay for the VRGDA.
     /// @param _targetPrice The target price for a token if sold on pace, scaled by 1e18.
     /// @param _priceDecayPercent The percent price decays per unit of time with no sales, scaled by 1e18.
@@ -33,6 +36,8 @@ contract VRGDAC {
         priceDecayPercent = _priceDecayPercent;
 
         decayConstant = wadLn(1e18 - _priceDecayPercent);
+
+        maxXBound = wadLn((type(int256).max / _targetPrice) / 1e18);
 
         // The decay constant must be negative for VRGDAs to work.
         require(decayConstant < 0, "NON_NEGATIVE_DECAY_CONSTANT");
@@ -105,8 +110,7 @@ contract VRGDAC {
         // p_0 * (e ** x) = (2 ** 255 - 1)
         // Divide by 1e18 to get the x value for wadExp
         // x = ln( (2 ** 255 - 1) / targetPrice) / 1e18
-        //todo cache this value on initialization
-        if (x >= wadLn((type(int256).max / targetPrice) / 1e18)) {
+        if (x >= maxXBound) {
             // When ahead of schedule drastically
             // Return the max possible price value given we are about to also multiply by perTimeUnit
             return (type(int256).max / perTimeUnit);
