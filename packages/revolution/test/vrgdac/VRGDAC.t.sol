@@ -44,6 +44,7 @@ contract PointsTestSuite is RevolutionBuilderTest {
 
     /// forge-config: default.fuzz.runs = 21000
     function test_yToX_NoPurchasesAfterLongTime(
+        int256 amount,
         int256 randomTime,
         int256 sold,
         int256 perTimeUnit,
@@ -66,8 +67,14 @@ contract PointsTestSuite is RevolutionBuilderTest {
         // setup vrgda
         VRGDAC vrgdac = new VRGDAC(targetPrice, priceDecayPercent, perTimeUnit);
 
+        amount = bound(
+            amount,
+            int(revolutionPointsEmitter.minPurchaseAmount()),
+            int(revolutionPointsEmitter.maxPurchaseAmount())
+        );
+
         // call y to x ensure no revert
-        int256 x = vrgdac.yToX({ timeSinceStart: timeSinceStart, sold: sold, amount: targetPrice });
+        int256 x = vrgdac.yToX({ timeSinceStart: timeSinceStart, sold: sold, amount: amount });
 
         // ensure x is not negative even though there haven't been any sales in forever
         assertGe(x, 0, "x should be greater than or equal to zero");
@@ -75,6 +82,7 @@ contract PointsTestSuite is RevolutionBuilderTest {
 
     /// forge-config: default.fuzz.runs = 21000
     function test_yToX_ManyPurchasesAfterLongTime(
+        int256 amount,
         int256 randomTime,
         int256 sold,
         int256 perTimeUnit,
@@ -91,11 +99,7 @@ contract PointsTestSuite is RevolutionBuilderTest {
         int256 targetPrice = 1 ether;
 
         //bound sold to perTimeUnit * nDays < 50% oversold
-        int256 max = (perTimeUnit * nDays * 15) / 10;
-        sold = bound(sold, perTimeUnit * nDays, max);
-
-        emit log_named_int("sold", sold / 1e18);
-        emit log_named_int("targetPrice", targetPrice / 1e18);
+        sold = bound(sold, perTimeUnit * nDays, (perTimeUnit * nDays * 15) / 10);
 
         // setup vrgda
         VRGDAC vrgdac = new VRGDAC(1 ether, priceDecayPercent, perTimeUnit);
@@ -103,9 +107,13 @@ contract PointsTestSuite is RevolutionBuilderTest {
         int256 wadExpParameter = (wadLn(1e18 - priceDecayPercent) *
             (timeSinceStart - unsafeWadDiv(sold, perTimeUnit))) / 1e18; // when this overflows, we just want to floor / max it
 
-        emit log_named_int("wadExpParameter", wadExpParameter);
+        amount = bound(
+            amount,
+            int(revolutionPointsEmitter.minPurchaseAmount()),
+            int(revolutionPointsEmitter.maxPurchaseAmount())
+        );
 
         // call y to x ensure no revert
-        int256 x = vrgdac.yToX({ timeSinceStart: timeSinceStart, sold: sold, amount: targetPrice });
+        int256 x = vrgdac.yToX({ timeSinceStart: timeSinceStart, sold: sold, amount: amount });
     }
 }
