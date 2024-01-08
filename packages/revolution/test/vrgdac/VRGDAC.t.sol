@@ -21,11 +21,11 @@ contract PointsTestSuite is RevolutionBuilderTest {
     }
 
     /// forge-config: default.fuzz.runs = 100000
-    function test_noNegatives(int256 amount, int256 perTimeUnit) public {
+    function test_noNegatives(int256 amount, int256 perTimeUnit, int256 targetPrice) public {
         perTimeUnit = bound(perTimeUnit, 1 * 1e18, 1_000_000 * 1e18);
+        targetPrice = bound(targetPrice, 1 * 1e10, 1_000 * 1e18);
 
         int256 priceDecayPercent = 1e18 / 10;
-        int256 targetPrice = 1 ether;
 
         amount = bound(
             amount,
@@ -44,7 +44,13 @@ contract PointsTestSuite is RevolutionBuilderTest {
     }
 
     /// forge-config: default.fuzz.runs = 21000
-    function test_yToX_NoPurchasesAfterLongTime(int256 randomTime, int256 sold, int256 perTimeUnit) public {
+    function test_yToX_NoPurchasesAfterLongTime(
+        int256 randomTime,
+        int256 sold,
+        int256 perTimeUnit,
+        int256 targetPrice
+    ) public {
+        targetPrice = bound(targetPrice, 1 * 1e10, 1_000 * 1e18);
         perTimeUnit = bound(perTimeUnit, 1 * 1e18, 1_000_000 * 1e18);
         randomTime = bound(randomTime, 10 days, 7665 days);
 
@@ -68,7 +74,13 @@ contract PointsTestSuite is RevolutionBuilderTest {
     }
 
     /// forge-config: default.fuzz.runs = 21000
-    function test_yToX_ManyPurchasesAfterLongTime(int256 randomTime, int256 sold, int256 perTimeUnit) public {
+    function test_yToX_ManyPurchasesAfterLongTime(
+        int256 randomTime,
+        int256 sold,
+        int256 perTimeUnit,
+        int256 targetPrice
+    ) public {
+        targetPrice = bound(targetPrice, 1 * 1e10, 1_000 * 1e18);
         perTimeUnit = bound(perTimeUnit, 1 * 1e18, 1_000_000 * 1e18);
         randomTime = bound(randomTime, 10 days, 7665 days);
 
