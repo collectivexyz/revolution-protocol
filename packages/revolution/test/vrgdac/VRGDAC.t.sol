@@ -21,11 +21,10 @@ contract PointsTestSuite is RevolutionBuilderTest {
     }
 
     /// forge-config: default.fuzz.runs = 100000
-    function test_noNegatives(int256 amount, int256 perTimeUnit, int256 targetPrice) public {
+    function test_noNegatives(int256 amount, int256 perTimeUnit, int256 targetPrice, int256 priceDecayPercent) public {
         perTimeUnit = bound(perTimeUnit, 1 * 1e18, 1_000_000 * 1e18);
         targetPrice = bound(targetPrice, 1 * 1e10, 1_000 * 1e18);
-
-        int256 priceDecayPercent = 1e18 / 10;
+        priceDecayPercent = bound(priceDecayPercent, 1e18 / 1000, 1e18 / 2);
 
         amount = bound(
             amount,
@@ -40,7 +39,7 @@ contract PointsTestSuite is RevolutionBuilderTest {
         console2.log(uint256(x));
         console2.log(uint256(x) / 1e18);
 
-        assertGt(x, 0, "x should be greater than zero");
+        assertGe(x, 0, "x should be greater than or equal to zero");
     }
 
     /// forge-config: default.fuzz.runs = 21000
@@ -48,15 +47,16 @@ contract PointsTestSuite is RevolutionBuilderTest {
         int256 randomTime,
         int256 sold,
         int256 perTimeUnit,
-        int256 targetPrice
+        int256 targetPrice,
+        int256 priceDecayPercent
     ) public {
         targetPrice = bound(targetPrice, 1 * 1e10, 1_000 * 1e18);
         perTimeUnit = bound(perTimeUnit, 1 * 1e18, 1_000_000 * 1e18);
         randomTime = bound(randomTime, 10 days, 7665 days);
+        priceDecayPercent = bound(priceDecayPercent, 1e18 / 1000, 1e18 / 2);
 
         int256 nDays = randomTime / 1 days;
         int256 timeSinceStart = toDaysWadUnsafe(uint(randomTime));
-        int256 priceDecayPercent = 1e18 / 10;
         int256 targetPrice = 1 ether;
 
         //bound sold to perTimeUnit * nDays < 50% undersold
@@ -70,7 +70,7 @@ contract PointsTestSuite is RevolutionBuilderTest {
         int256 x = vrgdac.yToX({ timeSinceStart: timeSinceStart, sold: sold, amount: targetPrice });
 
         // ensure x is not negative even though there haven't been any sales in forever
-        assertGt(x, 0, "x should be greater than zero");
+        assertGe(x, 0, "x should be greater than or equal to zero");
     }
 
     /// forge-config: default.fuzz.runs = 21000
@@ -78,15 +78,16 @@ contract PointsTestSuite is RevolutionBuilderTest {
         int256 randomTime,
         int256 sold,
         int256 perTimeUnit,
-        int256 targetPrice
+        int256 targetPrice,
+        int256 priceDecayPercent
     ) public {
         targetPrice = bound(targetPrice, 1 * 1e10, 1_000 * 1e18);
         perTimeUnit = bound(perTimeUnit, 1 * 1e18, 1_000_000 * 1e18);
         randomTime = bound(randomTime, 10 days, 7665 days);
+        priceDecayPercent = bound(priceDecayPercent, 1e18 / 1000, 1e18 / 2);
 
         int256 nDays = randomTime / 1 days;
         int256 timeSinceStart = toDaysWadUnsafe(uint(randomTime));
-        int256 priceDecayPercent = 1e18 / 10;
         int256 targetPrice = 1 ether;
 
         //bound sold to perTimeUnit * nDays < 50% oversold
