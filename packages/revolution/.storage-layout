@@ -23,6 +23,13 @@
 | revolutionTokenVoteWeight | uint256                                                           | 13   | 0      | 32    | src/culture-index/CultureIndex.sol:CultureIndex |
 
 =======================
+➡ VRGDAC
+=======================
+
+| Name | Type | Slot | Offset | Bytes | Contract |
+|------|------|------|--------|-------|----------|
+
+=======================
 ➡ RevolutionPoints
 =======================
 
