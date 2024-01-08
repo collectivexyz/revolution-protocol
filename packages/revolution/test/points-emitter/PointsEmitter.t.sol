@@ -46,7 +46,7 @@ contract PointsEmitterTest is RevolutionBuilderTest {
         vm.deal(address(0), 100000 ether);
     }
 
-    function getTokenQuoteForEtherHelper(uint256 etherAmount, int256 supply) public view returns (int gainedX) {
+    function getTokenQuoteForEtherHelper(uint256 etherAmount, int256 supply) public returns (int gainedX) {
         // Note: By using toDaysWadUnsafe(block.timestamp - startTime) we are establishing that 1 "unit of time" is 1 day.
         // solhint-disable-next-line not-rely-on-time
         return
