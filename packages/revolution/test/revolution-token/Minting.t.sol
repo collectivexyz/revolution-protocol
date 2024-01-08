@@ -166,7 +166,7 @@ contract TokenMintingTest is RevolutionTokenTestSuite {
 
         uint256 expectedQuorum = ((10_000 + voteWeight) * cultureIndex.quorumVotesBPS()) / 10_000;
 
-        bool shouldRevertMint = voteWeight <= expectedQuorum;
+        bool shouldRevertMint = voteWeight < expectedQuorum;
 
         vm.startPrank(address(auction));
         if (shouldRevertMint) vm.expectRevert("dropTopVotedPiece failed");
