@@ -21,14 +21,19 @@ contract PointsTestSuite is RevolutionBuilderTest {
     }
 
     /// forge-config: default.fuzz.runs = 100000
-    function test_noNegatives(int256 amount) public {
+    function test_noNegatives(int256 amount, int256 perTimeUnit) public {
+        perTimeUnit = bound(perTimeUnit, 1 * 1e18, 1_000_000 * 1e18);
+
+        int256 priceDecayPercent = 1e18 / 10;
+        int256 targetPrice = 1 ether;
+
         amount = bound(
             amount,
             int(revolutionPointsEmitter.minPurchaseAmount()),
             int(revolutionPointsEmitter.maxPurchaseAmount())
         );
 
-        VRGDAC vrgdac = new VRGDAC(1 ether, 1e18 / 10, 1_000 * 1e18);
+        VRGDAC vrgdac = new VRGDAC(targetPrice, priceDecayPercent, perTimeUnit);
         int256 x = vrgdac.yToX({ timeSinceStart: 2000000000000000000, sold: 1000000000000000000, amount: amount });
 
         console2.log((x));
