@@ -39,10 +39,10 @@ contract PointsTestSuite is RevolutionBuilderTest {
     }
 
     /// forge-config: default.fuzz.runs = 21000
-    function test_yToX_NoPurchasesAfterLongTime(int256 randomTime, int256 sold) public {
+    function test_yToX_NoPurchasesAfterLongTime(int256 randomTime, int256 sold, int256 perTimeUnit) public {
+        perTimeUnit = bound(perTimeUnit, 1 * 1e18, 1_000_000 * 1e18);
         randomTime = bound(randomTime, 10 days, 7665 days);
 
-        int256 perTimeUnit = 1_000 * 1e18;
         int256 nDays = randomTime / 1 days;
         int256 timeSinceStart = toDaysWadUnsafe(uint(randomTime));
         int256 priceDecayPercent = 1e18 / 10;
@@ -63,10 +63,10 @@ contract PointsTestSuite is RevolutionBuilderTest {
     }
 
     /// forge-config: default.fuzz.runs = 21000
-    function test_yToX_ManyPurchasesAfterLongTime(int256 randomTime, int256 sold) public {
+    function test_yToX_ManyPurchasesAfterLongTime(int256 randomTime, int256 sold, int256 perTimeUnit) public {
+        perTimeUnit = bound(perTimeUnit, 1 * 1e18, 1_000_000 * 1e18);
         randomTime = bound(randomTime, 10 days, 7665 days);
 
-        int256 perTimeUnit = 1_000 * 1e18;
         int256 nDays = randomTime / 1 days;
         int256 timeSinceStart = toDaysWadUnsafe(uint(randomTime));
         int256 priceDecayPercent = 1e18 / 10;
