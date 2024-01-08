@@ -268,7 +268,7 @@ contract CultureIndex is
             newPiece.creators.push(creatorArray[i]);
         }
 
-        emit PieceCreated(pieceId, msg.sender, metadata, newPiece.quorumVotes, totalVotesSupply, creatorArray);
+        emit PieceCreated(pieceId, msg.sender, metadata, creatorArray);
 
         return pieceId;
     }

@@ -129,8 +129,6 @@ contract TokenBasicTest is RevolutionTokenTestSuite {
                 text: text,
                 mediaType: mediaType
             }),
-            0,
-            0,
             creators
         );
 

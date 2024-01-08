@@ -186,8 +186,6 @@ contract TokenSecurityTest is RevolutionTokenTestSuite {
                 text: "",
                 mediaType: ICultureIndex.MediaType.IMAGE
             }),
-            0,
-            0,
             creators
         );
 

@@ -20,16 +20,12 @@ interface ICultureIndexEvents {
      * @param pieceId Unique identifier for the newly created piece.
      * @param sponsor Address that created the piece.
      * @param metadata Metadata associated with the art piece.
-     * @param quorumVotes The quorum votes for the piece.
-     * @param totalVotesSupply The total votes supply for the piece.
      * @param creators Creators of the art piece.
      */
     event PieceCreated(
         uint256 indexed pieceId,
         address indexed sponsor,
         ICultureIndex.ArtPieceMetadata metadata,
-        uint256 quorumVotes,
-        uint256 totalVotesSupply,
         ICultureIndex.CreatorBps[] creators
     );
 
