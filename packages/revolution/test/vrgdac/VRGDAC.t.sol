@@ -49,9 +49,9 @@ contract PointsTestSuite is RevolutionBuilderTest {
         emit log_named_uint("nDays", nDays);
         emit log_named_uint("perDayTarget", perDayTarget / 1e18);
 
-        //bound sold to perDayTarget * nDays < 10% both ways
-        uint256 min = (perDayTarget * nDays * 9) / 10;
-        uint256 max = (perDayTarget * nDays * 11) / 10;
+        //bound sold to perDayTarget * nDays < 50% both ways
+        uint256 min = (perDayTarget * nDays * 5) / 10;
+        uint256 max = (perDayTarget * nDays * 15) / 10;
         sold = bound(sold, min, max);
 
         emit log_named_uint("sold", sold / 1e18);
