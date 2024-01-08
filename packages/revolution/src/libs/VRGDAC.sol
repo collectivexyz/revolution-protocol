@@ -75,7 +75,8 @@ contract VRGDAC {
     }
 
     function p(int256 timeSinceStart, int256 sold) internal view returns (int256) {
-        // we want to make sure we don't hit the precision limits of wadExp and permanently brick the vrgda
+        // we want to make sure we don't hit the precision limits of wadPow and permanently brick the vrgda
+
         // wadPow -> x ** y == e ** (ln(x) * y)
         // so ln(x) * y is what goes into wadExp per the SignedWadMath function
         // divide by 1e18 because wadMath
@@ -86,18 +87,20 @@ contract VRGDAC {
         // If it is too large or too small, we will sacrifice precision to keep the VRGDA functional
         // until it can get back on schedule
 
-        // From SignedWadMath.sol by t11s
+        // From SignedWadMath.sol by t11s //
+
         // When the result is < 0.5 we return zero. This happens when
         // x <= floor(log(0.5e18) * 1e18) ~ -42e18
         // When this case is reached, we want to return 1 instead of 0 to avoid breaking the VRGDA
         // Intuitively, when we are way behind schedule eg: not enough tokens sold, the price for them is tiny
-        if (wadExpParameter <= -42139678854452767551) return wadMul(targetPrice, 1);
+        if (wadExpParameter <= -40753384493332877003) return wadMul(targetPrice, 1);
 
         // When the result is > (2**255 - 1) / 1e18 we can not represent it as an
         // int. This happens when x >= floor(log((2**255 - 1) / 1e18) * 1e18) ~ 135.
-        // When this case is reached, we want to return the max int256 value instead of reverting
+        // When this case is reached, we want to return the max possible value instead of reverting
         // Intuitively, when we are way ahead of schedule eg: too many tokens sold, the price for them is huge
-        if (wadExpParameter >= 135305999368893231589) return wadMul(targetPrice, type(int256).max);
+        // Need to make sure this doesn't overflow, given we're multiplying targetPrice * max int256,
+        // if (wadExpParameter >= 135305999368893231589) return type(int256).max / 1e18;
 
         // Otherwise return the normal formula
         // p_0 * (1 - k) ** (t - x / r)
