@@ -117,7 +117,7 @@ contract VRGDAC {
         }
 
         // Otherwise return the normal formula
-        // p_0 * (1 - k) ** (t - x / r)
+        // p_0 * (1 - k) ** (t - x_start / r)
         return wadMul(targetPrice, wadPow(1e18 - priceDecayPercent, timeSinceStart - unsafeWadDiv(sold, perTimeUnit)));
     }
 }
