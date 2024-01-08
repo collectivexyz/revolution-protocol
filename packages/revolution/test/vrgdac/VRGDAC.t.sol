@@ -56,22 +56,23 @@ contract PointsTestSuite is RevolutionBuilderTest {
         randomTime = bound(randomTime, 10 days, 7665 days);
         priceDecayPercent = bound(priceDecayPercent, 1e18 / 1000, 1e18 / 2);
 
-        int256 nDays = randomTime / 1 days;
-        int256 timeSinceStart = toDaysWadUnsafe(uint(randomTime));
-        int256 targetPrice = 1 ether;
-
-        //bound sold to perTimeUnit * nDays < 50% undersold
-        int256 min = (perTimeUnit * nDays * 5) / 10;
-        sold = bound(sold, min, perTimeUnit * nDays);
-
-        // setup vrgda
-        VRGDAC vrgdac = new VRGDAC(targetPrice, priceDecayPercent, perTimeUnit);
-
         amount = bound(
             amount,
             int(revolutionPointsEmitter.minPurchaseAmount()),
             int(revolutionPointsEmitter.maxPurchaseAmount())
         );
+
+        // setup vrgda
+        VRGDAC vrgdac = new VRGDAC(targetPrice, priceDecayPercent, perTimeUnit);
+
+        int256 nDays = randomTime / 1 days;
+        int256 timeSinceStart = toDaysWadUnsafe(uint(randomTime));
+
+        //bound sold to perTimeUnit * nDays < 50% undersold
+        sold = bound(sold, (perTimeUnit * nDays * 5) / 10, perTimeUnit * nDays);
+
+        int256 e_x_param = (wadLn(1e18 - priceDecayPercent) * (timeSinceStart - unsafeWadDiv(sold, perTimeUnit))) /
+            1e18; // when this overflows, we just want to floor / max it
 
         // call y to x ensure no revert
         int256 x = vrgdac.yToX({ timeSinceStart: timeSinceStart, sold: sold, amount: amount });
@@ -93,25 +94,23 @@ contract PointsTestSuite is RevolutionBuilderTest {
         perTimeUnit = bound(perTimeUnit, 1 * 1e18, 1_000_000 * 1e18);
         randomTime = bound(randomTime, 10 days, 7665 days);
         priceDecayPercent = bound(priceDecayPercent, 1e18 / 1000, 1e18 / 2);
-
-        int256 nDays = randomTime / 1 days;
-        int256 timeSinceStart = toDaysWadUnsafe(uint(randomTime));
-        int256 targetPrice = 1 ether;
-
-        //bound sold to perTimeUnit * nDays < 50% oversold
-        sold = bound(sold, perTimeUnit * nDays, (perTimeUnit * nDays * 15) / 10);
-
-        // setup vrgda
-        VRGDAC vrgdac = new VRGDAC(1 ether, priceDecayPercent, perTimeUnit);
-
-        int256 wadExpParameter = (wadLn(1e18 - priceDecayPercent) *
-            (timeSinceStart - unsafeWadDiv(sold, perTimeUnit))) / 1e18; // when this overflows, we just want to floor / max it
-
         amount = bound(
             amount,
             int(revolutionPointsEmitter.minPurchaseAmount()),
             int(revolutionPointsEmitter.maxPurchaseAmount())
         );
+
+        // setup vrgda
+        VRGDAC vrgdac = new VRGDAC(targetPrice, priceDecayPercent, perTimeUnit);
+
+        int256 nDays = randomTime / 1 days;
+        int256 timeSinceStart = toDaysWadUnsafe(uint(randomTime));
+
+        //bound sold to perTimeUnit * nDays < 50% oversold
+        sold = bound(sold, perTimeUnit * nDays, (perTimeUnit * nDays * 15) / 10);
+
+        int256 wadExpParameter = (wadLn(1e18 - priceDecayPercent) *
+            (timeSinceStart - unsafeWadDiv(sold, perTimeUnit))) / 1e18; // when this overflows, we just want to floor / max it
 
         // call y to x ensure no revert
         int256 x = vrgdac.yToX({ timeSinceStart: timeSinceStart, sold: sold, amount: amount });

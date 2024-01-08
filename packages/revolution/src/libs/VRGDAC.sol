@@ -98,7 +98,16 @@ contract VRGDAC {
         // When this case is reached, we want to return 1 instead of 0 to avoid breaking the VRGDA
         // Intuitively, when we are way behind schedule eg: not enough tokens sold, the price for them is tiny
         // Instead of returning 0 as the price, we return 1
-        if (x <= -41446531673892822313) return wadMul(targetPrice, 1);
+        if (x <= -41446531673892822313) {
+            //don't allow 0 as the 2nd parameter to wadMul
+            int256 p_x = wadMul(targetPrice, 1);
+            // if p_x is 0, return 1 instead so we don't break the VRGDA
+            // nothing in this function depends on the amount of tokens being purchased, so we can return 1
+            if (p_x == 0) {
+                return 1;
+            }
+            return p_x;
+        }
 
         // When the result of wadExp is > (2**255 - 1) / 1e18 we can not represent it as an
         // int. This happens when x >= floor(log((2**255 - 1) / 1e18) * 1e18) ~ 135.
@@ -116,8 +125,15 @@ contract VRGDAC {
             return (type(int256).max / perTimeUnit);
         }
 
-        // Otherwise return the normal formula
-        // p_0 * (1 - k) ** (t - x_start / r)
-        return wadMul(targetPrice, wadPow(1e18 - priceDecayPercent, timeSinceStart - unsafeWadDiv(sold, perTimeUnit)));
+        int256 p_x = wadMul(
+            targetPrice,
+            wadPow(1e18 - priceDecayPercent, timeSinceStart - unsafeWadDiv(sold, perTimeUnit))
+        );
+        // if p_x is 0, return 1 instead so we don't break the VRGDA
+        // nothing in this function depends on the amount of tokens being purchased, so we can return 1
+        if (p_x == 0) {
+            return 1;
+        }
+        return p_x;
     }
 }
