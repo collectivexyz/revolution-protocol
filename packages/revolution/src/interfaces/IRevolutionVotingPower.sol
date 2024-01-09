@@ -13,11 +13,11 @@ import { ERC20VotesUpgradeable } from "../base/erc20/ERC20VotesUpgradeable.sol";
  */
 interface IRevolutionVotingPowerEvents {
     event ERC721VotingTokenUpdated(ERC721CheckpointableUpgradeable ERC721VotingToken);
-    event ERC721VotingTokenLocked();
+
     event ERC721VotingPowerUpdated(uint256 oldERC721VotingPower, uint256 newERC721VotingPower);
 
     event ERC20VotingTokenUpdated(ERC20VotesUpgradeable ERC20VotingToken);
-    event ERC20VotingTokenLocked();
+
     event ERC20VotingPowerUpdated(uint256 oldERC20VotingPower, uint256 newERC20VotingPower);
 }
 
