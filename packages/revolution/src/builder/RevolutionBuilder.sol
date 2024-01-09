@@ -306,6 +306,7 @@ contract RevolutionBuilder is
 
         descriptor = addresses.descriptor;
         auction = addresses.auction;
+        revolutionToken = addresses.revolutionToken;
         executor = addresses.executor;
         dao = addresses.dao;
 
