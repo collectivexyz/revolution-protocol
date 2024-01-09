@@ -21,6 +21,7 @@ contract TokenBasicTest is RevolutionTokenTestSuite {
     function testTokenMetadataIntegrity() public {
         // Create an art piece and mint a token
         uint256 artPieceId = createDefaultArtPiece();
+        vm.roll(block.number + 1);
 
         vm.stopPrank();
         vm.startPrank(address(auction));
@@ -43,7 +44,7 @@ contract TokenBasicTest is RevolutionTokenTestSuite {
         (string memory name, string memory description, string memory image) = parseJson(metadataJson);
 
         // Retrieve the expected metadata directly from the art piece for comparison
-        (, ICultureIndex.ArtPieceMetadata memory metadata, , , , , , ) = cultureIndex.pieces(artPieceId);
+        (, ICultureIndex.ArtPieceMetadata memory metadata, , , ) = cultureIndex.pieces(artPieceId);
 
         //assert name equals Verb + tokenId
         string memory expectedName = string(abi.encodePacked(tokenNamePrefix, " ", Strings.toString(tokenId)));
@@ -91,6 +92,7 @@ contract TokenBasicTest is RevolutionTokenTestSuite {
     /// @dev Tests that minted tokens are correctly associated with the art piece from CultureIndex
     function testCorrectArtAssociation() public {
         uint256 artPieceId = createDefaultArtPiece();
+        vm.roll(block.number + 1);
 
         vm.stopPrank();
         vm.startPrank(address(auction));
@@ -146,7 +148,7 @@ contract TokenBasicTest is RevolutionTokenTestSuite {
         );
 
         // Act
-        (, ICultureIndex.ArtPieceMetadata memory metadata, , , , , , ) = cultureIndex.pieces(artPieceId);
+        (, ICultureIndex.ArtPieceMetadata memory metadata, , , ) = cultureIndex.pieces(artPieceId);
 
         // Assert
         assertEq(metadata.name, "Mona Lisa", "The name of the art piece should match the provided name.");
@@ -314,6 +316,7 @@ contract TokenBasicTest is RevolutionTokenTestSuite {
         uint256 artPieceId = createDefaultArtPiece();
         address voter = address(0x5);
         uint256 voteWeight = 100;
+        vm.roll(block.number + 1);
 
         vm.stopPrank();
         vm.startPrank(address(auction));
@@ -399,6 +402,7 @@ contract TokenBasicTest is RevolutionTokenTestSuite {
         vm.startPrank(voter);
         cultureIndex.vote(artPieceId);
         vm.stopPrank();
+        vm.roll(block.number + 1);
 
         vm.startPrank(address(auction));
         // Act
@@ -515,6 +519,7 @@ contract TokenBasicTest is RevolutionTokenTestSuite {
 
         //create piece
         createDefaultArtPiece();
+        vm.roll(block.number + 1);
 
         uint256 preMintPieceId = cultureIndex.topVotedPieceId();
         uint256 tokenId = revolutionToken.mint();

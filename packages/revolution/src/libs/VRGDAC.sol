@@ -100,13 +100,13 @@ contract VRGDAC {
         // Instead of returning 0 as the price, we return 1
         if (x <= -41446531673892822313) {
             //don't allow 0 as the 2nd parameter to wadMul
-            int256 p_x = wadMul(targetPrice, 1);
-            // if p_x is 0, return 1 instead so we don't break the VRGDA
+            int256 p_x_min = wadMul(targetPrice, 1);
+            // if p_x_min is 0, return 1 instead so we don't break the VRGDA
             // nothing in this function depends on the amount of tokens being purchased, so we can return 1
-            if (p_x == 0) {
+            if (p_x_min == 0) {
                 return 1;
             }
-            return p_x;
+            return p_x_min;
         }
 
         // When the result of wadExp is > (2**255 - 1) / 1e18 we can not represent it as an

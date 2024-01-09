@@ -103,6 +103,8 @@ contract CultureIndexVotingBasicTest is CultureIndexTestSuite {
 
         // Mint an ERC721 token to the voter
         vm.startPrank(address(auction));
+        vm.roll(block.number + 1);
+
         revolutionToken.mint();
         revolutionToken.transferFrom(address(auction), voter, tokenId);
         assertEq(revolutionToken.ownerOf(tokenId), voter);
@@ -152,6 +154,7 @@ contract CultureIndexVotingBasicTest is CultureIndexTestSuite {
 
         vm.startPrank(address(revolutionPointsEmitter));
         revolutionPoints.mint(voter, voteWeight);
+        vm.roll(block.number + 1);
 
         vm.startPrank(address(auction));
         revolutionToken.mint(); // Mint an ERC721 token to the owner
@@ -200,6 +203,7 @@ contract CultureIndexVotingBasicTest is CultureIndexTestSuite {
         createDefaultArtPiece();
         address voter = address(this);
         uint256 initialPointsWeight = 50;
+        vm.roll(block.number + 1);
 
         // Set initial token balances
         vm.stopPrank();
@@ -354,6 +358,8 @@ contract CultureIndexVotingBasicTest is CultureIndexTestSuite {
         cultureIndex.vote(pieceId);
 
         vm.startPrank(address(revolutionToken));
+        vm.roll(block.number + 1); // Roll forward to ensure votes are snapshotted
+
         cultureIndex.dropTopVotedPiece(); // Drop the piece
 
         uint256[] memory pieceIds = new uint256[](1);
@@ -627,17 +633,30 @@ contract CultureIndexVotingBasicTest is CultureIndexTestSuite {
      * We expect the vote to fail since the piece has been dropped.
      */
     function testCannotVoteOnDroppedPiece() public {
-        uint256 newPieceId = createDefaultArtPiece();
-        vm.stopPrank();
-        vm.startPrank(address(revolutionPointsEmitter));
         vm.stopPrank();
         vm.startPrank(address(revolutionPointsEmitter));
         revolutionPoints.mint(address(this), 100);
         vm.roll(block.number + 1); // Roll forward to ensure votes are snapshotted
 
+        uint256 newPieceId = createDefaultArtPiece();
+
+        vm.roll(block.number + 1); // Roll forward to ensure votes are snapshotted
+
+        //prank this
+        vm.startPrank(address(this));
+        cultureIndex.vote(newPieceId);
+
         // Drop the top-voted piece (which should be the new piece)
         vm.startPrank(address(revolutionToken));
+        //vote for the piece
         cultureIndex.dropTopVotedPiece();
+
+        //mint to new address
+        vm.startPrank(address(revolutionPointsEmitter));
+        revolutionPoints.mint(address(auction), 100);
+
+        //prank auction
+        vm.startPrank(address(auction));
 
         // Try to vote for the dropped piece and expect to fail
         vm.expectRevert(abi.encodeWithSignature("ALREADY_DROPPED()"));

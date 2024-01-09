@@ -151,9 +151,6 @@ interface ICultureIndex is ICultureIndexEvents {
      * @param sponsor Address that created the piece.
      * @param isDropped Boolean indicating if the piece has been dropped.
      * @param creationBlock Block number when the piece was created.
-     * @param quorumVotes The quorum votes for the piece.
-     * @param totalPointsSupply The total RevolutionPoints supply for the piece.
-     * @param totalVotesSupply The total votes supply for the piece.
      */
     struct ArtPiece {
         uint256 pieceId;
@@ -162,9 +159,6 @@ interface ICultureIndex is ICultureIndexEvents {
         address sponsor;
         bool isDropped;
         uint256 creationBlock;
-        uint256 quorumVotes;
-        uint256 totalPointsSupply;
-        uint256 totalVotesSupply;
     }
 
     /**
