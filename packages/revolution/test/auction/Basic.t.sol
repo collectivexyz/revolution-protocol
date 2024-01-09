@@ -22,10 +22,13 @@ contract AuctionHouseBasicTest is AuctionHouseTest {
         auction.setEntropyRateBps(newEntropyRateBps);
     }
 
-    function testBidEventEmission() public {
+    function test_BidEventEmission() public {
         //setup bid
         uint256 bidAmount = 100 ether;
         uint256 verbId = createDefaultArtPiece();
+
+        // roll
+        vm.roll(block.number + 1);
 
         auction.unpause();
         vm.deal(address(1), bidAmount + 2 ether);
@@ -192,10 +195,13 @@ contract AuctionHouseBasicTest is AuctionHouseTest {
         assertEq(auction.duration(), 24 hours, "Auction duration should be set correctly");
     }
 
-    function testBidForAnotherAccount() public {
+    function test_BidForAnotherAccount() public {
         //setup bid
         uint256 bidAmount = 100 ether;
         uint256 verbId = createDefaultArtPiece();
+
+        // roll
+        vm.roll(block.number + 1);
 
         auction.unpause();
         vm.deal(address(1), bidAmount + 2 ether);
@@ -244,8 +250,10 @@ contract AuctionHouseBasicTest is AuctionHouseTest {
         assertEq(revolutionToken.ownerOf(verbId), address(21), "Verb should be transferred to bidder param");
     }
 
-    function testAuctionCreation() public {
+    function test_AuctionCreation() public {
         createDefaultArtPiece();
+
+        vm.roll(block.number + 1); // roll block number to enable voting snapshot
 
         auction.unpause();
         uint256 startTime = block.timestamp;
@@ -266,11 +274,13 @@ contract AuctionHouseBasicTest is AuctionHouseTest {
         assertEq(settled, false, "Auction should not be settled");
     }
 
-    function testBiddingProcess(uint256 bidAmount) public {
+    function test_BiddingProcess(uint256 bidAmount) public {
         vm.assume(bidAmount > auction.reservePrice());
         vm.assume(bidAmount < 10_000_000 ether);
 
         createDefaultArtPiece();
+
+        vm.roll(block.number + 1); // roll block number to enable voting snapshot
 
         auction.unpause();
         vm.deal(address(1), bidAmount + 2 ether);
