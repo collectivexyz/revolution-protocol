@@ -75,6 +75,7 @@ contract TokenSecurityTest is RevolutionTokenTestSuite {
         vm.startPrank(address(auction));
 
         createDefaultArtPiece();
+        vm.roll(vm.getBlockNumber() + 1);
 
         uint256 tokenId = revolutionToken.mint();
 
@@ -186,8 +187,6 @@ contract TokenSecurityTest is RevolutionTokenTestSuite {
                 text: "",
                 mediaType: ICultureIndex.MediaType.IMAGE
             }),
-            0,
-            0,
             creators
         );
 
@@ -220,6 +219,7 @@ contract TokenSecurityTest is RevolutionTokenTestSuite {
     function testMintToDropTopVotedPieceFailure() public {
         // Create a default art piece to have something to mint
         createDefaultArtPiece();
+        vm.roll(vm.getBlockNumber() + 1);
 
         // Mock the CultureIndex to simulate dropTopVotedPiece failure
         address cultureIndexMock = address(new CultureIndexMock());

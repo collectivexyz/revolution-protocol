@@ -62,6 +62,9 @@ contract MaxHeap is VersionedContract, UUPS, Ownable2StepUpgradeable, Reentrancy
     /// @notice Reverts for position zero
     error INVALID_POSITION_ZERO();
 
+    /// @notice Reverts for invalid piece ID
+    error INVALID_PIECE_ID();
+
     ///                                                          ///
     ///                         INITIALIZER                      ///
     ///                                                          ///
@@ -158,6 +161,9 @@ contract MaxHeap is VersionedContract, UUPS, Ownable2StepUpgradeable, Reentrancy
     /// @param newValue The new value for the item
     /// @dev This function adjusts the heap to maintain the max-heap property after updating the vote count
     function updateValue(uint256 itemId, uint256 newValue) public onlyAdmin {
+        //ensure itemId exists in the heap
+        if (items[itemId].heapIndex >= size) revert INVALID_PIECE_ID();
+
         uint256 position = items[itemId].heapIndex;
         uint256 oldValue = items[itemId].value;
 

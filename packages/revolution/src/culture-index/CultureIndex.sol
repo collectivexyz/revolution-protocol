@@ -249,26 +249,19 @@ contract CultureIndex is
         /// @dev Insert the new piece into the max heap with 0 vote weight
         maxHeap.insert(pieceId, 0);
 
-        // Pull necessary data
-        uint256 totalPointsSupply = revolutionPoints.totalSupply();
-        uint256 totalVotesSupply = _calculateVoteWeight(totalPointsSupply, revolutionToken.totalSupply());
-
         // Save art piece to storage mapping
         ArtPiece storage newPiece = pieces[pieceId];
 
         newPiece.pieceId = pieceId;
-        newPiece.totalVotesSupply = totalVotesSupply;
-        newPiece.totalPointsSupply = totalPointsSupply;
         newPiece.metadata = metadata;
         newPiece.sponsor = msg.sender;
         newPiece.creationBlock = block.number;
-        newPiece.quorumVotes = (quorumVotesBPS * totalVotesSupply) / 10_000;
 
         for (uint i; i < creatorArrayLength; i++) {
             newPiece.creators.push(creatorArray[i]);
         }
 
-        emit PieceCreated(pieceId, msg.sender, metadata, newPiece.quorumVotes, totalVotesSupply, creatorArray);
+        emit PieceCreated(pieceId, msg.sender, metadata, creatorArray);
 
         return pieceId;
     }
@@ -543,6 +536,19 @@ contract CultureIndex is
     }
 
     /**
+     * @notice Current quorum votes for a specific piece using ERC721 Total Supply, ERC721 Vote Weight, and RevolutionPoints Total Supply
+     * @param pieceId The ID of the art piece.
+     */
+    function quorumVotesForPiece(uint256 pieceId) public view returns (uint256) {
+        return
+            (quorumVotesBPS *
+                _calculateVoteWeight(
+                    revolutionPoints.getPastTotalSupply(pieces[pieceId].creationBlock),
+                    revolutionToken.getPastTotalSupply(pieces[pieceId].creationBlock)
+                )) / 10_000;
+    }
+
+    /**
      * @notice Pulls and drops the top-voted piece.
      * @return The top voted piece
      */
@@ -551,7 +557,14 @@ contract CultureIndex is
 
         uint256 pieceId = topVotedPieceId();
 
-        if (totalVoteWeights[pieceId] < pieces[pieceId].quorumVotes) revert DOES_NOT_MEET_QUORUM();
+        uint256 creationBlock = pieces[pieceId].creationBlock;
+
+        uint256 pastQuorumVotes = (quorumVotesBPS *
+            _calculateVoteWeight(
+                revolutionPoints.getPastTotalSupply(creationBlock),
+                revolutionToken.getPastTotalSupply(creationBlock)
+            )) / 10_000;
+        if (totalVoteWeights[pieceId] < pastQuorumVotes) revert DOES_NOT_MEET_QUORUM();
 
         //set the piece as dropped
         pieces[pieceId].isDropped = true;
