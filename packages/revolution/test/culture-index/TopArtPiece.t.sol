@@ -91,6 +91,7 @@ contract CultureIndexArtPieceTest is CultureIndexTestSuite {
 
         vm.roll(block.number + 1); // roll block number to enable voting snapshot
         uint256 firstPieceId = voter1Test.createDefaultArtPiece();
+        vm.roll(block.number + 1); // roll block number to enable voting snapshot
 
         voter1Test.voteForPiece(firstPieceId);
         vm.startPrank(address(revolutionToken));
@@ -99,7 +100,7 @@ contract CultureIndexArtPieceTest is CultureIndexTestSuite {
         assertEq(poppedPiece.pieceId, firstPieceId, "Popped piece should be the first piece");
     }
 
-    function testRemovedPieceShouldBeReplaced() public {
+    function test_RemovedPieceShouldBeReplaced() public {
         vm.stopPrank();
         vm.startPrank(address(revolutionPointsEmitter));
         revolutionPoints.mint(address(voter1Test), 100);
@@ -108,6 +109,7 @@ contract CultureIndexArtPieceTest is CultureIndexTestSuite {
 
         uint256 firstPieceId = voter1Test.createDefaultArtPiece();
         uint256 secondPieceId = voter2Test.createDefaultArtPiece();
+        vm.roll(block.number + 1); // roll block number to enable voting snapshot
 
         voter1Test.voteForPiece(firstPieceId);
         voter2Test.voteForPiece(secondPieceId);
@@ -232,6 +234,7 @@ contract CultureIndexArtPieceTest is CultureIndexTestSuite {
 
         // Pop the top voted piece and log the gas used.
         uint256 startGas = gasleft();
+        vm.roll(block.number + 1); // roll block number to enable voting snapshot
 
         cultureIndex.dropTopVotedPiece();
         uint256 gasUsed = startGas - gasleft();
@@ -249,6 +252,7 @@ contract CultureIndexArtPieceTest is CultureIndexTestSuite {
         }
 
         vm.startPrank(address(revolutionToken));
+        vm.roll(block.number + 1); // roll block number to enable voting snapshot
 
         // Pop the top voted piece and log the gas used.
         startGas = gasleft();
@@ -259,7 +263,7 @@ contract CultureIndexArtPieceTest is CultureIndexTestSuite {
         assertLt(gasUsed2, gasUsed * 2, "Should not be more than double the gas");
     }
 
-    function testDropTopVotedPieceSequentialOrder() public {
+    function test_DropTopVotedPieceSequentialOrder() public {
         vm.stopPrank();
         vm.startPrank(address(revolutionPointsEmitter));
         // Create some pieces and vote on them
@@ -268,12 +272,15 @@ contract CultureIndexArtPieceTest is CultureIndexTestSuite {
 
         uint256 pieceId1 = voter1Test.createDefaultArtPiece();
 
+        vm.roll(block.number + 1); // roll block number to enable voting snapshot
+
         voter1Test.voteForPiece(pieceId1);
 
         revolutionPoints.mint(address(voter1Test), 20);
         vm.roll(block.number + 1); // roll block number to enable voting snapshot
 
         uint256 pieceId2 = voter1Test.createDefaultArtPiece();
+        vm.roll(block.number + 1); // roll block number to enable voting snapshot
 
         voter1Test.voteForPiece(pieceId2);
 
@@ -292,7 +299,7 @@ contract CultureIndexArtPieceTest is CultureIndexTestSuite {
     }
 
     /// @dev Ensure that the dropTopVotedPiece function behaves correctly when there are no more pieces to drop
-    function testDropTopVotedPieceWithNoMorePieces() public {
+    function test_DropTopVotedPieceWithNoMorePieces() public {
         vm.stopPrank();
         vm.startPrank(address(revolutionPointsEmitter));
         // Create and vote on a single piece
@@ -300,6 +307,7 @@ contract CultureIndexArtPieceTest is CultureIndexTestSuite {
         vm.roll(block.number + 1); // roll block number to enable voting snapshot
 
         uint256 pieceId = voter1Test.createDefaultArtPiece();
+        vm.roll(block.number + 1); // roll block number to enable voting snapshot
 
         voter1Test.voteForPiece(pieceId);
 
