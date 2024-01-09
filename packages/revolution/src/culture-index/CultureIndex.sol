@@ -280,6 +280,7 @@ contract CultureIndex is
      * @return A boolean indicating if the voter has voted for the art piece.
      */
     function hasVoted(uint256 pieceId, address voter) external view returns (bool) {
+        if (pieceId >= _currentPieceId) revert INVALID_PIECE_ID();
         return votes[pieceId][voter].voterAddress != address(0);
     }
 

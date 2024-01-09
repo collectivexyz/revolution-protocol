@@ -498,6 +498,25 @@ contract AuctionHouseSettleTest is AuctionHouseTest {
 
         assertEq(address(0x1).balance, creatorsShare);
     }
+
+    function testSettleAuctionZeroEntropyRate() public {
+        // set entropy rate to 0
+        auction.setEntropyRateBps(0);
+
+        createDefaultArtPiece();
+        auction.unpause();
+
+        address recipient = address(0x123); // Some EOA address
+        uint256 amount = 1 ether;
+
+        vm.startPrank(address(auction));
+        vm.deal(address(auction), amount);
+        auction.createBid{ value: amount }(0, address(this)); // Assuming first auction's verbId is 0
+        //go in future
+        vm.warp(block.timestamp + auction.duration() + 1); // Fast forward time to end the auction
+
+        auction.settleCurrentAndCreateNewAuction();
+    }
 }
 
 contract ContractWithoutReceiveOrFallback {
