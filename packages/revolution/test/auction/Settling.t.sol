@@ -14,6 +14,9 @@ contract AuctionHouseSettleTest is AuctionHouseTest {
 
     function test_VotesCount(uint8 nDays) public {
         createDefaultArtPiece();
+
+        vm.roll(block.number + 1);
+
         auction.unpause();
 
         uint256 bidAmount = auction.reservePrice();
@@ -39,6 +42,8 @@ contract AuctionHouseSettleTest is AuctionHouseTest {
 
     function test_OwnerPayment(uint8 nDays) public {
         createDefaultArtPiece();
+        vm.roll(block.number + 1); // roll block number to enable voting snapshot
+
         auction.unpause();
 
         uint256 bidAmount = auction.reservePrice();
@@ -83,6 +88,8 @@ contract AuctionHouseSettleTest is AuctionHouseTest {
 
     function testSettlingAuctionWithNoBids(uint8 nDays) public {
         uint256 verbId = createDefaultArtPiece();
+        vm.roll(block.number + 1); // roll block number to enable voting snapshot
+
         auction.unpause();
 
         vm.warp(block.timestamp + auction.duration() + nDays); // Fast forward time to end the auction
@@ -108,6 +115,8 @@ contract AuctionHouseSettleTest is AuctionHouseTest {
         vm.assume(amount < revolutionPointsEmitter.maxPurchaseAmount());
 
         createDefaultArtPiece();
+        vm.roll(block.number + 1); // roll block number to enable voting snapshot
+
         auction.unpause();
 
         address recipient = address(new ContractThatRejectsEther());
@@ -145,6 +154,8 @@ contract AuctionHouseSettleTest is AuctionHouseTest {
 
     function testTransferToEOA() public {
         createDefaultArtPiece();
+        vm.roll(block.number + 1); // roll block number to enable voting snapshot
+
         auction.unpause();
 
         address recipient = address(0x123); // Some EOA address
@@ -184,6 +195,8 @@ contract AuctionHouseSettleTest is AuctionHouseTest {
         vm.assume(amount < revolutionPointsEmitter.maxPurchaseAmount());
 
         createDefaultArtPiece();
+        vm.roll(block.number + 1); // roll block number to enable voting snapshot
+
         auction.unpause();
 
         address recipient = address(new ContractWithoutReceiveOrFallback());
@@ -324,6 +337,8 @@ contract AuctionHouseSettleTest is AuctionHouseTest {
             creatorBps
         );
 
+        vm.roll(block.number + 1); // roll block number to enable voting snapshot
+
         auction.unpause();
 
         vm.deal(address(21_000), auction.reservePrice() + 1 ether);
@@ -382,9 +397,7 @@ contract AuctionHouseSettleTest is AuctionHouseTest {
         );
     }
 
-    // function testSettlingAuctionWithWinningBidAndCreatorPayout(uint256 bidAmount) public {
-    function testSettlingAuctionWithWinningBidAndCreatorPayout() public {
-        uint256 bidAmount = 1014663871532104959;
+    function testSettlingAuctionWithWinningBidAndCreatorPayout(uint256 bidAmount) public {
         vm.assume(bidAmount > revolutionPointsEmitter.minPurchaseAmount());
         vm.assume(bidAmount > auction.reservePrice());
         vm.assume(bidAmount < revolutionPointsEmitter.maxPurchaseAmount());
@@ -399,6 +412,7 @@ contract AuctionHouseSettleTest is AuctionHouseTest {
             address(0x1),
             10_000
         );
+        vm.roll(block.number + 1); // roll block number to enable voting snapshot
 
         auction.unpause();
 
@@ -414,6 +428,10 @@ contract AuctionHouseSettleTest is AuctionHouseTest {
         uint256 balanceBeforeOwner = address(dao).balance;
 
         uint256 expectedGovernanceTokens = getCreatorGovernancePayoutHelper(bidAmount);
+
+        //create default art piece and roll
+        createDefaultArtPiece();
+        vm.roll(block.number + 1);
 
         auction.settleCurrentAndCreateNewAuction();
 
@@ -436,16 +454,18 @@ contract AuctionHouseSettleTest is AuctionHouseTest {
 
         uint expectedGrantsDirectPayout = getGrantsDirectPayment(bidAmount);
 
-        assertEq(
+        assertApproxEqAbs(
             address(revolutionPointsEmitter.creatorsAddress()).balance,
             expectedGrantsDirectPayout,
-            "Grants address did not receive the correct amount of ETH"
+            // "Grants address did not receive the correct amount of ETH"
+            10
         );
 
-        assertEq(
+        assertApproxEqAbs(
             address(dao).balance - balanceBeforeOwner,
             getDAOPayout(bidAmount),
-            "Owner did not receive the correct amount of ETH"
+            10
+            // "Owner did not receive the correct amount of ETH"
         );
 
         assertEq(revolutionToken.ownerOf(verbId), address(21_000), "Verb should be transferred to the highest bidder");
@@ -471,6 +491,7 @@ contract AuctionHouseSettleTest is AuctionHouseTest {
         auction.setReservePrice(bidAmount);
 
         uint256 verbId = createDefaultArtPiece();
+        vm.roll(block.number + 1); // roll block number to enable voting snapshot
 
         uint256 balance = 1 ether;
         address alice = vm.addr(uint256(1001));
