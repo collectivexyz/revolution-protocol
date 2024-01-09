@@ -558,8 +558,6 @@ contract CultureIndex is
 
         uint256 creationBlock = pieces[pieceId].creationBlock;
 
-        // if (totalVoteWeights[pieceId] < pieces[pieceId].quorumVotes) revert DOES_NOT_MEET_QUORUM();
-
         uint256 pastQuorumVotes = (quorumVotesBPS *
             _calculateVoteWeight(
                 revolutionPoints.getPastTotalSupply(creationBlock),
