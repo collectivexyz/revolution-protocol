@@ -5,3 +5,112 @@
 ➡ CultureIndex
 =======================
 
+| Name                      | Type                                                              | Slot | Offset | Bytes | Contract                                        |
+|---------------------------|-------------------------------------------------------------------|------|--------|-------|-------------------------------------------------|
+| nonces                    | mapping(address => uint256)                                       | 0    | 0      | 32    | src/culture-index/CultureIndex.sol:CultureIndex |
+| maxHeap                   | contract MaxHeap                                                  | 1    | 0      | 20    | src/culture-index/CultureIndex.sol:CultureIndex |
+| votingPower               | contract IRevolutionVotingPower                                   | 2    | 0      | 20    | src/culture-index/CultureIndex.sol:CultureIndex |
+| minVoteWeight             | uint256                                                           | 3    | 0      | 32    | src/culture-index/CultureIndex.sol:CultureIndex |
+| quorumVotesBPS            | uint256                                                           | 4    | 0      | 32    | src/culture-index/CultureIndex.sol:CultureIndex |
+| name                      | string                                                            | 5    | 0      | 32    | src/culture-index/CultureIndex.sol:CultureIndex |
+| description               | string                                                            | 6    | 0      | 32    | src/culture-index/CultureIndex.sol:CultureIndex |
+| pieces                    | mapping(uint256 => struct ICultureIndex.ArtPiece)                 | 7    | 0      | 32    | src/culture-index/CultureIndex.sol:CultureIndex |
+| _currentPieceId           | uint256                                                           | 8    | 0      | 32    | src/culture-index/CultureIndex.sol:CultureIndex |
+| votes                     | mapping(uint256 => mapping(address => struct ICultureIndex.Vote)) | 9    | 0      | 32    | src/culture-index/CultureIndex.sol:CultureIndex |
+| totalVoteWeights          | mapping(uint256 => uint256)                                       | 10   | 0      | 32    | src/culture-index/CultureIndex.sol:CultureIndex |
+| dropperAdmin              | address                                                           | 11   | 0      | 20    | src/culture-index/CultureIndex.sol:CultureIndex |
+| revolutionTokenVoteWeight | uint256                                                           | 12   | 0      | 32    | src/culture-index/CultureIndex.sol:CultureIndex |
+
+=======================
+➡ RevolutionVotingPower
+=======================
+
+| Name                       | Type                                     | Slot | Offset | Bytes | Contract                                            |
+|----------------------------|------------------------------------------|------|--------|-------|-----------------------------------------------------|
+| revolutionPoints           | contract ERC20VotesUpgradeable           | 0    | 0      | 20    | src/RevolutionVotingPower.sol:RevolutionVotingPower |
+| revolutionToken            | contract ERC721CheckpointableUpgradeable | 1    | 0      | 20    | src/RevolutionVotingPower.sol:RevolutionVotingPower |
+| revolutionPointsVoteWeight | uint256                                  | 2    | 0      | 32    | src/RevolutionVotingPower.sol:RevolutionVotingPower |
+| revolutionTokenVoteWeight  | uint256                                  | 3    | 0      | 32    | src/RevolutionVotingPower.sol:RevolutionVotingPower |
+
+=======================
+➡ VRGDAC
+=======================
+
+| Name | Type | Slot | Offset | Bytes | Contract |
+|------|------|------|--------|-------|----------|
+
+=======================
+➡ RevolutionPoints
+=======================
+
+| Name | Type | Slot | Offset | Bytes | Contract |
+|------|------|------|--------|-------|----------|
+
+=======================
+➡ RevolutionPointsEmitter
+=======================
+
+| Name            | Type                      | Slot | Offset | Bytes | Contract                                                |
+|-----------------|---------------------------|------|--------|-------|---------------------------------------------------------|
+| WETH            | address                   | 0    | 0      | 20    | src/RevolutionPointsEmitter.sol:RevolutionPointsEmitter |
+| token           | contract RevolutionPoints | 1    | 0      | 20    | src/RevolutionPointsEmitter.sol:RevolutionPointsEmitter |
+| vrgdac          | contract VRGDAC           | 2    | 0      | 20    | src/RevolutionPointsEmitter.sol:RevolutionPointsEmitter |
+| startTime       | uint256                   | 3    | 0      | 32    | src/RevolutionPointsEmitter.sol:RevolutionPointsEmitter |
+| creatorRateBps  | uint256                   | 4    | 0      | 32    | src/RevolutionPointsEmitter.sol:RevolutionPointsEmitter |
+| entropyRateBps  | uint256                   | 5    | 0      | 32    | src/RevolutionPointsEmitter.sol:RevolutionPointsEmitter |
+| creatorsAddress | address                   | 6    | 0      | 20    | src/RevolutionPointsEmitter.sol:RevolutionPointsEmitter |
+
+=======================
+➡ AuctionHouse
+=======================
+
+| Name                      | Type                              | Slot | Offset | Bytes | Contract                          |
+|---------------------------|-----------------------------------|------|--------|-------|-----------------------------------|
+| revolutionToken           | contract IRevolutionToken         | 0    | 0      | 20    | src/AuctionHouse.sol:AuctionHouse |
+| revolutionPointsEmitter   | contract IRevolutionPointsEmitter | 1    | 0      | 20    | src/AuctionHouse.sol:AuctionHouse |
+| WETH                      | address                           | 2    | 0      | 20    | src/AuctionHouse.sol:AuctionHouse |
+| timeBuffer                | uint256                           | 3    | 0      | 32    | src/AuctionHouse.sol:AuctionHouse |
+| reservePrice              | uint256                           | 4    | 0      | 32    | src/AuctionHouse.sol:AuctionHouse |
+| minBidIncrementPercentage | uint8                             | 5    | 0      | 1     | src/AuctionHouse.sol:AuctionHouse |
+| creatorRateBps            | uint256                           | 6    | 0      | 32    | src/AuctionHouse.sol:AuctionHouse |
+| minCreatorRateBps         | uint256                           | 7    | 0      | 32    | src/AuctionHouse.sol:AuctionHouse |
+| entropyRateBps            | uint256                           | 8    | 0      | 32    | src/AuctionHouse.sol:AuctionHouse |
+| duration                  | uint256                           | 9    | 0      | 32    | src/AuctionHouse.sol:AuctionHouse |
+| auction                   | struct IAuctionHouse.Auction      | 10   | 0      | 160   | src/AuctionHouse.sol:AuctionHouse |
+
+=======================
+➡ MaxHeap
+=======================
+
+| Name  | Type                                    | Slot | Offset | Bytes | Contract                              |
+|-------|-----------------------------------------|------|--------|-------|---------------------------------------|
+| admin | address                                 | 0    | 0      | 20    | src/culture-index/MaxHeap.sol:MaxHeap |
+| heap  | mapping(uint256 => uint256)             | 1    | 0      | 32    | src/culture-index/MaxHeap.sol:MaxHeap |
+| size  | uint256                                 | 2    | 0      | 32    | src/culture-index/MaxHeap.sol:MaxHeap |
+| items | mapping(uint256 => struct MaxHeap.Item) | 3    | 0      | 32    | src/culture-index/MaxHeap.sol:MaxHeap |
+
+=======================
+➡ RevolutionToken
+=======================
+
+| Name                 | Type                        | Slot | Offset | Bytes | Contract                                |
+|----------------------|-----------------------------|------|--------|-------|-----------------------------------------|
+| minter               | address                     | 0    | 0      | 20    | src/RevolutionToken.sol:RevolutionToken |
+| descriptor           | contract IDescriptorMinimal | 1    | 0      | 20    | src/RevolutionToken.sol:RevolutionToken |
+| cultureIndex         | contract ICultureIndex      | 2    | 0      | 20    | src/RevolutionToken.sol:RevolutionToken |
+| isMinterLocked       | bool                        | 2    | 20     | 1     | src/RevolutionToken.sol:RevolutionToken |
+| isCultureIndexLocked | bool                        | 2    | 21     | 1     | src/RevolutionToken.sol:RevolutionToken |
+| isDescriptorLocked   | bool                        | 2    | 22     | 1     | src/RevolutionToken.sol:RevolutionToken |
+| _currentVerbId       | uint256                     | 3    | 0      | 32    | src/RevolutionToken.sol:RevolutionToken |
+| _contractURIHash     | string                      | 4    | 0      | 32    | src/RevolutionToken.sol:RevolutionToken |
+| artPieces            | mapping(uint256 => uint256) | 5    | 0      | 32    | src/RevolutionToken.sol:RevolutionToken |
+
+=======================
+➡ Descriptor
+=======================
+
+| Name             | Type   | Slot | Offset | Bytes | Contract                      |
+|------------------|--------|------|--------|-------|-------------------------------|
+| isDataURIEnabled | bool   | 0    | 0      | 1     | src/Descriptor.sol:Descriptor |
+| baseURI          | string | 1    | 0      | 32    | src/Descriptor.sol:Descriptor |
+| tokenNamePrefix  | string | 2    | 0      | 32    | src/Descriptor.sol:Descriptor |
