@@ -240,7 +240,7 @@ contract CultureIndexVotingSignaturesTest is CultureIndexTestSuite {
         uint256[] memory pieceIds = new uint256[](1);
         pieceIds[0] = createDefaultArtPiece();
 
-        vm.roll(block.number + 1);
+        vm.roll(block.number + 2);
 
         uint256 nonce = cultureIndex.nonces(offchainVoter);
         uint256 deadline = block.timestamp + 1 days;

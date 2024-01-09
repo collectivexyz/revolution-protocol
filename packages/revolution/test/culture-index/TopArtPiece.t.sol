@@ -91,7 +91,7 @@ contract CultureIndexArtPieceTest is CultureIndexTestSuite {
 
         vm.roll(block.number + 1); // roll block number to enable voting snapshot
         uint256 firstPieceId = voter1Test.createDefaultArtPiece();
-        vm.roll(block.number + 1); // roll block number to enable voting snapshot
+        vm.roll(block.number + 2);
 
         voter1Test.voteForPiece(firstPieceId);
         vm.startPrank(address(revolutionToken));
@@ -109,7 +109,7 @@ contract CultureIndexArtPieceTest is CultureIndexTestSuite {
 
         uint256 firstPieceId = voter1Test.createDefaultArtPiece();
         uint256 secondPieceId = voter2Test.createDefaultArtPiece();
-        vm.roll(block.number + 1); // roll block number to enable voting snapshot
+        vm.roll(block.number + 2); // roll block number to enable voting snapshot
 
         voter1Test.voteForPiece(firstPieceId);
         voter2Test.voteForPiece(secondPieceId);
@@ -307,7 +307,7 @@ contract CultureIndexArtPieceTest is CultureIndexTestSuite {
         vm.roll(block.number + 1); // roll block number to enable voting snapshot
 
         uint256 pieceId = voter1Test.createDefaultArtPiece();
-        vm.roll(block.number + 1); // roll block number to enable voting snapshot
+        vm.roll(block.number + 2); // roll block number to enable voting snapshot
 
         voter1Test.voteForPiece(pieceId);
 

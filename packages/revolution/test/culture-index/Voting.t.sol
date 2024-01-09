@@ -108,7 +108,7 @@ contract CultureIndexVotingBasicTest is CultureIndexTestSuite {
         revolutionToken.mint();
         revolutionToken.transferFrom(address(auction), voter, tokenId);
         assertEq(revolutionToken.ownerOf(tokenId), voter);
-        vm.roll(block.number + 1);
+        vm.roll(block.number + 2);
 
         uint256 artPieceId = createDefaultArtPiece();
 
@@ -154,7 +154,7 @@ contract CultureIndexVotingBasicTest is CultureIndexTestSuite {
 
         vm.startPrank(address(revolutionPointsEmitter));
         revolutionPoints.mint(voter, voteWeight);
-        vm.roll(block.number + 1);
+        vm.roll(block.number + 2);
 
         vm.startPrank(address(auction));
         revolutionToken.mint(); // Mint an ERC721 token to the owner
@@ -358,7 +358,7 @@ contract CultureIndexVotingBasicTest is CultureIndexTestSuite {
         cultureIndex.vote(pieceId);
 
         vm.startPrank(address(revolutionToken));
-        vm.roll(block.number + 1); // Roll forward to ensure votes are snapshotted
+        vm.roll(block.number + 2); // Roll forward to ensure votes are snapshotted
 
         cultureIndex.dropTopVotedPiece(); // Drop the piece
 
@@ -640,7 +640,7 @@ contract CultureIndexVotingBasicTest is CultureIndexTestSuite {
 
         uint256 newPieceId = createDefaultArtPiece();
 
-        vm.roll(block.number + 1); // Roll forward to ensure votes are snapshotted
+        vm.roll(block.number + 2); // Roll forward to ensure votes are snapshotted
 
         //prank this
         vm.startPrank(address(this));
