@@ -25,12 +25,12 @@
 ➡ RevolutionVotingPower
 =======================
 
-| Name                       | Type                                     | Slot | Offset | Bytes | Contract                                            |
-|----------------------------|------------------------------------------|------|--------|-------|-----------------------------------------------------|
-| revolutionPoints           | contract ERC20VotesUpgradeable           | 0    | 0      | 20    | src/RevolutionVotingPower.sol:RevolutionVotingPower |
-| revolutionToken            | contract ERC721CheckpointableUpgradeable | 1    | 0      | 20    | src/RevolutionVotingPower.sol:RevolutionVotingPower |
-| revolutionPointsVoteWeight | uint256                                  | 2    | 0      | 32    | src/RevolutionVotingPower.sol:RevolutionVotingPower |
-| revolutionTokenVoteWeight  | uint256                                  | 3    | 0      | 32    | src/RevolutionVotingPower.sol:RevolutionVotingPower |
+| Name             | Type                                     | Slot | Offset | Bytes | Contract                                            |
+|------------------|------------------------------------------|------|--------|-------|-----------------------------------------------------|
+| points           | contract ERC20VotesUpgradeable           | 0    | 0      | 20    | src/RevolutionVotingPower.sol:RevolutionVotingPower |
+| token            | contract ERC721CheckpointableUpgradeable | 1    | 0      | 20    | src/RevolutionVotingPower.sol:RevolutionVotingPower |
+| pointsVoteWeight | uint256                                  | 2    | 0      | 32    | src/RevolutionVotingPower.sol:RevolutionVotingPower |
+| tokenVoteWeight  | uint256                                  | 3    | 0      | 32    | src/RevolutionVotingPower.sol:RevolutionVotingPower |
 
 =======================
 ➡ VRGDAC

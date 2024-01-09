@@ -21,12 +21,12 @@ contract CultureIndexVotingBasicTest is CultureIndexTestSuite {
 
         // Mock the Points and ERC721 token balances
         vm.mockCall(
-            address(cultureIndex.votingPower().revolutionPoints()),
+            address(cultureIndex.votingPower().points()),
             abi.encodeWithSelector(revolutionPoints.getVotes.selector, voter),
             abi.encode(pointsBalance)
         );
         vm.mockCall(
-            address(cultureIndex.votingPower().revolutionToken()),
+            address(cultureIndex.votingPower().token()),
             abi.encodeWithSelector(cultureIndex.votingPower().getVotes.selector, voter),
             abi.encode(erc721Balance)
         );
@@ -47,7 +47,7 @@ contract CultureIndexVotingBasicTest is CultureIndexTestSuite {
 
         // Mock ERC721 token balance
         vm.mockCall(
-            address(cultureIndex.votingPower().revolutionToken()),
+            address(cultureIndex.votingPower().token()),
             abi.encodeWithSelector(cultureIndex.votingPower().getPastVotes.selector, voter, block.number),
             abi.encode(erc721Weight)
         );

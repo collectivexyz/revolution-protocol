@@ -35,16 +35,16 @@ contract RevolutionVotingPower is
     ///                                                          ///
 
     // The ERC20 token used for voting
-    ERC20VotesUpgradeable public revolutionPoints;
+    ERC20VotesUpgradeable public points;
 
     // The ERC721 token used for voting
-    ERC721CheckpointableUpgradeable public revolutionToken;
+    ERC721CheckpointableUpgradeable public token;
 
     // The vote weight of the ERC20 token
-    uint256 public revolutionPointsVoteWeight;
+    uint256 public pointsVoteWeight;
 
     // The vote weight of the ERC721 token
-    uint256 public revolutionTokenVoteWeight;
+    uint256 public tokenVoteWeight;
 
     ///                                                          ///
     ///                         CONSTRUCTOR                      ///
@@ -90,21 +90,21 @@ contract RevolutionVotingPower is
         if (_revolutionToken == address(0)) revert INVALID_ADDRESS_ZERO();
 
         // Initialize the ERC20 & ERC721 tokens
-        revolutionPoints = ERC20VotesUpgradeable(_revolutionPoints);
-        revolutionToken = ERC721CheckpointableUpgradeable(_revolutionToken);
+        points = ERC20VotesUpgradeable(_revolutionPoints);
+        token = ERC721CheckpointableUpgradeable(_revolutionToken);
 
         // Initialize the vote weights
-        revolutionPointsVoteWeight = _revolutionPointsVoteWeight;
-        revolutionTokenVoteWeight = _revolutionTokenVoteWeight;
+        pointsVoteWeight = _revolutionPointsVoteWeight;
+        tokenVoteWeight = _revolutionTokenVoteWeight;
 
         __Ownable_init(_initialOwner);
         __ReentrancyGuard_init();
 
-        emit ERC721VotingTokenUpdated(revolutionToken);
-        emit ERC20VotingTokenUpdated(revolutionPoints);
+        emit ERC721VotingTokenUpdated(token);
+        emit ERC20VotingTokenUpdated(points);
 
-        emit ERC721VotingPowerUpdated(revolutionTokenVoteWeight, revolutionTokenVoteWeight);
-        emit ERC20VotingPowerUpdated(revolutionPointsVoteWeight, _revolutionTokenVoteWeight);
+        emit ERC721VotingPowerUpdated(tokenVoteWeight, _revolutionTokenVoteWeight);
+        emit ERC20VotingPowerUpdated(pointsVoteWeight, _revolutionPointsVoteWeight);
     }
 
     ///                                                          ///
@@ -134,7 +134,7 @@ contract RevolutionVotingPower is
      * @return The voting power of the voter.
      */
     function getVotes(address account) external view override returns (uint256) {
-        return _getVotes(account, revolutionPointsVoteWeight, revolutionTokenVoteWeight);
+        return _getVotes(account, pointsVoteWeight, tokenVoteWeight);
     }
 
     /**
@@ -157,13 +157,7 @@ contract RevolutionVotingPower is
      * @return The total voting power.
      */
     function getTotalVotes() external view override returns (uint256) {
-        return
-            _calculateVoteWeight(
-                revolutionPoints.totalSupply(),
-                revolutionPointsVoteWeight,
-                revolutionToken.totalSupply(),
-                revolutionTokenVoteWeight
-            );
+        return _calculateVoteWeight(points.totalSupply(), pointsVoteWeight, token.totalSupply(), tokenVoteWeight);
     }
 
     /**
@@ -178,9 +172,9 @@ contract RevolutionVotingPower is
     ) external view override returns (uint256) {
         return
             _calculateVoteWeight(
-                revolutionPoints.totalSupply(),
+                points.totalSupply(),
                 erc20PointsVoteWeight,
-                revolutionToken.totalSupply(),
+                token.totalSupply(),
                 erc721TokenVoteWeight
             );
     }
@@ -199,9 +193,9 @@ contract RevolutionVotingPower is
     ) internal view returns (uint256) {
         return
             _calculateVoteWeight(
-                revolutionPoints.getVotes(account),
+                points.getVotes(account),
                 erc20PointsVoteWeight,
-                revolutionToken.getVotes(account),
+                token.getVotes(account),
                 erc721TokenVoteWeight
             );
     }
@@ -213,7 +207,7 @@ contract RevolutionVotingPower is
      * @return The voting power of the voter.
      */
     function getPastVotes(address account, uint256 blockNumber) external view override returns (uint256) {
-        return _getPastVotes(account, blockNumber, revolutionPointsVoteWeight, revolutionTokenVoteWeight);
+        return _getPastVotes(account, blockNumber, pointsVoteWeight, tokenVoteWeight);
     }
 
     /**
@@ -241,10 +235,10 @@ contract RevolutionVotingPower is
     function getPastTotalVotes(uint256 blockNumber) external view override returns (uint256) {
         return
             _calculateVoteWeight(
-                revolutionPoints.getPastTotalSupply(blockNumber),
-                revolutionPointsVoteWeight,
-                revolutionToken.getPastTotalSupply(blockNumber),
-                revolutionTokenVoteWeight
+                points.getPastTotalSupply(blockNumber),
+                pointsVoteWeight,
+                token.getPastTotalSupply(blockNumber),
+                tokenVoteWeight
             );
     }
 
@@ -262,9 +256,9 @@ contract RevolutionVotingPower is
     ) external view override returns (uint256) {
         return
             _calculateVoteWeight(
-                revolutionPoints.getPastTotalSupply(blockNumber),
+                points.getPastTotalSupply(blockNumber),
                 erc20PointsVoteWeight,
-                revolutionToken.getPastTotalSupply(blockNumber),
+                token.getPastTotalSupply(blockNumber),
                 erc721TokenVoteWeight
             );
     }
@@ -284,9 +278,9 @@ contract RevolutionVotingPower is
     ) internal view returns (uint256) {
         return
             _calculateVoteWeight(
-                revolutionPoints.getPastVotes(account, blockNumber),
+                points.getPastVotes(account, blockNumber),
                 erc20PointsVoteWeight,
-                revolutionToken.getPastVotes(account, blockNumber),
+                token.getPastVotes(account, blockNumber),
                 erc721TokenVoteWeight
             );
     }
