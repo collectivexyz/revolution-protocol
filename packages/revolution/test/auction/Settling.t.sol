@@ -12,7 +12,7 @@ contract AuctionHouseSettleTest is AuctionHouseTest {
     // Fallback function to allow contract to receive Ether
     receive() external payable {}
 
-    function test_VotesCount(uint8 nDays) public {
+    function test__VotesCount(uint8 nDays) public {
         createDefaultArtPiece();
 
         vm.roll(vm.getBlockNumber() + 1);
@@ -34,13 +34,13 @@ contract AuctionHouseSettleTest is AuctionHouseTest {
         assertEq(revolutionToken.ownerOf(0), address(11), "Verb should be transferred to the highest bidder");
         // cultureIndex currentVotes of highest bidder should be 10
         assertEq(
-            cultureIndex.getVotes(address(11)),
+            cultureIndex.votingPower().getVotesWithWeights(address(11), 1, cultureIndex.revolutionTokenVoteWeight()),
             cultureIndex.revolutionTokenVoteWeight(),
             "Highest bidder should have 10 votes"
         );
     }
 
-    function test_OwnerPayment(uint8 nDays) public {
+    function test__OwnerPayment(uint8 nDays) public {
         createDefaultArtPiece();
         vm.roll(vm.getBlockNumber() + 1); // roll block number to enable voting snapshot
 
@@ -86,7 +86,7 @@ contract AuctionHouseSettleTest is AuctionHouseTest {
         );
     }
 
-    function testSettlingAuctionWithNoBids(uint8 nDays) public {
+    function test__SettlingAuctionWithNoBids(uint8 nDays) public {
         uint256 verbId = createDefaultArtPiece();
         vm.roll(vm.getBlockNumber() + 1); // roll block number to enable voting snapshot
 
@@ -101,7 +101,7 @@ contract AuctionHouseSettleTest is AuctionHouseTest {
         auction.settleCurrentAndCreateNewAuction();
     }
 
-    function testSettlingAuctionPrematurely() public {
+    function test__SettlingAuctionPrematurely() public {
         createDefaultArtPiece();
         auction.unpause();
 
@@ -109,7 +109,7 @@ contract AuctionHouseSettleTest is AuctionHouseTest {
         auction.settleAuction(); // Attempt to settle before the auction ends
     }
 
-    function testTransferFailureAndFallbackToWETH(uint256 amount) public {
+    function test__TransferFailureAndFallbackToWETH(uint256 amount) public {
         vm.assume(amount > revolutionPointsEmitter.minPurchaseAmount());
         vm.assume(amount > auction.reservePrice());
         vm.assume(amount < revolutionPointsEmitter.maxPurchaseAmount());
@@ -146,13 +146,13 @@ contract AuctionHouseSettleTest is AuctionHouseTest {
         assertEq(recipient.balance, 0); // Ether balance should still be 0
         //make sure voting weight on culture index is 721 vote weight for winning bidder
         assertEq(
-            cultureIndex.getVotes(address(this)),
+            cultureIndex.votingPower().getVotesWithWeights(address(this), 1, cultureIndex.revolutionTokenVoteWeight()),
             cultureIndex.revolutionTokenVoteWeight(),
             "Highest bidder should have 10 votes"
         );
     }
 
-    function testTransferToEOA() public {
+    function test__TransferToEOA() public {
         createDefaultArtPiece();
         vm.roll(vm.getBlockNumber() + 1); // roll block number to enable voting snapshot
 
@@ -183,13 +183,13 @@ contract AuctionHouseSettleTest is AuctionHouseTest {
         assertEq(recipient.balance, (amount * (10_000 - creatorRate)) / 10_000);
         //make sure voting weight on culture index is 721 vote weight for winning bidder
         assertEq(
-            cultureIndex.getVotes(address(this)),
+            cultureIndex.votingPower().getVotesWithWeights(address(this), 1, cultureIndex.revolutionTokenVoteWeight()),
             cultureIndex.revolutionTokenVoteWeight(),
             "Highest bidder should have 10 votes"
         );
     }
 
-    function testTransferToContractWithoutReceiveOrFallback(uint256 amount) public {
+    function test__TransferToContractWithoutReceiveOrFallback(uint256 amount) public {
         vm.assume(amount > revolutionPointsEmitter.minPurchaseAmount());
         vm.assume(amount > auction.reservePrice());
         vm.assume(amount < revolutionPointsEmitter.maxPurchaseAmount());
@@ -227,7 +227,7 @@ contract AuctionHouseSettleTest is AuctionHouseTest {
         assertEq(recipient.balance, 0); // Ether balance should still be 0
         //make sure voting weight on culture index is 721 vote weight for winning bidder
         assertEq(
-            cultureIndex.getVotes(address(this)),
+            cultureIndex.votingPower().getVotesWithWeights(address(this), 1, cultureIndex.revolutionTokenVoteWeight()),
             cultureIndex.revolutionTokenVoteWeight(),
             "Highest bidder should have 10 votes"
         );
@@ -306,7 +306,7 @@ contract AuctionHouseSettleTest is AuctionHouseTest {
         return (grantsShare * revolutionPointsEmitter.entropyRateBps()) / 10_000;
     }
 
-    function testSettlingAuctionWithMultipleCreators(uint8 nCreators) public {
+    function test__SettlingAuctionWithMultipleCreators(uint8 nCreators) public {
         vm.assume(nCreators > 0);
         vm.assume(nCreators < cultureIndex.MAX_NUM_CREATORS());
 
@@ -391,13 +391,17 @@ contract AuctionHouseSettleTest is AuctionHouseTest {
         assertEq(revolutionToken.ownerOf(0), address(21_000), "Verb should be transferred to the highest bidder");
         // Verify voting weight on culture index is 721 vote weight for winning bidder
         assertEq(
-            cultureIndex.getVotes(address(21_000)),
+            cultureIndex.votingPower().getVotesWithWeights(
+                address(21_000),
+                1,
+                cultureIndex.revolutionTokenVoteWeight()
+            ),
             cultureIndex.revolutionTokenVoteWeight(),
             "Highest bidder should have 10 votes"
         );
     }
 
-    function testSettlingAuctionWithWinningBidAndCreatorPayout(uint256 bidAmount) public {
+    function test__SettlingAuctionWithWinningBidAndCreatorPayout(uint256 bidAmount) public {
         vm.assume(bidAmount > revolutionPointsEmitter.minPurchaseAmount());
         vm.assume(bidAmount > auction.reservePrice());
         vm.assume(bidAmount < revolutionPointsEmitter.maxPurchaseAmount());
@@ -471,7 +475,11 @@ contract AuctionHouseSettleTest is AuctionHouseTest {
         assertEq(revolutionToken.ownerOf(verbId), address(21_000), "Verb should be transferred to the highest bidder");
         // Checking voting weight on culture index is 721 vote weight for winning bidder
         assertEq(
-            cultureIndex.getVotes(address(21_000)),
+            cultureIndex.votingPower().getVotesWithWeights(
+                address(21_000),
+                1,
+                cultureIndex.revolutionTokenVoteWeight()
+            ),
             cultureIndex.revolutionTokenVoteWeight(),
             "Highest bidder should have 10 votes"
         );
@@ -483,7 +491,7 @@ contract AuctionHouseSettleTest is AuctionHouseTest {
         );
     }
 
-    function test_EntropyPecentCannotLeadToDos() public {
+    function test__EntropyPecentCannotLeadToDos() public {
         //set entropy to 9999
         auction.setEntropyRateBps(9999);
         //set reserve price to 0.005 ether
@@ -520,11 +528,13 @@ contract AuctionHouseSettleTest is AuctionHouseTest {
         assertEq(address(0x1).balance, creatorsShare);
     }
 
-    function testSettleAuctionZeroEntropyRate() public {
+    function test__SettleAuctionZeroEntropyRate() public {
         // set entropy rate to 0
         auction.setEntropyRateBps(0);
 
         createDefaultArtPiece();
+        vm.roll(vm.getBlockNumber() + 1); // roll block number to enable voting snapshot
+
         auction.unpause();
 
         address recipient = address(0x123); // Some EOA address

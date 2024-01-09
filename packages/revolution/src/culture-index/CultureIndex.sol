@@ -8,6 +8,7 @@ import { UUPS } from "../libs/proxy/UUPS.sol";
 import { VersionedContract } from "../version/VersionedContract.sol";
 
 import { IRevolutionBuilder } from "../interfaces/IRevolutionBuilder.sol";
+import { IRevolutionVotingPower } from "../interfaces/IRevolutionVotingPower.sol";
 
 import { ERC20VotesUpgradeable } from "../base/erc20/ERC20VotesUpgradeable.sol";
 import { MaxHeap } from "./MaxHeap.sol";
@@ -72,16 +73,14 @@ contract CultureIndex is
 
     /**
      * @notice Initializes a token's metadata descriptor
-     * @param _revolutionPoints The address of the RevolutionPoints
-     * @param _revolutionToken The address of the ERC721 voting token, commonly the dropped art pieces
+     * @param _votingPower The address of the RevolutionVotingPower contract
      * @param _initialOwner The owner of the contract, allowed to drop pieces. Commonly updated to the AuctionHouse
      * @param _maxHeap The address of the max heap contract
      * @param _dropperAdmin The address that can drop new art pieces
      * @param _cultureIndexParams The CultureIndex settings
      */
     function initialize(
-        address _revolutionPoints,
-        address _revolutionToken,
+        address _votingPower,
         address _initialOwner,
         address _maxHeap,
         address _dropperAdmin,
@@ -91,8 +90,7 @@ contract CultureIndex is
 
         if (_cultureIndexParams.quorumVotesBPS > MAX_QUORUM_VOTES_BPS) revert INVALID_QUORUM_BPS();
         if (_cultureIndexParams.revolutionTokenVoteWeight <= 0) revert INVALID_ERC721_VOTING_WEIGHT();
-        if (_revolutionPoints == address(0)) revert ADDRESS_ZERO();
-        if (_revolutionToken == address(0)) revert ADDRESS_ZERO();
+        if (_votingPower == address(0)) revert ADDRESS_ZERO();
         if (_initialOwner == address(0)) revert ADDRESS_ZERO();
 
         // Setup ownable
@@ -103,8 +101,7 @@ contract CultureIndex is
 
         __ReentrancyGuard_init();
 
-        revolutionPoints = ERC20VotesUpgradeable(_revolutionPoints);
-        revolutionToken = ERC721CheckpointableUpgradeable(_revolutionToken);
+        votingPower = IRevolutionVotingPower(_votingPower);
         revolutionTokenVoteWeight = _cultureIndexParams.revolutionTokenVoteWeight;
         name = _cultureIndexParams.name;
         description = _cultureIndexParams.description;
@@ -278,46 +275,6 @@ contract CultureIndex is
     }
 
     /**
-     * @notice Returns the voting power of a voter at the current block.
-     * @param account The address of the voter.
-     * @return The voting power of the voter.
-     */
-    function getVotes(address account) external view override returns (uint256) {
-        return _getVotes(account);
-    }
-
-    /**
-     * @notice Returns the voting power of a voter at the current block.
-     * @param account The address of the voter.
-     * @return The voting power of the voter.
-     */
-    function getPastVotes(address account, uint256 blockNumber) external view override returns (uint256) {
-        return _getPastVotes(account, blockNumber);
-    }
-
-    /**
-     * @notice Calculates the vote weight of a voter.
-     * @param pointsBalance The RevolutionPoints balance of the voter.
-     * @param erc721Balance The ERC721 balance of the voter.
-     * @return The vote weight of the voter.
-     */
-    function _calculateVoteWeight(uint256 pointsBalance, uint256 erc721Balance) internal view returns (uint256) {
-        return pointsBalance + (erc721Balance * revolutionTokenVoteWeight);
-    }
-
-    function _getVotes(address account) internal view returns (uint256) {
-        return _calculateVoteWeight(revolutionPoints.getVotes(account), revolutionToken.getVotes(account));
-    }
-
-    function _getPastVotes(address account, uint256 blockNumber) internal view returns (uint256) {
-        return
-            _calculateVoteWeight(
-                revolutionPoints.getPastVotes(account, blockNumber),
-                revolutionToken.getPastVotes(account, blockNumber)
-            );
-    }
-
-    /**
      * @notice Cast a vote for a specific ArtPiece.
      * @param pieceId The ID of the ArtPiece to vote for.
      * @param voter The address of the voter.
@@ -331,7 +288,13 @@ contract CultureIndex is
         if (votes[pieceId][voter].voterAddress != address(0)) revert ALREADY_VOTED();
 
         // Use the previous block number to calculate the vote weight to prevent flash attacks
-        uint256 weight = _getPastVotes(voter, pieces[pieceId].creationBlock - 1);
+        uint256 erc20PointsVoteWeight = 1;
+        uint256 weight = votingPower.getPastVotesWithWeights(
+            voter,
+            pieces[pieceId].creationBlock - 1,
+            erc20PointsVoteWeight,
+            revolutionTokenVoteWeight
+        );
         if (weight <= minVoteWeight) revert WEIGHT_TOO_LOW();
 
         votes[pieceId][voter] = Vote(voter, weight);
@@ -530,9 +493,7 @@ contract CultureIndex is
      * Differs from `GovernerBravo` which uses fixed amount
      */
     function quorumVotes() public view returns (uint256) {
-        return
-            (quorumVotesBPS * _calculateVoteWeight(revolutionPoints.totalSupply(), revolutionToken.totalSupply())) /
-            10_000;
+        return (quorumVotesBPS * votingPower.getTotalVotesWithWeights(1, revolutionTokenVoteWeight)) / 10_000;
     }
 
     /**
@@ -542,10 +503,8 @@ contract CultureIndex is
     function quorumVotesForPiece(uint256 pieceId) public view returns (uint256) {
         return
             (quorumVotesBPS *
-                _calculateVoteWeight(
-                    revolutionPoints.getPastTotalSupply(pieces[pieceId].creationBlock),
-                    revolutionToken.getPastTotalSupply(pieces[pieceId].creationBlock)
-                )) / 10_000;
+                votingPower.getPastTotalVotesWithWeights(pieces[pieceId].creationBlock, 1, revolutionTokenVoteWeight)) /
+            10_000;
     }
 
     /**
@@ -557,13 +516,9 @@ contract CultureIndex is
 
         uint256 pieceId = topVotedPieceId();
 
-        uint256 creationBlock = pieces[pieceId].creationBlock;
-
         uint256 pastQuorumVotes = (quorumVotesBPS *
-            _calculateVoteWeight(
-                revolutionPoints.getPastTotalSupply(creationBlock),
-                revolutionToken.getPastTotalSupply(creationBlock)
-            )) / 10_000;
+            votingPower.getPastTotalVotesWithWeights(pieces[pieceId].creationBlock, 1, revolutionTokenVoteWeight)) /
+            10_000;
         if (totalVoteWeights[pieceId] < pastQuorumVotes) revert DOES_NOT_MEET_QUORUM();
 
         //set the piece as dropped

@@ -25,5 +25,7 @@ interface RevolutionBuilderTypesV1 {
         address revolutionToken;
         /// @notice Address for deployed MaxHeap contract
         address maxHeap;
+        /// @notice Address for deployed RevolutionVotingPower contract
+        address revolutionVotingPower;
     }
 }

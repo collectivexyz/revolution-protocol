@@ -286,22 +286,16 @@ interface ICultureIndex is ICultureIndexEvents {
      */
     function dropTopVotedPiece() external returns (ArtPieceCondensed memory);
 
-    function getVotes(address account) external view returns (uint256);
-
-    function getPastVotes(address account, uint256 blockNumber) external view returns (uint256);
-
     /**
      * @notice Initializes a token's metadata descriptor
-     * @param revolutionPoints The address of the revolution points
-     * @param revolutionToken The address of the ERC721 voting token, commonly the dropped art pieces
+     * @param votingPower The address of the revolution voting power contract
      * @param initialOwner The owner of the contract, allowed to drop pieces. Commonly updated to the AuctionHouse
      * @param maxHeap The address of the max heap contract
      * @param dropperAdmin The address that can drop new art pieces
      * @param cultureIndexParams The CultureIndex settings
      */
     function initialize(
-        address revolutionPoints,
-        address revolutionToken,
+        address votingPower,
         address initialOwner,
         address maxHeap,
         address dropperAdmin,
