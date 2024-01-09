@@ -710,7 +710,7 @@ contract CultureIndexVotingBasicTest is CultureIndexTestSuite {
 
         vm.roll(block.number + 1);
 
-        //for desired erc721 supply, loop create art pieces and drop them
+        //for desired erc721 supply, loop create art pieces and drop
         for (uint256 i = 0; i < erc721TotalSupply; i++) {
             createDefaultArtPiece();
             vm.roll(block.number + 1);
