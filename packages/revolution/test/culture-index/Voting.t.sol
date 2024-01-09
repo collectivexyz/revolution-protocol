@@ -16,23 +16,27 @@ contract CultureIndexVotingBasicTest is CultureIndexTestSuite {
     /// @dev Tests the vote weight calculation with ERC721 token
     function testCalculateVoteWeight() public {
         address voter = address(0x1);
-        uint256 pointsWeight = 100;
-        uint256 erc721Weight = 2; // Number of ERC721 tokens held by the voter
+        uint256 pointsBalance = 100;
+        uint256 erc721Balance = 2; // Number of ERC721 tokens held by the voter
 
         // Mock the Points and ERC721 token balances
         vm.mockCall(
-            address(cultureIndex.revolutionPoints()),
+            address(cultureIndex.votingPower().revolutionPoints()),
             abi.encodeWithSelector(revolutionPoints.getVotes.selector, voter),
-            abi.encode(pointsWeight)
+            abi.encode(pointsBalance)
         );
         vm.mockCall(
-            address(cultureIndex.revolutionToken()),
-            abi.encodeWithSelector(cultureIndex.getVotes.selector, voter),
-            abi.encode(erc721Weight)
+            address(cultureIndex.votingPower().revolutionToken()),
+            abi.encodeWithSelector(cultureIndex.votingPower().getVotes.selector, voter),
+            abi.encode(erc721Balance)
         );
 
-        uint256 expectedWeight = pointsWeight + (erc721Weight * cultureIndex.revolutionTokenVoteWeight());
-        uint256 actualWeight = cultureIndex.getVotes(voter);
+        uint256 expectedWeight = pointsBalance + (erc721Balance * cultureIndex.revolutionTokenVoteWeight());
+        uint256 actualWeight = cultureIndex.votingPower().getVotesWithWeights(
+            voter,
+            1,
+            cultureIndex.revolutionTokenVoteWeight()
+        );
         assertEq(expectedWeight, actualWeight);
     }
 
@@ -43,8 +47,8 @@ contract CultureIndexVotingBasicTest is CultureIndexTestSuite {
 
         // Mock ERC721 token balance
         vm.mockCall(
-            address(cultureIndex.revolutionToken()),
-            abi.encodeWithSelector(cultureIndex.getPastVotes.selector, voter, block.number),
+            address(cultureIndex.votingPower().revolutionToken()),
+            abi.encodeWithSelector(cultureIndex.votingPower().getPastVotes.selector, voter, block.number),
             abi.encode(erc721Weight)
         );
 
@@ -163,9 +167,13 @@ contract CultureIndexVotingBasicTest is CultureIndexTestSuite {
         assertEq(revolutionToken.balanceOf(address(auction)), 1, "ERC721 token should be minted");
         // ensure cultureindex currentvotes is correct
         assertEq(
-            cultureIndex.getVotes(address(auction)),
+            cultureIndex.votingPower().getVotesWithWeights(
+                address(auction),
+                1,
+                cultureIndex.revolutionTokenVoteWeight()
+            ),
             cultureIndex.revolutionTokenVoteWeight(),
-            "Vote weight should be correct"
+            "Vote weight for voter should be correct"
         );
 
         // burn the 721
@@ -175,10 +183,22 @@ contract CultureIndexVotingBasicTest is CultureIndexTestSuite {
         assertEq(revolutionToken.balanceOf(address(auction)), 0, "ERC721 token should be burned");
 
         // ensure cultureindex currentvotes is correct
-        assertEq(cultureIndex.getVotes(address(auction)), 0, "Vote weight should be correct");
+        assertEq(
+            cultureIndex.votingPower().getVotesWithWeights(
+                address(auction),
+                1,
+                cultureIndex.revolutionTokenVoteWeight()
+            ),
+            0,
+            "Vote weight for auction should be zero"
+        );
 
         // ensure that the points token balance is reflected for voter
-        uint256 newWeight = cultureIndex.getVotes(voter);
+        uint256 newWeight = cultureIndex.votingPower().getVotesWithWeights(
+            voter,
+            1,
+            cultureIndex.revolutionTokenVoteWeight()
+        );
         assertEq(newWeight, voteWeight * 2, "Vote weight should reset to zero after transferring all tokens");
     }
 
@@ -215,7 +235,11 @@ contract CultureIndexVotingBasicTest is CultureIndexTestSuite {
         //transfer to voter
         revolutionToken.transferFrom(address(auction), voter, 0);
 
-        uint256 initialWeight = cultureIndex.getVotes(voter);
+        uint256 initialWeight = cultureIndex.votingPower().getVotesWithWeights(
+            voter,
+            1,
+            cultureIndex.revolutionTokenVoteWeight()
+        );
         uint256 expectedInitialWeight = initialPointsWeight + (1 * cultureIndex.revolutionTokenVoteWeight());
         assertEq(initialWeight, expectedInitialWeight);
 
@@ -230,7 +254,11 @@ contract CultureIndexVotingBasicTest is CultureIndexTestSuite {
         // transfer to voter
         revolutionToken.transferFrom(address(auction), voter, 1);
 
-        uint256 updatedWeight = cultureIndex.getVotes(voter);
+        uint256 updatedWeight = cultureIndex.votingPower().getVotesWithWeights(
+            voter,
+            1,
+            cultureIndex.revolutionTokenVoteWeight()
+        );
         uint256 expectedUpdatedWeight = updatePointsWeight +
             initialPointsWeight +
             (2 * cultureIndex.revolutionTokenVoteWeight());
@@ -245,7 +273,7 @@ contract CultureIndexVotingBasicTest is CultureIndexTestSuite {
 
         // ensure cultureindex currentvotes is correct
         assertEq(
-            cultureIndex.getVotes(address(voter)),
+            cultureIndex.votingPower().getVotesWithWeights(address(voter), 1, cultureIndex.revolutionTokenVoteWeight()),
             updatePointsWeight + initialPointsWeight,
             "Vote weight should be correct"
         );
@@ -689,7 +717,11 @@ contract CultureIndexVotingBasicTest is CultureIndexTestSuite {
         uint256 expectedVoteWeight = pointsBalance + (erc721Balance * cultureIndex.revolutionTokenVoteWeight());
 
         // Get the actual vote weight from the contract
-        uint256 actualVoteWeight = cultureIndex.getVotes(address(auction));
+        uint256 actualVoteWeight = cultureIndex.votingPower().getVotesWithWeights(
+            address(auction),
+            1,
+            cultureIndex.revolutionTokenVoteWeight()
+        );
 
         // Assert that the actual vote weight matches the expected value
         assertEq(actualVoteWeight, expectedVoteWeight, "Vote weight calculation does not match expected value");

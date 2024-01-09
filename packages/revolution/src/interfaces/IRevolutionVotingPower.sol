@@ -41,4 +41,40 @@ interface IRevolutionVotingPower is IRevolutionVotingPowerEvents {
         address revolutionToken,
         uint256 revolutionTokenVoteWeight
     ) external;
+
+    function revolutionPoints() external returns (ERC20VotesUpgradeable);
+
+    function revolutionToken() external returns (ERC721CheckpointableUpgradeable);
+
+    function getVotes(address account) external view returns (uint256);
+
+    function getVotesWithWeights(
+        address account,
+        uint256 erc20PointsVoteWeight,
+        uint256 erc721TokenVoteWeight
+    ) external view returns (uint256);
+
+    function getTotalVotes() external view returns (uint256);
+
+    function getTotalVotesWithWeights(
+        uint256 erc20PointsVoteWeight,
+        uint256 erc721TokenVoteWeight
+    ) external view returns (uint256);
+
+    function getPastVotes(address account, uint256 blockNumber) external view returns (uint256);
+
+    function getPastVotesWithWeights(
+        address account,
+        uint256 blockNumber,
+        uint256 erc20PointsVoteWeight,
+        uint256 erc721TokenVoteWeight
+    ) external view returns (uint256);
+
+    function getPastTotalVotes(uint256 blockNumber) external view returns (uint256);
+
+    function getPastTotalVotesWithWeights(
+        uint256 blockNumber,
+        uint256 erc20PointsVoteWeight,
+        uint256 erc721TokenVoteWeight
+    ) external view returns (uint256);
 }

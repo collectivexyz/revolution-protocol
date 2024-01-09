@@ -211,8 +211,7 @@ contract RevolutionBuilder is
         });
 
         ICultureIndex(daoAddressesByToken[revolutionToken].cultureIndex).initialize({
-            revolutionPoints: daoAddressesByToken[revolutionToken].revolutionPoints,
-            revolutionToken: daoAddressesByToken[revolutionToken].revolutionToken,
+            votingPower: daoAddressesByToken[revolutionToken].revolutionVotingPower,
             initialOwner: daoAddressesByToken[revolutionToken].dao,
             dropperAdmin: daoAddressesByToken[revolutionToken].revolutionToken,
             cultureIndexParams: _cultureIndexParams,

@@ -157,6 +157,20 @@ contract RevolutionBuilderTest is Test {
         });
     }
 
+    function setMockRevolutionVotingPowerParams() internal virtual {
+        setRevolutionVotingPowerParams(1000, 1);
+    }
+
+    function setRevolutionVotingPowerParams(
+        uint256 _revolutionTokenVoteWeight,
+        uint256 _revolutionPointsVoteWeight
+    ) internal virtual {
+        revolutionVotingPowerParams = IRevolutionBuilder.RevolutionVotingPowerParams({
+            revolutionTokenVoteWeight: _revolutionTokenVoteWeight,
+            revolutionPointsVoteWeight: _revolutionPointsVoteWeight
+        });
+    }
+
     function setMockAuctionParams() internal virtual {
         setAuctionParams(15 minutes, 1 ether, 24 hours, 5, 1000, 1000, 1000);
     }
@@ -293,6 +307,7 @@ contract RevolutionBuilderTest is Test {
         setMockCultureIndexParams();
         setMockPointsParams();
         setMockPointsEmitterParams();
+        setMockRevolutionVotingPowerParams();
     }
 
     function deployMock() internal virtual {
@@ -338,6 +353,7 @@ contract RevolutionBuilderTest is Test {
         revolutionPoints = RevolutionPoints(_addresses.revolutionPoints);
         revolutionPointsEmitter = RevolutionPointsEmitter(_addresses.revolutionPointsEmitter);
         maxHeap = MaxHeap(_addresses.maxHeap);
+        revolutionVotingPower = RevolutionVotingPower(_addresses.revolutionVotingPower);
 
         vm.label(address(revolutionToken), "ERC721TOKEN");
         vm.label(address(descriptor), "DESCRIPTOR");
@@ -348,6 +364,7 @@ contract RevolutionBuilderTest is Test {
         vm.label(address(revolutionPoints), "Points");
         vm.label(address(revolutionPointsEmitter), "POINTS_EMITTER");
         vm.label(address(maxHeap), "MAX_HEAP");
+        vm.label(address(revolutionVotingPower), "VOTING_POWER");
     }
 
     ///                                                          ///

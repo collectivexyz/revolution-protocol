@@ -124,8 +124,8 @@ contract RevolutionVotingPower is
         uint256 erc20PointsVoteWeight,
         uint256 erc721TokenBalance,
         uint256 erc721TokenVoteWeight
-    ) internal view returns (uint256) {
-        return (erc20PointsBalance * erc20PointsVoteWeight) + (erc721TokenBalance * revolutionTokenVoteWeight);
+    ) internal pure returns (uint256) {
+        return (erc20PointsBalance * erc20PointsVoteWeight) + (erc721TokenBalance * erc721TokenVoteWeight);
     }
 
     /**
@@ -133,7 +133,7 @@ contract RevolutionVotingPower is
      * @param account The address of the voter.
      * @return The voting power of the voter.
      */
-    function getVotes(address account) external view returns (uint256) {
+    function getVotes(address account) external view override returns (uint256) {
         return _getVotes(account, revolutionPointsVoteWeight, revolutionTokenVoteWeight);
     }
 
@@ -148,8 +148,41 @@ contract RevolutionVotingPower is
         address account,
         uint256 erc20PointsVoteWeight,
         uint256 erc721TokenVoteWeight
-    ) external view returns (uint256) {
+    ) external view override returns (uint256) {
         return _getVotes(account, erc20PointsVoteWeight, erc721TokenVoteWeight);
+    }
+
+    /**
+     * @notice Returns the voting power of a voter at the current block with the default vote weights.
+     * @return The total voting power.
+     */
+    function getTotalVotes() external view override returns (uint256) {
+        return
+            _calculateVoteWeight(
+                revolutionPoints.totalSupply(),
+                revolutionPointsVoteWeight,
+                revolutionToken.totalSupply(),
+                revolutionTokenVoteWeight
+            );
+    }
+
+    /**
+     * @notice Returns the voting power of a voter at the current block with the default vote weights.
+     * @param erc20PointsVoteWeight The ERC20 RevolutionPoints vote weight.
+     * @param erc721TokenVoteWeight The ERC721 token vote weight.
+     * @return The total voting power.
+     */
+    function getTotalVotesWithWeights(
+        uint256 erc20PointsVoteWeight,
+        uint256 erc721TokenVoteWeight
+    ) external view override returns (uint256) {
+        return
+            _calculateVoteWeight(
+                revolutionPoints.totalSupply(),
+                erc20PointsVoteWeight,
+                revolutionToken.totalSupply(),
+                erc721TokenVoteWeight
+            );
     }
 
     /**
@@ -176,9 +209,10 @@ contract RevolutionVotingPower is
     /**
      * @notice Returns the voting power of a voter at the given blockNumber.
      * @param account The address of the voter.
+     * @param blockNumber The block number at which to calculate the voting power.
      * @return The voting power of the voter.
      */
-    function getPastVotes(address account, uint256 blockNumber) external view returns (uint256) {
+    function getPastVotes(address account, uint256 blockNumber) external view override returns (uint256) {
         return _getPastVotes(account, blockNumber, revolutionPointsVoteWeight, revolutionTokenVoteWeight);
     }
 
@@ -195,8 +229,44 @@ contract RevolutionVotingPower is
         uint256 blockNumber,
         uint256 erc20PointsVoteWeight,
         uint256 erc721TokenVoteWeight
-    ) external view returns (uint256) {
+    ) external view override returns (uint256) {
         return _getPastVotes(account, blockNumber, erc20PointsVoteWeight, erc721TokenVoteWeight);
+    }
+
+    /**
+     * @notice Get total voting power at the given blockNumber.
+     * @param blockNumber The block number at which to calculate the voting power.
+     * @return The total voting power.
+     */
+    function getPastTotalVotes(uint256 blockNumber) external view override returns (uint256) {
+        return
+            _calculateVoteWeight(
+                revolutionPoints.getPastTotalSupply(blockNumber),
+                revolutionPointsVoteWeight,
+                revolutionToken.getPastTotalSupply(blockNumber),
+                revolutionTokenVoteWeight
+            );
+    }
+
+    /**
+     * @notice Get total voting power at the given blockNumber with given vote weights.
+     * @param blockNumber The block number at which to calculate the voting power.
+     * @param erc20PointsVoteWeight The ERC20 RevolutionPoints vote weight.
+     * @param erc721TokenVoteWeight The ERC721 token vote weight.
+     * @return The total voting power given weights at a previous block.
+     */
+    function getPastTotalVotesWithWeights(
+        uint256 blockNumber,
+        uint256 erc20PointsVoteWeight,
+        uint256 erc721TokenVoteWeight
+    ) external view override returns (uint256) {
+        return
+            _calculateVoteWeight(
+                revolutionPoints.getPastTotalSupply(blockNumber),
+                erc20PointsVoteWeight,
+                revolutionToken.getPastTotalSupply(blockNumber),
+                erc721TokenVoteWeight
+            );
     }
 
     /**
