@@ -33,13 +33,6 @@
 | tokenVoteWeight  | uint256                                  | 3    | 0      | 32    | src/RevolutionVotingPower.sol:RevolutionVotingPower |
 
 =======================
-➡ VRGDAC
-=======================
-
-| Name | Type | Slot | Offset | Bytes | Contract |
-|------|------|------|--------|-------|----------|
-
-=======================
 ➡ RevolutionPoints
 =======================
 
