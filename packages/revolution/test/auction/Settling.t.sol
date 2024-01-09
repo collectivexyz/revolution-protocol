@@ -525,6 +525,8 @@ contract AuctionHouseSettleTest is AuctionHouseTest {
         auction.setEntropyRateBps(0);
 
         createDefaultArtPiece();
+        vm.roll(vm.getBlockNumber() + 1); // roll block number to enable voting snapshot
+
         auction.unpause();
 
         address recipient = address(0x123); // Some EOA address

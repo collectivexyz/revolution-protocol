@@ -12,6 +12,7 @@ import { RevolutionDAOLogicV1 } from "../src/governance/RevolutionDAOLogicV1.sol
 import { DAOExecutor } from "../src/governance/DAOExecutor.sol";
 import { CultureIndex } from "../src/culture-index/CultureIndex.sol";
 import { RevolutionPoints } from "../src/RevolutionPoints.sol";
+import { RevolutionVotingPower } from "../src/RevolutionVotingPower.sol";
 import { RevolutionPointsEmitter } from "../src/RevolutionPointsEmitter.sol";
 import { MaxHeap } from "../src/culture-index/MaxHeap.sol";
 import { RevolutionDAOStorageV1 } from "../src/governance/RevolutionDAOInterfaces.sol";
@@ -41,6 +42,7 @@ contract RevolutionBuilderTest is Test {
     address internal revolutionPointsEmitterImpl;
     address internal cultureIndexImpl;
     address internal maxHeapImpl;
+    address internal revolutionVotingPowerImpl;
 
     address internal nounsDAO;
     address internal revolutionDAO;
@@ -86,6 +88,7 @@ contract RevolutionBuilderTest is Test {
                 address(0),
                 address(0),
                 address(0),
+                address(0),
                 address(0)
             )
         );
@@ -104,6 +107,7 @@ contract RevolutionBuilderTest is Test {
         );
         cultureIndexImpl = address(new CultureIndex(address(manager)));
         maxHeapImpl = address(new MaxHeap(address(manager)));
+        revolutionVotingPowerImpl = address(new RevolutionVotingPower(address(manager)));
 
         managerImpl = address(
             new RevolutionBuilder(
@@ -115,7 +119,8 @@ contract RevolutionBuilderTest is Test {
                 cultureIndexImpl,
                 revolutionPointsImpl,
                 revolutionPointsEmitterImpl,
-                maxHeapImpl
+                maxHeapImpl,
+                revolutionVotingPowerImpl
             )
         );
 
@@ -131,8 +136,8 @@ contract RevolutionBuilderTest is Test {
     IRevolutionBuilder.AuctionParams internal auctionParams;
     IRevolutionBuilder.GovParams internal govParams;
     IRevolutionBuilder.CultureIndexParams internal cultureIndexParams;
-    IRevolutionBuilder.PointsParams internal revolutionPointsParams;
-    IRevolutionBuilder.PointsEmitterParams internal revolutionPointsEmitterParams;
+    IRevolutionBuilder.RevolutionPointsParams internal revolutionPointsParams;
+    IRevolutionBuilder.RevolutionVotingPowerParams internal revolutionVotingPowerParams;
 
     function setMockRevolutionTokenParams() internal virtual {
         setRevolutionTokenParams("Mock Token", "MOCK", "Qmew7TdyGnj6YRUjQR68sUJN3239MYXRD8uxowxF6rGK8j", "Mock");
@@ -233,7 +238,10 @@ contract RevolutionBuilderTest is Test {
     }
 
     function setPointsParams(string memory _name, string memory _symbol) internal virtual {
-        revolutionPointsParams = IRevolutionBuilder.PointsParams({ name: _name, symbol: _symbol });
+        revolutionPointsParams = revolutionPointsParams = IRevolutionBuilder.RevolutionPointsParams({
+            emitterParams: revolutionPointsParams.emitterParams,
+            tokenParams: IRevolutionBuilder.PointsTokenParams({ name: _name, symbol: _symbol })
+        });
     }
 
     function setMockPointsEmitterParams() internal virtual {
@@ -246,17 +254,20 @@ contract RevolutionBuilderTest is Test {
         int256 _tokensPerTimeUnit,
         address _creatorsAddress
     ) internal virtual {
-        revolutionPointsEmitterParams = IRevolutionBuilder.PointsEmitterParams({
-            vrgdaParams: IRevolutionBuilder.VRGDAParams({
-                targetPrice: _targetPrice,
-                priceDecayPercent: _priceDecayPercent,
-                tokensPerTimeUnit: _tokensPerTimeUnit
-            }),
-            creatorParams: IRevolutionBuilder.PointsEmitterCreatorParams({
-                creatorRateBps: 1000,
-                entropyRateBps: 4_000
-            }),
-            creatorsAddress: _creatorsAddress
+        revolutionPointsParams = IRevolutionBuilder.RevolutionPointsParams({
+            tokenParams: revolutionPointsParams.tokenParams,
+            emitterParams: IRevolutionBuilder.PointsEmitterParams({
+                vrgdaParams: IRevolutionBuilder.VRGDAParams({
+                    targetPrice: _targetPrice,
+                    priceDecayPercent: _priceDecayPercent,
+                    tokensPerTimeUnit: _tokensPerTimeUnit
+                }),
+                creatorParams: IRevolutionBuilder.PointsEmitterCreatorParams({
+                    creatorRateBps: 1000,
+                    entropyRateBps: 4_000
+                }),
+                creatorsAddress: _creatorsAddress
+            })
         });
     }
 
@@ -273,6 +284,7 @@ contract RevolutionBuilderTest is Test {
     RevolutionPoints internal revolutionPoints;
     RevolutionPointsEmitter internal revolutionPointsEmitter;
     MaxHeap internal maxHeap;
+    RevolutionVotingPower internal revolutionVotingPower;
 
     function setMockParams() internal virtual {
         setMockRevolutionTokenParams();
@@ -292,7 +304,7 @@ contract RevolutionBuilderTest is Test {
             govParams,
             cultureIndexParams,
             revolutionPointsParams,
-            revolutionPointsEmitterParams
+            revolutionVotingPowerParams
         );
     }
 
@@ -303,8 +315,8 @@ contract RevolutionBuilderTest is Test {
         IRevolutionBuilder.AuctionParams memory _auctionParams,
         IRevolutionBuilder.GovParams memory _govParams,
         IRevolutionBuilder.CultureIndexParams memory _cultureIndexParams,
-        IRevolutionBuilder.PointsParams memory _PointsParams,
-        IRevolutionBuilder.PointsEmitterParams memory _PointsEmitterParams
+        IRevolutionBuilder.RevolutionPointsParams memory _pointsParams,
+        IRevolutionBuilder.RevolutionVotingPowerParams memory _revolutionVotingPowerParams
     ) internal virtual {
         RevolutionBuilderTypesV1.DAOAddresses memory _addresses = manager.deploy(
             _initialOwner,
@@ -313,8 +325,8 @@ contract RevolutionBuilderTest is Test {
             _auctionParams,
             _govParams,
             _cultureIndexParams,
-            _PointsParams,
-            _PointsEmitterParams
+            _pointsParams,
+            _revolutionVotingPowerParams
         );
 
         revolutionToken = RevolutionToken(_addresses.revolutionToken);

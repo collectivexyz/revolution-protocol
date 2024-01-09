@@ -67,14 +67,14 @@ contract RevolutionPoints is Initializable, ERC20VotesUpgradeable, Ownable2StepU
 
     /// @notice Initializes a DAO's ERC-20 governance token contract
     /// @param _initialOwner The address of the initial owner
-    /// @param _revolutionPointsParams The params of the token
+    /// @param _tokenParams The params of the token
     function initialize(
         address _initialOwner,
-        IRevolutionBuilder.PointsParams calldata _revolutionPointsParams
+        IRevolutionBuilder.PointsTokenParams calldata _tokenParams
     ) external initializer {
         if (msg.sender != address(manager)) revert ONLY_MANAGER();
 
-        __RevolutionPoints_init(_initialOwner, _revolutionPointsParams.name, _revolutionPointsParams.symbol);
+        __RevolutionPoints_init(_initialOwner, _tokenParams.name, _tokenParams.symbol);
     }
 
     /**

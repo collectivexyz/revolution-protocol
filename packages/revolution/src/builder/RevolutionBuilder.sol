@@ -27,6 +27,7 @@ import { Ownable2StepUpgradeable } from "@openzeppelin/contracts-upgradeable/acc
 import { RevolutionBuilderStorageV1 } from "./storage/RevolutionBuilderStorageV1.sol";
 import { IRevolutionBuilder } from "../interfaces/IRevolutionBuilder.sol";
 import { IRevolutionToken } from "../interfaces/IRevolutionToken.sol";
+import { IRevolutionVotingPower } from "../interfaces/IRevolutionVotingPower.sol";
 import { IDescriptor } from "../interfaces/IDescriptor.sol";
 import { IAuctionHouse } from "../interfaces/IAuctionHouse.sol";
 import { IDAOExecutor } from "../interfaces/IDAOExecutor.sol";
@@ -83,6 +84,9 @@ contract RevolutionBuilder is
     /// @notice The maxHeap implementation address
     address public immutable maxHeapImpl;
 
+    /// @notice the revolutionVotingPower implementation address
+    address public immutable revolutionVotingPowerImpl;
+
     ///                                                          ///
     ///                          CONSTRUCTOR                     ///
     ///                                                          ///
@@ -96,7 +100,8 @@ contract RevolutionBuilder is
         address _cultureIndexImpl,
         address _revolutionPointsImpl,
         address _revolutionPointsEmitterImpl,
-        address _maxHeapImpl
+        address _maxHeapImpl,
+        address _revolutionVotingPowerImpl
     ) payable initializer {
         revolutionTokenImpl = _revolutionTokenImpl;
         descriptorImpl = _descriptorImpl;
@@ -107,6 +112,7 @@ contract RevolutionBuilder is
         revolutionPointsImpl = _revolutionPointsImpl;
         revolutionPointsEmitterImpl = _revolutionPointsEmitterImpl;
         maxHeapImpl = _maxHeapImpl;
+        revolutionVotingPowerImpl = _revolutionVotingPowerImpl;
     }
 
     ///                                                          ///
@@ -135,7 +141,7 @@ contract RevolutionBuilder is
     /// @param _govParams The governance settings
     /// @param _cultureIndexParams The culture index settings
     /// @param _revolutionPointsParams The ERC-20 token settings
-    /// @param _revolutionPointsEmitterParams The ERC-20 points emitter settings
+    /// @param _revolutionVotingPowerParams The voting power settings
     function deploy(
         address _initialOwner,
         address _weth,
@@ -143,8 +149,8 @@ contract RevolutionBuilder is
         AuctionParams calldata _auctionParams,
         GovParams calldata _govParams,
         CultureIndexParams calldata _cultureIndexParams,
-        PointsParams calldata _revolutionPointsParams,
-        PointsEmitterParams calldata _revolutionPointsEmitterParams
+        RevolutionPointsParams calldata _revolutionPointsParams,
+        RevolutionVotingPowerParams calldata _revolutionVotingPowerParams
     ) external returns (DAOAddresses memory) {
         require(_initialOwner != address(0), "Initial owner cannot be 0x0");
 
@@ -154,9 +160,9 @@ contract RevolutionBuilder is
         // Deploy the VRGDAC contract
         address vrgdac = address(
             new VRGDAC(
-                _revolutionPointsEmitterParams.vrgdaParams.targetPrice,
-                _revolutionPointsEmitterParams.vrgdaParams.priceDecayPercent,
-                _revolutionPointsEmitterParams.vrgdaParams.tokensPerTimeUnit
+                _revolutionPointsParams.emitterParams.vrgdaParams.targetPrice,
+                _revolutionPointsParams.emitterParams.vrgdaParams.priceDecayPercent,
+                _revolutionPointsParams.emitterParams.vrgdaParams.tokensPerTimeUnit
             )
         );
 
@@ -173,13 +179,22 @@ contract RevolutionBuilder is
             cultureIndex: address(new ERC1967Proxy{ salt: salt }(cultureIndexImpl, "")),
             revolutionPoints: address(new ERC1967Proxy{ salt: salt }(revolutionPointsImpl, "")),
             revolutionToken: revolutionToken,
-            maxHeap: address(new ERC1967Proxy{ salt: salt }(maxHeapImpl, ""))
+            maxHeap: address(new ERC1967Proxy{ salt: salt }(maxHeapImpl, "")),
+            revolutionVotingPower: address(new ERC1967Proxy{ salt: salt }(revolutionVotingPowerImpl, ""))
         });
 
         // Initialize each instance with the provided settings
         IMaxHeap(daoAddressesByToken[revolutionToken].maxHeap).initialize({
             initialOwner: daoAddressesByToken[revolutionToken].dao,
             admin: daoAddressesByToken[revolutionToken].cultureIndex
+        });
+
+        IRevolutionVotingPower(daoAddressesByToken[revolutionToken].revolutionVotingPower).initialize({
+            initialOwner: daoAddressesByToken[revolutionToken].dao,
+            revolutionPoints: daoAddressesByToken[revolutionToken].revolutionPoints,
+            revolutionPointsVoteWeight: _revolutionVotingPowerParams.revolutionPointsVoteWeight,
+            revolutionToken: daoAddressesByToken[revolutionToken].revolutionToken,
+            revolutionTokenVoteWeight: _revolutionVotingPowerParams.revolutionTokenVoteWeight
         });
 
         IRevolutionToken(revolutionToken).initialize({
@@ -214,7 +229,7 @@ contract RevolutionBuilder is
 
         IRevolutionPoints(daoAddressesByToken[revolutionToken].revolutionPoints).initialize({
             initialOwner: daoAddressesByToken[revolutionToken].revolutionPointsEmitter,
-            revolutionPointsParams: _revolutionPointsParams
+            tokenParams: _revolutionPointsParams.tokenParams
         });
 
         IRevolutionPointsEmitter(daoAddressesByToken[revolutionToken].revolutionPointsEmitter).initialize({
@@ -222,8 +237,8 @@ contract RevolutionBuilder is
             initialOwner: daoAddressesByToken[revolutionToken].dao,
             weth: _weth,
             vrgdac: vrgdac,
-            creatorsAddress: _revolutionPointsEmitterParams.creatorsAddress,
-            creatorParams: _revolutionPointsEmitterParams.creatorParams
+            creatorsAddress: _revolutionPointsParams.emitterParams.creatorsAddress,
+            creatorParams: _revolutionPointsParams.emitterParams.creatorParams
         });
 
         IDAOExecutor(daoAddressesByToken[revolutionToken].executor).initialize({
@@ -247,7 +262,8 @@ contract RevolutionBuilder is
             revolutionPointsEmitter: daoAddressesByToken[revolutionToken].revolutionPointsEmitter,
             cultureIndex: daoAddressesByToken[revolutionToken].cultureIndex,
             revolutionPoints: daoAddressesByToken[revolutionToken].revolutionPoints,
-            maxHeap: daoAddressesByToken[revolutionToken].maxHeap
+            maxHeap: daoAddressesByToken[revolutionToken].maxHeap,
+            revolutionVotingPower: daoAddressesByToken[revolutionToken].revolutionVotingPower
         });
 
         return daoAddressesByToken[revolutionToken];
@@ -268,6 +284,7 @@ contract RevolutionBuilder is
     /// @return revolutionPoints ERC-20 token deployed address
     /// @return revolutionPointsEmitter ERC-20 points emitter deployed address
     /// @return maxHeap MaxHeap deployed address
+    /// @return revolutionVotingPower RevolutionVotingPower deployed address
     function getAddresses(
         address _token
     )
@@ -282,7 +299,8 @@ contract RevolutionBuilder is
             address cultureIndex,
             address revolutionPoints,
             address revolutionPointsEmitter,
-            address maxHeap
+            address maxHeap,
+            address revolutionVotingPower
         )
     {
         DAOAddresses storage addresses = daoAddressesByToken[_token];
@@ -296,6 +314,7 @@ contract RevolutionBuilder is
         revolutionPoints = addresses.revolutionPoints;
         revolutionPointsEmitter = addresses.revolutionPointsEmitter;
         maxHeap = addresses.maxHeap;
+        revolutionVotingPower = addresses.revolutionVotingPower;
     }
 
     ///                                                          ///
@@ -348,7 +367,8 @@ contract RevolutionBuilder is
             address cultureIndex,
             address revolutionPoints,
             address revolutionPointsEmitter,
-            address maxHeap
+            address maxHeap,
+            address revolutionVotingPower
         ) = getAddresses(token);
         return
             DAOVersionInfo({
@@ -360,7 +380,8 @@ contract RevolutionBuilder is
                 revolutionPoints: _safeGetVersion(revolutionPoints),
                 cultureIndex: _safeGetVersion(cultureIndex),
                 revolutionPointsEmitter: _safeGetVersion(revolutionPointsEmitter),
-                maxHeap: _safeGetVersion(maxHeap)
+                maxHeap: _safeGetVersion(maxHeap),
+                revolutionVotingPower: _safeGetVersion(revolutionVotingPower)
             });
     }
 
@@ -375,7 +396,8 @@ contract RevolutionBuilder is
                 cultureIndex: _safeGetVersion(cultureIndexImpl),
                 revolutionPoints: _safeGetVersion(revolutionPointsImpl),
                 revolutionPointsEmitter: _safeGetVersion(revolutionPointsEmitterImpl),
-                maxHeap: _safeGetVersion(maxHeapImpl)
+                maxHeap: _safeGetVersion(maxHeapImpl),
+                revolutionVotingPower: _safeGetVersion(revolutionVotingPowerImpl)
             });
     }
 

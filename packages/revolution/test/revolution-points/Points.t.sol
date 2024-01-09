@@ -165,7 +165,7 @@ contract PointsTestSuite is RevolutionBuilderTest {
     function testOwnershipTransferAndManagerRevert() public {
         // Attempt to initialize contract by a non-manager account
         address nonManager = address(0x10);
-        IRevolutionBuilder.PointsParams memory params = IRevolutionBuilder.PointsParams("Test Token", "TST");
+        IRevolutionBuilder.PointsTokenParams memory params = IRevolutionBuilder.PointsTokenParams("Test Token", "TST");
         vm.startPrank(nonManager);
         vm.expectRevert(abi.encodeWithSignature("InvalidInitialization()"));
         revolutionPoints.initialize(nonManager, params);

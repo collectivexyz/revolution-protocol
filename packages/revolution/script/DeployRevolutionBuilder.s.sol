@@ -35,6 +35,7 @@ contract DeployContracts is Script {
         address maxHeapImpl;
         address revolutionPointsImpl;
         address revolutionPointsEmitterImpl;
+        address revolutionVotingPowerImpl;
         address builderImpl;
     }
 
@@ -77,6 +78,7 @@ contract DeployContracts is Script {
                 address(0),
                 address(0),
                 address(0),
+                address(0),
                 address(0)
             )
         );
@@ -95,7 +97,8 @@ contract DeployContracts is Script {
                 deployedContracts.cultureIndexImpl,
                 deployedContracts.revolutionPointsImpl,
                 deployedContracts.revolutionPointsEmitterImpl,
-                deployedContracts.maxHeapImpl
+                deployedContracts.maxHeapImpl,
+                deployedContracts.revolutionVotingPowerImpl
             )
         );
     }
@@ -121,6 +124,9 @@ contract DeployContracts is Script {
         deployedContracts.revolutionPointsImpl = address(new RevolutionPoints(address(deployedContracts.builderProxy)));
         deployedContracts.revolutionPointsEmitterImpl = address(
             new RevolutionPointsEmitter(address(deployedContracts.builderProxy), protocolRewards, rewardsRecipient)
+        );
+        deployedContracts.revolutionVotingPowerImpl = address(
+            new RevolutionToken(address(deployedContracts.builderProxy))
         );
     }
 

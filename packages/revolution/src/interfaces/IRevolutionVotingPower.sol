@@ -28,17 +28,17 @@ interface IRevolutionVotingPowerEvents {
 interface IRevolutionVotingPower is IRevolutionVotingPowerEvents {
     /**
      * @notice Initializes the RevolutionVotingPower contract
-     * @param _initialOwner The initial owner of the contract
-     * @param _revolutionPoints The address of the ERC20 token used for voting
-     * @param _revolutionPointsVoteWeight The vote weight of the ERC20 token
-     * @param _revolutionToken The address of the ERC721 token used for voting
-     * @param _revolutionTokenVoteWeight The vote weight of the ERC721 token
+     * @param initialOwner The initial owner of the contract
+     * @param revolutionPoints The address of the ERC20 token used for voting
+     * @param revolutionPointsVoteWeight The vote weight of the ERC20 token
+     * @param revolutionToken The address of the ERC721 token used for voting
+     * @param revolutionTokenVoteWeight The vote weight of the ERC721 token
      */
     function initialize(
-        address _initialOwner,
-        address _revolutionPoints,
-        uint256 _revolutionPointsVoteWeight,
-        address _revolutionToken,
-        uint256 _revolutionTokenVoteWeight
+        address initialOwner,
+        address revolutionPoints,
+        uint256 revolutionPointsVoteWeight,
+        address revolutionToken,
+        uint256 revolutionTokenVoteWeight
     ) external;
 }
