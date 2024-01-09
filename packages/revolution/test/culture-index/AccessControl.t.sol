@@ -69,12 +69,12 @@ contract CultureIndexAccessControlTest is CultureIndexTestSuite {
         revolutionPoints.mint(address(0x21), quorumBps * 10);
         revolutionPoints.mint(address(this), ((quorumBps / 2) * (quorumBps)) / 10_000);
 
-        vm.roll(block.number + 2);
+        vm.roll(vm.getBlockNumber() + 2);
 
         // Create an art piece
         uint256 pieceId = createDefaultArtPiece();
 
-        vm.roll(block.number + 2);
+        vm.roll(vm.getBlockNumber() + 2);
 
         // Vote for the piece, but do not meet the quorum
         vm.startPrank(address(this));

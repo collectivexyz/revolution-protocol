@@ -15,7 +15,7 @@ contract CultureIndexVotingTestManager is CultureIndexTestSuite {
         revolutionPoints.mint(address(voter1Test), 100);
         revolutionPoints.mint(address(voter2Test), 200);
 
-        vm.roll(block.number + 1); // advance block for vote snapshotting
+        vm.roll(vm.getBlockNumber() + 1); // advance block for vote snapshotting
 
         uint256 newPieceId = voter1Test.createDefaultArtPiece();
 
@@ -41,7 +41,7 @@ contract CultureIndexVotingTestManager is CultureIndexTestSuite {
         // Mint tokens to a test contract (acting as a voter)
         vm.startPrank(address(revolutionPointsEmitter));
         revolutionPoints.mint(address(voter1Test), 100);
-        vm.roll(block.number + 1); // advance block for vote snapshotting
+        vm.roll(vm.getBlockNumber() + 1); // advance block for vote snapshotting
 
         uint256 firstPieceId = voter1Test.createDefaultArtPiece();
         uint256 secondPieceId = voter2Test.createDefaultArtPiece();

@@ -76,7 +76,7 @@ contract CultureIndexVotingSignaturesTest is CultureIndexTestSuite {
         vm.stopPrank();
 
         vm.startPrank(address(this));
-        vm.roll(block.number + 1);
+        vm.roll(vm.getBlockNumber() + 1);
 
         uint256[] memory pieceIds = new uint256[](1);
         pieceIds[0] = createDefaultArtPiece();
@@ -173,7 +173,7 @@ contract CultureIndexVotingSignaturesTest is CultureIndexTestSuite {
         vm.startPrank(address(revolutionPointsEmitter));
         revolutionPoints.mint(offchainVoter, offchainVoterWeight);
 
-        vm.roll(block.number + 1);
+        vm.roll(vm.getBlockNumber() + 1);
 
         uint256[] memory pieceIds = new uint256[](1);
         pieceIds[0] = createDefaultArtPiece();
@@ -235,12 +235,12 @@ contract CultureIndexVotingSignaturesTest is CultureIndexTestSuite {
         vm.startPrank(address(revolutionPointsEmitter));
         revolutionPoints.mint(offchainVoter, 100);
 
-        vm.roll(block.number + 1);
+        vm.roll(vm.getBlockNumber() + 1);
 
         uint256[] memory pieceIds = new uint256[](1);
         pieceIds[0] = createDefaultArtPiece();
 
-        vm.roll(block.number + 2);
+        vm.roll(vm.getBlockNumber() + 2);
 
         uint256 nonce = cultureIndex.nonces(offchainVoter);
         uint256 deadline = block.timestamp + 1 days;

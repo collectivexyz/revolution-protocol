@@ -324,7 +324,7 @@ contract CultureIndexArtPieceTest is CultureIndexTestSuite {
         vm.startPrank(address(revolutionPointsEmitter));
         revolutionPoints.mint(address(this), pointsSupply);
 
-        vm.roll(block.number + 1);
+        vm.roll(vm.getBlockNumber() + 1);
 
         // Create an art piece
         uint256 pieceId = createDefaultArtPiece();
@@ -333,7 +333,7 @@ contract CultureIndexArtPieceTest is CultureIndexTestSuite {
         // Check initial values
         uint256 expectedTotalVotesSupply = pointsSupply;
         uint256 expectedQuorumVotes = (quorumVotesBPS * expectedTotalVotesSupply) / 10_000;
-        vm.roll(block.number + 1);
+        vm.roll(vm.getBlockNumber() + 1);
 
         assertEq(
             cultureIndex.quorumVotesForPiece(piece.pieceId),
@@ -341,24 +341,24 @@ contract CultureIndexArtPieceTest is CultureIndexTestSuite {
             "Quorum votes should be set correctly on creation"
         );
 
-        vm.roll(block.number + 1);
+        vm.roll(vm.getBlockNumber() + 1);
         // Cast votes
         vm.startPrank(address(this));
         voteForPiece(pieceId);
 
         // Mint token and govTokens, create a new piece and check fields
         vm.startPrank(address(auction));
-        vm.roll(block.number + 1);
+        vm.roll(vm.getBlockNumber() + 1);
 
         revolutionToken.mint();
 
         vm.startPrank(address(revolutionPointsEmitter));
         revolutionPoints.mint(address(this), pointsSupply);
 
-        vm.roll(block.number + 1);
+        vm.roll(vm.getBlockNumber() + 1);
 
         CultureIndex.ArtPiece memory newPiece = cultureIndex.getPieceById(createDefaultArtPiece());
-        vm.roll(block.number + 1);
+        vm.roll(vm.getBlockNumber() + 1);
 
         uint256 expectedTotalVotesSupply2 = pointsSupply * 2 + cultureIndex.revolutionTokenVoteWeight();
 

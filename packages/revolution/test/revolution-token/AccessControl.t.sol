@@ -162,7 +162,7 @@ contract TokenAccessControlTest is RevolutionTokenTestSuite {
         vm.stopPrank();
         vm.startPrank(address(auction));
         createDefaultArtPiece();
-        vm.roll(block.number + 1);
+        vm.roll(vm.getBlockNumber() + 1);
 
         uint256 tokenId = revolutionToken.mint();
 
@@ -197,7 +197,7 @@ contract TokenAccessControlTest is RevolutionTokenTestSuite {
     /// @dev Tests that the minter can be set and locked appropriately
     function testMinterAssignmentAndLocking() public {
         createDefaultArtPiece();
-        vm.roll(block.number + 1);
+        vm.roll(vm.getBlockNumber() + 1);
 
         // Test setting the minter and minting a token
         revolutionToken.setMinter(address(0x2));

@@ -15,7 +15,7 @@ contract AuctionHouseSettleTest is AuctionHouseTest {
     function test_VotesCount(uint8 nDays) public {
         createDefaultArtPiece();
 
-        vm.roll(block.number + 1);
+        vm.roll(vm.getBlockNumber() + 1);
 
         auction.unpause();
 
@@ -29,7 +29,7 @@ contract AuctionHouseSettleTest is AuctionHouseTest {
 
         createDefaultArtPiece();
         auction.settleCurrentAndCreateNewAuction();
-        vm.roll(block.number + 1);
+        vm.roll(vm.getBlockNumber() + 1);
 
         assertEq(revolutionToken.ownerOf(0), address(11), "Verb should be transferred to the highest bidder");
         // cultureIndex currentVotes of highest bidder should be 10
@@ -42,7 +42,7 @@ contract AuctionHouseSettleTest is AuctionHouseTest {
 
     function test_OwnerPayment(uint8 nDays) public {
         createDefaultArtPiece();
-        vm.roll(block.number + 1); // roll block number to enable voting snapshot
+        vm.roll(vm.getBlockNumber() + 1); // roll block number to enable voting snapshot
 
         auction.unpause();
 
@@ -56,7 +56,7 @@ contract AuctionHouseSettleTest is AuctionHouseTest {
 
         createDefaultArtPiece();
         auction.settleCurrentAndCreateNewAuction();
-        vm.roll(block.number + 1);
+        vm.roll(vm.getBlockNumber() + 1);
 
         //calculate fee
         uint256 auctioneerPayment = (bidAmount * (10_000 - auction.creatorRateBps())) / 10_000;
@@ -88,7 +88,7 @@ contract AuctionHouseSettleTest is AuctionHouseTest {
 
     function testSettlingAuctionWithNoBids(uint8 nDays) public {
         uint256 verbId = createDefaultArtPiece();
-        vm.roll(block.number + 1); // roll block number to enable voting snapshot
+        vm.roll(vm.getBlockNumber() + 1); // roll block number to enable voting snapshot
 
         auction.unpause();
 
@@ -115,7 +115,7 @@ contract AuctionHouseSettleTest is AuctionHouseTest {
         vm.assume(amount < revolutionPointsEmitter.maxPurchaseAmount());
 
         createDefaultArtPiece();
-        vm.roll(block.number + 1); // roll block number to enable voting snapshot
+        vm.roll(vm.getBlockNumber() + 1); // roll block number to enable voting snapshot
 
         auction.unpause();
 
@@ -154,7 +154,7 @@ contract AuctionHouseSettleTest is AuctionHouseTest {
 
     function testTransferToEOA() public {
         createDefaultArtPiece();
-        vm.roll(block.number + 1); // roll block number to enable voting snapshot
+        vm.roll(vm.getBlockNumber() + 1); // roll block number to enable voting snapshot
 
         auction.unpause();
 
@@ -195,7 +195,7 @@ contract AuctionHouseSettleTest is AuctionHouseTest {
         vm.assume(amount < revolutionPointsEmitter.maxPurchaseAmount());
 
         createDefaultArtPiece();
-        vm.roll(block.number + 1); // roll block number to enable voting snapshot
+        vm.roll(vm.getBlockNumber() + 1); // roll block number to enable voting snapshot
 
         auction.unpause();
 
@@ -337,7 +337,7 @@ contract AuctionHouseSettleTest is AuctionHouseTest {
             creatorBps
         );
 
-        vm.roll(block.number + 1); // roll block number to enable voting snapshot
+        vm.roll(vm.getBlockNumber() + 1); // roll block number to enable voting snapshot
 
         auction.unpause();
 
@@ -412,7 +412,7 @@ contract AuctionHouseSettleTest is AuctionHouseTest {
             address(0x1),
             10_000
         );
-        vm.roll(block.number + 1); // roll block number to enable voting snapshot
+        vm.roll(vm.getBlockNumber() + 1); // roll block number to enable voting snapshot
 
         auction.unpause();
 
@@ -431,7 +431,7 @@ contract AuctionHouseSettleTest is AuctionHouseTest {
 
         //create default art piece and roll
         createDefaultArtPiece();
-        vm.roll(block.number + 1);
+        vm.roll(vm.getBlockNumber() + 1);
 
         auction.settleCurrentAndCreateNewAuction();
 
@@ -491,7 +491,7 @@ contract AuctionHouseSettleTest is AuctionHouseTest {
         auction.setReservePrice(bidAmount);
 
         uint256 verbId = createDefaultArtPiece();
-        vm.roll(block.number + 1); // roll block number to enable voting snapshot
+        vm.roll(vm.getBlockNumber() + 1); // roll block number to enable voting snapshot
 
         uint256 balance = 1 ether;
         address alice = vm.addr(uint256(1001));

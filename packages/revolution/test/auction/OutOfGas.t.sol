@@ -42,7 +42,7 @@ contract AuctionHouseOutOfGasTest is AuctionHouseTest {
             creatorBps
         );
 
-        vm.roll(block.number + 1); // roll block number to enable voting snapshot
+        vm.roll(vm.getBlockNumber() + 1); // roll block number to enable voting snapshot
 
         vm.startPrank(auction.owner());
         auction.unpause();
@@ -67,7 +67,7 @@ contract AuctionHouseOutOfGasTest is AuctionHouseTest {
             creatorAddresses,
             creatorBps
         );
-        vm.roll(block.number + 1); // roll block number to enable voting snapshot
+        vm.roll(vm.getBlockNumber() + 1); // roll block number to enable voting snapshot
     }
 
     // Helper function to create a string of a specified length

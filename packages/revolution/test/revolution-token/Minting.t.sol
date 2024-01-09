@@ -26,11 +26,11 @@ contract TokenMintingTest is RevolutionTokenTestSuite {
         revolutionPoints.mint(address(this), 10);
 
         // ensure vote snapshot is taken
-        vm.roll(block.number + 1);
+        vm.roll(vm.getBlockNumber() + 1);
 
         // Create a new art piece and simulate it being the top voted piece
         uint256 pieceId = createDefaultArtPiece();
-        vm.roll(block.number + 2);
+        vm.roll(vm.getBlockNumber() + 2);
 
         vm.startPrank(address(this));
         cultureIndex.vote(pieceId); // Simulate voting for the piece to make it top-voted
@@ -105,7 +105,7 @@ contract TokenMintingTest is RevolutionTokenTestSuite {
         vm.startPrank(address(auction));
         // Add a piece to the CultureIndex
         createDefaultArtPiece();
-        vm.roll(block.number + 1);
+        vm.roll(vm.getBlockNumber() + 1);
 
         // Mint a token
         uint256 tokenId = revolutionToken.mint();
@@ -124,7 +124,7 @@ contract TokenMintingTest is RevolutionTokenTestSuite {
         uint256 initialTotalSupply = revolutionToken.totalSupply();
         vm.stopPrank();
         vm.startPrank(address(auction));
-        vm.roll(block.number + 1);
+        vm.roll(vm.getBlockNumber() + 1);
 
         uint256 newTokenId = revolutionToken.mint();
         assertEq(revolutionToken.totalSupply(), initialTotalSupply + 1, "One new token should have been minted");
@@ -138,7 +138,7 @@ contract TokenMintingTest is RevolutionTokenTestSuite {
     /// @dev Tests burning a verb token
     function testBurn() public {
         createDefaultArtPiece();
-        vm.roll(block.number + 1);
+        vm.roll(vm.getBlockNumber() + 1);
 
         vm.stopPrank();
         vm.startPrank(address(auction));
@@ -160,11 +160,11 @@ contract TokenMintingTest is RevolutionTokenTestSuite {
         revolutionPoints.mint(address(this), voteWeight);
 
         // ensure vote snapshot is taken
-        vm.roll(block.number + 1);
+        vm.roll(vm.getBlockNumber() + 1);
 
         uint256 pieceId1 = createDefaultArtPiece();
         uint256 pieceId2 = createDefaultArtPiece();
-        vm.roll(block.number + 2);
+        vm.roll(vm.getBlockNumber() + 2);
 
         vm.startPrank(address(this));
         if (voteWeight == 0) vm.expectRevert(abi.encodeWithSignature("WEIGHT_TOO_LOW()"));
@@ -194,7 +194,7 @@ contract TokenMintingTest is RevolutionTokenTestSuite {
     /// @dev Checks if the VerbCreated event is emitted with correct parameters on minting
     function testMintingEvent() public {
         createDefaultArtPiece();
-        vm.roll(block.number + 1);
+        vm.roll(vm.getBlockNumber() + 1);
 
         (uint256 pieceId, ICultureIndex.ArtPieceMetadata memory metadata, , , ) = cultureIndex.pieces(0);
 
@@ -225,7 +225,7 @@ contract TokenMintingTest is RevolutionTokenTestSuite {
         vm.startPrank(address(auction));
         //create piece
         createDefaultArtPiece();
-        vm.roll(block.number + 1);
+        vm.roll(vm.getBlockNumber() + 1);
 
         uint256 tokenId = revolutionToken.mint();
 
@@ -242,7 +242,7 @@ contract TokenMintingTest is RevolutionTokenTestSuite {
         vm.stopPrank();
         vm.startPrank(address(auction));
         uint256 artPieceId = createDefaultArtPiece();
-        vm.roll(block.number + 1);
+        vm.roll(vm.getBlockNumber() + 1);
 
         uint256 tokenId = revolutionToken.mint();
         (, ICultureIndex.ArtPieceMetadata memory metadata, , , ) = cultureIndex.pieces(artPieceId);
@@ -262,7 +262,7 @@ contract TokenMintingTest is RevolutionTokenTestSuite {
         revolutionPoints.mint(address(this), 10);
 
         // ensure vote snapshot is taken
-        vm.roll(block.number + 1);
+        vm.roll(vm.getBlockNumber() + 1);
 
         // Create a new piece and simulate it being the top voted piece
         uint256 pieceId = createDefaultArtPiece(); // This function should exist within the test contract
@@ -273,7 +273,7 @@ contract TokenMintingTest is RevolutionTokenTestSuite {
         // Mint a token
         vm.startPrank(address(auction));
         // fast forward to the next block
-        vm.roll(block.number + 2);
+        vm.roll(vm.getBlockNumber() + 2);
         uint256 tokenId = revolutionToken.mint();
 
         // Validate the token is associated with the top voted piece

@@ -21,7 +21,7 @@ contract TokenBasicTest is RevolutionTokenTestSuite {
     function testTokenMetadataIntegrity() public {
         // Create an art piece and mint a token
         uint256 artPieceId = createDefaultArtPiece();
-        vm.roll(block.number + 1);
+        vm.roll(vm.getBlockNumber() + 1);
 
         vm.stopPrank();
         vm.startPrank(address(auction));
@@ -92,7 +92,7 @@ contract TokenBasicTest is RevolutionTokenTestSuite {
     /// @dev Tests that minted tokens are correctly associated with the art piece from CultureIndex
     function testCorrectArtAssociation() public {
         uint256 artPieceId = createDefaultArtPiece();
-        vm.roll(block.number + 1);
+        vm.roll(vm.getBlockNumber() + 1);
 
         vm.stopPrank();
         vm.startPrank(address(auction));
@@ -250,7 +250,7 @@ contract TokenBasicTest is RevolutionTokenTestSuite {
         vm.startPrank(address(revolutionPointsEmitter));
         revolutionPoints.mint(voter, voteWeight);
 
-        vm.roll(block.number + 1);
+        vm.roll(vm.getBlockNumber() + 1);
 
         uint256 artPieceId = createDefaultArtPiece();
 
@@ -276,7 +276,7 @@ contract TokenBasicTest is RevolutionTokenTestSuite {
         vm.stopPrank();
         // Arrange
         uint256 artPieceId = createDefaultArtPiece();
-        vm.roll(block.number + 1);
+        vm.roll(vm.getBlockNumber() + 1);
         address voter = address(0x3); // An address that does not hold any voting tokens
 
         // Act & Assert
@@ -295,7 +295,7 @@ contract TokenBasicTest is RevolutionTokenTestSuite {
         vm.stopPrank();
         vm.startPrank(address(revolutionPointsEmitter));
         revolutionPoints.mint(voter, voteWeight);
-        vm.roll(block.number + 1);
+        vm.roll(vm.getBlockNumber() + 1);
 
         uint256 artPieceId = createDefaultArtPiece();
 
@@ -316,7 +316,7 @@ contract TokenBasicTest is RevolutionTokenTestSuite {
         uint256 artPieceId = createDefaultArtPiece();
         address voter = address(0x5);
         uint256 voteWeight = 100;
-        vm.roll(block.number + 1);
+        vm.roll(vm.getBlockNumber() + 1);
 
         vm.stopPrank();
         vm.startPrank(address(auction));
@@ -328,7 +328,7 @@ contract TokenBasicTest is RevolutionTokenTestSuite {
         vm.stopPrank();
         vm.startPrank(address(revolutionPointsEmitter));
         revolutionPoints.mint(voter, voteWeight);
-        vm.roll(block.number + 1);
+        vm.roll(vm.getBlockNumber() + 1);
 
         // Act & Assert
         vm.startPrank(voter); // Set the next message sender to the voter address
@@ -352,7 +352,7 @@ contract TokenBasicTest is RevolutionTokenTestSuite {
 
         // Vote on the first piece
         vm.startPrank(voter);
-        vm.roll(block.number + 1);
+        vm.roll(vm.getBlockNumber() + 1);
 
         uint256 firstArtPieceId = createDefaultArtPiece();
 
@@ -360,7 +360,7 @@ contract TokenBasicTest is RevolutionTokenTestSuite {
 
         vm.startPrank(address(revolutionPointsEmitter));
         revolutionPoints.mint(voter, secondPieceVoteWeight);
-        vm.roll(block.number + 1);
+        vm.roll(vm.getBlockNumber() + 1);
 
         // Vote on the second piece with a higher weight
         uint256 secondArtPieceId = createArtPiece(
@@ -395,14 +395,14 @@ contract TokenBasicTest is RevolutionTokenTestSuite {
         vm.stopPrank();
         vm.startPrank(address(revolutionPointsEmitter));
         revolutionPoints.mint(voter, 100);
-        vm.roll(block.number + 1);
+        vm.roll(vm.getBlockNumber() + 1);
 
         uint256 artPieceId = createDefaultArtPiece();
 
         vm.startPrank(voter);
         cultureIndex.vote(artPieceId);
         vm.stopPrank();
-        vm.roll(block.number + 1);
+        vm.roll(vm.getBlockNumber() + 1);
 
         vm.startPrank(address(auction));
         // Act
@@ -435,7 +435,7 @@ contract TokenBasicTest is RevolutionTokenTestSuite {
         vm.stopPrank();
         vm.startPrank(address(revolutionPointsEmitter));
         revolutionPoints.mint(voter, voteWeight);
-        vm.roll(block.number + 1);
+        vm.roll(vm.getBlockNumber() + 1);
 
         // Act & Assert
         vm.startPrank(voter);
@@ -519,7 +519,7 @@ contract TokenBasicTest is RevolutionTokenTestSuite {
 
         //create piece
         createDefaultArtPiece();
-        vm.roll(block.number + 1);
+        vm.roll(vm.getBlockNumber() + 1);
 
         uint256 preMintPieceId = cultureIndex.topVotedPieceId();
         uint256 tokenId = revolutionToken.mint();
