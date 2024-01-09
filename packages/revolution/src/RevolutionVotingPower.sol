@@ -11,10 +11,18 @@ import { VersionedContract } from "./version/VersionedContract.sol";
 import { ERC20VotesUpgradeable } from "./base/erc20/ERC20VotesUpgradeable.sol";
 import { ERC721CheckpointableUpgradeable } from "./base/ERC721CheckpointableUpgradeable.sol";
 
+import { IRevolutionVotingPower } from "./interfaces/IRevolutionVotingPower.sol";
+
 /// @title RevolutionVotingPower
 /// @dev This contract implements the voting power calculations for Revolution DAOs
 /// @author rocketman
-contract RevolutionVotingPower is VersionedContract, UUPS, Ownable2StepUpgradeable, ReentrancyGuardUpgradeable {
+contract RevolutionVotingPower is
+    IRevolutionVotingPower,
+    VersionedContract,
+    UUPS,
+    Ownable2StepUpgradeable,
+    ReentrancyGuardUpgradeable
+{
     ///                                                          ///
     ///                         IMMUTABLES                       ///
     ///                                                          ///
@@ -91,6 +99,12 @@ contract RevolutionVotingPower is VersionedContract, UUPS, Ownable2StepUpgradeab
 
         __Ownable_init(_initialOwner);
         __ReentrancyGuard_init();
+
+        emit ERC721VotingTokenUpdated(revolutionToken);
+        emit ERC20VotingTokenUpdated(revolutionPoints);
+
+        emit ERC721VotingPowerUpdated(revolutionTokenVoteWeight, revolutionTokenVoteWeight);
+        emit ERC20VotingPowerUpdated(revolutionPointsVoteWeight, _revolutionTokenVoteWeight);
     }
 
     ///                                                          ///
