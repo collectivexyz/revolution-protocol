@@ -190,6 +190,15 @@ contract DeployContracts is Script {
                 )
             )
         );
+        vm.writeLine(
+            filePath,
+            string(
+                abi.encodePacked(
+                    "RevolutionVotingPower implementation: ",
+                    addressToString(deployedContracts.revolutionVotingPowerImpl)
+                )
+            )
+        );
 
         console2.log("~~~~~~~~~~ MANAGER IMPL 0 ~~~~~~~~~~~");
         console2.logAddress(deployedContracts.builderImpl0);
