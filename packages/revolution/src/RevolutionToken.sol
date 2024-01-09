@@ -191,6 +191,7 @@ contract RevolutionToken is
      * @dev See {IERC721Metadata-tokenURI}.
      */
     function tokenURI(uint256 tokenId) public view override returns (string memory) {
+        if (ownerOf(tokenId) == address(0)) revert();
         return descriptor.tokenURI(tokenId, cultureIndex.getPieceById(artPieces[tokenId]).metadata);
     }
 
@@ -199,6 +200,7 @@ contract RevolutionToken is
      * with the JSON contents directly inlined.
      */
     function dataURI(uint256 tokenId) public view override returns (string memory) {
+        if (ownerOf(tokenId) == address(0)) revert();
         return descriptor.dataURI(tokenId, cultureIndex.getPieceById(artPieces[tokenId]).metadata);
     }
 
