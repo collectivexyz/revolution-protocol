@@ -204,7 +204,7 @@ contract RevolutionVotingPower is
      * @notice Returns the voting power of a voter at the current block with the default vote weights.
      * @return The total voting power.
      */
-    function getTotalVotes() external view override returns (uint256) {
+    function getTotalVotesSupply() external view override returns (uint256) {
         return _calculateVoteWeight(points.totalSupply(), pointsVoteWeight, token.totalSupply(), tokenVoteWeight);
     }
 
@@ -214,7 +214,7 @@ contract RevolutionVotingPower is
      * @param _tokenVoteWeight The ERC721 token vote weight.
      * @return The total voting power.
      */
-    function getTotalVotesWithWeights(
+    function getTotalVotesSupplyWithWeights(
         uint256 _pointsVoteWeight,
         uint256 _tokenVoteWeight
     ) external view override returns (uint256) {
@@ -253,7 +253,7 @@ contract RevolutionVotingPower is
      * @param _blockNumber The block number at which to calculate the voting power.
      * @return The total voting power.
      */
-    function getPastTotalVotes(uint256 _blockNumber) external view override returns (uint256) {
+    function getPastTotalVotesSupply(uint256 _blockNumber) external view override returns (uint256) {
         return
             _calculateVoteWeight(
                 points.getPastTotalSupply(_blockNumber),
@@ -270,7 +270,7 @@ contract RevolutionVotingPower is
      * @param _tokenVoteWeight The ERC721 token vote weight.
      * @return The total voting power given weights at a previous block.
      */
-    function getPastTotalVotesWithWeights(
+    function getPastTotalVotesSupplyWithWeights(
         uint256 _blockNumber,
         uint256 _pointsVoteWeight,
         uint256 _tokenVoteWeight

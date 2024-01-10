@@ -99,7 +99,6 @@ interface IRevolutionBuilder is IUUPS {
     /// @param votingPeriod The time period to vote on a proposal
     /// @param proposalThresholdBPS The basis points of the token supply required to create a proposal
     /// @param vetoer The address authorized to veto proposals (address(0) if none desired)
-    /// @param revolutionTokenVoteWeight The voting weight of the individual Revolution tokens, normally a large multiple of 1e18 eg: (100 * 1e18) to match up with daily emission of ERC20 points (which normally have 18 decimals)
     /// @param daoName The name of the DAO
     /// @param dynamicQuorumParams The dynamic quorum parameters
     struct GovParams {
@@ -108,7 +107,6 @@ interface IRevolutionBuilder is IUUPS {
         uint256 votingPeriod;
         uint256 proposalThresholdBPS;
         address vetoer;
-        uint256 revolutionTokenVoteWeight;
         string daoName;
         RevolutionDAOStorageV1.DynamicQuorumParams dynamicQuorumParams;
     }

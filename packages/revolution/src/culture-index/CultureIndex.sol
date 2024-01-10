@@ -493,7 +493,7 @@ contract CultureIndex is
      * Differs from `GovernerBravo` which uses fixed amount
      */
     function quorumVotes() public view returns (uint256) {
-        return (quorumVotesBPS * votingPower.getTotalVotesWithWeights(1, revolutionTokenVoteWeight)) / 10_000;
+        return (quorumVotesBPS * votingPower.getTotalVotesSupplyWithWeights(1, revolutionTokenVoteWeight)) / 10_000;
     }
 
     /**
@@ -503,8 +503,11 @@ contract CultureIndex is
     function quorumVotesForPiece(uint256 pieceId) public view returns (uint256) {
         return
             (quorumVotesBPS *
-                votingPower.getPastTotalVotesWithWeights(pieces[pieceId].creationBlock, 1, revolutionTokenVoteWeight)) /
-            10_000;
+                votingPower.getPastTotalVotesSupplyWithWeights(
+                    pieces[pieceId].creationBlock,
+                    1,
+                    revolutionTokenVoteWeight
+                )) / 10_000;
     }
 
     /**
@@ -519,7 +522,7 @@ contract CultureIndex is
         uint256 creationBlock = pieces[pieceId].creationBlock;
 
         uint256 pastQuorumVotes = (quorumVotesBPS *
-            (votingPower.getPastTotalVotesWithWeights(creationBlock, 1, revolutionTokenVoteWeight) -
+            (votingPower.getPastTotalVotesSupplyWithWeights(creationBlock, 1, revolutionTokenVoteWeight) -
                 //subtract the votes of the AuctionHouse when calculating quorum since the tokens are not accessible
                 votingPower._getTokenMinter__PastTokenVotes__WithWeight(creationBlock, revolutionTokenVoteWeight))) /
             10_000;
