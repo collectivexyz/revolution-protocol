@@ -22,6 +22,49 @@
 | revolutionTokenVoteWeight | uint256                                                           | 12   | 0      | 32    | src/culture-index/CultureIndex.sol:CultureIndex |
 
 =======================
+➡ RevolutionBuilder
+=======================
+
+| Name                | Type                                                             | Slot | Offset | Bytes | Contract                                            |
+|---------------------|------------------------------------------------------------------|------|--------|-------|-----------------------------------------------------|
+| isUpgrade           | mapping(address => mapping(address => bool))                     | 0    | 0      | 32    | src/builder/RevolutionBuilder.sol:RevolutionBuilder |
+| daoAddressesByToken | mapping(address => struct RevolutionBuilderTypesV1.DAOAddresses) | 1    | 0      | 32    | src/builder/RevolutionBuilder.sol:RevolutionBuilder |
+
+=======================
+➡ DAOExecutor
+=======================
+
+| Name               | Type                     | Slot | Offset | Bytes | Contract                                   |
+|--------------------|--------------------------|------|--------|-------|--------------------------------------------|
+| admin              | address                  | 0    | 0      | 20    | src/governance/DAOExecutor.sol:DAOExecutor |
+| pendingAdmin       | address                  | 1    | 0      | 20    | src/governance/DAOExecutor.sol:DAOExecutor |
+| delay              | uint256                  | 2    | 0      | 32    | src/governance/DAOExecutor.sol:DAOExecutor |
+| queuedTransactions | mapping(bytes32 => bool) | 3    | 0      | 32    | src/governance/DAOExecutor.sol:DAOExecutor |
+
+=======================
+➡ RevolutionDAOLogicV1
+=======================
+
+| Name                    | Type                                                          | Slot | Offset | Bytes | Contract                                                     |
+|-------------------------|---------------------------------------------------------------|------|--------|-------|--------------------------------------------------------------|
+| admin                   | address                                                       | 0    | 0      | 20    | src/governance/RevolutionDAOLogicV1.sol:RevolutionDAOLogicV1 |
+| pendingAdmin            | address                                                       | 1    | 0      | 20    | src/governance/RevolutionDAOLogicV1.sol:RevolutionDAOLogicV1 |
+| implementation          | address                                                       | 2    | 0      | 20    | src/governance/RevolutionDAOLogicV1.sol:RevolutionDAOLogicV1 |
+| vetoer                  | address                                                       | 3    | 0      | 20    | src/governance/RevolutionDAOLogicV1.sol:RevolutionDAOLogicV1 |
+| votingDelay             | uint256                                                       | 4    | 0      | 32    | src/governance/RevolutionDAOLogicV1.sol:RevolutionDAOLogicV1 |
+| votingPeriod            | uint256                                                       | 5    | 0      | 32    | src/governance/RevolutionDAOLogicV1.sol:RevolutionDAOLogicV1 |
+| proposalThresholdBPS    | uint256                                                       | 6    | 0      | 32    | src/governance/RevolutionDAOLogicV1.sol:RevolutionDAOLogicV1 |
+| quorumVotesBPS          | uint256                                                       | 7    | 0      | 32    | src/governance/RevolutionDAOLogicV1.sol:RevolutionDAOLogicV1 |
+| proposalCount           | uint256                                                       | 8    | 0      | 32    | src/governance/RevolutionDAOLogicV1.sol:RevolutionDAOLogicV1 |
+| timelock                | contract IDAOExecutor                                         | 9    | 0      | 20    | src/governance/RevolutionDAOLogicV1.sol:RevolutionDAOLogicV1 |
+| votingPower             | contract IRevolutionVotingPower                               | 10   | 0      | 20    | src/governance/RevolutionDAOLogicV1.sol:RevolutionDAOLogicV1 |
+| _proposals              | mapping(uint256 => struct RevolutionDAOStorageV1.Proposal)    | 11   | 0      | 32    | src/governance/RevolutionDAOLogicV1.sol:RevolutionDAOLogicV1 |
+| latestProposalIds       | mapping(address => uint256)                                   | 12   | 0      | 32    | src/governance/RevolutionDAOLogicV1.sol:RevolutionDAOLogicV1 |
+| quorumParamsCheckpoints | struct RevolutionDAOStorageV1.DynamicQuorumParamsCheckpoint[] | 13   | 0      | 32    | src/governance/RevolutionDAOLogicV1.sol:RevolutionDAOLogicV1 |
+| pendingVetoer           | address                                                       | 14   | 0      | 20    | src/governance/RevolutionDAOLogicV1.sol:RevolutionDAOLogicV1 |
+| name                    | string                                                        | 15   | 0      | 32    | src/governance/RevolutionDAOLogicV1.sol:RevolutionDAOLogicV1 |
+
+=======================
 ➡ RevolutionVotingPower
 =======================
 

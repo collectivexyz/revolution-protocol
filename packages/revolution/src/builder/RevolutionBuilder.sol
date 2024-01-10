@@ -247,8 +247,7 @@ contract RevolutionBuilder is
 
         IRevolutionDAO(daoAddressesByToken[revolutionToken].dao).initialize({
             executor: daoAddressesByToken[revolutionToken].executor,
-            revolutionToken: daoAddressesByToken[revolutionToken].revolutionToken,
-            revolutionPoints: daoAddressesByToken[revolutionToken].revolutionPoints,
+            votingPower: daoAddressesByToken[revolutionToken].revolutionVotingPower,
             govParams: _govParams
         });
 

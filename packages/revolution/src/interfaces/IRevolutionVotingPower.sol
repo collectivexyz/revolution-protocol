@@ -63,13 +63,6 @@ interface IRevolutionVotingPower is IRevolutionVotingPowerEvents {
         uint256 erc721TokenVoteWeight
     ) external view returns (uint256);
 
-    function getTotalVotes() external view returns (uint256);
-
-    function getTotalVotesWithWeights(
-        uint256 erc20PointsVoteWeight,
-        uint256 erc721TokenVoteWeight
-    ) external view returns (uint256);
-
     function getPastVotes(address account, uint256 blockNumber) external view returns (uint256);
 
     function getPastVotesWithWeights(
@@ -79,9 +72,16 @@ interface IRevolutionVotingPower is IRevolutionVotingPowerEvents {
         uint256 erc721TokenVoteWeight
     ) external view returns (uint256);
 
-    function getPastTotalVotes(uint256 blockNumber) external view returns (uint256);
+    function getTotalVotesSupply() external view returns (uint256);
 
-    function getPastTotalVotesWithWeights(
+    function getTotalVotesSupplyWithWeights(
+        uint256 erc20PointsVoteWeight,
+        uint256 erc721TokenVoteWeight
+    ) external view returns (uint256);
+
+    function getPastTotalVotesSupply(uint256 blockNumber) external view returns (uint256);
+
+    function getPastTotalVotesSupplyWithWeights(
         uint256 blockNumber,
         uint256 erc20PointsVoteWeight,
         uint256 erc721TokenVoteWeight

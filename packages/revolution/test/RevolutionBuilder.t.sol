@@ -196,32 +196,30 @@ contract RevolutionBuilderTest is Test {
     }
 
     function setMockGovParams() internal virtual {
-        setGovParams(2 days, 1 seconds, 1 weeks, 50, founder, 100 * 1e18, 1000, 0, 1000, "Vrbs DAO");
+        setGovParams(2 days, 1 seconds, 1 weeks, 50, founder, 1000, 0, 1000, "Vrbs DAO");
     }
 
     function setGovParams(
         uint256 _timelockDelay,
         uint256 _votingDelay,
         uint256 _votingPeriod,
-        uint256 proposalThresholdBPS,
+        uint256 _proposalThresholdBPS,
         address _vetoer,
-        uint256 _revolutionTokenVoteWeight,
-        uint16 minQuorumVotesBPS,
-        uint16 maxQuorumVotesBPS,
-        uint16 quorumCoefficient,
+        uint16 _minQuorumVotesBPS,
+        uint16 _maxQuorumVotesBPS,
+        uint16 _quorumCoefficient,
         string memory _daoName
     ) internal virtual {
         govParams = IRevolutionBuilder.GovParams({
             timelockDelay: _timelockDelay,
             votingDelay: _votingDelay,
             votingPeriod: _votingPeriod,
-            proposalThresholdBPS: proposalThresholdBPS,
+            proposalThresholdBPS: _proposalThresholdBPS,
             vetoer: _vetoer,
-            revolutionTokenVoteWeight: _revolutionTokenVoteWeight,
             dynamicQuorumParams: RevolutionDAOStorageV1.DynamicQuorumParams({
-                minQuorumVotesBPS: minQuorumVotesBPS,
-                maxQuorumVotesBPS: maxQuorumVotesBPS,
-                quorumCoefficient: quorumCoefficient
+                minQuorumVotesBPS: _minQuorumVotesBPS,
+                maxQuorumVotesBPS: _maxQuorumVotesBPS,
+                quorumCoefficient: _quorumCoefficient
             }),
             daoName: _daoName
         });
