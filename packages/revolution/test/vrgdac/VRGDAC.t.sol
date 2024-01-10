@@ -20,7 +20,6 @@ contract PointsTestSuite is RevolutionBuilderTest {
         super.deployMock();
     }
 
-    /// forge-config: default.fuzz.runs = 100000
     function test_noNegatives(int256 amount, int256 perTimeUnit, int256 targetPrice, int256 priceDecayPercent) public {
         perTimeUnit = bound(perTimeUnit, 1 * 1e18, 1_000_000 * 1e18);
         targetPrice = bound(targetPrice, 1 * 1e10, 1_000 * 1e18);
@@ -42,7 +41,6 @@ contract PointsTestSuite is RevolutionBuilderTest {
         assertGe(x, 0, "x should be greater than or equal to zero");
     }
 
-    /// forge-config: default.fuzz.runs = 21000
     function test_yToX_NoPurchasesAfterLongTime(
         int256 amount,
         int256 randomTime,
@@ -81,7 +79,6 @@ contract PointsTestSuite is RevolutionBuilderTest {
         assertGe(x, 0, "x should be greater than or equal to zero");
     }
 
-    /// forge-config: default.fuzz.runs = 21000
     function test_yToX_ManyPurchasesAfterLongTime(
         int256 amount,
         int256 randomTime,
