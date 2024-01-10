@@ -285,40 +285,42 @@ contract RevolutionVotingPower is
     }
 
     /**
-     * @notice gets the balance of the owner of the ERC721 token
+     * @notice gets the balance of the minter of the ERC721 token
      * @dev useful to eg: subtract the AuctionHouse balance when calculating quorum
      */
-    function _getTokenOwner__TokenVotes() external view override returns (uint256) {
-        return token.getVotes(token.owner()) * tokenVoteWeight;
+    function _getTokenMinter__TokenVotes() external view override returns (uint256) {
+        return token.getVotes(token.minter()) * tokenVoteWeight;
     }
 
     /**
-     * @notice gets the balance of the owner of the ERC721 token
+     * @notice gets the balance of the minter of the ERC721 token
      * @dev useful to eg: subtract the AuctionHouse balance when calculating quorum
      * @param _blockNumber The block number at which to calculate the voting power.
      */
-    function _getTokenOwner__PastTokenVotes(uint256 _blockNumber) external view override returns (uint256) {
-        return token.getPastVotes(token.owner(), _blockNumber) * tokenVoteWeight;
+    function _getTokenMinter__PastTokenVotes(uint256 _blockNumber) external view override returns (uint256) {
+        return token.getPastVotes(token.minter(), _blockNumber) * tokenVoteWeight;
     }
 
     /**
-     * @notice gets the balance of the owner of the ERC721 token
+     * @notice gets the balance of the minter of the ERC721 token
      * @param _tokenVoteWeight The ERC721 token vote weight.
      */
-    function _getTokenOwner__TokenVotes__WithWeight(uint256 _tokenVoteWeight) external view override returns (uint256) {
-        return token.getVotes(token.owner()) * _tokenVoteWeight;
+    function _getTokenMinter__TokenVotes__WithWeight(
+        uint256 _tokenVoteWeight
+    ) external view override returns (uint256) {
+        return token.getVotes(token.minter()) * _tokenVoteWeight;
     }
 
     /**
-     * @notice gets the balance of the owner of the ERC721 token
+     * @notice gets the balance of the minter of the ERC721 token
      * @param _blockNumber The block number at which to calculate the voting power.
      * @param _tokenVoteWeight The ERC721 token vote weight.
      */
-    function _getTokenOwner__PastTokenVotes__WithWeight(
+    function _getTokenMinter__PastTokenVotes__WithWeight(
         uint256 _blockNumber,
         uint256 _tokenVoteWeight
     ) external view override returns (uint256) {
-        return token.getPastVotes(token.owner(), _blockNumber) * _tokenVoteWeight;
+        return token.getPastVotes(token.minter(), _blockNumber) * _tokenVoteWeight;
     }
 
     ///                                                          ///
