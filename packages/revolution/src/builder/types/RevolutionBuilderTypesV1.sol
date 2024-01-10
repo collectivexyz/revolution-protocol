@@ -28,4 +28,12 @@ interface RevolutionBuilderTypesV1 {
         /// @notice Address for deployed RevolutionVotingPower contract
         address revolutionVotingPower;
     }
+
+    struct InitialProxySetup {
+        address revolutionToken;
+        address executor;
+        address revolutionVotingPower;
+        address dao;
+        bytes32 salt;
+    }
 }
