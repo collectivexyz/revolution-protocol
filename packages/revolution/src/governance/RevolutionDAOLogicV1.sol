@@ -155,7 +155,7 @@ contract RevolutionDAOLogicV1 is
         address _votingPower,
         IRevolutionBuilder.GovParams calldata _govParams
     ) public virtual initializer {
-        if (msg.sender != address(manager)) revert NOT_MANAGER();
+        if (msg.sender != admin) revert ADMIN_ONLY();
 
         if (_executor == address(0)) revert INVALID_EXECUTOR_ADDRESS();
 

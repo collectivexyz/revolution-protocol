@@ -38,6 +38,7 @@
 pragma solidity ^0.8.22;
 
 import "./RevolutionDAOInterfaces.sol";
+import { IRevolutionBuilder } from "../interfaces/IRevolutionBuilder.sol";
 
 contract RevolutionDAOProxyV1 is RevolutionDAOStorageV1, RevolutionDAOEvents {
     ///                                                          ///
@@ -50,7 +51,7 @@ contract RevolutionDAOProxyV1 is RevolutionDAOStorageV1, RevolutionDAOEvents {
     constructor(
         address _executor,
         address _votingPower,
-        DynamicQuorumParams memory _govParams,
+        IRevolutionBuilder.GovParams memory _govParams,
         address _implementation,
         address _admin
     ) {
