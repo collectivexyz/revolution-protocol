@@ -112,15 +112,15 @@ contract EmissionRatesTest is PointsEmitterTest {
 
         vm.stopPrank();
         // set setCreatorsAddress
-        vm.prank(address(dao));
+        vm.prank(address(executor));
         revolutionPointsEmitter.setCreatorsAddress(address(100));
 
         // change creatorRateBps to 0
-        vm.prank(address(dao));
+        vm.prank(address(executor));
         revolutionPointsEmitter.setCreatorRateBps(0);
 
         // set entropyRateBps to 0
-        vm.prank(address(dao));
+        vm.prank(address(executor));
         revolutionPointsEmitter.setEntropyRateBps(0);
 
         vm.startPrank(address(0));

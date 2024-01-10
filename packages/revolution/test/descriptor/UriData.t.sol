@@ -230,7 +230,7 @@ contract DescriptorURIDataTest is DescriptorTest {
         vm.stopPrank();
 
         // Verify ownership has not changed
-        assertEq(descriptor.owner(), address(dao), "Ownership should not have changed");
+        assertEq(descriptor.owner(), address(executor), "Ownership should not have changed");
     }
 
     /// @notice Test `tokenURI` with only image metadata set
