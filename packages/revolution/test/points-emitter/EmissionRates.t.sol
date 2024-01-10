@@ -19,7 +19,7 @@ contract EmissionRatesTest is PointsEmitterTest {
         // Assume valid rates
         vm.assume(creatorRate <= 10000 && entropyRate <= 10000);
 
-        vm.startPrank(address(dao));
+        vm.startPrank(address(executor));
         // Set creator and entropy rates
         revolutionPointsEmitter.setCreatorRateBps(creatorRate);
         revolutionPointsEmitter.setEntropyRateBps(entropyRate);
@@ -304,7 +304,7 @@ contract EmissionRatesTest is PointsEmitterTest {
         // Assume valid rates
         vm.assume(creatorRate <= 10000 && entropyRate <= 10000);
 
-        vm.startPrank(address(dao));
+        vm.startPrank(address(executor));
         // Set creator and entropy rates
         revolutionPointsEmitter.setCreatorRateBps(creatorRate);
         revolutionPointsEmitter.setEntropyRateBps(entropyRate);

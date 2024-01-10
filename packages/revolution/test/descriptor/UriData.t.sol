@@ -18,7 +18,7 @@ contract DescriptorURIDataTest is DescriptorTest {
 
         super.deployMock();
 
-        vm.startPrank(address(dao));
+        vm.startPrank(address(executor));
     }
 
     /// @notice Test that toggling `isDataURIEnabled` changes state correctly

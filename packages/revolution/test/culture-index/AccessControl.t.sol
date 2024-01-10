@@ -22,7 +22,6 @@ contract CultureIndexAccessControlTest is CultureIndexTestSuite {
         vm.assume(newQuorumBPS <= cultureIndex.MAX_QUORUM_VOTES_BPS());
 
         // Set new quorum BPS by owner
-        vm.startPrank(address(dao));
         cultureIndex._setQuorumVotesBPS(newQuorumBPS);
         vm.stopPrank();
 
@@ -36,7 +35,6 @@ contract CultureIndexAccessControlTest is CultureIndexTestSuite {
         vm.assume(newQuorumBPS > cultureIndex.MAX_QUORUM_VOTES_BPS());
 
         // Set new quorum BPS by owner
-        vm.startPrank(address(dao));
         vm.expectRevert(abi.encodeWithSignature("INVALID_QUORUM_BPS()"));
         cultureIndex._setQuorumVotesBPS(newQuorumBPS);
         vm.stopPrank();
@@ -61,7 +59,6 @@ contract CultureIndexAccessControlTest is CultureIndexTestSuite {
         vm.assume(quorumBps > 200 && quorumBps <= cultureIndex.MAX_QUORUM_VOTES_BPS());
 
         // Set quorum BPS
-        vm.startPrank(address(dao));
         cultureIndex._setQuorumVotesBPS(quorumBps);
         vm.stopPrank();
 
