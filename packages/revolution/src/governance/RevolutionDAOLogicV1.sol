@@ -146,18 +146,18 @@ contract RevolutionDAOLogicV1 is
 
     /**
      * @notice Used to initialize the contract during delegator contructor
-     * @param _executor_ The address of the DAOExecutor
+     * @param _executor The address of the DAOExecutor
      * @param _votingPower The address of the RevolutionVotingPower contract
      * @param _govParams The initial governance parameters
      */
     function initialize(
-        address _executor_,
+        address _executor,
         address _votingPower,
         IRevolutionBuilder.GovParams calldata _govParams
     ) public virtual initializer {
         if (msg.sender != address(manager)) revert NOT_MANAGER();
 
-        if (_executor_ == address(0)) revert INVALID_EXECUTOR_ADDRESS();
+        if (_executor == address(0)) revert INVALID_EXECUTOR_ADDRESS();
 
         if (_votingPower == address(0)) revert INVALID_VOTINGPOWER_ADDRESS();
 
@@ -176,13 +176,13 @@ contract RevolutionDAOLogicV1 is
         __EIP712_init(_govParams.daoName, "1");
 
         // Grant ownership to the executor
-        __Ownable_init(_executor_);
+        __Ownable_init(_executor);
 
         emit VotingPeriodSet(votingPeriod, _govParams.votingPeriod);
         emit VotingDelaySet(votingDelay, _govParams.votingDelay);
         emit ProposalThresholdBPSSet(proposalThresholdBPS, _govParams.proposalThresholdBPS);
 
-        timelock = IDAOExecutor(_executor_);
+        timelock = IDAOExecutor(_executor);
         votingPower = IRevolutionVotingPower(_votingPower);
         vetoer = _govParams.vetoer;
         votingPeriod = _govParams.votingPeriod;
