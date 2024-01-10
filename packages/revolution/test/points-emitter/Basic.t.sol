@@ -234,7 +234,7 @@ contract PointsEmitterBasicTest is PointsEmitterTest {
     function testSetCreatorsAddress() public {
         // Setting Creators Address by Owner
         address newCreatorsAddress = address(0x123);
-        vm.prank(address(dao));
+        vm.prank(address(executor));
         revolutionPointsEmitter.setCreatorsAddress(newCreatorsAddress);
         assertEq(
             revolutionPointsEmitter.creatorsAddress(),

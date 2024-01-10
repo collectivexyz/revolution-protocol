@@ -212,12 +212,12 @@ contract RevolutionBuilder is
 
         // Initialize each instance with the provided settings
         IMaxHeap(daoAddressesByToken[revolutionToken].maxHeap).initialize({
-            initialOwner: initialSetup.dao,
+            initialOwner: initialSetup.executor,
             admin: daoAddressesByToken[revolutionToken].cultureIndex
         });
 
         IRevolutionVotingPower(daoAddressesByToken[revolutionToken].revolutionVotingPower).initialize({
-            initialOwner: initialSetup.dao,
+            initialOwner: initialSetup.executor,
             revolutionPoints: daoAddressesByToken[revolutionToken].revolutionPoints,
             revolutionPointsVoteWeight: _revolutionVotingPowerParams.revolutionPointsVoteWeight,
             revolutionToken: daoAddressesByToken[revolutionToken].revolutionToken,
@@ -227,19 +227,19 @@ contract RevolutionBuilder is
         IRevolutionToken(revolutionToken).initialize({
             minter: daoAddressesByToken[revolutionToken].auction,
             descriptor: daoAddressesByToken[revolutionToken].descriptor,
-            initialOwner: initialSetup.dao,
+            initialOwner: initialSetup.executor,
             cultureIndex: daoAddressesByToken[revolutionToken].cultureIndex,
             revolutionTokenParams: _revolutionTokenParams
         });
 
         IDescriptor(daoAddressesByToken[revolutionToken].descriptor).initialize({
-            initialOwner: initialSetup.dao,
+            initialOwner: initialSetup.executor,
             tokenNamePrefix: _revolutionTokenParams.tokenNamePrefix
         });
 
         ICultureIndex(daoAddressesByToken[revolutionToken].cultureIndex).initialize({
             votingPower: daoAddressesByToken[revolutionToken].revolutionVotingPower,
-            initialOwner: initialSetup.dao,
+            initialOwner: initialSetup.executor,
             dropperAdmin: daoAddressesByToken[revolutionToken].revolutionToken,
             cultureIndexParams: _cultureIndexParams,
             maxHeap: daoAddressesByToken[revolutionToken].maxHeap
@@ -248,7 +248,7 @@ contract RevolutionBuilder is
         IAuctionHouse(daoAddressesByToken[revolutionToken].auction).initialize({
             revolutionToken: daoAddressesByToken[revolutionToken].revolutionToken,
             revolutionPointsEmitter: daoAddressesByToken[revolutionToken].revolutionPointsEmitter,
-            initialOwner: initialSetup.dao,
+            initialOwner: initialSetup.executor,
             auctionParams: _auctionParams,
             weth: _weth
         });
@@ -260,7 +260,7 @@ contract RevolutionBuilder is
 
         IRevolutionPointsEmitter(daoAddressesByToken[revolutionToken].revolutionPointsEmitter).initialize({
             revolutionPoints: daoAddressesByToken[revolutionToken].revolutionPoints,
-            initialOwner: initialSetup.dao,
+            initialOwner: initialSetup.executor,
             weth: _weth,
             vrgdac: vrgdac,
             creatorsAddress: _revolutionPointsParams.emitterParams.creatorsAddress,

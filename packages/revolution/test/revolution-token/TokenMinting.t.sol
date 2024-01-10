@@ -206,7 +206,7 @@ contract TokenMintingTest is RevolutionTokenTestSuite {
         ICultureIndex.ArtPieceCondensed memory expectedArtPiece = ICultureIndex.ArtPieceCondensed({
             pieceId: 0,
             creators: creators,
-            sponsor: address(dao)
+            sponsor: address(executor)
         });
 
         vm.stopPrank();

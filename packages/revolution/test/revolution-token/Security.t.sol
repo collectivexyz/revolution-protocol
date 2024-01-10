@@ -178,7 +178,7 @@ contract TokenSecurityTest is RevolutionTokenTestSuite {
         vm.expectEmit(true, true, true, true);
         emit ICultureIndexEvents.PieceCreated(
             0,
-            address(dao),
+            address(executor),
             ICultureIndex.ArtPieceMetadata({
                 name: "Mona Lisa",
                 description: "A masterpiece",

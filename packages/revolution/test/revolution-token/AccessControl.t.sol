@@ -204,7 +204,7 @@ contract TokenAccessControlTest is RevolutionTokenTestSuite {
         vm.startPrank(address(0x2)); // simulate calls from the new minter address
         revolutionToken.mint();
 
-        vm.startPrank(address(dao));
+        vm.startPrank(address(executor));
         // Lock the minter and attempt to change it, expecting a revert
         revolutionToken.lockMinter();
         vm.expectRevert(abi.encodeWithSignature("MINTER_LOCKED()"));
@@ -222,7 +222,7 @@ contract TokenAccessControlTest is RevolutionTokenTestSuite {
         vm.startPrank(address(manager));
         IDescriptor(newDescriptor).initialize(address(this), "Verb");
 
-        vm.startPrank(address(dao));
+        vm.startPrank(address(executor));
         revolutionToken.setDescriptor(IDescriptor(newDescriptor));
 
         // Lock the descriptor and attempt to change it, expecting a revert
