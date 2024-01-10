@@ -25,4 +25,4 @@ jobs:
 
       - name: Build contracts
         run: |
-          cd ${{ inputs.package_folder}} && forge build
+          cd ${{ inputs.package_folder}} && forge build --skip test

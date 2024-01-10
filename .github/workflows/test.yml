@@ -25,7 +25,12 @@ jobs:
         with:
           package_folder: ${{ inputs.package_folder }}
 
+      - name: Test Light
+        run: |
+          cd ${{ inputs.package_folder}} && pnpm clean && pnpm test:ci
+
       - name: Test
+        if: github.ref == 'refs/heads/main'
         run: |
           cd ${{ inputs.package_folder}} && pnpm clean && pnpm test
 

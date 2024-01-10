@@ -155,7 +155,8 @@ contract RevolutionDAOLogicV1 is
         address _votingPower,
         IRevolutionBuilder.GovParams calldata _govParams
     ) public virtual initializer {
-        if (msg.sender != address(manager)) revert NOT_MANAGER();
+        // Not using manager here since this is called by the RevolutionDAOProxyV1
+        if (msg.sender != admin) revert ADMIN_ONLY();
 
         if (_executor == address(0)) revert INVALID_EXECUTOR_ADDRESS();
 
@@ -190,12 +191,11 @@ contract RevolutionDAOLogicV1 is
         proposalThresholdBPS = _govParams.proposalThresholdBPS;
         name = _govParams.daoName;
 
-        // TODO set these dynamic quorum params
-        // _setDynamicQuorumParams(
-        //     govParams_.dynamicQuorumParams.minQuorumVotesBPS,
-        //     govParams_.dynamicQuorumParams.maxQuorumVotesBPS,
-        //     govParams_.dynamicQuorumParams.quorumCoefficient
-        // );
+        _setDynamicQuorumParams(
+            _govParams.dynamicQuorumParams.minQuorumVotesBPS,
+            _govParams.dynamicQuorumParams.maxQuorumVotesBPS,
+            _govParams.dynamicQuorumParams.quorumCoefficient
+        );
     }
 
     struct ProposalTemp {

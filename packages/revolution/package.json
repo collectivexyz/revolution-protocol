@@ -13,6 +13,7 @@
     "build:sizes": "forge build --sizes",
     "dev": "FOUNDRY_PROFILE=dev forge test --watch -vvv",
     "test": "forge test -vvv",
+    "test:ci": "FOUNDRY_PROFILE=ci forge test -vvv",
     "slither:check": "slither src --checklist --filter-paths '@openzeppelin|ERC721|Votes.sol|VotesUpgradeable.sol|ERC20Upgradeable.sol' --config-file='../../slither.config.json'",
     "build:contracts": "forge build",
     "prettier:check": "prettier --check 'src/**/*.sol' 'test/**/*.sol'",
