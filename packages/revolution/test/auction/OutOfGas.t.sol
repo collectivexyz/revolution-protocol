@@ -80,7 +80,6 @@ contract AuctionHouseOutOfGasTest is AuctionHouseTest {
     }
 
     //attempt to trigger an auction paused error with differing gas amounts
-    /// forge-config: default.fuzz.runs = 1000
     function test_OutOfGas_DOS(uint gasUsed) public {
         vm.assume(gasUsed < 31_000_000); // block gas limit is 30m
         vm.startPrank(cultureIndex.owner());
