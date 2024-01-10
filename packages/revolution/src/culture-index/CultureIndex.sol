@@ -516,10 +516,13 @@ contract CultureIndex is
 
         uint256 pieceId = topVotedPieceId();
 
+        uint256 creationBlock = pieces[pieceId].creationBlock;
+
         uint256 pastQuorumVotes = (quorumVotesBPS *
-            (votingPower.getPastTotalVotesWithWeights(pieces[pieceId].creationBlock, 1, revolutionTokenVoteWeight) -
+            (votingPower.getPastTotalVotesWithWeights(creationBlock, 1, revolutionTokenVoteWeight) -
                 //subtract the votes of the AuctionHouse when calculating quorum since the tokens are not accessible
-                votingPower.getTokenOwnerTokenVotesWithWeight(revolutionTokenVoteWeight))) / 10_000;
+                votingPower._getTokenOwner__PastTokenVotes__WithWeight(creationBlock, revolutionTokenVoteWeight))) /
+            10_000;
         if (totalVoteWeights[pieceId] < pastQuorumVotes) revert DOES_NOT_MEET_QUORUM();
 
         //set the piece as dropped

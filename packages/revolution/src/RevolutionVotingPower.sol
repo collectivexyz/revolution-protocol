@@ -286,25 +286,39 @@ contract RevolutionVotingPower is
 
     /**
      * @notice gets the balance of the owner of the ERC721 token
+     * @dev useful to eg: subtract the AuctionHouse balance when calculating quorum
      */
-    function getTokenOwnerTokenBalance() external view override returns (uint256) {
-        return token.balanceOf(token.owner());
+    function _getTokenOwner__TokenVotes() external view override returns (uint256) {
+        return token.getVotes(token.owner()) * tokenVoteWeight;
     }
 
     /**
      * @notice gets the balance of the owner of the ERC721 token
      * @dev useful to eg: subtract the AuctionHouse balance when calculating quorum
+     * @param _blockNumber The block number at which to calculate the voting power.
      */
-    function getTokenOwnerTokenVotes() external view override returns (uint256) {
-        return token.balanceOf(token.owner()) * tokenVoteWeight;
+    function _getTokenOwner__PastTokenVotes(uint256 _blockNumber) external view override returns (uint256) {
+        return token.getPastVotes(token.owner(), _blockNumber) * tokenVoteWeight;
     }
 
     /**
      * @notice gets the balance of the owner of the ERC721 token
      * @param _tokenVoteWeight The ERC721 token vote weight.
      */
-    function getTokenOwnerTokenVotesWithWeight(uint256 _tokenVoteWeight) external view override returns (uint256) {
-        return token.balanceOf(token.owner()) * _tokenVoteWeight;
+    function _getTokenOwner__TokenVotes__WithWeight(uint256 _tokenVoteWeight) external view override returns (uint256) {
+        return token.getVotes(token.owner()) * _tokenVoteWeight;
+    }
+
+    /**
+     * @notice gets the balance of the owner of the ERC721 token
+     * @param _blockNumber The block number at which to calculate the voting power.
+     * @param _tokenVoteWeight The ERC721 token vote weight.
+     */
+    function _getTokenOwner__PastTokenVotes__WithWeight(
+        uint256 _blockNumber,
+        uint256 _tokenVoteWeight
+    ) external view override returns (uint256) {
+        return token.getPastVotes(token.owner(), _blockNumber) * _tokenVoteWeight;
     }
 
     ///                                                          ///

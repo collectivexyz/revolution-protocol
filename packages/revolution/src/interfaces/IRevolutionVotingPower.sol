@@ -46,9 +46,14 @@ interface IRevolutionVotingPower is IRevolutionVotingPowerEvents {
 
     function token() external returns (RevolutionToken);
 
-    function getTokenOwnerTokenBalance() external view returns (uint256);
-    function getTokenOwnerTokenVotes() external view returns (uint256);
-    function getTokenOwnerTokenVotesWithWeight(uint256 erc721TokenVoteWeight) external view returns (uint256);
+    /// @notice useful in the CultureIndex to subtract weight of the AuctionHouse from quorum
+    function _getTokenOwner__TokenVotes() external view returns (uint256);
+    function _getTokenOwner__PastTokenVotes(uint256 blockNumber) external view returns (uint256);
+    function _getTokenOwner__TokenVotes__WithWeight(uint256 erc721TokenVoteWeight) external view returns (uint256);
+    function _getTokenOwner__PastTokenVotes__WithWeight(
+        uint256 blockNumber,
+        uint256 erc721TokenVoteWeight
+    ) external view returns (uint256);
 
     function getVotes(address account) external view returns (uint256);
 
