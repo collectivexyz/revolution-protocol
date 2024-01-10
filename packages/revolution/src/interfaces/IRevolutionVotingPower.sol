@@ -3,7 +3,7 @@
 pragma solidity ^0.8.22;
 
 import { IERC20 } from "@openzeppelin/contracts/token/ERC20/IERC20.sol";
-import { ERC721CheckpointableUpgradeable } from "../base/ERC721CheckpointableUpgradeable.sol";
+import { RevolutionToken } from "../RevolutionToken.sol";
 import { IRevolutionBuilder } from "./IRevolutionBuilder.sol";
 import { ERC20VotesUpgradeable } from "../base/erc20/ERC20VotesUpgradeable.sol";
 
@@ -12,7 +12,7 @@ import { ERC20VotesUpgradeable } from "../base/erc20/ERC20VotesUpgradeable.sol";
  * @dev This interface defines the events for the RevolutionVotingPower contract.
  */
 interface IRevolutionVotingPowerEvents {
-    event ERC721VotingTokenUpdated(ERC721CheckpointableUpgradeable ERC721VotingToken);
+    event ERC721VotingTokenUpdated(RevolutionToken ERC721VotingToken);
 
     event ERC721VotingPowerUpdated(uint256 oldERC721VotingPower, uint256 newERC721VotingPower);
 
@@ -44,7 +44,16 @@ interface IRevolutionVotingPower is IRevolutionVotingPowerEvents {
 
     function points() external returns (ERC20VotesUpgradeable);
 
-    function token() external returns (ERC721CheckpointableUpgradeable);
+    function token() external returns (RevolutionToken);
+
+    /// @notice useful in the CultureIndex to subtract weight of the AuctionHouse from quorum
+    function _getTokenMinter__TokenVotes() external view returns (uint256);
+    function _getTokenMinter__PastTokenVotes(uint256 blockNumber) external view returns (uint256);
+    function _getTokenMinter__TokenVotes__WithWeight(uint256 erc721TokenVoteWeight) external view returns (uint256);
+    function _getTokenMinter__PastTokenVotes__WithWeight(
+        uint256 blockNumber,
+        uint256 erc721TokenVoteWeight
+    ) external view returns (uint256);
 
     function getVotes(address account) external view returns (uint256);
 
