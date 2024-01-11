@@ -32,8 +32,9 @@ pragma solidity ^0.8.22;
 
 import { Initializable } from "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
 import { IRevolutionBuilder } from "../interfaces/IRevolutionBuilder.sol";
+import { VersionedContract } from "../version/VersionedContract.sol";
 
-contract DAOExecutor is Initializable {
+contract DAOExecutor is Initializable, VersionedContract {
     event NewAdmin(address indexed newAdmin);
     event NewPendingAdmin(address indexed newPendingAdmin);
     event NewDelay(uint256 indexed newDelay);
