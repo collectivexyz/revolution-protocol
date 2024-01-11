@@ -3,7 +3,7 @@ pragma solidity ^0.8.22;
 
 import { AuctionHouseTest } from "./AuctionHouse.t.sol";
 import { IERC20 } from "@openzeppelin/contracts/token/ERC20/IERC20.sol";
-import { ICultureIndex } from "../../src/interfaces/ICultureIndex.sol";
+import { IArtRace } from "../../src/interfaces/IArtRace.sol";
 import { IRevolutionToken } from "../../src/interfaces/IRevolutionToken.sol";
 import { MockWETH } from "../mock/MockWETH.sol";
 import { toDaysWadUnsafe } from "../../src/libs/SignedWadMath.sol";
@@ -34,7 +34,7 @@ contract AuctionHouseOutOfGasTest is AuctionHouseTest {
         uint256 verbId = createArtPieceMultiCreator(
             createLongString(cultureIndex.MAX_NAME_LENGTH()),
             createLongString(cultureIndex.MAX_DESCRIPTION_LENGTH()),
-            ICultureIndex.MediaType.ANIMATION,
+            IArtRace.MediaType.ANIMATION,
             string.concat("ipfs://", createLongString(cultureIndex.MAX_IMAGE_LENGTH() - 7)),
             string.concat("ipfs://", createLongString(cultureIndex.MAX_TEXT_LENGTH() - 7)),
             string.concat("ipfs://", createLongString(cultureIndex.MAX_ANIMATION_URL_LENGTH() - 7)),
@@ -60,7 +60,7 @@ contract AuctionHouseOutOfGasTest is AuctionHouseTest {
         createArtPieceMultiCreator(
             createLongString(cultureIndex.MAX_NAME_LENGTH()),
             createLongString(cultureIndex.MAX_DESCRIPTION_LENGTH()),
-            ICultureIndex.MediaType.ANIMATION,
+            IArtRace.MediaType.ANIMATION,
             string.concat("ipfs://", createLongString(cultureIndex.MAX_IMAGE_LENGTH() - 7)),
             string.concat("ipfs://", createLongString(cultureIndex.MAX_TEXT_LENGTH() - 7)),
             string.concat("ipfs://", createLongString(cultureIndex.MAX_ANIMATION_URL_LENGTH() - 7)),

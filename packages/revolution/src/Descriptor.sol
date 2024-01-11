@@ -25,7 +25,7 @@ import { VersionedContract } from "./version/VersionedContract.sol";
 import { Strings } from "@openzeppelin/contracts/utils/Strings.sol";
 import { IDescriptor } from "./interfaces/IDescriptor.sol";
 import { Base64 } from "@openzeppelin/contracts/utils/Base64.sol";
-import { ICultureIndex } from "./interfaces/ICultureIndex.sol";
+import { IArtRace } from "./interfaces/IArtRace.sol";
 import { IRevolutionBuilder } from "./interfaces/IRevolutionBuilder.sol";
 
 contract Descriptor is IDescriptor, VersionedContract, UUPS, Ownable2StepUpgradeable {
@@ -184,7 +184,7 @@ contract Descriptor is IDescriptor, VersionedContract, UUPS, Ownable2StepUpgrade
     //slither-disable-next-line encode-packed-collision
     function tokenURI(
         uint256 tokenId,
-        ICultureIndex.ArtPieceMetadata memory metadata
+        IArtRace.ArtPieceMetadata memory metadata
     ) external view returns (string memory) {
         if (isDataURIEnabled) return dataURI(tokenId, metadata);
 
@@ -194,10 +194,7 @@ contract Descriptor is IDescriptor, VersionedContract, UUPS, Ownable2StepUpgrade
     /**
      * @notice Given a token ID, construct a base64 encoded data URI for an official Vrbs DAO verb.
      */
-    function dataURI(
-        uint256 tokenId,
-        ICultureIndex.ArtPieceMetadata memory metadata
-    ) public view returns (string memory) {
+    function dataURI(uint256 tokenId, IArtRace.ArtPieceMetadata memory metadata) public view returns (string memory) {
         return genericDataURI(string(abi.encodePacked(tokenNamePrefix, " ", tokenId.toString())), metadata);
     }
 
@@ -206,7 +203,7 @@ contract Descriptor is IDescriptor, VersionedContract, UUPS, Ownable2StepUpgrade
      */
     function genericDataURI(
         string memory name,
-        ICultureIndex.ArtPieceMetadata memory metadata
+        IArtRace.ArtPieceMetadata memory metadata
     ) public pure returns (string memory) {
         /// @dev Get name description image and animation_url from ArtRace
 

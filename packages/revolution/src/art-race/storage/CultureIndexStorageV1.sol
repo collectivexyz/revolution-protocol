@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: MIT
 pragma solidity 0.8.22;
 
-import { ICultureIndex } from "../../interfaces/ICultureIndex.sol";
+import { IArtRace } from "../../interfaces/IArtRace.sol";
 import { IRevolutionVotingPower } from "../../interfaces/IRevolutionVotingPower.sol";
 import { MaxHeap } from "../MaxHeap.sol";
 
@@ -31,13 +31,13 @@ contract CultureIndexStorageV1 {
     string public description;
 
     // The list of all pieces
-    mapping(uint256 => ICultureIndex.ArtPiece) public pieces;
+    mapping(uint256 => IArtRace.ArtPiece) public pieces;
 
     // The internal piece ID tracker
     uint256 public _currentPieceId;
 
     // The mapping of all votes for a piece
-    mapping(uint256 => mapping(address => ICultureIndex.Vote)) public votes;
+    mapping(uint256 => mapping(address => IArtRace.Vote)) public votes;
 
     // The total voting weight for a piece
     mapping(uint256 => uint256) public totalVoteWeights;

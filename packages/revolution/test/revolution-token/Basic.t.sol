@@ -5,7 +5,7 @@ import { Test } from "forge-std/Test.sol";
 import { RevolutionToken } from "../../src/RevolutionToken.sol";
 import { IRevolutionToken } from "../../src/interfaces/IRevolutionToken.sol";
 import { IDescriptorMinimal } from "../../src/interfaces/IDescriptorMinimal.sol";
-import { ICultureIndex, ICultureIndexEvents } from "../../src/interfaces/ICultureIndex.sol";
+import { IArtRace, ICultureIndexEvents } from "../../src/interfaces/IArtRace.sol";
 import { Strings } from "@openzeppelin/contracts/utils/Strings.sol";
 import { ArtRace } from "../../src/art-race/ArtRace.sol";
 import { MockERC20 } from "../mock/MockERC20.sol";
@@ -44,7 +44,7 @@ contract TokenBasicTest is RevolutionTokenTestSuite {
         (string memory name, string memory description, string memory image) = parseJson(metadataJson);
 
         // Retrieve the expected metadata directly from the art piece for comparison
-        (, ICultureIndex.ArtPieceMetadata memory metadata, , , ) = cultureIndex.pieces(artPieceId);
+        (, IArtRace.ArtPieceMetadata memory metadata, , , ) = cultureIndex.pieces(artPieceId);
 
         //assert name equals Verb + tokenId
         string memory expectedName = string(abi.encodePacked(tokenNamePrefix, " ", Strings.toString(tokenId)));
@@ -113,17 +113,17 @@ contract TokenBasicTest is RevolutionTokenTestSuite {
         string memory animationUrl = "";
         string memory text = "";
         address creatorAddress = address(0x1);
-        ICultureIndex.MediaType mediaType = ICultureIndex.MediaType.IMAGE;
+        IArtRace.MediaType mediaType = IArtRace.MediaType.IMAGE;
 
-        ICultureIndex.CreatorBps[] memory creators = new ICultureIndex.CreatorBps[](1);
-        creators[0] = ICultureIndex.CreatorBps({ creator: creatorAddress, bps: 10_000 });
+        IArtRace.CreatorBps[] memory creators = new IArtRace.CreatorBps[](1);
+        creators[0] = IArtRace.CreatorBps({ creator: creatorAddress, bps: 10_000 });
 
         // Check for PieceCreated event
         vm.expectEmit(true, true, true, true);
         emit ICultureIndexEvents.PieceCreated(
             0,
             address(this),
-            ICultureIndex.ArtPieceMetadata({
+            IArtRace.ArtPieceMetadata({
                 name: name,
                 description: description,
                 image: image,
@@ -148,7 +148,7 @@ contract TokenBasicTest is RevolutionTokenTestSuite {
         );
 
         // Act
-        (, ICultureIndex.ArtPieceMetadata memory metadata, , , ) = cultureIndex.pieces(artPieceId);
+        (, IArtRace.ArtPieceMetadata memory metadata, , , ) = cultureIndex.pieces(artPieceId);
 
         // Assert
         assertEq(metadata.name, "Mona Lisa", "The name of the art piece should match the provided name.");
@@ -165,7 +165,7 @@ contract TokenBasicTest is RevolutionTokenTestSuite {
         // Arrange
         string memory name = "Faulty Piece";
         string memory description = "This should not work";
-        ICultureIndex.MediaType mediaType = ICultureIndex.MediaType.IMAGE;
+        IArtRace.MediaType mediaType = IArtRace.MediaType.IMAGE;
         string memory image = "ipfs://faultyimage";
         string memory animationUrl = "";
         string memory text = "";
@@ -182,7 +182,7 @@ contract TokenBasicTest is RevolutionTokenTestSuite {
         // Arrange
         string memory name = "No Creator Piece";
         string memory description = "This piece has no creator";
-        ICultureIndex.MediaType mediaType = ICultureIndex.MediaType.IMAGE;
+        IArtRace.MediaType mediaType = IArtRace.MediaType.IMAGE;
         string memory image = "ipfs://noimage";
         string memory animationUrl = "";
         string memory text = "";
@@ -199,21 +199,21 @@ contract TokenBasicTest is RevolutionTokenTestSuite {
         // Arrange
         string memory name = "Too Many Creators";
         string memory description = "This piece has too many creators";
-        ICultureIndex.MediaType mediaType = ICultureIndex.MediaType.IMAGE;
+        IArtRace.MediaType mediaType = IArtRace.MediaType.IMAGE;
         string memory image = "ipfs://toomanycreators";
         string memory animationUrl = "";
         string memory text = "";
 
         // Creating a creators array with more than 100 creators should fail
-        ICultureIndex.CreatorBps[] memory creators = new ICultureIndex.CreatorBps[](101);
+        IArtRace.CreatorBps[] memory creators = new IArtRace.CreatorBps[](101);
         for (uint i = 0; i < 101; i++) {
-            creators[i] = ICultureIndex.CreatorBps({ creator: address(uint160(i + 1)), bps: 100 });
+            creators[i] = IArtRace.CreatorBps({ creator: address(uint160(i + 1)), bps: 100 });
         }
 
         // Act & Assert
         vm.expectRevert(abi.encodeWithSignature("MAX_NUM_CREATORS_EXCEEDED()"));
         cultureIndex.createPiece(
-            ICultureIndex.ArtPieceMetadata({
+            IArtRace.ArtPieceMetadata({
                 name: name,
                 description: description,
                 mediaType: mediaType,
@@ -366,7 +366,7 @@ contract TokenBasicTest is RevolutionTokenTestSuite {
         uint256 secondArtPieceId = createArtPiece(
             "Second Piece",
             "Another masterpiece",
-            ICultureIndex.MediaType.IMAGE,
+            IArtRace.MediaType.IMAGE,
             "ipfs://secondpiece",
             "",
             "",
@@ -377,7 +377,7 @@ contract TokenBasicTest is RevolutionTokenTestSuite {
         cultureIndex.vote(secondArtPieceId);
 
         // Act
-        ICultureIndex.ArtPiece memory topPiece = cultureIndex.getTopVotedPiece();
+        IArtRace.ArtPiece memory topPiece = cultureIndex.getTopVotedPiece();
 
         // Assert
         assertEq(
@@ -409,7 +409,7 @@ contract TokenBasicTest is RevolutionTokenTestSuite {
         revolutionToken.mint();
 
         // Assert
-        ICultureIndex.ArtPiece memory piece = cultureIndex.getPieceById(artPieceId);
+        IArtRace.ArtPiece memory piece = cultureIndex.getPieceById(artPieceId);
         assertTrue(piece.isDropped, "Art piece should be marked as dropped after dropping");
     }
 

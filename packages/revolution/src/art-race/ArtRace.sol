@@ -12,7 +12,7 @@ import { IRevolutionVotingPower } from "../interfaces/IRevolutionVotingPower.sol
 
 import { ERC20VotesUpgradeable } from "../base/erc20/ERC20VotesUpgradeable.sol";
 import { MaxHeap } from "./MaxHeap.sol";
-import { ICultureIndex } from "../interfaces/ICultureIndex.sol";
+import { IArtRace } from "../interfaces/IArtRace.sol";
 import { CultureIndexStorageV1 } from "./storage/CultureIndexStorageV1.sol";
 
 import { ERC721CheckpointableUpgradeable } from "../base/ERC721CheckpointableUpgradeable.sol";
@@ -20,7 +20,7 @@ import { EIP712Upgradeable } from "@openzeppelin/contracts-upgradeable/utils/cry
 import { Strings } from "@openzeppelin/contracts/utils/Strings.sol";
 
 contract ArtRace is
-    ICultureIndex,
+    IArtRace,
     VersionedContract,
     UUPS,
     Ownable2StepUpgradeable,
@@ -537,7 +537,7 @@ contract ArtRace is
         emit PieceDropped(pieceId, msg.sender);
 
         return
-            ICultureIndex.ArtPieceCondensed({
+            IArtRace.ArtPieceCondensed({
                 pieceId: pieceId,
                 creators: pieces[pieceId].creators,
                 sponsor: pieces[pieceId].sponsor

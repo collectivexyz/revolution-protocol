@@ -26,7 +26,7 @@ import { VersionedContract } from "./version/VersionedContract.sol";
 
 import { ERC721CheckpointableUpgradeable } from "./base/ERC721CheckpointableUpgradeable.sol";
 import { IDescriptorMinimal } from "./interfaces/IDescriptorMinimal.sol";
-import { ICultureIndex } from "./interfaces/ICultureIndex.sol";
+import { IArtRace } from "./interfaces/IArtRace.sol";
 import { IRevolutionToken } from "./interfaces/IRevolutionToken.sol";
 import { IRevolutionBuilder } from "./interfaces/IRevolutionBuilder.sol";
 
@@ -45,7 +45,7 @@ contract RevolutionToken is
     IDescriptorMinimal public descriptor;
 
     // The ArtRace contract
-    ICultureIndex public cultureIndex;
+    IArtRace public cultureIndex;
 
     // Whether the minter can be updated
     bool public isMinterLocked;
@@ -152,7 +152,7 @@ contract RevolutionToken is
         // Set the contracts
         minter = _minter;
         descriptor = IDescriptorMinimal(_descriptor);
-        cultureIndex = ICultureIndex(_cultureIndex);
+        cultureIndex = IArtRace(_cultureIndex);
     }
 
     /**
@@ -251,7 +251,7 @@ contract RevolutionToken is
      * @notice Set the token ArtRace.
      * @dev Only callable by the owner when not locked.
      */
-    function setCultureIndex(ICultureIndex _cultureIndex) external onlyOwner whenCultureIndexNotLocked nonReentrant {
+    function setCultureIndex(IArtRace _cultureIndex) external onlyOwner whenCultureIndexNotLocked nonReentrant {
         cultureIndex = _cultureIndex;
 
         emit CultureIndexUpdated(_cultureIndex);
@@ -272,7 +272,7 @@ contract RevolutionToken is
      * @param verbId The ID of the art piece.
      * @return The ArtPiece struct associated with the given ID.
      */
-    function getArtPieceById(uint256 verbId) external view returns (ICultureIndex.ArtPiece memory) {
+    function getArtPieceById(uint256 verbId) external view returns (IArtRace.ArtPiece memory) {
         if (verbId >= _currentVerbId) revert INVALID_PIECE_ID();
         return cultureIndex.getPieceById(artPieces[verbId]);
     }
@@ -282,7 +282,7 @@ contract RevolutionToken is
      */
     function _mintTo(address to) internal returns (uint256) {
         // Use try/catch to handle potential failure
-        try cultureIndex.dropTopVotedPiece() returns (ICultureIndex.ArtPieceCondensed memory artPiece) {
+        try cultureIndex.dropTopVotedPiece() returns (IArtRace.ArtPieceCondensed memory artPiece) {
             uint256 verbId = _currentVerbId++;
 
             artPieces[verbId] = artPiece.pieceId;

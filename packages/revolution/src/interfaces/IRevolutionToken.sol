@@ -19,7 +19,7 @@ pragma solidity ^0.8.22;
 
 import { IERC721 } from "@openzeppelin/contracts/token/ERC721/IERC721.sol";
 import { IDescriptorMinimal } from "./IDescriptorMinimal.sol";
-import { ICultureIndex } from "./ICultureIndex.sol";
+import { IArtRace } from "./IArtRace.sol";
 import { IRevolutionBuilder } from "./IRevolutionBuilder.sol";
 
 interface IRevolutionToken is IERC721 {
@@ -55,7 +55,7 @@ interface IRevolutionToken is IERC721 {
     ///                           EVENTS                         ///
     ///                                                          ///
 
-    event VerbCreated(uint256 indexed tokenId, ICultureIndex.ArtPieceCondensed artPiece);
+    event VerbCreated(uint256 indexed tokenId, IArtRace.ArtPieceCondensed artPiece);
 
     event VerbBurned(uint256 indexed tokenId);
 
@@ -67,7 +67,7 @@ interface IRevolutionToken is IERC721 {
 
     event DescriptorLocked();
 
-    event CultureIndexUpdated(ICultureIndex cultureIndex);
+    event CultureIndexUpdated(IArtRace cultureIndex);
 
     event CultureIndexLocked();
 
@@ -91,7 +91,7 @@ interface IRevolutionToken is IERC721 {
 
     function lockCultureIndex() external;
 
-    function getArtPieceById(uint256 tokenId) external view returns (ICultureIndex.ArtPiece memory);
+    function getArtPieceById(uint256 tokenId) external view returns (IArtRace.ArtPiece memory);
 
     /// @notice Initializes a DAO's ERC-721 token contract
     /// @param minter The address of the minter

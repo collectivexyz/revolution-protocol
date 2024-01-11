@@ -9,7 +9,7 @@ import { IRevolutionToken } from "../../src/interfaces/IRevolutionToken.sol";
 import { Descriptor } from "../../src/Descriptor.sol";
 import { ArtRace } from "../../src/art-race/ArtRace.sol";
 import { IDescriptorMinimal } from "../../src/interfaces/IDescriptorMinimal.sol";
-import { ICultureIndex, ICultureIndexEvents } from "../../src/interfaces/ICultureIndex.sol";
+import { IArtRace, ICultureIndexEvents } from "../../src/interfaces/IArtRace.sol";
 import { IAuctionHouse } from "../../src/interfaces/IAuctionHouse.sol";
 import { IERC20 } from "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import { RevolutionPoints } from "../../src/RevolutionPoints.sol";
@@ -51,7 +51,7 @@ contract AuctionHouseTest is RevolutionBuilderTest {
     function createArtPiece(
         string memory name,
         string memory description,
-        ICultureIndex.MediaType mediaType,
+        IArtRace.MediaType mediaType,
         string memory image,
         string memory text,
         string memory animationUrl,
@@ -83,7 +83,7 @@ contract AuctionHouseTest is RevolutionBuilderTest {
             createArtPiece(
                 "Mona Lisa",
                 "A masterpiece",
-                ICultureIndex.MediaType.IMAGE,
+                IArtRace.MediaType.IMAGE,
                 "ipfs://legends",
                 "",
                 "",
@@ -96,14 +96,14 @@ contract AuctionHouseTest is RevolutionBuilderTest {
     function createArtPieceMultiCreator(
         string memory name,
         string memory description,
-        ICultureIndex.MediaType mediaType,
+        IArtRace.MediaType mediaType,
         string memory image,
         string memory text,
         string memory animationUrl,
         address[] memory creatorAddresses,
         uint256[] memory creatorBps
     ) internal returns (uint256) {
-        ICultureIndex.ArtPieceMetadata memory metadata = ICultureIndex.ArtPieceMetadata({
+        IArtRace.ArtPieceMetadata memory metadata = IArtRace.ArtPieceMetadata({
             name: name,
             description: description,
             mediaType: mediaType,
@@ -112,9 +112,9 @@ contract AuctionHouseTest is RevolutionBuilderTest {
             animationUrl: animationUrl
         });
 
-        ICultureIndex.CreatorBps[] memory creators = new ICultureIndex.CreatorBps[](creatorAddresses.length);
+        IArtRace.CreatorBps[] memory creators = new IArtRace.CreatorBps[](creatorAddresses.length);
         for (uint256 i = 0; i < creatorAddresses.length; i++) {
-            creators[i] = ICultureIndex.CreatorBps({ creator: creatorAddresses[i], bps: creatorBps[i] });
+            creators[i] = IArtRace.CreatorBps({ creator: creatorAddresses[i], bps: creatorBps[i] });
         }
 
         return cultureIndex.createPiece(metadata, creators);

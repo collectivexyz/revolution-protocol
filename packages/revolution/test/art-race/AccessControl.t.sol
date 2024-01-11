@@ -5,7 +5,7 @@ import { Test } from "forge-std/Test.sol";
 import { RevolutionToken } from "../../src/RevolutionToken.sol";
 import { IRevolutionToken } from "../../src/interfaces/IRevolutionToken.sol";
 import { IDescriptorMinimal } from "../../src/interfaces/IDescriptorMinimal.sol";
-import { ICultureIndex, ICultureIndexEvents } from "../../src/interfaces/ICultureIndex.sol";
+import { IArtRace, ICultureIndexEvents } from "../../src/interfaces/IArtRace.sol";
 import { Strings } from "@openzeppelin/contracts/utils/Strings.sol";
 import { ArtRace } from "../../src/art-race/ArtRace.sol";
 import { MockERC20 } from "../mock/MockERC20.sol";
@@ -91,7 +91,7 @@ contract CultureIndexAccessControlTest is CultureIndexTestSuite {
 
         // Attempt to drop the top-voted piece, should succeed
         vm.startPrank(address(revolutionToken));
-        ICultureIndex.ArtPieceCondensed memory droppedPiece = cultureIndex.dropTopVotedPiece();
+        IArtRace.ArtPieceCondensed memory droppedPiece = cultureIndex.dropTopVotedPiece();
         assertTrue(cultureIndex.getPieceById(droppedPiece.pieceId).isDropped, "Top voted piece should be dropped");
     }
 }

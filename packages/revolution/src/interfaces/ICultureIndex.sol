@@ -25,8 +25,8 @@ interface ICultureIndexEvents {
     event PieceCreated(
         uint256 indexed pieceId,
         address indexed sponsor,
-        ICultureIndex.ArtPieceMetadata metadata,
-        ICultureIndex.CreatorBps[] creators
+        IArtRace.ArtPieceMetadata metadata,
+        IArtRace.CreatorBps[] creators
     );
 
     /**
@@ -50,10 +50,10 @@ interface ICultureIndexEvents {
 }
 
 /**
- * @title ICultureIndex
+ * @title IArtRace
  * @dev This interface defines the methods for the ArtRace contract for art piece management and voting.
  */
-interface ICultureIndex is ICultureIndexEvents {
+interface IArtRace is ICultureIndexEvents {
     ///                                                          ///
     ///                           ERRORS                         ///
     ///                                                          ///

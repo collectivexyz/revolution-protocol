@@ -18,7 +18,7 @@
 pragma solidity ^0.8.22;
 
 import { IDescriptorMinimal } from "./IDescriptorMinimal.sol";
-import { ICultureIndex } from "./ICultureIndex.sol";
+import { IArtRace } from "./IArtRace.sol";
 
 interface IDescriptor is IDescriptorMinimal {
     event DataURIToggled(bool enabled);
@@ -33,13 +33,13 @@ interface IDescriptor is IDescriptorMinimal {
 
     function setBaseURI(string calldata baseURI) external;
 
-    function tokenURI(uint256 tokenId, ICultureIndex.ArtPieceMetadata memory) external view returns (string memory);
+    function tokenURI(uint256 tokenId, IArtRace.ArtPieceMetadata memory) external view returns (string memory);
 
-    function dataURI(uint256 tokenId, ICultureIndex.ArtPieceMetadata memory) external view returns (string memory);
+    function dataURI(uint256 tokenId, IArtRace.ArtPieceMetadata memory) external view returns (string memory);
 
     function genericDataURI(
         string calldata name,
-        ICultureIndex.ArtPieceMetadata memory
+        IArtRace.ArtPieceMetadata memory
     ) external view returns (string memory);
 
     /// @notice Initializes a token's metadata descriptor

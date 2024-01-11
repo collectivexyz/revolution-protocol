@@ -3,7 +3,7 @@ pragma solidity ^0.8.22;
 
 import { ArtRace } from "../../src/art-race/ArtRace.sol";
 import { MockERC20 } from "../mock/MockERC20.sol";
-import { ICultureIndex } from "../../src/interfaces/ICultureIndex.sol";
+import { IArtRace } from "../../src/interfaces/IArtRace.sol";
 import { CultureIndexTestSuite } from "./ArtRace.t.sol";
 
 /**
@@ -23,10 +23,10 @@ contract CultureIndexArtMetadataTest is CultureIndexTestSuite {
     // Test for exceeding the maximum name length
     function test__ExceedingNameLength() public {
         string memory longName = createLongString(cultureIndex.MAX_NAME_LENGTH() + 1);
-        (ArtRace.ArtPieceMetadata memory metadata, ICultureIndex.CreatorBps[] memory creators) = createArtPieceTuple(
+        (ArtRace.ArtPieceMetadata memory metadata, IArtRace.CreatorBps[] memory creators) = createArtPieceTuple(
             longName,
             "Valid Description",
-            ICultureIndex.MediaType.IMAGE,
+            IArtRace.MediaType.IMAGE,
             "ipfs://lajdslkajsdlkjaslkdj",
             "",
             "",
@@ -40,10 +40,10 @@ contract CultureIndexArtMetadataTest is CultureIndexTestSuite {
     // Test for exceeding the maximum description length
     function test__ExceedingDescriptionLength() public {
         string memory longDescription = createLongString(cultureIndex.MAX_DESCRIPTION_LENGTH() + 1);
-        (ArtRace.ArtPieceMetadata memory metadata, ICultureIndex.CreatorBps[] memory creators) = createArtPieceTuple(
+        (ArtRace.ArtPieceMetadata memory metadata, IArtRace.CreatorBps[] memory creators) = createArtPieceTuple(
             "Valid Name",
             longDescription,
-            ICultureIndex.MediaType.IMAGE,
+            IArtRace.MediaType.IMAGE,
             "valid_image_link",
             "",
             "",
@@ -56,10 +56,10 @@ contract CultureIndexArtMetadataTest is CultureIndexTestSuite {
 
     function test__ExceedingImageLength() public {
         string memory longImageUrl = createLongString(cultureIndex.MAX_IMAGE_LENGTH() + 1);
-        (ArtRace.ArtPieceMetadata memory metadata, ICultureIndex.CreatorBps[] memory creators) = createArtPieceTuple(
+        (ArtRace.ArtPieceMetadata memory metadata, IArtRace.CreatorBps[] memory creators) = createArtPieceTuple(
             "Valid Name",
             "Valid Description",
-            ICultureIndex.MediaType.IMAGE,
+            IArtRace.MediaType.IMAGE,
             longImageUrl,
             "",
             "",
@@ -72,10 +72,10 @@ contract CultureIndexArtMetadataTest is CultureIndexTestSuite {
 
     function test__ExceedingAnimationLength() public {
         string memory longAnimationUrl = createLongString(cultureIndex.MAX_ANIMATION_URL_LENGTH() + 1);
-        (ArtRace.ArtPieceMetadata memory metadata, ICultureIndex.CreatorBps[] memory creators) = createArtPieceTuple(
+        (ArtRace.ArtPieceMetadata memory metadata, IArtRace.CreatorBps[] memory creators) = createArtPieceTuple(
             "Valid Name",
             "Valid Description",
-            ICultureIndex.MediaType.ANIMATION,
+            IArtRace.MediaType.ANIMATION,
             "",
             "",
             longAnimationUrl,
@@ -88,10 +88,10 @@ contract CultureIndexArtMetadataTest is CultureIndexTestSuite {
 
     function test__ExceedingAudioLength() public {
         string memory longAudioUrl = createLongString(cultureIndex.MAX_ANIMATION_URL_LENGTH() + 1);
-        (ArtRace.ArtPieceMetadata memory metadata, ICultureIndex.CreatorBps[] memory creators) = createArtPieceTuple(
+        (ArtRace.ArtPieceMetadata memory metadata, IArtRace.CreatorBps[] memory creators) = createArtPieceTuple(
             "Valid Name",
             "Valid Description",
-            ICultureIndex.MediaType.AUDIO,
+            IArtRace.MediaType.AUDIO,
             "",
             "",
             longAudioUrl,
@@ -104,10 +104,10 @@ contract CultureIndexArtMetadataTest is CultureIndexTestSuite {
 
     function test__ExceedingTextLength() public {
         string memory longText = createLongString(cultureIndex.MAX_TEXT_LENGTH() + 1);
-        (ArtRace.ArtPieceMetadata memory metadata, ICultureIndex.CreatorBps[] memory creators) = createArtPieceTuple(
+        (ArtRace.ArtPieceMetadata memory metadata, IArtRace.CreatorBps[] memory creators) = createArtPieceTuple(
             "Valid Name",
             "Valid Description",
-            ICultureIndex.MediaType.TEXT,
+            IArtRace.MediaType.TEXT,
             "",
             longText,
             "",
@@ -119,10 +119,10 @@ contract CultureIndexArtMetadataTest is CultureIndexTestSuite {
     }
 
     function test__MissingMediaDataAudio() public {
-        (ArtRace.ArtPieceMetadata memory metadata, ICultureIndex.CreatorBps[] memory creators) = createArtPieceTuple(
+        (ArtRace.ArtPieceMetadata memory metadata, IArtRace.CreatorBps[] memory creators) = createArtPieceTuple(
             "Valid Name",
             "Valid Description",
-            ICultureIndex.MediaType.AUDIO,
+            IArtRace.MediaType.AUDIO,
             "",
             "",
             "", // Missing animation URL
@@ -134,10 +134,10 @@ contract CultureIndexArtMetadataTest is CultureIndexTestSuite {
     }
 
     function test__InvalidImagePrefix() public {
-        (ArtRace.ArtPieceMetadata memory metadata, ICultureIndex.CreatorBps[] memory creators) = createArtPieceTuple(
+        (ArtRace.ArtPieceMetadata memory metadata, IArtRace.CreatorBps[] memory creators) = createArtPieceTuple(
             "Valid Name",
             "Valid Description",
-            ICultureIndex.MediaType.IMAGE,
+            IArtRace.MediaType.IMAGE,
             "ipfz://alksjdalskdjalksjdlakjsd",
             "",
             "", //invalid animation URL
@@ -149,10 +149,10 @@ contract CultureIndexArtMetadataTest is CultureIndexTestSuite {
     }
 
     function test__ValidImagePrefixIpfs() public {
-        (ArtRace.ArtPieceMetadata memory metadata, ICultureIndex.CreatorBps[] memory creators) = createArtPieceTuple(
+        (ArtRace.ArtPieceMetadata memory metadata, IArtRace.CreatorBps[] memory creators) = createArtPieceTuple(
             "Valid Name",
             "Valid Description",
-            ICultureIndex.MediaType.IMAGE,
+            IArtRace.MediaType.IMAGE,
             "ipfs://",
             "",
             "", //invalid animation URL
@@ -164,10 +164,10 @@ contract CultureIndexArtMetadataTest is CultureIndexTestSuite {
     }
 
     function test__ValidImagePrefixSvg() public {
-        (ArtRace.ArtPieceMetadata memory metadata, ICultureIndex.CreatorBps[] memory creators) = createArtPieceTuple(
+        (ArtRace.ArtPieceMetadata memory metadata, IArtRace.CreatorBps[] memory creators) = createArtPieceTuple(
             "Valid Name",
             "Valid Description",
-            ICultureIndex.MediaType.IMAGE,
+            IArtRace.MediaType.IMAGE,
             "data:image/svg+xml;base64,",
             "",
             "", //invalid animation URL
@@ -179,10 +179,10 @@ contract CultureIndexArtMetadataTest is CultureIndexTestSuite {
     }
 
     function test__InvalidBothHashesAnimation() public {
-        (ArtRace.ArtPieceMetadata memory metadata, ICultureIndex.CreatorBps[] memory creators) = createArtPieceTuple(
+        (ArtRace.ArtPieceMetadata memory metadata, IArtRace.CreatorBps[] memory creators) = createArtPieceTuple(
             "Valid Name",
             "Valid Description",
-            ICultureIndex.MediaType.ANIMATION,
+            IArtRace.MediaType.ANIMATION,
             "ipfz://bafybeigofz5ao63vehylvbgx5ikcjfualns4xpx5gmibdojeaydq7khviy", //invalid animation URL
             "",
             "ipfz://bafybeigofz5ao63vehylvbgx5ikcjfualns4xpx5gmibdojeaydq7khviy", //invalid animation URL
@@ -194,10 +194,10 @@ contract CultureIndexArtMetadataTest is CultureIndexTestSuite {
     }
 
     function test__InvalidBothHashesImage() public {
-        (ArtRace.ArtPieceMetadata memory metadata, ICultureIndex.CreatorBps[] memory creators) = createArtPieceTuple(
+        (ArtRace.ArtPieceMetadata memory metadata, IArtRace.CreatorBps[] memory creators) = createArtPieceTuple(
             "Valid Name",
             "Valid Description",
-            ICultureIndex.MediaType.IMAGE,
+            IArtRace.MediaType.IMAGE,
             "ipfz://bafybeigofz5ao63vehylvbgx5ikcjfualns4xpx5gmibdojeaydq7khviy", //invalid animation URL
             "",
             "ipfz://bafybeigofz5ao63vehylvbgx5ikcjfualns4xpx5gmibdojeaydq7khviy", //invalid animation URL
@@ -209,10 +209,10 @@ contract CultureIndexArtMetadataTest is CultureIndexTestSuite {
     }
 
     function test__ValidHashesAnimation_SVG() public {
-        (ArtRace.ArtPieceMetadata memory metadata, ICultureIndex.CreatorBps[] memory creators) = createArtPieceTuple(
+        (ArtRace.ArtPieceMetadata memory metadata, IArtRace.CreatorBps[] memory creators) = createArtPieceTuple(
             "Valid Name",
             "Valid Description",
-            ICultureIndex.MediaType.ANIMATION,
+            IArtRace.MediaType.ANIMATION,
             "data:image/svg+xml;base64,", //invalid animation URL
             "",
             "ipfs://bafybeigofz5ao63vehylvbgx5ikcjfualns4xpx5gmibdojeaydq7khviy", //invalid animation URL
@@ -224,10 +224,10 @@ contract CultureIndexArtMetadataTest is CultureIndexTestSuite {
     }
 
     function test__InvalidOneHashImage_1() public {
-        (ArtRace.ArtPieceMetadata memory metadata, ICultureIndex.CreatorBps[] memory creators) = createArtPieceTuple(
+        (ArtRace.ArtPieceMetadata memory metadata, IArtRace.CreatorBps[] memory creators) = createArtPieceTuple(
             "Valid Name",
             "Valid Description",
-            ICultureIndex.MediaType.IMAGE,
+            IArtRace.MediaType.IMAGE,
             "ipfz://bafybeigofz5ao63vehylvbgx5ikcjfualns4xpx5gmibdojeaydq7khviy", //invalid animation URL
             "",
             "ipfs://bafybeigofz5ao63vehylvbgx5ikcjfualns4xpx5gmibdojeaydq7khviy", //invalid animation URL
@@ -239,10 +239,10 @@ contract CultureIndexArtMetadataTest is CultureIndexTestSuite {
     }
 
     function test__InvalidOneHashImage_2() public {
-        (ArtRace.ArtPieceMetadata memory metadata, ICultureIndex.CreatorBps[] memory creators) = createArtPieceTuple(
+        (ArtRace.ArtPieceMetadata memory metadata, IArtRace.CreatorBps[] memory creators) = createArtPieceTuple(
             "Valid Name",
             "Valid Description",
-            ICultureIndex.MediaType.IMAGE,
+            IArtRace.MediaType.IMAGE,
             "ipfs://bafybeigofz5ao63vehylvbgx5ikcjfualns4xpx5gmibdojeaydq7khviy", //invalid animation URL
             "",
             "ipfz://bafybeigofz5ao63vehylvbgx5ikcjfualns4xpx5gmibdojeaydq7khviy", //invalid animation URL
@@ -254,10 +254,10 @@ contract CultureIndexArtMetadataTest is CultureIndexTestSuite {
     }
 
     function test__InvalidOneHashAnimation_1() public {
-        (ArtRace.ArtPieceMetadata memory metadata, ICultureIndex.CreatorBps[] memory creators) = createArtPieceTuple(
+        (ArtRace.ArtPieceMetadata memory metadata, IArtRace.CreatorBps[] memory creators) = createArtPieceTuple(
             "Valid Name",
             "Valid Description",
-            ICultureIndex.MediaType.ANIMATION,
+            IArtRace.MediaType.ANIMATION,
             "ipfz://bafybeigofz5ao63vehylvbgx5ikcjfualns4xpx5gmibdojeaydq7khviy", //invalid animation URL
             "",
             "ipfs://bafybeigofz5ao63vehylvbgx5ikcjfualns4xpx5gmibdojeaydq7khviy", //invalid animation URL
@@ -269,10 +269,10 @@ contract CultureIndexArtMetadataTest is CultureIndexTestSuite {
     }
 
     function test__InvalidOneHashAnimation_2() public {
-        (ArtRace.ArtPieceMetadata memory metadata, ICultureIndex.CreatorBps[] memory creators) = createArtPieceTuple(
+        (ArtRace.ArtPieceMetadata memory metadata, IArtRace.CreatorBps[] memory creators) = createArtPieceTuple(
             "Valid Name",
             "Valid Description",
-            ICultureIndex.MediaType.ANIMATION,
+            IArtRace.MediaType.ANIMATION,
             "ipfs://bafybeigofz5ao63vehylvbgx5ikcjfualns4xpx5gmibdojeaydq7khviy", //invalid animation URL
             "",
             "ipfz://bafybeigofz5ao63vehylvbgx5ikcjfualns4xpx5gmibdojeaydq7khviy", //invalid animation URL
@@ -284,10 +284,10 @@ contract CultureIndexArtMetadataTest is CultureIndexTestSuite {
     }
 
     function test__InvalidImagePrefixFullHash() public {
-        (ArtRace.ArtPieceMetadata memory metadata, ICultureIndex.CreatorBps[] memory creators) = createArtPieceTuple(
+        (ArtRace.ArtPieceMetadata memory metadata, IArtRace.CreatorBps[] memory creators) = createArtPieceTuple(
             "Valid Name",
             "Valid Description",
-            ICultureIndex.MediaType.ANIMATION,
+            IArtRace.MediaType.ANIMATION,
             "ipfz://bafybeigofz5ao63vehylvbgx5ikcjfualns4xpx5gmibdojeaydq7khviy", //invalid animation URL
             "",
             "",
@@ -299,10 +299,10 @@ contract CultureIndexArtMetadataTest is CultureIndexTestSuite {
     }
 
     function test__InvalidAnimationPrefixFullHash() public {
-        (ArtRace.ArtPieceMetadata memory metadata, ICultureIndex.CreatorBps[] memory creators) = createArtPieceTuple(
+        (ArtRace.ArtPieceMetadata memory metadata, IArtRace.CreatorBps[] memory creators) = createArtPieceTuple(
             "Valid Name",
             "Valid Description",
-            ICultureIndex.MediaType.ANIMATION,
+            IArtRace.MediaType.ANIMATION,
             "",
             "",
             "ipfz://bafybeigofz5ao63vehylvbgx5ikcjfualns4xpx5gmibdojeaydq7khviy", //invalid animation URL
@@ -314,10 +314,10 @@ contract CultureIndexArtMetadataTest is CultureIndexTestSuite {
     }
 
     function test__InvalidAnimationPrefix() public {
-        (ArtRace.ArtPieceMetadata memory metadata, ICultureIndex.CreatorBps[] memory creators) = createArtPieceTuple(
+        (ArtRace.ArtPieceMetadata memory metadata, IArtRace.CreatorBps[] memory creators) = createArtPieceTuple(
             "Valid Name",
             "Valid Description",
-            ICultureIndex.MediaType.ANIMATION,
+            IArtRace.MediaType.ANIMATION,
             "",
             "",
             "ipfz://", //invalid animation URL
@@ -329,10 +329,10 @@ contract CultureIndexArtMetadataTest is CultureIndexTestSuite {
     }
 
     function test__MissingMediaDataText() public {
-        (ArtRace.ArtPieceMetadata memory metadata, ICultureIndex.CreatorBps[] memory creators) = createArtPieceTuple(
+        (ArtRace.ArtPieceMetadata memory metadata, IArtRace.CreatorBps[] memory creators) = createArtPieceTuple(
             "Valid Name",
             "Valid Description",
-            ICultureIndex.MediaType.TEXT,
+            IArtRace.MediaType.TEXT,
             "",
             "", // Missing text content
             "",

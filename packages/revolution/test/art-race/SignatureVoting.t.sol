@@ -4,7 +4,7 @@ pragma solidity ^0.8.22;
 import { Test } from "forge-std/Test.sol";
 import { ArtRace } from "../../src/art-race/ArtRace.sol";
 import { MockERC20 } from "../mock/MockERC20.sol";
-import { ICultureIndex, ICultureIndexEvents } from "../../src/interfaces/ICultureIndex.sol";
+import { IArtRace, ICultureIndexEvents } from "../../src/interfaces/IArtRace.sol";
 import { RevolutionPoints } from "../../src/RevolutionPoints.sol";
 import { CultureIndexTestSuite } from "./ArtRace.t.sol";
 import { ERC721CheckpointableUpgradeable } from "../../src/base/ERC721CheckpointableUpgradeable.sol";
@@ -99,7 +99,7 @@ contract CultureIndexVotingSignaturesTest is CultureIndexTestSuite {
         (uint8 v, bytes32 r, bytes32 s) = vm.sign(offchainVoterPk, digest);
 
         uint256 beforeVoteWeight = cultureIndex.totalVoteWeights(pieceIds[0]);
-        ICultureIndex.Vote memory voteBefore = cultureIndex.getVote(pieceIds[0], offchainVoter);
+        IArtRace.Vote memory voteBefore = cultureIndex.getVote(pieceIds[0], offchainVoter);
 
         //ensure voteBefore is empty
         assertEq(voteBefore.voterAddress, address(0));
@@ -117,7 +117,7 @@ contract CultureIndexVotingSignaturesTest is CultureIndexTestSuite {
         assertEq(cultureIndex.totalVoteWeights(pieceIds[0]), beforeVoteWeight + offchainVoterWeight);
 
         //make sure vote.voterAddress and vote.weight are set correctly
-        ICultureIndex.Vote memory voteAfter = cultureIndex.getVote(pieceIds[0], offchainVoter);
+        IArtRace.Vote memory voteAfter = cultureIndex.getVote(pieceIds[0], offchainVoter);
         assertEq(voteAfter.voterAddress, offchainVoter);
         assertEq(voteAfter.weight, offchainVoterWeight);
     }

@@ -3,7 +3,7 @@ pragma solidity ^0.8.22;
 
 import { AuctionHouseTest } from "./AuctionHouse.t.sol";
 import { IERC20 } from "@openzeppelin/contracts/token/ERC20/IERC20.sol";
-import { ICultureIndex } from "../../src/interfaces/ICultureIndex.sol";
+import { IArtRace } from "../../src/interfaces/IArtRace.sol";
 import { IRevolutionToken } from "../../src/interfaces/IRevolutionToken.sol";
 import { MockWETH } from "../mock/MockWETH.sol";
 import { toDaysWadUnsafe } from "../../src/libs/SignedWadMath.sol";
@@ -329,7 +329,7 @@ contract AuctionHouseSettleTest is AuctionHouseTest {
         createArtPieceMultiCreator(
             "Multi Creator Art",
             "An art piece with multiple creators",
-            ICultureIndex.MediaType.IMAGE,
+            IArtRace.MediaType.IMAGE,
             "ipfs://multi-creator-art",
             "",
             "",
@@ -409,7 +409,7 @@ contract AuctionHouseSettleTest is AuctionHouseTest {
         uint256 verbId = createArtPiece(
             "Art Piece",
             "A new art piece",
-            ICultureIndex.MediaType.IMAGE,
+            IArtRace.MediaType.IMAGE,
             "ipfs://image",
             "",
             "",

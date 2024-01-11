@@ -4,7 +4,7 @@ pragma solidity ^0.8.22;
 import { Test } from "forge-std/Test.sol";
 import { ArtRace } from "../../src/art-race/ArtRace.sol";
 import { MockERC20 } from "../mock/MockERC20.sol";
-import { ICultureIndex } from "../../src/interfaces/ICultureIndex.sol";
+import { IArtRace } from "../../src/interfaces/IArtRace.sol";
 import { RevolutionPoints } from "../../src/RevolutionPoints.sol";
 import { RevolutionToken } from "../../src/RevolutionToken.sol";
 import { IDescriptorMinimal } from "../../src/interfaces/IDescriptorMinimal.sol";
@@ -45,15 +45,15 @@ contract CultureIndexTestSuite is RevolutionBuilderTest {
     function createArtPieceTuple(
         string memory name,
         string memory description,
-        ICultureIndex.MediaType mediaType,
+        IArtRace.MediaType mediaType,
         string memory image,
         string memory text,
         string memory animationUrl,
         address creatorAddress,
         uint256 creatorBps
-    ) public pure returns (ArtRace.ArtPieceMetadata memory, ICultureIndex.CreatorBps[] memory) {
+    ) public pure returns (ArtRace.ArtPieceMetadata memory, IArtRace.CreatorBps[] memory) {
         // <-- Change here
-        ICultureIndex.ArtPieceMetadata memory metadata = createArtPieceMetadata(
+        IArtRace.ArtPieceMetadata memory metadata = createArtPieceMetadata(
             name,
             description,
             mediaType,
@@ -61,7 +61,7 @@ contract CultureIndexTestSuite is RevolutionBuilderTest {
             text,
             animationUrl
         );
-        ICultureIndex.CreatorBps[] memory creators = createArtPieceCreators(creatorAddress, creatorBps);
+        IArtRace.CreatorBps[] memory creators = createArtPieceCreators(creatorAddress, creatorBps);
         return (metadata, creators);
     }
 
@@ -69,14 +69,14 @@ contract CultureIndexTestSuite is RevolutionBuilderTest {
     function createArtPiece(
         string memory name,
         string memory description,
-        ICultureIndex.MediaType mediaType,
+        IArtRace.MediaType mediaType,
         string memory image,
         string memory text,
         string memory animationUrl,
         address creatorAddress,
         uint256 creatorBps
     ) internal returns (uint256) {
-        ICultureIndex.ArtPieceMetadata memory metadata = ICultureIndex.ArtPieceMetadata({
+        IArtRace.ArtPieceMetadata memory metadata = IArtRace.ArtPieceMetadata({
             name: name,
             description: description,
             mediaType: mediaType,
@@ -85,8 +85,8 @@ contract CultureIndexTestSuite is RevolutionBuilderTest {
             animationUrl: animationUrl
         });
 
-        ICultureIndex.CreatorBps[] memory creators = new ICultureIndex.CreatorBps[](1);
-        creators[0] = ICultureIndex.CreatorBps({ creator: creatorAddress, bps: creatorBps });
+        IArtRace.CreatorBps[] memory creators = new IArtRace.CreatorBps[](1);
+        creators[0] = IArtRace.CreatorBps({ creator: creatorAddress, bps: creatorBps });
 
         return cultureIndex.createPiece(metadata, creators);
     }
@@ -95,13 +95,13 @@ contract CultureIndexTestSuite is RevolutionBuilderTest {
     function createArtPieceMetadata(
         string memory name,
         string memory description,
-        ICultureIndex.MediaType mediaType,
+        IArtRace.MediaType mediaType,
         string memory image,
         string memory text,
         string memory animationUrl
     ) public pure returns (ArtRace.ArtPieceMetadata memory) {
         // <-- Change visibility and mutability as needed
-        ICultureIndex.ArtPieceMetadata memory metadata = ICultureIndex.ArtPieceMetadata({
+        IArtRace.ArtPieceMetadata memory metadata = IArtRace.ArtPieceMetadata({
             name: name,
             description: description,
             mediaType: mediaType,
@@ -118,8 +118,8 @@ contract CultureIndexTestSuite is RevolutionBuilderTest {
         uint256 creatorBps
     ) public pure returns (ArtRace.CreatorBps[] memory) {
         // <-- Change visibility and mutability as needed
-        ICultureIndex.CreatorBps[] memory creators = new ICultureIndex.CreatorBps[](1);
-        creators[0] = ICultureIndex.CreatorBps({ creator: creatorAddress, bps: creatorBps });
+        IArtRace.CreatorBps[] memory creators = new IArtRace.CreatorBps[](1);
+        creators[0] = IArtRace.CreatorBps({ creator: creatorAddress, bps: creatorBps });
         return creators;
     }
 
@@ -129,7 +129,7 @@ contract CultureIndexTestSuite is RevolutionBuilderTest {
             createArtPiece(
                 "Mona Lisa",
                 "A masterpiece",
-                ICultureIndex.MediaType.IMAGE,
+                IArtRace.MediaType.IMAGE,
                 "ipfs://legends",
                 "",
                 "",
@@ -156,14 +156,14 @@ contract CultureIndexVotingTest is Test {
     function createArtPiece(
         string memory name,
         string memory description,
-        ICultureIndex.MediaType mediaType,
+        IArtRace.MediaType mediaType,
         string memory image,
         string memory text,
         string memory animationUrl,
         address creatorAddress,
         uint256 creatorBps
     ) internal returns (uint256) {
-        ICultureIndex.ArtPieceMetadata memory metadata = ICultureIndex.ArtPieceMetadata({
+        IArtRace.ArtPieceMetadata memory metadata = IArtRace.ArtPieceMetadata({
             name: name,
             description: description,
             mediaType: mediaType,
@@ -172,8 +172,8 @@ contract CultureIndexVotingTest is Test {
             animationUrl: animationUrl
         });
 
-        ICultureIndex.CreatorBps[] memory creators = new ICultureIndex.CreatorBps[](1);
-        creators[0] = ICultureIndex.CreatorBps({ creator: creatorAddress, bps: creatorBps });
+        IArtRace.CreatorBps[] memory creators = new IArtRace.CreatorBps[](1);
+        creators[0] = IArtRace.CreatorBps({ creator: creatorAddress, bps: creatorBps });
 
         return cultureIndex.createPiece(metadata, creators);
     }
@@ -184,7 +184,7 @@ contract CultureIndexVotingTest is Test {
             createArtPiece(
                 "Mona Lisa",
                 "A masterpiece",
-                ICultureIndex.MediaType.IMAGE,
+                IArtRace.MediaType.IMAGE,
                 "ipfs://legends",
                 "",
                 "",

@@ -6,7 +6,7 @@ import "../../src/Descriptor.sol";
 import { IDescriptor } from "../../src/interfaces/IDescriptor.sol";
 import "../utils/Base64Decode.sol";
 import "../utils/JsmnSolLib.sol";
-import { ICultureIndex } from "../../src/interfaces/ICultureIndex.sol";
+import { IArtRace } from "../../src/interfaces/IArtRace.sol";
 import { DescriptorTest } from "./Descriptor.t.sol";
 
 contract DescriptorURIDataTest is DescriptorTest {
@@ -73,10 +73,10 @@ contract DescriptorURIDataTest is DescriptorTest {
 
         // Set up a token ID and dummy metadata
         uint256 tokenId = 1;
-        ICultureIndex.ArtPieceMetadata memory metadata = ICultureIndex.ArtPieceMetadata({
+        IArtRace.ArtPieceMetadata memory metadata = IArtRace.ArtPieceMetadata({
             name: "Test Art",
             description: "A description",
-            mediaType: ICultureIndex.MediaType.IMAGE,
+            mediaType: IArtRace.MediaType.IMAGE,
             image: "https://example.com/image.png",
             text: "",
             animationUrl: ""
@@ -106,10 +106,10 @@ contract DescriptorURIDataTest is DescriptorTest {
         uint256 tokenId = 1;
 
         // Create dummy metadata
-        ICultureIndex.ArtPieceMetadata memory metadata = ICultureIndex.ArtPieceMetadata({
+        IArtRace.ArtPieceMetadata memory metadata = IArtRace.ArtPieceMetadata({
             name: "Test Art",
             description: "A description",
-            mediaType: ICultureIndex.MediaType.IMAGE,
+            mediaType: IArtRace.MediaType.IMAGE,
             image: "https://example.com/image.png",
             text: "",
             animationUrl: ""
@@ -124,10 +124,10 @@ contract DescriptorURIDataTest is DescriptorTest {
     /// @notice Test `dataURI` returns valid base64 encoded data URI
     function testDataURI() public {
         uint256 tokenId = 1;
-        ICultureIndex.ArtPieceMetadata memory metadata = ICultureIndex.ArtPieceMetadata({
+        IArtRace.ArtPieceMetadata memory metadata = IArtRace.ArtPieceMetadata({
             name: "Test Art",
             description: "A piece of art",
-            mediaType: ICultureIndex.MediaType.IMAGE,
+            mediaType: IArtRace.MediaType.IMAGE,
             image: "https://example.com/image.png",
             text: "",
             animationUrl: ""
@@ -145,10 +145,10 @@ contract DescriptorURIDataTest is DescriptorTest {
 
     /// @notice Test `genericDataURI` returns valid base64 encoded data URI
     function testGenericDataURI() public {
-        ICultureIndex.ArtPieceMetadata memory metadata = ICultureIndex.ArtPieceMetadata({
+        IArtRace.ArtPieceMetadata memory metadata = IArtRace.ArtPieceMetadata({
             name: "Test Art",
             description: "A generic art piece",
-            mediaType: ICultureIndex.MediaType.IMAGE,
+            mediaType: IArtRace.MediaType.IMAGE,
             image: "https://example.com/image.png",
             text: "",
             animationUrl: ""
@@ -185,10 +185,10 @@ contract DescriptorURIDataTest is DescriptorTest {
         assertTrue(descriptor.isDataURIEnabled(), "isDataURIEnabled should be true by default");
 
         uint256 tokenId = 1;
-        ICultureIndex.ArtPieceMetadata memory metadata = ICultureIndex.ArtPieceMetadata({
+        IArtRace.ArtPieceMetadata memory metadata = IArtRace.ArtPieceMetadata({
             name: "Baseline Art",
             description: "The baseline piece",
-            mediaType: ICultureIndex.MediaType.IMAGE,
+            mediaType: IArtRace.MediaType.IMAGE,
             image: "https://example.com/baseline.png",
             text: "",
             animationUrl: ""
@@ -236,10 +236,10 @@ contract DescriptorURIDataTest is DescriptorTest {
     /// @notice Test `tokenURI` with only image metadata set
     function testTokenURIWithOnlyImageMetadata() public {
         uint256 tokenId = 1;
-        ICultureIndex.ArtPieceMetadata memory metadata = ICultureIndex.ArtPieceMetadata({
+        IArtRace.ArtPieceMetadata memory metadata = IArtRace.ArtPieceMetadata({
             name: "",
             description: "",
-            mediaType: ICultureIndex.MediaType.IMAGE,
+            mediaType: IArtRace.MediaType.IMAGE,
             image: "https://example.com/image.png",
             text: "",
             animationUrl: ""
@@ -254,10 +254,10 @@ contract DescriptorURIDataTest is DescriptorTest {
     /// @notice Test `tokenURI` with mixed media types in metadata
     function testTokenURIWithMixedMediaMetadata() public {
         uint256 tokenId = 3;
-        ICultureIndex.ArtPieceMetadata memory metadata = ICultureIndex.ArtPieceMetadata({
+        IArtRace.ArtPieceMetadata memory metadata = IArtRace.ArtPieceMetadata({
             name: "Mixed Media Art",
             description: "Art with mixed media types",
-            mediaType: ICultureIndex.MediaType.ANIMATION,
+            mediaType: IArtRace.MediaType.ANIMATION,
             image: "https://example.com/mixed-image.png",
             text: "",
             animationUrl: "https://example.com/mixed-animation.mp4"
@@ -272,10 +272,10 @@ contract DescriptorURIDataTest is DescriptorTest {
     /// @notice Test `tokenURI` with full metadata set
     function testTokenURIWithFullMetadata() public {
         uint256 tokenId = 2;
-        ICultureIndex.ArtPieceMetadata memory metadata = ICultureIndex.ArtPieceMetadata({
+        IArtRace.ArtPieceMetadata memory metadata = IArtRace.ArtPieceMetadata({
             name: "Full Metadata Art",
             description: "Complete metadata for testing",
-            mediaType: ICultureIndex.MediaType.IMAGE,
+            mediaType: IArtRace.MediaType.IMAGE,
             image: "https://example.com/full-image.png",
             text: "This is a full metadata test.",
             animationUrl: "https://example.com/animation.mp4"

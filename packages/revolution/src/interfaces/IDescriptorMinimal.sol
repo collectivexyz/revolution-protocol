@@ -17,20 +17,14 @@
 
 pragma solidity ^0.8.22;
 
-import { ICultureIndex } from "./ICultureIndex.sol";
+import { IArtRace } from "./IArtRace.sol";
 
 interface IDescriptorMinimal {
     ///
     /// USED BY TOKEN
     ///
 
-    function tokenURI(
-        uint256 tokenId,
-        ICultureIndex.ArtPieceMetadata memory metadata
-    ) external view returns (string memory);
+    function tokenURI(uint256 tokenId, IArtRace.ArtPieceMetadata memory metadata) external view returns (string memory);
 
-    function dataURI(
-        uint256 tokenId,
-        ICultureIndex.ArtPieceMetadata memory metadata
-    ) external view returns (string memory);
+    function dataURI(uint256 tokenId, IArtRace.ArtPieceMetadata memory metadata) external view returns (string memory);
 }

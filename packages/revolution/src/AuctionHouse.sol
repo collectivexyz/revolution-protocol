@@ -29,7 +29,7 @@ import { IAuctionHouse } from "./interfaces/IAuctionHouse.sol";
 import { IRevolutionToken } from "./interfaces/IRevolutionToken.sol";
 import { IWETH } from "./interfaces/IWETH.sol";
 import { IRevolutionPointsEmitter } from "./interfaces/IRevolutionPointsEmitter.sol";
-import { ICultureIndex } from "./interfaces/ICultureIndex.sol";
+import { IArtRace } from "./interfaces/IArtRace.sol";
 import { IRevolutionBuilder } from "./interfaces/IRevolutionBuilder.sol";
 import { Ownable2StepUpgradeable } from "@openzeppelin/contracts-upgradeable/access/Ownable2StepUpgradeable.sol";
 
@@ -374,9 +374,7 @@ contract AuctionHouse is
                 //Transfer creator's share to the creator, for each creator, and build arrays for revolutionPointsEmitter.buyToken
                 if (creatorsShare > 0) {
                     //Get the creators of the Verb
-                    ICultureIndex.CreatorBps[] memory creators = revolutionToken
-                        .getArtPieceById(_auction.verbId)
-                        .creators;
+                    IArtRace.CreatorBps[] memory creators = revolutionToken.getArtPieceById(_auction.verbId).creators;
 
                     //Calculate the amount to be paid to the creators
                     uint entropyRateAmount = creatorsShare * entropyRateBps;

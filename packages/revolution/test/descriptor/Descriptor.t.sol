@@ -6,7 +6,7 @@ import "../../src/Descriptor.sol";
 import { IDescriptor } from "../../src/interfaces/IDescriptor.sol";
 import "../utils/Base64Decode.sol";
 import "../utils/JsmnSolLib.sol";
-import { ICultureIndex } from "../../src/interfaces/ICultureIndex.sol";
+import { IArtRace } from "../../src/interfaces/IArtRace.sol";
 import { RevolutionBuilderTest } from "../RevolutionBuilder.t.sol";
 
 contract DescriptorTest is RevolutionBuilderTest {
@@ -23,7 +23,7 @@ contract DescriptorTest is RevolutionBuilderTest {
     // Helper function to assert the integrity of the full metadata in the token URI
     function assertFullMetadataIntegrity(
         string memory uri,
-        ICultureIndex.ArtPieceMetadata memory expectedMetadata,
+        IArtRace.ArtPieceMetadata memory expectedMetadata,
         uint256 tokenId,
         string memory errorMessage
     ) internal {

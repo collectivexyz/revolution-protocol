@@ -32,7 +32,7 @@ import { IDescriptor } from "../interfaces/IDescriptor.sol";
 import { IAuctionHouse } from "../interfaces/IAuctionHouse.sol";
 import { IDAOExecutor } from "../interfaces/IDAOExecutor.sol";
 import { IRevolutionDAO } from "../interfaces/IRevolutionDAO.sol";
-import { ICultureIndex } from "../interfaces/ICultureIndex.sol";
+import { IArtRace } from "../interfaces/IArtRace.sol";
 import { IMaxHeap } from "../interfaces/IMaxHeap.sol";
 import { IRevolutionPointsEmitter } from "../interfaces/IRevolutionPointsEmitter.sol";
 import { IRevolutionPoints } from "../interfaces/IRevolutionPoints.sol";
@@ -237,7 +237,7 @@ contract RevolutionBuilder is
             tokenNamePrefix: _revolutionTokenParams.tokenNamePrefix
         });
 
-        ICultureIndex(daoAddressesByToken[revolutionToken].cultureIndex).initialize({
+        IArtRace(daoAddressesByToken[revolutionToken].cultureIndex).initialize({
             votingPower: daoAddressesByToken[revolutionToken].revolutionVotingPower,
             initialOwner: initialSetup.executor,
             dropperAdmin: daoAddressesByToken[revolutionToken].revolutionToken,

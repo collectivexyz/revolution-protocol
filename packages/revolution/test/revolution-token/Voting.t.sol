@@ -3,10 +3,10 @@ pragma solidity ^0.8.22;
 
 import { Test } from "forge-std/Test.sol";
 import { RevolutionToken } from "../../src/RevolutionToken.sol";
-import { ICultureIndex, ICultureIndexEvents } from "../../src/interfaces/ICultureIndex.sol";
+import { IArtRace, ICultureIndexEvents } from "../../src/interfaces/IArtRace.sol";
 import { IRevolutionToken } from "../../src/interfaces/IRevolutionToken.sol";
 import { IDescriptorMinimal } from "../../src/interfaces/IDescriptorMinimal.sol";
-import { ICultureIndex } from "../../src/interfaces/ICultureIndex.sol";
+import { IArtRace } from "../../src/interfaces/IArtRace.sol";
 import { Strings } from "@openzeppelin/contracts/utils/Strings.sol";
 import { ArtRace } from "../../src/art-race/ArtRace.sol";
 import { MockERC20 } from "../mock/MockERC20.sol";

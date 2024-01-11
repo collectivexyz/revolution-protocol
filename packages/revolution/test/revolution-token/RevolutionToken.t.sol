@@ -6,7 +6,7 @@ import { RevolutionToken } from "../../src/RevolutionToken.sol";
 import { IRevolutionToken } from "../../src/interfaces/IRevolutionToken.sol";
 import { IDescriptorMinimal } from "../../src/interfaces/IDescriptorMinimal.sol";
 
-import { ICultureIndex } from "../../src/interfaces/ICultureIndex.sol";
+import { IArtRace } from "../../src/interfaces/IArtRace.sol";
 import { Strings } from "@openzeppelin/contracts/utils/Strings.sol";
 import { ArtRace } from "../../src/art-race/ArtRace.sol";
 import { MockERC20 } from "../mock/MockERC20.sol";
@@ -41,14 +41,14 @@ contract RevolutionTokenTestSuite is RevolutionBuilderTest {
     function createArtPiece(
         string memory name,
         string memory description,
-        ICultureIndex.MediaType mediaType,
+        IArtRace.MediaType mediaType,
         string memory image,
         string memory text,
         string memory animationUrl,
         address creatorAddress,
         uint256 creatorBps
     ) internal returns (uint256) {
-        ICultureIndex.ArtPieceMetadata memory metadata = ICultureIndex.ArtPieceMetadata({
+        IArtRace.ArtPieceMetadata memory metadata = IArtRace.ArtPieceMetadata({
             name: name,
             description: description,
             mediaType: mediaType,
@@ -57,8 +57,8 @@ contract RevolutionTokenTestSuite is RevolutionBuilderTest {
             animationUrl: animationUrl
         });
 
-        ICultureIndex.CreatorBps[] memory creators = new ICultureIndex.CreatorBps[](1);
-        creators[0] = ICultureIndex.CreatorBps({ creator: creatorAddress, bps: creatorBps });
+        IArtRace.CreatorBps[] memory creators = new IArtRace.CreatorBps[](1);
+        creators[0] = IArtRace.CreatorBps({ creator: creatorAddress, bps: creatorBps });
 
         return cultureIndex.createPiece(metadata, creators);
     }
@@ -69,7 +69,7 @@ contract RevolutionTokenTestSuite is RevolutionBuilderTest {
             createArtPiece(
                 "Mona Lisa",
                 "A masterpiece",
-                ICultureIndex.MediaType.IMAGE,
+                IArtRace.MediaType.IMAGE,
                 "ipfs://legends",
                 "",
                 "",
@@ -79,12 +79,12 @@ contract RevolutionTokenTestSuite is RevolutionBuilderTest {
     }
 
     //function to create basic metadata
-    function createDefaultMetadata() internal pure returns (ICultureIndex.ArtPieceMetadata memory) {
+    function createDefaultMetadata() internal pure returns (IArtRace.ArtPieceMetadata memory) {
         return
-            ICultureIndex.ArtPieceMetadata({
+            IArtRace.ArtPieceMetadata({
                 name: "Mona Lisa",
                 description: "A masterpiece",
-                mediaType: ICultureIndex.MediaType.IMAGE,
+                mediaType: IArtRace.MediaType.IMAGE,
                 image: "ipfs://legends",
                 text: "",
                 animationUrl: ""

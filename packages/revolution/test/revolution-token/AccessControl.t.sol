@@ -5,7 +5,7 @@ import { Test } from "forge-std/Test.sol";
 import { RevolutionToken } from "../../src/RevolutionToken.sol";
 import { IRevolutionToken } from "../../src/interfaces/IRevolutionToken.sol";
 import { IDescriptor } from "../../src/interfaces/IDescriptor.sol";
-import { ICultureIndex } from "../../src/interfaces/ICultureIndex.sol";
+import { IArtRace } from "../../src/interfaces/IArtRace.sol";
 import { Strings } from "@openzeppelin/contracts/utils/Strings.sol";
 import { ArtRace } from "../../src/art-race/ArtRace.sol";
 import { MockERC20 } from "../mock/MockERC20.sol";
@@ -105,7 +105,7 @@ contract TokenAccessControlTest is RevolutionTokenTestSuite {
             descriptorLocked = true;
         }
 
-        try revolutionToken.setCultureIndex(ICultureIndex(newCultureIndex)) {
+        try revolutionToken.setCultureIndex(IArtRace(newCultureIndex)) {
             fail("Should fail: cultureIndex is locked");
         } catch {
             cultureIndexLocked = true;
@@ -245,13 +245,13 @@ contract TokenAccessControlTest is RevolutionTokenTestSuite {
 
     /// @dev Tests updating and locking the ArtRace.
     function testCultureIndexUpdateAndLock() public {
-        ICultureIndex newCultureIndex = ICultureIndex(address(0xDEF));
+        IArtRace newCultureIndex = IArtRace(address(0xDEF));
         revolutionToken.setCultureIndex(newCultureIndex);
         assertEq(address(revolutionToken.cultureIndex()), address(newCultureIndex), "ArtRace should be updated");
 
         revolutionToken.lockCultureIndex();
         assertTrue(revolutionToken.isCultureIndexLocked(), "ArtRace should be locked");
         vm.expectRevert(abi.encodeWithSignature("CULTURE_INDEX_LOCKED()"));
-        revolutionToken.setCultureIndex(ICultureIndex(address(0x101112)));
+        revolutionToken.setCultureIndex(IArtRace(address(0x101112)));
     }
 }

@@ -4,7 +4,7 @@ pragma solidity 0.8.22;
 import { Test } from "forge-std/Test.sol";
 import { console2 } from "forge-std/console2.sol";
 import { DescriptorTest } from "./Descriptor.t.sol";
-import { ICultureIndex } from "../../src/interfaces/ICultureIndex.sol";
+import { IArtRace } from "../../src/interfaces/IArtRace.sol";
 import { Strings } from "@openzeppelin/contracts/utils/Strings.sol";
 
 contract JsonInjectionAttackTest is DescriptorTest {
@@ -24,10 +24,10 @@ contract JsonInjectionAttackTest is DescriptorTest {
     /// @notice Test `tokenURI` with injected animation
     function testTokenURIWithMixedMediaMetadata() public {
         uint256 tokenId = 3;
-        ICultureIndex.ArtPieceMetadata memory expectedMetadata = ICultureIndex.ArtPieceMetadata({
+        IArtRace.ArtPieceMetadata memory expectedMetadata = IArtRace.ArtPieceMetadata({
             name: "Mona Lisa",
             description: "A renowned painting by Leonardo da Vinci",
-            mediaType: ICultureIndex.MediaType.IMAGE,
+            mediaType: IArtRace.MediaType.IMAGE,
             image: "ipfs://realMonaLisa",
             text: "",
             animationUrl: '", "image": "ipfs://fakeMonaLisa' // malicious string injected
@@ -61,9 +61,9 @@ contract JsonInjectionAttackTest is DescriptorTest {
         );
     }
 
-    function _createArtPieceCreators() internal pure returns (ICultureIndex.CreatorBps[] memory) {
-        ICultureIndex.CreatorBps[] memory creators = new ICultureIndex.CreatorBps[](1);
-        creators[0] = ICultureIndex.CreatorBps({ creator: address(0xc), bps: 10_000 });
+    function _createArtPieceCreators() internal pure returns (IArtRace.CreatorBps[] memory) {
+        IArtRace.CreatorBps[] memory creators = new IArtRace.CreatorBps[](1);
+        creators[0] = IArtRace.CreatorBps({ creator: address(0xc), bps: 10_000 });
         return creators;
     }
 

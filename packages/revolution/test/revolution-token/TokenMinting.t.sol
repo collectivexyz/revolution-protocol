@@ -5,7 +5,7 @@ import { Test } from "forge-std/Test.sol";
 import { RevolutionToken } from "../../src/RevolutionToken.sol";
 import { IRevolutionToken } from "../../src/interfaces/IRevolutionToken.sol";
 import { IDescriptorMinimal } from "../../src/interfaces/IDescriptorMinimal.sol";
-import { ICultureIndex } from "../../src/interfaces/ICultureIndex.sol";
+import { IArtRace } from "../../src/interfaces/IArtRace.sol";
 import { Strings } from "@openzeppelin/contracts/utils/Strings.sol";
 import { ArtRace } from "../../src/art-race/ArtRace.sol";
 import { MockERC20 } from "../mock/MockERC20.sol";
@@ -36,14 +36,14 @@ contract TokenMintingTest is RevolutionTokenTestSuite {
         cultureIndex.vote(pieceId); // Simulate voting for the piece to make it top-voted
 
         // Fetch the top voted piece before minting
-        ICultureIndex.ArtPiece memory topVotedPieceBeforeMint = cultureIndex.getTopVotedPiece();
+        IArtRace.ArtPiece memory topVotedPieceBeforeMint = cultureIndex.getTopVotedPiece();
 
         // Mint a token
         vm.startPrank(address(auction));
         uint256 tokenId = revolutionToken.mint();
 
         // Fetch the dropped art piece associated with the minted token
-        ICultureIndex.ArtPiece memory droppedArtPiece = revolutionToken.getArtPieceById(tokenId);
+        IArtRace.ArtPiece memory droppedArtPiece = revolutionToken.getArtPieceById(tokenId);
 
         // Now compare the relevant fields of topVotedPieceBeforeMint and droppedArtPiece
         assertEq(droppedArtPiece.pieceId, topVotedPieceBeforeMint.pieceId, "Piece ID should match");
@@ -62,8 +62,8 @@ contract TokenMintingTest is RevolutionTokenTestSuite {
 
     // Helper function to compare ArtPieceMetadata structs
     function areArtPieceMetadataEqual(
-        ICultureIndex.ArtPieceMetadata memory metadata1,
-        ICultureIndex.ArtPieceMetadata memory metadata2
+        IArtRace.ArtPieceMetadata memory metadata1,
+        IArtRace.ArtPieceMetadata memory metadata2
     ) internal pure returns (bool) {
         return (keccak256(bytes(metadata1.name)) == keccak256(bytes(metadata2.name)) &&
             keccak256(bytes(metadata1.description)) == keccak256(bytes(metadata2.description)) &&
@@ -75,8 +75,8 @@ contract TokenMintingTest is RevolutionTokenTestSuite {
 
     // Helper function to compare arrays of creators
     function areArraysEqual(
-        ICultureIndex.CreatorBps[] memory arr1,
-        ICultureIndex.CreatorBps[] memory arr2
+        IArtRace.CreatorBps[] memory arr1,
+        IArtRace.CreatorBps[] memory arr2
     ) internal pure returns (bool) {
         if (arr1.length != arr2.length) {
             return false;
@@ -196,14 +196,14 @@ contract TokenMintingTest is RevolutionTokenTestSuite {
         createDefaultArtPiece();
         vm.roll(vm.getBlockNumber() + 1);
 
-        (uint256 pieceId, ICultureIndex.ArtPieceMetadata memory metadata, , , ) = cultureIndex.pieces(0);
+        (uint256 pieceId, IArtRace.ArtPieceMetadata memory metadata, , , ) = cultureIndex.pieces(0);
 
         emit log_uint(pieceId);
 
-        ICultureIndex.CreatorBps[] memory creators = new ICultureIndex.CreatorBps[](1);
-        creators[0] = ICultureIndex.CreatorBps({ creator: address(0x1), bps: 10000 });
+        IArtRace.CreatorBps[] memory creators = new IArtRace.CreatorBps[](1);
+        creators[0] = IArtRace.CreatorBps({ creator: address(0x1), bps: 10000 });
 
-        ICultureIndex.ArtPieceCondensed memory expectedArtPiece = ICultureIndex.ArtPieceCondensed({
+        IArtRace.ArtPieceCondensed memory expectedArtPiece = IArtRace.ArtPieceCondensed({
             pieceId: 0,
             creators: creators,
             sponsor: address(executor)
@@ -245,7 +245,7 @@ contract TokenMintingTest is RevolutionTokenTestSuite {
         vm.roll(vm.getBlockNumber() + 1);
 
         uint256 tokenId = revolutionToken.mint();
-        (, ICultureIndex.ArtPieceMetadata memory metadata, , , ) = cultureIndex.pieces(artPieceId);
+        (, IArtRace.ArtPieceMetadata memory metadata, , , ) = cultureIndex.pieces(artPieceId);
         // Assuming the descriptor returns a fixed URI for the given tokenId
         string memory expectedTokenURI = descriptor.tokenURI(tokenId, metadata);
         assertEq(

@@ -4,7 +4,7 @@ pragma solidity ^0.8.22;
 import { Test } from "forge-std/Test.sol";
 import { ArtRace } from "../../src/art-race/ArtRace.sol";
 import { MockERC20 } from "../mock/MockERC20.sol";
-import { ICultureIndex } from "../../src/interfaces/ICultureIndex.sol";
+import { IArtRace } from "../../src/interfaces/IArtRace.sol";
 import { RevolutionPoints } from "../../src/RevolutionPoints.sol";
 import { CultureIndexTestSuite } from "./ArtRace.t.sol";
 
@@ -62,7 +62,7 @@ contract CultureIndexVotingBasicTest is CultureIndexTestSuite {
 
         // Check vote is recorded with correct weight
         uint256 expectedWeight = erc721Weight * cultureIndex.revolutionTokenVoteWeight();
-        ICultureIndex.Vote memory vote = cultureIndex.getVote(pieceId, voter);
+        IArtRace.Vote memory vote = cultureIndex.getVote(pieceId, voter);
         assertEq(vote.weight, expectedWeight);
     }
 
@@ -92,7 +92,7 @@ contract CultureIndexVotingBasicTest is CultureIndexTestSuite {
         cultureIndex.vote(pieceId2);
 
         // Check top-voted piece
-        ICultureIndex.ArtPiece memory topVotedPiece = cultureIndex.getTopVotedPiece();
+        IArtRace.ArtPiece memory topVotedPiece = cultureIndex.getTopVotedPiece();
         assertEq(topVotedPiece.pieceId, pieceId2, "Piece with higher total vote weight should be top voted");
     }
 
@@ -296,7 +296,7 @@ contract CultureIndexVotingBasicTest is CultureIndexTestSuite {
         uint256 newPieceId = createArtPiece(
             "Mona Lisa",
             "A masterpiece",
-            ICultureIndex.MediaType.IMAGE,
+            IArtRace.MediaType.IMAGE,
             "ipfs://legends",
             "",
             "",
@@ -309,7 +309,7 @@ contract CultureIndexVotingBasicTest is CultureIndexTestSuite {
         cultureIndex.vote(newPieceId);
 
         // Validate the vote
-        ICultureIndex.Vote memory pieceVotes = cultureIndex.getVote(newPieceId, address(this));
+        IArtRace.Vote memory pieceVotes = cultureIndex.getVote(newPieceId, address(this));
         uint256 totalVoteWeight = cultureIndex.totalVoteWeights(newPieceId);
 
         assertEq(pieceVotes.voterAddress, address(this), "Voter address should match");
@@ -335,7 +335,7 @@ contract CultureIndexVotingBasicTest is CultureIndexTestSuite {
 
         // Assertions
         for (uint256 i = 0; i < pieceIds.length; i++) {
-            ICultureIndex.Vote memory vote = cultureIndex.getVote(pieceIds[i], address(this));
+            IArtRace.Vote memory vote = cultureIndex.getVote(pieceIds[i], address(this));
             assertEq(vote.voterAddress, address(this), "Voter address should match");
             assertEq(vote.weight, 200, "Vote weight should be correct");
         }
@@ -484,7 +484,7 @@ contract CultureIndexVotingBasicTest is CultureIndexTestSuite {
         uint256 newPieceId = createArtPiece(
             "Mona Lisa",
             "A masterpiece",
-            ICultureIndex.MediaType.IMAGE,
+            IArtRace.MediaType.IMAGE,
             "ipfs://legends",
             "",
             "",
@@ -511,7 +511,7 @@ contract CultureIndexVotingBasicTest is CultureIndexTestSuite {
         uint256 newPieceId = createArtPiece(
             "Starry Night",
             "A masterpiece",
-            ICultureIndex.MediaType.IMAGE,
+            IArtRace.MediaType.IMAGE,
             "ipfs://legends",
             "",
             "",
@@ -542,7 +542,7 @@ contract CultureIndexVotingBasicTest is CultureIndexTestSuite {
         uint256 firstPieceId = createArtPiece(
             "Mona Lisa",
             "A masterpiece",
-            ICultureIndex.MediaType.IMAGE,
+            IArtRace.MediaType.IMAGE,
             "ipfs://legends",
             "",
             "",
@@ -553,7 +553,7 @@ contract CultureIndexVotingBasicTest is CultureIndexTestSuite {
         uint256 secondPieceId = createArtPiece(
             "Starry Night",
             "Another masterpiece",
-            ICultureIndex.MediaType.IMAGE,
+            IArtRace.MediaType.IMAGE,
             "ipfs://starrynight",
             "",
             "",
@@ -588,7 +588,7 @@ contract CultureIndexVotingBasicTest is CultureIndexTestSuite {
         uint256 firstPieceId = createArtPiece(
             "Mona Lisa",
             "A masterpiece",
-            ICultureIndex.MediaType.IMAGE,
+            IArtRace.MediaType.IMAGE,
             "ipfs://legends",
             "",
             "",
@@ -599,7 +599,7 @@ contract CultureIndexVotingBasicTest is CultureIndexTestSuite {
         uint256 secondPieceId = createArtPiece(
             "Starry Night",
             "Another masterpiece",
-            ICultureIndex.MediaType.IMAGE,
+            IArtRace.MediaType.IMAGE,
             "ipfs://starrynight",
             "",
             "",
