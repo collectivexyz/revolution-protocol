@@ -1,5 +1,11 @@
 # @collectivexyz/revolution
 
+## 0.3.1
+
+### Patch Changes
+
+- cafed37: make RevolutionPoints owned by the DAO Executor contract, and add a minter to it for the PointsEmitter
+
 ## 0.3.0
 
 ### Minor Changes
