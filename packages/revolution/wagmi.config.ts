@@ -9,7 +9,7 @@ export default defineConfig({
         build: false,
       },
       include: [
-        "CultureIndex",
+        "ArtRace",
         "AuctionHouse",
         "RevolutionBuilder",
         "RevolutionPointsEmitter",

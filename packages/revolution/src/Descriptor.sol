@@ -208,7 +208,7 @@ contract Descriptor is IDescriptor, VersionedContract, UUPS, Ownable2StepUpgrade
         string memory name,
         ICultureIndex.ArtPieceMetadata memory metadata
     ) public pure returns (string memory) {
-        /// @dev Get name description image and animation_url from CultureIndex
+        /// @dev Get name description image and animation_url from ArtRace
 
         TokenURIParams memory params = TokenURIParams({
             name: name,

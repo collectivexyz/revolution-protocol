@@ -62,7 +62,7 @@ Run the tests with and generate a gas report.
 cd packages/revolution && pnpm run write-gas-report
 ```
 
-Gas optimizations around the CultureIndex `createPiece` and `vote` functionality, the [MaxHeap](https://github.com/collectivexyz/revolution-protocol/blob/main/packages/revolution/src/MaxHeap.sol) and [`buyToken`](https://github.com/collectivexyz/revolution-protocol/blob/main/packages/revolution/src/RevolutionPointsEmitter.sol) should be prioritized.
+Gas optimizations around the ArtRace `createPiece` and `vote` functionality, the [MaxHeap](https://github.com/collectivexyz/revolution-protocol/blob/main/packages/revolution/src/MaxHeap.sol) and [`buyToken`](https://github.com/collectivexyz/revolution-protocol/blob/main/packages/revolution/src/RevolutionPointsEmitter.sol) should be prioritized.
 
 ## Slither
 
@@ -88,19 +88,19 @@ slither src --checklist --show-ignored-findings --filter-paths "@openzeppelin" -
 
 # revolution overview
 
-Instead of [auctioning](https://nouns.wtf/) off a generative PFP like Nouns, anyone can upload art pieces to the [CultureIndex](https://github.com/collectivexyz/revolution-protocol/blob/main/packages/revolution/src/CultureIndex.sol) contract, and the community votes on their favorite art pieces.
+Instead of [auctioning](https://nouns.wtf/) off a generative PFP like Nouns, anyone can upload art pieces to the [ArtRace](https://github.com/collectivexyz/revolution-protocol/blob/main/packages/revolution/src/ArtRace.sol) contract, and the community votes on their favorite art pieces.
 
 The top piece is auctioned off every day as an ERC721 [RevolutionToken](https://github.com/collectivexyz/revolution-protocol/blob/main/packages/revolution/src/RevolutionToken.sol) via the [AuctionHouse](https://github.com/collectivexyz/revolution-protocol/blob/main/packages/revolution/src/AuctionHouse.sol).
 
 The auction proceeds are split with the creator(s) of the art piece, and the rest is sent to the owner of the auction contract. The winner of the auction receives an ERC721 of the art piece. The creator receives an amount of RevolutionPoints and a share of the winning bid.
 
-The RevolutionPoints the creator receives is calculated by the [RevolutionPointsEmitter](https://github.com/collectivexyz/revolution-protocol/blob/main/packages/revolution/src/RevolutionPointsEmitter.sol). Both the ERC721 and the RevolutionPoints have voting power to vote on art pieces in the **CultureIndex**.
+The RevolutionPoints the creator receives is calculated by the [RevolutionPointsEmitter](https://github.com/collectivexyz/revolution-protocol/blob/main/packages/revolution/src/RevolutionPointsEmitter.sol). Both the ERC721 and the RevolutionPoints have voting power to vote on art pieces in the **ArtRace**.
 
 # relevant contracts
 
-## CultureIndex
+## ArtRace
 
-[**CultureIndex.sol**](https://github.com/collectivexyz/revolution-protocol/blob/main/packages/revolution/src/CultureIndex.sol) is a directory of uploaded art pieces that anyone can add media to. Owners of an ERC721 or RevolutionPoints can vote weighted by their balance on any given art piece.
+[**ArtRace.sol**](https://github.com/collectivexyz/revolution-protocol/blob/main/packages/revolution/src/ArtRace.sol) is a directory of uploaded art pieces that anyone can add media to. Owners of an ERC721 or RevolutionPoints can vote weighted by their balance on any given art piece.
 
 <img width="817" alt="culture index" src="https://github.com/collectivexyz/revolution-protocol/blob/main/readme-img/art-race.png">
 
@@ -110,7 +110,7 @@ The contract has a function called **dropTopVotedPiece**, only callable by the o
 
 ## RevolutionToken
 
-[**RevolutionToken.sol**](https://github.com/collectivexyz/revolution-protocol/blob/main/packages/revolution/src/RevolutionToken.sol) is a fork of the [NounsToken](https://github.com/nounsDAO/nouns-monorepo/blob/master/packages/nouns-contracts/contracts/NounsToken.sol) contract. **RevolutionToken** owns the **CultureIndex**. When calling **mint()** on the **RevolutionToken**, the contract calls **dropTopVotedPiece** on **CultureIndex**, and creates an ERC721 with metadata based on the dropped art piece data from the **CultureIndex**.
+[**RevolutionToken.sol**](https://github.com/collectivexyz/revolution-protocol/blob/main/packages/revolution/src/RevolutionToken.sol) is a fork of the [NounsToken](https://github.com/nounsDAO/nouns-monorepo/blob/master/packages/nouns-contracts/contracts/NounsToken.sol) contract. **RevolutionToken** owns the **ArtRace**. When calling **mint()** on the **RevolutionToken**, the contract calls **dropTopVotedPiece** on **ArtRace**, and creates an ERC721 with metadata based on the dropped art piece data from the **ArtRace**.
 
 ## AuctionHouse
 
@@ -184,19 +184,19 @@ For all contracts - only the RevolutionBuilder manager should be able to initial
 
 - The RevolutionPointsEmitter and AuctionHouse should always pay creators (ETH or RevolutionPoints) in accordance with the creatorRateBps and entropyRateBps calculation.
 
-- The AuctionHouse should always pay only creator(s) of the CultureIndex art piece being auctioned and the owner.
+- The AuctionHouse should always pay only creator(s) of the ArtRace art piece being auctioned and the owner.
 
 - The RevolutionPointsEmitter should always pay the `creatorsAddress`.
 
 - ETH and RevolutionPoints transfer functions are secure and protected with reentrancy checks / math errors.
 
-### CultureIndex
+### ArtRace
 
-- Anything uploaded to the CultureIndex should always be mintable by the RevolutionToken contract and not disrupt the RevolutionToken contract in any way.
+- Anything uploaded to the ArtRace should always be mintable by the RevolutionToken contract and not disrupt the RevolutionToken contract in any way.
 
 - The voting weights calculated must be solely based on the ERC721 and RevolutionPoints balance of the account that casts the vote.
 
-- Accounts should not be able to vote more than once on the same art piece with the same ERC721 token in the CultureIndex.
+- Accounts should not be able to vote more than once on the same art piece with the same ERC721 token in the ArtRace.
 
 - Accounts can not vote twice on the same art piece.
 
@@ -204,15 +204,15 @@ For all contracts - only the RevolutionBuilder manager should be able to initial
 
 - Only snapshotted (at art piece creation block) vote weights should be able to update the total vote weight of the art piece. eg: If you received votes after snapshot date on the art piece, you should have 0 votes.
 
-- CultureIndex and MaxHeap, must be resilient to DoS attacks that could significantly hinder voting, art creation, or auction processes.
+- ArtRace and MaxHeap, must be resilient to DoS attacks that could significantly hinder voting, art creation, or auction processes.
 
 - An art piece that has not met quorum cannot be dropped.
 
 ### RevolutionToken
 
-- RevolutionToken should only mint art pieces from the CultureIndex.
+- RevolutionToken should only mint art pieces from the ArtRace.
 
-- RevolutionToken should always mint the top voted art piece in the CultureIndex.
+- RevolutionToken should always mint the top voted art piece in the ArtRace.
 
 ### AuctionHouse
 

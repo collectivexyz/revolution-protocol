@@ -36,7 +36,7 @@ interface IRevolutionToken is IERC721 {
     /// @dev Reverts if the minter is locked.
     error MINTER_LOCKED();
 
-    /// @dev Reverts if the CultureIndex is locked.
+    /// @dev Reverts if the ArtRace is locked.
     error CULTURE_INDEX_LOCKED();
 
     /// @dev Reverts if the descriptor is locked.
@@ -97,7 +97,7 @@ interface IRevolutionToken is IERC721 {
     /// @param minter The address of the minter
     /// @param initialOwner The address of the initial owner
     /// @param descriptor The address of the token URI descriptor
-    /// @param cultureIndex The address of the CultureIndex contract
+    /// @param cultureIndex The address of the ArtRace contract
     /// @param revolutionTokenParams The name, symbol, and contract metadata of the token
     function initialize(
         address minter,

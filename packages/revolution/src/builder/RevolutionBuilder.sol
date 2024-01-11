@@ -301,7 +301,7 @@ contract RevolutionBuilder is
     /// @return auction Auction deployed address
     /// @return executor Executor deployed address
     /// @return dao DAO deployed address
-    /// @return cultureIndex CultureIndex deployed address
+    /// @return cultureIndex ArtRace deployed address
     /// @return revolutionPoints ERC-20 token deployed address
     /// @return revolutionPointsEmitter ERC-20 points emitter deployed address
     /// @return maxHeap MaxHeap deployed address

@@ -7,7 +7,7 @@ import { IRevolutionToken } from "../../src/interfaces/IRevolutionToken.sol";
 import { IDescriptor } from "../../src/interfaces/IDescriptor.sol";
 import { ICultureIndex } from "../../src/interfaces/ICultureIndex.sol";
 import { Strings } from "@openzeppelin/contracts/utils/Strings.sol";
-import { CultureIndex } from "../../src/art-race/CultureIndex.sol";
+import { ArtRace } from "../../src/art-race/ArtRace.sol";
 import { MockERC20 } from "../mock/MockERC20.sol";
 import { Descriptor } from "../../src/Descriptor.sol";
 import "../utils/Base64Decode.sol";
@@ -18,9 +18,9 @@ import { ERC1967Proxy } from "../../src/libs/proxy/ERC1967Proxy.sol";
 /// @title RevolutionTokenTest
 /// @dev The test suite for the RevolutionToken contract
 contract TokenAccessControlTest is RevolutionTokenTestSuite {
-    /// @dev Tests that non-owners cannot call dropTopVotedPiece on CultureIndex
+    /// @dev Tests that non-owners cannot call dropTopVotedPiece on ArtRace
     function testNonOwnerCannotCallDropTopVotedPiece() public {
-        // Assuming the CultureIndex is already set up and there are some pieces with votes
+        // Assuming the ArtRace is already set up and there are some pieces with votes
         createDefaultArtPiece();
 
         // Use an arbitrary non-owner address for the test
@@ -113,7 +113,7 @@ contract TokenAccessControlTest is RevolutionTokenTestSuite {
 
         assertTrue(minterLocked, "Minter should be locked");
         assertTrue(descriptorLocked, "Descriptor should be locked");
-        assertTrue(cultureIndexLocked, "CultureIndex should be locked");
+        assertTrue(cultureIndexLocked, "ArtRace should be locked");
     }
 
     /// @dev Tests that only the owner can call owner-specific functions
@@ -243,14 +243,14 @@ contract TokenAccessControlTest is RevolutionTokenTestSuite {
         revolutionToken.setDescriptor(IDescriptor(address(0xABC)));
     }
 
-    /// @dev Tests updating and locking the CultureIndex.
+    /// @dev Tests updating and locking the ArtRace.
     function testCultureIndexUpdateAndLock() public {
         ICultureIndex newCultureIndex = ICultureIndex(address(0xDEF));
         revolutionToken.setCultureIndex(newCultureIndex);
-        assertEq(address(revolutionToken.cultureIndex()), address(newCultureIndex), "CultureIndex should be updated");
+        assertEq(address(revolutionToken.cultureIndex()), address(newCultureIndex), "ArtRace should be updated");
 
         revolutionToken.lockCultureIndex();
-        assertTrue(revolutionToken.isCultureIndexLocked(), "CultureIndex should be locked");
+        assertTrue(revolutionToken.isCultureIndexLocked(), "ArtRace should be locked");
         vm.expectRevert(abi.encodeWithSignature("CULTURE_INDEX_LOCKED()"));
         revolutionToken.setCultureIndex(ICultureIndex(address(0x101112)));
     }

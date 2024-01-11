@@ -46,7 +46,7 @@ interface IRevolutionVotingPower is IRevolutionVotingPowerEvents {
 
     function token() external returns (RevolutionToken);
 
-    /// @notice useful in the CultureIndex to subtract weight of the AuctionHouse from quorum
+    /// @notice useful in the ArtRace to subtract weight of the AuctionHouse from quorum
     function _getTokenMinter__TokenVotes() external view returns (uint256);
     function _getTokenMinter__PastTokenVotes(uint256 blockNumber) external view returns (uint256);
     function _getTokenMinter__TokenVotes__WithWeight(uint256 erc721TokenVoteWeight) external view returns (uint256);

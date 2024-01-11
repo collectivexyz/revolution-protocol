@@ -7,7 +7,7 @@ import { IRevolutionToken } from "../../src/interfaces/IRevolutionToken.sol";
 import { IDescriptorMinimal } from "../../src/interfaces/IDescriptorMinimal.sol";
 import { ICultureIndex, ICultureIndexEvents } from "../../src/interfaces/ICultureIndex.sol";
 import { Strings } from "@openzeppelin/contracts/utils/Strings.sol";
-import { CultureIndex } from "../../src/art-race/CultureIndex.sol";
+import { ArtRace } from "../../src/art-race/ArtRace.sol";
 import { MockERC20 } from "../mock/MockERC20.sol";
 import { Descriptor } from "../../src/Descriptor.sol";
 import "../utils/Base64Decode.sol";
@@ -89,7 +89,7 @@ contract TokenBasicTest is RevolutionTokenTestSuite {
         assertEq(cultureIndexAddress, address(cultureIndex), "Initial cultureIndex should be set correctly");
     }
 
-    /// @dev Tests that minted tokens are correctly associated with the art piece from CultureIndex
+    /// @dev Tests that minted tokens are correctly associated with the art piece from ArtRace
     function testCorrectArtAssociation() public {
         uint256 artPieceId = createDefaultArtPiece();
         vm.roll(vm.getBlockNumber() + 1);
@@ -512,7 +512,7 @@ contract TokenBasicTest is RevolutionTokenTestSuite {
         return (name, description, image);
     }
 
-    /// @dev Tests the interaction with the CultureIndex during minting
+    /// @dev Tests the interaction with the ArtRace during minting
     function testCultureIndexInteraction() public {
         vm.stopPrank();
         vm.startPrank(address(auction));

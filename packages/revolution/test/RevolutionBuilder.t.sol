@@ -10,7 +10,7 @@ import { Descriptor } from "../src/Descriptor.sol";
 import { IAuctionHouse, AuctionHouse } from "../src/AuctionHouse.sol";
 import { RevolutionDAOLogicV1 } from "../src/governance/RevolutionDAOLogicV1.sol";
 import { DAOExecutor } from "../src/governance/DAOExecutor.sol";
-import { CultureIndex } from "../src/art-race/CultureIndex.sol";
+import { ArtRace } from "../src/art-race/ArtRace.sol";
 import { RevolutionPoints } from "../src/RevolutionPoints.sol";
 import { RevolutionVotingPower } from "../src/RevolutionVotingPower.sol";
 import { RevolutionPointsEmitter } from "../src/RevolutionPointsEmitter.sol";
@@ -105,7 +105,7 @@ contract RevolutionBuilderTest is Test {
         revolutionPointsEmitterImpl = address(
             new RevolutionPointsEmitter(address(manager), address(protocolRewards), revolutionDAO)
         );
-        cultureIndexImpl = address(new CultureIndex(address(manager)));
+        cultureIndexImpl = address(new ArtRace(address(manager)));
         maxHeapImpl = address(new MaxHeap(address(manager)));
         revolutionVotingPowerImpl = address(new RevolutionVotingPower(address(manager)));
 
@@ -292,7 +292,7 @@ contract RevolutionBuilderTest is Test {
     AuctionHouse internal auction;
     DAOExecutor internal executor;
     RevolutionDAOLogicV1 internal dao;
-    CultureIndex internal cultureIndex;
+    ArtRace internal cultureIndex;
     RevolutionPoints internal revolutionPoints;
     RevolutionPointsEmitter internal revolutionPointsEmitter;
     MaxHeap internal maxHeap;
@@ -347,7 +347,7 @@ contract RevolutionBuilderTest is Test {
         auction = AuctionHouse(_addresses.auction);
         executor = DAOExecutor(payable(_addresses.executor));
         dao = RevolutionDAOLogicV1(payable(_addresses.dao));
-        cultureIndex = CultureIndex(_addresses.cultureIndex);
+        cultureIndex = ArtRace(_addresses.cultureIndex);
         revolutionPoints = RevolutionPoints(_addresses.revolutionPoints);
         revolutionPointsEmitter = RevolutionPointsEmitter(_addresses.revolutionPointsEmitter);
         maxHeap = MaxHeap(_addresses.maxHeap);

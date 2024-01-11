@@ -2,14 +2,14 @@
 pragma solidity ^0.8.22;
 
 import { Test } from "forge-std/Test.sol";
-import { CultureIndex } from "../../src/art-race/CultureIndex.sol";
+import { ArtRace } from "../../src/art-race/ArtRace.sol";
 import { MockERC20 } from "../mock/MockERC20.sol";
 import { ICultureIndex } from "../../src/interfaces/ICultureIndex.sol";
-import { CultureIndexTestSuite } from "./CultureIndex.t.sol";
+import { CultureIndexTestSuite } from "./ArtRace.t.sol";
 
 /**
  * @title CultureIndexArtPieceTest
- * @dev Test contract for CultureIndex art piece creation
+ * @dev Test contract for ArtRace art piece creation
  */
 contract CultureIndexArtPieceTest is CultureIndexTestSuite {
     function testVoteAndVerifyTopVotedPiece() public {

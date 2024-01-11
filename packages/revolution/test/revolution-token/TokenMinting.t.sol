@@ -7,7 +7,7 @@ import { IRevolutionToken } from "../../src/interfaces/IRevolutionToken.sol";
 import { IDescriptorMinimal } from "../../src/interfaces/IDescriptorMinimal.sol";
 import { ICultureIndex } from "../../src/interfaces/ICultureIndex.sol";
 import { Strings } from "@openzeppelin/contracts/utils/Strings.sol";
-import { CultureIndex } from "../../src/art-race/CultureIndex.sol";
+import { ArtRace } from "../../src/art-race/ArtRace.sol";
 import { MockERC20 } from "../mock/MockERC20.sol";
 import { Descriptor } from "../../src/Descriptor.sol";
 import { RevolutionPoints } from "../../src/RevolutionPoints.sol";
@@ -103,7 +103,7 @@ contract TokenMintingTest is RevolutionTokenTestSuite {
     function testMint() public {
         vm.stopPrank();
         vm.startPrank(address(auction));
-        // Add a piece to the CultureIndex
+        // Add a piece to the ArtRace
         createDefaultArtPiece();
         vm.roll(vm.getBlockNumber() + 1);
 
@@ -255,7 +255,7 @@ contract TokenMintingTest is RevolutionTokenTestSuite {
         );
     }
 
-    /// @dev Ensures minting fetches and associates the top-voted piece from CultureIndex
+    /// @dev Ensures minting fetches and associates the top-voted piece from ArtRace
     function test_TopVotedPieceMinting() public {
         vm.stopPrank();
         vm.startPrank(address(revolutionPointsEmitter));

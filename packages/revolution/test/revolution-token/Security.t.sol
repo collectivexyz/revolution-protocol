@@ -8,7 +8,7 @@ import { IRevolutionToken } from "../../src/interfaces/IRevolutionToken.sol";
 import { IDescriptorMinimal } from "../../src/interfaces/IDescriptorMinimal.sol";
 import { ICultureIndex } from "../../src/interfaces/ICultureIndex.sol";
 import { Strings } from "@openzeppelin/contracts/utils/Strings.sol";
-import { CultureIndex } from "../../src/art-race/CultureIndex.sol";
+import { ArtRace } from "../../src/art-race/ArtRace.sol";
 import { MockERC20 } from "../mock/MockERC20.sol";
 import { Descriptor } from "../../src/Descriptor.sol";
 import "../utils/Base64Decode.sol";
@@ -221,7 +221,7 @@ contract TokenSecurityTest is RevolutionTokenTestSuite {
         createDefaultArtPiece();
         vm.roll(vm.getBlockNumber() + 1);
 
-        // Mock the CultureIndex to simulate dropTopVotedPiece failure
+        // Mock the ArtRace to simulate dropTopVotedPiece failure
         address cultureIndexMock = address(new CultureIndexMock());
         revolutionToken.setCultureIndex(ICultureIndex(cultureIndexMock));
 
@@ -259,7 +259,7 @@ contract ReentrancyAttackContractGeneral {
     // Implement fallback or receive function that calls burn again
 }
 
-// Mock CultureIndex to simulate failure in dropTopVotedPiece
+// Mock ArtRace to simulate failure in dropTopVotedPiece
 contract CultureIndexMock {
     function dropTopVotedPiece() external pure returns (ICultureIndex.ArtPiece memory) {
         revert("Mocked failure");

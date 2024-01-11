@@ -8,7 +8,7 @@ import { IRevolutionBuilder } from "./IRevolutionBuilder.sol";
 
 /**
  * @title ICultureIndexEvents
- * @dev This interface defines the events for the CultureIndex contract.
+ * @dev This interface defines the events for the ArtRace contract.
  */
 interface ICultureIndexEvents {
     event ERC721VotingTokenUpdated(ERC721CheckpointableUpgradeable ERC721VotingToken);
@@ -51,7 +51,7 @@ interface ICultureIndexEvents {
 
 /**
  * @title ICultureIndex
- * @dev This interface defines the methods for the CultureIndex contract for art piece management and voting.
+ * @dev This interface defines the methods for the ArtRace contract for art piece management and voting.
  */
 interface ICultureIndex is ICultureIndexEvents {
     ///                                                          ///
@@ -292,7 +292,7 @@ interface ICultureIndex is ICultureIndexEvents {
      * @param initialOwner The owner of the contract, allowed to drop pieces. Commonly updated to the AuctionHouse
      * @param maxHeap The address of the max heap contract
      * @param dropperAdmin The address that can drop new art pieces
-     * @param cultureIndexParams The CultureIndex settings
+     * @param cultureIndexParams The ArtRace settings
      */
     function initialize(
         address votingPower,

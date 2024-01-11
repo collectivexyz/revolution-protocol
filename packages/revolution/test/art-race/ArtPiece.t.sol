@@ -1,14 +1,14 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.22;
 
-import { CultureIndex } from "../../src/art-race/CultureIndex.sol";
+import { ArtRace } from "../../src/art-race/ArtRace.sol";
 import { MockERC20 } from "../mock/MockERC20.sol";
 import { ICultureIndex } from "../../src/interfaces/ICultureIndex.sol";
-import { CultureIndexTestSuite } from "./CultureIndex.t.sol";
+import { CultureIndexTestSuite } from "./ArtRace.t.sol";
 
 /**
  * @title CultureIndexArtPieceTest
- * @dev Test contract for CultureIndex art piece creation
+ * @dev Test contract for ArtRace art piece creation
  */
 contract CultureIndexArtPieceTest is CultureIndexTestSuite {
     //test that creating the first piece the pieceId is 0
@@ -113,19 +113,16 @@ contract CultureIndexArtPieceTest is CultureIndexTestSuite {
     //  * @dev Test case to validate the art piece creation with an invalid zero address for the creator
     //  */
     function testInvalidCreatorAddress() public {
-        (
-            CultureIndex.ArtPieceMetadata memory metadata,
-            ICultureIndex.CreatorBps[] memory creators
-        ) = createArtPieceTuple(
-                "Invalid Creator",
-                "Invalid Piece",
-                ICultureIndex.MediaType.IMAGE,
-                "ipfs://invalid",
-                "",
-                "",
-                address(0),
-                10000
-            );
+        (ArtRace.ArtPieceMetadata memory metadata, ICultureIndex.CreatorBps[] memory creators) = createArtPieceTuple(
+            "Invalid Creator",
+            "Invalid Piece",
+            ICultureIndex.MediaType.IMAGE,
+            "ipfs://invalid",
+            "",
+            "",
+            address(0),
+            10000
+        );
 
         vm.expectRevert(abi.encodeWithSignature("ADDRESS_ZERO()"));
         cultureIndex.createPiece(metadata, creators);
@@ -135,19 +132,16 @@ contract CultureIndexArtPieceTest is CultureIndexTestSuite {
      * @dev Test case to validate the art piece creation with incorrect total basis points
      */
     function testExcessiveTotalBasisPoints() public {
-        (
-            CultureIndex.ArtPieceMetadata memory metadata,
-            ICultureIndex.CreatorBps[] memory creators
-        ) = createArtPieceTuple(
-                "Invalid Creator",
-                "Invalid Piece",
-                ICultureIndex.MediaType.IMAGE,
-                "ipfs://invalid",
-                "",
-                "",
-                address(0x1),
-                21_000_000
-            );
+        (ArtRace.ArtPieceMetadata memory metadata, ICultureIndex.CreatorBps[] memory creators) = createArtPieceTuple(
+            "Invalid Creator",
+            "Invalid Piece",
+            ICultureIndex.MediaType.IMAGE,
+            "ipfs://invalid",
+            "",
+            "",
+            address(0x1),
+            21_000_000
+        );
 
         vm.expectRevert(abi.encodeWithSignature("INVALID_BPS_SUM()"));
         cultureIndex.createPiece(metadata, creators);
@@ -157,19 +151,16 @@ contract CultureIndexArtPieceTest is CultureIndexTestSuite {
     //  * @dev Test case to validate the art piece creation with incorrect total basis points
     //  */
     function testTooFewTotalBasisPoints() public {
-        (
-            CultureIndex.ArtPieceMetadata memory metadata,
-            ICultureIndex.CreatorBps[] memory creators
-        ) = createArtPieceTuple(
-                "Invalid Creator",
-                "Invalid Piece",
-                ICultureIndex.MediaType.IMAGE,
-                "ipfs://invalid",
-                "",
-                "",
-                address(0x1),
-                21
-            );
+        (ArtRace.ArtPieceMetadata memory metadata, ICultureIndex.CreatorBps[] memory creators) = createArtPieceTuple(
+            "Invalid Creator",
+            "Invalid Piece",
+            ICultureIndex.MediaType.IMAGE,
+            "ipfs://invalid",
+            "",
+            "",
+            address(0x1),
+            21
+        );
 
         vm.expectRevert(abi.encodeWithSignature("INVALID_BPS_SUM()"));
         cultureIndex.createPiece(metadata, creators);
@@ -179,19 +170,16 @@ contract CultureIndexArtPieceTest is CultureIndexTestSuite {
      * @dev Test case to validate art piece creation with missing media data
      */
     function testMissingMediaDataImage() public {
-        (
-            CultureIndex.ArtPieceMetadata memory metadata,
-            ICultureIndex.CreatorBps[] memory creators
-        ) = createArtPieceTuple(
-                "Missing Media Data",
-                "Invalid Piece",
-                ICultureIndex.MediaType.IMAGE,
-                "",
-                "",
-                "",
-                address(0x1),
-                10000
-            );
+        (ArtRace.ArtPieceMetadata memory metadata, ICultureIndex.CreatorBps[] memory creators) = createArtPieceTuple(
+            "Missing Media Data",
+            "Invalid Piece",
+            ICultureIndex.MediaType.IMAGE,
+            "",
+            "",
+            "",
+            address(0x1),
+            10000
+        );
 
         vm.expectRevert(abi.encodeWithSignature("INVALID_MEDIA_METADATA()"));
         cultureIndex.createPiece(metadata, creators);
@@ -201,19 +189,16 @@ contract CultureIndexArtPieceTest is CultureIndexTestSuite {
      * @dev Test case to validate art piece creation with missing media data
      */
     function testMissingMediaDataAnimation() public {
-        (
-            CultureIndex.ArtPieceMetadata memory metadata,
-            ICultureIndex.CreatorBps[] memory creators
-        ) = createArtPieceTuple(
-                "Missing Media Data",
-                "Invalid Piece",
-                ICultureIndex.MediaType.ANIMATION,
-                "",
-                "",
-                "",
-                address(0x1),
-                10000
-            );
+        (ArtRace.ArtPieceMetadata memory metadata, ICultureIndex.CreatorBps[] memory creators) = createArtPieceTuple(
+            "Missing Media Data",
+            "Invalid Piece",
+            ICultureIndex.MediaType.ANIMATION,
+            "",
+            "",
+            "",
+            address(0x1),
+            10000
+        );
 
         vm.expectRevert(abi.encodeWithSignature("INVALID_MEDIA_METADATA()"));
         cultureIndex.createPiece(metadata, creators);
@@ -223,19 +208,16 @@ contract CultureIndexArtPieceTest is CultureIndexTestSuite {
      * @dev Test case to validate art piece creation with missing media data
      */
     function testMissingMediaDataText() public {
-        (
-            CultureIndex.ArtPieceMetadata memory metadata,
-            ICultureIndex.CreatorBps[] memory creators
-        ) = createArtPieceTuple(
-                "Missing Media Data",
-                "Invalid Piece",
-                ICultureIndex.MediaType.TEXT,
-                "",
-                "",
-                "",
-                address(0x1),
-                10000
-            );
+        (ArtRace.ArtPieceMetadata memory metadata, ICultureIndex.CreatorBps[] memory creators) = createArtPieceTuple(
+            "Missing Media Data",
+            "Invalid Piece",
+            ICultureIndex.MediaType.TEXT,
+            "",
+            "",
+            "",
+            address(0x1),
+            10000
+        );
 
         vm.expectRevert(abi.encodeWithSignature("INVALID_MEDIA_METADATA()"));
         cultureIndex.createPiece(metadata, creators);
@@ -245,10 +227,16 @@ contract CultureIndexArtPieceTest is CultureIndexTestSuite {
      * @dev Test case to validate art piece creation with missing name
      */
     function testMissingName() public {
-        (
-            CultureIndex.ArtPieceMetadata memory metadata,
-            ICultureIndex.CreatorBps[] memory creators
-        ) = createArtPieceTuple("", "Invalid Piece", ICultureIndex.MediaType.TEXT, "", "", "", address(0x1), 10000);
+        (ArtRace.ArtPieceMetadata memory metadata, ICultureIndex.CreatorBps[] memory creators) = createArtPieceTuple(
+            "",
+            "Invalid Piece",
+            ICultureIndex.MediaType.TEXT,
+            "",
+            "",
+            "",
+            address(0x1),
+            10000
+        );
 
         vm.expectRevert(abi.encodeWithSignature("INVALID_MEDIA_METADATA()"));
         cultureIndex.createPiece(metadata, creators);
@@ -328,7 +316,7 @@ contract CultureIndexArtPieceTest is CultureIndexTestSuite {
 
         // Create an art piece
         uint256 pieceId = createDefaultArtPiece();
-        CultureIndex.ArtPiece memory piece = cultureIndex.getPieceById(pieceId);
+        ArtRace.ArtPiece memory piece = cultureIndex.getPieceById(pieceId);
 
         // Check initial values
         uint256 expectedTotalVotesSupply = pointsSupply;
@@ -357,7 +345,7 @@ contract CultureIndexArtPieceTest is CultureIndexTestSuite {
 
         vm.roll(vm.getBlockNumber() + 1);
 
-        CultureIndex.ArtPiece memory newPiece = cultureIndex.getPieceById(createDefaultArtPiece());
+        ArtRace.ArtPiece memory newPiece = cultureIndex.getPieceById(createDefaultArtPiece());
         vm.roll(vm.getBlockNumber() + 1);
 
         uint256 expectedTotalVotesSupply2 = pointsSupply * 2 + cultureIndex.revolutionTokenVoteWeight();

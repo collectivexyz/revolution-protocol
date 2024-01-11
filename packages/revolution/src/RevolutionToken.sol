@@ -44,13 +44,13 @@ contract RevolutionToken is
     // The Revolution Token URI descriptor
     IDescriptorMinimal public descriptor;
 
-    // The CultureIndex contract
+    // The ArtRace contract
     ICultureIndex public cultureIndex;
 
     // Whether the minter can be updated
     bool public isMinterLocked;
 
-    // Whether the CultureIndex can be updated
+    // Whether the ArtRace can be updated
     bool public isCultureIndexLocked;
 
     // Whether the descriptor can be updated
@@ -62,7 +62,7 @@ contract RevolutionToken is
     // IPFS content hash of contract-level metadata
     string private _contractURIHash;
 
-    // The CultureIndex art pieces mapping (verbId => artPiece ID)
+    // The ArtRace art pieces mapping (verbId => artPiece ID)
     mapping(uint256 => uint256) public artPieces;
 
     ///                                                          ///
@@ -78,7 +78,7 @@ contract RevolutionToken is
     }
 
     /**
-     * @notice Require that the CultureIndex has not been locked.
+     * @notice Require that the ArtRace has not been locked.
      */
     modifier whenCultureIndexNotLocked() {
         if (isCultureIndexLocked) revert CULTURE_INDEX_LOCKED();
@@ -125,7 +125,7 @@ contract RevolutionToken is
     /// @param _minter The address of the minter
     /// @param _initialOwner The address of the initial owner
     /// @param _descriptor The address of the token URI descriptor
-    /// @param _cultureIndex The address of the CultureIndex contract
+    /// @param _cultureIndex The address of the ArtRace contract
     /// @param _revolutionTokenParams The name, symbol, and contract metadata of the token
     function initialize(
         address _minter,
@@ -248,7 +248,7 @@ contract RevolutionToken is
     }
 
     /**
-     * @notice Set the token CultureIndex.
+     * @notice Set the token ArtRace.
      * @dev Only callable by the owner when not locked.
      */
     function setCultureIndex(ICultureIndex _cultureIndex) external onlyOwner whenCultureIndexNotLocked nonReentrant {
@@ -258,7 +258,7 @@ contract RevolutionToken is
     }
 
     /**
-     * @notice Lock the CultureIndex
+     * @notice Lock the ArtRace
      * @dev This cannot be reversed and is only callable by the owner when not locked.
      */
     function lockCultureIndex() external override onlyOwner whenCultureIndexNotLocked {
@@ -278,7 +278,7 @@ contract RevolutionToken is
     }
 
     /**
-     * @notice Mint a Verb with `verbId` to the provided `to` address. Pulls the top voted art piece from the CultureIndex.
+     * @notice Mint a Verb with `verbId` to the provided `to` address. Pulls the top voted art piece from the ArtRace.
      */
     function _mintTo(address to) internal returns (uint256) {
         // Use try/catch to handle potential failure

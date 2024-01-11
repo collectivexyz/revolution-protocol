@@ -2,9 +2,9 @@
 pragma solidity ^0.8.22;
 
 import { Test } from "forge-std/Test.sol";
-import { CultureIndex } from "../../src/art-race/CultureIndex.sol";
+import { ArtRace } from "../../src/art-race/ArtRace.sol";
 import { MockERC20 } from "../mock/MockERC20.sol";
-import { CultureIndexTestSuite } from "./CultureIndex.t.sol";
+import { CultureIndexTestSuite } from "./ArtRace.t.sol";
 
 contract CultureIndexVotingTestManager is CultureIndexTestSuite {
     function testVotingWithDifferentWeights() public {
@@ -24,8 +24,8 @@ contract CultureIndexVotingTestManager is CultureIndexTestSuite {
         voter2Test.voteForPiece(newPieceId);
 
         // Validate the weights
-        CultureIndex.Vote memory pieceVotes1 = cultureIndex.getVote(newPieceId, address(voter1Test));
-        CultureIndex.Vote memory pieceVotes2 = cultureIndex.getVote(newPieceId, address(voter2Test));
+        ArtRace.Vote memory pieceVotes1 = cultureIndex.getVote(newPieceId, address(voter1Test));
+        ArtRace.Vote memory pieceVotes2 = cultureIndex.getVote(newPieceId, address(voter2Test));
         uint256 totalVoteWeight = cultureIndex.totalVoteWeights(newPieceId);
 
         assertEq(pieceVotes1.voterAddress, address(voter1Test), "Voter address should match");
@@ -51,12 +51,12 @@ contract CultureIndexVotingTestManager is CultureIndexTestSuite {
         voter1Test.voteForPiece(secondPieceId);
 
         // Validate the weights for the first piece
-        CultureIndex.Vote memory firstPieceVote = cultureIndex.getVote(firstPieceId, address(voter1Test));
+        ArtRace.Vote memory firstPieceVote = cultureIndex.getVote(firstPieceId, address(voter1Test));
         assertEq(firstPieceVote.voterAddress, address(voter1Test), "Voter address should match");
         assertEq(firstPieceVote.weight, 100, "Voting weight for the first piece should be 100");
 
         // Validate the weights for the second piece
-        CultureIndex.Vote memory secondPieceVote = cultureIndex.getVote(secondPieceId, address(voter1Test));
+        ArtRace.Vote memory secondPieceVote = cultureIndex.getVote(secondPieceId, address(voter1Test));
         assertEq(secondPieceVote.voterAddress, address(voter1Test), "Voter address should match");
         assertEq(secondPieceVote.weight, 100, "Voting weight for the second piece should be 100");
     }

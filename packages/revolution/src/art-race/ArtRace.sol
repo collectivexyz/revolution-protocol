@@ -19,7 +19,7 @@ import { ERC721CheckpointableUpgradeable } from "../base/ERC721CheckpointableUpg
 import { EIP712Upgradeable } from "@openzeppelin/contracts-upgradeable/utils/cryptography/EIP712Upgradeable.sol";
 import { Strings } from "@openzeppelin/contracts/utils/Strings.sol";
 
-contract CultureIndex is
+contract ArtRace is
     ICultureIndex,
     VersionedContract,
     UUPS,
@@ -77,7 +77,7 @@ contract CultureIndex is
      * @param _initialOwner The owner of the contract, allowed to drop pieces. Commonly updated to the AuctionHouse
      * @param _maxHeap The address of the max heap contract
      * @param _dropperAdmin The address that can drop new art pieces
-     * @param _cultureIndexParams The CultureIndex settings
+     * @param _cultureIndexParams The ArtRace settings
      */
     function initialize(
         address _votingPower,
@@ -97,7 +97,7 @@ contract CultureIndex is
         __Ownable_init(_initialOwner);
 
         // Initialize EIP-712 support
-        __EIP712_init(string.concat(_cultureIndexParams.name, " CultureIndex"), "1");
+        __EIP712_init(string.concat(_cultureIndexParams.name, " ArtRace"), "1");
 
         __ReentrancyGuard_init();
 

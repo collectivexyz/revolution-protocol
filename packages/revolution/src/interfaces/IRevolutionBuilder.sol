@@ -154,7 +154,7 @@ interface IRevolutionBuilder is IUUPS {
         uint256 entropyRateBps;
     }
 
-    /// @notice The CultureIndex parameters
+    /// @notice The ArtRace parameters
     /// @param name The name of the culture index
     /// @param description A description for the culture index, can include rules for uploads etc.
     /// @param revolutionTokenVoteWeight The voting weight of the individual Revolution ERC721 tokens. Normally a large multiple to match up with daily emission of ERC20 points to match up with daily emission of ERC20 points (which normally have 18 decimals)
@@ -216,7 +216,7 @@ interface IRevolutionBuilder is IUUPS {
     /// @param revolutionTokenParams The Revolution ERC-721 token settings
     /// @param auctionParams The auction settings
     /// @param govParams The governance settings
-    /// @param cultureIndexParams The CultureIndex settings
+    /// @param cultureIndexParams The ArtRace settings
     /// @param revolutionPointsParams The RevolutionPoints settings
     /// @param revolutionVotingPowerParams The RevolutionVotingPower settings
     function deploy(

@@ -5,9 +5,9 @@ import { ICultureIndex } from "../../interfaces/ICultureIndex.sol";
 import { IRevolutionVotingPower } from "../../interfaces/IRevolutionVotingPower.sol";
 import { MaxHeap } from "../MaxHeap.sol";
 
-/// @notice CultureIndex Storage V1
+/// @notice ArtRace Storage V1
 /// @author rocketman
-/// @notice The CultureIndex storage contract
+/// @notice The ArtRace storage contract
 contract CultureIndexStorageV1 {
     /// @notice An account's nonce for gasless votes
     mapping(address => uint256) public nonces;

@@ -2,7 +2,7 @@
 pragma solidity ^0.8.22;
 
 import { Test } from "forge-std/Test.sol";
-import { CultureIndex } from "../../src/art-race/CultureIndex.sol";
+import { ArtRace } from "../../src/art-race/ArtRace.sol";
 import { MockERC20 } from "../mock/MockERC20.sol";
 import { ICultureIndex } from "../../src/interfaces/ICultureIndex.sol";
 import { RevolutionPoints } from "../../src/RevolutionPoints.sol";
@@ -12,7 +12,7 @@ import { RevolutionBuilderTest } from "../RevolutionBuilder.t.sol";
 
 /**
  * @title CultureIndexTest
- * @dev Test contract for CultureIndex
+ * @dev Test contract for ArtRace
  */
 contract CultureIndexTestSuite is RevolutionBuilderTest {
     CultureIndexVotingTest public voter1Test;
@@ -51,7 +51,7 @@ contract CultureIndexTestSuite is RevolutionBuilderTest {
         string memory animationUrl,
         address creatorAddress,
         uint256 creatorBps
-    ) public pure returns (CultureIndex.ArtPieceMetadata memory, ICultureIndex.CreatorBps[] memory) {
+    ) public pure returns (ArtRace.ArtPieceMetadata memory, ICultureIndex.CreatorBps[] memory) {
         // <-- Change here
         ICultureIndex.ArtPieceMetadata memory metadata = createArtPieceMetadata(
             name,
@@ -99,7 +99,7 @@ contract CultureIndexTestSuite is RevolutionBuilderTest {
         string memory image,
         string memory text,
         string memory animationUrl
-    ) public pure returns (CultureIndex.ArtPieceMetadata memory) {
+    ) public pure returns (ArtRace.ArtPieceMetadata memory) {
         // <-- Change visibility and mutability as needed
         ICultureIndex.ArtPieceMetadata memory metadata = ICultureIndex.ArtPieceMetadata({
             name: name,
@@ -116,7 +116,7 @@ contract CultureIndexTestSuite is RevolutionBuilderTest {
     function createArtPieceCreators(
         address creatorAddress,
         uint256 creatorBps
-    ) public pure returns (CultureIndex.CreatorBps[] memory) {
+    ) public pure returns (ArtRace.CreatorBps[] memory) {
         // <-- Change visibility and mutability as needed
         ICultureIndex.CreatorBps[] memory creators = new ICultureIndex.CreatorBps[](1);
         creators[0] = ICultureIndex.CreatorBps({ creator: creatorAddress, bps: creatorBps });
@@ -144,11 +144,11 @@ contract CultureIndexTestSuite is RevolutionBuilderTest {
 }
 
 contract CultureIndexVotingTest is Test {
-    CultureIndex public cultureIndex;
+    ArtRace public cultureIndex;
     RevolutionPoints public govToken;
 
     constructor(address _cultureIndex, address _votingToken) {
-        cultureIndex = CultureIndex(_cultureIndex);
+        cultureIndex = ArtRace(_cultureIndex);
         govToken = RevolutionPoints(_votingToken);
     }
 

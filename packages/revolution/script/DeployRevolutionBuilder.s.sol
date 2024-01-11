@@ -11,7 +11,7 @@ import { Descriptor } from "../src/Descriptor.sol";
 import { IAuctionHouse, AuctionHouse } from "../src/AuctionHouse.sol";
 import { RevolutionDAOLogicV1 } from "../src/governance/RevolutionDAOLogicV1.sol";
 import { DAOExecutor } from "../src/governance/DAOExecutor.sol";
-import { CultureIndex } from "../src/art-race/CultureIndex.sol";
+import { ArtRace } from "../src/art-race/ArtRace.sol";
 import { RevolutionProtocolRewards } from "@cobuild/protocol-rewards/src/RevolutionProtocolRewards.sol";
 import { MaxHeap } from "../src/art-race/MaxHeap.sol";
 import { RevolutionPoints } from "../src/RevolutionPoints.sol";
@@ -119,7 +119,7 @@ contract DeployContracts is Script {
         deployedContracts.auctionImpl = address(new AuctionHouse(address(deployedContracts.builderProxy)));
         deployedContracts.executorImpl = address(new DAOExecutor(address(deployedContracts.builderProxy)));
         deployedContracts.daoImpl = address(new RevolutionDAOLogicV1(address(deployedContracts.builderProxy)));
-        deployedContracts.cultureIndexImpl = address(new CultureIndex(address(deployedContracts.builderProxy)));
+        deployedContracts.cultureIndexImpl = address(new ArtRace(address(deployedContracts.builderProxy)));
         deployedContracts.maxHeapImpl = address(new MaxHeap(address(deployedContracts.builderProxy)));
         deployedContracts.revolutionPointsImpl = address(new RevolutionPoints(address(deployedContracts.builderProxy)));
         deployedContracts.revolutionPointsEmitterImpl = address(

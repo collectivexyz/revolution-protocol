@@ -6,7 +6,7 @@ import { PausableUpgradeable } from "@openzeppelin/contracts-upgradeable/utils/P
 
 contract AuctionHouseMintTest is AuctionHouseTest {
     function testMintFailureDueToEmptyNFTList() public {
-        // Pre-conditions setup to ensure the CultureIndex is empty
+        // Pre-conditions setup to ensure the ArtRace is empty
         vm.expectEmit(true, true, true, true);
         emit PausableUpgradeable.Paused(address(executor));
         auction.unpause();
