@@ -90,7 +90,8 @@ contract PointsEmitterBasicTest is PointsEmitterTest {
         });
 
         IRevolutionPoints(governanceToken).initialize({
-            initialOwner: address(emitter1),
+            initialOwner: address(executor),
+            minter: address(emitter1),
             tokenParams: IRevolutionBuilder.PointsTokenParams({ name: "Revolution Governance", symbol: "GOV" })
         });
 
@@ -128,12 +129,15 @@ contract PointsEmitterBasicTest is PointsEmitterTest {
             })
         });
 
-        vm.startPrank(address(emitter1));
+        vm.startPrank(address(executor));
         RevolutionPoints(governanceToken).transferOwnership(address(emitter2));
 
         vm.startPrank(address(emitter2));
         //accept ownership transfer
         RevolutionPoints(governanceToken).acceptOwnership();
+
+        //set the minter to the new emitter
+        RevolutionPoints(governanceToken).setMinter(address(emitter2));
 
         vm.startPrank(address(48));
         vm.deal(address(48), 100000 ether);
@@ -146,6 +150,9 @@ contract PointsEmitterBasicTest is PointsEmitterTest {
                 deployer: address(0)
             })
         );
+
+        //assert that the emitter2 is the owner
+        assertEq(RevolutionPoints(governanceToken).owner(), address(emitter2));
     }
 
     function testBuyingLaterIsBetter() public {
@@ -192,6 +199,7 @@ contract PointsEmitterBasicTest is PointsEmitterTest {
                 deployer: address(0)
             })
         );
+
         emit Log("Balance: ", revolutionPointsEmitter.balanceOf(address(1)));
     }
 
@@ -291,7 +299,8 @@ contract PointsEmitterBasicTest is PointsEmitterTest {
         });
 
         IRevolutionPoints(governanceToken).initialize({
-            initialOwner: address(emitter2),
+            initialOwner: address(executor),
+            minter: address(emitter2),
             tokenParams: IRevolutionBuilder.PointsTokenParams({ name: "Revolution Governance", symbol: "GOV" })
         });
 
