@@ -58,6 +58,10 @@ contract DeployContracts is Script {
         deployRevolutionBuilderContracts(owner);
         deployOtherContracts(deployedContracts.protocolRewards, rewardsRecipient);
 
+        // Upgrade the Builder proxy to the new implementation
+        vm.prank(owner);
+        RevolutionBuilder(deployedContracts.builderProxy).upgradeTo(address(deployedContracts.builderImpl));
+
         vm.stopBroadcast();
 
         writeDeploymentDetailsToFile(chainID);
