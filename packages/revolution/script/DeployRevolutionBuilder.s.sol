@@ -86,21 +86,6 @@ contract DeployContracts is Script {
         deployedContracts.builderProxy = address(
             new ERC1967Proxy(deployedContracts.builderImpl0, abi.encodeWithSignature("initialize(address)", owner))
         );
-
-        deployedContracts.builderImpl = address(
-            new RevolutionBuilder(
-                deployedContracts.revolutionTokenImpl,
-                deployedContracts.descriptorImpl,
-                deployedContracts.auctionImpl,
-                deployedContracts.executorImpl,
-                deployedContracts.daoImpl,
-                deployedContracts.cultureIndexImpl,
-                deployedContracts.revolutionPointsImpl,
-                deployedContracts.revolutionPointsEmitterImpl,
-                deployedContracts.maxHeapImpl,
-                deployedContracts.revolutionVotingPowerImpl
-            )
-        );
     }
 
     function logDeploymentDetails(uint256 chainID, address deployerAddress, address owner) private pure {
@@ -127,6 +112,21 @@ contract DeployContracts is Script {
         );
         deployedContracts.revolutionVotingPowerImpl = address(
             new RevolutionToken(address(deployedContracts.builderProxy))
+        );
+
+        deployedContracts.builderImpl = address(
+            new RevolutionBuilder(
+                deployedContracts.revolutionTokenImpl,
+                deployedContracts.descriptorImpl,
+                deployedContracts.auctionImpl,
+                deployedContracts.executorImpl,
+                deployedContracts.daoImpl,
+                deployedContracts.cultureIndexImpl,
+                deployedContracts.revolutionPointsImpl,
+                deployedContracts.revolutionPointsEmitterImpl,
+                deployedContracts.maxHeapImpl,
+                deployedContracts.revolutionVotingPowerImpl
+            )
         );
     }
 
