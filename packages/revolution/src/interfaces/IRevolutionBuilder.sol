@@ -264,4 +264,8 @@ interface IRevolutionBuilder is IUUPS {
     /// @param baseImpl The base implementation address
     /// @param upgradeImpl The upgrade implementation address
     function removeUpgrade(address baseImpl, address upgradeImpl) external;
+
+    function getDAOVersions(address token) external view returns (DAOVersionInfo memory);
+
+    function getLatestVersions() external view returns (DAOVersionInfo memory);
 }
