@@ -4,16 +4,16 @@ pragma solidity ^0.8.22;
 import { Test } from "forge-std/Test.sol";
 import { ArtRace } from "../../src/art-race/ArtRace.sol";
 import { MockERC20 } from "../mock/MockERC20.sol";
-import { IArtRace, ICultureIndexEvents } from "../../src/interfaces/IArtRace.sol";
+import { IArtRace, IArtRaceEvents } from "../../src/interfaces/IArtRace.sol";
 import { RevolutionPoints } from "../../src/RevolutionPoints.sol";
-import { CultureIndexTestSuite } from "./ArtRace.t.sol";
+import { ArtRaceTestSuite } from "./ArtRace.t.sol";
 import { ERC721CheckpointableUpgradeable } from "../../src/base/ERC721CheckpointableUpgradeable.sol";
 
 /**
  * @title ArtRace Edge Case Test
  * @dev Test contract for ArtRace
  */
-contract CultureIndexEdgeCaseTest is CultureIndexTestSuite {
+contract ArtRaceEdgeCaseTest is ArtRaceTestSuite {
     //utility function to insert and mint n number of pieces
     function _insertPiecesAndVote(uint256 n) public {
         address voter = address(89);

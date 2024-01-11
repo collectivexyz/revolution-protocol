@@ -135,7 +135,7 @@ contract RevolutionBuilderTest is Test {
     IRevolutionBuilder.RevolutionTokenParams internal revolutionTokenParams;
     IRevolutionBuilder.AuctionParams internal auctionParams;
     IRevolutionBuilder.GovParams internal govParams;
-    IRevolutionBuilder.CultureIndexParams internal cultureIndexParams;
+    IRevolutionBuilder.ArtRaceParams internal cultureIndexParams;
     IRevolutionBuilder.RevolutionPointsParams internal revolutionPointsParams;
     IRevolutionBuilder.RevolutionVotingPowerParams internal revolutionVotingPowerParams;
 
@@ -225,18 +225,18 @@ contract RevolutionBuilderTest is Test {
         });
     }
 
-    function setMockCultureIndexParams() internal virtual {
-        setCultureIndexParams("Vrbs", "Our community Vrbs. Must be 32x32.", 100 * 1e18, 1000, 0);
+    function setMockArtRaceParams() internal virtual {
+        setArtRaceParams("Vrbs", "Our community Vrbs. Must be 32x32.", 100 * 1e18, 1000, 0);
     }
 
-    function setCultureIndexParams(
+    function setArtRaceParams(
         string memory _name,
         string memory _description,
         uint256 _revolutionTokenVoteWeight,
         uint256 _quorumVotesBPS,
         uint256 _minVoteWeight
     ) internal virtual {
-        cultureIndexParams = IRevolutionBuilder.CultureIndexParams({
+        cultureIndexParams = IRevolutionBuilder.ArtRaceParams({
             name: _name,
             description: _description,
             revolutionTokenVoteWeight: _revolutionTokenVoteWeight,
@@ -302,7 +302,7 @@ contract RevolutionBuilderTest is Test {
         setMockRevolutionTokenParams();
         setMockAuctionParams();
         setMockGovParams();
-        setMockCultureIndexParams();
+        setMockArtRaceParams();
         setMockPointsParams();
         setMockPointsEmitterParams();
         setMockRevolutionVotingPowerParams();
@@ -327,7 +327,7 @@ contract RevolutionBuilderTest is Test {
         IRevolutionBuilder.RevolutionTokenParams memory _RevolutionTokenParams,
         IRevolutionBuilder.AuctionParams memory _auctionParams,
         IRevolutionBuilder.GovParams memory _govParams,
-        IRevolutionBuilder.CultureIndexParams memory _cultureIndexParams,
+        IRevolutionBuilder.ArtRaceParams memory _cultureIndexParams,
         IRevolutionBuilder.RevolutionPointsParams memory _pointsParams,
         IRevolutionBuilder.RevolutionVotingPowerParams memory _revolutionVotingPowerParams
     ) internal virtual {

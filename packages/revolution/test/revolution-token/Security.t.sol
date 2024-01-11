@@ -3,7 +3,7 @@ pragma solidity ^0.8.22;
 
 import { Test } from "forge-std/Test.sol";
 import { RevolutionToken } from "../../src/RevolutionToken.sol";
-import { IArtRace, ICultureIndexEvents } from "../../src/interfaces/IArtRace.sol";
+import { IArtRace, IArtRaceEvents } from "../../src/interfaces/IArtRace.sol";
 import { IRevolutionToken } from "../../src/interfaces/IRevolutionToken.sol";
 import { IDescriptorMinimal } from "../../src/interfaces/IDescriptorMinimal.sol";
 import { IArtRace } from "../../src/interfaces/IArtRace.sol";
@@ -123,10 +123,10 @@ contract TokenSecurityTest is RevolutionTokenTestSuite {
         revolutionToken.lockDescriptor();
 
         vm.expectRevert();
-        revolutionToken.setCultureIndex(IArtRace(unauthorizedAddress));
+        revolutionToken.setArtRace(IArtRace(unauthorizedAddress));
 
         vm.expectRevert();
-        revolutionToken.lockCultureIndex();
+        revolutionToken.lockArtRace();
     }
 
     function testReentrancyOtherFunctions() public {
@@ -176,7 +176,7 @@ contract TokenSecurityTest is RevolutionTokenTestSuite {
 
         // Check that the PieceCreated event was emitted with correct parameters
         vm.expectEmit(true, true, true, true);
-        emit ICultureIndexEvents.PieceCreated(
+        emit IArtRaceEvents.PieceCreated(
             0,
             address(executor),
             IArtRace.ArtPieceMetadata({
@@ -222,8 +222,8 @@ contract TokenSecurityTest is RevolutionTokenTestSuite {
         vm.roll(vm.getBlockNumber() + 1);
 
         // Mock the ArtRace to simulate dropTopVotedPiece failure
-        address cultureIndexMock = address(new CultureIndexMock());
-        revolutionToken.setCultureIndex(IArtRace(cultureIndexMock));
+        address cultureIndexMock = address(new ArtRaceMock());
+        revolutionToken.setArtRace(IArtRace(cultureIndexMock));
 
         // Store current verbId before test
         uint256 supplyBefore = 0;
@@ -260,7 +260,7 @@ contract ReentrancyAttackContractGeneral {
 }
 
 // Mock ArtRace to simulate failure in dropTopVotedPiece
-contract CultureIndexMock {
+contract ArtRaceMock {
     function dropTopVotedPiece() external pure returns (IArtRace.ArtPiece memory) {
         revert("Mocked failure");
     }

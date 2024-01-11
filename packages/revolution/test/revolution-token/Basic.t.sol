@@ -5,7 +5,7 @@ import { Test } from "forge-std/Test.sol";
 import { RevolutionToken } from "../../src/RevolutionToken.sol";
 import { IRevolutionToken } from "../../src/interfaces/IRevolutionToken.sol";
 import { IDescriptorMinimal } from "../../src/interfaces/IDescriptorMinimal.sol";
-import { IArtRace, ICultureIndexEvents } from "../../src/interfaces/IArtRace.sol";
+import { IArtRace, IArtRaceEvents } from "../../src/interfaces/IArtRace.sol";
 import { Strings } from "@openzeppelin/contracts/utils/Strings.sol";
 import { ArtRace } from "../../src/art-race/ArtRace.sol";
 import { MockERC20 } from "../mock/MockERC20.sol";
@@ -120,7 +120,7 @@ contract TokenBasicTest is RevolutionTokenTestSuite {
 
         // Check for PieceCreated event
         vm.expectEmit(true, true, true, true);
-        emit ICultureIndexEvents.PieceCreated(
+        emit IArtRaceEvents.PieceCreated(
             0,
             address(this),
             IArtRace.ArtPieceMetadata({
@@ -513,7 +513,7 @@ contract TokenBasicTest is RevolutionTokenTestSuite {
     }
 
     /// @dev Tests the interaction with the ArtRace during minting
-    function testCultureIndexInteraction() public {
+    function testArtRaceInteraction() public {
         vm.stopPrank();
         vm.startPrank(address(auction));
 

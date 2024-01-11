@@ -7,10 +7,10 @@ import { ERC721CheckpointableUpgradeable } from "../base/ERC721CheckpointableUpg
 import { IRevolutionBuilder } from "./IRevolutionBuilder.sol";
 
 /**
- * @title ICultureIndexEvents
+ * @title IArtRaceEvents
  * @dev This interface defines the events for the ArtRace contract.
  */
-interface ICultureIndexEvents {
+interface IArtRaceEvents {
     event ERC721VotingTokenUpdated(ERC721CheckpointableUpgradeable ERC721VotingToken);
 
     event ERC721VotingTokenLocked();
@@ -53,7 +53,7 @@ interface ICultureIndexEvents {
  * @title IArtRace
  * @dev This interface defines the methods for the ArtRace contract for art piece management and voting.
  */
-interface IArtRace is ICultureIndexEvents {
+interface IArtRace is IArtRaceEvents {
     ///                                                          ///
     ///                           ERRORS                         ///
     ///                                                          ///
@@ -299,6 +299,6 @@ interface IArtRace is ICultureIndexEvents {
         address initialOwner,
         address maxHeap,
         address dropperAdmin,
-        IRevolutionBuilder.CultureIndexParams calldata cultureIndexParams
+        IRevolutionBuilder.ArtRaceParams calldata cultureIndexParams
     ) external;
 }

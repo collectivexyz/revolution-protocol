@@ -5,19 +5,19 @@ import { Test } from "forge-std/Test.sol";
 import { RevolutionToken } from "../../src/RevolutionToken.sol";
 import { IRevolutionToken } from "../../src/interfaces/IRevolutionToken.sol";
 import { IDescriptorMinimal } from "../../src/interfaces/IDescriptorMinimal.sol";
-import { IArtRace, ICultureIndexEvents } from "../../src/interfaces/IArtRace.sol";
+import { IArtRace, IArtRaceEvents } from "../../src/interfaces/IArtRace.sol";
 import { Strings } from "@openzeppelin/contracts/utils/Strings.sol";
 import { ArtRace } from "../../src/art-race/ArtRace.sol";
 import { MockERC20 } from "../mock/MockERC20.sol";
 import { Descriptor } from "../../src/Descriptor.sol";
 import "../utils/Base64Decode.sol";
 import "../utils/JsmnSolLib.sol";
-import { CultureIndexTestSuite } from "./ArtRace.t.sol";
+import { ArtRaceTestSuite } from "./ArtRace.t.sol";
 import { ERC721CheckpointableUpgradeable } from "../../src/base/ERC721CheckpointableUpgradeable.sol";
 
 /// @title RevolutionTokenTest
 /// @dev The test suite for the RevolutionToken contract
-contract CultureIndexAccessControlTest is CultureIndexTestSuite {
+contract ArtRaceAccessControlTest is ArtRaceTestSuite {
     function testSetQuorumVotesBPSWithinRange(uint104 newQuorumBPS) public {
         vm.assume(newQuorumBPS <= cultureIndex.MAX_QUORUM_VOTES_BPS());
 

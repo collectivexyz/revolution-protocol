@@ -3,7 +3,7 @@ pragma solidity ^0.8.22;
 
 import { Test } from "forge-std/Test.sol";
 import { RevolutionToken } from "../../src/RevolutionToken.sol";
-import { IArtRace, ICultureIndexEvents } from "../../src/interfaces/IArtRace.sol";
+import { IArtRace, IArtRaceEvents } from "../../src/interfaces/IArtRace.sol";
 import { IRevolutionToken } from "../../src/interfaces/IRevolutionToken.sol";
 import { IDescriptorMinimal } from "../../src/interfaces/IDescriptorMinimal.sol";
 import { IArtRace } from "../../src/interfaces/IArtRace.sol";

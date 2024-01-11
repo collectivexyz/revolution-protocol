@@ -4,16 +4,16 @@ pragma solidity ^0.8.22;
 import { Test } from "forge-std/Test.sol";
 import { ArtRace } from "../../src/art-race/ArtRace.sol";
 import { MockERC20 } from "../mock/MockERC20.sol";
-import { IArtRace, ICultureIndexEvents } from "../../src/interfaces/IArtRace.sol";
+import { IArtRace, IArtRaceEvents } from "../../src/interfaces/IArtRace.sol";
 import { RevolutionPoints } from "../../src/RevolutionPoints.sol";
-import { CultureIndexTestSuite } from "./ArtRace.t.sol";
+import { ArtRaceTestSuite } from "./ArtRace.t.sol";
 import { ERC721CheckpointableUpgradeable } from "../../src/base/ERC721CheckpointableUpgradeable.sol";
 
 /**
- * @title CultureIndexTest
+ * @title ArtRaceTest
  * @dev Test contract for ArtRace
  */
-contract CultureIndexVotingSignaturesTest is CultureIndexTestSuite {
+contract ArtRaceVotingSignaturesTest is ArtRaceTestSuite {
     address offchainVoter;
     uint256 offchainVoterPk;
 
@@ -106,7 +106,7 @@ contract CultureIndexVotingSignaturesTest is CultureIndexTestSuite {
         assertEq(voteBefore.weight, 0);
 
         vm.expectEmit(true, true, true, true);
-        emit ICultureIndexEvents.VoteCast(
+        emit IArtRaceEvents.VoteCast(
             pieceIds[0],
             offchainVoter,
             offchainVoterWeight,

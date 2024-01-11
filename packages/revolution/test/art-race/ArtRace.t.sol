@@ -11,12 +11,12 @@ import { IDescriptorMinimal } from "../../src/interfaces/IDescriptorMinimal.sol"
 import { RevolutionBuilderTest } from "../RevolutionBuilder.t.sol";
 
 /**
- * @title CultureIndexTest
+ * @title ArtRaceTest
  * @dev Test contract for ArtRace
  */
-contract CultureIndexTestSuite is RevolutionBuilderTest {
-    CultureIndexVotingTest public voter1Test;
-    CultureIndexVotingTest public voter2Test;
+contract ArtRaceTestSuite is RevolutionBuilderTest {
+    ArtRaceVotingTest public voter1Test;
+    ArtRaceVotingTest public voter2Test;
 
     /**
      * @dev Setup function for each test case
@@ -27,7 +27,7 @@ contract CultureIndexTestSuite is RevolutionBuilderTest {
 
         super.setPointsParams("Revolution Governance", "GOV");
 
-        super.setCultureIndexParams("Vrbs", "Our community Vrbs. Must be 32x32.", 10, 200, 0);
+        super.setArtRaceParams("Vrbs", "Our community Vrbs. Must be 32x32.", 10, 200, 0);
 
         super.setRevolutionTokenParams("Vrbs", "VRBS", "QmQzDwaZ7yQxHHs7sQQenJVB89riTSacSGcJRv9jtHPuz5", "Vrb");
 
@@ -37,8 +37,8 @@ contract CultureIndexTestSuite is RevolutionBuilderTest {
         vm.startPrank(address(executor));
 
         // // Create new test instances acting as different voters
-        voter1Test = new CultureIndexVotingTest(address(cultureIndex), address(revolutionPoints));
-        voter2Test = new CultureIndexVotingTest(address(cultureIndex), address(revolutionPoints));
+        voter1Test = new ArtRaceVotingTest(address(cultureIndex), address(revolutionPoints));
+        voter2Test = new ArtRaceVotingTest(address(cultureIndex), address(revolutionPoints));
     }
 
     //returns metadata and creators in a tuple
@@ -143,7 +143,7 @@ contract CultureIndexTestSuite is RevolutionBuilderTest {
     }
 }
 
-contract CultureIndexVotingTest is Test {
+contract ArtRaceVotingTest is Test {
     ArtRace public cultureIndex;
     RevolutionPoints public govToken;
 

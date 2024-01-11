@@ -9,7 +9,7 @@ import { IRevolutionToken } from "../../src/interfaces/IRevolutionToken.sol";
 import { Descriptor } from "../../src/Descriptor.sol";
 import { ArtRace } from "../../src/art-race/ArtRace.sol";
 import { IDescriptorMinimal } from "../../src/interfaces/IDescriptorMinimal.sol";
-import { IArtRace, ICultureIndexEvents } from "../../src/interfaces/IArtRace.sol";
+import { IArtRace, IArtRaceEvents } from "../../src/interfaces/IArtRace.sol";
 import { IAuctionHouse } from "../../src/interfaces/IAuctionHouse.sol";
 import { IERC20 } from "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import { RevolutionPoints } from "../../src/RevolutionPoints.sol";
@@ -28,7 +28,7 @@ contract AuctionHouseTest is RevolutionBuilderTest {
 
         super.setPointsParams("Revolution Governance", "GOV");
 
-        super.setCultureIndexParams("Vrbs", "Our community Vrbs. Must be 32x32.", 10, 200, 0);
+        super.setArtRaceParams("Vrbs", "Our community Vrbs. Must be 32x32.", 10, 200, 0);
 
         super.setRevolutionTokenParams("Vrbs", "VRBS", "QmQzDwaZ7yQxHHs7sQQenJVB89riTSacSGcJRv9jtHPuz5", "Vrb");
 

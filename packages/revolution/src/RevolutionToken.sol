@@ -51,7 +51,7 @@ contract RevolutionToken is
     bool public isMinterLocked;
 
     // Whether the ArtRace can be updated
-    bool public isCultureIndexLocked;
+    bool public isArtRaceLocked;
 
     // Whether the descriptor can be updated
     bool public isDescriptorLocked;
@@ -80,8 +80,8 @@ contract RevolutionToken is
     /**
      * @notice Require that the ArtRace has not been locked.
      */
-    modifier whenCultureIndexNotLocked() {
-        if (isCultureIndexLocked) revert CULTURE_INDEX_LOCKED();
+    modifier whenArtRaceNotLocked() {
+        if (isArtRaceLocked) revert CULTURE_INDEX_LOCKED();
         _;
     }
 
@@ -251,20 +251,20 @@ contract RevolutionToken is
      * @notice Set the token ArtRace.
      * @dev Only callable by the owner when not locked.
      */
-    function setCultureIndex(IArtRace _cultureIndex) external onlyOwner whenCultureIndexNotLocked nonReentrant {
+    function setArtRace(IArtRace _cultureIndex) external onlyOwner whenArtRaceNotLocked nonReentrant {
         cultureIndex = _cultureIndex;
 
-        emit CultureIndexUpdated(_cultureIndex);
+        emit ArtRaceUpdated(_cultureIndex);
     }
 
     /**
      * @notice Lock the ArtRace
      * @dev This cannot be reversed and is only callable by the owner when not locked.
      */
-    function lockCultureIndex() external override onlyOwner whenCultureIndexNotLocked {
-        isCultureIndexLocked = true;
+    function lockArtRace() external override onlyOwner whenArtRaceNotLocked {
+        isArtRaceLocked = true;
 
-        emit CultureIndexLocked();
+        emit ArtRaceLocked();
     }
 
     /**

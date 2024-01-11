@@ -4,13 +4,13 @@ pragma solidity ^0.8.22;
 import { ArtRace } from "../../src/art-race/ArtRace.sol";
 import { MockERC20 } from "../mock/MockERC20.sol";
 import { IArtRace } from "../../src/interfaces/IArtRace.sol";
-import { CultureIndexTestSuite } from "./ArtRace.t.sol";
+import { ArtRaceTestSuite } from "./ArtRace.t.sol";
 
 /**
- * @title CultureIndexArtMetadataTest
+ * @title ArtRaceArtMetadataTest
  * @dev Test contract for ArtRace art metadata
  */
-contract CultureIndexArtMetadataTest is CultureIndexTestSuite {
+contract ArtRaceArtMetadataTest is ArtRaceTestSuite {
     // Helper function to create a string of a specified length
     function createLongString(uint length) internal pure returns (string memory) {
         bytes memory buffer = new bytes(length);
