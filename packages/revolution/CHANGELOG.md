@@ -1,5 +1,11 @@
 # @collectivexyz/revolution
 
+## 0.3.2
+
+### Patch Changes
+
+- 1de2dd3: fix deployer script implementation addr initialization
+
 ## 0.3.1
 
 ### Patch Changes
