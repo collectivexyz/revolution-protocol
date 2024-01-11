@@ -102,7 +102,7 @@ The RevolutionPoints the creator receives is calculated by the [RevolutionPoints
 
 [**CultureIndex.sol**](https://github.com/collectivexyz/revolution-protocol/blob/main/packages/revolution/src/CultureIndex.sol) is a directory of uploaded art pieces that anyone can add media to. Owners of an ERC721 or RevolutionPoints can vote weighted by their balance on any given art piece.
 
-<img width="817" alt="culture index" src="https://github.com/collectivexyz/revolution-protocol/blob/main/readme-img/culture-index.png">
+<img width="817" alt="culture index" src="https://github.com/collectivexyz/revolution-protocol/blob/main/readme-img/art-race.png">
 
 The art piece votes data is stored in [**MaxHeap.sol**](https://github.com/collectivexyz/revolution-protocol/blob/main/packages/revolution/src/MaxHeap.sol), a heap datastructure that enables efficient lookups of the highest voted art piece.
 

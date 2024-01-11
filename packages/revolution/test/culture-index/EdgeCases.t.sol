@@ -2,7 +2,7 @@
 pragma solidity ^0.8.22;
 
 import { Test } from "forge-std/Test.sol";
-import { CultureIndex } from "../../src/culture-index/CultureIndex.sol";
+import { CultureIndex } from "../../src/art-race/CultureIndex.sol";
 import { MockERC20 } from "../mock/MockERC20.sol";
 import { ICultureIndex, ICultureIndexEvents } from "../../src/interfaces/ICultureIndex.sol";
 import { RevolutionPoints } from "../../src/RevolutionPoints.sol";
