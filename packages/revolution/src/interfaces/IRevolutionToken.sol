@@ -67,9 +67,9 @@ interface IRevolutionToken is IERC721 {
 
     event DescriptorLocked();
 
-    event CultureIndexUpdated(IArtRace cultureIndex);
+    event ArtRaceUpdated(IArtRace cultureIndex);
 
-    event CultureIndexLocked();
+    event ArtRaceLocked();
 
     ///                                                          ///
     ///                         FUNCTIONS                        ///
@@ -89,7 +89,7 @@ interface IRevolutionToken is IERC721 {
 
     function lockDescriptor() external;
 
-    function lockCultureIndex() external;
+    function lockArtRace() external;
 
     function getArtPieceById(uint256 tokenId) external view returns (IArtRace.ArtPiece memory);
 

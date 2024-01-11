@@ -5,13 +5,13 @@ import { Test } from "forge-std/Test.sol";
 import { ArtRace } from "../../src/art-race/ArtRace.sol";
 import { MockERC20 } from "../mock/MockERC20.sol";
 import { IArtRace } from "../../src/interfaces/IArtRace.sol";
-import { CultureIndexTestSuite } from "./ArtRace.t.sol";
+import { ArtRaceTestSuite } from "./ArtRace.t.sol";
 
 /**
- * @title CultureIndexArtPieceTest
+ * @title ArtRaceArtPieceTest
  * @dev Test contract for ArtRace art piece creation
  */
-contract CultureIndexArtPieceTest is CultureIndexTestSuite {
+contract ArtRaceArtPieceTest is ArtRaceTestSuite {
     function testVoteAndVerifyTopVotedPiece() public {
         // Mint tokens to the test contracts (acting as voters)
         vm.stopPrank();

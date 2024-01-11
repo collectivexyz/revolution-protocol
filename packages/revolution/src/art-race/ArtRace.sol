@@ -13,7 +13,7 @@ import { IRevolutionVotingPower } from "../interfaces/IRevolutionVotingPower.sol
 import { ERC20VotesUpgradeable } from "../base/erc20/ERC20VotesUpgradeable.sol";
 import { MaxHeap } from "./MaxHeap.sol";
 import { IArtRace } from "../interfaces/IArtRace.sol";
-import { CultureIndexStorageV1 } from "./storage/CultureIndexStorageV1.sol";
+import { ArtRaceStorageV1 } from "./storage/ArtRaceStorageV1.sol";
 
 import { ERC721CheckpointableUpgradeable } from "../base/ERC721CheckpointableUpgradeable.sol";
 import { EIP712Upgradeable } from "@openzeppelin/contracts-upgradeable/utils/cryptography/EIP712Upgradeable.sol";
@@ -26,7 +26,7 @@ contract ArtRace is
     Ownable2StepUpgradeable,
     ReentrancyGuardUpgradeable,
     EIP712Upgradeable,
-    CultureIndexStorageV1
+    ArtRaceStorageV1
 {
     using Strings for uint256;
 
@@ -84,7 +84,7 @@ contract ArtRace is
         address _initialOwner,
         address _maxHeap,
         address _dropperAdmin,
-        IRevolutionBuilder.CultureIndexParams calldata _cultureIndexParams
+        IRevolutionBuilder.ArtRaceParams calldata _cultureIndexParams
     ) external initializer {
         if (msg.sender != address(manager)) revert NOT_MANAGER();
 

@@ -8,7 +8,7 @@ import { MaxHeap } from "../MaxHeap.sol";
 /// @notice ArtRace Storage V1
 /// @author rocketman
 /// @notice The ArtRace storage contract
-contract CultureIndexStorageV1 {
+contract ArtRaceStorageV1 {
     /// @notice An account's nonce for gasless votes
     mapping(address => uint256) public nonces;
 

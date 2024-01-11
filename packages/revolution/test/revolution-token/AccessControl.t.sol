@@ -82,12 +82,12 @@ contract TokenAccessControlTest is RevolutionTokenTestSuite {
         // Lock the minter, descriptor, and cultureIndex to prevent changes
         revolutionToken.lockMinter();
         revolutionToken.lockDescriptor();
-        revolutionToken.lockCultureIndex();
+        revolutionToken.lockArtRace();
 
         // Attempt to change minter, descriptor, or cultureIndex and expect to fail
         address newMinter = address(0xABC);
         address newDescriptor = address(0xDEF);
-        address newCultureIndex = address(0x123);
+        address newArtRace = address(0x123);
 
         bool minterLocked = false;
         bool descriptorLocked = false;
@@ -105,7 +105,7 @@ contract TokenAccessControlTest is RevolutionTokenTestSuite {
             descriptorLocked = true;
         }
 
-        try revolutionToken.setCultureIndex(IArtRace(newCultureIndex)) {
+        try revolutionToken.setArtRace(IArtRace(newArtRace)) {
             fail("Should fail: cultureIndex is locked");
         } catch {
             cultureIndexLocked = true;
@@ -244,14 +244,14 @@ contract TokenAccessControlTest is RevolutionTokenTestSuite {
     }
 
     /// @dev Tests updating and locking the ArtRace.
-    function testCultureIndexUpdateAndLock() public {
-        IArtRace newCultureIndex = IArtRace(address(0xDEF));
-        revolutionToken.setCultureIndex(newCultureIndex);
-        assertEq(address(revolutionToken.cultureIndex()), address(newCultureIndex), "ArtRace should be updated");
+    function testArtRaceUpdateAndLock() public {
+        IArtRace newArtRace = IArtRace(address(0xDEF));
+        revolutionToken.setArtRace(newArtRace);
+        assertEq(address(revolutionToken.cultureIndex()), address(newArtRace), "ArtRace should be updated");
 
-        revolutionToken.lockCultureIndex();
-        assertTrue(revolutionToken.isCultureIndexLocked(), "ArtRace should be locked");
+        revolutionToken.lockArtRace();
+        assertTrue(revolutionToken.isArtRaceLocked(), "ArtRace should be locked");
         vm.expectRevert(abi.encodeWithSignature("CULTURE_INDEX_LOCKED()"));
-        revolutionToken.setCultureIndex(IArtRace(address(0x101112)));
+        revolutionToken.setArtRace(IArtRace(address(0x101112)));
     }
 }

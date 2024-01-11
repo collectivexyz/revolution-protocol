@@ -6,13 +6,13 @@ import { ArtRace } from "../../src/art-race/ArtRace.sol";
 import { MockERC20 } from "../mock/MockERC20.sol";
 import { IArtRace } from "../../src/interfaces/IArtRace.sol";
 import { RevolutionPoints } from "../../src/RevolutionPoints.sol";
-import { CultureIndexTestSuite } from "./ArtRace.t.sol";
+import { ArtRaceTestSuite } from "./ArtRace.t.sol";
 
 /**
- * @title CultureIndexTest
+ * @title ArtRaceTest
  * @dev Test contract for ArtRace
  */
-contract CultureIndexVotingBasicTest is CultureIndexTestSuite {
+contract ArtRaceVotingBasicTest is ArtRaceTestSuite {
     /// @dev Tests the vote weight calculation with ERC721 token
     function testCalculateVoteWeight() public {
         address voter = address(0x1);

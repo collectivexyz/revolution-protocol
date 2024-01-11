@@ -16,7 +16,7 @@ contract JsonInjectionAttackTest is DescriptorTest {
 
         super.setRevolutionTokenParams("Vrbs", "VRBS", "https://example.com/token/", "Vrb");
 
-        super.setCultureIndexParams("Vrbs", "Our community Vrbs. Must be 32x32.", 10, 500, 0);
+        super.setArtRaceParams("Vrbs", "Our community Vrbs. Must be 32x32.", 10, 500, 0);
 
         super.deployMock();
     }

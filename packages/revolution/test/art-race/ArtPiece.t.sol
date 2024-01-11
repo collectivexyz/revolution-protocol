@@ -4,13 +4,13 @@ pragma solidity ^0.8.22;
 import { ArtRace } from "../../src/art-race/ArtRace.sol";
 import { MockERC20 } from "../mock/MockERC20.sol";
 import { IArtRace } from "../../src/interfaces/IArtRace.sol";
-import { CultureIndexTestSuite } from "./ArtRace.t.sol";
+import { ArtRaceTestSuite } from "./ArtRace.t.sol";
 
 /**
- * @title CultureIndexArtPieceTest
+ * @title ArtRaceArtPieceTest
  * @dev Test contract for ArtRace art piece creation
  */
-contract CultureIndexArtPieceTest is CultureIndexTestSuite {
+contract ArtRaceArtPieceTest is ArtRaceTestSuite {
     //test that creating the first piece the pieceId is 0
     function testFirstPieceId() public {
         uint256 newPieceId = createArtPiece(

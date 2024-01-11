@@ -4,9 +4,9 @@ pragma solidity ^0.8.22;
 import { Test } from "forge-std/Test.sol";
 import { ArtRace } from "../../src/art-race/ArtRace.sol";
 import { MockERC20 } from "../mock/MockERC20.sol";
-import { CultureIndexTestSuite } from "./ArtRace.t.sol";
+import { ArtRaceTestSuite } from "./ArtRace.t.sol";
 
-contract CultureIndexVotingTestManager is CultureIndexTestSuite {
+contract ArtRaceVotingTestManager is ArtRaceTestSuite {
     function testVotingWithDifferentWeights() public {
         vm.stopPrank();
 

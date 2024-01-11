@@ -175,7 +175,7 @@ contract RevolutionBuilder is
         RevolutionTokenParams calldata _revolutionTokenParams,
         AuctionParams calldata _auctionParams,
         GovParams calldata _govParams,
-        CultureIndexParams calldata _cultureIndexParams,
+        ArtRaceParams calldata _cultureIndexParams,
         RevolutionPointsParams calldata _revolutionPointsParams,
         RevolutionVotingPowerParams calldata _revolutionVotingPowerParams
     ) external returns (DAOAddresses memory) {
