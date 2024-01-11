@@ -68,6 +68,7 @@ interface IRevolutionBuilder is IUUPS {
     /// @param name The token name
     /// @param symbol The token symbol
     /// @param contractURIHash The IPFS content hash of the contract-level metadata
+    /// @param tokenNamePrefix The token name prefix
     struct RevolutionTokenParams {
         string name;
         string symbol;
@@ -111,6 +112,14 @@ interface IRevolutionBuilder is IUUPS {
         RevolutionDAOStorageV1.DynamicQuorumParams dynamicQuorumParams;
     }
 
+    /// @notice The RevolutionPoints ERC-20 params
+    /// @param tokenParams // The token parameters
+    /// @param emitterParams // The emitter parameters
+    struct RevolutionPointsParams {
+        PointsTokenParams tokenParams;
+        PointsEmitterParams emitterParams;
+    }
+
     /// @notice The RevolutionPoints ERC-20 token parameters
     /// @param name The token name
     /// @param symbol The token symbol
@@ -126,14 +135,6 @@ interface IRevolutionBuilder is IUUPS {
         VRGDAParams vrgdaParams;
         PointsEmitterCreatorParams creatorParams;
         address creatorsAddress;
-    }
-
-    /// @notice The RevolutionPoints ERC-20 params
-    /// @param tokenParams // The token parameters
-    /// @param emitterParams // The emitter parameters
-    struct RevolutionPointsParams {
-        PointsTokenParams tokenParams;
-        PointsEmitterParams emitterParams;
     }
 
     /// @notice The ERC-20 points emitter VRGDA parameters
