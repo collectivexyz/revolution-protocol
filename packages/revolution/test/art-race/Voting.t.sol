@@ -161,7 +161,7 @@ contract ArtRaceVotingBasicTest is ArtRaceTestSuite {
 
         // ensure that the ERC721 token is minted
         assertEq(revolutionToken.balanceOf(address(auction)), 1, "ERC721 token should be minted");
-        // ensure cultureindex currentvotes is correct
+        // ensure artRace currentvotes is correct
         assertEq(
             artRace.votingPower().getVotesWithWeights(address(auction), 1, artRace.revolutionTokenVoteWeight()),
             artRace.revolutionTokenVoteWeight(),
@@ -174,7 +174,7 @@ contract ArtRaceVotingBasicTest is ArtRaceTestSuite {
         // ensure that the ERC721 token is burned
         assertEq(revolutionToken.balanceOf(address(auction)), 0, "ERC721 token should be burned");
 
-        // ensure cultureindex currentvotes is correct
+        // ensure artRace currentvotes is correct
         assertEq(
             artRace.votingPower().getVotesWithWeights(address(auction), 1, artRace.revolutionTokenVoteWeight()),
             0,
@@ -255,7 +255,7 @@ contract ArtRaceVotingBasicTest is ArtRaceTestSuite {
         // ensure that the ERC721 token is burned
         assertEq(revolutionToken.balanceOf(address(voter)), 0, "ERC721 token should be burned");
 
-        // ensure cultureindex currentvotes is correct
+        // ensure artRace currentvotes is correct
         assertEq(
             artRace.votingPower().getVotesWithWeights(address(voter), 1, artRace.revolutionTokenVoteWeight()),
             updatePointsWeight + initialPointsWeight,

@@ -29,7 +29,7 @@
 
 ### Patch Changes
 
-- 7f495d2: Token, culture index, and maxheap owned by DAO, adds new cultureindex dropper and maxheap admin
+- 7f495d2: Token, culture index, and maxheap owned by DAO, adds new artRace dropper and maxheap admin
 
 ## 0.2.0
 

@@ -33,7 +33,7 @@ contract ArtRaceTestSuite is RevolutionBuilderTest {
 
         super.deployMock();
 
-        //start prank to be cultureindex's owner
+        //start prank to be artRace's owner
         vm.startPrank(address(executor));
 
         // // Create new test instances acting as different voters
