@@ -79,8 +79,10 @@
 ➡ RevolutionPoints
 =======================
 
-| Name | Type | Slot | Offset | Bytes | Contract |
-|------|------|------|--------|-------|----------|
+| Name           | Type    | Slot | Offset | Bytes | Contract                                  |
+|----------------|---------|------|--------|-------|-------------------------------------------|
+| minter         | address | 0    | 0      | 20    | src/RevolutionPoints.sol:RevolutionPoints |
+| isMinterLocked | bool    | 0    | 20     | 1     | src/RevolutionPoints.sol:RevolutionPoints |
 
 =======================
 ➡ RevolutionPointsEmitter
