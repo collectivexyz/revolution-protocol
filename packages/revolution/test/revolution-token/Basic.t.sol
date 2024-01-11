@@ -44,7 +44,7 @@ contract TokenBasicTest is RevolutionTokenTestSuite {
         (string memory name, string memory description, string memory image) = parseJson(metadataJson);
 
         // Retrieve the expected metadata directly from the art piece for comparison
-        (, IArtRace.ArtPieceMetadata memory metadata, , , ) = cultureIndex.pieces(artPieceId);
+        (, IArtRace.ArtPieceMetadata memory metadata, , , ) = artRace.pieces(artPieceId);
 
         //assert name equals Verb + tokenId
         string memory expectedName = string(abi.encodePacked(tokenNamePrefix, " ", Strings.toString(tokenId)));
@@ -82,11 +82,11 @@ contract TokenBasicTest is RevolutionTokenTestSuite {
     function testInitialVariablesState() public {
         address minter = revolutionToken.minter();
         address descriptorAddress = address(revolutionToken.descriptor());
-        address cultureIndexAddress = address(revolutionToken.cultureIndex());
+        address artRaceAddress = address(revolutionToken.artRace());
 
         assertEq(minter, address(auction), "Initial minter should be the auction");
         assertEq(descriptorAddress, address(descriptor), "Initial descriptor should be set correctly");
-        assertEq(cultureIndexAddress, address(cultureIndex), "Initial cultureIndex should be set correctly");
+        assertEq(artRaceAddress, address(artRace), "Initial artRace should be set correctly");
     }
 
     /// @dev Tests that minted tokens are correctly associated with the art piece from ArtRace
@@ -148,7 +148,7 @@ contract TokenBasicTest is RevolutionTokenTestSuite {
         );
 
         // Act
-        (, IArtRace.ArtPieceMetadata memory metadata, , , ) = cultureIndex.pieces(artPieceId);
+        (, IArtRace.ArtPieceMetadata memory metadata, , , ) = artRace.pieces(artPieceId);
 
         // Assert
         assertEq(metadata.name, "Mona Lisa", "The name of the art piece should match the provided name.");
@@ -212,7 +212,7 @@ contract TokenBasicTest is RevolutionTokenTestSuite {
 
         // Act & Assert
         vm.expectRevert(abi.encodeWithSignature("MAX_NUM_CREATORS_EXCEEDED()"));
-        cultureIndex.createPiece(
+        artRace.createPiece(
             IArtRace.ArtPieceMetadata({
                 name: name,
                 description: description,
@@ -228,14 +228,14 @@ contract TokenBasicTest is RevolutionTokenTestSuite {
     /// @dev Tests that the pieceCount is incremented correctly after each successful creation.
     function testPieceCountIncrement() public {
         // Arrange
-        uint256 initialPieceCount = cultureIndex.pieceCount();
+        uint256 initialPieceCount = artRace.pieceCount();
 
         // Act
         createDefaultArtPiece();
         createDefaultArtPiece(); // Creating a second piece to verify increment
 
         // Assert
-        uint256 newPieceCount = cultureIndex.pieceCount();
+        uint256 newPieceCount = artRace.pieceCount();
         assertEq(newPieceCount, initialPieceCount + 2, "pieceCount should be incremented by 2");
     }
 
@@ -254,15 +254,15 @@ contract TokenBasicTest is RevolutionTokenTestSuite {
 
         uint256 artPieceId = createDefaultArtPiece();
 
-        uint256 initialTotalVoteWeight = cultureIndex.totalVoteWeights(artPieceId);
+        uint256 initialTotalVoteWeight = artRace.totalVoteWeights(artPieceId);
 
         // Act
         // Assuming the voter is msg.sender for the vote function, and it only takes the artPieceId
         vm.startPrank(voter); // Set the next message sender to the voter address
-        cultureIndex.vote(artPieceId);
+        artRace.vote(artPieceId);
 
         // Assert
-        uint256 newTotalVoteWeight = cultureIndex.totalVoteWeights(artPieceId);
+        uint256 newTotalVoteWeight = artRace.totalVoteWeights(artPieceId);
 
         assertEq(
             newTotalVoteWeight,
@@ -282,7 +282,7 @@ contract TokenBasicTest is RevolutionTokenTestSuite {
         // Act & Assert
         vm.startPrank(voter); // Set the next message sender to the voter address
         vm.expectRevert(abi.encodeWithSignature("WEIGHT_TOO_LOW()"));
-        cultureIndex.vote(artPieceId); // Trying to vote
+        artRace.vote(artPieceId); // Trying to vote
     }
 
     /// @dev Tests that a voter cannot vote for a piece more than once.
@@ -301,13 +301,13 @@ contract TokenBasicTest is RevolutionTokenTestSuite {
 
         // First vote
         vm.startPrank(voter);
-        cultureIndex.vote(artPieceId);
+        artRace.vote(artPieceId);
 
         // Act & Assert
         // Attempt to vote again
         vm.startPrank(voter);
         vm.expectRevert(abi.encodeWithSignature("ALREADY_VOTED()"));
-        cultureIndex.vote(artPieceId);
+        artRace.vote(artPieceId);
     }
 
     /// @dev Tests that voting on an already dropped piece is rejected.
@@ -333,7 +333,7 @@ contract TokenBasicTest is RevolutionTokenTestSuite {
         // Act & Assert
         vm.startPrank(voter); // Set the next message sender to the voter address
         vm.expectRevert(abi.encodeWithSignature("ALREADY_DROPPED()"));
-        cultureIndex.vote(artPieceId);
+        artRace.vote(artPieceId);
     }
 
     /// @dev Tests that getTopVotedPiece returns the correct art piece.
@@ -356,7 +356,7 @@ contract TokenBasicTest is RevolutionTokenTestSuite {
 
         uint256 firstArtPieceId = createDefaultArtPiece();
 
-        cultureIndex.vote(firstArtPieceId);
+        artRace.vote(firstArtPieceId);
 
         vm.startPrank(address(revolutionPointsEmitter));
         revolutionPoints.mint(voter, secondPieceVoteWeight);
@@ -374,10 +374,10 @@ contract TokenBasicTest is RevolutionTokenTestSuite {
             10000
         );
         vm.startPrank(voter);
-        cultureIndex.vote(secondArtPieceId);
+        artRace.vote(secondArtPieceId);
 
         // Act
-        IArtRace.ArtPiece memory topPiece = cultureIndex.getTopVotedPiece();
+        IArtRace.ArtPiece memory topPiece = artRace.getTopVotedPiece();
 
         // Assert
         assertEq(
@@ -400,7 +400,7 @@ contract TokenBasicTest is RevolutionTokenTestSuite {
         uint256 artPieceId = createDefaultArtPiece();
 
         vm.startPrank(voter);
-        cultureIndex.vote(artPieceId);
+        artRace.vote(artPieceId);
         vm.stopPrank();
         vm.roll(vm.getBlockNumber() + 1);
 
@@ -409,7 +409,7 @@ contract TokenBasicTest is RevolutionTokenTestSuite {
         revolutionToken.mint();
 
         // Assert
-        IArtRace.ArtPiece memory piece = cultureIndex.getPieceById(artPieceId);
+        IArtRace.ArtPiece memory piece = artRace.getPieceById(artPieceId);
         assertTrue(piece.isDropped, "Art piece should be marked as dropped after dropping");
     }
 
@@ -440,7 +440,7 @@ contract TokenBasicTest is RevolutionTokenTestSuite {
         // Act & Assert
         vm.startPrank(voter);
         vm.expectRevert(abi.encodeWithSignature("INVALID_PIECE_ID()"));
-        cultureIndex.vote(nonExistentArtPieceId);
+        artRace.vote(nonExistentArtPieceId);
     }
 
     /// @dev Tests that retrieving votes for a non-existent art piece is rejected.
@@ -450,7 +450,7 @@ contract TokenBasicTest is RevolutionTokenTestSuite {
 
         // Act & Assert
         vm.expectRevert(abi.encodeWithSignature("INVALID_PIECE_ID()"));
-        cultureIndex.getVote(nonExistentArtPieceId, address(this)); // This function should revert
+        artRace.getVote(nonExistentArtPieceId, address(this)); // This function should revert
     }
 
     // Helper function to decode base64 encoded metadata
@@ -521,7 +521,7 @@ contract TokenBasicTest is RevolutionTokenTestSuite {
         createDefaultArtPiece();
         vm.roll(vm.getBlockNumber() + 1);
 
-        uint256 preMintPieceId = cultureIndex.topVotedPieceId();
+        uint256 preMintPieceId = artRace.topVotedPieceId();
         uint256 tokenId = revolutionToken.mint();
         uint256 pieceId = revolutionToken.artPieces(tokenId);
 

@@ -224,8 +224,8 @@ interface RevolutionBuilderTypesV1 {
         address revolutionPointsEmitter;
         /// @notice Address for deployed auction contract
         address revolutionPoints;
-        /// @notice Address for deployed cultureIndex contract
-        address cultureIndex;
+        /// @notice Address for deployed artRace contract
+        address artRace;
         /// @notice Address for deployed executor (treasury) contract
         address executor;
         /// @notice Address for deployed DAO contract
@@ -1744,7 +1744,7 @@ interface IRevolutionBuilder is IUUPS {
     /// @param auction The auction address
     /// @param executor The executor address
     /// @param dao The dao address
-    /// @param cultureIndex The cultureIndex address
+    /// @param artRace The artRace address
     /// @param revolutionPointsEmitter The RevolutionPointsEmitter address
     /// @param revolutionPoints The dao address
     /// @param maxHeap The maxHeap address
@@ -1754,7 +1754,7 @@ interface IRevolutionBuilder is IUUPS {
         address auction,
         address executor,
         address dao,
-        address cultureIndex,
+        address artRace,
         address revolutionPointsEmitter,
         address revolutionPoints,
         address maxHeap
@@ -1781,7 +1781,7 @@ interface IRevolutionBuilder is IUUPS {
         string auction;
         string executor;
         string dao;
-        string cultureIndex;
+        string artRace;
         string revolutionPoints;
         string revolutionPointsEmitter;
         string maxHeap;
@@ -1907,8 +1907,8 @@ interface IRevolutionBuilder is IUUPS {
     /// @notice The revolutionPointsEmitter implementation address
     function revolutionPointsEmitterImpl() external view returns (address);
 
-    /// @notice The cultureIndex implementation address
-    function cultureIndexImpl() external view returns (address);
+    /// @notice The artRace implementation address
+    function artRaceImpl() external view returns (address);
 
     /// @notice The revolutionPoints implementation address
     function revolutionPointsImpl() external view returns (address);
@@ -1922,7 +1922,7 @@ interface IRevolutionBuilder is IUUPS {
     /// @param revolutionTokenParams The ERC-721 token settings
     /// @param auctionParams The auction settings
     /// @param govParams The governance settings
-    /// @param cultureIndexParams The ArtRace settings
+    /// @param artRaceParams The ArtRace settings
     /// @param revolutionPointsParams The ERC-20 token settings
     /// @param revolutionPointsEmitterParams The ERC-20 points emitter settings
     function deploy(
@@ -1931,7 +1931,7 @@ interface IRevolutionBuilder is IUUPS {
         RevolutionTokenParams calldata revolutionTokenParams,
         AuctionParams calldata auctionParams,
         GovParams calldata govParams,
-        ArtRaceParams calldata cultureIndexParams,
+        ArtRaceParams calldata artRaceParams,
         PointsParams calldata revolutionPointsParams,
         PointsEmitterParams calldata revolutionPointsEmitterParams
     ) external returns (RevolutionBuilderTypesV1.DAOAddresses memory);
@@ -1948,7 +1948,7 @@ interface IRevolutionBuilder is IUUPS {
             address auction,
             address executor,
             address dao,
-            address cultureIndex,
+            address artRace,
             address revolutionPoints,
             address revolutionPointsEmitter,
             address maxHeap

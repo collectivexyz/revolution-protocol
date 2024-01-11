@@ -28,7 +28,7 @@ contract TokenAccessControlTest is RevolutionTokenTestSuite {
         vm.startPrank(nonOwner);
 
         bool hasErrorOccurred = false;
-        try revolutionToken.cultureIndex().dropTopVotedPiece() {
+        try revolutionToken.artRace().dropTopVotedPiece() {
             fail("Should revert when non-owner tries to call dropTopVotedPiece");
         } catch {
             // Catch the revert to confirm that the correct access control is in place
@@ -79,19 +79,19 @@ contract TokenAccessControlTest is RevolutionTokenTestSuite {
 
     /// @dev Tests the locking of admin functions
     function testLockAdminFunctions() public {
-        // Lock the minter, descriptor, and cultureIndex to prevent changes
+        // Lock the minter, descriptor, and artRace to prevent changes
         revolutionToken.lockMinter();
         revolutionToken.lockDescriptor();
         revolutionToken.lockArtRace();
 
-        // Attempt to change minter, descriptor, or cultureIndex and expect to fail
+        // Attempt to change minter, descriptor, or artRace and expect to fail
         address newMinter = address(0xABC);
         address newDescriptor = address(0xDEF);
         address newArtRace = address(0x123);
 
         bool minterLocked = false;
         bool descriptorLocked = false;
-        bool cultureIndexLocked = false;
+        bool artRaceLocked = false;
 
         try revolutionToken.setMinter(newMinter) {
             fail("Should fail: minter is locked");
@@ -106,14 +106,14 @@ contract TokenAccessControlTest is RevolutionTokenTestSuite {
         }
 
         try revolutionToken.setArtRace(IArtRace(newArtRace)) {
-            fail("Should fail: cultureIndex is locked");
+            fail("Should fail: artRace is locked");
         } catch {
-            cultureIndexLocked = true;
+            artRaceLocked = true;
         }
 
         assertTrue(minterLocked, "Minter should be locked");
         assertTrue(descriptorLocked, "Descriptor should be locked");
-        assertTrue(cultureIndexLocked, "ArtRace should be locked");
+        assertTrue(artRaceLocked, "ArtRace should be locked");
     }
 
     /// @dev Tests that only the owner can call owner-specific functions
@@ -247,7 +247,7 @@ contract TokenAccessControlTest is RevolutionTokenTestSuite {
     function testArtRaceUpdateAndLock() public {
         IArtRace newArtRace = IArtRace(address(0xDEF));
         revolutionToken.setArtRace(newArtRace);
-        assertEq(address(revolutionToken.cultureIndex()), address(newArtRace), "ArtRace should be updated");
+        assertEq(address(revolutionToken.artRace()), address(newArtRace), "ArtRace should be updated");
 
         revolutionToken.lockArtRace();
         assertTrue(revolutionToken.isArtRaceLocked(), "ArtRace should be locked");

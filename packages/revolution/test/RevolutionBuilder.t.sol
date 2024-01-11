@@ -40,7 +40,7 @@ contract RevolutionBuilderTest is Test {
     address internal daoImpl;
     address internal revolutionPointsImpl;
     address internal revolutionPointsEmitterImpl;
-    address internal cultureIndexImpl;
+    address internal artRaceImpl;
     address internal maxHeapImpl;
     address internal revolutionVotingPowerImpl;
 
@@ -105,7 +105,7 @@ contract RevolutionBuilderTest is Test {
         revolutionPointsEmitterImpl = address(
             new RevolutionPointsEmitter(address(manager), address(protocolRewards), revolutionDAO)
         );
-        cultureIndexImpl = address(new ArtRace(address(manager)));
+        artRaceImpl = address(new ArtRace(address(manager)));
         maxHeapImpl = address(new MaxHeap(address(manager)));
         revolutionVotingPowerImpl = address(new RevolutionVotingPower(address(manager)));
 
@@ -116,7 +116,7 @@ contract RevolutionBuilderTest is Test {
                 auctionImpl,
                 executorImpl,
                 daoImpl,
-                cultureIndexImpl,
+                artRaceImpl,
                 revolutionPointsImpl,
                 revolutionPointsEmitterImpl,
                 maxHeapImpl,
@@ -135,7 +135,7 @@ contract RevolutionBuilderTest is Test {
     IRevolutionBuilder.RevolutionTokenParams internal revolutionTokenParams;
     IRevolutionBuilder.AuctionParams internal auctionParams;
     IRevolutionBuilder.GovParams internal govParams;
-    IRevolutionBuilder.ArtRaceParams internal cultureIndexParams;
+    IRevolutionBuilder.ArtRaceParams internal artRaceParams;
     IRevolutionBuilder.RevolutionPointsParams internal revolutionPointsParams;
     IRevolutionBuilder.RevolutionVotingPowerParams internal revolutionVotingPowerParams;
 
@@ -236,7 +236,7 @@ contract RevolutionBuilderTest is Test {
         uint256 _quorumVotesBPS,
         uint256 _minVoteWeight
     ) internal virtual {
-        cultureIndexParams = IRevolutionBuilder.ArtRaceParams({
+        artRaceParams = IRevolutionBuilder.ArtRaceParams({
             name: _name,
             description: _description,
             revolutionTokenVoteWeight: _revolutionTokenVoteWeight,
@@ -292,7 +292,7 @@ contract RevolutionBuilderTest is Test {
     AuctionHouse internal auction;
     DAOExecutor internal executor;
     RevolutionDAOLogicV1 internal dao;
-    ArtRace internal cultureIndex;
+    ArtRace internal artRace;
     RevolutionPoints internal revolutionPoints;
     RevolutionPointsEmitter internal revolutionPointsEmitter;
     MaxHeap internal maxHeap;
@@ -315,7 +315,7 @@ contract RevolutionBuilderTest is Test {
             revolutionTokenParams,
             auctionParams,
             govParams,
-            cultureIndexParams,
+            artRaceParams,
             revolutionPointsParams,
             revolutionVotingPowerParams
         );
@@ -327,7 +327,7 @@ contract RevolutionBuilderTest is Test {
         IRevolutionBuilder.RevolutionTokenParams memory _RevolutionTokenParams,
         IRevolutionBuilder.AuctionParams memory _auctionParams,
         IRevolutionBuilder.GovParams memory _govParams,
-        IRevolutionBuilder.ArtRaceParams memory _cultureIndexParams,
+        IRevolutionBuilder.ArtRaceParams memory _artRaceParams,
         IRevolutionBuilder.RevolutionPointsParams memory _pointsParams,
         IRevolutionBuilder.RevolutionVotingPowerParams memory _revolutionVotingPowerParams
     ) internal virtual {
@@ -337,7 +337,7 @@ contract RevolutionBuilderTest is Test {
             _RevolutionTokenParams,
             _auctionParams,
             _govParams,
-            _cultureIndexParams,
+            _artRaceParams,
             _pointsParams,
             _revolutionVotingPowerParams
         );
@@ -347,7 +347,7 @@ contract RevolutionBuilderTest is Test {
         auction = AuctionHouse(_addresses.auction);
         executor = DAOExecutor(payable(_addresses.executor));
         dao = RevolutionDAOLogicV1(payable(_addresses.dao));
-        cultureIndex = ArtRace(_addresses.cultureIndex);
+        artRace = ArtRace(_addresses.artRace);
         revolutionPoints = RevolutionPoints(_addresses.revolutionPoints);
         revolutionPointsEmitter = RevolutionPointsEmitter(_addresses.revolutionPointsEmitter);
         maxHeap = MaxHeap(_addresses.maxHeap);
@@ -358,7 +358,7 @@ contract RevolutionBuilderTest is Test {
         vm.label(address(auction), "AUCTION");
         vm.label(address(executor), "EXECUTOR");
         vm.label(address(dao), "DAO");
-        vm.label(address(cultureIndex), "CULTURE_INDEX");
+        vm.label(address(artRace), "CULTURE_INDEX");
         vm.label(address(revolutionPoints), "Points");
         vm.label(address(revolutionPointsEmitter), "POINTS_EMITTER");
         vm.label(address(maxHeap), "MAX_HEAP");

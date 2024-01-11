@@ -27,15 +27,15 @@ contract ArtRaceArtPieceTest is ArtRaceTestSuite {
 
         // Vote for the first piece with voter1
         voter1Test.voteForPiece(firstPieceId);
-        assertEq(cultureIndex.topVotedPieceId(), firstPieceId, "First piece should be top-voted");
+        assertEq(artRace.topVotedPieceId(), firstPieceId, "First piece should be top-voted");
 
         // Vote for the second piece with voter2
         voter2Test.voteForPiece(secondPieceId);
-        assertEq(cultureIndex.topVotedPieceId(), secondPieceId, "Second piece should now be top-voted");
+        assertEq(artRace.topVotedPieceId(), secondPieceId, "Second piece should now be top-voted");
 
         // Vote for the first piece with voter2
         voter2Test.voteForPiece(firstPieceId);
-        assertEq(cultureIndex.topVotedPieceId(), firstPieceId, "First piece should now be top-voted again");
+        assertEq(artRace.topVotedPieceId(), firstPieceId, "First piece should now be top-voted again");
 
         revolutionPoints.mint(address(voter2Test), 21_000);
         vm.roll(vm.getBlockNumber() + 1); // roll block number to enable voting snapshot
@@ -43,7 +43,7 @@ contract ArtRaceArtPieceTest is ArtRaceTestSuite {
         uint256 thirdPieceId = voter2Test.createDefaultArtPiece();
 
         voter2Test.voteForPiece(thirdPieceId);
-        assertEq(cultureIndex.topVotedPieceId(), thirdPieceId, "Third piece should now be top-voted");
+        assertEq(artRace.topVotedPieceId(), thirdPieceId, "Third piece should now be top-voted");
     }
 
     function testFetchTopVotedPiece() public {
@@ -58,7 +58,7 @@ contract ArtRaceArtPieceTest is ArtRaceTestSuite {
         // Vote for the first piece
         voter1Test.voteForPiece(firstPieceId);
 
-        IArtRace.ArtPiece memory topVotedPiece = cultureIndex.getTopVotedPiece();
+        IArtRace.ArtPiece memory topVotedPiece = artRace.getTopVotedPiece();
         assertEq(topVotedPiece.pieceId, firstPieceId, "Top voted piece should match the voted piece");
     }
 
@@ -80,7 +80,7 @@ contract ArtRaceArtPieceTest is ArtRaceTestSuite {
         // Vote for the second piece with voter2
         voter2Test.voteForPiece(secondPieceId);
 
-        IArtRace.ArtPiece memory poppedPiece = cultureIndex.getTopVotedPiece();
+        IArtRace.ArtPiece memory poppedPiece = artRace.getTopVotedPiece();
         assertEq(poppedPiece.pieceId, secondPieceId, "Top voted piece should be the second piece");
     }
 
@@ -96,7 +96,7 @@ contract ArtRaceArtPieceTest is ArtRaceTestSuite {
         voter1Test.voteForPiece(firstPieceId);
         vm.startPrank(address(revolutionToken));
 
-        IArtRace.ArtPieceCondensed memory poppedPiece = cultureIndex.dropTopVotedPiece();
+        IArtRace.ArtPieceCondensed memory poppedPiece = artRace.dropTopVotedPiece();
         assertEq(poppedPiece.pieceId, firstPieceId, "Popped piece should be the first piece");
     }
 
@@ -116,11 +116,11 @@ contract ArtRaceArtPieceTest is ArtRaceTestSuite {
 
         vm.startPrank(address(revolutionToken));
 
-        IArtRace.ArtPieceCondensed memory poppedPiece = cultureIndex.dropTopVotedPiece();
+        IArtRace.ArtPieceCondensed memory poppedPiece = artRace.dropTopVotedPiece();
         //assert its the second piece
         assertEq(poppedPiece.pieceId, secondPieceId, "Popped piece should be the second piece");
 
-        uint256 topPieceId = cultureIndex.topVotedPieceId();
+        uint256 topPieceId = artRace.topVotedPieceId();
         assertEq(topPieceId, firstPieceId, "Top voted piece should be the first piece");
     }
 
@@ -214,7 +214,7 @@ contract ArtRaceArtPieceTest is ArtRaceTestSuite {
         }
 
         //assert dropping top piece is the correct pieceId
-        assertEq(cultureIndex.topVotedPieceId(), 4_999, "Top voted piece should be the 4_999th piece");
+        assertEq(artRace.topVotedPieceId(), 4_999, "Top voted piece should be the 4_999th piece");
     }
 
     /// @dev Tests the gas used for popping the top voted piece to ensure somewhat constant time
@@ -236,7 +236,7 @@ contract ArtRaceArtPieceTest is ArtRaceTestSuite {
         uint256 startGas = gasleft();
         vm.roll(vm.getBlockNumber() + 1); // roll block number to enable voting snapshot
 
-        cultureIndex.dropTopVotedPiece();
+        artRace.dropTopVotedPiece();
         uint256 gasUsed = startGas - gasleft();
         emit log_uint(gasUsed);
 
@@ -256,7 +256,7 @@ contract ArtRaceArtPieceTest is ArtRaceTestSuite {
 
         // Pop the top voted piece and log the gas used.
         startGas = gasleft();
-        cultureIndex.dropTopVotedPiece();
+        artRace.dropTopVotedPiece();
         uint256 gasUsed2 = startGas - gasleft();
         emit log_uint(gasUsed2);
 
@@ -286,13 +286,13 @@ contract ArtRaceArtPieceTest is ArtRaceTestSuite {
 
         // Drop the top voted piece
         vm.startPrank(address(revolutionToken));
-        IArtRace.ArtPieceCondensed memory artPiece2 = cultureIndex.dropTopVotedPiece();
+        IArtRace.ArtPieceCondensed memory artPiece2 = artRace.dropTopVotedPiece();
 
         // Verify that the dropped piece is correctly indexed
         assertEq(artPiece2.pieceId, pieceId2, "First dropped piece should be pieceId2");
 
         // Drop another top voted piece
-        IArtRace.ArtPieceCondensed memory artPiece1 = cultureIndex.dropTopVotedPiece();
+        IArtRace.ArtPieceCondensed memory artPiece1 = artRace.dropTopVotedPiece();
 
         // Verify again
         assertEq(artPiece1.pieceId, pieceId1, "Second dropped piece should be pieceId1");
@@ -314,11 +314,11 @@ contract ArtRaceArtPieceTest is ArtRaceTestSuite {
         vm.startPrank(address(revolutionToken));
 
         // Drop the top voted piece
-        cultureIndex.dropTopVotedPiece();
+        artRace.dropTopVotedPiece();
 
         // Try to drop again and expect a failure
         bool hasErrorOccurred = false;
-        try cultureIndex.dropTopVotedPiece() {
+        try artRace.dropTopVotedPiece() {
             // if this executes, there was no error
         } catch {
             // if we're here, an error occurred

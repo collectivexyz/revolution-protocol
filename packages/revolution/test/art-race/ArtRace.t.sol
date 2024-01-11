@@ -37,8 +37,8 @@ contract ArtRaceTestSuite is RevolutionBuilderTest {
         vm.startPrank(address(executor));
 
         // // Create new test instances acting as different voters
-        voter1Test = new ArtRaceVotingTest(address(cultureIndex), address(revolutionPoints));
-        voter2Test = new ArtRaceVotingTest(address(cultureIndex), address(revolutionPoints));
+        voter1Test = new ArtRaceVotingTest(address(artRace), address(revolutionPoints));
+        voter2Test = new ArtRaceVotingTest(address(artRace), address(revolutionPoints));
     }
 
     //returns metadata and creators in a tuple
@@ -88,7 +88,7 @@ contract ArtRaceTestSuite is RevolutionBuilderTest {
         IArtRace.CreatorBps[] memory creators = new IArtRace.CreatorBps[](1);
         creators[0] = IArtRace.CreatorBps({ creator: creatorAddress, bps: creatorBps });
 
-        return cultureIndex.createPiece(metadata, creators);
+        return artRace.createPiece(metadata, creators);
     }
 
     // Function to create ArtPieceMetadata
@@ -139,16 +139,16 @@ contract ArtRaceTestSuite is RevolutionBuilderTest {
     }
 
     function voteForPiece(uint256 pieceId) public {
-        cultureIndex.vote(pieceId);
+        artRace.vote(pieceId);
     }
 }
 
 contract ArtRaceVotingTest is Test {
-    ArtRace public cultureIndex;
+    ArtRace public artRace;
     RevolutionPoints public govToken;
 
-    constructor(address _cultureIndex, address _votingToken) {
-        cultureIndex = ArtRace(_cultureIndex);
+    constructor(address _artRace, address _votingToken) {
+        artRace = ArtRace(_artRace);
         govToken = RevolutionPoints(_votingToken);
     }
 
@@ -175,7 +175,7 @@ contract ArtRaceVotingTest is Test {
         IArtRace.CreatorBps[] memory creators = new IArtRace.CreatorBps[](1);
         creators[0] = IArtRace.CreatorBps({ creator: creatorAddress, bps: creatorBps });
 
-        return cultureIndex.createPiece(metadata, creators);
+        return artRace.createPiece(metadata, creators);
     }
 
     //Utility function to create default art piece
@@ -194,6 +194,6 @@ contract ArtRaceVotingTest is Test {
     }
 
     function voteForPiece(uint256 pieceId) public {
-        cultureIndex.vote(pieceId);
+        artRace.vote(pieceId);
     }
 }

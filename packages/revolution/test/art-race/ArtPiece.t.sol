@@ -47,7 +47,7 @@ contract ArtRaceArtPieceTest is ArtRaceTestSuite {
         );
 
         // Validate that the piece was created with correct data
-        IArtRace.ArtPiece memory createdPiece = cultureIndex.getPieceById(newPieceId);
+        IArtRace.ArtPiece memory createdPiece = artRace.getPieceById(newPieceId);
 
         assertEq(createdPiece.pieceId, newPieceId);
         assertEq(createdPiece.metadata.name, "Mona Lisa");
@@ -74,10 +74,10 @@ contract ArtRaceArtPieceTest is ArtRaceTestSuite {
         creators[0] = IArtRace.CreatorBps({ creator: address(0x1), bps: 5000 });
         creators[1] = IArtRace.CreatorBps({ creator: address(0x2), bps: 5000 });
 
-        uint256 newPieceId = cultureIndex.createPiece(metadata, creators);
+        uint256 newPieceId = artRace.createPiece(metadata, creators);
 
         // Validate that the piece was created with correct data
-        IArtRace.ArtPiece memory createdPiece = cultureIndex.getPieceById(newPieceId);
+        IArtRace.ArtPiece memory createdPiece = artRace.getPieceById(newPieceId);
 
         assertEq(createdPiece.pieceId, newPieceId);
         assertEq(createdPiece.metadata.name, "Collaborative Work");
@@ -106,7 +106,7 @@ contract ArtRaceArtPieceTest is ArtRaceTestSuite {
 
         // Validate that the piece was created with correct data
         vm.expectRevert(abi.encodeWithSignature("INVALID_BPS_SUM()"));
-        cultureIndex.createPiece(metadata, creators);
+        artRace.createPiece(metadata, creators);
     }
 
     // /**
@@ -125,7 +125,7 @@ contract ArtRaceArtPieceTest is ArtRaceTestSuite {
         );
 
         vm.expectRevert(abi.encodeWithSignature("ADDRESS_ZERO()"));
-        cultureIndex.createPiece(metadata, creators);
+        artRace.createPiece(metadata, creators);
     }
 
     /**
@@ -144,7 +144,7 @@ contract ArtRaceArtPieceTest is ArtRaceTestSuite {
         );
 
         vm.expectRevert(abi.encodeWithSignature("INVALID_BPS_SUM()"));
-        cultureIndex.createPiece(metadata, creators);
+        artRace.createPiece(metadata, creators);
     }
 
     // /**
@@ -163,7 +163,7 @@ contract ArtRaceArtPieceTest is ArtRaceTestSuite {
         );
 
         vm.expectRevert(abi.encodeWithSignature("INVALID_BPS_SUM()"));
-        cultureIndex.createPiece(metadata, creators);
+        artRace.createPiece(metadata, creators);
     }
 
     /**
@@ -182,7 +182,7 @@ contract ArtRaceArtPieceTest is ArtRaceTestSuite {
         );
 
         vm.expectRevert(abi.encodeWithSignature("INVALID_MEDIA_METADATA()"));
-        cultureIndex.createPiece(metadata, creators);
+        artRace.createPiece(metadata, creators);
     }
 
     /**
@@ -201,7 +201,7 @@ contract ArtRaceArtPieceTest is ArtRaceTestSuite {
         );
 
         vm.expectRevert(abi.encodeWithSignature("INVALID_MEDIA_METADATA()"));
-        cultureIndex.createPiece(metadata, creators);
+        artRace.createPiece(metadata, creators);
     }
 
     /**
@@ -220,7 +220,7 @@ contract ArtRaceArtPieceTest is ArtRaceTestSuite {
         );
 
         vm.expectRevert(abi.encodeWithSignature("INVALID_MEDIA_METADATA()"));
-        cultureIndex.createPiece(metadata, creators);
+        artRace.createPiece(metadata, creators);
     }
 
     /**
@@ -239,7 +239,7 @@ contract ArtRaceArtPieceTest is ArtRaceTestSuite {
         );
 
         vm.expectRevert(abi.encodeWithSignature("INVALID_MEDIA_METADATA()"));
-        cultureIndex.createPiece(metadata, creators);
+        artRace.createPiece(metadata, creators);
     }
 
     /**
@@ -294,20 +294,20 @@ contract ArtRaceArtPieceTest is ArtRaceTestSuite {
         }
 
         vm.expectRevert(abi.encodeWithSignature("MAX_NUM_CREATORS_EXCEEDED()"));
-        cultureIndex.createPiece(metadata, creators);
+        artRace.createPiece(metadata, creators);
     }
 
     function testArtPieceCreationAndVoting(uint256 pointsSupply, uint256 quorumVotesBPS) public {
         vm.assume(pointsSupply > 0 && pointsSupply < 2 ** 200);
-        vm.assume(quorumVotesBPS <= cultureIndex.MAX_QUORUM_VOTES_BPS());
+        vm.assume(quorumVotesBPS <= artRace.MAX_QUORUM_VOTES_BPS());
 
         // Set the quorum BPS
-        cultureIndex._setQuorumVotesBPS(quorumVotesBPS);
+        artRace._setQuorumVotesBPS(quorumVotesBPS);
 
-        cultureIndex.transferOwnership(address(revolutionToken));
+        artRace.transferOwnership(address(revolutionToken));
 
         vm.startPrank(address(revolutionToken));
-        cultureIndex.acceptOwnership();
+        artRace.acceptOwnership();
 
         vm.startPrank(address(revolutionPointsEmitter));
         revolutionPoints.mint(address(this), pointsSupply);
@@ -316,7 +316,7 @@ contract ArtRaceArtPieceTest is ArtRaceTestSuite {
 
         // Create an art piece
         uint256 pieceId = createDefaultArtPiece();
-        ArtRace.ArtPiece memory piece = cultureIndex.getPieceById(pieceId);
+        ArtRace.ArtPiece memory piece = artRace.getPieceById(pieceId);
 
         // Check initial values
         uint256 expectedTotalVotesSupply = pointsSupply;
@@ -324,7 +324,7 @@ contract ArtRaceArtPieceTest is ArtRaceTestSuite {
         vm.roll(vm.getBlockNumber() + 1);
 
         assertEq(
-            cultureIndex.quorumVotesForPiece(piece.pieceId),
+            artRace.quorumVotesForPiece(piece.pieceId),
             expectedQuorumVotes,
             "Quorum votes should be set correctly on creation"
         );
@@ -345,14 +345,14 @@ contract ArtRaceArtPieceTest is ArtRaceTestSuite {
 
         vm.roll(vm.getBlockNumber() + 1);
 
-        ArtRace.ArtPiece memory newPiece = cultureIndex.getPieceById(createDefaultArtPiece());
+        ArtRace.ArtPiece memory newPiece = artRace.getPieceById(createDefaultArtPiece());
         vm.roll(vm.getBlockNumber() + 1);
 
-        uint256 expectedTotalVotesSupply2 = pointsSupply * 2 + cultureIndex.revolutionTokenVoteWeight();
+        uint256 expectedTotalVotesSupply2 = pointsSupply * 2 + artRace.revolutionTokenVoteWeight();
 
         uint256 expectedQuorumVotes2 = (quorumVotesBPS * (expectedTotalVotesSupply2)) / 10_000;
         assertEq(
-            cultureIndex.quorumVotesForPiece(newPiece.pieceId),
+            artRace.quorumVotesForPiece(newPiece.pieceId),
             expectedQuorumVotes2,
             "Quorum votes should be set correctly on second creation"
         );

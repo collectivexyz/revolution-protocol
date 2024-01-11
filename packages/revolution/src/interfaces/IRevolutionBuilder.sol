@@ -18,7 +18,7 @@ interface IRevolutionBuilder is IUUPS {
     /// @param auction The auction address
     /// @param executor The executor address
     /// @param dao The dao address
-    /// @param cultureIndex The cultureIndex address
+    /// @param artRace The artRace address
     /// @param revolutionPointsEmitter The RevolutionPointsEmitter address
     /// @param revolutionPoints The dao address
     /// @param maxHeap The maxHeap address
@@ -29,7 +29,7 @@ interface IRevolutionBuilder is IUUPS {
         address auction,
         address executor,
         address dao,
-        address cultureIndex,
+        address artRace,
         address revolutionPointsEmitter,
         address revolutionPoints,
         address maxHeap,
@@ -57,7 +57,7 @@ interface IRevolutionBuilder is IUUPS {
         string auction;
         string executor;
         string dao;
-        string cultureIndex;
+        string artRace;
         string revolutionPoints;
         string revolutionPointsEmitter;
         string maxHeap;
@@ -198,8 +198,8 @@ interface IRevolutionBuilder is IUUPS {
     /// @notice The revolutionPointsEmitter implementation address
     function revolutionPointsEmitterImpl() external view returns (address);
 
-    /// @notice The cultureIndex implementation address
-    function cultureIndexImpl() external view returns (address);
+    /// @notice The artRace implementation address
+    function artRaceImpl() external view returns (address);
 
     /// @notice The revolutionPoints implementation address
     function revolutionPointsImpl() external view returns (address);
@@ -216,7 +216,7 @@ interface IRevolutionBuilder is IUUPS {
     /// @param revolutionTokenParams The Revolution ERC-721 token settings
     /// @param auctionParams The auction settings
     /// @param govParams The governance settings
-    /// @param cultureIndexParams The ArtRace settings
+    /// @param artRaceParams The ArtRace settings
     /// @param revolutionPointsParams The RevolutionPoints settings
     /// @param revolutionVotingPowerParams The RevolutionVotingPower settings
     function deploy(
@@ -225,7 +225,7 @@ interface IRevolutionBuilder is IUUPS {
         RevolutionTokenParams calldata revolutionTokenParams,
         AuctionParams calldata auctionParams,
         GovParams calldata govParams,
-        ArtRaceParams calldata cultureIndexParams,
+        ArtRaceParams calldata artRaceParams,
         RevolutionPointsParams calldata revolutionPointsParams,
         RevolutionVotingPowerParams calldata revolutionVotingPowerParams
     ) external returns (RevolutionBuilderTypesV1.DAOAddresses memory);
@@ -242,7 +242,7 @@ interface IRevolutionBuilder is IUUPS {
             address auction,
             address executor,
             address dao,
-            address cultureIndex,
+            address artRace,
             address revolutionPoints,
             address revolutionPointsEmitter,
             address maxHeap,

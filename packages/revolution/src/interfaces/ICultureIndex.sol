@@ -292,13 +292,13 @@ interface IArtRace is IArtRaceEvents {
      * @param initialOwner The owner of the contract, allowed to drop pieces. Commonly updated to the AuctionHouse
      * @param maxHeap The address of the max heap contract
      * @param dropperAdmin The address that can drop new art pieces
-     * @param cultureIndexParams The ArtRace settings
+     * @param artRaceParams The ArtRace settings
      */
     function initialize(
         address votingPower,
         address initialOwner,
         address maxHeap,
         address dropperAdmin,
-        IRevolutionBuilder.ArtRaceParams calldata cultureIndexParams
+        IRevolutionBuilder.ArtRaceParams calldata artRaceParams
     ) external;
 }

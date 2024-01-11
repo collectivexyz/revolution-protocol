@@ -45,7 +45,7 @@ contract RevolutionToken is
     IDescriptorMinimal public descriptor;
 
     // The ArtRace contract
-    IArtRace public cultureIndex;
+    IArtRace public artRace;
 
     // Whether the minter can be updated
     bool public isMinterLocked;
@@ -125,13 +125,13 @@ contract RevolutionToken is
     /// @param _minter The address of the minter
     /// @param _initialOwner The address of the initial owner
     /// @param _descriptor The address of the token URI descriptor
-    /// @param _cultureIndex The address of the ArtRace contract
+    /// @param _artRace The address of the ArtRace contract
     /// @param _revolutionTokenParams The name, symbol, and contract metadata of the token
     function initialize(
         address _minter,
         address _initialOwner,
         address _descriptor,
-        address _cultureIndex,
+        address _artRace,
         IRevolutionBuilder.RevolutionTokenParams calldata _revolutionTokenParams
     ) external initializer {
         if (msg.sender != address(manager)) revert ONLY_MANAGER_CAN_INITIALIZE();
@@ -152,7 +152,7 @@ contract RevolutionToken is
         // Set the contracts
         minter = _minter;
         descriptor = IDescriptorMinimal(_descriptor);
-        cultureIndex = IArtRace(_cultureIndex);
+        artRace = IArtRace(_artRace);
     }
 
     /**
@@ -192,7 +192,7 @@ contract RevolutionToken is
      */
     function tokenURI(uint256 tokenId) public view override returns (string memory) {
         if (ownerOf(tokenId) == address(0)) revert();
-        return descriptor.tokenURI(tokenId, cultureIndex.getPieceById(artPieces[tokenId]).metadata);
+        return descriptor.tokenURI(tokenId, artRace.getPieceById(artPieces[tokenId]).metadata);
     }
 
     /**
@@ -201,7 +201,7 @@ contract RevolutionToken is
      */
     function dataURI(uint256 tokenId) public view override returns (string memory) {
         if (ownerOf(tokenId) == address(0)) revert();
-        return descriptor.dataURI(tokenId, cultureIndex.getPieceById(artPieces[tokenId]).metadata);
+        return descriptor.dataURI(tokenId, artRace.getPieceById(artPieces[tokenId]).metadata);
     }
 
     /**
@@ -251,10 +251,10 @@ contract RevolutionToken is
      * @notice Set the token ArtRace.
      * @dev Only callable by the owner when not locked.
      */
-    function setArtRace(IArtRace _cultureIndex) external onlyOwner whenArtRaceNotLocked nonReentrant {
-        cultureIndex = _cultureIndex;
+    function setArtRace(IArtRace _artRace) external onlyOwner whenArtRaceNotLocked nonReentrant {
+        artRace = _artRace;
 
-        emit ArtRaceUpdated(_cultureIndex);
+        emit ArtRaceUpdated(_artRace);
     }
 
     /**
@@ -274,7 +274,7 @@ contract RevolutionToken is
      */
     function getArtPieceById(uint256 verbId) external view returns (IArtRace.ArtPiece memory) {
         if (verbId >= _currentVerbId) revert INVALID_PIECE_ID();
-        return cultureIndex.getPieceById(artPieces[verbId]);
+        return artRace.getPieceById(artPieces[verbId]);
     }
 
     /**
@@ -282,7 +282,7 @@ contract RevolutionToken is
      */
     function _mintTo(address to) internal returns (uint256) {
         // Use try/catch to handle potential failure
-        try cultureIndex.dropTopVotedPiece() returns (IArtRace.ArtPieceCondensed memory artPiece) {
+        try artRace.dropTopVotedPiece() returns (IArtRace.ArtPieceCondensed memory artPiece) {
             uint256 verbId = _currentVerbId++;
 
             artPieces[verbId] = artPiece.pieceId;

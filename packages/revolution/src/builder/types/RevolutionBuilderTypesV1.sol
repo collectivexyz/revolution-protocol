@@ -15,8 +15,8 @@ interface RevolutionBuilderTypesV1 {
         address revolutionPointsEmitter;
         /// @notice Address for deployed auction contract
         address revolutionPoints;
-        /// @notice Address for deployed cultureIndex contract
-        address cultureIndex;
+        /// @notice Address for deployed artRace contract
+        address artRace;
         /// @notice Address for deployed executor (treasury) contract
         address executor;
         /// @notice Address for deployed DAO contract

@@ -32,10 +32,10 @@ contract AuctionHouseSettleTest is AuctionHouseTest {
         vm.roll(vm.getBlockNumber() + 1);
 
         assertEq(revolutionToken.ownerOf(0), address(11), "Verb should be transferred to the highest bidder");
-        // cultureIndex currentVotes of highest bidder should be 10
+        // artRace currentVotes of highest bidder should be 10
         assertEq(
-            cultureIndex.votingPower().getVotesWithWeights(address(11), 1, cultureIndex.revolutionTokenVoteWeight()),
-            cultureIndex.revolutionTokenVoteWeight(),
+            artRace.votingPower().getVotesWithWeights(address(11), 1, artRace.revolutionTokenVoteWeight()),
+            artRace.revolutionTokenVoteWeight(),
             "Highest bidder should have 10 votes"
         );
     }
@@ -146,8 +146,8 @@ contract AuctionHouseSettleTest is AuctionHouseTest {
         assertEq(recipient.balance, 0); // Ether balance should still be 0
         //make sure voting weight on culture index is 721 vote weight for winning bidder
         assertEq(
-            cultureIndex.votingPower().getVotesWithWeights(address(this), 1, cultureIndex.revolutionTokenVoteWeight()),
-            cultureIndex.revolutionTokenVoteWeight(),
+            artRace.votingPower().getVotesWithWeights(address(this), 1, artRace.revolutionTokenVoteWeight()),
+            artRace.revolutionTokenVoteWeight(),
             "Highest bidder should have 10 votes"
         );
     }
@@ -183,8 +183,8 @@ contract AuctionHouseSettleTest is AuctionHouseTest {
         assertEq(recipient.balance, (amount * (10_000 - creatorRate)) / 10_000);
         //make sure voting weight on culture index is 721 vote weight for winning bidder
         assertEq(
-            cultureIndex.votingPower().getVotesWithWeights(address(this), 1, cultureIndex.revolutionTokenVoteWeight()),
-            cultureIndex.revolutionTokenVoteWeight(),
+            artRace.votingPower().getVotesWithWeights(address(this), 1, artRace.revolutionTokenVoteWeight()),
+            artRace.revolutionTokenVoteWeight(),
             "Highest bidder should have 10 votes"
         );
     }
@@ -227,8 +227,8 @@ contract AuctionHouseSettleTest is AuctionHouseTest {
         assertEq(recipient.balance, 0); // Ether balance should still be 0
         //make sure voting weight on culture index is 721 vote weight for winning bidder
         assertEq(
-            cultureIndex.votingPower().getVotesWithWeights(address(this), 1, cultureIndex.revolutionTokenVoteWeight()),
-            cultureIndex.revolutionTokenVoteWeight(),
+            artRace.votingPower().getVotesWithWeights(address(this), 1, artRace.revolutionTokenVoteWeight()),
+            artRace.revolutionTokenVoteWeight(),
             "Highest bidder should have 10 votes"
         );
     }
@@ -308,7 +308,7 @@ contract AuctionHouseSettleTest is AuctionHouseTest {
 
     function test__SettlingAuctionWithMultipleCreators(uint8 nCreators) public {
         vm.assume(nCreators > 0);
-        vm.assume(nCreators < cultureIndex.MAX_NUM_CREATORS());
+        vm.assume(nCreators < artRace.MAX_NUM_CREATORS());
 
         address[] memory creatorAddresses = new address[](nCreators);
         uint256[] memory creatorBps = new uint256[](nCreators);
@@ -391,12 +391,8 @@ contract AuctionHouseSettleTest is AuctionHouseTest {
         assertEq(revolutionToken.ownerOf(0), address(21_000), "Verb should be transferred to the highest bidder");
         // Verify voting weight on culture index is 721 vote weight for winning bidder
         assertEq(
-            cultureIndex.votingPower().getVotesWithWeights(
-                address(21_000),
-                1,
-                cultureIndex.revolutionTokenVoteWeight()
-            ),
-            cultureIndex.revolutionTokenVoteWeight(),
+            artRace.votingPower().getVotesWithWeights(address(21_000), 1, artRace.revolutionTokenVoteWeight()),
+            artRace.revolutionTokenVoteWeight(),
             "Highest bidder should have 10 votes"
         );
     }
@@ -475,12 +471,8 @@ contract AuctionHouseSettleTest is AuctionHouseTest {
         assertEq(revolutionToken.ownerOf(verbId), address(21_000), "Verb should be transferred to the highest bidder");
         // Checking voting weight on culture index is 721 vote weight for winning bidder
         assertEq(
-            cultureIndex.votingPower().getVotesWithWeights(
-                address(21_000),
-                1,
-                cultureIndex.revolutionTokenVoteWeight()
-            ),
-            cultureIndex.revolutionTokenVoteWeight(),
+            artRace.votingPower().getVotesWithWeights(address(21_000), 1, artRace.revolutionTokenVoteWeight()),
+            artRace.revolutionTokenVoteWeight(),
             "Highest bidder should have 10 votes"
         );
 

@@ -24,9 +24,9 @@ contract ArtRaceVotingTestManager is ArtRaceTestSuite {
         voter2Test.voteForPiece(newPieceId);
 
         // Validate the weights
-        ArtRace.Vote memory pieceVotes1 = cultureIndex.getVote(newPieceId, address(voter1Test));
-        ArtRace.Vote memory pieceVotes2 = cultureIndex.getVote(newPieceId, address(voter2Test));
-        uint256 totalVoteWeight = cultureIndex.totalVoteWeights(newPieceId);
+        ArtRace.Vote memory pieceVotes1 = artRace.getVote(newPieceId, address(voter1Test));
+        ArtRace.Vote memory pieceVotes2 = artRace.getVote(newPieceId, address(voter2Test));
+        uint256 totalVoteWeight = artRace.totalVoteWeights(newPieceId);
 
         assertEq(pieceVotes1.voterAddress, address(voter1Test), "Voter address should match");
         assertEq(pieceVotes1.weight, 100, "Voting weight should be 100");
@@ -51,12 +51,12 @@ contract ArtRaceVotingTestManager is ArtRaceTestSuite {
         voter1Test.voteForPiece(secondPieceId);
 
         // Validate the weights for the first piece
-        ArtRace.Vote memory firstPieceVote = cultureIndex.getVote(firstPieceId, address(voter1Test));
+        ArtRace.Vote memory firstPieceVote = artRace.getVote(firstPieceId, address(voter1Test));
         assertEq(firstPieceVote.voterAddress, address(voter1Test), "Voter address should match");
         assertEq(firstPieceVote.weight, 100, "Voting weight for the first piece should be 100");
 
         // Validate the weights for the second piece
-        ArtRace.Vote memory secondPieceVote = cultureIndex.getVote(secondPieceId, address(voter1Test));
+        ArtRace.Vote memory secondPieceVote = artRace.getVote(secondPieceId, address(voter1Test));
         assertEq(secondPieceVote.voterAddress, address(voter1Test), "Voter address should match");
         assertEq(secondPieceVote.weight, 100, "Voting weight for the second piece should be 100");
     }

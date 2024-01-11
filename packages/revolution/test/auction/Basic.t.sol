@@ -347,7 +347,7 @@ contract AuctionHouseBasicTest is AuctionHouseTest {
 
         //vote for pieceId
         vm.startPrank(address(auction));
-        cultureIndex.vote(pieceId);
+        artRace.vote(pieceId);
 
         auction.settleCurrentAndCreateNewAuction(); // This will settle the current auction and create a new one
 

@@ -97,7 +97,7 @@
 |----------------------|-----------------------------|------|--------|-------|-----------------------------------------|
 | minter               | address                     | 0    | 0      | 20    | src/RevolutionToken.sol:RevolutionToken |
 | descriptor           | contract IDescriptorMinimal | 1    | 0      | 20    | src/RevolutionToken.sol:RevolutionToken |
-| cultureIndex         | contract IArtRace      | 2    | 0      | 20    | src/RevolutionToken.sol:RevolutionToken |
+| artRace         | contract IArtRace      | 2    | 0      | 20    | src/RevolutionToken.sol:RevolutionToken |
 | isMinterLocked       | bool                        | 2    | 20     | 1     | src/RevolutionToken.sol:RevolutionToken |
 | isArtRaceLocked | bool                        | 2    | 21     | 1     | src/RevolutionToken.sol:RevolutionToken |
 | isDescriptorLocked   | bool                        | 2    | 22     | 1     | src/RevolutionToken.sol:RevolutionToken |

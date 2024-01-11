@@ -67,7 +67,7 @@ interface IRevolutionToken is IERC721 {
 
     event DescriptorLocked();
 
-    event ArtRaceUpdated(IArtRace cultureIndex);
+    event ArtRaceUpdated(IArtRace artRace);
 
     event ArtRaceLocked();
 
@@ -97,13 +97,13 @@ interface IRevolutionToken is IERC721 {
     /// @param minter The address of the minter
     /// @param initialOwner The address of the initial owner
     /// @param descriptor The address of the token URI descriptor
-    /// @param cultureIndex The address of the ArtRace contract
+    /// @param artRace The address of the ArtRace contract
     /// @param revolutionTokenParams The name, symbol, and contract metadata of the token
     function initialize(
         address minter,
         address initialOwner,
         address descriptor,
-        address cultureIndex,
+        address artRace,
         IRevolutionBuilder.RevolutionTokenParams memory revolutionTokenParams
     ) external;
 }

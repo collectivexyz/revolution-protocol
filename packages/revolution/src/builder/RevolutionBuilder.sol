@@ -76,8 +76,8 @@ contract RevolutionBuilder is
     /// @notice The revolutionPointsEmitter implementation address
     address public immutable revolutionPointsEmitterImpl;
 
-    /// @notice The cultureIndex implementation address
-    address public immutable cultureIndexImpl;
+    /// @notice The artRace implementation address
+    address public immutable artRaceImpl;
 
     /// @notice The revolutionPoints implementation address
     address public immutable revolutionPointsImpl;
@@ -98,7 +98,7 @@ contract RevolutionBuilder is
         address _auctionImpl,
         address _executorImpl,
         address _daoImpl,
-        address _cultureIndexImpl,
+        address _artRaceImpl,
         address _revolutionPointsImpl,
         address _revolutionPointsEmitterImpl,
         address _maxHeapImpl,
@@ -109,7 +109,7 @@ contract RevolutionBuilder is
         auctionImpl = _auctionImpl;
         executorImpl = _executorImpl;
         daoImpl = _daoImpl;
-        cultureIndexImpl = _cultureIndexImpl;
+        artRaceImpl = _artRaceImpl;
         revolutionPointsImpl = _revolutionPointsImpl;
         revolutionPointsEmitterImpl = _revolutionPointsEmitterImpl;
         maxHeapImpl = _maxHeapImpl;
@@ -166,7 +166,7 @@ contract RevolutionBuilder is
     /// @param _revolutionTokenParams The ERC-721 token settings
     /// @param _auctionParams The auction settings
     /// @param _govParams The governance settings
-    /// @param _cultureIndexParams The culture index settings
+    /// @param _artRaceParams The culture index settings
     /// @param _revolutionPointsParams The ERC-20 token settings
     /// @param _revolutionVotingPowerParams The voting power settings
     function deploy(
@@ -175,7 +175,7 @@ contract RevolutionBuilder is
         RevolutionTokenParams calldata _revolutionTokenParams,
         AuctionParams calldata _auctionParams,
         GovParams calldata _govParams,
-        ArtRaceParams calldata _cultureIndexParams,
+        ArtRaceParams calldata _artRaceParams,
         RevolutionPointsParams calldata _revolutionPointsParams,
         RevolutionVotingPowerParams calldata _revolutionVotingPowerParams
     ) external returns (DAOAddresses memory) {
@@ -202,7 +202,7 @@ contract RevolutionBuilder is
             revolutionPoints: address(new ERC1967Proxy{ salt: initialSetup.salt }(revolutionPointsImpl, "")),
             descriptor: address(new ERC1967Proxy{ salt: initialSetup.salt }(descriptorImpl, "")),
             auction: address(new ERC1967Proxy{ salt: initialSetup.salt }(auctionImpl, "")),
-            cultureIndex: address(new ERC1967Proxy{ salt: initialSetup.salt }(cultureIndexImpl, "")),
+            artRace: address(new ERC1967Proxy{ salt: initialSetup.salt }(artRaceImpl, "")),
             maxHeap: address(new ERC1967Proxy{ salt: initialSetup.salt }(maxHeapImpl, "")),
             revolutionVotingPower: initialSetup.revolutionVotingPower,
             revolutionToken: revolutionToken,
@@ -213,7 +213,7 @@ contract RevolutionBuilder is
         // Initialize each instance with the provided settings
         IMaxHeap(daoAddressesByToken[revolutionToken].maxHeap).initialize({
             initialOwner: initialSetup.executor,
-            admin: daoAddressesByToken[revolutionToken].cultureIndex
+            admin: daoAddressesByToken[revolutionToken].artRace
         });
 
         IRevolutionVotingPower(daoAddressesByToken[revolutionToken].revolutionVotingPower).initialize({
@@ -228,7 +228,7 @@ contract RevolutionBuilder is
             minter: daoAddressesByToken[revolutionToken].auction,
             descriptor: daoAddressesByToken[revolutionToken].descriptor,
             initialOwner: initialSetup.executor,
-            cultureIndex: daoAddressesByToken[revolutionToken].cultureIndex,
+            artRace: daoAddressesByToken[revolutionToken].artRace,
             revolutionTokenParams: _revolutionTokenParams
         });
 
@@ -237,11 +237,11 @@ contract RevolutionBuilder is
             tokenNamePrefix: _revolutionTokenParams.tokenNamePrefix
         });
 
-        IArtRace(daoAddressesByToken[revolutionToken].cultureIndex).initialize({
+        IArtRace(daoAddressesByToken[revolutionToken].artRace).initialize({
             votingPower: daoAddressesByToken[revolutionToken].revolutionVotingPower,
             initialOwner: initialSetup.executor,
             dropperAdmin: daoAddressesByToken[revolutionToken].revolutionToken,
-            cultureIndexParams: _cultureIndexParams,
+            artRaceParams: _artRaceParams,
             maxHeap: daoAddressesByToken[revolutionToken].maxHeap
         });
 
@@ -277,7 +277,7 @@ contract RevolutionBuilder is
         emit RevolutionDeployed({
             revolutionPointsEmitter: daoAddressesByToken[revolutionToken].revolutionPointsEmitter,
             revolutionPoints: daoAddressesByToken[revolutionToken].revolutionPoints,
-            cultureIndex: daoAddressesByToken[revolutionToken].cultureIndex,
+            artRace: daoAddressesByToken[revolutionToken].artRace,
             descriptor: daoAddressesByToken[revolutionToken].descriptor,
             auction: daoAddressesByToken[revolutionToken].auction,
             maxHeap: daoAddressesByToken[revolutionToken].maxHeap,
@@ -301,7 +301,7 @@ contract RevolutionBuilder is
     /// @return auction Auction deployed address
     /// @return executor Executor deployed address
     /// @return dao DAO deployed address
-    /// @return cultureIndex ArtRace deployed address
+    /// @return artRace ArtRace deployed address
     /// @return revolutionPoints ERC-20 token deployed address
     /// @return revolutionPointsEmitter ERC-20 points emitter deployed address
     /// @return maxHeap MaxHeap deployed address
@@ -317,7 +317,7 @@ contract RevolutionBuilder is
             address auction,
             address executor,
             address dao,
-            address cultureIndex,
+            address artRace,
             address revolutionPoints,
             address revolutionPointsEmitter,
             address maxHeap,
@@ -332,7 +332,7 @@ contract RevolutionBuilder is
         executor = addresses.executor;
         dao = addresses.dao;
 
-        cultureIndex = addresses.cultureIndex;
+        artRace = addresses.artRace;
         revolutionPoints = addresses.revolutionPoints;
         revolutionPointsEmitter = addresses.revolutionPointsEmitter;
         maxHeap = addresses.maxHeap;
@@ -386,7 +386,7 @@ contract RevolutionBuilder is
             address auction,
             address executor,
             address dao,
-            address cultureIndex,
+            address artRace,
             address revolutionPoints,
             address revolutionPointsEmitter,
             address maxHeap,
@@ -400,7 +400,7 @@ contract RevolutionBuilder is
                 executor: _safeGetVersion(executor),
                 dao: _safeGetVersion(dao),
                 revolutionPoints: _safeGetVersion(revolutionPoints),
-                cultureIndex: _safeGetVersion(cultureIndex),
+                artRace: _safeGetVersion(artRace),
                 revolutionPointsEmitter: _safeGetVersion(revolutionPointsEmitter),
                 maxHeap: _safeGetVersion(maxHeap),
                 revolutionVotingPower: _safeGetVersion(revolutionVotingPower)
@@ -415,7 +415,7 @@ contract RevolutionBuilder is
                 auction: _safeGetVersion(auctionImpl),
                 executor: _safeGetVersion(executorImpl),
                 dao: _safeGetVersion(daoImpl),
-                cultureIndex: _safeGetVersion(cultureIndexImpl),
+                artRace: _safeGetVersion(artRaceImpl),
                 revolutionPoints: _safeGetVersion(revolutionPointsImpl),
                 revolutionPointsEmitter: _safeGetVersion(revolutionPointsEmitterImpl),
                 maxHeap: _safeGetVersion(maxHeapImpl),

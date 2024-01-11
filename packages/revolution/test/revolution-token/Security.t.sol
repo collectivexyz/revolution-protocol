@@ -40,7 +40,7 @@ contract TokenSecurityTest is RevolutionTokenTestSuite {
 
         // Attempt to create the piece and expect it to fail due to too many creators
         bool exceededCreatorLimit = false;
-        try cultureIndex.createPiece(metadata, creators) {
+        try artRace.createPiece(metadata, creators) {
             fail("Should fail: creator array exceeds the limit");
         } catch {
             exceededCreatorLimit = true;
@@ -146,7 +146,7 @@ contract TokenSecurityTest is RevolutionTokenTestSuite {
         creators[0] = IArtRace.CreatorBps({ creator: address(0x1), bps: 5000 });
         creators[1] = IArtRace.CreatorBps({ creator: address(0x2), bps: 4000 });
 
-        try cultureIndex.createPiece(createDefaultMetadata(), creators) {
+        try artRace.createPiece(createDefaultMetadata(), creators) {
             fail("Should fail: Total basis points do not sum up to 10000");
         } catch {
             reverted = true;
@@ -161,7 +161,7 @@ contract TokenSecurityTest is RevolutionTokenTestSuite {
         IArtRace.CreatorBps[] memory creators = new IArtRace.CreatorBps[](1);
         creators[0] = IArtRace.CreatorBps({ creator: address(0), bps: 10000 });
 
-        try cultureIndex.createPiece(createDefaultMetadata(), creators) {
+        try artRace.createPiece(createDefaultMetadata(), creators) {
             fail("Should fail: Creator array contains zero address");
         } catch {
             reverted = true;
@@ -197,16 +197,16 @@ contract TokenSecurityTest is RevolutionTokenTestSuite {
         bool reverted = false;
 
         // Create an art piece with the maximum allowed number of creators
-        IArtRace.CreatorBps[] memory creators = new IArtRace.CreatorBps[](cultureIndex.MAX_NUM_CREATORS());
+        IArtRace.CreatorBps[] memory creators = new IArtRace.CreatorBps[](artRace.MAX_NUM_CREATORS());
 
         for (uint256 i = 0; i < creators.length; i++) {
             creators[i] = IArtRace.CreatorBps({
                 creator: address(uint160(i + 1)),
-                bps: 10_000 / cultureIndex.MAX_NUM_CREATORS()
+                bps: 10_000 / artRace.MAX_NUM_CREATORS()
             });
         }
 
-        try cultureIndex.createPiece(createDefaultMetadata(), creators) {
+        try artRace.createPiece(createDefaultMetadata(), creators) {
             // This should succeed if under maximum load
         } catch {
             reverted = true;
@@ -222,8 +222,8 @@ contract TokenSecurityTest is RevolutionTokenTestSuite {
         vm.roll(vm.getBlockNumber() + 1);
 
         // Mock the ArtRace to simulate dropTopVotedPiece failure
-        address cultureIndexMock = address(new ArtRaceMock());
-        revolutionToken.setArtRace(IArtRace(cultureIndexMock));
+        address artRaceMock = address(new ArtRaceMock());
+        revolutionToken.setArtRace(IArtRace(artRaceMock));
 
         // Store current verbId before test
         uint256 supplyBefore = 0;

@@ -60,7 +60,7 @@ contract RevolutionTokenTestSuite is RevolutionBuilderTest {
         IArtRace.CreatorBps[] memory creators = new IArtRace.CreatorBps[](1);
         creators[0] = IArtRace.CreatorBps({ creator: creatorAddress, bps: creatorBps });
 
-        return cultureIndex.createPiece(metadata, creators);
+        return artRace.createPiece(metadata, creators);
     }
 
     //Utility function to create default art piece

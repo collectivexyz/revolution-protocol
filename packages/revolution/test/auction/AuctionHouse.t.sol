@@ -117,6 +117,6 @@ contract AuctionHouseTest is RevolutionBuilderTest {
             creators[i] = IArtRace.CreatorBps({ creator: creatorAddresses[i], bps: creatorBps[i] });
         }
 
-        return cultureIndex.createPiece(metadata, creators);
+        return artRace.createPiece(metadata, creators);
     }
 }

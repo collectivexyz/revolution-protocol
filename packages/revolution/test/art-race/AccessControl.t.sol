@@ -19,28 +19,28 @@ import { ERC721CheckpointableUpgradeable } from "../../src/base/ERC721Checkpoint
 /// @dev The test suite for the RevolutionToken contract
 contract ArtRaceAccessControlTest is ArtRaceTestSuite {
     function testSetQuorumVotesBPSWithinRange(uint104 newQuorumBPS) public {
-        vm.assume(newQuorumBPS <= cultureIndex.MAX_QUORUM_VOTES_BPS());
+        vm.assume(newQuorumBPS <= artRace.MAX_QUORUM_VOTES_BPS());
 
         // Set new quorum BPS by owner
-        cultureIndex._setQuorumVotesBPS(newQuorumBPS);
+        artRace._setQuorumVotesBPS(newQuorumBPS);
         vm.stopPrank();
 
         // Check if the quorum BPS is updated correctly
-        uint256 currentQuorumBPS = cultureIndex.quorumVotesBPS();
+        uint256 currentQuorumBPS = artRace.quorumVotesBPS();
         assertEq(currentQuorumBPS, newQuorumBPS, "Quorum BPS should be updated within valid range");
     }
 
     function testSetQuorumVotesBPSOutsideRange(uint104 newQuorumBPS) public {
-        uint256 currentQuorumBPS = cultureIndex.quorumVotesBPS();
-        vm.assume(newQuorumBPS > cultureIndex.MAX_QUORUM_VOTES_BPS());
+        uint256 currentQuorumBPS = artRace.quorumVotesBPS();
+        vm.assume(newQuorumBPS > artRace.MAX_QUORUM_VOTES_BPS());
 
         // Set new quorum BPS by owner
         vm.expectRevert(abi.encodeWithSignature("INVALID_QUORUM_BPS()"));
-        cultureIndex._setQuorumVotesBPS(newQuorumBPS);
+        artRace._setQuorumVotesBPS(newQuorumBPS);
         vm.stopPrank();
 
         // Check if the quorum BPS is updated correctly
-        assertEq(cultureIndex.quorumVotesBPS(), currentQuorumBPS, "Quorum BPS should be updated within valid range");
+        assertEq(artRace.quorumVotesBPS(), currentQuorumBPS, "Quorum BPS should be updated within valid range");
     }
 
     function testRevertNonOwnerSetQuorumVotesBPS() public {
@@ -51,15 +51,15 @@ contract ArtRaceAccessControlTest is ArtRaceTestSuite {
         // Attempt to set new quorum BPS by non-owner and expect revert
         vm.startPrank(nonOwner);
         vm.expectRevert();
-        cultureIndex._setQuorumVotesBPS(newQuorumBPS);
+        artRace._setQuorumVotesBPS(newQuorumBPS);
         vm.stopPrank();
     }
 
     function testDropTopVotedPieceOnlyIfQuorumIsMet(uint256 quorumBps) public {
-        vm.assume(quorumBps > 200 && quorumBps <= cultureIndex.MAX_QUORUM_VOTES_BPS());
+        vm.assume(quorumBps > 200 && quorumBps <= artRace.MAX_QUORUM_VOTES_BPS());
 
         // Set quorum BPS
-        cultureIndex._setQuorumVotesBPS(quorumBps);
+        artRace._setQuorumVotesBPS(quorumBps);
         vm.stopPrank();
 
         vm.startPrank(address(revolutionPointsEmitter));
@@ -75,23 +75,23 @@ contract ArtRaceAccessControlTest is ArtRaceTestSuite {
 
         // Vote for the piece, but do not meet the quorum
         vm.startPrank(address(this));
-        cultureIndex.vote(pieceId);
+        artRace.vote(pieceId);
 
-        emit log_address(address(cultureIndex.dropperAdmin()));
+        emit log_address(address(artRace.dropperAdmin()));
 
         // Attempt to drop the top-voted piece and expect it to fail
         vm.expectRevert(abi.encodeWithSignature("DOES_NOT_MEET_QUORUM()"));
         vm.startPrank(address(revolutionToken));
-        cultureIndex.dropTopVotedPiece();
+        artRace.dropTopVotedPiece();
 
         // Additional votes to meet/exceed the quorum
         vm.startPrank(address(0x21));
-        cultureIndex.vote(pieceId);
+        artRace.vote(pieceId);
         vm.stopPrank();
 
         // Attempt to drop the top-voted piece, should succeed
         vm.startPrank(address(revolutionToken));
-        IArtRace.ArtPieceCondensed memory droppedPiece = cultureIndex.dropTopVotedPiece();
-        assertTrue(cultureIndex.getPieceById(droppedPiece.pieceId).isDropped, "Top voted piece should be dropped");
+        IArtRace.ArtPieceCondensed memory droppedPiece = artRace.dropTopVotedPiece();
+        assertTrue(artRace.getPieceById(droppedPiece.pieceId).isDropped, "Top voted piece should be dropped");
     }
 }

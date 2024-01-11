@@ -77,19 +77,19 @@ contract ArtRace is
      * @param _initialOwner The owner of the contract, allowed to drop pieces. Commonly updated to the AuctionHouse
      * @param _maxHeap The address of the max heap contract
      * @param _dropperAdmin The address that can drop new art pieces
-     * @param _cultureIndexParams The ArtRace settings
+     * @param _artRaceParams The ArtRace settings
      */
     function initialize(
         address _votingPower,
         address _initialOwner,
         address _maxHeap,
         address _dropperAdmin,
-        IRevolutionBuilder.ArtRaceParams calldata _cultureIndexParams
+        IRevolutionBuilder.ArtRaceParams calldata _artRaceParams
     ) external initializer {
         if (msg.sender != address(manager)) revert NOT_MANAGER();
 
-        if (_cultureIndexParams.quorumVotesBPS > MAX_QUORUM_VOTES_BPS) revert INVALID_QUORUM_BPS();
-        if (_cultureIndexParams.revolutionTokenVoteWeight <= 0) revert INVALID_ERC721_VOTING_WEIGHT();
+        if (_artRaceParams.quorumVotesBPS > MAX_QUORUM_VOTES_BPS) revert INVALID_QUORUM_BPS();
+        if (_artRaceParams.revolutionTokenVoteWeight <= 0) revert INVALID_ERC721_VOTING_WEIGHT();
         if (_votingPower == address(0)) revert ADDRESS_ZERO();
         if (_initialOwner == address(0)) revert ADDRESS_ZERO();
 
@@ -97,19 +97,19 @@ contract ArtRace is
         __Ownable_init(_initialOwner);
 
         // Initialize EIP-712 support
-        __EIP712_init(string.concat(_cultureIndexParams.name, " ArtRace"), "1");
+        __EIP712_init(string.concat(_artRaceParams.name, " ArtRace"), "1");
 
         __ReentrancyGuard_init();
 
         votingPower = IRevolutionVotingPower(_votingPower);
-        revolutionTokenVoteWeight = _cultureIndexParams.revolutionTokenVoteWeight;
-        name = _cultureIndexParams.name;
-        description = _cultureIndexParams.description;
-        quorumVotesBPS = _cultureIndexParams.quorumVotesBPS;
-        minVoteWeight = _cultureIndexParams.minVoteWeight;
+        revolutionTokenVoteWeight = _artRaceParams.revolutionTokenVoteWeight;
+        name = _artRaceParams.name;
+        description = _artRaceParams.description;
+        quorumVotesBPS = _artRaceParams.quorumVotesBPS;
+        minVoteWeight = _artRaceParams.minVoteWeight;
         dropperAdmin = _dropperAdmin;
 
-        emit QuorumVotesBPSSet(quorumVotesBPS, _cultureIndexParams.quorumVotesBPS);
+        emit QuorumVotesBPSSet(quorumVotesBPS, _artRaceParams.quorumVotesBPS);
 
         // Create maxHeap
         maxHeap = MaxHeap(_maxHeap);

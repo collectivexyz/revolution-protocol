@@ -31,7 +31,7 @@ contract DeployContracts is Script {
         address auctionImpl;
         address executorImpl;
         address daoImpl;
-        address cultureIndexImpl;
+        address artRaceImpl;
         address maxHeapImpl;
         address revolutionPointsImpl;
         address revolutionPointsEmitterImpl;
@@ -94,7 +94,7 @@ contract DeployContracts is Script {
                 deployedContracts.auctionImpl,
                 deployedContracts.executorImpl,
                 deployedContracts.daoImpl,
-                deployedContracts.cultureIndexImpl,
+                deployedContracts.artRaceImpl,
                 deployedContracts.revolutionPointsImpl,
                 deployedContracts.revolutionPointsEmitterImpl,
                 deployedContracts.maxHeapImpl,
@@ -119,7 +119,7 @@ contract DeployContracts is Script {
         deployedContracts.auctionImpl = address(new AuctionHouse(address(deployedContracts.builderProxy)));
         deployedContracts.executorImpl = address(new DAOExecutor(address(deployedContracts.builderProxy)));
         deployedContracts.daoImpl = address(new RevolutionDAOLogicV1(address(deployedContracts.builderProxy)));
-        deployedContracts.cultureIndexImpl = address(new ArtRace(address(deployedContracts.builderProxy)));
+        deployedContracts.artRaceImpl = address(new ArtRace(address(deployedContracts.builderProxy)));
         deployedContracts.maxHeapImpl = address(new MaxHeap(address(deployedContracts.builderProxy)));
         deployedContracts.revolutionPointsImpl = address(new RevolutionPoints(address(deployedContracts.builderProxy)));
         deployedContracts.revolutionPointsEmitterImpl = address(
@@ -169,9 +169,7 @@ contract DeployContracts is Script {
         );
         vm.writeLine(
             filePath,
-            string(
-                abi.encodePacked("Culture Index implementation: ", addressToString(deployedContracts.cultureIndexImpl))
-            )
+            string(abi.encodePacked("Culture Index implementation: ", addressToString(deployedContracts.artRaceImpl)))
         );
         vm.writeLine(
             filePath,

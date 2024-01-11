@@ -35,7 +35,7 @@ contract ArtRaceEdgeCaseTest is ArtRaceTestSuite {
             }
 
             vm.prank(voter);
-            cultureIndex.vote(pieceId);
+            artRace.vote(pieceId);
         }
     }
 
@@ -59,7 +59,7 @@ contract ArtRaceEdgeCaseTest is ArtRaceTestSuite {
 
         //drop top voted piece
         vm.prank(address(revolutionToken));
-        cultureIndex.dropTopVotedPiece();
+        artRace.dropTopVotedPiece();
 
         // calculate gas used
         uint256 gasUsed = gasLeft - gasleft();
@@ -80,7 +80,7 @@ contract ArtRaceEdgeCaseTest is ArtRaceTestSuite {
         //drop top voted piece
         vm.prank(address(revolutionToken));
 
-        cultureIndex.dropTopVotedPiece();
+        artRace.dropTopVotedPiece();
 
         // calculate gas used
         uint256 gasUsed100 = gasLeft - gasleft();

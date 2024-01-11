@@ -22,11 +22,11 @@ contract MaxHeapTestSuite is RevolutionBuilderTest {
 
         address maxHeapTesterAddr = address(new ERC1967Proxy(maxHeapTesterImpl, ""));
 
-        MaxHeapTester(maxHeapTesterAddr).initialize(address(dao), address(cultureIndex));
+        MaxHeapTester(maxHeapTesterAddr).initialize(address(dao), address(artRace));
 
         maxHeapTester = MaxHeapTester(maxHeapTesterAddr);
 
-        vm.startPrank(address(cultureIndex));
+        vm.startPrank(address(artRace));
     }
 
     function testOldHeapEntriesNotRemoved() public {
@@ -121,7 +121,7 @@ contract MaxHeapTestSuite is RevolutionBuilderTest {
         }
         assertTrue(hasErrored, "updateValue should have errored");
 
-        vm.startPrank(address(cultureIndex));
+        vm.startPrank(address(artRace));
         maxHeap.updateValue(1, 20); // No error expected
     }
 
@@ -138,7 +138,7 @@ contract MaxHeapTestSuite is RevolutionBuilderTest {
         }
         assertTrue(hasErrored, "insert should have errored");
 
-        vm.startPrank(address(cultureIndex));
+        vm.startPrank(address(artRace));
         maxHeap.insert(2, 15); // No error expected
     }
 
@@ -160,7 +160,7 @@ contract MaxHeapTestSuite is RevolutionBuilderTest {
         assertTrue(hasErrored, "extractMax should have errored");
 
         // Call extractMax as the owner and expect it to succeed
-        vm.startPrank(address(cultureIndex)); // set the owner to be the caller for the next transaction
+        vm.startPrank(address(artRace)); // set the owner to be the caller for the next transaction
         maxHeap.extractMax(); // this should succeed without reverting
     }
 

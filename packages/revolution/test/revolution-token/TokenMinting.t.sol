@@ -33,10 +33,10 @@ contract TokenMintingTest is RevolutionTokenTestSuite {
         vm.roll(vm.getBlockNumber() + 2);
 
         vm.startPrank(address(this));
-        cultureIndex.vote(pieceId); // Simulate voting for the piece to make it top-voted
+        artRace.vote(pieceId); // Simulate voting for the piece to make it top-voted
 
         // Fetch the top voted piece before minting
-        IArtRace.ArtPiece memory topVotedPieceBeforeMint = cultureIndex.getTopVotedPiece();
+        IArtRace.ArtPiece memory topVotedPieceBeforeMint = artRace.getTopVotedPiece();
 
         // Mint a token
         vm.startPrank(address(auction));
@@ -168,9 +168,9 @@ contract TokenMintingTest is RevolutionTokenTestSuite {
 
         vm.startPrank(address(this));
         if (voteWeight == 0) vm.expectRevert(abi.encodeWithSignature("WEIGHT_TOO_LOW()"));
-        cultureIndex.vote(pieceId1);
+        artRace.vote(pieceId1);
 
-        uint256 expectedQuorum = ((10_000 + voteWeight) * cultureIndex.quorumVotesBPS()) / 10_000;
+        uint256 expectedQuorum = ((10_000 + voteWeight) * artRace.quorumVotesBPS()) / 10_000;
 
         bool shouldRevertMint = voteWeight < expectedQuorum;
 
@@ -182,7 +182,7 @@ contract TokenMintingTest is RevolutionTokenTestSuite {
 
         vm.startPrank(address(this));
         if (voteWeight == 0) vm.expectRevert(abi.encodeWithSignature("WEIGHT_TOO_LOW()"));
-        cultureIndex.vote(pieceId2);
+        artRace.vote(pieceId2);
 
         vm.startPrank(address(auction));
         if (shouldRevertMint) vm.expectRevert("dropTopVotedPiece failed");
@@ -196,7 +196,7 @@ contract TokenMintingTest is RevolutionTokenTestSuite {
         createDefaultArtPiece();
         vm.roll(vm.getBlockNumber() + 1);
 
-        (uint256 pieceId, IArtRace.ArtPieceMetadata memory metadata, , , ) = cultureIndex.pieces(0);
+        (uint256 pieceId, IArtRace.ArtPieceMetadata memory metadata, , , ) = artRace.pieces(0);
 
         emit log_uint(pieceId);
 
@@ -245,7 +245,7 @@ contract TokenMintingTest is RevolutionTokenTestSuite {
         vm.roll(vm.getBlockNumber() + 1);
 
         uint256 tokenId = revolutionToken.mint();
-        (, IArtRace.ArtPieceMetadata memory metadata, , , ) = cultureIndex.pieces(artPieceId);
+        (, IArtRace.ArtPieceMetadata memory metadata, , , ) = artRace.pieces(artPieceId);
         // Assuming the descriptor returns a fixed URI for the given tokenId
         string memory expectedTokenURI = descriptor.tokenURI(tokenId, metadata);
         assertEq(
@@ -268,7 +268,7 @@ contract TokenMintingTest is RevolutionTokenTestSuite {
         uint256 pieceId = createDefaultArtPiece(); // This function should exist within the test contract
 
         vm.startPrank(address(this));
-        cultureIndex.vote(pieceId); // Assuming vote function exists and we cast 10 votes
+        artRace.vote(pieceId); // Assuming vote function exists and we cast 10 votes
 
         // Mint a token
         vm.startPrank(address(auction));

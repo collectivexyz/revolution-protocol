@@ -22,7 +22,7 @@ contract ArtRaceArtMetadataTest is ArtRaceTestSuite {
 
     // Test for exceeding the maximum name length
     function test__ExceedingNameLength() public {
-        string memory longName = createLongString(cultureIndex.MAX_NAME_LENGTH() + 1);
+        string memory longName = createLongString(artRace.MAX_NAME_LENGTH() + 1);
         (ArtRace.ArtPieceMetadata memory metadata, IArtRace.CreatorBps[] memory creators) = createArtPieceTuple(
             longName,
             "Valid Description",
@@ -34,12 +34,12 @@ contract ArtRaceArtMetadataTest is ArtRaceTestSuite {
             10000
         );
         vm.expectRevert(abi.encodeWithSignature("INVALID_MEDIA_METADATA()"));
-        cultureIndex.createPiece(metadata, creators);
+        artRace.createPiece(metadata, creators);
     }
 
     // Test for exceeding the maximum description length
     function test__ExceedingDescriptionLength() public {
-        string memory longDescription = createLongString(cultureIndex.MAX_DESCRIPTION_LENGTH() + 1);
+        string memory longDescription = createLongString(artRace.MAX_DESCRIPTION_LENGTH() + 1);
         (ArtRace.ArtPieceMetadata memory metadata, IArtRace.CreatorBps[] memory creators) = createArtPieceTuple(
             "Valid Name",
             longDescription,
@@ -51,11 +51,11 @@ contract ArtRaceArtMetadataTest is ArtRaceTestSuite {
             10000
         );
         vm.expectRevert(abi.encodeWithSignature("INVALID_MEDIA_METADATA()"));
-        cultureIndex.createPiece(metadata, creators);
+        artRace.createPiece(metadata, creators);
     }
 
     function test__ExceedingImageLength() public {
-        string memory longImageUrl = createLongString(cultureIndex.MAX_IMAGE_LENGTH() + 1);
+        string memory longImageUrl = createLongString(artRace.MAX_IMAGE_LENGTH() + 1);
         (ArtRace.ArtPieceMetadata memory metadata, IArtRace.CreatorBps[] memory creators) = createArtPieceTuple(
             "Valid Name",
             "Valid Description",
@@ -67,11 +67,11 @@ contract ArtRaceArtMetadataTest is ArtRaceTestSuite {
             10000
         );
         vm.expectRevert(abi.encodeWithSignature("INVALID_MEDIA_METADATA()"));
-        cultureIndex.createPiece(metadata, creators);
+        artRace.createPiece(metadata, creators);
     }
 
     function test__ExceedingAnimationLength() public {
-        string memory longAnimationUrl = createLongString(cultureIndex.MAX_ANIMATION_URL_LENGTH() + 1);
+        string memory longAnimationUrl = createLongString(artRace.MAX_ANIMATION_URL_LENGTH() + 1);
         (ArtRace.ArtPieceMetadata memory metadata, IArtRace.CreatorBps[] memory creators) = createArtPieceTuple(
             "Valid Name",
             "Valid Description",
@@ -83,11 +83,11 @@ contract ArtRaceArtMetadataTest is ArtRaceTestSuite {
             10000
         );
         vm.expectRevert(abi.encodeWithSignature("INVALID_MEDIA_METADATA()"));
-        cultureIndex.createPiece(metadata, creators);
+        artRace.createPiece(metadata, creators);
     }
 
     function test__ExceedingAudioLength() public {
-        string memory longAudioUrl = createLongString(cultureIndex.MAX_ANIMATION_URL_LENGTH() + 1);
+        string memory longAudioUrl = createLongString(artRace.MAX_ANIMATION_URL_LENGTH() + 1);
         (ArtRace.ArtPieceMetadata memory metadata, IArtRace.CreatorBps[] memory creators) = createArtPieceTuple(
             "Valid Name",
             "Valid Description",
@@ -99,11 +99,11 @@ contract ArtRaceArtMetadataTest is ArtRaceTestSuite {
             10000
         );
         vm.expectRevert(abi.encodeWithSignature("INVALID_MEDIA_METADATA()"));
-        cultureIndex.createPiece(metadata, creators);
+        artRace.createPiece(metadata, creators);
     }
 
     function test__ExceedingTextLength() public {
-        string memory longText = createLongString(cultureIndex.MAX_TEXT_LENGTH() + 1);
+        string memory longText = createLongString(artRace.MAX_TEXT_LENGTH() + 1);
         (ArtRace.ArtPieceMetadata memory metadata, IArtRace.CreatorBps[] memory creators) = createArtPieceTuple(
             "Valid Name",
             "Valid Description",
@@ -115,7 +115,7 @@ contract ArtRaceArtMetadataTest is ArtRaceTestSuite {
             10000
         );
         vm.expectRevert(abi.encodeWithSignature("INVALID_MEDIA_METADATA()"));
-        cultureIndex.createPiece(metadata, creators);
+        artRace.createPiece(metadata, creators);
     }
 
     function test__MissingMediaDataAudio() public {
@@ -130,7 +130,7 @@ contract ArtRaceArtMetadataTest is ArtRaceTestSuite {
             10000
         );
         vm.expectRevert(abi.encodeWithSignature("INVALID_MEDIA_METADATA()"));
-        cultureIndex.createPiece(metadata, creators);
+        artRace.createPiece(metadata, creators);
     }
 
     function test__InvalidImagePrefix() public {
@@ -145,7 +145,7 @@ contract ArtRaceArtMetadataTest is ArtRaceTestSuite {
             10000
         );
         vm.expectRevert(abi.encodeWithSignature("INVALID_MEDIA_METADATA()"));
-        cultureIndex.createPiece(metadata, creators);
+        artRace.createPiece(metadata, creators);
     }
 
     function test__ValidImagePrefixIpfs() public {
@@ -160,7 +160,7 @@ contract ArtRaceArtMetadataTest is ArtRaceTestSuite {
             10000
         );
 
-        cultureIndex.createPiece(metadata, creators);
+        artRace.createPiece(metadata, creators);
     }
 
     function test__ValidImagePrefixSvg() public {
@@ -175,7 +175,7 @@ contract ArtRaceArtMetadataTest is ArtRaceTestSuite {
             10000
         );
 
-        cultureIndex.createPiece(metadata, creators);
+        artRace.createPiece(metadata, creators);
     }
 
     function test__InvalidBothHashesAnimation() public {
@@ -190,7 +190,7 @@ contract ArtRaceArtMetadataTest is ArtRaceTestSuite {
             10000
         );
         vm.expectRevert(abi.encodeWithSignature("INVALID_MEDIA_METADATA()"));
-        cultureIndex.createPiece(metadata, creators);
+        artRace.createPiece(metadata, creators);
     }
 
     function test__InvalidBothHashesImage() public {
@@ -205,7 +205,7 @@ contract ArtRaceArtMetadataTest is ArtRaceTestSuite {
             10000
         );
         vm.expectRevert(abi.encodeWithSignature("INVALID_MEDIA_METADATA()"));
-        cultureIndex.createPiece(metadata, creators);
+        artRace.createPiece(metadata, creators);
     }
 
     function test__ValidHashesAnimation_SVG() public {
@@ -220,7 +220,7 @@ contract ArtRaceArtMetadataTest is ArtRaceTestSuite {
             10000
         );
 
-        cultureIndex.createPiece(metadata, creators);
+        artRace.createPiece(metadata, creators);
     }
 
     function test__InvalidOneHashImage_1() public {
@@ -235,7 +235,7 @@ contract ArtRaceArtMetadataTest is ArtRaceTestSuite {
             10000
         );
         vm.expectRevert(abi.encodeWithSignature("INVALID_MEDIA_METADATA()"));
-        cultureIndex.createPiece(metadata, creators);
+        artRace.createPiece(metadata, creators);
     }
 
     function test__InvalidOneHashImage_2() public {
@@ -250,7 +250,7 @@ contract ArtRaceArtMetadataTest is ArtRaceTestSuite {
             10000
         );
         vm.expectRevert(abi.encodeWithSignature("INVALID_MEDIA_METADATA()"));
-        cultureIndex.createPiece(metadata, creators);
+        artRace.createPiece(metadata, creators);
     }
 
     function test__InvalidOneHashAnimation_1() public {
@@ -265,7 +265,7 @@ contract ArtRaceArtMetadataTest is ArtRaceTestSuite {
             10000
         );
         vm.expectRevert(abi.encodeWithSignature("INVALID_MEDIA_METADATA()"));
-        cultureIndex.createPiece(metadata, creators);
+        artRace.createPiece(metadata, creators);
     }
 
     function test__InvalidOneHashAnimation_2() public {
@@ -280,7 +280,7 @@ contract ArtRaceArtMetadataTest is ArtRaceTestSuite {
             10000
         );
         vm.expectRevert(abi.encodeWithSignature("INVALID_MEDIA_METADATA()"));
-        cultureIndex.createPiece(metadata, creators);
+        artRace.createPiece(metadata, creators);
     }
 
     function test__InvalidImagePrefixFullHash() public {
@@ -295,7 +295,7 @@ contract ArtRaceArtMetadataTest is ArtRaceTestSuite {
             10000
         );
         vm.expectRevert(abi.encodeWithSignature("INVALID_MEDIA_METADATA()"));
-        cultureIndex.createPiece(metadata, creators);
+        artRace.createPiece(metadata, creators);
     }
 
     function test__InvalidAnimationPrefixFullHash() public {
@@ -310,7 +310,7 @@ contract ArtRaceArtMetadataTest is ArtRaceTestSuite {
             10000
         );
         vm.expectRevert(abi.encodeWithSignature("INVALID_MEDIA_METADATA()"));
-        cultureIndex.createPiece(metadata, creators);
+        artRace.createPiece(metadata, creators);
     }
 
     function test__InvalidAnimationPrefix() public {
@@ -325,7 +325,7 @@ contract ArtRaceArtMetadataTest is ArtRaceTestSuite {
             10000
         );
         vm.expectRevert(abi.encodeWithSignature("INVALID_MEDIA_METADATA()"));
-        cultureIndex.createPiece(metadata, creators);
+        artRace.createPiece(metadata, creators);
     }
 
     function test__MissingMediaDataText() public {
@@ -340,6 +340,6 @@ contract ArtRaceArtMetadataTest is ArtRaceTestSuite {
             10000
         );
         vm.expectRevert(abi.encodeWithSignature("INVALID_MEDIA_METADATA()"));
-        cultureIndex.createPiece(metadata, creators);
+        artRace.createPiece(metadata, creators);
     }
 }
