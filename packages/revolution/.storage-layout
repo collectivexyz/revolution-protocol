@@ -5,21 +5,21 @@
 ➡ ArtRace
 =======================
 
-| Name                      | Type                                                              | Slot | Offset | Bytes | Contract                                        |
-|---------------------------|-------------------------------------------------------------------|------|--------|-------|-------------------------------------------------|
-| nonces                    | mapping(address => uint256)                                       | 0    | 0      | 32    | src/art-race/ArtRace.sol:ArtRace |
-| maxHeap                   | contract MaxHeap                                                  | 1    | 0      | 20    | src/art-race/ArtRace.sol:ArtRace |
-| votingPower               | contract IRevolutionVotingPower                                   | 2    | 0      | 20    | src/art-race/ArtRace.sol:ArtRace |
-| minVoteWeight             | uint256                                                           | 3    | 0      | 32    | src/art-race/ArtRace.sol:ArtRace |
-| quorumVotesBPS            | uint256                                                           | 4    | 0      | 32    | src/art-race/ArtRace.sol:ArtRace |
-| name                      | string                                                            | 5    | 0      | 32    | src/art-race/ArtRace.sol:ArtRace |
-| description               | string                                                            | 6    | 0      | 32    | src/art-race/ArtRace.sol:ArtRace |
+| Name                      | Type                                                         | Slot | Offset | Bytes | Contract                         |
+|---------------------------|--------------------------------------------------------------|------|--------|-------|----------------------------------|
+| nonces                    | mapping(address => uint256)                                  | 0    | 0      | 32    | src/art-race/ArtRace.sol:ArtRace |
+| maxHeap                   | contract MaxHeap                                             | 1    | 0      | 20    | src/art-race/ArtRace.sol:ArtRace |
+| votingPower               | contract IRevolutionVotingPower                              | 2    | 0      | 20    | src/art-race/ArtRace.sol:ArtRace |
+| minVoteWeight             | uint256                                                      | 3    | 0      | 32    | src/art-race/ArtRace.sol:ArtRace |
+| quorumVotesBPS            | uint256                                                      | 4    | 0      | 32    | src/art-race/ArtRace.sol:ArtRace |
+| name                      | string                                                       | 5    | 0      | 32    | src/art-race/ArtRace.sol:ArtRace |
+| description               | string                                                       | 6    | 0      | 32    | src/art-race/ArtRace.sol:ArtRace |
 | pieces                    | mapping(uint256 => struct IArtRace.ArtPiece)                 | 7    | 0      | 32    | src/art-race/ArtRace.sol:ArtRace |
-| _currentPieceId           | uint256                                                           | 8    | 0      | 32    | src/art-race/ArtRace.sol:ArtRace |
+| _currentPieceId           | uint256                                                      | 8    | 0      | 32    | src/art-race/ArtRace.sol:ArtRace |
 | votes                     | mapping(uint256 => mapping(address => struct IArtRace.Vote)) | 9    | 0      | 32    | src/art-race/ArtRace.sol:ArtRace |
-| totalVoteWeights          | mapping(uint256 => uint256)                                       | 10   | 0      | 32    | src/art-race/ArtRace.sol:ArtRace |
-| dropperAdmin              | address                                                           | 11   | 0      | 20    | src/art-race/ArtRace.sol:ArtRace |
-| revolutionTokenVoteWeight | uint256                                                           | 12   | 0      | 32    | src/art-race/ArtRace.sol:ArtRace |
+| totalVoteWeights          | mapping(uint256 => uint256)                                  | 10   | 0      | 32    | src/art-race/ArtRace.sol:ArtRace |
+| dropperAdmin              | address                                                      | 11   | 0      | 20    | src/art-race/ArtRace.sol:ArtRace |
+| revolutionTokenVoteWeight | uint256                                                      | 12   | 0      | 32    | src/art-race/ArtRace.sol:ArtRace |
 
 =======================
 ➡ RevolutionBuilder
@@ -120,8 +120,8 @@
 ➡ MaxHeap
 =======================
 
-| Name  | Type                                    | Slot | Offset | Bytes | Contract                              |
-|-------|-----------------------------------------|------|--------|-------|---------------------------------------|
+| Name  | Type                                    | Slot | Offset | Bytes | Contract                         |
+|-------|-----------------------------------------|------|--------|-------|----------------------------------|
 | admin | address                                 | 0    | 0      | 20    | src/art-race/MaxHeap.sol:MaxHeap |
 | heap  | mapping(uint256 => uint256)             | 1    | 0      | 32    | src/art-race/MaxHeap.sol:MaxHeap |
 | size  | uint256                                 | 2    | 0      | 32    | src/art-race/MaxHeap.sol:MaxHeap |
@@ -131,17 +131,17 @@
 ➡ RevolutionToken
 =======================
 
-| Name                 | Type                        | Slot | Offset | Bytes | Contract                                |
-|----------------------|-----------------------------|------|--------|-------|-----------------------------------------|
-| minter               | address                     | 0    | 0      | 20    | src/RevolutionToken.sol:RevolutionToken |
-| descriptor           | contract IDescriptorMinimal | 1    | 0      | 20    | src/RevolutionToken.sol:RevolutionToken |
-| artRace         | contract IArtRace      | 2    | 0      | 20    | src/RevolutionToken.sol:RevolutionToken |
-| isMinterLocked       | bool                        | 2    | 20     | 1     | src/RevolutionToken.sol:RevolutionToken |
-| isArtRaceLocked | bool                        | 2    | 21     | 1     | src/RevolutionToken.sol:RevolutionToken |
-| isDescriptorLocked   | bool                        | 2    | 22     | 1     | src/RevolutionToken.sol:RevolutionToken |
-| _currentVerbId       | uint256                     | 3    | 0      | 32    | src/RevolutionToken.sol:RevolutionToken |
-| _contractURIHash     | string                      | 4    | 0      | 32    | src/RevolutionToken.sol:RevolutionToken |
-| artPieces            | mapping(uint256 => uint256) | 5    | 0      | 32    | src/RevolutionToken.sol:RevolutionToken |
+| Name               | Type                        | Slot | Offset | Bytes | Contract                                |
+|--------------------|-----------------------------|------|--------|-------|-----------------------------------------|
+| minter             | address                     | 0    | 0      | 20    | src/RevolutionToken.sol:RevolutionToken |
+| descriptor         | contract IDescriptorMinimal | 1    | 0      | 20    | src/RevolutionToken.sol:RevolutionToken |
+| artRace            | contract IArtRace           | 2    | 0      | 20    | src/RevolutionToken.sol:RevolutionToken |
+| isMinterLocked     | bool                        | 2    | 20     | 1     | src/RevolutionToken.sol:RevolutionToken |
+| isArtRaceLocked    | bool                        | 2    | 21     | 1     | src/RevolutionToken.sol:RevolutionToken |
+| isDescriptorLocked | bool                        | 2    | 22     | 1     | src/RevolutionToken.sol:RevolutionToken |
+| _currentVerbId     | uint256                     | 3    | 0      | 32    | src/RevolutionToken.sol:RevolutionToken |
+| _contractURIHash   | string                      | 4    | 0      | 32    | src/RevolutionToken.sol:RevolutionToken |
+| artPieces          | mapping(uint256 => uint256) | 5    | 0      | 32    | src/RevolutionToken.sol:RevolutionToken |
 
 =======================
 ➡ Descriptor
