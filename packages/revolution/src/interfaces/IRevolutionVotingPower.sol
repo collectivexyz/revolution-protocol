@@ -5,7 +5,7 @@ pragma solidity ^0.8.22;
 import { IERC20 } from "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import { IRevolutionToken } from "./IRevolutionToken.sol";
 import { IRevolutionBuilder } from "./IRevolutionBuilder.sol";
-import { ERC20VotesUpgradeable } from "../base/erc20/ERC20VotesUpgradeable.sol";
+import { IRevolutionPoints } from "./IRevolutionPoints.sol";
 
 /**
  * @title IRevolutionVotingPowerEvents
@@ -16,7 +16,7 @@ interface IRevolutionVotingPowerEvents {
 
     event ERC721VotingPowerUpdated(uint256 oldERC721VotingPower, uint256 newERC721VotingPower);
 
-    event ERC20VotingTokenUpdated(ERC20VotesUpgradeable ERC20VotingToken);
+    event ERC20VotingTokenUpdated(address erc20VotingToken);
 
     event ERC20VotingPowerUpdated(uint256 oldERC20VotingPower, uint256 newERC20VotingPower);
 }
@@ -42,7 +42,7 @@ interface IRevolutionVotingPower is IRevolutionVotingPowerEvents {
         uint256 revolutionTokenVoteWeight
     ) external;
 
-    function points() external returns (ERC20VotesUpgradeable);
+    function points() external returns (IRevolutionPoints);
 
     function token() external returns (IRevolutionToken);
 

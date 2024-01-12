@@ -20,18 +20,21 @@ import { PausableUpgradeable } from "@openzeppelin/contracts-upgradeable/utils/P
 import { Initializable } from "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
 import { EIP712Upgradeable } from "@openzeppelin/contracts-upgradeable/utils/cryptography/EIP712Upgradeable.sol";
 import { ReentrancyGuardUpgradeable } from "@openzeppelin/contracts-upgradeable/utils/ReentrancyGuardUpgradeable.sol";
+import { IERC20 } from "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 
 import { ERC20VotesUpgradeable } from "./base/erc20/ERC20VotesUpgradeable.sol";
+import { VersionedContract } from "./version/VersionedContract.sol";
+import { ERC20Upgradeable } from "./base/erc20/ERC20Upgradeable.sol";
 
 import { IRevolutionBuilder } from "./interfaces/IRevolutionBuilder.sol";
 import { IRevolutionPoints } from "./interfaces/IRevolutionPoints.sol";
 
 contract RevolutionPoints is
     IRevolutionPoints,
-    Initializable,
-    ERC20VotesUpgradeable,
+    VersionedContract,
     Ownable2StepUpgradeable,
-    ReentrancyGuardUpgradeable
+    ReentrancyGuardUpgradeable,
+    ERC20VotesUpgradeable
 {
     // An address who has permissions to mint Revolution Points
     address public minter;
@@ -131,28 +134,28 @@ contract RevolutionPoints is
     /**
      * @dev Not allowed
      */
-    function transfer(address, uint256) public virtual override returns (bool) {
+    function transfer(address, uint256) public virtual override(ERC20Upgradeable, IERC20) returns (bool) {
         revert TRANSFER_NOT_ALLOWED();
     }
 
     /**
      * @dev Not allowed
      */
-    function _transfer(address from, address to, uint256 value) internal override {
+    function _transfer(address, address, uint256) internal pure override {
         revert TRANSFER_NOT_ALLOWED();
     }
 
     /**
      * @dev Not allowed
      */
-    function transferFrom(address, address, uint256) public virtual override returns (bool) {
+    function transferFrom(address, address, uint256) public virtual override(ERC20Upgradeable, IERC20) returns (bool) {
         revert TRANSFER_NOT_ALLOWED();
     }
 
     /**
      * @dev Not allowed
      */
-    function approve(address, uint256) public virtual override returns (bool) {
+    function approve(address, uint256) public virtual override(ERC20Upgradeable, IERC20) returns (bool) {
         revert TRANSFER_NOT_ALLOWED();
     }
 
@@ -178,21 +181,21 @@ contract RevolutionPoints is
     /**
      * @dev Not allowed
      */
-    function _approve(address owner, address spender, uint256 value) internal override {
+    function _approve(address, address, uint256) internal pure override {
         revert TRANSFER_NOT_ALLOWED();
     }
 
     /**
      * @dev Not allowed
      */
-    function _approve(address owner, address spender, uint256 value, bool emitEvent) internal virtual override {
+    function _approve(address, address, uint256, bool) internal virtual override {
         revert TRANSFER_NOT_ALLOWED();
     }
 
     /**
      * @dev Not allowed
      */
-    function _spendAllowance(address owner, address spender, uint256 value) internal virtual override {
+    function _spendAllowance(address, address, uint256) internal virtual override {
         revert TRANSFER_NOT_ALLOWED();
     }
 
