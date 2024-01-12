@@ -15,6 +15,7 @@ import { CultureIndex } from "../src/culture-index/CultureIndex.sol";
 import { RevolutionProtocolRewards } from "@cobuild/protocol-rewards/src/RevolutionProtocolRewards.sol";
 import { MaxHeap } from "../src/culture-index/MaxHeap.sol";
 import { RevolutionPoints } from "../src/RevolutionPoints.sol";
+import { RevolutionVotingPower } from "../src/RevolutionVotingPower.sol";
 import { RevolutionPointsEmitter } from "../src/RevolutionPointsEmitter.sol";
 import { IDAOExecutor } from "../src/governance/RevolutionDAOInterfaces.sol";
 import { ERC1967Proxy } from "../src/libs/proxy/ERC1967Proxy.sol";
@@ -111,7 +112,7 @@ contract DeployContracts is Script {
             new RevolutionPointsEmitter(address(deployedContracts.builderProxy), protocolRewards, rewardsRecipient)
         );
         deployedContracts.revolutionVotingPowerImpl = address(
-            new RevolutionToken(address(deployedContracts.builderProxy))
+            new RevolutionVotingPower(address(deployedContracts.builderProxy))
         );
 
         deployedContracts.builderImpl = address(
