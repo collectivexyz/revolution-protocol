@@ -126,6 +126,9 @@ contract RevolutionBuilderTest is Test {
 
         vm.prank(revolutionDAO);
         manager.upgradeTo(managerImpl);
+
+        vm.prank(revolutionDAO);
+        manager.initialize(revolutionDAO);
     }
 
     ///                                                          ///

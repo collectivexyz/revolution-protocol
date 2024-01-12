@@ -124,7 +124,7 @@ contract RevolutionBuilder is
     /// @param _newOwner The owner address to set (will be transferred to the Revolution DAO once its deployed)
     function initialize(address _newOwner) external initializer {
         // Ensure an owner is specified
-        require(_newOwner != address(0), "Owner address cannot be 0x0");
+        if (_newOwner == address(0)) revert INVALID_ZERO_ADDRESS();
 
         // Set the contract owner
         __Ownable_init(_newOwner);
@@ -160,6 +160,20 @@ contract RevolutionBuilder is
             });
     }
 
+    /// @notice a test deploy function that just returns the initial owner, so we can test this execution reverted bug
+    function testDeploy(
+        address _initialOwner,
+        address _weth,
+        RevolutionTokenParams calldata _revolutionTokenParams,
+        AuctionParams calldata _auctionParams,
+        GovParams calldata _govParams,
+        CultureIndexParams calldata _cultureIndexParams,
+        RevolutionPointsParams calldata _revolutionPointsParams,
+        RevolutionVotingPowerParams calldata _revolutionVotingPowerParams
+    ) external returns (address) {
+        return _initialOwner;
+    }
+
     /// @notice Deploys a DAO with custom token, auction, emitter, revolution points, and governance settings
     /// @param _initialOwner The initial owner address
     /// @param _weth The WETH address
@@ -179,7 +193,7 @@ contract RevolutionBuilder is
         RevolutionPointsParams calldata _revolutionPointsParams,
         RevolutionVotingPowerParams calldata _revolutionVotingPowerParams
     ) external returns (DAOAddresses memory) {
-        require(_initialOwner != address(0), "Initial owner cannot be 0x0");
+        if (_initialOwner == address(0)) revert INVALID_ZERO_ADDRESS();
 
         InitialProxySetup memory initialSetup = _setupInitialProxies(_govParams);
 
