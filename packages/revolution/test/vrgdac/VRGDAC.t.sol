@@ -9,8 +9,6 @@ import { toDaysWadUnsafe, unsafeWadDiv, wadLn, wadExp, wadMul } from "../../src/
 import { console2 } from "forge-std/console2.sol";
 
 contract PointsTestSuite is RevolutionBuilderTest {
-    event Log(string, uint);
-
     function setUp() public override {
         super.setUp();
         super.setMockParams();

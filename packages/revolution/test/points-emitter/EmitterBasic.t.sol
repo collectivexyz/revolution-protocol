@@ -199,8 +199,6 @@ contract PointsEmitterBasicTest is PointsEmitterTest {
                 deployer: address(0)
             })
         );
-
-        emit Log("Balance: ", revolutionPointsEmitter.balanceOf(address(1)));
     }
 
     function testBuyTokenPriceIncreases() public {

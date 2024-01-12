@@ -8,8 +8,6 @@ import { IRevolutionBuilder } from "../../src/interfaces/IRevolutionBuilder.sol"
 import { Ownable2StepUpgradeable } from "@openzeppelin/contracts-upgradeable/access/Ownable2StepUpgradeable.sol";
 
 contract PointsTestSuite is RevolutionBuilderTest {
-    event Log(string, uint);
-
     function setUp() public override {
         super.setUp();
         super.setMockParams();
@@ -124,8 +122,6 @@ contract PointsTestSuite is RevolutionBuilderTest {
 
         // Check total supply
         uint256 totalSupply = revolutionPoints.totalSupply();
-
-        emit Log("totalSupply", totalSupply);
 
         assertEq(totalSupply, mintAmount1 + mintAmount1 / 10, "Total supply should equal sum of balances");
 
