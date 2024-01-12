@@ -160,20 +160,6 @@ contract RevolutionBuilder is
             });
     }
 
-    /// @notice a test deploy function that just returns the initial owner, so we can test this execution reverted bug
-    function testDeploy(
-        address _initialOwner,
-        address _weth,
-        RevolutionTokenParams calldata _revolutionTokenParams,
-        AuctionParams calldata _auctionParams,
-        GovParams calldata _govParams,
-        CultureIndexParams calldata _cultureIndexParams,
-        RevolutionPointsParams calldata _revolutionPointsParams,
-        RevolutionVotingPowerParams calldata _revolutionVotingPowerParams
-    ) external returns (address) {
-        return _initialOwner;
-    }
-
     /// @notice Deploys a DAO with custom token, auction, emitter, revolution points, and governance settings
     /// @param _initialOwner The initial owner address
     /// @param _weth The WETH address
