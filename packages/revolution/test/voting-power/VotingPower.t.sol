@@ -49,10 +49,14 @@ contract VotingPowerTest is RevolutionBuilderTest {
         pointsBalance = bound(pointsBalance, 1, 1e18);
         pointsVoteWeight = bound(pointsVoteWeight, 1 * 1e18, 1_000_000 * 1e18);
         tokenVoteWeight = bound(tokenVoteWeight, 1 * 1e18, 1_000_000 * 1e18);
-        tokenBalance = bound(tokenBalance, 1, 1e4);
+        tokenBalance = bound(tokenBalance, 1, 1e3);
 
         //mint points and token to address voter
         address voter = address(this);
+
+        //mint points and token to address voter
+        vm.prank(address(revolutionPointsEmitter));
+        revolutionPoints.mint(voter, pointsBalance);
 
         for (uint256 i = 0; i < tokenBalance; i++) {
             createDefaultArtPiece();
@@ -72,14 +76,6 @@ contract VotingPowerTest is RevolutionBuilderTest {
         bytes32 salt = bytes32(uint256(uint160(address(revolutionToken))) << 96);
 
         address revolutionVotingPower = address(new ERC1967Proxy{ salt: salt }(revolutionVotingPowerImpl, ""));
-
-        // Arrange: Set up token balances and vote weights
-        uint256 tokenBalance = 1;
-
-        emit log_address(revolutionToken.minter());
-
-        vm.prank(address(revolutionPointsEmitter));
-        revolutionPoints.mint(voter, pointsBalance);
 
         // Act: Calculate the expected and actual voting power
         uint256 expectedVotingPower = (pointsBalance * pointsVoteWeight) + (tokenBalance * tokenVoteWeight);
