@@ -8,9 +8,8 @@ import { IRevolutionBuilder } from "./interfaces/IRevolutionBuilder.sol";
 import { UUPS } from "./libs/proxy/UUPS.sol";
 import { VersionedContract } from "./version/VersionedContract.sol";
 
-import { ERC20VotesUpgradeable } from "./base/erc20/ERC20VotesUpgradeable.sol";
-import { RevolutionToken } from "./RevolutionToken.sol";
-
+import { IRevolutionToken } from "./interfaces/IRevolutionToken.sol";
+import { IRevolutionPoints } from "./interfaces/IRevolutionPoints.sol";
 import { IRevolutionVotingPower } from "./interfaces/IRevolutionVotingPower.sol";
 
 /// @title RevolutionVotingPower
@@ -35,10 +34,10 @@ contract RevolutionVotingPower is
     ///                                                          ///
 
     // The ERC20 token used for voting
-    ERC20VotesUpgradeable public points;
+    IRevolutionPoints public points;
 
     // The ERC721 token used for voting
-    RevolutionToken public token;
+    IRevolutionToken public token;
 
     // The vote weight of the ERC20 token
     uint256 public pointsVoteWeight;
@@ -90,8 +89,8 @@ contract RevolutionVotingPower is
         if (_revolutionToken == address(0)) revert INVALID_ADDRESS_ZERO();
 
         // Initialize the ERC20 & ERC721 tokens
-        points = ERC20VotesUpgradeable(_revolutionPoints);
-        token = RevolutionToken(_revolutionToken);
+        points = IRevolutionPoints(_revolutionPoints);
+        token = IRevolutionToken(_revolutionToken);
 
         // Initialize the vote weights
         pointsVoteWeight = _revolutionPointsVoteWeight;
@@ -100,8 +99,8 @@ contract RevolutionVotingPower is
         __Ownable_init(_initialOwner);
         __ReentrancyGuard_init();
 
-        emit ERC721VotingTokenUpdated(token);
-        emit ERC20VotingTokenUpdated(points);
+        emit ERC721VotingTokenUpdated(address(token));
+        emit ERC20VotingTokenUpdated(address(points));
 
         emit ERC721VotingPowerUpdated(tokenVoteWeight, _revolutionTokenVoteWeight);
         emit ERC20VotingPowerUpdated(pointsVoteWeight, _revolutionPointsVoteWeight);

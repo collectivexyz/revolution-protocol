@@ -17,12 +17,13 @@
 
 pragma solidity ^0.8.22;
 
-import { IERC721 } from "@openzeppelin/contracts/token/ERC721/IERC721.sol";
+import { IERC721Enumerable } from "@openzeppelin/contracts/token/ERC721/extensions/IERC721Enumerable.sol";
+import { IVotes } from "@openzeppelin/contracts/governance/utils/IVotes.sol";
 import { IDescriptorMinimal } from "./IDescriptorMinimal.sol";
 import { ICultureIndex } from "./ICultureIndex.sol";
 import { IRevolutionBuilder } from "./IRevolutionBuilder.sol";
 
-interface IRevolutionToken is IERC721 {
+interface IRevolutionToken is IERC721Enumerable, IVotes {
     ///                                                          ///
     ///                           ERRORS                         ///
     ///                                                          ///
@@ -84,6 +85,8 @@ interface IRevolutionToken is IERC721 {
     function setMinter(address minter) external;
 
     function lockMinter() external;
+
+    function minter() external view returns (address);
 
     function setDescriptor(IDescriptorMinimal descriptor) external;
 

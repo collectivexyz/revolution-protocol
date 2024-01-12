@@ -8,8 +8,6 @@ import { IRevolutionBuilder } from "../../src/interfaces/IRevolutionBuilder.sol"
 import { Ownable2StepUpgradeable } from "@openzeppelin/contracts-upgradeable/access/Ownable2StepUpgradeable.sol";
 
 contract RevolutionBuilderBasicTest is RevolutionBuilderTest {
-    event Log(string, uint);
-
     function setUp() public override {
         super.setUp();
         super.setMockParams();

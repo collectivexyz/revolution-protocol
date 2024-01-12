@@ -15,8 +15,6 @@ import { ERC1967Proxy } from "../../src/libs/proxy/ERC1967Proxy.sol";
 import { console2 } from "forge-std/console2.sol";
 
 contract PointsEmitterTest is RevolutionBuilderTest {
-    event Log(string, uint);
-
     // 1,000 tokens per day is the target emission
     uint256 tokensPerTimeUnit = 1_000;
 

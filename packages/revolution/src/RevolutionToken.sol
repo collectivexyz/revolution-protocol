@@ -25,6 +25,7 @@ import { UUPS } from "./libs/proxy/UUPS.sol";
 import { VersionedContract } from "./version/VersionedContract.sol";
 
 import { ERC721CheckpointableUpgradeable } from "./base/ERC721CheckpointableUpgradeable.sol";
+
 import { IDescriptorMinimal } from "./interfaces/IDescriptorMinimal.sol";
 import { ICultureIndex } from "./interfaces/ICultureIndex.sol";
 import { IRevolutionToken } from "./interfaces/IRevolutionToken.sol";

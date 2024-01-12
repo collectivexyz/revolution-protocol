@@ -2,8 +2,10 @@
 pragma solidity ^0.8.22;
 
 import { IRevolutionBuilder } from "./IRevolutionBuilder.sol";
+import { IVotes } from "@openzeppelin/contracts/governance/utils/IVotes.sol";
+import { IERC20 } from "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 
-interface IRevolutionPoints {
+interface IRevolutionPoints is IERC20, IVotes {
     ///                                                          ///
     ///                           EVENTS                         ///
     ///                                                          ///
