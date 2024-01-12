@@ -1,5 +1,11 @@
 # @collectivexyz/revolution
 
+## 0.3.4
+
+### Patch Changes
+
+- 2d6e515: test deploy function
+
 ## 0.3.3
 
 ### Patch Changes
