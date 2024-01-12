@@ -85,6 +85,8 @@ interface IRevolutionToken is IERC721 {
 
     function lockMinter() external;
 
+    function minter() external view returns (address);
+
     function setDescriptor(IDescriptorMinimal descriptor) external;
 
     function lockDescriptor() external;
@@ -106,4 +108,12 @@ interface IRevolutionToken is IERC721 {
         address cultureIndex,
         IRevolutionBuilder.RevolutionTokenParams memory revolutionTokenParams
     ) external;
+
+    function totalSupply() external view returns (uint256);
+
+    function getPastTotalSupply(uint256 blockNumber) external view returns (uint256);
+
+    function getVotes(address account) external view returns (uint256);
+
+    function getPastVotes(address account, uint256 blockNumber) external view returns (uint256);
 }

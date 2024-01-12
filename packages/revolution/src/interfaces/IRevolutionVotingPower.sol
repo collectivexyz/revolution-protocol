@@ -3,7 +3,7 @@
 pragma solidity ^0.8.22;
 
 import { IERC20 } from "@openzeppelin/contracts/token/ERC20/IERC20.sol";
-import { RevolutionToken } from "../RevolutionToken.sol";
+import { IRevolutionToken } from "./IRevolutionToken.sol";
 import { IRevolutionBuilder } from "./IRevolutionBuilder.sol";
 import { ERC20VotesUpgradeable } from "../base/erc20/ERC20VotesUpgradeable.sol";
 
@@ -12,7 +12,7 @@ import { ERC20VotesUpgradeable } from "../base/erc20/ERC20VotesUpgradeable.sol";
  * @dev This interface defines the events for the RevolutionVotingPower contract.
  */
 interface IRevolutionVotingPowerEvents {
-    event ERC721VotingTokenUpdated(RevolutionToken ERC721VotingToken);
+    event ERC721VotingTokenUpdated(address erc721VotingToken);
 
     event ERC721VotingPowerUpdated(uint256 oldERC721VotingPower, uint256 newERC721VotingPower);
 
@@ -44,7 +44,7 @@ interface IRevolutionVotingPower is IRevolutionVotingPowerEvents {
 
     function points() external returns (ERC20VotesUpgradeable);
 
-    function token() external returns (RevolutionToken);
+    function token() external returns (IRevolutionToken);
 
     /// @notice useful in the CultureIndex to subtract weight of the AuctionHouse from quorum
     function _getTokenMinter__TokenVotes() external view returns (uint256);
