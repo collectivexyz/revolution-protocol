@@ -47,6 +47,13 @@ interface IRevolutionBuilder is IUUPS {
     event UpgradeRemoved(address baseImpl, address upgradeImpl);
 
     ///                                                          ///
+    ///                            ERRORS                        ///
+    ///                                                          ///
+
+    /// @notice The error message when invalid address zero is passed
+    error INVALID_ZERO_ADDRESS();
+
+    ///                                                          ///
     ///                            STRUCTS                       ///
     ///                                                          ///
 
@@ -268,4 +275,8 @@ interface IRevolutionBuilder is IUUPS {
     function getDAOVersions(address token) external view returns (DAOVersionInfo memory);
 
     function getLatestVersions() external view returns (DAOVersionInfo memory);
+
+    /// @notice Initializes the Revolution builder contract
+    /// @param initialOwner The address of the initial owner
+    function initialize(address initialOwner) external;
 }
