@@ -17,12 +17,13 @@
 
 pragma solidity ^0.8.22;
 
-import { IERC721 } from "@openzeppelin/contracts/token/ERC721/IERC721.sol";
+import { IERC721Enumerable } from "@openzeppelin/contracts/token/ERC721/extensions/IERC721Enumerable.sol";
+import { IVotes } from "@openzeppelin/contracts/governance/utils/IVotes.sol";
 import { IDescriptorMinimal } from "./IDescriptorMinimal.sol";
 import { ICultureIndex } from "./ICultureIndex.sol";
 import { IRevolutionBuilder } from "./IRevolutionBuilder.sol";
 
-interface IRevolutionToken is IERC721 {
+interface IRevolutionToken is IERC721Enumerable, IVotes {
     ///                                                          ///
     ///                           ERRORS                         ///
     ///                                                          ///
@@ -108,12 +109,4 @@ interface IRevolutionToken is IERC721 {
         address cultureIndex,
         IRevolutionBuilder.RevolutionTokenParams memory revolutionTokenParams
     ) external;
-
-    function totalSupply() external view returns (uint256);
-
-    function getPastTotalSupply(uint256 blockNumber) external view returns (uint256);
-
-    function getVotes(address account) external view returns (uint256);
-
-    function getPastVotes(address account, uint256 blockNumber) external view returns (uint256);
 }

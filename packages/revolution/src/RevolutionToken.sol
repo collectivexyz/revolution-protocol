@@ -25,8 +25,7 @@ import { UUPS } from "./libs/proxy/UUPS.sol";
 import { VersionedContract } from "./version/VersionedContract.sol";
 
 import { ERC721CheckpointableUpgradeable } from "./base/ERC721CheckpointableUpgradeable.sol";
-import { VotesUpgradeable } from "./base/VotesUpgradeable.sol";
-import { ERC721EnumerableUpgradeable } from "./base/ERC721EnumerableUpgradeable.sol";
+
 import { IDescriptorMinimal } from "./interfaces/IDescriptorMinimal.sol";
 import { IRevolutionToken } from "./interfaces/IRevolutionToken.sol";
 import { ICultureIndex } from "./interfaces/ICultureIndex.sol";
@@ -298,32 +297,6 @@ contract RevolutionToken is
         } catch {
             revert("dropTopVotedPiece failed");
         }
-    }
-
-    ///                                                          ///
-    ///                         ACCESS PARENT                    ///
-    ///                                                          ///
-
-    /// @notice these functions were added to support the IRevolutionToken interface
-    function totalSupply() public view override(ERC721EnumerableUpgradeable, IRevolutionToken) returns (uint256) {
-        return super.totalSupply();
-    }
-
-    function getPastTotalSupply(
-        uint256 blockNumber
-    ) public view override(IRevolutionToken, VotesUpgradeable) returns (uint256) {
-        return super.getPastTotalSupply(blockNumber);
-    }
-
-    function getVotes(address account) public view override(VotesUpgradeable, IRevolutionToken) returns (uint256) {
-        return super.getVotes(account);
-    }
-
-    function getPastVotes(
-        address account,
-        uint256 blockNumber
-    ) public view override(VotesUpgradeable, IRevolutionToken) returns (uint256) {
-        return super.getPastVotes(account, blockNumber);
     }
 
     ///                                                          ///
