@@ -1,5 +1,11 @@
 # @collectivexyz/revolution
 
+## 0.3.5
+
+### Patch Changes
+
+- 2fca317: rm test function, use interfaces in VotingPower
+
 ## 0.3.4
 
 ### Patch Changes
