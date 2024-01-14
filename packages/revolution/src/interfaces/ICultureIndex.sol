@@ -103,8 +103,20 @@ interface ICultureIndex is ICultureIndexEvents {
     /// @dev Reverts if art piece metadata is invalid
     error INVALID_MEDIA_TYPE();
 
-    /// @dev Reverts if art piece metadata is invalid
-    error INVALID_MEDIA_METADATA();
+    /// @dev Reverts if art piece image is invalid
+    error INVALID_IMAGE();
+
+    /// @dev Reverts if art piece animation url is invalid
+    error INVALID_ANIMATION_URL();
+
+    /// @dev Reverts if art piece text is invalid
+    error INVALID_TEXT();
+
+    /// @dev Reverts if art piece description is invalid
+    error INVALID_DESCRIPTION();
+
+    /// @dev Reverts if art piece name is invalid
+    error INVALID_NAME();
 
     /// @dev Reverts if substring is invalid
     error INVALID_SUBSTRING();
