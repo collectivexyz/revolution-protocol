@@ -1,5 +1,11 @@
 # @collectivexyz/revolution
 
+## 0.3.7
+
+### Patch Changes
+
+- dc8d678: more verbose errors for CultureIndex
+
 ## 0.3.6
 
 ### Patch Changes
