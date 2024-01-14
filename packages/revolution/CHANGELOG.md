@@ -1,5 +1,11 @@
 # @collectivexyz/revolution
 
+## 0.3.6
+
+### Patch Changes
+
+- 1cb84f5: reduce max num creators in the CultureIndex
+
 ## 0.3.5
 
 ### Patch Changes
