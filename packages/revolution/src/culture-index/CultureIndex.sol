@@ -154,24 +154,24 @@ contract CultureIndex is
         if (uint8(metadata.mediaType) > 3) revert INVALID_MEDIA_TYPE();
 
         if (metadata.mediaType == MediaType.IMAGE) {
-            if (bytes(metadata.image).length == 0) revert INVALID_MEDIA_METADATA();
+            if (bytes(metadata.image).length == 0) revert INVALID_IMAGE();
         } else if (metadata.mediaType == MediaType.ANIMATION || metadata.mediaType == MediaType.AUDIO) {
-            if (bytes(metadata.animationUrl).length == 0) revert INVALID_MEDIA_METADATA();
+            if (bytes(metadata.animationUrl).length == 0) revert INVALID_ANIMATION_URL();
         } else if (metadata.mediaType == MediaType.TEXT) {
-            if (bytes(metadata.text).length == 0) revert INVALID_MEDIA_METADATA();
+            if (bytes(metadata.text).length == 0) revert INVALID_TEXT();
         }
 
         // ensure all fields of metadata are within reasonable bounds
-        if (bytes(metadata.description).length > MAX_DESCRIPTION_LENGTH) revert INVALID_MEDIA_METADATA();
+        if (bytes(metadata.description).length > MAX_DESCRIPTION_LENGTH) revert INVALID_DESCRIPTION();
 
         // permit reasonable SVG images
-        if (bytes(metadata.image).length > MAX_IMAGE_LENGTH) revert INVALID_MEDIA_METADATA();
+        if (bytes(metadata.image).length > MAX_IMAGE_LENGTH) revert INVALID_IMAGE();
 
         // assume animation is always an ipfs hash
-        if (bytes(metadata.animationUrl).length > MAX_ANIMATION_URL_LENGTH) revert INVALID_MEDIA_METADATA();
+        if (bytes(metadata.animationUrl).length > MAX_ANIMATION_URL_LENGTH) revert INVALID_ANIMATION_URL();
 
         // permit reasonable text
-        if (bytes(metadata.text).length > MAX_TEXT_LENGTH) revert INVALID_MEDIA_METADATA();
+        if (bytes(metadata.text).length > MAX_TEXT_LENGTH) revert INVALID_TEXT();
 
         string memory ipfsPrefix = "ipfs://";
         string memory svgPrefix = "data:image/svg+xml;base64,";
@@ -180,18 +180,17 @@ contract CultureIndex is
         if (
             bytes(metadata.animationUrl).length > 0 &&
             !Strings.equal(_substring(metadata.animationUrl, 0, 7), (ipfsPrefix))
-        ) revert INVALID_MEDIA_METADATA();
+        ) revert INVALID_ANIMATION_URL();
 
         // ensure image url starts with ipfs:// or data:image/svg+xml;base64,
         if (
             bytes(metadata.image).length > 0 &&
             !(Strings.equal(_substring(metadata.image, 0, 7), (ipfsPrefix)) ||
                 Strings.equal(_substring(metadata.image, 0, 26), (svgPrefix)))
-        ) revert INVALID_MEDIA_METADATA();
+        ) revert INVALID_IMAGE();
 
         //ensure name is set
-        if (bytes(metadata.name).length == 0 || bytes(metadata.name).length > MAX_NAME_LENGTH)
-            revert INVALID_MEDIA_METADATA();
+        if (bytes(metadata.name).length == 0 || bytes(metadata.name).length > MAX_NAME_LENGTH) revert INVALID_NAME();
     }
 
     /**

@@ -36,7 +36,7 @@ contract CultureIndexArtMetadataTest is CultureIndexTestSuite {
                 address(0x1),
                 10000
             );
-        vm.expectRevert(abi.encodeWithSignature("INVALID_MEDIA_METADATA()"));
+        vm.expectRevert(abi.encodeWithSignature("INVALID_NAME()"));
         cultureIndex.createPiece(metadata, creators);
     }
 
@@ -56,7 +56,7 @@ contract CultureIndexArtMetadataTest is CultureIndexTestSuite {
                 address(0x1),
                 10000
             );
-        vm.expectRevert(abi.encodeWithSignature("INVALID_MEDIA_METADATA()"));
+        vm.expectRevert(abi.encodeWithSignature("INVALID_DESCRIPTION()"));
         cultureIndex.createPiece(metadata, creators);
     }
 
@@ -75,7 +75,7 @@ contract CultureIndexArtMetadataTest is CultureIndexTestSuite {
                 address(0x1),
                 10000
             );
-        vm.expectRevert(abi.encodeWithSignature("INVALID_MEDIA_METADATA()"));
+        vm.expectRevert(abi.encodeWithSignature("INVALID_IMAGE()"));
         cultureIndex.createPiece(metadata, creators);
     }
 
@@ -94,7 +94,7 @@ contract CultureIndexArtMetadataTest is CultureIndexTestSuite {
                 address(0x1),
                 10000
             );
-        vm.expectRevert(abi.encodeWithSignature("INVALID_MEDIA_METADATA()"));
+        vm.expectRevert(abi.encodeWithSignature("INVALID_ANIMATION_URL()"));
         cultureIndex.createPiece(metadata, creators);
     }
 
@@ -113,7 +113,7 @@ contract CultureIndexArtMetadataTest is CultureIndexTestSuite {
                 address(0x1),
                 10000
             );
-        vm.expectRevert(abi.encodeWithSignature("INVALID_MEDIA_METADATA()"));
+        vm.expectRevert(abi.encodeWithSignature("INVALID_ANIMATION_URL()"));
         cultureIndex.createPiece(metadata, creators);
     }
 
@@ -132,7 +132,7 @@ contract CultureIndexArtMetadataTest is CultureIndexTestSuite {
                 address(0x1),
                 10000
             );
-        vm.expectRevert(abi.encodeWithSignature("INVALID_MEDIA_METADATA()"));
+        vm.expectRevert(abi.encodeWithSignature("INVALID_TEXT()"));
         cultureIndex.createPiece(metadata, creators);
     }
 
@@ -150,7 +150,7 @@ contract CultureIndexArtMetadataTest is CultureIndexTestSuite {
                 address(0x1),
                 10000
             );
-        vm.expectRevert(abi.encodeWithSignature("INVALID_MEDIA_METADATA()"));
+        vm.expectRevert(abi.encodeWithSignature("INVALID_ANIMATION_URL()"));
         cultureIndex.createPiece(metadata, creators);
     }
 
@@ -168,7 +168,7 @@ contract CultureIndexArtMetadataTest is CultureIndexTestSuite {
                 address(0x1),
                 10000
             );
-        vm.expectRevert(abi.encodeWithSignature("INVALID_MEDIA_METADATA()"));
+        vm.expectRevert(abi.encodeWithSignature("INVALID_IMAGE()"));
         cultureIndex.createPiece(metadata, creators);
     }
 
@@ -222,7 +222,7 @@ contract CultureIndexArtMetadataTest is CultureIndexTestSuite {
                 address(0x1),
                 10000
             );
-        vm.expectRevert(abi.encodeWithSignature("INVALID_MEDIA_METADATA()"));
+        vm.expectRevert(abi.encodeWithSignature("INVALID_ANIMATION_URL()"));
         cultureIndex.createPiece(metadata, creators);
     }
 
@@ -240,7 +240,7 @@ contract CultureIndexArtMetadataTest is CultureIndexTestSuite {
                 address(0x1),
                 10000
             );
-        vm.expectRevert(abi.encodeWithSignature("INVALID_MEDIA_METADATA()"));
+        vm.expectRevert(abi.encodeWithSignature("INVALID_ANIMATION_URL()"));
         cultureIndex.createPiece(metadata, creators);
     }
 
@@ -276,7 +276,7 @@ contract CultureIndexArtMetadataTest is CultureIndexTestSuite {
                 address(0x1),
                 10000
             );
-        vm.expectRevert(abi.encodeWithSignature("INVALID_MEDIA_METADATA()"));
+        vm.expectRevert(abi.encodeWithSignature("INVALID_IMAGE()"));
         cultureIndex.createPiece(metadata, creators);
     }
 
@@ -294,7 +294,7 @@ contract CultureIndexArtMetadataTest is CultureIndexTestSuite {
                 address(0x1),
                 10000
             );
-        vm.expectRevert(abi.encodeWithSignature("INVALID_MEDIA_METADATA()"));
+        vm.expectRevert(abi.encodeWithSignature("INVALID_ANIMATION_URL()"));
         cultureIndex.createPiece(metadata, creators);
     }
 
@@ -312,7 +312,7 @@ contract CultureIndexArtMetadataTest is CultureIndexTestSuite {
                 address(0x1),
                 10000
             );
-        vm.expectRevert(abi.encodeWithSignature("INVALID_MEDIA_METADATA()"));
+        vm.expectRevert(abi.encodeWithSignature("INVALID_IMAGE()"));
         cultureIndex.createPiece(metadata, creators);
     }
 
@@ -330,7 +330,7 @@ contract CultureIndexArtMetadataTest is CultureIndexTestSuite {
                 address(0x1),
                 10000
             );
-        vm.expectRevert(abi.encodeWithSignature("INVALID_MEDIA_METADATA()"));
+        vm.expectRevert(abi.encodeWithSignature("INVALID_ANIMATION_URL()"));
         cultureIndex.createPiece(metadata, creators);
     }
 
@@ -348,7 +348,7 @@ contract CultureIndexArtMetadataTest is CultureIndexTestSuite {
                 address(0x1),
                 10000
             );
-        vm.expectRevert(abi.encodeWithSignature("INVALID_MEDIA_METADATA()"));
+        vm.expectRevert(abi.encodeWithSignature("INVALID_ANIMATION_URL()"));
         cultureIndex.createPiece(metadata, creators);
     }
 
@@ -366,7 +366,7 @@ contract CultureIndexArtMetadataTest is CultureIndexTestSuite {
                 address(0x1),
                 10000
             );
-        vm.expectRevert(abi.encodeWithSignature("INVALID_MEDIA_METADATA()"));
+        vm.expectRevert(abi.encodeWithSignature("INVALID_ANIMATION_URL()"));
         cultureIndex.createPiece(metadata, creators);
     }
 
@@ -384,7 +384,7 @@ contract CultureIndexArtMetadataTest is CultureIndexTestSuite {
                 address(0x1),
                 10000
             );
-        vm.expectRevert(abi.encodeWithSignature("INVALID_MEDIA_METADATA()"));
+        vm.expectRevert(abi.encodeWithSignature("INVALID_ANIMATION_URL()"));
         cultureIndex.createPiece(metadata, creators);
     }
 
@@ -402,7 +402,7 @@ contract CultureIndexArtMetadataTest is CultureIndexTestSuite {
                 address(0x1),
                 10000
             );
-        vm.expectRevert(abi.encodeWithSignature("INVALID_MEDIA_METADATA()"));
+        vm.expectRevert(abi.encodeWithSignature("INVALID_TEXT()"));
         cultureIndex.createPiece(metadata, creators);
     }
 }
