@@ -17,6 +17,7 @@ export default defineConfig({
         "VRGDAC",
         "Descriptor",
         "MaxHeap",
+        "RevolutionVotingPower",
         "RevolutionToken",
         "RevolutionDAOLogicV1",
       ].map((contractName) => `${contractName}.json`),
