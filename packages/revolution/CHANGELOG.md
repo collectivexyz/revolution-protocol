@@ -1,5 +1,11 @@
 # @collectivexyz/revolution
 
+## 0.3.8
+
+### Patch Changes
+
+- 50e418a: add votingpower abi
+
 ## 0.3.7
 
 ### Patch Changes
