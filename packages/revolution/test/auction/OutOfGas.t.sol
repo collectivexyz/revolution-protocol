@@ -17,7 +17,7 @@ contract AuctionHouseOutOfGasTest is AuctionHouseTest {
         uint256 totalBps = 0;
         address[] memory creators = new address[](nCreators);
         for (uint i = 0; i < nCreators; i++) {
-            creators[i] = address(uint160(0x1234 + i));
+            creators[i] = address(new InfiniteLoop());
         }
 
         for (uint256 i = 0; i < nCreators; i++) {
@@ -81,7 +81,7 @@ contract AuctionHouseOutOfGasTest is AuctionHouseTest {
 
     //attempt to trigger an auction paused error with differing gas amounts
     function test_OutOfGas_DOS(uint gasUsed) public {
-        vm.assume(gasUsed < 31_000_000); // block gas limit is 30m
+        gasUsed = bound(gasUsed, 0, 31_000_000);
         vm.startPrank(cultureIndex.owner());
         cultureIndex._setQuorumVotesBPS(0);
         vm.stopPrank();
@@ -89,7 +89,6 @@ contract AuctionHouseOutOfGasTest is AuctionHouseTest {
         _createAndFinishAuction();
 
         assertFalse(auction.paused());
-
         try auction.settleCurrentAndCreateNewAuction{ gas: gasUsed }() {
             // if the auction is paused, this will fail
             assertFalse(auction.paused());
@@ -114,4 +113,10 @@ contract ContractThatRejectsEther {
     // fallback() external payable {
     //     revert("Rejecting Ether transfer");
     // }
+}
+
+contract InfiniteLoop {
+    receive() external payable {
+        while (true) {}
+    }
 }
