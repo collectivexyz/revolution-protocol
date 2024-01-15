@@ -218,28 +218,36 @@ contract AuctionHouseBasicTest is AuctionHouseTest {
         emit IAuctionHouse.AuctionBid(verbId, address(21), address(1), bidAmount, false);
         auction.createBid{ value: bidAmount }(0, address(21), address(0)); // Assuming the first auction's verbId is 0
 
-        // Expect auction bidder to be 21
-        (, , , , address payable bidder, ) = auction.auction();
-        assertEq(bidder, address(21), "Bidder address should be set correctly");
-
-        // Expect auction amount to be bidAmount
-        (, uint256 amount, , , , ) = auction.auction();
-        assertEq(amount, bidAmount, "Bid amount should be set correctly");
-
-        // Expect auction settled to be false
-        (, , , , , bool settled) = auction.auction();
-        assertEq(settled, false, "Auction should not be settled");
+        // Retrieve auction details once and perform all assertions
+        (
+            uint256 verbId2,
+            uint256 amount,
+            uint256 startTime,
+            uint256 endTime,
+            address payable bidder,
+            address payable referral,
+            bool settled
+        ) = auction.auction();
 
         // Expect auction verbId to be 0
-        (uint256 verbId2, , , , , ) = auction.auction();
         assertEq(verbId2, 0, "Auction should be for the zeroth verb");
 
+        // Expect auction amount to be bidAmount
+        assertEq(amount, bidAmount, "Bid amount should be set correctly");
+
+        // Expect auction bidder to be 21
+        assertEq(bidder, address(21), "Bidder address should be set correctly");
+
+        // Expect auction settled to be false
+        assertEq(settled, false, "Auction should not be settled");
+
         // Expect auction startTime to be set correctly
-        (, , uint256 startTime, , , ) = auction.auction();
         assertEq(startTime, block.timestamp, "Auction start time should be set correctly");
 
+        // expect auction referral to be address(0)
+        assertEq(referral, address(0), "Auction referral should be 0");
+
         // Expect auction endTime to be set correctly
-        (, , , uint256 endTime, , ) = auction.auction();
         assertEq(endTime, block.timestamp + auction.duration(), "Auction end time should be set correctly");
 
         // vm warp and then settle auction
@@ -264,6 +272,7 @@ contract AuctionHouseBasicTest is AuctionHouseTest {
             uint256 auctionStartTime,
             uint256 auctionEndTime,
             address payable bidder,
+            address payable referral,
             bool settled
         ) = auction.auction();
         assertEq(auctionStartTime, startTime, "Auction start time should be set correctly");
@@ -272,6 +281,7 @@ contract AuctionHouseBasicTest is AuctionHouseTest {
         assertEq(amount, 0, "Auction amount should be 0");
         assertEq(bidder, address(0), "Auction bidder should be 0");
         assertEq(settled, false, "Auction should not be settled");
+        assertEq(referral, address(0), "Auction referral should be 0");
     }
 
     function test_BiddingProcess(uint256 bidAmount) public {
@@ -287,7 +297,7 @@ contract AuctionHouseBasicTest is AuctionHouseTest {
 
         vm.startPrank(address(1));
         auction.createBid{ value: bidAmount }(0, address(1), address(0)); // Assuming the first auction's verbId is 0
-        (uint256 verbId, uint256 amount, , uint256 endTime, address payable bidder, ) = auction.auction();
+        (uint256 verbId, uint256 amount, , uint256 endTime, address payable bidder, , ) = auction.auction();
 
         assertEq(amount, bidAmount, "Bid amount should be set correctly");
         assertEq(bidder, address(1), "Bidder address should be set correctly");
@@ -322,7 +332,7 @@ contract AuctionHouseBasicTest is AuctionHouseTest {
         auction.settleCurrentAndCreateNewAuction(); // This will settle the current auction and create a new one
 
         if (shouldExpectRevert) {
-            (, , , , , bool settled) = auction.auction();
+            (, , , , , , bool settled) = auction.auction();
             assertEq(settled, false, "Auction should not be settled because new one created");
         } else {
             assertEq(revolutionToken.ownerOf(verbId), address(1), "Verb should be transferred to the auction house");
@@ -336,7 +346,7 @@ contract AuctionHouseBasicTest is AuctionHouseTest {
 
         auction.unpause();
 
-        (uint256 verbId, , , uint256 endTime, , ) = auction.auction();
+        (uint256 verbId, , , uint256 endTime, , , ) = auction.auction();
         assertEq(revolutionToken.ownerOf(verbId), address(auction), "Verb should be transferred to the auction house");
 
         vm.warp(endTime + 1);
@@ -351,7 +361,7 @@ contract AuctionHouseBasicTest is AuctionHouseTest {
 
         auction.settleCurrentAndCreateNewAuction(); // This will settle the current auction and create a new one
 
-        (, , , , , bool settled) = auction.auction();
+        (, , , , , , bool settled) = auction.auction();
 
         assertEq(settled, false, "Auction should not be settled because new one created");
     }

@@ -28,6 +28,7 @@ contract AuctionHouseMintTest is AuctionHouseTest {
             uint256 auctionStartTime,
             uint256 auctionEndTime,
             address payable bidder,
+            address payable referral,
             bool settled
         ) = auction.auction();
 

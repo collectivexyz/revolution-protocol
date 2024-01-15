@@ -511,7 +511,7 @@ contract AuctionHouseSettleTest is AuctionHouseTest {
         vm.prank(alice);
         auction.createBid{ value: bidAmount }(verbId, alice, address(0));
 
-        (, , , uint256 endTime, , ) = auction.auction();
+        (, , , uint256 endTime, , , ) = auction.auction();
         vm.warp(endTime + 1);
 
         auction.settleCurrentAndCreateNewAuction();

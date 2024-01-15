@@ -396,7 +396,7 @@ contract RevolutionBuilderTest is Test {
 
         unchecked {
             for (uint256 i; i < _numTokens; ++i) {
-                (uint256 tokenId, , , , , ) = auction.auction();
+                (uint256 tokenId, , , , , , ) = auction.auction();
 
                 vm.prank(otherUsers[i]);
                 auction.createBid{ value: reservePrice }(tokenId, otherUsers[i], address(0));
