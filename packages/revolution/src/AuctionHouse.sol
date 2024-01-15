@@ -166,7 +166,7 @@ contract AuctionHouse is
      * @param verbId The ID of the Token to bid on.
      * @param bidder The address of the bidder.
      */
-    function createBid(uint256 verbId, address bidder) external payable override nonReentrant {
+    function createBid(uint256 verbId, address bidder, address referral) external payable override nonReentrant {
         IAuctionHouse.Auction memory _auction = auction;
 
         //require bidder is valid address
@@ -180,6 +180,7 @@ contract AuctionHouse is
 
         auction.amount = msg.value;
         auction.bidder = payable(bidder);
+        auction.referral = payable(referral);
 
         // Extend the auction if the bid was received within `timeBuffer` of the auction end time
         bool extended = _auction.endTime - block.timestamp < timeBuffer;
@@ -310,7 +311,8 @@ contract AuctionHouse is
                 startTime: startTime,
                 endTime: endTime,
                 bidder: payable(0),
-                settled: false
+                settled: false,
+                referral: payable(0)
             });
 
             emit AuctionCreated(verbId, startTime, endTime);
@@ -407,7 +409,7 @@ contract AuctionHouse is
                         vrgdaSplits,
                         IRevolutionPointsEmitter.ProtocolRewardAddresses({
                             builder: address(0),
-                            purchaseReferral: address(0),
+                            purchaseReferral: _auction.referral,
                             deployer: deployer
                         })
                     );

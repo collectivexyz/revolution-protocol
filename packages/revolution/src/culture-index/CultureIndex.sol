@@ -274,6 +274,22 @@ contract CultureIndex is
     }
 
     /**
+     * @notice Get account voting power for a specific piece
+     * @param pieceId The ID of the art piece.
+     * @param account The address of the voter.
+     */
+    function getAccountVotingPowerForPiece(uint256 pieceId, address account) public view returns (uint256) {
+        if (pieceId >= _currentPieceId) revert INVALID_PIECE_ID();
+        return
+            votingPower.getPastVotesWithWeights(
+                account,
+                pieces[pieceId].creationBlock - 1,
+                1,
+                revolutionTokenVoteWeight
+            );
+    }
+
+    /**
      * @notice Cast a vote for a specific ArtPiece.
      * @param pieceId The ID of the ArtPiece to vote for.
      * @param voter The address of the voter.
@@ -287,11 +303,10 @@ contract CultureIndex is
         if (votes[pieceId][voter].voterAddress != address(0)) revert ALREADY_VOTED();
 
         // Use the previous block number to calculate the vote weight to prevent flash attacks
-        uint256 erc20PointsVoteWeight = 1;
         uint256 weight = votingPower.getPastVotesWithWeights(
             voter,
             pieces[pieceId].creationBlock - 1,
-            erc20PointsVoteWeight,
+            1,
             revolutionTokenVoteWeight
         );
         if (weight <= minVoteWeight) revert WEIGHT_TOO_LOW();

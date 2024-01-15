@@ -55,7 +55,7 @@ contract AuctionHouseDOSTest is AuctionHouseTest {
         uint256 bidAmount = auction.reservePrice();
         vm.deal(address(creators[nCreators]), bidAmount + 1 ether);
         vm.startPrank(address(creators[nCreators]));
-        auction.createBid{ value: bidAmount }(verbId, address(creators[nCreators]));
+        auction.createBid{ value: bidAmount }(verbId, address(creators[nCreators]), address(0));
         vm.stopPrank();
 
         vm.warp(block.timestamp + auction.duration() + 1); // Fast forward time to end the auction
