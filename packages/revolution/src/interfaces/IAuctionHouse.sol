@@ -77,6 +77,8 @@ interface IAuctionHouse {
         uint256 endTime;
         // The address of the current highest bid
         address payable bidder;
+        // The address of the referral account who referred the current highest bidder
+        address payable referral;
         // Whether or not the auction has been settled
         bool settled;
     }
@@ -105,7 +107,7 @@ interface IAuctionHouse {
 
     function settleCurrentAndCreateNewAuction() external;
 
-    function createBid(uint256 verbId, address bidder) external payable;
+    function createBid(uint256 verbId, address bidder, address referral) external payable;
 
     function pause() external;
 

@@ -399,7 +399,7 @@ contract RevolutionBuilderTest is Test {
                 (uint256 tokenId, , , , , ) = auction.auction();
 
                 vm.prank(otherUsers[i]);
-                auction.createBid{ value: reservePrice }(tokenId, otherUsers[i]);
+                auction.createBid{ value: reservePrice }(tokenId, otherUsers[i], address(0));
 
                 vm.warp(block.timestamp + duration);
 

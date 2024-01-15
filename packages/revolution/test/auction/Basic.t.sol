@@ -37,7 +37,7 @@ contract AuctionHouseBasicTest is AuctionHouseTest {
         // Expect an event emission
         vm.expectEmit(true, true, true, true);
         emit IAuctionHouse.AuctionBid(verbId, address(21), address(1), bidAmount, false);
-        auction.createBid{ value: bidAmount }(0, address(21)); // Assuming the first auction's verbId is 0
+        auction.createBid{ value: bidAmount }(0, address(21), address(0)); // Assuming the first auction's verbId is 0
     }
 
     function testSetEntropyRateBps(uint256 newEntropyRateBps) public {
@@ -211,12 +211,12 @@ contract AuctionHouseBasicTest is AuctionHouseTest {
         // try to bid with bidder address(0) first and expect revert
         vm.expectRevert(abi.encodeWithSignature("ADDRESS_ZERO()"));
         vm.startPrank(address(1));
-        auction.createBid{ value: bidAmount }(0, address(0)); // Assuming the first auction's verbId is 0
+        auction.createBid{ value: bidAmount }(0, address(0), address(0)); // Assuming the first auction's verbId is 0
 
         // Expect an event emission
         vm.expectEmit(true, true, true, true);
         emit IAuctionHouse.AuctionBid(verbId, address(21), address(1), bidAmount, false);
-        auction.createBid{ value: bidAmount }(0, address(21)); // Assuming the first auction's verbId is 0
+        auction.createBid{ value: bidAmount }(0, address(21), address(0)); // Assuming the first auction's verbId is 0
 
         // Expect auction bidder to be 21
         (, , , , address payable bidder, ) = auction.auction();
@@ -286,7 +286,7 @@ contract AuctionHouseBasicTest is AuctionHouseTest {
         vm.deal(address(1), bidAmount + 2 ether);
 
         vm.startPrank(address(1));
-        auction.createBid{ value: bidAmount }(0, address(1)); // Assuming the first auction's verbId is 0
+        auction.createBid{ value: bidAmount }(0, address(1), address(0)); // Assuming the first auction's verbId is 0
         (uint256 verbId, uint256 amount, , uint256 endTime, address payable bidder, ) = auction.auction();
 
         assertEq(amount, bidAmount, "Bid amount should be set correctly");
