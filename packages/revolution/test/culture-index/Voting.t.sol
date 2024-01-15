@@ -765,4 +765,39 @@ contract CultureIndexVotingBasicTest is CultureIndexTestSuite {
         // Assert that the actual quorum votes match the expected value
         assertEq(actualQuorumVotes, expectedQuorumVotes, "Quorum votes calculation does not match expected value");
     }
+
+    function testVoteWeightAfterMinting() public {
+        vm.stopPrank();
+        address voter = address(this);
+
+        // Mint tokens to the voter
+        vm.prank(address(revolutionPointsEmitter));
+        revolutionPoints.mint(voter, 100);
+        vm.roll(vm.getBlockNumber() + 1);
+
+        uint256 pieceId = createDefaultArtPiece();
+
+        // Cast a vote for the art piece
+        vm.prank(voter);
+        cultureIndex.vote(pieceId);
+
+        // Get the expected vote weight from the contract
+        uint256 expectedVoteWeight = cultureIndex.getAccountVotingPowerForPiece(pieceId, voter);
+
+        // Get the actual vote weight added
+        uint256 actualVoteWeightAdded = cultureIndex.totalVoteWeights(pieceId);
+
+        // Assert that the actual vote weight added matches the expected vote weight
+        assertEq(
+            actualVoteWeightAdded,
+            expectedVoteWeight,
+            "Vote weight added does not match expected vote weight from getAccountVotingPowerForPiece"
+        );
+
+        assertEq(
+            actualVoteWeightAdded,
+            cultureIndex.getVote(pieceId, voter).weight,
+            "Vote weight added does not match expected vote weight from getAccountVotingPowerForPiece"
+        );
+    }
 }
