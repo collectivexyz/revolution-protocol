@@ -1,5 +1,11 @@
 # @collectivexyz/revolution
 
+## 0.3.9
+
+### Patch Changes
+
+- 1aa9001: add voting power helper function to CultureIndex and referral to auction
+
 ## 0.3.8
 
 ### Patch Changes
