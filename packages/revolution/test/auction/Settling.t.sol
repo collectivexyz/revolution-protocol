@@ -80,7 +80,7 @@ contract AuctionHouseSettleTest is AuctionHouseTest {
         uint pointsEmitterValueOwner = msgValueRemaining - pointsEmitterValueGrants;
 
         assertEq(
-            address(founder).balance,
+            address(executor).balance,
             auctioneerPayment + pointsEmitterValueOwner + pointsEmitterValueGrantsGov,
             "Bid amount minus entropy should be transferred to the auction house owner"
         );
@@ -466,7 +466,7 @@ contract AuctionHouseSettleTest is AuctionHouseTest {
         );
 
         assertApproxEqAbs(
-            address(founder).balance - balanceBeforeOwner,
+            address(executor).balance - balanceBeforeOwner,
             getDAOPayout(bidAmount),
             10
             // "Owner did not receive the correct amount of ETH"
