@@ -36,7 +36,11 @@ import { Initializable } from "@openzeppelin/contracts-upgradeable/proxy/utils/I
  * Checkpointing logic from VotesUpgradeable.sol has been used with the following modifications:
  * - `delegates` is a public function that uses the `_delegatee` mapping look-up, but unlike
  *   VotesUpgradeable.sol, returns the delegator's own address if there is no delegate.
- *   This avoids the delegator needing to "delegate to self" with an additional transaction
+ *   This avoids the delegator needing to "delegate to self" with an additional transaction.
+ * - `_delegate` is a private function that does not allow delegating to the zero address.
+ *   This prevents a delegatee from draining all voting units from delegator as a result of the change in default
+ *   behavior of `delegates` function.
+ *   Audit info: https://github.com/code-423n4/2023-12-revolutionprotocol-findings/issues/49
  */
 
 abstract contract VotesUpgradeable is

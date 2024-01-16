@@ -32,6 +32,14 @@ import { Initializable } from "@openzeppelin/contracts-upgradeable/proxy/utils/I
  * by listening to said events. Other implementations of the ERC may not emit
  * these events, as it isn't required by the specification.
  */
+
+/**
+ * @dev MODIFICATIONS
+ * Makes certain functions virtual to allow for overriding them in derived contracts including:
+ * - `_transfer`
+ * - `_mint`
+ * - `_approve`
+ */
 abstract contract ERC20Upgradeable is Initializable, ContextUpgradeable, IERC20, IERC20Metadata, IERC20Errors {
     /// @custom:storage-location erc7201:openzeppelin.storage.ERC20
     struct ERC20Storage {
