@@ -360,7 +360,7 @@ contract CultureIndexArtPieceTest is CultureIndexTestSuite {
         CultureIndex.ArtPiece memory newPiece = cultureIndex.getPieceById(createDefaultArtPiece());
         vm.roll(vm.getBlockNumber() + 1);
 
-        uint256 expectedTotalVotesSupply2 = pointsSupply * 2 + cultureIndex.revolutionTokenVoteWeight();
+        uint256 expectedTotalVotesSupply2 = pointsSupply * 2;
 
         uint256 expectedQuorumVotes2 = (quorumVotesBPS * (expectedTotalVotesSupply2)) / 10_000;
         assertEq(
@@ -368,5 +368,78 @@ contract CultureIndexArtPieceTest is CultureIndexTestSuite {
             expectedQuorumVotes2,
             "Quorum votes should be set correctly on second creation"
         );
+
+        // transfer the token to address(this) and then create new piece and assert quorum votes also includes the votes from the token
+        vm.startPrank(address(auction));
+        revolutionToken.transferFrom(address(auction), address(this), 0);
+
+        vm.startPrank(address(revolutionPointsEmitter));
+        revolutionPoints.mint(address(this), pointsSupply);
+
+        vm.roll(vm.getBlockNumber() + 1);
+
+        CultureIndex.ArtPiece memory newPiece2 = cultureIndex.getPieceById(createDefaultArtPiece());
+        vm.roll(vm.getBlockNumber() + 1);
+
+        uint256 expectedSupply3 = pointsSupply * 3 + cultureIndex.revolutionTokenVoteWeight();
+        uint256 expectedQuorumVotes3 = (quorumVotesBPS * (expectedSupply3)) / 10_000;
+
+        assertEq(
+            cultureIndex.quorumVotesForPiece(newPiece2.pieceId),
+            expectedQuorumVotes3,
+            "Quorum votes should be set correctly on second creation"
+        );
+    }
+
+    function testTopVotedPieceMeetsQuorum() public {
+        vm.stopPrank();
+        uint256 pointsSupply = 1000;
+
+        vm.startPrank(address(revolutionPointsEmitter));
+        revolutionPoints.mint(address(this), pointsSupply);
+        vm.roll(vm.getBlockNumber() + 1);
+
+        uint256 pieceId = createDefaultArtPiece();
+
+        // Cast votes
+        vm.startPrank(address(this));
+        voteForPiece(pieceId);
+
+        // Mint token and govTokens, create a new piece and check fields
+        vm.startPrank(address(auction));
+        vm.roll(vm.getBlockNumber() + 1);
+
+        revolutionToken.mint();
+
+        CultureIndex.ArtPiece memory newPiece = cultureIndex.getPieceById(pieceId);
+        vm.roll(vm.getBlockNumber() + 1);
+
+        uint256 expectedTotalVotesSupply = pointsSupply;
+
+        uint256 expectedQuorumVotes = (cultureIndex.quorumVotesBPS() * (expectedTotalVotesSupply)) / 10_000;
+        assertEq(
+            cultureIndex.quorumVotesForPiece(newPiece.pieceId),
+            expectedQuorumVotes,
+            "Quorum votes should be set correctly on creation"
+        );
+
+        // create art piece and vote for it again
+        uint256 pieceId2 = createDefaultArtPiece();
+
+        // roll
+        vm.roll(vm.getBlockNumber() + 1);
+
+        bool meetsQuorum = cultureIndex.topVotedPieceMeetsQuorum();
+        assertTrue(!meetsQuorum, "Top voted piece should not meet quorum");
+
+        // Cast votes
+        vm.startPrank(address(this));
+        voteForPiece(pieceId2);
+
+        // roll
+        vm.roll(vm.getBlockNumber() + 1);
+
+        meetsQuorum = cultureIndex.topVotedPieceMeetsQuorum();
+        assertTrue(meetsQuorum, "Top voted piece should meet quorum");
     }
 }
