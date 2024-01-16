@@ -101,7 +101,7 @@
 | isMinterLocked       | bool                        | 2    | 20     | 1     | src/RevolutionToken.sol:RevolutionToken |
 | isCultureIndexLocked | bool                        | 2    | 21     | 1     | src/RevolutionToken.sol:RevolutionToken |
 | isDescriptorLocked   | bool                        | 2    | 22     | 1     | src/RevolutionToken.sol:RevolutionToken |
-| _currentVerbId       | uint256                     | 3    | 0      | 32    | src/RevolutionToken.sol:RevolutionToken |
+| _currentTokenId       | uint256                     | 3    | 0      | 32    | src/RevolutionToken.sol:RevolutionToken |
 | _contractURIHash     | string                      | 4    | 0      | 32    | src/RevolutionToken.sol:RevolutionToken |
 | artPieces            | mapping(uint256 => uint256) | 5    | 0      | 32    | src/RevolutionToken.sol:RevolutionToken |
 

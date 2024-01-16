@@ -45,8 +45,14 @@ interface ICultureIndexEvents {
      */
     event VoteCast(uint256 indexed pieceId, address indexed voter, uint256 weight, uint256 totalWeight);
 
-    // @notice Emitted when quorum votes basis points is set
+    /// @notice Emitted when quorum votes basis points is set
     event QuorumVotesBPSSet(uint256 oldQuorumVotesBPS, uint256 newQuorumVotesBPS);
+
+    /// @notice Emitted when min voting power to vote is set
+    event MinVotingPowerToVoteSet(uint256 oldMinVotingPowerToVote, uint256 newMinVotingPowerToVote);
+
+    /// @notice Emitted when min voting power to create is set
+    event MinVotingPowerToCreateSet(uint256 oldMinVotingPowerToCreate, uint256 newMinVotingPowerToCreate);
 }
 
 /**

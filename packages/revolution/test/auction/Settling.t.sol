@@ -22,7 +22,7 @@ contract AuctionHouseSettleTest is AuctionHouseTest {
         uint256 bidAmount = auction.reservePrice();
         vm.deal(address(11), bidAmount);
         vm.startPrank(address(11));
-        auction.createBid{ value: bidAmount }(0, address(11), address(0)); // Assuming first auction's verbId is 0
+        auction.createBid{ value: bidAmount }(0, address(11), address(0)); // Assuming first auction's tokenId is 0
         vm.stopPrank();
 
         vm.warp(block.timestamp + auction.duration() + nDays); // Fast forward time to end the auction
@@ -49,7 +49,7 @@ contract AuctionHouseSettleTest is AuctionHouseTest {
         uint256 bidAmount = auction.reservePrice();
         vm.deal(address(11), bidAmount);
         vm.startPrank(address(11));
-        auction.createBid{ value: bidAmount }(0, address(11), address(0)); // Assuming first auction's verbId is 0
+        auction.createBid{ value: bidAmount }(0, address(11), address(0)); // Assuming first auction's tokenId is 0
         vm.stopPrank();
 
         vm.warp(block.timestamp + auction.duration() + nDays); // Fast forward time to end the auction
@@ -87,7 +87,7 @@ contract AuctionHouseSettleTest is AuctionHouseTest {
     }
 
     function test__SettlingAuctionWithNoBids(uint8 nDays) public {
-        uint256 verbId = createDefaultArtPiece();
+        uint256 tokenId = createDefaultArtPiece();
         vm.roll(vm.getBlockNumber() + 1); // roll block number to enable voting snapshot
 
         auction.unpause();
@@ -96,7 +96,7 @@ contract AuctionHouseSettleTest is AuctionHouseTest {
 
         // Assuming revolutionToken.burn is called for auctions with no bids
         vm.expectEmit(true, true, true, true);
-        emit IRevolutionToken.VerbBurned(verbId);
+        emit IRevolutionToken.VerbBurned(tokenId);
 
         auction.settleCurrentAndCreateNewAuction();
     }
@@ -129,7 +129,7 @@ contract AuctionHouseSettleTest is AuctionHouseTest {
         vm.startPrank(address(auction));
 
         vm.deal(address(auction), amount);
-        auction.createBid{ value: amount }(0, address(this), address(0)); // Assuming first auction's verbId is 0
+        auction.createBid{ value: amount }(0, address(this), address(0)); // Assuming first auction's tokenId is 0
 
         // Initially, recipient should have 0 ether and 0 WETH
         assertEq(recipient.balance, 0);
@@ -168,7 +168,7 @@ contract AuctionHouseSettleTest is AuctionHouseTest {
 
         vm.startPrank(address(auction));
         vm.deal(address(auction), amount);
-        auction.createBid{ value: amount }(0, address(this), address(0)); // Assuming first auction's verbId is 0
+        auction.createBid{ value: amount }(0, address(this), address(0)); // Assuming first auction's tokenId is 0
 
         // Initially, recipient should have 0 ether
         assertEq(recipient.balance, 0);
@@ -209,7 +209,7 @@ contract AuctionHouseSettleTest is AuctionHouseTest {
         vm.startPrank(address(auction));
 
         vm.deal(address(auction), amount);
-        auction.createBid{ value: amount }(0, address(this), address(0)); // Assuming first auction's verbId is 0
+        auction.createBid{ value: amount }(0, address(this), address(0)); // Assuming first auction's tokenId is 0
 
         // Initially, recipient should have 0 ether and 0 WETH
         assertEq(recipient.balance, 0);
@@ -406,7 +406,7 @@ contract AuctionHouseSettleTest is AuctionHouseTest {
         vm.assume(bidAmount > auction.reservePrice());
         vm.assume(bidAmount < revolutionPointsEmitter.maxPurchaseAmount());
 
-        uint256 verbId = createArtPiece(
+        uint256 tokenId = createArtPiece(
             "Art Piece",
             "A new art piece",
             ICultureIndex.MediaType.IMAGE,
@@ -422,7 +422,7 @@ contract AuctionHouseSettleTest is AuctionHouseTest {
 
         vm.deal(address(21_000), bidAmount);
         vm.startPrank(address(21_000));
-        auction.createBid{ value: bidAmount }(verbId, address(21_000), address(0));
+        auction.createBid{ value: bidAmount }(tokenId, address(21_000), address(0));
         vm.stopPrank();
 
         vm.warp(block.timestamp + auction.duration() + 1); // Fast forward time to end the auction
@@ -472,7 +472,7 @@ contract AuctionHouseSettleTest is AuctionHouseTest {
             // "Owner did not receive the correct amount of ETH"
         );
 
-        assertEq(revolutionToken.ownerOf(verbId), address(21_000), "Verb should be transferred to the highest bidder");
+        assertEq(revolutionToken.ownerOf(tokenId), address(21_000), "Verb should be transferred to the highest bidder");
         // Checking voting weight on culture index is 721 vote weight for winning bidder
         assertEq(
             cultureIndex.votingPower().getVotesWithWeights(
@@ -498,7 +498,7 @@ contract AuctionHouseSettleTest is AuctionHouseTest {
         uint bidAmount = 0.005 ether;
         auction.setReservePrice(bidAmount);
 
-        uint256 verbId = createDefaultArtPiece();
+        uint256 tokenId = createDefaultArtPiece();
         vm.roll(vm.getBlockNumber() + 1); // roll block number to enable voting snapshot
 
         uint256 balance = 1 ether;
@@ -509,7 +509,7 @@ contract AuctionHouseSettleTest is AuctionHouseTest {
         vm.stopPrank();
 
         vm.prank(alice);
-        auction.createBid{ value: bidAmount }(verbId, alice, address(0));
+        auction.createBid{ value: bidAmount }(tokenId, alice, address(0));
 
         (, , , uint256 endTime, , , ) = auction.auction();
         vm.warp(endTime + 1);
@@ -542,7 +542,7 @@ contract AuctionHouseSettleTest is AuctionHouseTest {
 
         vm.startPrank(address(auction));
         vm.deal(address(auction), amount);
-        auction.createBid{ value: amount }(0, address(this), address(0)); // Assuming first auction's verbId is 0
+        auction.createBid{ value: amount }(0, address(this), address(0)); // Assuming first auction's tokenId is 0
         //go in future
         vm.warp(block.timestamp + auction.duration() + 1); // Fast forward time to end the auction
 

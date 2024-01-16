@@ -265,7 +265,7 @@ contract CultureIndexVotingSignaturesTest is CultureIndexTestSuite {
         vm.expectRevert(abi.encodeWithSignature("INVALID_PIECE_ID()"));
         cultureIndex.voteForManyWithSig(offchainVoter, invalidPieceIds, deadline, v, r, s);
 
-        // vote correctly but expect "Weight must be greater than minVoteWeight"
+        // vote correctly but expect "Weight must be greater than minVotingPowerToVote"
         nonce = cultureIndex.nonces(funVoterGuy);
         deadline = block.timestamp + 1 days;
 

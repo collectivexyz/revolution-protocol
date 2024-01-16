@@ -25,7 +25,7 @@ contract AuctionHouseBasicTest is AuctionHouseTest {
     function test_BidEventEmission() public {
         //setup bid
         uint256 bidAmount = 100 ether;
-        uint256 verbId = createDefaultArtPiece();
+        uint256 tokenId = createDefaultArtPiece();
 
         // roll
         vm.roll(vm.getBlockNumber() + 1);
@@ -36,8 +36,8 @@ contract AuctionHouseBasicTest is AuctionHouseTest {
         vm.prank(address(1));
         // Expect an event emission
         vm.expectEmit(true, true, true, true);
-        emit IAuctionHouse.AuctionBid(verbId, address(21), address(1), bidAmount, false);
-        auction.createBid{ value: bidAmount }(0, address(21), address(0)); // Assuming the first auction's verbId is 0
+        emit IAuctionHouse.AuctionBid(tokenId, address(21), address(1), bidAmount, false);
+        auction.createBid{ value: bidAmount }(0, address(21), address(0)); // Assuming the first auction's tokenId is 0
     }
 
     function testSetEntropyRateBps(uint256 newEntropyRateBps) public {
@@ -198,7 +198,7 @@ contract AuctionHouseBasicTest is AuctionHouseTest {
     function test_BidForAnotherAccount() public {
         //setup bid
         uint256 bidAmount = 100 ether;
-        uint256 verbId = createDefaultArtPiece();
+        uint256 tokenId = createDefaultArtPiece();
 
         // roll
         vm.roll(vm.getBlockNumber() + 1);
@@ -211,16 +211,16 @@ contract AuctionHouseBasicTest is AuctionHouseTest {
         // try to bid with bidder address(0) first and expect revert
         vm.expectRevert(abi.encodeWithSignature("ADDRESS_ZERO()"));
         vm.startPrank(address(1));
-        auction.createBid{ value: bidAmount }(0, address(0), address(0)); // Assuming the first auction's verbId is 0
+        auction.createBid{ value: bidAmount }(0, address(0), address(0)); // Assuming the first auction's tokenId is 0
 
         // Expect an event emission
         vm.expectEmit(true, true, true, true);
-        emit IAuctionHouse.AuctionBid(verbId, address(21), address(1), bidAmount, false);
-        auction.createBid{ value: bidAmount }(0, address(21), address(0)); // Assuming the first auction's verbId is 0
+        emit IAuctionHouse.AuctionBid(tokenId, address(21), address(1), bidAmount, false);
+        auction.createBid{ value: bidAmount }(0, address(21), address(0)); // Assuming the first auction's tokenId is 0
 
         // Retrieve auction details once and perform all assertions
         (
-            uint256 verbId2,
+            uint256 tokenId2,
             uint256 amount,
             uint256 startTime,
             uint256 endTime,
@@ -229,8 +229,8 @@ contract AuctionHouseBasicTest is AuctionHouseTest {
             bool settled
         ) = auction.auction();
 
-        // Expect auction verbId to be 0
-        assertEq(verbId2, 0, "Auction should be for the zeroth verb");
+        // Expect auction tokenId to be 0
+        assertEq(tokenId2, 0, "Auction should be for the zeroth verb");
 
         // Expect auction amount to be bidAmount
         assertEq(amount, bidAmount, "Bid amount should be set correctly");
@@ -255,7 +255,7 @@ contract AuctionHouseBasicTest is AuctionHouseTest {
         auction.settleCurrentAndCreateNewAuction(); // This will settle the current auction and create a new one
 
         // Expect 21 to be the owner of the verb
-        assertEq(revolutionToken.ownerOf(verbId), address(21), "Verb should be transferred to bidder param");
+        assertEq(revolutionToken.ownerOf(tokenId), address(21), "Verb should be transferred to bidder param");
     }
 
     function test_AuctionCreation() public {
@@ -267,7 +267,7 @@ contract AuctionHouseBasicTest is AuctionHouseTest {
         uint256 startTime = block.timestamp;
 
         (
-            uint256 verbId,
+            uint256 tokenId,
             uint256 amount,
             uint256 auctionStartTime,
             uint256 auctionEndTime,
@@ -277,7 +277,7 @@ contract AuctionHouseBasicTest is AuctionHouseTest {
         ) = auction.auction();
         assertEq(auctionStartTime, startTime, "Auction start time should be set correctly");
         assertEq(auctionEndTime, startTime + auction.duration(), "Auction end time should be set correctly");
-        assertEq(verbId, 0, "Auction should be for the zeroth verb");
+        assertEq(tokenId, 0, "Auction should be for the zeroth verb");
         assertEq(amount, 0, "Auction amount should be 0");
         assertEq(bidder, address(0), "Auction bidder should be 0");
         assertEq(settled, false, "Auction should not be settled");
@@ -296,8 +296,8 @@ contract AuctionHouseBasicTest is AuctionHouseTest {
         vm.deal(address(1), bidAmount + 2 ether);
 
         vm.startPrank(address(1));
-        auction.createBid{ value: bidAmount }(0, address(1), address(0)); // Assuming the first auction's verbId is 0
-        (uint256 verbId, uint256 amount, , uint256 endTime, address payable bidder, , ) = auction.auction();
+        auction.createBid{ value: bidAmount }(0, address(1), address(0)); // Assuming the first auction's tokenId is 0
+        (uint256 tokenId, uint256 amount, , uint256 endTime, address payable bidder, , ) = auction.auction();
 
         assertEq(amount, bidAmount, "Bid amount should be set correctly");
         assertEq(bidder, address(1), "Bidder address should be set correctly");
@@ -335,7 +335,7 @@ contract AuctionHouseBasicTest is AuctionHouseTest {
             (, , , , , , bool settled) = auction.auction();
             assertEq(settled, false, "Auction should not be settled because new one created");
         } else {
-            assertEq(revolutionToken.ownerOf(verbId), address(1), "Verb should be transferred to the auction house");
+            assertEq(revolutionToken.ownerOf(tokenId), address(1), "Verb should be transferred to the auction house");
         }
     }
 
@@ -346,8 +346,8 @@ contract AuctionHouseBasicTest is AuctionHouseTest {
 
         auction.unpause();
 
-        (uint256 verbId, , , uint256 endTime, , , ) = auction.auction();
-        assertEq(revolutionToken.ownerOf(verbId), address(auction), "Verb should be transferred to the auction house");
+        (uint256 tokenId, , , uint256 endTime, , , ) = auction.auction();
+        assertEq(revolutionToken.ownerOf(tokenId), address(auction), "Verb should be transferred to the auction house");
 
         vm.warp(endTime + 1);
         vm.roll(vm.getBlockNumber() + 1);

@@ -106,7 +106,8 @@ contract CultureIndex is
         name = _cultureIndexParams.name;
         description = _cultureIndexParams.description;
         quorumVotesBPS = _cultureIndexParams.quorumVotesBPS;
-        minVoteWeight = _cultureIndexParams.minVoteWeight;
+        minVotingPowerToVote = _cultureIndexParams.minVotingPowerToVote;
+        minVotingPowerToCreate = _cultureIndexParams.minVotingPowerToCreate;
         dropperAdmin = _dropperAdmin;
 
         emit QuorumVotesBPSSet(quorumVotesBPS, _cultureIndexParams.quorumVotesBPS);
@@ -235,6 +236,8 @@ contract CultureIndex is
         ArtPieceMetadata calldata metadata,
         CreatorBps[] calldata creatorArray
     ) public returns (uint256) {
+        if (votingPower.getVotes(msg.sender) < minVotingPowerToCreate) revert WEIGHT_TOO_LOW();
+
         uint256 creatorArrayLength = validateCreatorsArray(creatorArray);
 
         // Validate the media type and associated data
@@ -309,7 +312,7 @@ contract CultureIndex is
             1,
             revolutionTokenVoteWeight
         );
-        if (weight <= minVoteWeight) revert WEIGHT_TOO_LOW();
+        if (weight <= minVotingPowerToVote) revert WEIGHT_TOO_LOW();
 
         votes[pieceId][voter] = Vote(voter, weight);
         totalVoteWeights[pieceId] += weight;
@@ -500,6 +503,26 @@ contract CultureIndex is
         emit QuorumVotesBPSSet(quorumVotesBPS, newQuorumVotesBPS);
 
         quorumVotesBPS = newQuorumVotesBPS;
+    }
+
+    /**
+     * @notice Admin function for setting the min voting power required to vote
+     * @param newMinVotingPowerToVote new min voting power required to vote
+     */
+    function _setMinVotingPowerToVote(uint256 newMinVotingPowerToVote) external onlyOwner {
+        emit MinVotingPowerToVoteSet(minVotingPowerToVote, newMinVotingPowerToVote);
+
+        minVotingPowerToVote = newMinVotingPowerToVote;
+    }
+
+    /**
+     * @notice Admin function for setting the min voting power required to create
+     * @param newMinVotingPowerToCreate new min voting power required to create
+     */
+    function _setMinVotingPowerToCreate(uint256 newMinVotingPowerToCreate) external onlyOwner {
+        emit MinVotingPowerToCreateSet(minVotingPowerToCreate, newMinVotingPowerToCreate);
+
+        minVotingPowerToCreate = newMinVotingPowerToCreate;
     }
 
     /**

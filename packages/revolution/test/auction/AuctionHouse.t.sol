@@ -28,7 +28,7 @@ contract AuctionHouseTest is RevolutionBuilderTest {
 
         super.setPointsParams("Revolution Governance", "GOV");
 
-        super.setCultureIndexParams("Vrbs", "Our community Vrbs. Must be 32x32.", 10, 200, 0);
+        super.setCultureIndexParams("Vrbs", "Our community Vrbs. Must be 32x32.", 10, 200, 0, 0);
 
         super.setRevolutionTokenParams("Vrbs", "VRBS", "QmQzDwaZ7yQxHHs7sQQenJVB89riTSacSGcJRv9jtHPuz5", "Vrb");
 
@@ -43,6 +43,13 @@ contract AuctionHouseTest is RevolutionBuilderTest {
         );
 
         super.deployMock();
+
+        //transfer ownership and accept
+        vm.prank(address(founder));
+        auction.transferOwnership(address(executor));
+
+        vm.prank(address(executor));
+        auction.acceptOwnership();
 
         vm.startPrank(address(executor));
     }

@@ -30,7 +30,7 @@ contract RevolutionTokenTestSuite is RevolutionBuilderTest {
 
         super.setRevolutionTokenParams(tokenName, tokenSymbol, "https://example.com/token/", tokenNamePrefix);
 
-        super.setCultureIndexParams("Vrbs", "Our community Vrbs. Must be 32x32.", 10, 200, 0);
+        super.setCultureIndexParams("Vrbs", "Our community Vrbs. Must be 32x32.", 10, 200, 0, 0);
 
         super.deployMock();
 

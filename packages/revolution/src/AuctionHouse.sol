@@ -163,15 +163,15 @@ contract AuctionHouse is
     /**
      * @notice Create a bid for a Token, with a given amount.
      * @dev This contract only accepts payment in ETH.
-     * @param verbId The ID of the Token to bid on.
+     * @param tokenId The ID of the Token to bid on.
      * @param bidder The address of the bidder.
      */
-    function createBid(uint256 verbId, address bidder, address referral) external payable override nonReentrant {
+    function createBid(uint256 tokenId, address bidder, address referral) external payable override nonReentrant {
         IAuctionHouse.Auction memory _auction = auction;
 
         //require bidder is valid address
         if (bidder == address(0)) revert ADDRESS_ZERO();
-        if (_auction.verbId != verbId) revert INVALID_VERB_ID();
+        if (_auction.tokenId != tokenId) revert INVALID_VERB_ID();
         if (block.timestamp >= _auction.endTime) revert AUCTION_EXPIRED();
         if (msg.value < reservePrice) revert BELOW_RESERVE_PRICE();
         if (msg.value < _auction.amount + ((_auction.amount * minBidIncrementPercentage) / 100)) revert BID_TOO_LOW();
@@ -189,9 +189,9 @@ contract AuctionHouse is
         // Refund the last bidder, if applicable
         if (lastBidder != address(0)) _safeTransferETHWithFallback(lastBidder, _auction.amount);
 
-        emit AuctionBid(_auction.verbId, bidder, msg.sender, msg.value, extended);
+        emit AuctionBid(_auction.tokenId, bidder, msg.sender, msg.value, extended);
 
-        if (extended) emit AuctionExtended(_auction.verbId, _auction.endTime);
+        if (extended) emit AuctionExtended(_auction.tokenId, _auction.endTime);
     }
 
     /**
@@ -301,12 +301,12 @@ contract AuctionHouse is
         // Check if there's enough gas to safely execute token.mint() and subsequent operations
         if (gasleft() < MIN_TOKEN_MINT_GAS_THRESHOLD) revert INSUFFICIENT_GAS_FOR_AUCTION();
 
-        try revolutionToken.mint() returns (uint256 verbId) {
+        try revolutionToken.mint() returns (uint256 tokenId) {
             uint256 startTime = block.timestamp;
             uint256 endTime = startTime + duration;
 
             auction = Auction({
-                verbId: verbId,
+                tokenId: tokenId,
                 amount: 0,
                 startTime: startTime,
                 endTime: endTime,
@@ -315,7 +315,7 @@ contract AuctionHouse is
                 referral: payable(0)
             });
 
-            emit AuctionCreated(verbId, startTime, endTime);
+            emit AuctionCreated(tokenId, startTime, endTime);
         } catch {
             _pause();
         }
@@ -346,13 +346,13 @@ contract AuctionHouse is
             }
 
             // And then burn the token
-            revolutionToken.burn(_auction.verbId);
+            revolutionToken.burn(_auction.tokenId);
         } else {
             //If no one has bid, burn the token
             if (_auction.bidder == address(0))
-                revolutionToken.burn(_auction.verbId);
+                revolutionToken.burn(_auction.tokenId);
                 //If someone has bid, transfer the token to the winning bidder
-            else revolutionToken.transferFrom(address(this), _auction.bidder, _auction.verbId);
+            else revolutionToken.transferFrom(address(this), _auction.bidder, _auction.tokenId);
 
             if (_auction.amount > 0) {
                 // Ether going to owner of the auction
@@ -361,8 +361,8 @@ contract AuctionHouse is
                 //Total amount of ether going to creator
                 uint256 creatorsShare = _auction.amount - auctioneerPayment;
 
-                uint256 numCreators = revolutionToken.getArtPieceById(_auction.verbId).creators.length;
-                address deployer = revolutionToken.getArtPieceById(_auction.verbId).sponsor;
+                uint256 numCreators = revolutionToken.getArtPieceById(_auction.tokenId).creators.length;
+                address deployer = revolutionToken.getArtPieceById(_auction.tokenId).sponsor;
 
                 //Build arrays for revolutionPointsEmitter.buyToken
                 uint256[] memory vrgdaSplits = new uint256[](numCreators);
@@ -377,7 +377,7 @@ contract AuctionHouse is
                 if (creatorsShare > 0) {
                     //Get the creators of the Verb
                     ICultureIndex.CreatorBps[] memory creators = revolutionToken
-                        .getArtPieceById(_auction.verbId)
+                        .getArtPieceById(_auction.tokenId)
                         .creators;
 
                     //Calculate the amount to be paid to the creators
@@ -417,7 +417,7 @@ contract AuctionHouse is
             }
         }
 
-        emit AuctionSettled(_auction.verbId, _auction.bidder, _auction.amount, creatorTokensEmitted);
+        emit AuctionSettled(_auction.tokenId, _auction.bidder, _auction.amount, creatorTokensEmitted);
     }
 
     /// @notice Transfer ETH/WETH from the contract
