@@ -1,5 +1,11 @@
 # @collectivexyz/revolution
 
+## 0.3.10
+
+### Patch Changes
+
+- e9c1c86: add 2 configurable voting power minimums to the CultureIndex for voting and creating
+
 ## 0.3.9
 
 ### Patch Changes
