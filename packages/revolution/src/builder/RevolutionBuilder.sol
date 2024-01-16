@@ -248,7 +248,9 @@ contract RevolutionBuilder is
         IAuctionHouse(daoAddressesByToken[revolutionToken].auction).initialize({
             revolutionToken: daoAddressesByToken[revolutionToken].revolutionToken,
             revolutionPointsEmitter: daoAddressesByToken[revolutionToken].revolutionPointsEmitter,
-            initialOwner: initialSetup.executor,
+            /// @notice So the auction can be unpaused easily
+            /// @dev the _initialOwner should immediately transfer ownership to the DAO after unpausing the auction
+            initialOwner: _initialOwner,
             auctionParams: _auctionParams,
             weth: _weth
         });
