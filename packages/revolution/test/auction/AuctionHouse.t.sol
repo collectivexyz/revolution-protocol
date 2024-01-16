@@ -44,6 +44,6 @@ contract AuctionHouseTest is RevolutionBuilderTest {
 
         super.deployMock();
 
-        vm.startPrank(address(executor));
+        vm.startPrank(address(founder));
     }
 }
