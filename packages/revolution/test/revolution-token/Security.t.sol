@@ -223,7 +223,7 @@ contract TokenSecurityTest is RevolutionTokenTestSuite {
         assertFalse(reverted, "Should handle the maximum number of creators without reverting");
     }
 
-    /// @dev Tests the _mintTo function for failure in dropTopVotedPiece and ensures verbId is not incremented
+    /// @dev Tests the _mintTo function for failure in dropTopVotedPiece and ensures tokenId is not incremented
     function testMintToDropTopVotedPieceFailure() public {
         // Create a default art piece to have something to mint
         createDefaultArtPiece();
@@ -233,7 +233,7 @@ contract TokenSecurityTest is RevolutionTokenTestSuite {
         address cultureIndexMock = address(new CultureIndexMock());
         revolutionToken.setCultureIndex(ICultureIndex(cultureIndexMock));
 
-        // Store current verbId before test
+        // Store current tokenId before test
         uint256 supplyBefore = 0;
 
         bool dropTopVotedPieceFailed = false;
@@ -243,9 +243,9 @@ contract TokenSecurityTest is RevolutionTokenTestSuite {
             dropTopVotedPieceFailed = true;
         }
 
-        // Verify verbId has not incremented after failure
+        // Verify tokenId has not incremented after failure
         uint256 totalSupply = revolutionToken.totalSupply();
-        assertEq(supplyBefore, totalSupply, "verbId should not increment after failure");
+        assertEq(supplyBefore, totalSupply, "tokenId should not increment after failure");
 
         assertTrue(dropTopVotedPieceFailed, "_mintTo should revert if dropTopVotedPiece fails");
     }

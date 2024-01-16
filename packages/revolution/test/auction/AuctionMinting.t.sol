@@ -23,7 +23,7 @@ contract AuctionHouseMintTest is AuctionHouseTest {
         auction.unpause();
 
         (
-            uint256 verbId,
+            uint256 tokenId,
             uint256 amount,
             uint256 auctionStartTime,
             uint256 auctionEndTime,
@@ -33,7 +33,7 @@ contract AuctionHouseMintTest is AuctionHouseTest {
         ) = auction.auction();
 
         // Check that auction is not created
-        assertEq(verbId, 0);
+        assertEq(tokenId, 0);
         assertEq(amount, 0);
         assertEq(auctionStartTime, 0);
         assertEq(auctionEndTime, 0);

@@ -31,7 +31,7 @@ contract AuctionHouseOutOfGasTest is AuctionHouseTest {
         }
 
         // create the initial art piece
-        uint256 verbId = createArtPieceMultiCreator(
+        uint256 tokenId = createArtPieceMultiCreator(
             createLongString(cultureIndex.MAX_NAME_LENGTH()),
             createLongString(cultureIndex.MAX_DESCRIPTION_LENGTH()),
             ICultureIndex.MediaType.ANIMATION,
@@ -51,7 +51,7 @@ contract AuctionHouseOutOfGasTest is AuctionHouseTest {
         uint256 bidAmount = auction.reservePrice();
         vm.deal(address(creators[nCreators - 1]), bidAmount + 1 ether);
         vm.startPrank(address(creators[nCreators - 1]));
-        auction.createBid{ value: bidAmount }(verbId, address(creators[nCreators - 1]), address(0));
+        auction.createBid{ value: bidAmount }(tokenId, address(creators[nCreators - 1]), address(0));
         vm.stopPrank();
 
         vm.warp(block.timestamp + auction.duration() + 1); // Fast forward time to end the auction

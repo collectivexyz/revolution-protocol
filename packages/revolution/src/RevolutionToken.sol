@@ -63,7 +63,7 @@ contract RevolutionToken is
     // IPFS content hash of contract-level metadata
     string private _contractURIHash;
 
-    // The CultureIndex art pieces mapping (verbId => artPiece ID)
+    // The CultureIndex art pieces mapping (tokenId => artPiece ID)
     mapping(uint256 => uint256) public artPieces;
 
     ///                                                          ///
@@ -182,9 +182,9 @@ contract RevolutionToken is
     /**
      * @notice Burn a verb.
      */
-    function burn(uint256 verbId) public override onlyMinter nonReentrant {
-        _burn(verbId);
-        emit VerbBurned(verbId);
+    function burn(uint256 tokenId) public override onlyMinter nonReentrant {
+        _burn(tokenId);
+        emit VerbBurned(tokenId);
     }
 
     /**
@@ -270,29 +270,29 @@ contract RevolutionToken is
 
     /**
      * @notice Fetch an art piece by its ID.
-     * @param verbId The ID of the art piece.
+     * @param tokenId The ID of the art piece.
      * @return The ArtPiece struct associated with the given ID.
      */
-    function getArtPieceById(uint256 verbId) external view returns (ICultureIndex.ArtPiece memory) {
-        if (verbId >= _currentVerbId) revert INVALID_PIECE_ID();
-        return cultureIndex.getPieceById(artPieces[verbId]);
+    function getArtPieceById(uint256 tokenId) external view returns (ICultureIndex.ArtPiece memory) {
+        if (tokenId >= _currentVerbId) revert INVALID_PIECE_ID();
+        return cultureIndex.getPieceById(artPieces[tokenId]);
     }
 
     /**
-     * @notice Mint a Verb with `verbId` to the provided `to` address. Pulls the top voted art piece from the CultureIndex.
+     * @notice Mint a Verb with `tokenId` to the provided `to` address. Pulls the top voted art piece from the CultureIndex.
      */
     function _mintTo(address to) internal returns (uint256) {
         // Use try/catch to handle potential failure
         try cultureIndex.dropTopVotedPiece() returns (ICultureIndex.ArtPieceCondensed memory artPiece) {
-            uint256 verbId = _currentVerbId++;
+            uint256 tokenId = _currentVerbId++;
 
-            artPieces[verbId] = artPiece.pieceId;
+            artPieces[tokenId] = artPiece.pieceId;
 
-            _mint(to, verbId);
+            _mint(to, tokenId);
 
-            emit VerbCreated(verbId, artPiece);
+            emit VerbCreated(tokenId, artPiece);
 
-            return verbId;
+            return tokenId;
         } catch {
             revert("dropTopVotedPiece failed");
         }
