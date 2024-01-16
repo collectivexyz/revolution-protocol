@@ -298,6 +298,9 @@ contract AuctionHouse is
      * catch the revert and pause this contract.
      */
     function _createAuction() internal {
+        // Check if the top voted piece meets quorum before potentially pausing auction with failed mint
+        if (!revolutionToken.topVotedPieceMeetsQuorum()) revert QUORUM_NOT_MET();
+
         // Check if there's enough gas to safely execute token.mint() and subsequent operations
         if (gasleft() < MIN_TOKEN_MINT_GAS_THRESHOLD) revert INSUFFICIENT_GAS_FOR_AUCTION();
 
