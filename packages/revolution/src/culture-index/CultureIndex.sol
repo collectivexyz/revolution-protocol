@@ -506,6 +506,26 @@ contract CultureIndex is
     }
 
     /**
+     * @notice Admin function for setting the min voting power required to vote
+     * @param newMinVotingPowerToVote new min voting power required to vote
+     */
+    function _setMinVotingPowerToVote(uint256 newMinVotingPowerToVote) external onlyOwner {
+        emit MinVotingPowerToVoteSet(minVotingPowerToVote, newMinVotingPowerToVote);
+
+        minVotingPowerToVote = newMinVotingPowerToVote;
+    }
+
+    /**
+     * @notice Admin function for setting the min voting power required to create
+     * @param newMinVotingPowerToCreate new min voting power required to create
+     */
+    function _setMinVotingPowerToCreate(uint256 newMinVotingPowerToCreate) external onlyOwner {
+        emit MinVotingPowerToCreateSet(minVotingPowerToCreate, newMinVotingPowerToCreate);
+
+        minVotingPowerToCreate = newMinVotingPowerToCreate;
+    }
+
+    /**
      * @notice Current quorum votes using ERC721 Total Supply, ERC721 Vote Weight, and RevolutionPoints Total Supply
      * Differs from `GovernerBravo` which uses fixed amount
      */
