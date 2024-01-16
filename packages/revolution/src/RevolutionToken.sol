@@ -279,6 +279,14 @@ contract RevolutionToken is
     }
 
     /**
+     * @notice Returns true or false depending on whether the top voted piece in the culture index meets quorum
+     * @return True if the top voted piece meets quorum, false otherwise
+     */
+    function topVotedPieceMeetsQuorum() external view returns (bool) {
+        return cultureIndex.topVotedPieceMeetsQuorum();
+    }
+
+    /**
      * @notice Mint a Verb with `tokenId` to the provided `to` address. Pulls the top voted art piece from the CultureIndex.
      */
     function _mintTo(address to) internal returns (uint256) {

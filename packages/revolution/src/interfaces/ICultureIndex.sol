@@ -298,6 +298,12 @@ interface ICultureIndex is ICultureIndexEvents {
     function topVotedPieceId() external view returns (uint256);
 
     /**
+     * @notice Returns true or false depending on whether the top voted piece meets quorum
+     * @return True if the top voted piece meets quorum, false otherwise
+     */
+    function topVotedPieceMeetsQuorum() external view returns (bool);
+
+    /**
      * @notice Officially release or "drop" the art piece with the most votes.
      * @dev This function also updates internal state to reflect the piece's dropped status.
      * @return The ArtPiece struct of the top voted piece that was just dropped.
