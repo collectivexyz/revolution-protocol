@@ -150,7 +150,7 @@ contract TokenMintingTest is RevolutionTokenTestSuite {
         assertEq(newTotalSupply, initialTotalSupply - 1, "Total supply should decrease by 1 after burning");
     }
 
-    /// @dev Ensures _currentVerbId increments correctly after each mint
+    /// @dev Ensures _currentTokenId increments correctly after each mint
     function test_MintingIncrement(uint200 voteWeight) public {
         vm.assume(voteWeight < type(uint200).max / 2);
         vm.stopPrank();
@@ -178,7 +178,7 @@ contract TokenMintingTest is RevolutionTokenTestSuite {
         if (shouldRevertMint) vm.expectRevert("dropTopVotedPiece failed");
         uint256 tokenId1 = revolutionToken.mint();
         if (!shouldRevertMint)
-            assertEq(revolutionToken.totalSupply(), tokenId1 + 1, "CurrentVerbId should increment after first mint");
+            assertEq(revolutionToken.totalSupply(), tokenId1 + 1, "CurrentTokenId should increment after first mint");
 
         vm.startPrank(address(this));
         if (voteWeight == 0) vm.expectRevert(abi.encodeWithSignature("WEIGHT_TOO_LOW()"));
@@ -188,7 +188,7 @@ contract TokenMintingTest is RevolutionTokenTestSuite {
         if (shouldRevertMint) vm.expectRevert("dropTopVotedPiece failed");
         uint256 tokenId2 = revolutionToken.mint();
         if (!shouldRevertMint)
-            assertEq(revolutionToken.totalSupply(), tokenId2 + 1, "CurrentVerbId should increment after second mint");
+            assertEq(revolutionToken.totalSupply(), tokenId2 + 1, "CurrentTokenId should increment after second mint");
     }
 
     /// @dev Checks if the VerbCreated event is emitted with correct parameters on minting

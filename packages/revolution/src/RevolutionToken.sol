@@ -58,7 +58,7 @@ contract RevolutionToken is
     bool public isDescriptorLocked;
 
     // The internal verb ID tracker
-    uint256 private _currentVerbId;
+    uint256 private _currentTokenId;
 
     // IPFS content hash of contract-level metadata
     string private _contractURIHash;
@@ -274,7 +274,7 @@ contract RevolutionToken is
      * @return The ArtPiece struct associated with the given ID.
      */
     function getArtPieceById(uint256 tokenId) external view returns (ICultureIndex.ArtPiece memory) {
-        if (tokenId >= _currentVerbId) revert INVALID_PIECE_ID();
+        if (tokenId >= _currentTokenId) revert INVALID_PIECE_ID();
         return cultureIndex.getPieceById(artPieces[tokenId]);
     }
 
@@ -284,7 +284,7 @@ contract RevolutionToken is
     function _mintTo(address to) internal returns (uint256) {
         // Use try/catch to handle potential failure
         try cultureIndex.dropTopVotedPiece() returns (ICultureIndex.ArtPieceCondensed memory artPiece) {
-            uint256 tokenId = _currentVerbId++;
+            uint256 tokenId = _currentTokenId++;
 
             artPieces[tokenId] = artPiece.pieceId;
 
