@@ -1876,13 +1876,13 @@ interface IRevolutionBuilder is IUUPS {
     /// @param description A description for the culture index, can include rules for uploads etc.
     /// @param revolutionTokenVoteWeight The voting weight of the individual ERC721 tokens. Normally a large multiple to match up with daily emission of ERC20 points
     /// @param quorumVotesBPS The initial quorum votes threshold in basis points
-    /// @param minVoteWeight The minimum vote weight in basis points that a voter must have to be able to vote.
+    /// @param minVotingPowerToVote The minimum vote weight in basis points that a voter must have to be able to vote.
     struct CultureIndexParams {
         string name;
         string description;
         uint256 revolutionTokenVoteWeight;
         uint256 quorumVotesBPS;
-        uint256 minVoteWeight;
+        uint256 minVotingPowerToVote;
     }
 
     ///                                                          ///

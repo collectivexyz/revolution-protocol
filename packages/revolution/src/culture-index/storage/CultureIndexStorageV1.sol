@@ -18,8 +18,11 @@ contract CultureIndexStorageV1 {
     // The RevolutionVotingPower contract used to get the voting power of an account
     IRevolutionVotingPower public votingPower;
 
-    /// @notice The minimum vote weight required in order to vote
-    uint256 public minVoteWeight;
+    /// @notice The minimum vote power required to vote on an art piece
+    uint256 public minVotingPowerToVote;
+
+    /// @notice The minimum voting power required to create an art piece
+    uint256 public minVotingPowerToCreate;
 
     /// @notice The basis point number of votes in support of a art piece required in order for a quorum to be reached and for an art piece to be dropped.
     uint256 public quorumVotesBPS;

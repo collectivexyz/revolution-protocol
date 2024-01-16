@@ -14,7 +14,7 @@ contract PointsTestSuite is RevolutionBuilderTest {
 
         super.setPointsParams("Revolution Governance", "GOV");
 
-        super.setCultureIndexParams("Vrbs", "Our community Vrbs. Must be 32x32.", 10, 200, 0);
+        super.setCultureIndexParams("Vrbs", "Our community Vrbs. Must be 32x32.", 10, 200, 0, 0);
 
         super.deployMock();
     }
