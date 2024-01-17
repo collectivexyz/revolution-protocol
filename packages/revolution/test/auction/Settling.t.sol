@@ -631,6 +631,67 @@ contract AuctionHouseSettleTest is AuctionHouseTest {
         meetsQuorum = cultureIndex.topVotedPieceMeetsQuorum();
         assertTrue(meetsQuorum, "Top voted piece should meet quorum");
     }
+
+    function test_CreateAuctionWithoutSettleAndCreate() public {
+        uint256 tokenId = createDefaultArtPiece();
+        createDefaultArtPiece();
+
+        // roll
+        vm.roll(vm.getBlockNumber() + 1);
+
+        // Unpause the auction
+        auction.unpause();
+
+        // warp to the end
+        vm.warp(block.timestamp + auction.duration() + 1);
+
+        // Expect revert when trying to create auction without settling and creating first
+        vm.expectRevert(abi.encodeWithSignature("AUCTION_ALREADY_IN_PROGRESS()"));
+        auction.createAuction();
+
+        //now settle
+        auction.settleCurrentAndCreateNewAuction();
+    }
+
+    function test_CreateAuctionWithoutSettle() public {
+        vm.stopPrank();
+        // mint points
+        vm.prank(address(revolutionPointsEmitter));
+        revolutionPoints.mint(address(this), 1000);
+
+        vm.roll(vm.getBlockNumber() + 1);
+
+        uint256 tokenId = createDefaultArtPiece();
+        createDefaultArtPiece();
+
+        //vote for tokenId
+        vm.prank(address(this));
+        cultureIndex.vote(tokenId);
+
+        // roll
+        vm.roll(vm.getBlockNumber() + 1);
+
+        //ensure you can't call createAuction when paused
+        vm.expectRevert(abi.encodeWithSignature("EnforcedPause()"));
+        auction.createAuction();
+
+        // Unpause the auction
+        vm.prank(address(executor));
+        auction.unpause();
+
+        // warp to the end
+        vm.warp(block.timestamp + auction.duration() + 1);
+
+        // Expect revert when trying to create auction without settling and creating first
+        vm.expectRevert(abi.encodeWithSignature("AUCTION_ALREADY_IN_PROGRESS()"));
+        auction.createAuction();
+
+        //create and settle and expect revert
+        vm.expectRevert(abi.encodeWithSignature("QUORUM_NOT_MET()"));
+        auction.settleCurrentAndCreateNewAuction();
+
+        //todo does settled get set to true? seems like it does onchain, but not in the foundry test?
+    }
 }
 
 contract ContractWithoutReceiveOrFallback {
