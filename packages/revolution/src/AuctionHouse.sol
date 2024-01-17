@@ -153,18 +153,6 @@ contract AuctionHouse is
     }
 
     /**
-     * @notice Create a new auction if previous call failed due to low gas or lack of quorum.
-     * @dev Helpful in cases where auction was not created, but we want to let the community
-     * restart it without waiting for the DAO to do so.
-     */
-    function createAuction() external override nonReentrant whenNotPaused {
-        if (!auction.settled && auction.startTime != 0) {
-            revert AUCTION_ALREADY_IN_PROGRESS();
-        }
-        _createAuction();
-    }
-
-    /**
      * @notice Settle the current auction.
      * @dev This function can only be called when the contract is paused.
      */

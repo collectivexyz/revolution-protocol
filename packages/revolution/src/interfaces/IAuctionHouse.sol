@@ -135,8 +135,6 @@ interface IAuctionHouse {
 
     function manager() external returns (IRevolutionBuilder);
 
-    function createAuction() external;
-
     /**
      * @notice Initialize the auction house and base contracts.
      * @param revolutionToken The address of the Revolution ERC721 token contract.

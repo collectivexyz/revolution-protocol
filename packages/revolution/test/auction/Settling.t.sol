@@ -632,27 +632,6 @@ contract AuctionHouseSettleTest is AuctionHouseTest {
         assertTrue(meetsQuorum, "Top voted piece should meet quorum");
     }
 
-    function test_CreateAuctionWithoutSettleAndCreate() public {
-        uint256 tokenId = createDefaultArtPiece();
-        createDefaultArtPiece();
-
-        // roll
-        vm.roll(vm.getBlockNumber() + 1);
-
-        // Unpause the auction
-        auction.unpause();
-
-        // warp to the end
-        vm.warp(block.timestamp + auction.duration() + 1);
-
-        // Expect revert when trying to create auction without settling and creating first
-        vm.expectRevert(abi.encodeWithSignature("AUCTION_ALREADY_IN_PROGRESS()"));
-        auction.createAuction();
-
-        //now settle
-        auction.settleCurrentAndCreateNewAuction();
-    }
-
     function test_CreateAuctionWithoutSettle() public {
         vm.stopPrank();
         // mint points
@@ -671,10 +650,6 @@ contract AuctionHouseSettleTest is AuctionHouseTest {
         // roll
         vm.roll(vm.getBlockNumber() + 1);
 
-        //ensure you can't call createAuction when paused
-        vm.expectRevert(abi.encodeWithSignature("EnforcedPause()"));
-        auction.createAuction();
-
         // Unpause the auction
         vm.prank(address(executor));
         auction.unpause();
@@ -682,15 +657,17 @@ contract AuctionHouseSettleTest is AuctionHouseTest {
         // warp to the end
         vm.warp(block.timestamp + auction.duration() + 1);
 
-        // Expect revert when trying to create auction without settling and creating first
-        vm.expectRevert(abi.encodeWithSignature("AUCTION_ALREADY_IN_PROGRESS()"));
-        auction.createAuction();
-
         //create and settle and expect revert
         vm.expectRevert(abi.encodeWithSignature("QUORUM_NOT_MET()"));
         auction.settleCurrentAndCreateNewAuction();
 
-        //todo does settled get set to true? seems like it does onchain, but not in the foundry test?
+        // ensure auction is not paused and auction is not settled
+        assertEq(auction.paused(), false, "Auction house should not be paused");
+
+        (, , , , , , bool settled) = auction.auction();
+
+        // Check that auction is not created
+        assertEq(settled, false, "Auction should not be settled");
     }
 }
 
