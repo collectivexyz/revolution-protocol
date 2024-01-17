@@ -2,7 +2,7 @@
 pragma solidity ^0.8.22;
 
 import { AuctionHouseTest } from "./AuctionHouse.t.sol";
-import { IAuctionHouse } from "../../src/interfaces/IAuctionHouse.sol";
+import { IAuctionHouseEvents } from "../../src/interfaces/IAuctionHouse.sol";
 import { wadMul, wadDiv } from "../../src/libs/SignedWadMath.sol";
 
 contract AuctionHouseBasicTest is AuctionHouseTest {
@@ -13,12 +13,12 @@ contract AuctionHouseBasicTest is AuctionHouseTest {
 
         // Expect events when changing creatorRateBps
         vm.expectEmit(true, true, true, true);
-        emit IAuctionHouse.CreatorRateBpsUpdated(newCreatorRateBps);
+        emit IAuctionHouseEvents.CreatorRateBpsUpdated(newCreatorRateBps);
         auction.setCreatorRateBps(newCreatorRateBps);
 
         // Expect events when changing entropyRateBps
         vm.expectEmit(true, true, true, true);
-        emit IAuctionHouse.EntropyRateBpsUpdated(newEntropyRateBps);
+        emit IAuctionHouseEvents.EntropyRateBpsUpdated(newEntropyRateBps);
         auction.setEntropyRateBps(newEntropyRateBps);
     }
 
@@ -36,7 +36,7 @@ contract AuctionHouseBasicTest is AuctionHouseTest {
         vm.prank(address(1));
         // Expect an event emission
         vm.expectEmit(true, true, true, true);
-        emit IAuctionHouse.AuctionBid(tokenId, address(21), address(1), bidAmount, false);
+        emit IAuctionHouseEvents.AuctionBid(tokenId, address(21), address(1), bidAmount, false);
         auction.createBid{ value: bidAmount }(0, address(21), address(0)); // Assuming the first auction's tokenId is 0
     }
 
@@ -45,7 +45,7 @@ contract AuctionHouseBasicTest is AuctionHouseTest {
 
         // Expect an event emission
         vm.expectEmit(true, true, true, true);
-        emit IAuctionHouse.EntropyRateBpsUpdated(newEntropyRateBps);
+        emit IAuctionHouseEvents.EntropyRateBpsUpdated(newEntropyRateBps);
 
         // Update the rate
         auction.setEntropyRateBps(newEntropyRateBps);
@@ -95,7 +95,7 @@ contract AuctionHouseBasicTest is AuctionHouseTest {
         } else {
             // Expect an event emission
             vm.expectEmit(true, true, true, true);
-            emit IAuctionHouse.CreatorRateBpsUpdated(creatorRateBps);
+            emit IAuctionHouseEvents.CreatorRateBpsUpdated(creatorRateBps);
         }
         auction.setCreatorRateBps(creatorRateBps);
 
@@ -107,7 +107,7 @@ contract AuctionHouseBasicTest is AuctionHouseTest {
         } else {
             // Expect an event emission
             vm.expectEmit(true, true, true, true);
-            emit IAuctionHouse.MinCreatorRateBpsUpdated(newMinCreatorRateBps);
+            emit IAuctionHouseEvents.MinCreatorRateBpsUpdated(newMinCreatorRateBps);
         }
         // Update the minimum rate
         auction.setMinCreatorRateBps(newMinCreatorRateBps);
@@ -215,7 +215,7 @@ contract AuctionHouseBasicTest is AuctionHouseTest {
 
         // Expect an event emission
         vm.expectEmit(true, true, true, true);
-        emit IAuctionHouse.AuctionBid(tokenId, address(21), address(1), bidAmount, false);
+        emit IAuctionHouseEvents.AuctionBid(tokenId, address(21), address(1), bidAmount, false);
         auction.createBid{ value: bidAmount }(0, address(21), address(0)); // Assuming the first auction's tokenId is 0
 
         // Retrieve auction details once and perform all assertions
