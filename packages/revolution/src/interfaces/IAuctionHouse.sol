@@ -19,7 +19,29 @@ pragma solidity ^0.8.22;
 
 import { IRevolutionBuilder } from "./IRevolutionBuilder.sol";
 
-interface IAuctionHouse {
+interface IAuctionHouseEvents {
+    event AuctionCreated(uint256 indexed tokenId, uint256 startTime, uint256 endTime);
+
+    event AuctionBid(uint256 indexed tokenId, address bidder, address sender, uint256 value, bool extended);
+
+    event AuctionExtended(uint256 indexed tokenId, uint256 endTime);
+
+    event AuctionSettled(uint256 indexed tokenId, address winner, uint256 amount, uint256 creatorTokensEmitted);
+
+    event AuctionTimeBufferUpdated(uint256 timeBuffer);
+
+    event AuctionReservePriceUpdated(uint256 reservePrice);
+
+    event AuctionMinBidIncrementPercentageUpdated(uint256 minBidIncrementPercentage);
+
+    event CreatorRateBpsUpdated(uint256 rateBps);
+
+    event MinCreatorRateBpsUpdated(uint256 rateBps);
+
+    event EntropyRateBpsUpdated(uint256 rateBps);
+}
+
+interface IAuctionHouse is IAuctionHouseEvents {
     ///                                                          ///
     ///                           ERRORS                         ///
     ///                                                          ///
@@ -88,26 +110,6 @@ interface IAuctionHouse {
         // Whether or not the auction has been settled
         bool settled;
     }
-
-    event AuctionCreated(uint256 indexed tokenId, uint256 startTime, uint256 endTime);
-
-    event AuctionBid(uint256 indexed tokenId, address bidder, address sender, uint256 value, bool extended);
-
-    event AuctionExtended(uint256 indexed tokenId, uint256 endTime);
-
-    event AuctionSettled(uint256 indexed tokenId, address winner, uint256 amount, uint256 creatorTokensEmitted);
-
-    event AuctionTimeBufferUpdated(uint256 timeBuffer);
-
-    event AuctionReservePriceUpdated(uint256 reservePrice);
-
-    event AuctionMinBidIncrementPercentageUpdated(uint256 minBidIncrementPercentage);
-
-    event CreatorRateBpsUpdated(uint256 rateBps);
-
-    event MinCreatorRateBpsUpdated(uint256 rateBps);
-
-    event EntropyRateBpsUpdated(uint256 rateBps);
 
     function settleAuction() external;
 
