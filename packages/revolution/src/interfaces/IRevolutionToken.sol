@@ -96,6 +96,12 @@ interface IRevolutionToken is IERC721Enumerable, IVotes {
 
     function getArtPieceById(uint256 tokenId) external view returns (ICultureIndex.ArtPiece memory);
 
+    /**
+     * @notice Returns true or false depending on whether the top voted piece in the culture index meets quorum
+     * @return True if the top voted piece meets quorum, false otherwise
+     */
+    function topVotedPieceMeetsQuorum() external view returns (bool);
+
     /// @notice Initializes a DAO's ERC-721 token contract
     /// @param minter The address of the minter
     /// @param initialOwner The address of the initial owner

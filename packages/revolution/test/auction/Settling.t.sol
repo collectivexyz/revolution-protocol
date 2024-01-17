@@ -14,6 +14,7 @@ contract AuctionHouseSettleTest is AuctionHouseTest {
 
     function test__VotesCount(uint8 nDays) public {
         createDefaultArtPiece();
+        createDefaultArtPiece();
 
         vm.roll(vm.getBlockNumber() + 1);
 
@@ -41,6 +42,7 @@ contract AuctionHouseSettleTest is AuctionHouseTest {
     }
 
     function test__OwnerPayment(uint8 nDays) public {
+        createDefaultArtPiece();
         createDefaultArtPiece();
         vm.roll(vm.getBlockNumber() + 1); // roll block number to enable voting snapshot
 
@@ -88,6 +90,7 @@ contract AuctionHouseSettleTest is AuctionHouseTest {
 
     function test__SettlingAuctionWithNoBids(uint8 nDays) public {
         uint256 tokenId = createDefaultArtPiece();
+        createDefaultArtPiece();
         vm.roll(vm.getBlockNumber() + 1); // roll block number to enable voting snapshot
 
         auction.unpause();
@@ -103,6 +106,10 @@ contract AuctionHouseSettleTest is AuctionHouseTest {
 
     function test__SettlingAuctionPrematurely() public {
         createDefaultArtPiece();
+        createDefaultArtPiece();
+
+        vm.roll(vm.getBlockNumber() + 1); // roll block number to enable voting snapshot
+
         auction.unpause();
 
         vm.expectRevert();
@@ -114,6 +121,7 @@ contract AuctionHouseSettleTest is AuctionHouseTest {
         vm.assume(amount > auction.reservePrice());
         vm.assume(amount < revolutionPointsEmitter.maxPurchaseAmount());
 
+        createDefaultArtPiece();
         createDefaultArtPiece();
         vm.roll(vm.getBlockNumber() + 1); // roll block number to enable voting snapshot
 
@@ -153,6 +161,7 @@ contract AuctionHouseSettleTest is AuctionHouseTest {
     }
 
     function test__TransferToEOA() public {
+        createDefaultArtPiece();
         createDefaultArtPiece();
         vm.roll(vm.getBlockNumber() + 1); // roll block number to enable voting snapshot
 
@@ -194,6 +203,7 @@ contract AuctionHouseSettleTest is AuctionHouseTest {
         vm.assume(amount > auction.reservePrice());
         vm.assume(amount < revolutionPointsEmitter.maxPurchaseAmount());
 
+        createDefaultArtPiece();
         createDefaultArtPiece();
         vm.roll(vm.getBlockNumber() + 1); // roll block number to enable voting snapshot
 
@@ -307,6 +317,7 @@ contract AuctionHouseSettleTest is AuctionHouseTest {
     }
 
     function test__SettlingAuctionWithMultipleCreators(uint8 nCreators) public {
+        vm.stopPrank();
         vm.assume(nCreators > 0);
         vm.assume(nCreators < cultureIndex.MAX_NUM_CREATORS());
 
@@ -326,7 +337,19 @@ contract AuctionHouseSettleTest is AuctionHouseTest {
             totalBps += creatorBps[i];
         }
 
-        createArtPieceMultiCreator(
+        //mint points
+        vm.prank(address(revolutionPointsEmitter));
+        revolutionPoints.mint(address(this), 1000);
+        vm.roll(vm.getBlockNumber() + 1);
+
+        uint256 oldPieceId = createDefaultArtPiece();
+
+        //mint 1 more token
+        vm.prank(address(revolutionPointsEmitter));
+        revolutionPoints.mint(address(this), 1000);
+        vm.roll(vm.getBlockNumber() + 1);
+
+        uint256 pieceId = createArtPieceMultiCreator(
             "Multi Creator Art",
             "An art piece with multiple creators",
             ICultureIndex.MediaType.IMAGE,
@@ -339,6 +362,12 @@ contract AuctionHouseSettleTest is AuctionHouseTest {
 
         vm.roll(vm.getBlockNumber() + 1); // roll block number to enable voting snapshot
 
+        //mint tokens and vote for piece
+        vm.prank(address(this));
+        cultureIndex.vote(pieceId);
+        cultureIndex.vote(oldPieceId);
+
+        vm.prank(address(executor));
         auction.unpause();
 
         vm.deal(address(21_000), auction.reservePrice() + 1 ether);
@@ -499,6 +528,7 @@ contract AuctionHouseSettleTest is AuctionHouseTest {
         auction.setReservePrice(bidAmount);
 
         uint256 tokenId = createDefaultArtPiece();
+        createDefaultArtPiece();
         vm.roll(vm.getBlockNumber() + 1); // roll block number to enable voting snapshot
 
         uint256 balance = 1 ether;
@@ -533,6 +563,7 @@ contract AuctionHouseSettleTest is AuctionHouseTest {
         auction.setEntropyRateBps(0);
 
         createDefaultArtPiece();
+        createDefaultArtPiece();
         vm.roll(vm.getBlockNumber() + 1); // roll block number to enable voting snapshot
 
         auction.unpause();
@@ -547,6 +578,96 @@ contract AuctionHouseSettleTest is AuctionHouseTest {
         vm.warp(block.timestamp + auction.duration() + 1); // Fast forward time to end the auction
 
         auction.settleCurrentAndCreateNewAuction();
+    }
+
+    function test__RevertTopVotedPieceMeetsQuorum() public {
+        vm.stopPrank();
+        uint256 pointsSupply = 1000;
+
+        vm.startPrank(address(revolutionPointsEmitter));
+        revolutionPoints.mint(address(this), pointsSupply);
+        vm.roll(vm.getBlockNumber() + 1);
+
+        uint256 pieceId = createDefaultArtPiece();
+
+        // Cast votes
+        vm.startPrank(address(this));
+        cultureIndex.vote(pieceId);
+
+        // Mint token and govTokens, create a new piece and check fields
+        vm.startPrank(address(executor));
+        vm.roll(vm.getBlockNumber() + 1);
+
+        auction.unpause();
+
+        ICultureIndex.ArtPiece memory newPiece = cultureIndex.getPieceById(pieceId);
+        vm.roll(vm.getBlockNumber() + 1);
+
+        uint256 expectedTotalVotesSupply = pointsSupply;
+
+        uint256 expectedQuorumVotes = (cultureIndex.quorumVotesBPS() * (expectedTotalVotesSupply)) / 10_000;
+        assertEq(
+            cultureIndex.quorumVotesForPiece(newPiece.pieceId),
+            expectedQuorumVotes,
+            "Quorum votes should be set correctly on creation"
+        );
+
+        // create art piece and vote for it again
+        uint256 pieceId2 = createDefaultArtPiece();
+
+        // roll
+        vm.roll(vm.getBlockNumber() + 1);
+
+        bool meetsQuorum = cultureIndex.topVotedPieceMeetsQuorum();
+        assertTrue(!meetsQuorum, "Top voted piece should not meet quorum");
+
+        // Cast votes
+        vm.startPrank(address(this));
+        cultureIndex.vote(pieceId2);
+
+        // roll
+        vm.roll(vm.getBlockNumber() + 1);
+
+        meetsQuorum = cultureIndex.topVotedPieceMeetsQuorum();
+        assertTrue(meetsQuorum, "Top voted piece should meet quorum");
+    }
+
+    function test_CreateAuctionWithoutSettle() public {
+        vm.stopPrank();
+        // mint points
+        vm.prank(address(revolutionPointsEmitter));
+        revolutionPoints.mint(address(this), 1000);
+
+        vm.roll(vm.getBlockNumber() + 1);
+
+        uint256 tokenId = createDefaultArtPiece();
+        createDefaultArtPiece();
+
+        //vote for tokenId
+        vm.prank(address(this));
+        cultureIndex.vote(tokenId);
+
+        // roll
+        vm.roll(vm.getBlockNumber() + 1);
+
+        // Unpause the auction
+        vm.prank(address(executor));
+        auction.unpause();
+
+        // warp to the end
+        vm.warp(block.timestamp + auction.duration() + 1);
+
+        //create and settle and expect revert
+        vm.expectRevert(abi.encodeWithSignature("QUORUM_NOT_MET()"));
+        auction.settleCurrentAndCreateNewAuction();
+
+        // ensure auction is not paused and auction is not settled
+        assertEq(auction.paused(), false, "Auction house should not be paused");
+
+        (, , , , , , bool settled) = auction.auction();
+
+        // Check that auction is not created
+        assertEq(settled, false, "Auction should not be settled");
     }
 }
 

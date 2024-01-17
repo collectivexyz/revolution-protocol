@@ -538,13 +538,27 @@ contract CultureIndex is
      * @param pieceId The ID of the art piece.
      */
     function quorumVotesForPiece(uint256 pieceId) public view returns (uint256) {
+        uint256 creationBlock = pieces[pieceId].creationBlock;
         return
             (quorumVotesBPS *
-                votingPower.getPastTotalVotesSupplyWithWeights(
-                    pieces[pieceId].creationBlock,
-                    1,
-                    revolutionTokenVoteWeight
-                )) / 10_000;
+                (votingPower.getPastTotalVotesSupplyWithWeights(creationBlock, 1, revolutionTokenVoteWeight) -
+                    // Subtract the votes for the tokens held by the minter
+                    votingPower._getTokenMinter__PastTokenVotes__WithWeight(
+                        creationBlock,
+                        revolutionTokenVoteWeight
+                    ))) / 10_000;
+    }
+
+    /**
+     * @notice Returns true or false depending on whether the top voted piece meets quorum
+     * @return True if the top voted piece meets quorum, false otherwise
+     */
+    function topVotedPieceMeetsQuorum() public view returns (bool) {
+        // If the heap is empty, return false so we don't brick the AuctionHouse
+        if (maxHeap.size() == 0) return false;
+
+        uint256 pieceId = topVotedPieceId();
+        return totalVoteWeights[pieceId] >= quorumVotesForPiece(pieceId);
     }
 
     /**
@@ -558,11 +572,7 @@ contract CultureIndex is
 
         uint256 creationBlock = pieces[pieceId].creationBlock;
 
-        uint256 pastQuorumVotes = (quorumVotesBPS *
-            (votingPower.getPastTotalVotesSupplyWithWeights(creationBlock, 1, revolutionTokenVoteWeight) -
-                //subtract the votes of the AuctionHouse when calculating quorum since the tokens are not accessible
-                votingPower._getTokenMinter__PastTokenVotes__WithWeight(creationBlock, revolutionTokenVoteWeight))) /
-            10_000;
+        uint256 pastQuorumVotes = quorumVotesForPiece(pieceId);
         if (totalVoteWeights[pieceId] < pastQuorumVotes) revert DOES_NOT_MEET_QUORUM();
 
         //set the piece as dropped
