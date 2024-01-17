@@ -554,6 +554,9 @@ contract CultureIndex is
      * @return True if the top voted piece meets quorum, false otherwise
      */
     function topVotedPieceMeetsQuorum() public view returns (bool) {
+        // If the heap is empty, return false so we don't brick the AuctionHouse
+        if (maxHeap.size() == 0) return false;
+
         uint256 pieceId = topVotedPieceId();
         return totalVoteWeights[pieceId] >= quorumVotesForPiece(pieceId);
     }

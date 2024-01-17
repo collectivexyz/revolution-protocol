@@ -2,24 +2,20 @@
 pragma solidity ^0.8.22;
 
 import { AuctionHouseTest } from "./AuctionHouse.t.sol";
-import { PausableUpgradeable } from "@openzeppelin/contracts-upgradeable/utils/PausableUpgradeable.sol";
 
 contract AuctionHouseMintTest is AuctionHouseTest {
-    function testMintFailureDueToEmptyNFTList() public {
+    function test__MintFailureDueToEmptyNFTList() public {
         // Pre-conditions setup to ensure the CultureIndex is empty
-        vm.expectEmit(true, true, true, true);
-        emit PausableUpgradeable.Paused(address(executor));
+        vm.expectRevert(abi.encodeWithSignature("QUORUM_NOT_MET()"));
         auction.unpause();
 
         // Expect that the auction is paused due to error
         assertEq(auction.paused(), true, "Auction house should be paused");
     }
 
-    function testBehaviorOnMintFailureDuringAuctionCreation() public {
+    function test__BehaviorOnMintFailureDuringAuctionCreation() public {
         //check auction paused emitted
-        vm.expectEmit(true, true, true, true);
-        emit PausableUpgradeable.Paused(address(executor));
-
+        vm.expectRevert(abi.encodeWithSignature("QUORUM_NOT_MET()"));
         auction.unpause();
 
         (

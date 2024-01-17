@@ -250,8 +250,12 @@ contract AuctionHouseBasicTest is AuctionHouseTest {
         // Expect auction endTime to be set correctly
         assertEq(endTime, block.timestamp + auction.duration(), "Auction end time should be set correctly");
 
-        // vm warp and then settle auction
         vm.warp(endTime + 1);
+
+        createDefaultArtPiece();
+
+        vm.roll(vm.getBlockNumber() + 1);
+
         auction.settleCurrentAndCreateNewAuction(); // This will settle the current auction and create a new one
 
         // Expect 21 to be the owner of the verb
@@ -323,6 +327,10 @@ contract AuctionHouseBasicTest is AuctionHouseTest {
 
         bool shouldExpectRevert = creatorGovernancePayment <= revolutionPointsEmitter.minPurchaseAmount() ||
             creatorGovernancePayment >= revolutionPointsEmitter.maxPurchaseAmount();
+
+        // create art piece
+        createDefaultArtPiece();
+        vm.roll(vm.getBlockNumber() + 1);
 
         // // BPS too small to issue rewards
         if (shouldExpectRevert) {

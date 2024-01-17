@@ -69,6 +69,9 @@ interface IAuctionHouse {
     /// @dev Reverts if the top voted piece does not meet quorum.
     error QUORUM_NOT_MET();
 
+    /// @dev Reverts if an existing auction is in progress.
+    error AUCTION_ALREADY_IN_PROGRESS();
+
     struct Auction {
         // ID for the Verb (ERC721 token ID)
         uint256 tokenId;
@@ -131,6 +134,8 @@ interface IAuctionHouse {
     function WETH() external view returns (address);
 
     function manager() external returns (IRevolutionBuilder);
+
+    function createAuction() external;
 
     /**
      * @notice Initialize the auction house and base contracts.
