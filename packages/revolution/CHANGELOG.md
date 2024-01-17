@@ -1,5 +1,11 @@
 # @collectivexyz/revolution
 
+## 0.3.12
+
+### Patch Changes
+
+- 7caa196: auction events in separate interface
+
 ## 0.3.11
 
 ### Patch Changes
