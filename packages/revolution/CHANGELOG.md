@@ -1,5 +1,12 @@
 # @collectivexyz/revolution
 
+## 0.3.11
+
+### Patch Changes
+
+- 0757c8c: rm unmodified OpenZeppelin contracts and import directly from OZ pkg
+- fa843b8: handle case where auction creation fails gracefully
+
 ## 0.3.10
 
 ### Patch Changes
