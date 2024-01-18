@@ -31,7 +31,7 @@ import { IWETH } from "./interfaces/IWETH.sol";
 import { IRevolutionPointsEmitter } from "./interfaces/IRevolutionPointsEmitter.sol";
 import { ICultureIndex } from "./interfaces/ICultureIndex.sol";
 import { IRevolutionBuilder } from "./interfaces/IRevolutionBuilder.sol";
-import { Ownable2StepUpgradeable } from "@openzeppelin/contracts-upgradeable/access/Ownable2StepUpgradeable.sol";
+import { OwnableUpgradeable } from "@openzeppelin/contracts-upgradeable/access/OwnableUpgradeable.sol";
 
 import { UUPS } from "./libs/proxy/UUPS.sol";
 import { VersionedContract } from "./version/VersionedContract.sol";
@@ -42,7 +42,7 @@ contract AuctionHouse is
     UUPS,
     PausableUpgradeable,
     ReentrancyGuardUpgradeable,
-    Ownable2StepUpgradeable
+    OwnableUpgradeable
 {
     // The Revolution ERC721 token contract
     IRevolutionToken public revolutionToken;
