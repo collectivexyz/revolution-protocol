@@ -23,6 +23,7 @@ interface IRevolutionBuilder is IUUPS {
     /// @param revolutionPoints The dao address
     /// @param maxHeap The maxHeap address
     /// @param revolutionVotingPower The revolutionVotingPower address
+    /// @param vrgda The VRGDA address
     event RevolutionDeployed(
         address revolutionToken,
         address descriptor,
@@ -33,7 +34,8 @@ interface IRevolutionBuilder is IUUPS {
         address revolutionPointsEmitter,
         address revolutionPoints,
         address maxHeap,
-        address revolutionVotingPower
+        address revolutionVotingPower,
+        address vrgda
     );
 
     /// @notice Emitted when an upgrade is registered by the Builder DAO
@@ -69,6 +71,7 @@ interface IRevolutionBuilder is IUUPS {
         string revolutionPointsEmitter;
         string maxHeap;
         string revolutionVotingPower;
+        string vrgda;
     }
 
     /// @notice The ERC-721 token parameters
@@ -256,7 +259,8 @@ interface IRevolutionBuilder is IUUPS {
             address revolutionPoints,
             address revolutionPointsEmitter,
             address maxHeap,
-            address revolutionVotingPower
+            address revolutionVotingPower,
+            address vrgda
         );
 
     /// @notice If an implementation is registered by the Builder DAO as an optional upgrade

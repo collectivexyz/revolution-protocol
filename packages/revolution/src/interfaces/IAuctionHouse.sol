@@ -26,7 +26,13 @@ interface IAuctionHouseEvents {
 
     event AuctionExtended(uint256 indexed tokenId, uint256 endTime);
 
-    event AuctionSettled(uint256 indexed tokenId, address winner, uint256 amount, uint256 creatorTokensEmitted);
+    event AuctionSettled(
+        uint256 indexed tokenId,
+        address winner,
+        uint256 amount,
+        uint256 pointsPaidToCreators,
+        uint256 ethPaidToCreators
+    );
 
     event AuctionTimeBufferUpdated(uint256 timeBuffer);
 

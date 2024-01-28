@@ -27,6 +27,8 @@ interface RevolutionBuilderTypesV1 {
         address maxHeap;
         /// @notice Address for deployed RevolutionVotingPower contract
         address revolutionVotingPower;
+        /// @notice Address for deployed VRGDA contract
+        address vrgda;
     }
 
     struct InitialProxySetup {

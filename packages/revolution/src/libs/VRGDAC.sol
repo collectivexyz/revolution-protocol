@@ -2,13 +2,14 @@
 pragma solidity 0.8.22;
 
 import { wadExp, wadLn, wadMul, wadDiv, unsafeWadDiv, wadPow } from "./SignedWadMath.sol";
+import { VersionedContract } from "../version/VersionedContract.sol";
 
 /// @title Continuous Variable Rate Gradual Dutch Auction
 /// @author transmissions11 <t11s@paradigm.xyz>
 /// @author FrankieIsLost <frankie@paradigm.xyz>
 /// @author Dan Robinson <dan@paradigm.xyz>
 /// @notice Sell tokens roughly according to an issuance schedule.
-contract VRGDAC {
+contract VRGDAC is VersionedContract {
     /*//////////////////////////////////////////////////////////////
                             VRGDA PARAMETERS
     //////////////////////////////////////////////////////////////*/

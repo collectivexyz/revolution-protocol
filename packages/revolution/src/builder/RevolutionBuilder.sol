@@ -88,6 +88,9 @@ contract RevolutionBuilder is
     /// @notice the revolutionVotingPower implementation address
     address public immutable revolutionVotingPowerImpl;
 
+    /// @notice The VRGDAC implementation address
+    address public immutable vrgdaImpl;
+
     ///                                                          ///
     ///                          CONSTRUCTOR                     ///
     ///                                                          ///
@@ -207,7 +210,8 @@ contract RevolutionBuilder is
             revolutionVotingPower: initialSetup.revolutionVotingPower,
             revolutionToken: revolutionToken,
             executor: initialSetup.executor,
-            dao: initialSetup.dao
+            dao: initialSetup.dao,
+            vrgda: vrgdac
         });
 
         // Initialize each instance with the provided settings
@@ -286,7 +290,8 @@ contract RevolutionBuilder is
             revolutionVotingPower: initialSetup.revolutionVotingPower,
             revolutionToken: revolutionToken,
             executor: initialSetup.executor,
-            dao: initialSetup.dao
+            dao: initialSetup.dao,
+            vrgda: vrgdac
         });
 
         return daoAddressesByToken[revolutionToken];
@@ -308,6 +313,7 @@ contract RevolutionBuilder is
     /// @return revolutionPointsEmitter ERC-20 points emitter deployed address
     /// @return maxHeap MaxHeap deployed address
     /// @return revolutionVotingPower RevolutionVotingPower deployed address
+    /// @return vrgda VRGDAC deployed address
     function getAddresses(
         address _token
     )
@@ -323,7 +329,8 @@ contract RevolutionBuilder is
             address revolutionPoints,
             address revolutionPointsEmitter,
             address maxHeap,
-            address revolutionVotingPower
+            address revolutionVotingPower,
+            address vrgda
         )
     {
         DAOAddresses storage addresses = daoAddressesByToken[_token];
@@ -339,6 +346,7 @@ contract RevolutionBuilder is
         revolutionPointsEmitter = addresses.revolutionPointsEmitter;
         maxHeap = addresses.maxHeap;
         revolutionVotingPower = addresses.revolutionVotingPower;
+        vrgda = addresses.vrgda;
     }
 
     ///                                                          ///
@@ -392,7 +400,8 @@ contract RevolutionBuilder is
             address revolutionPoints,
             address revolutionPointsEmitter,
             address maxHeap,
-            address revolutionVotingPower
+            address revolutionVotingPower,
+            address vrgda
         ) = getAddresses(token);
         return
             DAOVersionInfo({
@@ -405,7 +414,8 @@ contract RevolutionBuilder is
                 cultureIndex: _safeGetVersion(cultureIndex),
                 revolutionPointsEmitter: _safeGetVersion(revolutionPointsEmitter),
                 maxHeap: _safeGetVersion(maxHeap),
-                revolutionVotingPower: _safeGetVersion(revolutionVotingPower)
+                revolutionVotingPower: _safeGetVersion(revolutionVotingPower),
+                vrgda: _safeGetVersion(vrgda)
             });
     }
 
@@ -421,7 +431,8 @@ contract RevolutionBuilder is
                 revolutionPoints: _safeGetVersion(revolutionPointsImpl),
                 revolutionPointsEmitter: _safeGetVersion(revolutionPointsEmitterImpl),
                 maxHeap: _safeGetVersion(maxHeapImpl),
-                revolutionVotingPower: _safeGetVersion(revolutionVotingPowerImpl)
+                revolutionVotingPower: _safeGetVersion(revolutionVotingPowerImpl),
+                vrgda: _safeGetVersion(vrgdaImpl)
             });
     }
 
