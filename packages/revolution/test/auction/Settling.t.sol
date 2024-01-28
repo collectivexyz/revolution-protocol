@@ -131,9 +131,6 @@ contract AuctionHouseSettleTest is AuctionHouseTest {
 
         auction.transferOwnership(recipient);
 
-        vm.startPrank(recipient);
-        auction.acceptOwnership();
-
         vm.startPrank(address(auction));
 
         vm.deal(address(auction), amount);
@@ -172,9 +169,6 @@ contract AuctionHouseSettleTest is AuctionHouseTest {
 
         auction.transferOwnership(recipient);
 
-        vm.startPrank(recipient);
-        auction.acceptOwnership();
-
         vm.startPrank(address(auction));
         vm.deal(address(auction), amount);
         auction.createBid{ value: amount }(0, address(this), address(0)); // Assuming first auction's tokenId is 0
@@ -212,9 +206,6 @@ contract AuctionHouseSettleTest is AuctionHouseTest {
         address recipient = address(new ContractWithoutReceiveOrFallback());
 
         auction.transferOwnership(recipient);
-
-        vm.startPrank(recipient);
-        auction.acceptOwnership();
 
         vm.startPrank(address(auction));
 
