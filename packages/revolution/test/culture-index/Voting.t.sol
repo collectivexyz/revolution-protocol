@@ -429,8 +429,6 @@ contract CultureIndexVotingBasicTest is CultureIndexTestSuite {
             cultureIndex.vote(pieceIds[i]);
         }
         uint256 gasUsedIndividual = startGasIndividual - gasleft();
-        emit log_string("Gas used for individual votes");
-        emit log_uint(gasUsedIndividual); // Log gas used for individual votes
 
         vm.stopPrank();
 
@@ -457,12 +455,6 @@ contract CultureIndexVotingBasicTest is CultureIndexTestSuite {
 
         cultureIndex.voteForMany(batchPieceIds);
         uint256 gasUsedBatch = startGasBatch - gasleft();
-        emit log_string("Gas used for batch votes");
-        emit log_uint(gasUsedBatch); // Log gas used for batch votes
-
-        // Log the difference in gas usage
-        emit log_string("gas saved");
-        emit log_int(int(gasUsedIndividual) - int(gasUsedBatch)); // This will log the saved gas
 
         //assert that batch voting is cheaper
         assertTrue(gasUsedBatch < gasUsedIndividual, "Batch voting should be cheaper");

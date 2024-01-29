@@ -66,10 +66,6 @@ contract DescriptorTest is RevolutionBuilderTest {
         // Parse the JSON
         (returnValue, tokens, actualNum) = JsmnSolLib.parse(_json, numTokens);
 
-        emit log_uint(returnValue);
-        emit log_uint(actualNum);
-        emit log_uint(tokens.length);
-
         // Extract values from JSON by token indices
         for (uint256 i = 0; i < actualNum; i++) {
             JsmnSolLib.Token memory t = tokens[i];

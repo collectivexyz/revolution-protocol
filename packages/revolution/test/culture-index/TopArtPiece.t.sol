@@ -149,7 +149,6 @@ contract CultureIndexArtPieceTest is CultureIndexTestSuite {
         uint256 startGas = gasleft();
         voter1Test.voteForPiece(1);
         uint256 gasUsed = startGas - gasleft();
-        emit log_uint(gasUsed);
 
         // Insert a large number of items
         for (uint i = 0; i < 20_000; i++) {
@@ -176,7 +175,6 @@ contract CultureIndexArtPieceTest is CultureIndexTestSuite {
         startGas = gasleft();
         voter1Test.voteForPiece(5_001);
         uint256 gasUsed2 = startGas - gasleft();
-        emit log_uint(gasUsed2);
 
         //make sure gas used isn't more than double
         assertLt(gasUsed2, 2 * gasUsed, "Gas used should not be more than 100% increase");
@@ -190,7 +188,6 @@ contract CultureIndexArtPieceTest is CultureIndexTestSuite {
         vm.roll(vm.getBlockNumber() + 1); // roll block number to enable voting snapshot
 
         uint256 gasUsed = startGas - gasleft();
-        emit log_uint(gasUsed);
 
         // Create a set number of pieces and log the gas used for the last creation.
         vm.stopPrank();
@@ -205,7 +202,6 @@ contract CultureIndexArtPieceTest is CultureIndexTestSuite {
                 startGas = gasleft();
                 voter1Test.createDefaultArtPiece();
                 gasUsed = startGas - gasleft();
-                emit log_uint(gasUsed);
             } else {
                 voter1Test.createDefaultArtPiece();
             }
@@ -238,7 +234,6 @@ contract CultureIndexArtPieceTest is CultureIndexTestSuite {
 
         cultureIndex.dropTopVotedPiece();
         uint256 gasUsed = startGas - gasleft();
-        emit log_uint(gasUsed);
 
         vm.stopPrank();
         vm.startPrank(address(revolutionPointsEmitter));
@@ -258,7 +253,6 @@ contract CultureIndexArtPieceTest is CultureIndexTestSuite {
         startGas = gasleft();
         cultureIndex.dropTopVotedPiece();
         uint256 gasUsed2 = startGas - gasleft();
-        emit log_uint(gasUsed2);
 
         assertLt(gasUsed2, gasUsed * 2, "Should not be more than double the gas");
     }

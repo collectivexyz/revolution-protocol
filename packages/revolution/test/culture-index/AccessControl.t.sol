@@ -185,8 +185,6 @@ contract CultureIndexAccessControlTest is CultureIndexTestSuite {
         vm.startPrank(address(this));
         cultureIndex.vote(pieceId);
 
-        emit log_address(address(cultureIndex.dropperAdmin()));
-
         // Attempt to drop the top-voted piece and expect it to fail
         vm.expectRevert(abi.encodeWithSignature("DOES_NOT_MEET_QUORUM()"));
         vm.startPrank(address(revolutionToken));

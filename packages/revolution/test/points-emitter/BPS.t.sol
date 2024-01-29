@@ -122,9 +122,6 @@ contract PointsEmitterBasicTest is PointsEmitterTest {
         // Calculate ether spent on creators governance tokens
         uint256 creatorsGovernancePayment = ((msgValueRemaining * creatorRateBps) / 10_000) - creatorsDirectPayment;
 
-        emit log_uint(buyersShare);
-        emit log_uint(creatorsGovernancePayment);
-
         int expectedCreatorsAmount = revolutionPointsEmitter.getTokenQuoteForEther(creatorsGovernancePayment);
 
         int expectedBuyerAmount = getTokenQuoteForEtherHelper(buyersShare, expectedCreatorsAmount);

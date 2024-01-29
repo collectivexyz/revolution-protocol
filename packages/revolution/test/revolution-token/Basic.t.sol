@@ -30,15 +30,11 @@ contract TokenBasicTest is RevolutionTokenTestSuite {
         // Retrieve the token metadata URI
         string memory tokenURI = revolutionToken.tokenURI(tokenId);
 
-        emit log_string(tokenURI);
-
         // Extract the base64 encoded part of the tokenURI
         string memory base64Metadata = substring(tokenURI, 29, bytes(tokenURI).length);
-        emit log_string(base64Metadata);
 
         // Decode the base64 encoded metadata
         string memory metadataJson = decodeMetadata(base64Metadata);
-        emit log_string(metadataJson);
 
         // Parse the JSON to get metadata fields
         (string memory name, string memory description, string memory image) = parseJson(metadataJson);
@@ -482,10 +478,6 @@ contract TokenBasicTest is RevolutionTokenTestSuite {
 
         // Parse the JSON
         (returnValue, tokens, actualNum) = JsmnSolLib.parse(_json, numTokens);
-
-        emit log_uint(returnValue);
-        emit log_uint(actualNum);
-        emit log_uint(tokens.length);
 
         // Extract values from JSON by token indices
         for (uint256 i = 0; i < actualNum; i++) {

@@ -521,8 +521,6 @@ contract AuctionHouseSettleTest is AuctionHouseTest {
 
         uint256 maxBidAmount = minCreatorsShare / (1 - (10_000 - auction.creatorRateBps()) / 10_000);
 
-        emit log_named_uint("maxBidAmount", maxBidAmount);
-
         bidAmount = bound(bidAmount, 1, maxBidAmount);
 
         // Ether going to owner of the auction
