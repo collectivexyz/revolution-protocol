@@ -511,42 +511,61 @@ contract AuctionHouseSettleTest is AuctionHouseTest {
         );
     }
 
-    function test__EntropyPecentCannotLeadToDos() public {
+    function test__EntropyPecentCannotLeadToDos(uint256 bidAmount) public {
         //set entropy to 9999
         auction.setEntropyRateBps(9999);
-        //set reserve price to 0.005 ether
-        uint bidAmount = 0.005 ether;
-        auction.setReservePrice(bidAmount);
 
-        uint256 tokenId = createDefaultArtPiece();
-        createDefaultArtPiece();
-        vm.roll(vm.getBlockNumber() + 1); // roll block number to enable voting snapshot
+        // Ensure bidAmount is within bounds to make creatorGovernancePayment <= minPurchaseAmount
+        uint256 minPurchaseAmount = revolutionPointsEmitter.minPurchaseAmount();
+        uint256 minCreatorsShare = (minPurchaseAmount * 10_000) / (10_000 - auction.entropyRateBps());
 
-        uint256 balance = 1 ether;
-        address alice = vm.addr(uint256(1001));
-        vm.deal(alice, balance);
+        uint256 maxBidAmount = minCreatorsShare / (1 - (10_000 - auction.creatorRateBps()) / 10_000);
 
-        auction.unpause();
-        vm.stopPrank();
+        emit log_named_uint("maxBidAmount", maxBidAmount);
 
-        vm.prank(alice);
-        auction.createBid{ value: bidAmount }(tokenId, alice, address(0));
-
-        (, , , uint256 endTime, , , ) = auction.auction();
-        vm.warp(endTime + 1);
-
-        auction.settleCurrentAndCreateNewAuction();
-
-        //ensure creator got no governance, but got ETH
-        assertEq(revolutionPoints.balanceOf(address(0x1)), 0);
+        bidAmount = bound(bidAmount, 0, maxBidAmount);
 
         // Ether going to owner of the auction
         uint256 auctioneerPayment = (bidAmount * (10_000 - auction.creatorRateBps())) / 10_000;
 
+        //set reserve price to the bid amount
+        auction.setReservePrice(bidAmount);
+
+        // create 2 art pieces
+        uint256 pieceId = createDefaultArtPiece();
+        createDefaultArtPiece();
+
+        // roll block number to enable voting snapshot
+        vm.roll(vm.getBlockNumber() + 1);
+
+        //deal alice some eth
+        address alice = vm.addr(uint256(1001));
+        vm.deal(alice, bidAmount);
+
+        // start the first auction
+        auction.unpause();
+        vm.stopPrank();
+
+        // have alice create a  bid
+        vm.prank(alice);
+        auction.createBid{ value: bidAmount }(0, alice, address(0));
+
+        // warp to the end of the auction
+        (, , , uint256 endTime, , , ) = auction.auction();
+        vm.warp(endTime + 1);
+
+        // create a new auction
+        auction.settleCurrentAndCreateNewAuction();
+
+        //ensure creator got no governance, but got ETH
+        address creator = cultureIndex.getPieceById(pieceId).creators[0].creator;
+
+        assertEq(revolutionPoints.balanceOf(creator), 0);
+
         //Total amount of ether going to creator
         uint256 creatorsShare = bidAmount - auctioneerPayment;
 
-        assertEq(address(0x1).balance, creatorsShare);
+        assertEq(creator.balance, creatorsShare);
     }
 
     function test__SettleAuctionZeroEntropyRate() public {
