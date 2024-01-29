@@ -190,15 +190,6 @@ contract RevolutionBuilder is
 
         address revolutionToken = initialSetup.revolutionToken;
 
-        // // Deploy the VRGDAC contract
-        // address vrgdac = address(
-        //     new VRGDAC(
-        //         _revolutionPointsParams.emitterParams.vrgdaParams.targetPrice,
-        //         _revolutionPointsParams.emitterParams.vrgdaParams.priceDecayPercent,
-        //         _revolutionPointsParams.emitterParams.vrgdaParams.tokensPerTimeUnit
-        //     )
-        // );
-
         // Deploy the remaining DAO contracts
         daoAddressesByToken[initialSetup.revolutionToken] = DAOAddresses({
             revolutionPointsEmitter: address(
