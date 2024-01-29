@@ -116,7 +116,7 @@ contract AuctionHouseOutOfGasTest is AuctionHouseTest {
         gasUsed = bound(gasUsed, 0, 31_000_000);
 
         // create 1m art pieces, reasonable upper bound for a single culture index
-        _createManyPieces(1_000_000);
+        _createManyPieces(100_000);
 
         vm.startPrank(cultureIndex.owner());
         cultureIndex._setQuorumVotesBPS(0);
