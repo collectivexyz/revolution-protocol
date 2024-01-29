@@ -13,7 +13,7 @@ contract AuctionHouseOutOfGasTest is AuctionHouseTest {
         super.setUp();
 
         // create 1m art pieces, reasonable upper bound for a single culture index
-        // _createManyPieces(10_000);
+        _createManyPieces(100_000);
     }
 
     function _createManyPieces(uint256 n) internal {
@@ -119,7 +119,9 @@ contract AuctionHouseOutOfGasTest is AuctionHouseTest {
     }
 
     //attempt to trigger an auction paused error with differing gas amounts
-    function test_OutOfGas_DOS(uint gasUsed) public {
+    /// forge-config: dev.fuzz.runs = 64
+    /// forge-config: ci.fuzz.runs = 64
+    function test_OutOfGasDOS(uint256 gasUsed) public {
         gasUsed = bound(gasUsed, 0, 31_000_000);
 
         vm.startPrank(cultureIndex.owner());
