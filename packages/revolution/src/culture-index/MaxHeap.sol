@@ -63,8 +63,8 @@ contract MaxHeap is IMaxHeap, VersionedContract, UUPS, Ownable2StepUpgradeable, 
     /// @notice Reverts for position zero
     error INVALID_POSITION_ZERO();
 
-    /// @notice Reverts for invalid piece ID
-    error INVALID_PIECE_ID();
+    /// @notice Reverts for invalid item ID
+    error INVALID_ITEM_ID();
 
     ///                                                          ///
     ///                         INITIALIZER                      ///
@@ -87,7 +87,7 @@ contract MaxHeap is IMaxHeap, VersionedContract, UUPS, Ownable2StepUpgradeable, 
     }
 
     /// @notice Mapping to represent an item in the heap by it's itemId: key = index in heap (the *size* incremented) | value = itemId
-    mapping(uint256 => uint256) private heap;
+    mapping(uint256 => uint256) public heap;
 
     /// @notice the number of items in the heap
     uint256 public size;
@@ -101,7 +101,7 @@ contract MaxHeap is IMaxHeap, VersionedContract, UUPS, Ownable2StepUpgradeable, 
     }
 
     /// @notice mapping of itemIds to their priority value and heap index
-    mapping(uint256 => Item) private items;
+    mapping(uint256 => Item) public items;
 
     /// @notice Get the parent index of a given position
     /// @param pos The position for which to find the parent
@@ -165,7 +165,7 @@ contract MaxHeap is IMaxHeap, VersionedContract, UUPS, Ownable2StepUpgradeable, 
     /// @dev This function adjusts the heap to maintain the max-heap property after updating the vote count
     function updateValue(uint256 itemId, uint256 newValue) public onlyAdmin {
         //ensure itemId exists in the heap
-        if (items[itemId].heapIndex >= size) revert INVALID_PIECE_ID();
+        if (items[itemId].heapIndex >= size) revert INVALID_ITEM_ID();
 
         uint256 position = items[itemId].heapIndex;
         uint256 oldValue = items[itemId].value;

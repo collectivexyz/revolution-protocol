@@ -276,18 +276,13 @@ contract MaxHeapTestSuite is RevolutionBuilderTest {
 contract MaxHeapTester is MaxHeap {
     constructor(address _manager) MaxHeap(_manager) {}
 
-    /// @notice Mapping to represent an item in the heap by it's itemId: key = index in heap (the *size* incremented) | value = itemId
-    mapping(uint256 => uint256) public heap;
-
-    /// @notice mapping of itemIds to their priority value and heap index
-    mapping(uint256 => Item) public items;
-
     /// @notice Function to set a value in the heap (ONLY FOR TESTING)
     /// @param pos The position to set
     /// @param value The value to set at the given position
     function _set(uint256 pos, uint256 itemId, uint256 value) public {
         heap[pos] = itemId;
         items[itemId].value = value;
+        items[itemId].heapIndex = pos;
     }
 
     /// @notice Function to call maxHeapify (ONLY FOR TESTING)
