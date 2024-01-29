@@ -1,5 +1,11 @@
 # @collectivexyz/protocol-rewards
 
+## 0.10.1
+
+### Patch Changes
+
+- 6b611b1: make VRGDA follow initializable
+
 ## 0.10.0
 
 ### Minor Changes

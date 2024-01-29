@@ -1,5 +1,15 @@
 # @collectivexyz/revolution
 
+## 0.3.13
+
+### Patch Changes
+
+- 6b611b1: add vrgda to builder contract, increase cultureindex image max, emit ethPaidToCreators in auction
+- 0008cff: make points and emitter upgradeable
+- 6b611b1: make VRGDA follow initializable
+- Updated dependencies [6b611b1]
+  - @cobuild/protocol-rewards@0.10.1
+
 ## 0.3.12
 
 ### Patch Changes
