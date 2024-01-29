@@ -345,7 +345,7 @@ contract AuctionHouse is
 
         // Check if contract balance is greater than reserve price
         if (_auction.amount < reservePrice) {
-            // If contract balance is less than reserve price, refund to the last bidder
+            // If winning bid is less than reserve price, refund to the last bidder
             if (_auction.bidder != address(0)) {
                 _safeTransferETHWithFallback(_auction.bidder, _auction.amount);
             }
@@ -353,11 +353,13 @@ contract AuctionHouse is
             // And then burn the token
             revolutionToken.burn(_auction.tokenId);
         } else {
-            //If no one has bid, burn the token
-            if (_auction.bidder == address(0))
+            if (_auction.bidder == address(0)) {
+                //If no one has bid, burn the token
                 revolutionToken.burn(_auction.tokenId);
-                //If someone has bid, transfer the token to the winning bidder
-            else revolutionToken.transferFrom(address(this), _auction.bidder, _auction.tokenId);
+            } else {
+                //If someone has bid and won, transfer the token to the winning bidder
+                revolutionToken.transferFrom(address(this), _auction.bidder, _auction.tokenId);
+            }
 
             if (_auction.amount > 0) {
                 // Ether going to owner of the auction
@@ -373,7 +375,7 @@ contract AuctionHouse is
                 uint256[] memory vrgdaSplits = new uint256[](numCreators);
                 address[] memory vrgdaReceivers = new address[](numCreators);
 
-                //Transfer auction amount to the DAO
+                //Transfer auction amount to the owner
                 _safeTransferETHWithFallback(owner(), auctioneerPayment);
 
                 //Transfer creator's share to the creator, for each creator, and build arrays for revolutionPointsEmitter.buyToken
@@ -384,12 +386,12 @@ contract AuctionHouse is
                         .creators;
 
                     //Calculate the amount to be paid to the creators
-                    uint entropyRateAmount = creatorsShare * entropyRateBps;
+                    uint256 directPayment = creatorsShare * entropyRateBps;
 
                     //If the amount to be spent on governance for creators is less than the minimum purchase amount for points
-                    if ((creatorsShare - (entropyRateAmount / 10_000)) <= revolutionPointsEmitter.minPurchaseAmount()) {
+                    if ((creatorsShare - (directPayment / 10_000)) <= revolutionPointsEmitter.minPurchaseAmount()) {
                         //Set the amount to the full creators share, so creators are paid fully in ETH
-                        entropyRateAmount = creatorsShare * 10_000;
+                        directPayment = creatorsShare * 10_000;
                     }
 
                     for (uint256 i = 0; i < numCreators; i++) {
@@ -397,7 +399,7 @@ contract AuctionHouse is
                         vrgdaSplits[i] = creators[i].bps;
 
                         //Calculate paymentAmount for specific creator based on BPS splits - same as multiplying by creatorDirectPayment
-                        uint256 paymentAmount = (entropyRateAmount * creators[i].bps) / (10_000 * 10_000);
+                        uint256 paymentAmount = (directPayment * creators[i].bps) / (10_000 * 10_000);
                         ethPaidToCreators += paymentAmount;
 
                         //Transfer creator's share to the creator
