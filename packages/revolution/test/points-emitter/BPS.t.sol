@@ -191,7 +191,7 @@ contract PointsEmitterBasicTest is PointsEmitterTest {
 
         address emitter1 = address(new ERC1967Proxy(revolutionPointsEmitterImpl, ""));
 
-        address vrgdac = address(revolutionPointsEmitter.vrgdac());
+        address vrgdac = address(revolutionPointsEmitter.vrgda());
 
         vm.startPrank(address(manager));
         vm.expectRevert(abi.encodeWithSignature("INVALID_BPS()"));
@@ -199,7 +199,7 @@ contract PointsEmitterBasicTest is PointsEmitterTest {
             initialOwner: owner,
             weth: address(weth),
             revolutionPoints: address(governanceToken),
-            vrgdac: vrgdac,
+            vrgda: vrgdac,
             creatorsAddress: creatorsAddress,
             creatorParams: IRevolutionBuilder.PointsEmitterCreatorParams({
                 creatorRateBps: 100_000,

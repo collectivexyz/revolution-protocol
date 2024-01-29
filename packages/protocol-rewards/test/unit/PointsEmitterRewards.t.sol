@@ -35,7 +35,7 @@ contract PointsEmitterRewardsTest is ProtocolRewardsTest {
         IRevolutionPointsEmitter(mockPointsEmitterAddress).initialize({
             initialOwner: address(this),
             revolutionPoints: address(revolutionPoints),
-            vrgdac: vrgdac,
+            vrgda: vrgdac,
             creatorsAddress: creatorsAddress,
             creatorParams: IRevolutionBuilder.PointsEmitterCreatorParams({
                 creatorRateBps: 1_000,
@@ -108,7 +108,7 @@ contract PointsEmitterRewardsTest is ProtocolRewardsTest {
         IRevolutionPointsEmitter(mockPointsEmitterAddress).initialize({
             initialOwner: address(this),
             revolutionPoints: address(govToken2),
-            vrgdac: vrgdac,
+            vrgda: vrgdac,
             creatorsAddress: creatorsAddress,
             creatorParams: IRevolutionBuilder.PointsEmitterCreatorParams({
                 creatorRateBps: 1_000,

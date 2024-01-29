@@ -81,7 +81,7 @@ contract PointsEmitterBasicTest is PointsEmitterTest {
             initialOwner: owner,
             weth: address(weth),
             revolutionPoints: address(governanceToken),
-            vrgdac: address(revolutionPointsEmitter.vrgdac()),
+            vrgda: address(revolutionPointsEmitter.vrgda()),
             creatorsAddress: creatorsAddress,
             creatorParams: IRevolutionBuilder.PointsEmitterCreatorParams({
                 creatorRateBps: 1_000,
@@ -121,7 +121,7 @@ contract PointsEmitterBasicTest is PointsEmitterTest {
             initialOwner: owner,
             weth: address(weth),
             revolutionPoints: address(governanceToken),
-            vrgdac: address(revolutionPointsEmitter.vrgdac()),
+            vrgda: address(revolutionPointsEmitter.vrgda()),
             creatorsAddress: creatorsAddress,
             creatorParams: IRevolutionBuilder.PointsEmitterCreatorParams({
                 creatorRateBps: 1_000,
@@ -288,7 +288,7 @@ contract PointsEmitterBasicTest is PointsEmitterTest {
             initialOwner: address(maliciousOwner),
             weth: address(weth),
             revolutionPoints: address(governanceToken),
-            vrgdac: address(revolutionPointsEmitter.vrgdac()),
+            vrgda: address(revolutionPointsEmitter.vrgda()),
             creatorsAddress: creatorsAddress,
             creatorParams: IRevolutionBuilder.PointsEmitterCreatorParams({
                 creatorRateBps: 1_000,

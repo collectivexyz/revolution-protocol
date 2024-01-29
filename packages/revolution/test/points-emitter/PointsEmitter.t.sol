@@ -48,7 +48,7 @@ contract PointsEmitterTest is RevolutionBuilderTest {
         // Note: By using toDaysWadUnsafe(block.timestamp - startTime) we are establishing that 1 "unit of time" is 1 day.
         // solhint-disable-next-line not-rely-on-time
         return
-            revolutionPointsEmitter.vrgdac().yToX({
+            revolutionPointsEmitter.vrgda().yToX({
                 timeSinceStart: toDaysWadUnsafe(block.timestamp - revolutionPointsEmitter.startTime()),
                 sold: supply,
                 amount: int(etherAmount)

@@ -7,6 +7,8 @@ import { RevolutionBuilderTest } from "../RevolutionBuilder.t.sol";
 import { VRGDAC } from "../../src/libs/VRGDAC.sol";
 import { toDaysWadUnsafe, unsafeWadDiv, wadLn, wadExp, wadMul } from "../../src/libs/SignedWadMath.sol";
 import { console2 } from "forge-std/console2.sol";
+import { ERC1967Proxy } from "../../src/libs/proxy/ERC1967Proxy.sol";
+import { IVRGDAC } from "../../src/interfaces/IVRGDAC.sol";
 
 contract PointsTestSuite is RevolutionBuilderTest {
     function setUp() public override {
@@ -29,8 +31,20 @@ contract PointsTestSuite is RevolutionBuilderTest {
             int(revolutionPointsEmitter.maxPurchaseAmount())
         );
 
-        VRGDAC vrgdac = new VRGDAC(targetPrice, priceDecayPercent, perTimeUnit);
-        int256 x = vrgdac.yToX({ timeSinceStart: 2000000000000000000, sold: 1000000000000000000, amount: amount });
+        address vrgdac = address(new ERC1967Proxy(vrgdaImpl, ""));
+
+        IVRGDAC(vrgdac).initialize({
+            initialOwner: address(executor),
+            targetPrice: targetPrice,
+            priceDecayPercent: priceDecayPercent,
+            perTimeUnit: perTimeUnit
+        });
+
+        int256 x = IVRGDAC(vrgdac).yToX({
+            timeSinceStart: 2000000000000000000,
+            sold: 1000000000000000000,
+            amount: amount
+        });
 
         console2.log((x));
         console2.log(uint256(x));
@@ -58,8 +72,14 @@ contract PointsTestSuite is RevolutionBuilderTest {
             int(revolutionPointsEmitter.maxPurchaseAmount())
         );
 
-        // setup vrgda
-        VRGDAC vrgdac = new VRGDAC(targetPrice, priceDecayPercent, perTimeUnit);
+        address vrgdac = address(new ERC1967Proxy(vrgdaImpl, ""));
+
+        IVRGDAC(vrgdac).initialize({
+            initialOwner: address(executor),
+            targetPrice: targetPrice,
+            priceDecayPercent: priceDecayPercent,
+            perTimeUnit: perTimeUnit
+        });
 
         int256 nDays = randomTime / 1 days;
         int256 timeSinceStart = toDaysWadUnsafe(uint(randomTime));
@@ -71,7 +91,7 @@ contract PointsTestSuite is RevolutionBuilderTest {
             1e18; // when this overflows, we just want to floor / max it
 
         // call y to x ensure no revert
-        int256 x = vrgdac.yToX({ timeSinceStart: timeSinceStart, sold: sold, amount: amount });
+        int256 x = IVRGDAC(vrgdac).yToX({ timeSinceStart: timeSinceStart, sold: sold, amount: amount });
 
         // ensure x is not negative even though there haven't been any sales in forever
         assertGe(x, 0, "x should be greater than or equal to zero");
@@ -95,8 +115,14 @@ contract PointsTestSuite is RevolutionBuilderTest {
             int(revolutionPointsEmitter.maxPurchaseAmount())
         );
 
-        // setup vrgda
-        VRGDAC vrgdac = new VRGDAC(targetPrice, priceDecayPercent, perTimeUnit);
+        address vrgdac = address(new ERC1967Proxy(vrgdaImpl, ""));
+
+        IVRGDAC(vrgdac).initialize({
+            initialOwner: address(executor),
+            targetPrice: targetPrice,
+            priceDecayPercent: priceDecayPercent,
+            perTimeUnit: perTimeUnit
+        });
 
         int256 nDays = randomTime / 1 days;
         int256 timeSinceStart = toDaysWadUnsafe(uint(randomTime));
@@ -108,6 +134,6 @@ contract PointsTestSuite is RevolutionBuilderTest {
             (timeSinceStart - unsafeWadDiv(sold, perTimeUnit))) / 1e18; // when this overflows, we just want to floor / max it
 
         // call y to x ensure no revert
-        int256 x = vrgdac.yToX({ timeSinceStart: timeSinceStart, sold: sold, amount: amount });
+        int256 x = IVRGDAC(vrgdac).yToX({ timeSinceStart: timeSinceStart, sold: sold, amount: amount });
     }
 }

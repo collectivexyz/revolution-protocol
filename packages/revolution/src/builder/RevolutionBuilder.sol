@@ -36,7 +36,7 @@ import { ICultureIndex } from "../interfaces/ICultureIndex.sol";
 import { IMaxHeap } from "../interfaces/IMaxHeap.sol";
 import { IRevolutionPointsEmitter } from "../interfaces/IRevolutionPointsEmitter.sol";
 import { IRevolutionPoints } from "../interfaces/IRevolutionPoints.sol";
-import { VRGDAC } from "../libs/VRGDAC.sol";
+import { IVRGDAC } from "../interfaces/IVRGDAC.sol";
 
 import { ERC1967Proxy } from "../libs/proxy/ERC1967Proxy.sol";
 import { UUPS } from "../libs/proxy/UUPS.sol";
@@ -105,7 +105,8 @@ contract RevolutionBuilder is
         address _revolutionPointsImpl,
         address _revolutionPointsEmitterImpl,
         address _maxHeapImpl,
-        address _revolutionVotingPowerImpl
+        address _revolutionVotingPowerImpl,
+        address _vrgdaImpl
     ) payable initializer {
         revolutionTokenImpl = _revolutionTokenImpl;
         descriptorImpl = _descriptorImpl;
@@ -117,6 +118,7 @@ contract RevolutionBuilder is
         revolutionPointsEmitterImpl = _revolutionPointsEmitterImpl;
         maxHeapImpl = _maxHeapImpl;
         revolutionVotingPowerImpl = _revolutionVotingPowerImpl;
+        vrgdaImpl = _vrgdaImpl;
     }
 
     ///                                                          ///
@@ -188,14 +190,14 @@ contract RevolutionBuilder is
 
         address revolutionToken = initialSetup.revolutionToken;
 
-        // Deploy the VRGDAC contract
-        address vrgdac = address(
-            new VRGDAC(
-                _revolutionPointsParams.emitterParams.vrgdaParams.targetPrice,
-                _revolutionPointsParams.emitterParams.vrgdaParams.priceDecayPercent,
-                _revolutionPointsParams.emitterParams.vrgdaParams.tokensPerTimeUnit
-            )
-        );
+        // // Deploy the VRGDAC contract
+        // address vrgdac = address(
+        //     new VRGDAC(
+        //         _revolutionPointsParams.emitterParams.vrgdaParams.targetPrice,
+        //         _revolutionPointsParams.emitterParams.vrgdaParams.priceDecayPercent,
+        //         _revolutionPointsParams.emitterParams.vrgdaParams.tokensPerTimeUnit
+        //     )
+        // );
 
         // Deploy the remaining DAO contracts
         daoAddressesByToken[initialSetup.revolutionToken] = DAOAddresses({
@@ -204,20 +206,27 @@ contract RevolutionBuilder is
             ),
             revolutionPoints: address(new ERC1967Proxy{ salt: initialSetup.salt }(revolutionPointsImpl, "")),
             descriptor: address(new ERC1967Proxy{ salt: initialSetup.salt }(descriptorImpl, "")),
+            vrgda: address(new ERC1967Proxy{ salt: initialSetup.salt }(vrgdaImpl, "")),
             auction: address(new ERC1967Proxy{ salt: initialSetup.salt }(auctionImpl, "")),
             cultureIndex: address(new ERC1967Proxy{ salt: initialSetup.salt }(cultureIndexImpl, "")),
             maxHeap: address(new ERC1967Proxy{ salt: initialSetup.salt }(maxHeapImpl, "")),
             revolutionVotingPower: initialSetup.revolutionVotingPower,
             revolutionToken: revolutionToken,
             executor: initialSetup.executor,
-            dao: initialSetup.dao,
-            vrgda: vrgdac
+            dao: initialSetup.dao
         });
 
         // Initialize each instance with the provided settings
         IMaxHeap(daoAddressesByToken[revolutionToken].maxHeap).initialize({
             initialOwner: initialSetup.executor,
             admin: daoAddressesByToken[revolutionToken].cultureIndex
+        });
+
+        IVRGDAC(daoAddressesByToken[revolutionToken].vrgda).initialize({
+            initialOwner: initialSetup.executor,
+            targetPrice: _revolutionPointsParams.emitterParams.vrgdaParams.targetPrice,
+            priceDecayPercent: _revolutionPointsParams.emitterParams.vrgdaParams.priceDecayPercent,
+            perTimeUnit: _revolutionPointsParams.emitterParams.vrgdaParams.tokensPerTimeUnit
         });
 
         IRevolutionVotingPower(daoAddressesByToken[revolutionToken].revolutionVotingPower).initialize({
@@ -270,7 +279,7 @@ contract RevolutionBuilder is
             revolutionPoints: daoAddressesByToken[revolutionToken].revolutionPoints,
             initialOwner: initialSetup.executor,
             weth: _weth,
-            vrgdac: vrgdac,
+            vrgda: daoAddressesByToken[revolutionToken].vrgda,
             creatorsAddress: _revolutionPointsParams.emitterParams.creatorsAddress,
             creatorParams: _revolutionPointsParams.emitterParams.creatorParams
         });
@@ -291,7 +300,7 @@ contract RevolutionBuilder is
             revolutionToken: revolutionToken,
             executor: initialSetup.executor,
             dao: initialSetup.dao,
-            vrgda: vrgdac
+            vrgda: daoAddressesByToken[revolutionToken].vrgda
         });
 
         return daoAddressesByToken[revolutionToken];
