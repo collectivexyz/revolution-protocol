@@ -214,7 +214,7 @@ contract RevolutionPointsEmitter is
         BuyTokenPaymentShares memory buyTokenPaymentShares = _calculateBuyTokenPaymentShares(msgValueRemaining);
 
         // Calculate tokens to emit to creators
-        int totalTokensForCreators = buyTokenPaymentShares.creatorsGovernancePayment > 0
+        int256 totalTokensForCreators = buyTokenPaymentShares.creatorsGovernancePayment > 0
             ? getTokenQuoteForEther(buyTokenPaymentShares.creatorsGovernancePayment)
             : int(0);
 
@@ -240,7 +240,7 @@ contract RevolutionPointsEmitter is
 
         // Tokens to mint to buyers
         // ENSURE we do this after minting to creators, so that the total supply is correct
-        int totalTokensForBuyers = buyTokenPaymentShares.buyersGovernancePayment > 0
+        int256 totalTokensForBuyers = buyTokenPaymentShares.buyersGovernancePayment > 0
             ? getTokenQuoteForEther(buyTokenPaymentShares.buyersGovernancePayment)
             : int(0);
 

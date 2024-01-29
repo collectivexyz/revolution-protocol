@@ -21,8 +21,8 @@ contract PointsEmitterBasicTest is PointsEmitterTest {
         vm.assume(firstBps > 0);
         vm.startPrank(address(0));
 
-        uint creatorRateBps = revolutionPointsEmitter.creatorRateBps();
-        uint entropyRateBps = revolutionPointsEmitter.entropyRateBps();
+        uint256 creatorRateBps = revolutionPointsEmitter.creatorRateBps();
+        uint256 entropyRateBps = revolutionPointsEmitter.entropyRateBps();
 
         address[] memory recipients = new address[](2);
         recipients[0] = address(1);
@@ -33,15 +33,15 @@ contract PointsEmitterBasicTest is PointsEmitterTest {
         bps[1] = 10_000 - firstBps;
 
         // estimate tokens to be emitted
-        uint msgValueRemaining = 1e18 - revolutionPointsEmitter.computeTotalReward(1e18);
-        uint creatorsShare = (msgValueRemaining * creatorRateBps) / 10_000;
-        uint buyersShare = msgValueRemaining - creatorsShare;
-        uint creatorsGovernancePayment = creatorsShare - (creatorsShare * entropyRateBps) / 10_000;
-        int expectedCreatorsAmount = revolutionPointsEmitter.getTokenQuoteForEther(creatorsGovernancePayment);
+        uint256 msgValueRemaining = 1e18 - revolutionPointsEmitter.computeTotalReward(1e18);
+        uint256 creatorsShare = (msgValueRemaining * creatorRateBps) / 10_000;
+        uint256 buyersShare = msgValueRemaining - creatorsShare;
+        uint256 creatorsGovernancePayment = creatorsShare - (creatorsShare * entropyRateBps) / 10_000;
+        int256 expectedCreatorsAmount = revolutionPointsEmitter.getTokenQuoteForEther(creatorsGovernancePayment);
 
-        int expectedBuyerAmount = getTokenQuoteForEtherHelper(buyersShare, expectedCreatorsAmount);
+        int256 expectedBuyerAmount = getTokenQuoteForEtherHelper(buyersShare, expectedCreatorsAmount);
 
-        int expectedAmount = expectedCreatorsAmount + expectedBuyerAmount;
+        int256 expectedAmount = expectedCreatorsAmount + expectedBuyerAmount;
 
         revolutionPointsEmitter.buyToken{ value: 1e18 }(
             recipients,
@@ -122,16 +122,16 @@ contract PointsEmitterBasicTest is PointsEmitterTest {
         // Calculate ether spent on creators governance tokens
         uint256 creatorsGovernancePayment = ((msgValueRemaining * creatorRateBps) / 10_000) - creatorsDirectPayment;
 
-        int expectedCreatorsAmount = revolutionPointsEmitter.getTokenQuoteForEther(creatorsGovernancePayment);
+        int256 expectedCreatorsAmount = revolutionPointsEmitter.getTokenQuoteForEther(creatorsGovernancePayment);
 
-        int expectedBuyerAmount = getTokenQuoteForEtherHelper(buyersShare, expectedCreatorsAmount);
+        int256 expectedBuyerAmount = getTokenQuoteForEtherHelper(buyersShare, expectedCreatorsAmount);
 
-        int expectedAmount = expectedCreatorsAmount + expectedBuyerAmount;
+        int256 expectedAmount = expectedCreatorsAmount + expectedBuyerAmount;
 
         assertGt(expectedAmount, 0, "Token purchase should have a positive amount");
 
         // Attempting a valid token purchase
-        uint emittedWad = revolutionPointsEmitter.buyToken{ value: 1e18 }(
+        uint256 emittedWad = revolutionPointsEmitter.buyToken{ value: 1e18 }(
             recipients,
             correctBps,
             IRevolutionPointsEmitter.ProtocolRewardAddresses({
@@ -140,7 +140,7 @@ contract PointsEmitterBasicTest is PointsEmitterTest {
                 deployer: address(0)
             })
         );
-        int totalSupplyAfterValidPurchase = int(revolutionPointsEmitter.totalSupply());
+        int256 totalSupplyAfterValidPurchase = int(revolutionPointsEmitter.totalSupply());
         assertEq(totalSupplyAfterValidPurchase, expectedAmount, "Supply should match the expected amount");
         // //emitted should match expected
         assertEq(int(emittedWad), expectedBuyerAmount, "Emitted amount should match expected amount");

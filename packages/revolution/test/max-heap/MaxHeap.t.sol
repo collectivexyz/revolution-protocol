@@ -32,8 +32,8 @@ contract MaxHeapTestSuite is RevolutionBuilderTest {
     function testOldHeapEntriesNotRemoved() public {
         //this was a test case to evoke an error from previously bad contract logic as found in the C4_audit_0
 
-        uint popped;
-        uint value;
+        uint256 popped;
+        uint256 value;
 
         maxHeap.insert(0, 100);
         maxHeap.insert(1, 50);
@@ -81,8 +81,8 @@ contract MaxHeapTestSuite is RevolutionBuilderTest {
     function testOldHeapEntriesNotRemove2() public {
         //this was a test case to evoke an error from previously bad contract logic as found in the C4_audit_0
 
-        uint popped;
-        uint value;
+        uint256 popped;
+        uint256 value;
 
         maxHeap.insert(0, 50);
         maxHeap.insert(1, 100);

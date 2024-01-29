@@ -24,7 +24,7 @@ contract AuctionHouseOutOfGasTest is AuctionHouseTest {
 
     // create an auction with a piece of art with given number of creators and finish it
     function _createAndFinishAuction() internal {
-        uint nCreators = cultureIndex.MAX_NUM_CREATORS();
+        uint256 nCreators = cultureIndex.MAX_NUM_CREATORS();
         address[] memory creatorAddresses = new address[](nCreators);
         uint256[] memory creatorBps = new uint256[](nCreators);
         uint256 totalBps = 0;
@@ -89,7 +89,7 @@ contract AuctionHouseOutOfGasTest is AuctionHouseTest {
         vm.warp(block.timestamp + auction.duration() + 1); // Fast forward time to end the auction
 
         // create another art piece so that it's possible to create next auction
-        uint tokenId2 = createArtPieceMultiCreator(
+        uint256 tokenId2 = createArtPieceMultiCreator(
             createLongString(cultureIndex.MAX_NAME_LENGTH()),
             createLongString(cultureIndex.MAX_DESCRIPTION_LENGTH()),
             ICultureIndex.MediaType.ANIMATION,

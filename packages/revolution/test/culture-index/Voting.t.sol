@@ -56,7 +56,7 @@ contract CultureIndexVotingBasicTest is CultureIndexTestSuite {
         vm.startPrank(voter);
         vm.roll(vm.getBlockNumber() + 1);
 
-        uint pieceId = createDefaultArtPiece();
+        uint256 pieceId = createDefaultArtPiece();
         cultureIndex.vote(pieceId);
         vm.stopPrank();
 

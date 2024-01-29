@@ -56,9 +56,9 @@ contract DescriptorTest is RevolutionBuilderTest {
         internal
         returns (string memory name, string memory description, string memory image, string memory animationUrl)
     {
-        uint returnValue;
+        uint256 returnValue;
         JsmnSolLib.Token[] memory tokens;
-        uint actualNum;
+        uint256 actualNum;
 
         // Number of tokens to be parsed in the JSON (could be estimated or exactly known)
         uint256 numTokens = 20; // Increase if necessary to accommodate all fields in the JSON

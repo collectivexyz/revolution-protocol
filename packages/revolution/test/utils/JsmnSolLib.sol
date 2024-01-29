@@ -30,24 +30,24 @@ library JsmnSolLib {
         PRIMITIVE
     }
 
-    uint constant RETURN_SUCCESS = 0;
-    uint constant RETURN_ERROR_INVALID_JSON = 1;
-    uint constant RETURN_ERROR_PART = 2;
-    uint constant RETURN_ERROR_NO_MEM = 3;
+    uint256 constant RETURN_SUCCESS = 0;
+    uint256 constant RETURN_ERROR_INVALID_JSON = 1;
+    uint256 constant RETURN_ERROR_PART = 2;
+    uint256 constant RETURN_ERROR_NO_MEM = 3;
 
     struct Token {
         JsmnType jsmnType;
-        uint start;
+        uint256 start;
         bool startSet;
-        uint end;
+        uint256 end;
         bool endSet;
         uint8 size;
     }
 
     struct Parser {
-        uint pos;
-        uint toknext;
-        int toksuper;
+        uint256 pos;
+        uint256 toknext;
+        int256 toksuper;
     }
 
     function init(uint length) internal pure returns (Parser memory, Token[] memory) {
@@ -67,7 +67,7 @@ library JsmnSolLib {
         return (true, token);
     }
 
-    function fillToken(Token memory token, JsmnType jsmnType, uint start, uint end) internal pure {
+    function fillToken(Token memory token, JsmnType jsmnType, uint256 start, uint256 end) internal pure {
         token.jsmnType = jsmnType;
         token.start = start;
         token.startSet = true;
@@ -77,7 +77,7 @@ library JsmnSolLib {
     }
 
     function parseString(Parser memory parser, Token[] memory tokens, bytes memory s) internal pure returns (uint) {
-        uint start = parser.pos;
+        uint256 start = parser.pos;
         bool success;
         Token memory token;
         parser.pos++;
@@ -123,7 +123,7 @@ library JsmnSolLib {
 
     function parsePrimitive(Parser memory parser, Token[] memory tokens, bytes memory s) internal pure returns (uint) {
         bool found = false;
-        uint start = parser.pos;
+        uint256 start = parser.pos;
         bytes1 c;
         bool success;
         Token memory token;
@@ -154,16 +154,19 @@ library JsmnSolLib {
         return RETURN_SUCCESS;
     }
 
-    function parse(string memory json, uint numberElements) internal pure returns (uint, Token[] memory tokens, uint) {
+    function parse(
+        string memory json,
+        uint256 numberElements
+    ) internal pure returns (uint, Token[] memory tokens, uint) {
         bytes memory s = bytes(json);
         bool success;
         Parser memory parser;
         (parser, tokens) = init(numberElements);
 
         // Token memory token;
-        uint r;
-        uint count = parser.toknext;
-        uint i;
+        uint256 r;
+        uint256 count = parser.toknext;
+        uint256 i;
         Token memory token;
 
         for (; parser.pos < s.length; parser.pos++) {
@@ -295,7 +298,7 @@ library JsmnSolLib {
         return (RETURN_SUCCESS, tokens, parser.toknext);
     }
 
-    function getBytes(string memory json, uint start, uint end) internal pure returns (string memory) {
+    function getBytes(string memory json, uint256 start, uint256 end) internal pure returns (string memory) {
         bytes memory s = bytes(json);
         bytes memory result = new bytes(end - start);
         for (uint i = start; i < end; i++) {
@@ -310,9 +313,9 @@ library JsmnSolLib {
     }
 
     // parseInt(parseFloat*10^_b)
-    function parseInt(string memory _a, uint _b) internal pure returns (int) {
+    function parseInt(string memory _a, uint256 _b) internal pure returns (int) {
         bytes memory bresult = bytes(_a);
-        int mint = 0;
+        int256 mint = 0;
         bool decimals = false;
         bool negative = false;
         for (uint i = 0; i < bresult.length; i++) {
@@ -335,14 +338,14 @@ library JsmnSolLib {
 
     function uint2str(uint i) internal pure returns (string memory) {
         if (i == 0) return "0";
-        uint j = i;
-        uint len;
+        uint256 j = i;
+        uint256 len;
         while (j != 0) {
             len++;
             j /= 10;
         }
         bytes memory bstr = new bytes(len);
-        uint k = len - 1;
+        uint256 k = len - 1;
         while (i != 0) {
             bstr[k--] = bytes1(uint8(48 + (i % 10)));
             i /= 10;
@@ -361,7 +364,7 @@ library JsmnSolLib {
     function strCompare(string memory _a, string memory _b) internal pure returns (int) {
         bytes memory a = bytes(_a);
         bytes memory b = bytes(_b);
-        uint minLength = a.length;
+        uint256 minLength = a.length;
         if (b.length < minLength) minLength = b.length;
         for (uint i = 0; i < minLength; i++)
             if (a[i] < b[i]) return -1;
