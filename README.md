@@ -1,6 +1,6 @@
 # the Revolution protocol ⌐◨-◨
 
-Revolution is a set of contracts that improve on [Nouns DAO](https://github.com/nounsDAO/nouns-monorepo). Nouns is a generative avatar collective that auctions off one ERC721, every day, forever. 100% of the proceeds of each auction (the winning bid) go into a shared treasury, and owning an NFT gets you 1 vote over the treasury.
+Revolution is a set of contracts that improve on [Nouns DAO](https://github.com/nounsDAO/nouns-monorepo). Nouns is a generative avatar collective that auctions off one membership, every day, forever. 100% of the proceeds of each auction (the winning bid) go into a shared treasury, and owning a Noun gets you 1 vote over the treasury.
 
 <img width="377" alt="noun" src="https://github.com/collectivexyz/revolution-protocol/blob/main/readme-img/noun.png">
 
