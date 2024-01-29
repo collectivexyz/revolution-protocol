@@ -128,6 +128,7 @@ contract AuctionHouse is
         _pause();
 
         if (_auctionParams.creatorRateBps < _auctionParams.minCreatorRateBps) revert CREATOR_RATE_TOO_LOW();
+        if (_auctionParams.reservePrice == 0) revert RESERVE_PRICE_INVALID();
 
         revolutionToken = IRevolutionToken(_revolutionToken);
         revolutionPointsEmitter = IRevolutionPointsEmitter(_revolutionPointsEmitter);
@@ -276,6 +277,8 @@ contract AuctionHouse is
      * @dev Only callable by the owner.
      */
     function setReservePrice(uint256 _reservePrice) external override onlyOwner {
+        if (_reservePrice == 0) revert RESERVE_PRICE_INVALID();
+
         reservePrice = _reservePrice;
 
         emit AuctionReservePriceUpdated(_reservePrice);

@@ -523,7 +523,7 @@ contract AuctionHouseSettleTest is AuctionHouseTest {
 
         emit log_named_uint("maxBidAmount", maxBidAmount);
 
-        bidAmount = bound(bidAmount, 0, maxBidAmount);
+        bidAmount = bound(bidAmount, 1, maxBidAmount);
 
         // Ether going to owner of the auction
         uint256 auctioneerPayment = (bidAmount * (10_000 - auction.creatorRateBps())) / 10_000;

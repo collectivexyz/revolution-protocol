@@ -379,6 +379,8 @@ contract AuctionHouseBasicTest is AuctionHouseTest {
         uint256 newReservePrice,
         uint8 newMinBidIncrementPercentage
     ) public {
+        newReservePrice = bound(newReservePrice, 1, 10_000_000 ether);
+
         auction.setTimeBuffer(newTimeBuffer);
         assertEq(auction.timeBuffer(), newTimeBuffer, "Time buffer should be updated correctly");
 
