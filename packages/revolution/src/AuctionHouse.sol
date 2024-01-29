@@ -443,8 +443,8 @@ contract AuctionHouse is
 
         assembly {
             // Transfer ETH to the recipient
-            // Limit the call to 50,000 gas
-            success := call(50000, _to, _amount, 0, 0, 0, 0)
+            // Limit the call to 30,000 gas
+            success := call(30_000, _to, _amount, 0, 0, 0, 0)
         }
 
         // If the transfer failed:
