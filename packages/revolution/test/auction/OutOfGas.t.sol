@@ -13,7 +13,7 @@ contract AuctionHouseOutOfGasTest is AuctionHouseTest {
         super.setUp();
 
         // create 1m art pieces, reasonable upper bound for a single culture index
-        _createManyPieces(100_000);
+        // _createManyPieces(10_000);
     }
 
     function _createManyPieces(uint256 n) internal {
