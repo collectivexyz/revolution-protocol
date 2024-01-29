@@ -11,7 +11,7 @@ contract PointsEmitterRewardsTest is ProtocolRewardsTest {
     RevolutionPoints internal revolutionPoints;
 
     address creatorsAddress;
-    address vrgdac;
+    address vrgda;
 
     //enable this contract to receive eth
     receive() external payable {}
@@ -22,7 +22,7 @@ contract PointsEmitterRewardsTest is ProtocolRewardsTest {
         creatorsAddress = address(0x1);
 
         // Deploy the VRGDAC contract
-        vrgdac = address(new VRGDAC(1e11, 1e17, 1e22));
+        vrgda = address(new VRGDAC(1e11, 1e17, 1e22));
 
         address revolutionPointsEmitterImpl = address(
             new RevolutionPointsEmitter(address(this), address(protocolRewards), revolution)
@@ -35,7 +35,7 @@ contract PointsEmitterRewardsTest is ProtocolRewardsTest {
         IRevolutionPointsEmitter(mockPointsEmitterAddress).initialize({
             initialOwner: address(this),
             revolutionPoints: address(revolutionPoints),
-            vrgda: vrgdac,
+            vrgda: vrgda,
             creatorsAddress: creatorsAddress,
             creatorParams: IRevolutionBuilder.PointsEmitterCreatorParams({
                 creatorRateBps: 1_000,
@@ -108,7 +108,7 @@ contract PointsEmitterRewardsTest is ProtocolRewardsTest {
         IRevolutionPointsEmitter(mockPointsEmitterAddress).initialize({
             initialOwner: address(this),
             revolutionPoints: address(govToken2),
-            vrgda: vrgdac,
+            vrgda: vrgda,
             creatorsAddress: creatorsAddress,
             creatorParams: IRevolutionBuilder.PointsEmitterCreatorParams({
                 creatorRateBps: 1_000,
