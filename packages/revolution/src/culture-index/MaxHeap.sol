@@ -87,10 +87,10 @@ contract MaxHeap is IMaxHeap, VersionedContract, UUPS, Ownable2StepUpgradeable, 
     }
 
     /// @notice Mapping to represent an item in the heap by it's itemId: key = index in heap (the *size* incremented) | value = itemId
-    mapping(uint256 => uint256) public heap;
+    mapping(uint256 => uint256) private heap;
 
     /// @notice the number of items in the heap
-    uint256 public size = 0;
+    uint256 public size;
 
     /// @notice composite mapping of the heap position (index in the heap) and priority value of a specific item in the heap
     /// To enable value updates and indexing on external itemIds
@@ -99,7 +99,9 @@ contract MaxHeap is IMaxHeap, VersionedContract, UUPS, Ownable2StepUpgradeable, 
         uint256 value;
         uint256 heapIndex;
     }
-    mapping(uint256 => Item) public items;
+
+    /// @notice mapping of itemIds to their priority value and heap index
+    mapping(uint256 => Item) private items;
 
     /// @notice Get the parent index of a given position
     /// @param pos The position for which to find the parent
@@ -175,8 +177,9 @@ contract MaxHeap is IMaxHeap, VersionedContract, UUPS, Ownable2StepUpgradeable, 
         if (newValue > oldValue) {
             // Upwards heapify
             while (position != 0 && items[heap[position]].value > items[heap[parent(position)]].value) {
-                swap(position, parent(position));
-                position = parent(position);
+                uint256 parentOfPosition = parent(position);
+                swap(position, parentOfPosition);
+                position = parentOfPosition;
             }
         } else if (newValue < oldValue) maxHeapify(position); // Downwards heapify
     }
