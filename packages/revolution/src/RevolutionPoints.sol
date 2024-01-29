@@ -24,6 +24,7 @@ import { IERC20 } from "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 
 import { ERC20VotesUpgradeable } from "./base/erc20/ERC20VotesUpgradeable.sol";
 import { VersionedContract } from "./version/VersionedContract.sol";
+import { UUPS } from "./libs/proxy/UUPS.sol";
 import { ERC20Upgradeable } from "./base/erc20/ERC20Upgradeable.sol";
 
 import { IRevolutionBuilder } from "./interfaces/IRevolutionBuilder.sol";
@@ -32,6 +33,7 @@ import { IRevolutionPoints } from "./interfaces/IRevolutionPoints.sol";
 contract RevolutionPoints is
     IRevolutionPoints,
     VersionedContract,
+    UUPS,
     Ownable2StepUpgradeable,
     ReentrancyGuardUpgradeable,
     ERC20VotesUpgradeable
@@ -222,5 +224,17 @@ contract RevolutionPoints is
         isMinterLocked = true;
 
         emit MinterLocked();
+    }
+
+    ///                                                          ///
+    ///                       POINTS UPGRADE                     ///
+    ///                                                          ///
+
+    /// @notice Ensures the caller is authorized to upgrade the contract and that the new implementation is valid
+    /// @dev This function is called in `upgradeTo` & `upgradeToAndCall`
+    /// @param _newImpl The new implementation address
+    function _authorizeUpgrade(address _newImpl) internal view override onlyOwner {
+        // Ensure the new implementation is a registered upgrade
+        if (!manager.isRegisteredUpgrade(_getImplementation(), _newImpl)) revert INVALID_UPGRADE(_newImpl);
     }
 }
