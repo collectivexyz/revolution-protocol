@@ -91,9 +91,6 @@ contract PointsTestSuite is RevolutionBuilderTest {
         //bound sold to perTimeUnit * nDays < 50% undersold
         sold = bound(sold, (perTimeUnit * nDays * 5) / 10, perTimeUnit * nDays);
 
-        int256 e_x_param = (wadLn(1e18 - priceDecayPercent) * (timeSinceStart - unsafeWadDiv(sold, perTimeUnit))) /
-            1e18; // when this overflows, we just want to floor / max it
-
         // call y to x ensure no revert
         int256 x = IVRGDAC(vrgdac).yToX({ timeSinceStart: timeSinceStart, sold: sold, amount: amount });
 
@@ -136,10 +133,7 @@ contract PointsTestSuite is RevolutionBuilderTest {
         //bound sold to perTimeUnit * nDays < 50% oversold
         sold = bound(sold, perTimeUnit * nDays, (perTimeUnit * nDays * 15) / 10);
 
-        int256 wadExpParameter = (wadLn(1e18 - priceDecayPercent) *
-            (timeSinceStart - unsafeWadDiv(sold, perTimeUnit))) / 1e18; // when this overflows, we just want to floor / max it
-
         // call y to x ensure no revert
-        int256 x = IVRGDAC(vrgdac).yToX({ timeSinceStart: timeSinceStart, sold: sold, amount: amount });
+        IVRGDAC(vrgdac).yToX({ timeSinceStart: timeSinceStart, sold: sold, amount: amount });
     }
 }

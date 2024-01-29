@@ -198,8 +198,6 @@ contract TokenMintingTest is RevolutionTokenTestSuite {
 
         (uint256 pieceId, ICultureIndex.ArtPieceMetadata memory metadata, , , ) = cultureIndex.pieces(0);
 
-        emit log_uint(pieceId);
-
         ICultureIndex.CreatorBps[] memory creators = new ICultureIndex.CreatorBps[](1);
         creators[0] = ICultureIndex.CreatorBps({ creator: address(0x1), bps: 10000 });
 

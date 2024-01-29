@@ -63,8 +63,8 @@ contract MaxHeap is IMaxHeap, VersionedContract, UUPS, Ownable2StepUpgradeable, 
     /// @notice Reverts for position zero
     error INVALID_POSITION_ZERO();
 
-    /// @notice Reverts for invalid piece ID
-    error INVALID_PIECE_ID();
+    /// @notice Reverts for invalid item ID
+    error INVALID_ITEM_ID();
 
     ///                                                          ///
     ///                         INITIALIZER                      ///
@@ -90,7 +90,7 @@ contract MaxHeap is IMaxHeap, VersionedContract, UUPS, Ownable2StepUpgradeable, 
     mapping(uint256 => uint256) public heap;
 
     /// @notice the number of items in the heap
-    uint256 public size = 0;
+    uint256 public size;
 
     /// @notice composite mapping of the heap position (index in the heap) and priority value of a specific item in the heap
     /// To enable value updates and indexing on external itemIds
@@ -99,6 +99,8 @@ contract MaxHeap is IMaxHeap, VersionedContract, UUPS, Ownable2StepUpgradeable, 
         uint256 value;
         uint256 heapIndex;
     }
+
+    /// @notice mapping of itemIds to their priority value and heap index
     mapping(uint256 => Item) public items;
 
     /// @notice Get the parent index of a given position
@@ -163,7 +165,7 @@ contract MaxHeap is IMaxHeap, VersionedContract, UUPS, Ownable2StepUpgradeable, 
     /// @dev This function adjusts the heap to maintain the max-heap property after updating the vote count
     function updateValue(uint256 itemId, uint256 newValue) public onlyAdmin {
         //ensure itemId exists in the heap
-        if (items[itemId].heapIndex >= size) revert INVALID_PIECE_ID();
+        if (items[itemId].heapIndex >= size) revert INVALID_ITEM_ID();
 
         uint256 position = items[itemId].heapIndex;
         uint256 oldValue = items[itemId].value;
@@ -175,8 +177,9 @@ contract MaxHeap is IMaxHeap, VersionedContract, UUPS, Ownable2StepUpgradeable, 
         if (newValue > oldValue) {
             // Upwards heapify
             while (position != 0 && items[heap[position]].value > items[heap[parent(position)]].value) {
-                swap(position, parent(position));
-                position = parent(position);
+                uint256 parentOfPosition = parent(position);
+                swap(position, parentOfPosition);
+                position = parentOfPosition;
             }
         } else if (newValue < oldValue) maxHeapify(position); // Downwards heapify
     }

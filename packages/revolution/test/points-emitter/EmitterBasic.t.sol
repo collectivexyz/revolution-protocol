@@ -167,9 +167,6 @@ contract PointsEmitterBasicTest is PointsEmitterTest {
 
         int256 secondPrice = revolutionPointsEmitter.buyTokenQuote(1e19);
 
-        emit log_int(firstPrice);
-        emit log_int(secondPrice);
-
         int256 laterAmount = revolutionPointsEmitter.getTokenQuoteForEther(1e18);
 
         assertGt(laterAmount, initAmount, "Later amount should be greater than initial amount");
@@ -187,8 +184,6 @@ contract PointsEmitterBasicTest is PointsEmitterTest {
         bps[0] = 10_000;
 
         vm.deal(address(0), 100000 ether);
-
-        emit log_address(address(0));
 
         revolutionPointsEmitter.buyToken{ value: 1e18 }(
             recipients,

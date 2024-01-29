@@ -111,8 +111,6 @@ contract PointsEmitterBasicTest is PointsEmitterTest {
         // Call the function with the typical payment amount
         int256 tokenAmount = revolutionPointsEmitter.getTokenQuoteForEther(payment);
 
-        emit log_int(tokenAmount);
-
         // Assert that the token amount is reasonable (not zero or unexpectedly high)
         assertGt(tokenAmount, 0, "Token amount should be greater than zero");
         assertLt(
@@ -164,7 +162,6 @@ contract PointsEmitterBasicTest is PointsEmitterTest {
         uint256 smallPayment = 0.00001 ether;
         int256 smallPaymentTokenAmount = revolutionPointsEmitter.getTokenQuoteForEther(smallPayment);
         assertGt(smallPaymentTokenAmount, 0, "Token amount for small payment should be greater than zero");
-        emit log_int(smallPaymentTokenAmount);
 
         // A days worth of payment amount
         int256 dailyPaymentTokenAmount = revolutionPointsEmitter.getTokenQuoteForEther(expectedVolume);
@@ -173,8 +170,6 @@ contract PointsEmitterBasicTest is PointsEmitterTest {
             tokensPerTimeUnit * 1e18,
             "Token amount for daily payment should be less than tokens per day"
         );
-        emit log_string("Daily Payment Token Amount: ");
-        emit log_int(dailyPaymentTokenAmount);
 
         // Edge Case 2: Very Large Payment
         // An unusually large payment amount
@@ -186,8 +181,6 @@ contract PointsEmitterBasicTest is PointsEmitterTest {
             SOME_REALISTIC_UPPER_BOUND,
             "Token amount for large payment should be less than some realistic upper bound"
         );
-        emit log_string("Large Payment Token Amount: ");
-        emit log_int(largePaymentTokenAmount);
 
         uint256 largestPayment = expectedVolume * 1_000; // An unusually large payment amount
         int256 largestPaymentTokenAmount = revolutionPointsEmitter.getTokenQuoteForEther(largestPayment);
@@ -197,9 +190,6 @@ contract PointsEmitterBasicTest is PointsEmitterTest {
             50 * tokensPerTimeUnit * 1e18,
             "Token amount for largest payment should be less than some realistic upper bound"
         );
-
-        emit log_string("Largest Payment Token Amount: ");
-        emit log_int(largestPaymentTokenAmount);
 
         vm.stopPrank();
     }

@@ -166,7 +166,9 @@ contract RevolutionPointsEmitter is
         uint256 msgValueRemaining
     ) internal view returns (BuyTokenPaymentShares memory buyTokenPaymentShares) {
         // Calculate share of purchase amount reserved for buyers
-        buyTokenPaymentShares.buyersShare = msgValueRemaining - ((msgValueRemaining * creatorRateBps) / 10_000);
+        buyTokenPaymentShares.buyersGovernancePayment =
+            msgValueRemaining -
+            ((msgValueRemaining * creatorRateBps) / 10_000);
 
         // Calculate ether directly sent to creators
         buyTokenPaymentShares.creatorsDirectPayment =
@@ -212,14 +214,14 @@ contract RevolutionPointsEmitter is
         BuyTokenPaymentShares memory buyTokenPaymentShares = _calculateBuyTokenPaymentShares(msgValueRemaining);
 
         // Calculate tokens to emit to creators
-        int totalTokensForCreators = buyTokenPaymentShares.creatorsGovernancePayment > 0
+        int256 totalTokensForCreators = buyTokenPaymentShares.creatorsGovernancePayment > 0
             ? getTokenQuoteForEther(buyTokenPaymentShares.creatorsGovernancePayment)
             : int(0);
 
         // Deposit owner's funds, and eth used to buy creators gov. tokens to owner's account
         _safeTransferETHWithFallback(
             owner(),
-            buyTokenPaymentShares.buyersShare + buyTokenPaymentShares.creatorsGovernancePayment
+            buyTokenPaymentShares.buyersGovernancePayment + buyTokenPaymentShares.creatorsGovernancePayment
         );
 
         // Transfer ETH to creators
@@ -236,9 +238,10 @@ contract RevolutionPointsEmitter is
         uint256 bpsSum = 0;
         uint256 addressesLength = addresses.length;
 
-        // Tokens to emit to buyers - ENSURE we do this after minting to creators, so that the total supply is correct
-        int totalTokensForBuyers = buyTokenPaymentShares.buyersShare > 0
-            ? getTokenQuoteForEther(buyTokenPaymentShares.buyersShare)
+        // Tokens to mint to buyers
+        // ENSURE we do this after minting to creators, so that the total supply is correct
+        int256 totalTokensForBuyers = buyTokenPaymentShares.buyersGovernancePayment > 0
+            ? getTokenQuoteForEther(buyTokenPaymentShares.buyersGovernancePayment)
             : int(0);
 
         //Mint tokens to buyers
@@ -255,7 +258,7 @@ contract RevolutionPointsEmitter is
         emit PurchaseFinalized(
             msg.sender,
             msg.value,
-            buyTokenPaymentShares.buyersShare + buyTokenPaymentShares.creatorsGovernancePayment,
+            buyTokenPaymentShares.buyersGovernancePayment + buyTokenPaymentShares.creatorsGovernancePayment,
             msg.value - msgValueRemaining,
             uint256(totalTokensForBuyers),
             uint256(totalTokensForCreators),

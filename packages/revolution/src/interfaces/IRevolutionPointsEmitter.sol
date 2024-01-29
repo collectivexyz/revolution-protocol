@@ -46,7 +46,7 @@ interface IRevolutionPointsEmitter is IRewardSplits {
     }
 
     struct BuyTokenPaymentShares {
-        uint256 buyersShare;
+        uint256 buyersGovernancePayment;
         uint256 creatorsDirectPayment;
         uint256 creatorsGovernancePayment;
     }

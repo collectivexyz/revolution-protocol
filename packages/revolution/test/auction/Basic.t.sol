@@ -184,10 +184,6 @@ contract AuctionHouseBasicTest is AuctionHouseTest {
     receive() external payable {}
 
     function testInitializationParameters() public {
-        emit log_string("testing");
-        emit log_address(weth);
-        emit log_address(auction.WETH());
-
         assertEq(auction.WETH(), address(weth), "WETH address should be set correctly");
         assertEq(auction.timeBuffer(), 15 minutes, "Time buffer should be set correctly");
         assertEq(auction.reservePrice(), 1 ether, "Reserve price should be set correctly");
@@ -379,6 +375,8 @@ contract AuctionHouseBasicTest is AuctionHouseTest {
         uint256 newReservePrice,
         uint8 newMinBidIncrementPercentage
     ) public {
+        newReservePrice = bound(newReservePrice, 1, 10_000_000 ether);
+
         auction.setTimeBuffer(newTimeBuffer);
         assertEq(auction.timeBuffer(), newTimeBuffer, "Time buffer should be updated correctly");
 

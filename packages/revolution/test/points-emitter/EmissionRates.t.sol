@@ -85,15 +85,12 @@ contract EmissionRatesTest is PointsEmitterTest {
         vm.stopPrank();
 
         int256 priceAfterManyPurchases = revolutionPointsEmitter.buyTokenQuote(1e18);
-        emit log_int(priceAfterManyPurchases);
 
         // Simulate the passage of time
         uint256 daysElapsed = 221;
         vm.warp(block.timestamp + daysElapsed * 1 days);
 
         int256 priceAfterManyDays = revolutionPointsEmitter.buyTokenQuote(1e18);
-
-        emit log_int(priceAfterManyDays);
 
         // Assert that the price is greater than zero
         assertGt(priceAfterManyDays, 0, "Price should never hit zero");
@@ -227,9 +224,6 @@ contract EmissionRatesTest is PointsEmitterTest {
 
         vm.deal(address(this), 100000 ether);
 
-        emit log_address(revolutionPointsEmitter.creatorsAddress());
-        emit log_uint(revolutionPoints.balanceOf(revolutionPointsEmitter.creatorsAddress()));
-
         //expect balance to start out at 0
         assertEq(revolutionPoints.balanceOf(revolutionPointsEmitter.creatorsAddress()), 0, "Balance should start at 0");
 
@@ -269,18 +263,12 @@ contract EmissionRatesTest is PointsEmitterTest {
             })
         );
 
-        //log creatorsAddress balance
-        emit log_uint(revolutionPoints.balanceOf(revolutionPointsEmitter.creatorsAddress()));
-
         //assert that creatorsAddress balance is correct
         assertEq(
             uint(revolutionPoints.balanceOf(revolutionPointsEmitter.creatorsAddress())),
             uint(expectedAmountForCreators),
             "Creators should have correct balance"
         );
-
-        //log recipient0 balance
-        emit log_uint(revolutionPoints.balanceOf(address(1)));
 
         // assert that recipient0 balance is correct
         assertEq(

@@ -85,7 +85,7 @@ contract DescriptorURIDataTest is DescriptorTest {
         // Call tokenURI and check the return value is a data URI
         string memory uri = descriptor.tokenURI(tokenId, metadata);
         assertTrue(bytes(uri).length > 0, "URI should not be empty");
-        emit log_string(uri);
+
         // Further data URI validation can be done here if necessary
 
         //tokenURI should just be 1

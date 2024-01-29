@@ -76,6 +76,9 @@ interface IAuctionHouse is IAuctionHouseEvents {
     /// @dev Reverts if the creator rate is below the minimum required creator rate basis points.
     error CREATOR_RATE_TOO_LOW();
 
+    /// @dev Reverts if the reserve price is invalid.
+    error RESERVE_PRICE_INVALID();
+
     /// @dev Reverts if the new minimum creator rate is not greater than the previous minimum creator rate.
     error MIN_CREATOR_RATE_NOT_INCREASED();
 

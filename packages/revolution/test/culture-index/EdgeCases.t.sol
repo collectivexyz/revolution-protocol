@@ -51,9 +51,6 @@ contract CultureIndexEdgeCaseTest is CultureIndexTestSuite {
         //vm roll
         vm.roll(vm.getBlockNumber() + 1);
 
-        // log maxHeap size
-        emit log_named_uint("maxHeapSize", maxHeap.size());
-
         // calculate gas left
         uint256 gasLeft = gasleft();
 
@@ -63,8 +60,6 @@ contract CultureIndexEdgeCaseTest is CultureIndexTestSuite {
 
         // calculate gas used
         uint256 gasUsed = gasLeft - gasleft();
-
-        emit log_named_uint("gasUsed", gasUsed);
 
         //now insert 100_000 pieces and ensure gas used is less than double what it was before
 
@@ -84,8 +79,6 @@ contract CultureIndexEdgeCaseTest is CultureIndexTestSuite {
 
         // calculate gas used
         uint256 gasUsed100 = gasLeft - gasleft();
-
-        emit log_named_uint("gasUsed100k", gasUsed100);
 
         //ensure gas used is less than double what it was before
         assertLt(gasUsed100, gasUsed * 2, "gas used should be less than double what it was before");
