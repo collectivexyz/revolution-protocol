@@ -33,6 +33,8 @@ contract PointsTestSuite is RevolutionBuilderTest {
 
         address vrgdac = address(new ERC1967Proxy(vrgdaImpl, ""));
 
+        //prank manager
+        vm.prank(address(manager));
         IVRGDAC(vrgdac).initialize({
             initialOwner: address(executor),
             targetPrice: targetPrice,
@@ -74,6 +76,8 @@ contract PointsTestSuite is RevolutionBuilderTest {
 
         address vrgdac = address(new ERC1967Proxy(vrgdaImpl, ""));
 
+        //prank manager
+        vm.prank(address(manager));
         IVRGDAC(vrgdac).initialize({
             initialOwner: address(executor),
             targetPrice: targetPrice,
@@ -117,6 +121,8 @@ contract PointsTestSuite is RevolutionBuilderTest {
 
         address vrgdac = address(new ERC1967Proxy(vrgdaImpl, ""));
 
+        //prank manager
+        vm.prank(address(manager));
         IVRGDAC(vrgdac).initialize({
             initialOwner: address(executor),
             targetPrice: targetPrice,
