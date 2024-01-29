@@ -2,33 +2,79 @@
 pragma solidity 0.8.22;
 
 import { wadExp, wadLn, wadMul, wadDiv, unsafeWadDiv, wadPow } from "./SignedWadMath.sol";
+import { VersionedContract } from "../version/VersionedContract.sol";
+import { IRevolutionBuilder } from "../interfaces/IRevolutionBuilder.sol";
+import { UUPS } from "./proxy/UUPS.sol";
+import { OwnableUpgradeable } from "@openzeppelin/contracts-upgradeable/access/OwnableUpgradeable.sol";
+import { IVRGDAC } from "../interfaces/IVRGDAC.sol";
 
 /// @title Continuous Variable Rate Gradual Dutch Auction
 /// @author transmissions11 <t11s@paradigm.xyz>
 /// @author FrankieIsLost <frankie@paradigm.xyz>
 /// @author Dan Robinson <dan@paradigm.xyz>
 /// @notice Sell tokens roughly according to an issuance schedule.
-contract VRGDAC {
+contract VRGDAC is IVRGDAC, VersionedContract, UUPS, OwnableUpgradeable {
+    ///                                                          ///
+    ///                         IMMUTABLES                       ///
+    ///                                                          ///
+
+    /// @notice The contract upgrade manager
+    IRevolutionBuilder private immutable manager;
+
     /*//////////////////////////////////////////////////////////////
                             VRGDA PARAMETERS
     //////////////////////////////////////////////////////////////*/
 
-    int256 public immutable targetPrice;
+    int256 public targetPrice;
 
-    int256 public immutable perTimeUnit;
+    int256 public perTimeUnit;
 
-    int256 public immutable decayConstant;
+    int256 public decayConstant;
 
-    int256 public immutable priceDecayPercent;
+    int256 public priceDecayPercent;
 
     // e ** x bound for the p function in wad form
-    int256 public immutable maxXBound;
+    int256 public maxXBound;
+
+    ///                                                          ///
+    ///                         CONSTRUCTOR                      ///
+    ///                                                          ///
+
+    /// @param _manager The contract upgrade manager address
+    constructor(address _manager) payable initializer {
+        manager = IRevolutionBuilder(_manager);
+    }
+
+    ///                                                          ///
+    ///                           ERRORS                         ///
+    ///                                                          ///
+
+    /// @notice Reverts for invalid manager initialization
+    error SENDER_NOT_MANAGER();
+
+    /// @notice Reverts for address zero
+    error INVALID_ADDRESS_ZERO();
+
+    ///                                                          ///
+    ///                         INITIALIZER                      ///
+    ///                                                          ///
 
     /// @notice Sets target price and per time unit price decay for the VRGDA.
+    /// @param _initialOwner The initial owner of the contract
     /// @param _targetPrice The target price for a token if sold on pace, scaled by 1e18.
     /// @param _priceDecayPercent The percent price decays per unit of time with no sales, scaled by 1e18.
     /// @param _perTimeUnit The number of tokens to target selling in 1 full unit of time, scaled by 1e18.
-    constructor(int256 _targetPrice, int256 _priceDecayPercent, int256 _perTimeUnit) {
+    function initialize(
+        address _initialOwner,
+        int256 _targetPrice,
+        int256 _priceDecayPercent,
+        int256 _perTimeUnit
+    ) public initializer {
+        if (msg.sender != address(manager)) revert SENDER_NOT_MANAGER();
+        if (_initialOwner == address(0)) revert INVALID_ADDRESS_ZERO();
+
+        __Ownable_init(_initialOwner);
+
         targetPrice = _targetPrice;
 
         perTimeUnit = _perTimeUnit;
@@ -135,5 +181,17 @@ contract VRGDAC {
             return 1;
         }
         return p_x;
+    }
+
+    ///                                                          ///
+    ///                        VRGDA UPGRADE                     ///
+    ///                                                          ///
+
+    /// @notice Ensures the caller is authorized to upgrade the contract and that the new implementation is valid
+    /// @dev This function is called in `upgradeTo` & `upgradeToAndCall`
+    /// @param _newImpl The new implementation address
+    function _authorizeUpgrade(address _newImpl) internal view override onlyOwner {
+        // Ensure the new implementation is a registered upgrade
+        if (!manager.isRegisteredUpgrade(_getImplementation(), _newImpl)) revert INVALID_UPGRADE(_newImpl);
     }
 }

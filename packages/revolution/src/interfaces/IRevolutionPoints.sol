@@ -41,6 +41,10 @@ interface IRevolutionPoints is IERC20, IVotes {
 
     function lockMinter() external;
 
+    function mint(address account, uint256 amount) external;
+
+    function decimals() external view returns (uint8);
+
     /// @notice Initializes a DAO's ERC-20 governance token contract
     /// @param initialOwner The address of the initial owner
     /// @param minter The address of the minter

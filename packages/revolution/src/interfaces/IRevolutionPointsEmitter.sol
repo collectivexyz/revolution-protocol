@@ -96,7 +96,7 @@ interface IRevolutionPointsEmitter is IRewardSplits {
      * @param initialOwner The initial owner of the points emitter
      * @param weth The address of the WETH contract.
      * @param revolutionPoints The ERC-20 token contract address
-     * @param vrgdac The VRGDA contract address
+     * @param vrgda The VRGDA contract address
      * @param creatorsAddress The address of the creators
      * @param creatorParams The creator and entropy rate parameters
      */
@@ -104,7 +104,7 @@ interface IRevolutionPointsEmitter is IRewardSplits {
         address initialOwner,
         address weth,
         address revolutionPoints,
-        address vrgdac,
+        address vrgda,
         address creatorsAddress,
         IRevolutionBuilder.PointsEmitterCreatorParams calldata creatorParams
     ) external;

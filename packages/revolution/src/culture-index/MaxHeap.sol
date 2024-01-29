@@ -7,11 +7,12 @@ import { IRevolutionBuilder } from "../interfaces/IRevolutionBuilder.sol";
 
 import { UUPS } from "../libs/proxy/UUPS.sol";
 import { VersionedContract } from "../version/VersionedContract.sol";
+import { IMaxHeap } from "../interfaces/IMaxHeap.sol";
 
 /// @title MaxHeap implementation in Solidity
 /// @dev This contract implements a Max Heap data structure with basic operations
 /// @author Written by rocketman and gpt4
-contract MaxHeap is VersionedContract, UUPS, Ownable2StepUpgradeable, ReentrancyGuardUpgradeable {
+contract MaxHeap is IMaxHeap, VersionedContract, UUPS, Ownable2StepUpgradeable, ReentrancyGuardUpgradeable {
     /// @notice The parent contract that is allowed to update the data store
     address public admin;
 

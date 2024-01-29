@@ -19,11 +19,11 @@ import { MaxHeap } from "../src/culture-index/MaxHeap.sol";
 import { RevolutionDAOStorageV1 } from "../src/governance/RevolutionDAOInterfaces.sol";
 import { RevolutionProtocolRewards } from "@cobuild/protocol-rewards/src/RevolutionProtocolRewards.sol";
 import { RevolutionBuilderTypesV1 } from "../src/builder/types/RevolutionBuilderTypesV1.sol";
-
 import { ERC1967Proxy } from "../src/libs/proxy/ERC1967Proxy.sol";
 import { MockERC721 } from "./mock/MockERC721.sol";
 import { MockERC1155 } from "./mock/MockERC1155.sol";
 import { MockWETH } from "./mock/MockWETH.sol";
+import { VRGDAC } from "../src/libs/VRGDAC.sol";
 
 contract RevolutionBuilderTest is Test {
     ///                                                          ///
@@ -44,6 +44,7 @@ contract RevolutionBuilderTest is Test {
     address internal cultureIndexImpl;
     address internal maxHeapImpl;
     address internal revolutionVotingPowerImpl;
+    address internal vrgdaImpl;
 
     address internal nounsDAO;
     address internal revolutionDAO;
@@ -52,7 +53,6 @@ contract RevolutionBuilderTest is Test {
     address internal founder2;
     address internal weth;
     address internal protocolRewards;
-    address internal vrgdac;
 
     MockERC721 internal mock721;
     MockERC1155 internal mock1155;
@@ -90,6 +90,7 @@ contract RevolutionBuilderTest is Test {
                 address(0),
                 address(0),
                 address(0),
+                address(0),
                 address(0)
             )
         );
@@ -109,6 +110,7 @@ contract RevolutionBuilderTest is Test {
         cultureIndexImpl = address(new CultureIndex(address(manager)));
         maxHeapImpl = address(new MaxHeap(address(manager)));
         revolutionVotingPowerImpl = address(new RevolutionVotingPower(address(manager)));
+        vrgdaImpl = address(new VRGDAC(address(manager)));
 
         managerImpl = address(
             new RevolutionBuilder(
@@ -121,7 +123,8 @@ contract RevolutionBuilderTest is Test {
                 revolutionPointsImpl,
                 revolutionPointsEmitterImpl,
                 maxHeapImpl,
-                revolutionVotingPowerImpl
+                revolutionVotingPowerImpl,
+                vrgdaImpl
             )
         );
 

@@ -7,15 +7,17 @@ import { Ownable2StepUpgradeable } from "@openzeppelin/contracts-upgradeable/acc
 import { PausableUpgradeable } from "@openzeppelin/contracts-upgradeable/utils/PausableUpgradeable.sol";
 
 import { IWETH } from "./interfaces/IWETH.sol";
-import { VRGDAC } from "./libs/VRGDAC.sol";
+import { IVRGDAC } from "./interfaces/IVRGDAC.sol";
 import { toDaysWadUnsafe } from "./libs/SignedWadMath.sol";
 import { Strings } from "@openzeppelin/contracts/utils/Strings.sol";
-import { RevolutionPoints } from "./RevolutionPoints.sol";
+import { IRevolutionPoints } from "./interfaces/IRevolutionPoints.sol";
 import { IRevolutionPointsEmitter } from "./interfaces/IRevolutionPointsEmitter.sol";
+import { VersionedContract } from "./version/VersionedContract.sol";
 
 import { IRevolutionBuilder } from "./interfaces/IRevolutionBuilder.sol";
 
 contract RevolutionPointsEmitter is
+    VersionedContract,
     IRevolutionPointsEmitter,
     ReentrancyGuardUpgradeable,
     PointsEmitterRewards,
@@ -26,10 +28,10 @@ contract RevolutionPointsEmitter is
     address public WETH;
 
     // The token that is being minted.
-    RevolutionPoints public token;
+    IRevolutionPoints public token;
 
     // The VRGDA contract
-    VRGDAC public vrgdac;
+    IVRGDAC public vrgda;
 
     // solhint-disable-next-line not-rely-on-time
     uint256 public startTime;
@@ -78,21 +80,21 @@ contract RevolutionPointsEmitter is
      * @param _initialOwner The initial owner of the points emitter
      * @param _weth The address of the WETH contract
      * @param _revolutionPoints The ERC-20 token contract address
-     * @param _vrgdac The VRGDA contract address
+     * @param _vrgda The VRGDA contract address
      * @param _creatorsAddress The address to pay the creator reward to
      */
     function initialize(
         address _initialOwner,
         address _weth,
         address _revolutionPoints,
-        address _vrgdac,
+        address _vrgda,
         address _creatorsAddress,
         IRevolutionBuilder.PointsEmitterCreatorParams calldata _creatorParams
     ) external initializer {
         if (msg.sender != address(manager)) revert NOT_MANAGER();
         if (_initialOwner == address(0)) revert ADDRESS_ZERO();
         if (_revolutionPoints == address(0)) revert ADDRESS_ZERO();
-        if (_vrgdac == address(0)) revert ADDRESS_ZERO();
+        if (_vrgda == address(0)) revert ADDRESS_ZERO();
         if (_creatorsAddress == address(0)) revert ADDRESS_ZERO();
         if (_weth == address(0)) revert ADDRESS_ZERO();
 
@@ -106,8 +108,8 @@ contract RevolutionPointsEmitter is
         __Ownable_init(_initialOwner);
 
         creatorsAddress = _creatorsAddress;
-        vrgdac = VRGDAC(_vrgdac);
-        token = RevolutionPoints(_revolutionPoints);
+        vrgda = IVRGDAC(_vrgda);
+        token = IRevolutionPoints(_revolutionPoints);
         creatorRateBps = _creatorParams.creatorRateBps;
         entropyRateBps = _creatorParams.entropyRateBps;
         WETH = _weth;
@@ -271,7 +273,7 @@ contract RevolutionPointsEmitter is
         // Note: By using toDaysWadUnsafe(block.timestamp - startTime) we are establishing that 1 "unit of time" is 1 day.
         // solhint-disable-next-line not-rely-on-time
         return
-            vrgdac.xToY({
+            vrgda.xToY({
                 timeSinceStart: toDaysWadUnsafe(block.timestamp - startTime),
                 sold: int(token.totalSupply()),
                 amount: int(amount)
@@ -288,7 +290,7 @@ contract RevolutionPointsEmitter is
         // Note: By using toDaysWadUnsafe(block.timestamp - startTime) we are establishing that 1 "unit of time" is 1 day.
         // solhint-disable-next-line not-rely-on-time
         return
-            vrgdac.yToX({
+            vrgda.yToX({
                 timeSinceStart: toDaysWadUnsafe(block.timestamp - startTime),
                 sold: int(token.totalSupply()),
                 amount: int(etherAmount)
@@ -305,7 +307,7 @@ contract RevolutionPointsEmitter is
         // Note: By using toDaysWadUnsafe(block.timestamp - startTime) we are establishing that 1 "unit of time" is 1 day.
         // solhint-disable-next-line not-rely-on-time
         return
-            vrgdac.yToX({
+            vrgda.yToX({
                 timeSinceStart: toDaysWadUnsafe(block.timestamp - startTime),
                 sold: int(token.totalSupply()),
                 amount: int(((paymentAmount - computeTotalReward(paymentAmount)) * (10_000 - creatorRateBps)) / 10_000)

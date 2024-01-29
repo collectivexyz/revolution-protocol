@@ -340,7 +340,9 @@ contract AuctionHouse is
 
         auction.settled = true;
 
-        uint256 creatorTokensEmitted = 0;
+        uint256 pointsPaidToCreators = 0;
+        uint256 ethPaidToCreators = 0;
+
         // Check if contract balance is greater than reserve price
         if (_auction.amount < reservePrice) {
             // If contract balance is less than reserve price, refund to the last bidder
@@ -374,8 +376,6 @@ contract AuctionHouse is
                 //Transfer auction amount to the DAO
                 _safeTransferETHWithFallback(owner(), auctioneerPayment);
 
-                uint256 ethPaidToCreators = 0;
-
                 //Transfer creator's share to the creator, for each creator, and build arrays for revolutionPointsEmitter.buyToken
                 if (creatorsShare > 0) {
                     //Get the creators of the Verb
@@ -407,7 +407,7 @@ contract AuctionHouse is
 
                 //Buy token from RevolutionPointsEmitter for all the creators
                 if (creatorsShare > ethPaidToCreators) {
-                    creatorTokensEmitted = revolutionPointsEmitter.buyToken{ value: creatorsShare - ethPaidToCreators }(
+                    pointsPaidToCreators = revolutionPointsEmitter.buyToken{ value: creatorsShare - ethPaidToCreators }(
                         vrgdaReceivers,
                         vrgdaSplits,
                         IRevolutionPointsEmitter.ProtocolRewardAddresses({
@@ -420,7 +420,13 @@ contract AuctionHouse is
             }
         }
 
-        emit AuctionSettled(_auction.tokenId, _auction.bidder, _auction.amount, creatorTokensEmitted);
+        emit AuctionSettled(
+            _auction.tokenId,
+            _auction.bidder,
+            _auction.amount,
+            pointsPaidToCreators,
+            ethPaidToCreators
+        );
     }
 
     /// @notice Transfer ETH/WETH from the contract

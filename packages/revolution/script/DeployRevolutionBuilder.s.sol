@@ -19,6 +19,7 @@ import { RevolutionVotingPower } from "../src/RevolutionVotingPower.sol";
 import { RevolutionPointsEmitter } from "../src/RevolutionPointsEmitter.sol";
 import { IDAOExecutor } from "../src/governance/RevolutionDAOInterfaces.sol";
 import { ERC1967Proxy } from "../src/libs/proxy/ERC1967Proxy.sol";
+import { VRGDAC } from "../src/libs/VRGDAC.sol";
 
 contract DeployContracts is Script {
     using Strings for uint256;
@@ -38,6 +39,7 @@ contract DeployContracts is Script {
         address revolutionPointsEmitterImpl;
         address revolutionVotingPowerImpl;
         address builderImpl;
+        address vrgdaImpl;
     }
 
     // Define the struct for deployed contracts
@@ -71,6 +73,7 @@ contract DeployContracts is Script {
     function deployRevolutionBuilderContracts(address owner) private {
         deployedContracts.builderImpl0 = address(
             new RevolutionBuilder(
+                address(0),
                 address(0),
                 address(0),
                 address(0),
@@ -114,6 +117,7 @@ contract DeployContracts is Script {
         deployedContracts.revolutionVotingPowerImpl = address(
             new RevolutionVotingPower(address(deployedContracts.builderProxy))
         );
+        deployedContracts.vrgdaImpl = address(new VRGDAC(address(deployedContracts.builderProxy)));
 
         deployedContracts.builderImpl = address(
             new RevolutionBuilder(
@@ -126,7 +130,8 @@ contract DeployContracts is Script {
                 deployedContracts.revolutionPointsImpl,
                 deployedContracts.revolutionPointsEmitterImpl,
                 deployedContracts.maxHeapImpl,
-                deployedContracts.revolutionVotingPowerImpl
+                deployedContracts.revolutionVotingPowerImpl,
+                deployedContracts.vrgdaImpl
             )
         );
     }

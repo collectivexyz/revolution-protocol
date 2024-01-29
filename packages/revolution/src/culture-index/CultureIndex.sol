@@ -38,12 +38,12 @@ contract CultureIndex is
     IRevolutionBuilder private immutable manager;
 
     // Constant for max number of creators
-    uint256 public constant MAX_NUM_CREATORS = 42;
+    uint256 public constant MAX_NUM_CREATORS = 21;
 
     // Constant for art piece metadata
     uint256 public constant MAX_NAME_LENGTH = 100;
     uint256 public constant MAX_DESCRIPTION_LENGTH = 2100;
-    uint256 public constant MAX_IMAGE_LENGTH = 21_000;
+    uint256 public constant MAX_IMAGE_LENGTH = 64_000;
     uint256 public constant MAX_ANIMATION_URL_LENGTH = 100;
     uint256 public constant MAX_TEXT_LENGTH = 67_112;
 
@@ -569,8 +569,6 @@ contract CultureIndex is
         if (msg.sender != dropperAdmin) revert NOT_DROPPER_ADMIN();
 
         uint256 pieceId = topVotedPieceId();
-
-        uint256 creationBlock = pieces[pieceId].creationBlock;
 
         uint256 pastQuorumVotes = quorumVotesForPiece(pieceId);
         if (totalVoteWeights[pieceId] < pastQuorumVotes) revert DOES_NOT_MEET_QUORUM();

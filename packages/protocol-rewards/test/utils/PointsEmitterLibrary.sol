@@ -1313,7 +1313,7 @@ interface IRevolutionPointsEmitter {
      * @param initialOwner The initial owner of the points emitter
      * @param weth The address of the WETH contract.
      * @param revolutionPoints The ERC-20 token contract address
-     * @param vrgdac The VRGDA contract address
+     * @param vrgda The VRGDA contract address
      * @param creatorsAddress The address of the creators
      * @param creatorParams The creator and entropy rate parameters
      */
@@ -1321,7 +1321,7 @@ interface IRevolutionPointsEmitter {
         address initialOwner,
         address weth,
         address revolutionPoints,
-        address vrgdac,
+        address vrgda,
         address creatorsAddress,
         IRevolutionBuilder.PointsEmitterCreatorParams calldata creatorParams
     ) external;
@@ -1341,7 +1341,7 @@ contract RevolutionPointsEmitter is
     RevolutionPoints public token;
 
     // The VRGDA contract
-    VRGDAC public vrgdac;
+    VRGDAC public vrgda;
 
     // solhint-disable-next-line not-rely-on-time
     uint256 public startTime;
@@ -1395,21 +1395,21 @@ contract RevolutionPointsEmitter is
      * @param _initialOwner The initial owner of the points emitter
      * @param _weth The address of the WETH contract
      * @param _revolutionPoints The ERC-20 token contract address
-     * @param _vrgdac The VRGDA contract address
+     * @param _vrgda The VRGDA contract address
      * @param _creatorsAddress The address to pay the creator reward to
      */
     function initialize(
         address _initialOwner,
         address _weth,
         address _revolutionPoints,
-        address _vrgdac,
+        address _vrgda,
         address _creatorsAddress,
         IRevolutionBuilder.PointsEmitterCreatorParams calldata _creatorParams
     ) external initializer {
         if (msg.sender != address(manager)) revert NOT_MANAGER();
         if (_initialOwner == address(0)) revert ADDRESS_ZERO();
         if (_revolutionPoints == address(0)) revert ADDRESS_ZERO();
-        if (_vrgdac == address(0)) revert ADDRESS_ZERO();
+        if (_vrgda == address(0)) revert ADDRESS_ZERO();
         if (_creatorsAddress == address(0)) revert ADDRESS_ZERO();
         if (_weth == address(0)) revert ADDRESS_ZERO();
 
@@ -1423,7 +1423,7 @@ contract RevolutionPointsEmitter is
         __Ownable_init(_initialOwner);
 
         creatorsAddress = _creatorsAddress;
-        vrgdac = VRGDAC(_vrgdac);
+        vrgda = VRGDAC(_vrgda);
         token = RevolutionPoints(_revolutionPoints);
         creatorRateBps = _creatorParams.creatorRateBps;
         entropyRateBps = _creatorParams.entropyRateBps;
@@ -1593,7 +1593,7 @@ contract RevolutionPointsEmitter is
         // Note: By using toDaysWadUnsafe(block.timestamp - startTime) we are establishing that 1 "unit of time" is 1 day.
         // solhint-disable-next-line not-rely-on-time
         return
-            vrgdac.xToY({
+            vrgda.xToY({
                 timeSinceStart: toDaysWadUnsafe(block.timestamp - startTime),
                 sold: emittedTokenWad,
                 amount: int(amount)
@@ -1610,7 +1610,7 @@ contract RevolutionPointsEmitter is
         // Note: By using toDaysWadUnsafe(block.timestamp - startTime) we are establishing that 1 "unit of time" is 1 day.
         // solhint-disable-next-line not-rely-on-time
         return
-            vrgdac.yToX({
+            vrgda.yToX({
                 timeSinceStart: toDaysWadUnsafe(block.timestamp - startTime),
                 sold: emittedTokenWad,
                 amount: int(etherAmount)
@@ -1627,7 +1627,7 @@ contract RevolutionPointsEmitter is
         // Note: By using toDaysWadUnsafe(block.timestamp - startTime) we are establishing that 1 "unit of time" is 1 day.
         // solhint-disable-next-line not-rely-on-time
         return
-            vrgdac.yToX({
+            vrgda.yToX({
                 timeSinceStart: toDaysWadUnsafe(block.timestamp - startTime),
                 sold: emittedTokenWad,
                 amount: int(((paymentAmount - computeTotalReward(paymentAmount)) * (10_000 - creatorRateBps)) / 10_000)
