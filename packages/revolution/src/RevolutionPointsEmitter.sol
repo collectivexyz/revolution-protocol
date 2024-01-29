@@ -13,12 +13,14 @@ import { Strings } from "@openzeppelin/contracts/utils/Strings.sol";
 import { IRevolutionPoints } from "./interfaces/IRevolutionPoints.sol";
 import { IRevolutionPointsEmitter } from "./interfaces/IRevolutionPointsEmitter.sol";
 import { VersionedContract } from "./version/VersionedContract.sol";
+import { UUPS } from "./libs/proxy/UUPS.sol";
 
 import { IRevolutionBuilder } from "./interfaces/IRevolutionBuilder.sol";
 
 contract RevolutionPointsEmitter is
-    VersionedContract,
     IRevolutionPointsEmitter,
+    VersionedContract,
+    UUPS,
     ReentrancyGuardUpgradeable,
     PointsEmitterRewards,
     Ownable2StepUpgradeable,
@@ -377,5 +379,17 @@ contract RevolutionPointsEmitter is
             // Ensure successful transfer
             if (!wethSuccess) revert WETH_TRANSFER_FAILED();
         }
+    }
+
+    ///                                                          ///
+    ///                 POINTS EMITTER UPGRADE                   ///
+    ///                                                          ///
+
+    /// @notice Ensures the caller is authorized to upgrade the contract and that the new implementation is valid
+    /// @dev This function is called in `upgradeTo` & `upgradeToAndCall`
+    /// @param _newImpl The new implementation address
+    function _authorizeUpgrade(address _newImpl) internal view override onlyOwner {
+        // Ensure the new implementation is a registered upgrade
+        if (!manager.isRegisteredUpgrade(_getImplementation(), _newImpl)) revert INVALID_UPGRADE(_newImpl);
     }
 }
