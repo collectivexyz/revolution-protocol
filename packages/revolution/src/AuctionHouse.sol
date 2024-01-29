@@ -394,6 +394,7 @@ contract AuctionHouse is
                     //If the amount to be spent on governance for creators is less than the minimum purchase amount for points
                     if ((creatorsShare - (directPayment / 10_000)) <= revolutionPointsEmitter.minPurchaseAmount()) {
                         //Set the amount to the full creators share, so creators are paid fully in ETH
+                        //10_000 assumes 100% in BPS of the creators share is paid to the creators
                         directPayment = creatorsShare * 10_000;
                     }
 
@@ -402,6 +403,7 @@ contract AuctionHouse is
                         vrgdaSplits[i] = creators[i].bps;
 
                         //Calculate paymentAmount for specific creator based on BPS splits - same as multiplying by creatorDirectPayment
+                        //Do division at the end of operations to avoid rounding errors, don't divide before multiplying
                         uint256 paymentAmount = (directPayment * creators[i].bps) / (10_000 * 10_000);
                         ethPaidToCreators += paymentAmount;
 
