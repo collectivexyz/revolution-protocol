@@ -12,7 +12,7 @@ contract AuctionHouseOutOfGasTest is AuctionHouseTest {
     function setUp() public override {
         super.setUp();
 
-        // create 1m art pieces, reasonable upper bound for a single culture index
+        // create 100k art pieces, reasonable upper bound for a single culture index
         _createManyPieces(100_000);
     }
 
