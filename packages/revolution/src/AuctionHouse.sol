@@ -368,10 +368,7 @@ contract AuctionHouse is
                 //Total amount of ether going to creator
                 uint256 creatorsShare = _auction.amount - auctioneerPayment;
 
-                //Get the creators of the Verb
-                ICultureIndex.CreatorBps[] memory creators = revolutionToken.getArtPieceById(_auction.tokenId).creators;
-
-                uint256 numCreators = creators.length;
+                uint256 numCreators = revolutionToken.getArtPieceById(_auction.tokenId).creators.length;
                 address deployer = revolutionToken.getArtPieceById(_auction.tokenId).sponsor;
 
                 //Build arrays for revolutionPointsEmitter.buyToken
@@ -383,6 +380,11 @@ contract AuctionHouse is
 
                 //Transfer creator's share to the creator, for each creator, and build arrays for revolutionPointsEmitter.buyToken
                 if (creatorsShare > 0) {
+                    //Get the creators of the Verb
+                    ICultureIndex.CreatorBps[] memory creators = revolutionToken
+                        .getArtPieceById(_auction.tokenId)
+                        .creators;
+
                     //Calculate the amount to be paid to the creators
                     uint256 directPayment = creatorsShare * entropyRateBps;
 
