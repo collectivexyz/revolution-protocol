@@ -9,6 +9,13 @@ import { MockWETH } from "../mock/MockWETH.sol";
 import { toDaysWadUnsafe } from "../../src/libs/SignedWadMath.sol";
 
 contract AuctionHouseOutOfGasTest is AuctionHouseTest {
+    function setUp() public override {
+        super.setUp();
+
+        // create 1m art pieces, reasonable upper bound for a single culture index
+        _createManyPieces(100_000);
+    }
+
     function _createManyPieces(uint256 n) internal {
         for (uint256 i = 0; i < n; i++) {
             createDefaultArtPiece();
@@ -114,9 +121,6 @@ contract AuctionHouseOutOfGasTest is AuctionHouseTest {
     //attempt to trigger an auction paused error with differing gas amounts
     function test_OutOfGas_DOS(uint gasUsed) public {
         gasUsed = bound(gasUsed, 0, 31_000_000);
-
-        // create 1m art pieces, reasonable upper bound for a single culture index
-        _createManyPieces(100_000);
 
         vm.startPrank(cultureIndex.owner());
         cultureIndex._setQuorumVotesBPS(0);

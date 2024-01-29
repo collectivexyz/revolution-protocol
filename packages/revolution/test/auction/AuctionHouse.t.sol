@@ -22,7 +22,7 @@ import { ERC721CheckpointableUpgradeable } from "../../src/base/ERC721Checkpoint
 import { RevolutionBuilderTest } from "../RevolutionBuilder.t.sol";
 
 contract AuctionHouseTest is RevolutionBuilderTest {
-    function setUp() public override {
+    function setUp() public virtual override {
         super.setUp();
         super.setMockParams();
 
