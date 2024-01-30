@@ -239,19 +239,21 @@ contract RevolutionVotingPower is
 
     /**
      * @notice Calculates the voting power given the balances and vote weights.
-     * @param pointsBalance The ERC20 RevolutionPoints balance of the voter.
-     * @param tokenBalance The ERC721 token balance of the voter.
-     * @param erc20PointsVoteWeight The ERC20 RevolutionPoints vote weight.
-     * @param erc721TokenVoteWeight The ERC721 token vote weight.
+     * @param pointsVotes The ERC20 RevolutionPoints balance and vote weight of the voter.
+     * @param tokenVotes The ERC721 token balance and vote weight of the voter.
      * @return The calculated voting power
      */
     function calculateVotesWithWeights(
-        uint256 pointsBalance,
-        uint256 tokenBalance,
-        uint256 erc20PointsVoteWeight,
-        uint256 erc721TokenVoteWeight
+        BalanceAndWeight calldata pointsVotes,
+        BalanceAndWeight calldata tokenVotes
     ) external view override returns (uint256) {
-        return _calculateVoteWeight(pointsBalance, erc20PointsVoteWeight, tokenBalance, erc721TokenVoteWeight);
+        return
+            _calculateVoteWeight(
+                pointsVotes.balance,
+                pointsVotes.voteWeight,
+                tokenVotes.balance,
+                tokenVotes.voteWeight
+            );
     }
 
     /**

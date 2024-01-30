@@ -115,11 +115,14 @@ interface IRevolutionVotingPower is IRevolutionVotingPowerEvents {
     ///                    CALCULATE VOTES                       ///
     ///                                                          ///
 
+    struct BalanceAndWeight {
+        uint256 balance;
+        uint256 voteWeight;
+    }
+
     function calculateVotesWithWeights(
-        uint256 pointsBalance,
-        uint256 tokenBalance,
-        uint256 erc20PointsVoteWeight,
-        uint256 erc721TokenVoteWeight
+        BalanceAndWeight calldata points,
+        BalanceAndWeight calldata token
     ) external view returns (uint256);
 
     function calculateVotes(uint256 pointsBalance, uint256 tokenBalance) external view returns (uint256);
