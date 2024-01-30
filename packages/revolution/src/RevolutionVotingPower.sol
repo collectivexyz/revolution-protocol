@@ -189,6 +189,24 @@ contract RevolutionVotingPower is
         return token.totalSupply();
     }
 
+    /**
+     * @notice Returns the total supply of points at the given block
+     * @param _blockNumber The block number at which to calculate the supply.
+     * @return The total supply of points at the given block.
+     */
+    function getPastPointsSupply(uint256 _blockNumber) public view override returns (uint256) {
+        return points.getPastTotalSupply(_blockNumber);
+    }
+
+    /**
+     * @notice Returns the total supply of tokens at the given block
+     * @param _blockNumber The block number at which to calculate the supply
+     * @return The total supply of tokens at the given block
+     */
+    function getPastTokenSupply(uint256 _blockNumber) public view override returns (uint256) {
+        return token.getPastTotalSupply(_blockNumber);
+    }
+
     ///                                                          ///
     ///                  CALCULATE VOTES FUNCTIONS               ///
     ///                                                          ///

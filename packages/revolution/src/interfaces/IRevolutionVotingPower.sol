@@ -42,18 +42,25 @@ interface IRevolutionVotingPower is IRevolutionVotingPowerEvents {
         uint256 tokenVoteWeight
     ) external;
 
+    ///                                                          ///
+    ///                   POINTS AND TOKENS                      ///
+    ///                                                          ///
+
     function points() external returns (IRevolutionPoints);
 
     function token() external returns (IRevolutionToken);
 
-    /// @notice useful in the CultureIndex to subtract weight of the AuctionHouse from quorum
-    function _getTokenMinter__TokenVotes() external view returns (uint256);
-    function _getTokenMinter__PastTokenVotes(uint256 blockNumber) external view returns (uint256);
-    function _getTokenMinter__TokenVotes__WithWeight(uint256 erc721TokenVoteWeight) external view returns (uint256);
-    function _getTokenMinter__PastTokenVotes__WithWeight(
-        uint256 blockNumber,
-        uint256 erc721TokenVoteWeight
-    ) external view returns (uint256);
+    function getTokenSupply() external view returns (uint256);
+
+    function getPastTokenSupply(uint256 blockNumber) external view returns (uint256);
+
+    function getPointsSupply() external view returns (uint256);
+
+    function getPastPointsSupply(uint256 blockNumber) external view returns (uint256);
+
+    ///                                                          ///
+    ///                         VOTES                            ///
+    ///                                                          ///
 
     function getVotes(address account) external view returns (uint256);
 
@@ -63,22 +70,22 @@ interface IRevolutionVotingPower is IRevolutionVotingPowerEvents {
         uint256 erc721TokenVoteWeight
     ) external view returns (uint256);
 
+    function getTotalVotesSupply() external view returns (uint256);
+
+    function getTotalVotesSupplyWithWeights(
+        uint256 erc20PointsVoteWeight,
+        uint256 erc721TokenVoteWeight
+    ) external view returns (uint256);
+
+    ///                                                          ///
+    ///                       PAST VOTES                         ///
+    ///                                                          ///
+
     function getPastVotes(address account, uint256 blockNumber) external view returns (uint256);
 
     function getPastVotesWithWeights(
         address account,
         uint256 blockNumber,
-        uint256 erc20PointsVoteWeight,
-        uint256 erc721TokenVoteWeight
-    ) external view returns (uint256);
-
-    function getPointsSupply() external view returns (uint256);
-
-    function getTokenSupply() external view returns (uint256);
-
-    function getTotalVotesSupply() external view returns (uint256);
-
-    function getTotalVotesSupplyWithWeights(
         uint256 erc20PointsVoteWeight,
         uint256 erc721TokenVoteWeight
     ) external view returns (uint256);
@@ -90,6 +97,23 @@ interface IRevolutionVotingPower is IRevolutionVotingPowerEvents {
         uint256 erc20PointsVoteWeight,
         uint256 erc721TokenVoteWeight
     ) external view returns (uint256);
+
+    ///                                                          ///
+    ///                 TOKEN MINTER UTILS                       ///
+    ///                                                          ///
+
+    /// @notice useful in the CultureIndex to subtract weight of the AuctionHouse from quorum
+    function _getTokenMinter__TokenVotes() external view returns (uint256);
+    function _getTokenMinter__PastTokenVotes(uint256 blockNumber) external view returns (uint256);
+    function _getTokenMinter__TokenVotes__WithWeight(uint256 erc721TokenVoteWeight) external view returns (uint256);
+    function _getTokenMinter__PastTokenVotes__WithWeight(
+        uint256 blockNumber,
+        uint256 erc721TokenVoteWeight
+    ) external view returns (uint256);
+
+    ///                                                          ///
+    ///                    CALCULATE VOTES                       ///
+    ///                                                          ///
 
     function calculateVotesWithWeights(
         uint256 pointsBalance,
