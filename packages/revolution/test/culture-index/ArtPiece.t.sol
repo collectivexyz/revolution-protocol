@@ -381,7 +381,7 @@ contract CultureIndexArtPieceTest is CultureIndexTestSuite {
         CultureIndex.ArtPiece memory newPiece2 = cultureIndex.getPieceById(createDefaultArtPiece());
         vm.roll(vm.getBlockNumber() + 1);
 
-        uint256 expectedSupply3 = pointsSupply * 3 + cultureIndex.revolutionTokenVoteWeight();
+        uint256 expectedSupply3 = pointsSupply * 3 + cultureIndex.tokenVoteWeight();
         uint256 expectedQuorumVotes3 = (quorumVotesBPS * (expectedSupply3)) / 10_000;
 
         assertEq(

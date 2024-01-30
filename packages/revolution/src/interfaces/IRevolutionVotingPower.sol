@@ -30,16 +30,16 @@ interface IRevolutionVotingPower is IRevolutionVotingPowerEvents {
      * @notice Initializes the RevolutionVotingPower contract
      * @param initialOwner The initial owner of the contract
      * @param revolutionPoints The address of the ERC20 token used for voting
-     * @param revolutionPointsVoteWeight The vote weight of the ERC20 token
+     * @param pointsVoteWeight The vote weight of the ERC20 token
      * @param revolutionToken The address of the ERC721 token used for voting
-     * @param revolutionTokenVoteWeight The vote weight of the ERC721 token
+     * @param tokenVoteWeight The vote weight of the ERC721 token
      */
     function initialize(
         address initialOwner,
         address revolutionPoints,
-        uint256 revolutionPointsVoteWeight,
+        uint256 pointsVoteWeight,
         address revolutionToken,
-        uint256 revolutionTokenVoteWeight
+        uint256 tokenVoteWeight
     ) external;
 
     function points() external returns (IRevolutionPoints);

@@ -72,16 +72,16 @@ contract RevolutionVotingPower is
      * @notice Initializes the RevolutionVotingPower contract
      * @param _initialOwner The initial owner of the contract
      * @param _revolutionPoints The address of the ERC20 token used for voting
-     * @param _revolutionPointsVoteWeight The vote weight of the ERC20 token
+     * @param _pointsVoteWeight The vote weight of the ERC20 token
      * @param _revolutionToken The address of the ERC721 token used for voting
-     * @param _revolutionTokenVoteWeight The vote weight of the ERC721 token
+     * @param _tokenVoteWeight The vote weight of the ERC721 token
      */
     function initialize(
         address _initialOwner,
         address _revolutionPoints,
-        uint256 _revolutionPointsVoteWeight,
+        uint256 _pointsVoteWeight,
         address _revolutionToken,
-        uint256 _revolutionTokenVoteWeight
+        uint256 _tokenVoteWeight
     ) public initializer {
         if (msg.sender != address(manager)) revert SENDER_NOT_MANAGER();
         if (_initialOwner == address(0)) revert INVALID_ADDRESS_ZERO();
@@ -93,8 +93,8 @@ contract RevolutionVotingPower is
         token = IRevolutionToken(_revolutionToken);
 
         // Initialize the vote weights
-        pointsVoteWeight = _revolutionPointsVoteWeight;
-        tokenVoteWeight = _revolutionTokenVoteWeight;
+        pointsVoteWeight = _pointsVoteWeight;
+        tokenVoteWeight = _tokenVoteWeight;
 
         __Ownable_init(_initialOwner);
         __ReentrancyGuard_init();
@@ -102,8 +102,8 @@ contract RevolutionVotingPower is
         emit ERC721VotingTokenUpdated(address(token));
         emit ERC20VotingTokenUpdated(address(points));
 
-        emit ERC721VotingPowerUpdated(tokenVoteWeight, _revolutionTokenVoteWeight);
-        emit ERC20VotingPowerUpdated(pointsVoteWeight, _revolutionPointsVoteWeight);
+        emit ERC721VotingPowerUpdated(tokenVoteWeight, _tokenVoteWeight);
+        emit ERC20VotingPowerUpdated(pointsVoteWeight, _pointsVoteWeight);
     }
 
     ///                                                          ///

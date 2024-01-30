@@ -27,6 +27,12 @@ contract CultureIndexStorageV1 {
     /// @notice The basis point number of votes in support of a art piece required in order for a quorum to be reached and for an art piece to be dropped.
     uint256 public quorumVotesBPS;
 
+    // The weight of the 721 voting token
+    uint256 public tokenVoteWeight;
+
+    // The weight of the 20 voting token
+    uint256 public pointsVoteWeight;
+
     /// @notice The name of the culture index
     string public name;
 

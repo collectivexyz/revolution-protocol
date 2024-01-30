@@ -168,25 +168,27 @@ interface IRevolutionBuilder is IUUPS {
     /// @notice The CultureIndex parameters
     /// @param name The name of the culture index
     /// @param description A description for the culture index, can include rules for uploads etc.
-    /// @param revolutionTokenVoteWeight The voting weight of the individual Revolution ERC721 tokens. Normally a large multiple to match up with daily emission of ERC20 points to match up with daily emission of ERC20 points (which normally have 18 decimals)
+    /// @param tokenVoteWeight The voting weight of the individual Revolution ERC721 tokens. Normally a large multiple to match up with daily emission of ERC20 points to match up with daily emission of ERC20 points (which normally have 18 decimals)
+    /// @param pointsVoteWeight The voting weight of the individual Revolution ERC20 points tokens.
     /// @param quorumVotesBPS The initial quorum votes threshold in basis points
     /// @param minVotingPowerToVote The minimum vote weight that a voter must have to be able to vote.
     /// @param minVotingPowerToCreate The minimum vote weight that a voter must have to be able to create an art piece.
     struct CultureIndexParams {
         string name;
         string description;
-        uint256 revolutionTokenVoteWeight;
+        uint256 tokenVoteWeight;
+        uint256 pointsVoteWeight;
         uint256 quorumVotesBPS;
         uint256 minVotingPowerToVote;
         uint256 minVotingPowerToCreate;
     }
 
     /// @notice The RevolutionVotingPower parameters
-    /// @param revolutionTokenVoteWeight The voting weight of the individual Revolution ERC721 tokens. Normally a large multiple to match up with daily emission of ERC20 points to match up with daily emission of ERC20 points (which normally have 18 decimals)
-    /// @param revolutionPointsVoteWeight The voting weight of the individual Revolution ERC20 points tokens. (usually 1 because of 18 decimals on the ERC20 contract)
+    /// @param tokenVoteWeight The voting weight of the individual Revolution ERC721 tokens. Normally a large multiple to match up with daily emission of ERC20 points to match up with daily emission of ERC20 points (which normally have 18 decimals)
+    /// @param pointsVoteWeight The voting weight of the individual Revolution ERC20 points tokens. (usually 1 because of 18 decimals on the ERC20 contract)
     struct RevolutionVotingPowerParams {
-        uint256 revolutionTokenVoteWeight;
-        uint256 revolutionPointsVoteWeight;
+        uint256 tokenVoteWeight;
+        uint256 pointsVoteWeight;
     }
 
     ///                                                          ///

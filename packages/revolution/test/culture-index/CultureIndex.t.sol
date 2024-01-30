@@ -27,7 +27,7 @@ contract CultureIndexTestSuite is RevolutionBuilderTest {
 
         super.setPointsParams("Revolution Governance", "GOV");
 
-        super.setCultureIndexParams("Vrbs", "Our community Vrbs. Must be 32x32.", 10, 200, 0, 0);
+        super.setCultureIndexParams("Vrbs", "Our community Vrbs. Must be 32x32.", 10, 1, 200, 0, 0);
 
         super.setRevolutionTokenParams("Vrbs", "VRBS", "QmQzDwaZ7yQxHHs7sQQenJVB89riTSacSGcJRv9jtHPuz5", "Vrb");
 

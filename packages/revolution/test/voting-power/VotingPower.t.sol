@@ -32,9 +32,9 @@ contract VotingPowerTest is RevolutionBuilderTest {
         IRevolutionVotingPower(revolutionVotingPower).initialize({
             initialOwner: address(executor),
             revolutionPoints: address(revolutionPoints),
-            revolutionPointsVoteWeight: revolutionVotingPowerParams.revolutionPointsVoteWeight,
+            pointsVoteWeight: revolutionVotingPowerParams.pointsVoteWeight,
             revolutionToken: revolutionToken,
-            revolutionTokenVoteWeight: revolutionVotingPowerParams.revolutionTokenVoteWeight
+            tokenVoteWeight: revolutionVotingPowerParams.tokenVoteWeight
         });
     }
 
@@ -82,9 +82,9 @@ contract VotingPowerTest is RevolutionBuilderTest {
         IRevolutionVotingPower(revolutionVotingPower).initialize({
             initialOwner: address(executor),
             revolutionPoints: address(revolutionPoints),
-            revolutionPointsVoteWeight: pointsVoteWeight,
+            pointsVoteWeight: pointsVoteWeight,
             revolutionToken: address(revolutionToken),
-            revolutionTokenVoteWeight: tokenVoteWeight
+            tokenVoteWeight: tokenVoteWeight
         });
 
         uint256 actualVotingPower = IRevolutionVotingPower(revolutionVotingPower).getVotes(voter);
@@ -137,9 +137,9 @@ contract VotingPowerTest is RevolutionBuilderTest {
         IRevolutionVotingPower(revolutionVotingPower).initialize({
             initialOwner: address(executor),
             revolutionPoints: address(revolutionPoints),
-            revolutionPointsVoteWeight: 0,
+            pointsVoteWeight: 0,
             revolutionToken: address(revolutionToken),
-            revolutionTokenVoteWeight: 0
+            tokenVoteWeight: 0
         });
 
         uint256 actualVotingPower = IRevolutionVotingPower(revolutionVotingPower).getVotesWithWeights(
