@@ -185,7 +185,7 @@ contract RevolutionVotingPower is
 
     /**
      * ░░░░░░░░░░░░░░░░░░░░░░░░░░░░░
-     *  SUPPLY FUNCTIONS
+     *  SUPPLY
      * ░░░░░░░░░░░░░░░░░░░░░░░░░░░░░
      */
 
@@ -233,7 +233,7 @@ contract RevolutionVotingPower is
      * @param tokenBalance The ERC721 token balance of the voter.
      * @return The calculated voting power
      */
-    function calculateVotes(uint256 pointsBalance, uint256 tokenBalance) external pure returns (uint256) {
+    function calculateVotes(uint256 pointsBalance, uint256 tokenBalance) external view override returns (uint256) {
         return _calculateVoteWeight(pointsBalance, pointsVoteWeight, tokenBalance, tokenVoteWeight);
     }
 
@@ -250,13 +250,13 @@ contract RevolutionVotingPower is
         uint256 tokenBalance,
         uint256 erc20PointsVoteWeight,
         uint256 erc721TokenVoteWeight
-    ) external pure returns (uint256) {
+    ) external view override returns (uint256) {
         return _calculateVoteWeight(pointsBalance, erc20PointsVoteWeight, tokenBalance, erc721TokenVoteWeight);
     }
 
     /**
      * ░░░░░░░░░░░░░░░░░░░░░░░░░░░░░
-     *  VOTES FUNCTIONS
+     *  VOTES
      * ░░░░░░░░░░░░░░░░░░░░░░░░░░░░░
      */
 
@@ -376,7 +376,7 @@ contract RevolutionVotingPower is
 
     /**
      * ░░░░░░░░░░░░░░░░░░░░░░░░░░░░░
-     *   TOKEN MINTER FUNCTIONS
+     *   TOKEN MINTER
      * ░░░░░░░░░░░░░░░░░░░░░░░░░░░░░
      */
 
