@@ -72,6 +72,10 @@ interface IRevolutionVotingPower is IRevolutionVotingPowerEvents {
         uint256 erc721TokenVoteWeight
     ) external view returns (uint256);
 
+    function getPointsSupply() external view returns (uint256);
+
+    function getTokenSupply() external view returns (uint256);
+
     function getTotalVotesSupply() external view returns (uint256);
 
     function getTotalVotesSupplyWithWeights(

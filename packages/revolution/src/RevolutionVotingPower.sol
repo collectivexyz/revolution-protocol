@@ -172,6 +172,24 @@ contract RevolutionVotingPower is
     }
 
     ///                                                          ///
+    ///                   SUPPLY FUNCTIONS                       ///
+    ///                                                          ///
+
+    /**
+     * @notice Returns the total supply of points at the current block.
+     */
+    function getPointsSupply() public view override returns (uint256) {
+        return points.totalSupply();
+    }
+
+    /**
+     * @notice Returns the total supply of points at the current block.
+     */
+    function getTokenSupply() public view override returns (uint256) {
+        return token.totalSupply();
+    }
+
+    ///                                                          ///
     ///                      FUNCTIONS                           ///
     ///                                                          ///
 

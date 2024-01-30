@@ -151,4 +151,15 @@ contract VotingPowerTest is RevolutionBuilderTest {
         // Assert: The actual voting power should match the expected voting power
         assertEq(actualVotingPower, expectedVotingPower);
     }
+
+    function testTotalSupplyMatches() public {
+        uint256 totalPointsSupply = revolutionVotingPower.getPointsSupply();
+        uint256 totalTokenSupply = revolutionVotingPower.getTokenSupply();
+
+        uint256 actualPointsSupply = revolutionPoints.totalSupply();
+        uint256 actualTokenSupply = revolutionToken.totalSupply();
+
+        assertEq(totalTokenSupply, actualTokenSupply, "Total token supply does not match");
+        assertEq(totalPointsSupply, actualPointsSupply, "Total points supply does not match");
+    }
 }
