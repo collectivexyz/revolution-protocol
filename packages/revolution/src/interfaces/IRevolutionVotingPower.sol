@@ -90,4 +90,13 @@ interface IRevolutionVotingPower is IRevolutionVotingPowerEvents {
         uint256 erc20PointsVoteWeight,
         uint256 erc721TokenVoteWeight
     ) external view returns (uint256);
+
+    function calculateVotesWithWeights(
+        uint256 pointsBalance,
+        uint256 tokenBalance,
+        uint256 erc20PointsVoteWeight,
+        uint256 erc721TokenVoteWeight
+    ) external pure returns (uint256);
+
+    function calculateVotes(uint256 pointsBalance, uint256 tokenBalance) external pure returns (uint256);
 }

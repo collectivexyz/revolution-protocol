@@ -190,7 +190,38 @@ contract RevolutionVotingPower is
     }
 
     ///                                                          ///
-    ///                      FUNCTIONS                           ///
+    ///                  CALCULATE VOTES FUNCTIONS               ///
+    ///                                                          ///
+
+    /**
+     * @notice Calculates the voting power given the balances of points and tokens.
+     * @param pointsBalance The ERC20 RevolutionPoints balance of the voter.
+     * @param tokenBalance The ERC721 token balance of the voter.
+     * @return The calculated voting power
+     */
+    function calculateVotes(uint256 pointsBalance, uint256 tokenBalance) external pure returns (uint256) {
+        return _calculateVoteWeight(pointsBalance, pointsVoteWeight, tokenBalance, tokenVoteWeight);
+    }
+
+    /**
+     * @notice Calculates the voting power given the balances and vote weights.
+     * @param pointsBalance The ERC20 RevolutionPoints balance of the voter.
+     * @param tokenBalance The ERC721 token balance of the voter.
+     * @param erc20PointsVoteWeight The ERC20 RevolutionPoints vote weight.
+     * @param erc721TokenVoteWeight The ERC721 token vote weight.
+     * @return The calculated voting power
+     */
+    function calculateVotesWithWeights(
+        uint256 pointsBalance,
+        uint256 tokenBalance,
+        uint256 erc20PointsVoteWeight,
+        uint256 erc721TokenVoteWeight
+    ) external pure returns (uint256) {
+        return _calculateVoteWeight(pointsBalance, erc20PointsVoteWeight, tokenBalance, erc721TokenVoteWeight);
+    }
+
+    ///                                                          ///
+    ///                      VOTES FUNCTIONS                     ///
     ///                                                          ///
 
     /**
@@ -237,6 +268,10 @@ contract RevolutionVotingPower is
     ) external view override returns (uint256) {
         return _calculateVoteWeight(points.totalSupply(), _pointsVoteWeight, token.totalSupply(), _tokenVoteWeight);
     }
+
+    ///                                                          ///
+    ///                   PAST VOTES FUNCTIONS                   ///
+    ///                                                          ///
 
     /**
      * @notice Returns the voting power of a voter at the given blockNumber.
@@ -300,6 +335,10 @@ contract RevolutionVotingPower is
                 _tokenVoteWeight
             );
     }
+
+    ///                                                          ///
+    ///                TOKEN MINTER FUNCTIONS                    ///
+    ///                                                          ///
 
     /**
      * @notice gets the balance of the minter of the ERC721 token
