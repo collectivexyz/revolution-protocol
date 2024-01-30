@@ -570,8 +570,7 @@ contract CultureIndex is
 
         uint256 pieceId = topVotedPieceId();
 
-        uint256 pastQuorumVotes = quorumVotesForPiece(pieceId);
-        if (totalVoteWeights[pieceId] < pastQuorumVotes) revert DOES_NOT_MEET_QUORUM();
+        if (totalVoteWeights[pieceId] < quorumVotesForPiece(pieceId)) revert DOES_NOT_MEET_QUORUM();
 
         //set the piece as dropped
         pieces[pieceId].isDropped = true;
