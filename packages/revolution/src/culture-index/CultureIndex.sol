@@ -305,7 +305,8 @@ contract CultureIndex is
         if (pieces[pieceId].isDropped) revert ALREADY_DROPPED();
         if (votes[pieceId][voter].voterAddress != address(0)) revert ALREADY_VOTED();
 
-        // Use the previous block number to calculate the vote weight to prevent flash attacks
+        // Use the previous block number to calculate the vote weight
+        // to prevent buying votes and selling in the same block
         uint256 weight = votingPower.getPastVotesWithWeights(
             voter,
             pieces[pieceId].creationBlock - 1,
@@ -319,7 +320,6 @@ contract CultureIndex is
 
         uint256 totalWeight = totalVoteWeights[pieceId];
 
-        // TODO add security consideration here based on block created to prevent flash attacks on drops?
         maxHeap.updateValue(pieceId, totalWeight);
         emit VoteCast(pieceId, voter, weight, totalWeight);
     }
@@ -545,7 +545,8 @@ contract CultureIndex is
         /// @notice Tokens are assumed to be transferable and thus we need snapshotting for them
         uint256 totalVotesSupply = votingPower.calculateVotesWithWeights(
             IRevolutionVotingPower.BalanceAndWeight({
-                /// @notice Use recent block number to prevent flash attacks
+                /// @notice Use recent block number to prevent auction
+                /// from minting points and throwing off the quorum in the same block
                 balance: votingPower.getPastTokenSupply(block.number - 1),
                 voteWeight: pointsVoteWeight
             }),
