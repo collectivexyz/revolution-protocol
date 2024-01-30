@@ -22,16 +22,20 @@ contract RevolutionVotingPower is
     Ownable2StepUpgradeable,
     ReentrancyGuardUpgradeable
 {
-    ///                                                          ///
-    ///                         IMMUTABLES                       ///
-    ///                                                          ///
+    /**
+     * ░░░░░░░░░░░░░░░░░░░░░░░░░░░░░
+     *  IMMUTABLES
+     * ░░░░░░░░░░░░░░░░░░░░░░░░░░░░░
+     */
 
     /// @notice The contract upgrade manager
     IRevolutionBuilder private immutable manager;
 
-    ///                                                          ///
-    ///                           STORAGE                        ///
-    ///                                                          ///
+    /**
+     * ░░░░░░░░░░░░░░░░░░░░░░░░░░░░░
+     *  STORAGE
+     * ░░░░░░░░░░░░░░░░░░░░░░░░░░░░░
+     */
 
     // The ERC20 token used for voting
     IRevolutionPoints public points;
@@ -45,18 +49,22 @@ contract RevolutionVotingPower is
     // The vote weight of the ERC721 token
     uint256 public tokenVoteWeight;
 
-    ///                                                          ///
-    ///                         CONSTRUCTOR                      ///
-    ///                                                          ///
+    /**
+     * ░░░░░░░░░░░░░░░░░░░░░░░░░░░░░
+     *  CONSTRUCTOR
+     * ░░░░░░░░░░░░░░░░░░░░░░░░░░░░░
+     */
 
     /// @param _manager The contract upgrade manager address
     constructor(address _manager) payable initializer {
         manager = IRevolutionBuilder(_manager);
     }
 
-    ///                                                          ///
-    ///                           ERRORS                         ///
-    ///                                                          ///
+    /**
+     * ░░░░░░░░░░░░░░░░░░░░░░░░░░░░░
+     *  ERRORS
+     * ░░░░░░░░░░░░░░░░░░░░░░░░░░░░░
+     */
 
     /// @notice Reverts for address zero
     error INVALID_ADDRESS_ZERO();
@@ -64,9 +72,11 @@ contract RevolutionVotingPower is
     /// @notice Reverts for invalid manager initialization
     error SENDER_NOT_MANAGER();
 
-    ///                                                          ///
-    ///                         INITIALIZER                      ///
-    ///                                                          ///
+    /**
+     * ░░░░░░░░░░░░░░░░░░░░░░░░░░░░░
+     *  INITIALIZER
+     * ░░░░░░░░░░░░░░░░░░░░░░░░░░░░░
+     */
 
     /**
      * @notice Initializes the RevolutionVotingPower contract
@@ -106,9 +116,11 @@ contract RevolutionVotingPower is
         emit ERC20VotingPowerUpdated(pointsVoteWeight, _pointsVoteWeight);
     }
 
-    ///                                                          ///
-    ///                 INTERNAL FUNCTIONS                       ///
-    ///                                                          ///
+    /**
+     * ░░░░░░░░░░░░░░░░░░░░░░░░░░░░░
+     *  INTERNAL
+     * ░░░░░░░░░░░░░░░░░░░░░░░░░░░░░
+     */
 
     /**
      * @notice Calculates the vote weight of a voter.
@@ -171,9 +183,11 @@ contract RevolutionVotingPower is
             );
     }
 
-    ///                                                          ///
-    ///                   SUPPLY FUNCTIONS                       ///
-    ///                                                          ///
+    /**
+     * ░░░░░░░░░░░░░░░░░░░░░░░░░░░░░
+     *  SUPPLY FUNCTIONS
+     * ░░░░░░░░░░░░░░░░░░░░░░░░░░░░░
+     */
 
     /**
      * @notice Returns the total supply of points at the current block.
@@ -207,9 +221,11 @@ contract RevolutionVotingPower is
         return token.getPastTotalSupply(_blockNumber);
     }
 
-    ///                                                          ///
-    ///                  CALCULATE VOTES FUNCTIONS               ///
-    ///                                                          ///
+    /**
+     * ░░░░░░░░░░░░░░░░░░░░░░░░░░░░░
+     *  CALCULATE VOTES
+     * ░░░░░░░░░░░░░░░░░░░░░░░░░░░░░
+     */
 
     /**
      * @notice Calculates the voting power given the balances of points and tokens.
@@ -238,9 +254,11 @@ contract RevolutionVotingPower is
         return _calculateVoteWeight(pointsBalance, erc20PointsVoteWeight, tokenBalance, erc721TokenVoteWeight);
     }
 
-    ///                                                          ///
-    ///                      VOTES FUNCTIONS                     ///
-    ///                                                          ///
+    /**
+     * ░░░░░░░░░░░░░░░░░░░░░░░░░░░░░
+     *  VOTES FUNCTIONS
+     * ░░░░░░░░░░░░░░░░░░░░░░░░░░░░░
+     */
 
     /**
      * @notice Returns the voting power of a voter at the current block with the default vote weights.
@@ -287,9 +305,11 @@ contract RevolutionVotingPower is
         return _calculateVoteWeight(points.totalSupply(), _pointsVoteWeight, token.totalSupply(), _tokenVoteWeight);
     }
 
-    ///                                                          ///
-    ///                   PAST VOTES FUNCTIONS                   ///
-    ///                                                          ///
+    /**
+     * ░░░░░░░░░░░░░░░░░░░░░░░░░░░░░
+     *  PAST VOTES
+     * ░░░░░░░░░░░░░░░░░░░░░░░░░░░░░
+     */
 
     /**
      * @notice Returns the voting power of a voter at the given blockNumber.
@@ -354,9 +374,11 @@ contract RevolutionVotingPower is
             );
     }
 
-    ///                                                          ///
-    ///                TOKEN MINTER FUNCTIONS                    ///
-    ///                                                          ///
+    /**
+     * ░░░░░░░░░░░░░░░░░░░░░░░░░░░░░
+     *   TOKEN MINTER FUNCTIONS
+     * ░░░░░░░░░░░░░░░░░░░░░░░░░░░░░
+     */
 
     /**
      * @notice gets the balance of the minter of the ERC721 token
@@ -397,9 +419,11 @@ contract RevolutionVotingPower is
         return token.getPastVotes(token.minter(), _blockNumber) * _tokenVoteWeight;
     }
 
-    ///                                                          ///
-    ///             REVOLUTION VOTING POWER UPGRADE              ///
-    ///                                                          ///
+    /**
+     * ░░░░░░░░░░░░░░░░░░░░░░░░░░░░
+     *   REVOLUTION VOTING POWER UPGRADE
+     * ░░░░░░░░░░░░░░░░░░░░░░░░░░░░
+     */
 
     /// @notice Ensures the caller is authorized to upgrade the contract and that the new implementation is valid
     /// @dev This function is called in `upgradeTo` & `upgradeToAndCall`
