@@ -149,6 +149,22 @@ interface ICultureIndex is ICultureIndexEvents {
         uint256 animationUrl;
     }
 
+    // Enum representing file type requirements for art pieces.
+    enum RequiredMediaPrefix {
+        NONE,
+        SVG,
+        IPFS
+    }
+
+    // Enum representing media type requirement for art pieces.
+    enum RequiredMediaType {
+        NONE,
+        IMAGE,
+        ANIMATION,
+        AUDIO,
+        TEXT
+    }
+
     // Enum representing different media types for art pieces.
     enum MediaType {
         IMAGE,

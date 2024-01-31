@@ -103,13 +103,16 @@ contract CultureIndex is
         minVotingPowerToCreate = _cultureIndexParams.minVotingPowerToCreate;
         dropperAdmin = _dropperAdmin;
 
-        PIECE_MAXIMUMS = PieceMaximums({
+        PIECE_DATA_MAXIMUMS = PieceMaximums({
             name: _cultureIndexParams.pieceMaximums.name,
             description: _cultureIndexParams.pieceMaximums.description,
             image: _cultureIndexParams.pieceMaximums.image,
             animationUrl: _cultureIndexParams.pieceMaximums.animationUrl,
             text: _cultureIndexParams.pieceMaximums.text
         });
+
+        requiredMediaType = _cultureIndexParams.requiredMediaType;
+        requiredMediaPrefix = _cultureIndexParams.requiredMediaPrefix;
 
         emit QuorumVotesBPSSet(quorumVotesBPS, _cultureIndexParams.quorumVotesBPS);
 
@@ -164,16 +167,13 @@ contract CultureIndex is
         }
 
         // ensure all fields of metadata are within reasonable bounds
-        if (bytes(metadata.description).length > PIECE_MAXIMUMS.description) revert INVALID_DESCRIPTION();
+        if (bytes(metadata.description).length > PIECE_DATA_MAXIMUMS.description) revert INVALID_DESCRIPTION();
 
-        // permit reasonable SVG images
-        if (bytes(metadata.image).length > PIECE_MAXIMUMS.image) revert INVALID_IMAGE();
+        if (bytes(metadata.image).length > PIECE_DATA_MAXIMUMS.image) revert INVALID_IMAGE();
 
-        // assume animation is always an ipfs hash
-        if (bytes(metadata.animationUrl).length > PIECE_MAXIMUMS.animationUrl) revert INVALID_ANIMATION_URL();
+        if (bytes(metadata.animationUrl).length > PIECE_DATA_MAXIMUMS.animationUrl) revert INVALID_ANIMATION_URL();
 
-        // permit reasonable text
-        if (bytes(metadata.text).length > PIECE_MAXIMUMS.text) revert INVALID_TEXT();
+        if (bytes(metadata.text).length > PIECE_DATA_MAXIMUMS.text) revert INVALID_TEXT();
 
         string memory ipfsPrefix = "ipfs://";
         string memory svgPrefix = "data:image/svg+xml;base64,";
@@ -192,7 +192,7 @@ contract CultureIndex is
         ) revert INVALID_IMAGE();
 
         //ensure name is set
-        if (bytes(metadata.name).length == 0 || bytes(metadata.name).length > PIECE_MAXIMUMS.name)
+        if (bytes(metadata.name).length == 0 || bytes(metadata.name).length > PIECE_DATA_MAXIMUMS.name)
             revert INVALID_NAME();
     }
 
@@ -612,23 +612,23 @@ contract CultureIndex is
     }
 
     function maxNameLength() external view returns (uint256) {
-        return PIECE_MAXIMUMS.name;
+        return PIECE_DATA_MAXIMUMS.name;
     }
 
     function maxDescriptionLength() external view returns (uint256) {
-        return PIECE_MAXIMUMS.description;
+        return PIECE_DATA_MAXIMUMS.description;
     }
 
     function maxImageLength() external view returns (uint256) {
-        return PIECE_MAXIMUMS.image;
+        return PIECE_DATA_MAXIMUMS.image;
     }
 
     function maxTextLength() external view returns (uint256) {
-        return PIECE_MAXIMUMS.text;
+        return PIECE_DATA_MAXIMUMS.text;
     }
 
     function maxAnimationUrlLength() external view returns (uint256) {
-        return PIECE_MAXIMUMS.animationUrl;
+        return PIECE_DATA_MAXIMUMS.animationUrl;
     }
 
     ///                                                          ///

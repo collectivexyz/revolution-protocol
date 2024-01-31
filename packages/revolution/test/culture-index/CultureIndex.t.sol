@@ -36,7 +36,9 @@ contract CultureIndexTestSuite is RevolutionBuilderTest {
             200,
             0,
             0,
-            ICultureIndex.PieceMaximums({ name: 100, description: 2100, image: 64_000, text: 256, animationUrl: 100 })
+            ICultureIndex.PieceMaximums({ name: 100, description: 2100, image: 64_000, text: 256, animationUrl: 100 }),
+            ICultureIndex.RequiredMediaType.NONE,
+            ICultureIndex.RequiredMediaPrefix.NONE
         );
 
         super.setRevolutionTokenParams("Vrbs", "VRBS", "QmQzDwaZ7yQxHHs7sQQenJVB89riTSacSGcJRv9jtHPuz5", "Vrb");
