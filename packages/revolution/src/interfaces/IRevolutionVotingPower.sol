@@ -43,20 +43,32 @@ interface IRevolutionVotingPower is IRevolutionVotingPowerEvents {
     ) external;
 
     ///                                                          ///
-    ///                   POINTS AND TOKENS                      ///
+    ///                          POINTS                          ///
     ///                                                          ///
 
     function points() external returns (IRevolutionPoints);
 
-    function token() external returns (IRevolutionToken);
+    function getPointsVotes(address account) external view returns (uint256);
 
-    function getTokenSupply() external view returns (uint256);
-
-    function getPastTokenSupply(uint256 blockNumber) external view returns (uint256);
+    function getPastPointsVotes(address account, uint256 blockNumber) external view returns (uint256);
 
     function getPointsSupply() external view returns (uint256);
 
     function getPastPointsSupply(uint256 blockNumber) external view returns (uint256);
+
+    ///                                                          ///
+    ///                          TOKENS                          ///
+    ///                                                          ///
+
+    function token() external returns (IRevolutionToken);
+
+    function getTokenVotes(address account) external view returns (uint256);
+
+    function getPastTokenVotes(address account, uint256 blockNumber) external view returns (uint256);
+
+    function getTokenSupply() external view returns (uint256);
+
+    function getPastTokenSupply(uint256 blockNumber) external view returns (uint256);
 
     ///                                                          ///
     ///                         VOTES                            ///

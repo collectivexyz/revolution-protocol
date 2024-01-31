@@ -185,6 +185,48 @@ contract RevolutionVotingPower is
 
     /**
      * ░░░░░░░░░░░░░░░░░░░░░░░░░░░░░
+     *  BALANCES
+     * ░░░░░░░░░░░░░░░░░░░░░░░░░░░░░
+     */
+
+    /**
+     * @notice Returns the ERC20 RevolutionPoints votes balance of a voter.
+     * @param account The address of the voter.
+     * @return The ERC20 RevolutionPoints votes balance of the voter.
+     */
+    function getPointsVotes(address account) external view returns (uint256) {
+        return points.getVotes(account);
+    }
+
+    /**
+     * @notice Returns past ERC20 RevolutionPoints votes balance of a voter at a given block.
+     * @param account The address of the voter.
+     * @return The past ERC20 RevolutionPoints votes balance of the voter at the given block.
+     */
+    function getPastPointsVotes(address account, uint256 blockNumber) external view returns (uint256) {
+        return points.getPastVotes(account, blockNumber);
+    }
+
+    /**
+     * @notice Returns the ERC721 token votes balance of a voter.
+     * @param account The address of the voter.
+     * @return The ERC721 token votes balance of the voter.
+     */
+    function getTokenVotes(address account) external view returns (uint256) {
+        return token.getVotes(account);
+    }
+
+    /**
+     * @notice Returns past ERC721 token votes balance of a voter at a given block.
+     * @param account The address of the voter.
+     * @return The past ERC721 token votes balance of the voter at the given block.
+     */
+    function getPastTokenVotes(address account, uint256 blockNumber) external view returns (uint256) {
+        return token.getPastVotes(account, blockNumber);
+    }
+
+    /**
+     * ░░░░░░░░░░░░░░░░░░░░░░░░░░░░░
      *  SUPPLY
      * ░░░░░░░░░░░░░░░░░░░░░░░░░░░░░
      */
