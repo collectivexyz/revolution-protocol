@@ -18,9 +18,8 @@ contract CultureIndexRequiredDataTest is RevolutionBuilderTest {
      * @dev Setup function for each test case
      */
     function setUp() public virtual override {
+        super.setUp();
         super.setMockParams();
-
-        super.setPointsParams("Revolution Governance", "GOV");
     }
 
     function createImage() public {
@@ -42,8 +41,8 @@ contract CultureIndexRequiredDataTest is RevolutionBuilderTest {
             "A masterpiece",
             ICultureIndex.MediaType.ANIMATION,
             "",
-            "ipfs://legends",
             "",
+            "ipfs://legends",
             address(0x1),
             10000
         );
@@ -55,15 +54,24 @@ contract CultureIndexRequiredDataTest is RevolutionBuilderTest {
             "A masterpiece",
             ICultureIndex.MediaType.TEXT,
             "",
+            "texto",
             "",
-            "ipfs://legends",
             address(0x1),
             10000
         );
     }
 
     function createAudio() public {
-        createArtPiece("Mona Lisa", "A masterpiece", ICultureIndex.MediaType.AUDIO, "", "", "", address(0x1), 10000);
+        createArtPiece(
+            "Mona Lisa",
+            "A masterpiece",
+            ICultureIndex.MediaType.AUDIO,
+            "",
+            "",
+            "ipfs://noun40",
+            address(0x1),
+            10000
+        );
     }
 
     function test__requiredMediaType_NONE() public {
@@ -254,9 +262,9 @@ contract CultureIndexRequiredDataTest is RevolutionBuilderTest {
             "Mona Lisa",
             "A masterpiece",
             ICultureIndex.MediaType.IMAGE,
+            "data:image/svg+xml;base64,noundata",
             "",
             "",
-            "ipfs://legends",
             address(0x1),
             10000
         );
