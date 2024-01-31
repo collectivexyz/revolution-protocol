@@ -77,7 +77,7 @@ contract CultureIndexRequiredTest is CultureIndexTestSuite {
             0,
             ICultureIndex.PieceMaximums({ name: 100, description: 2100, image: 64_000, text: 256, animationUrl: 100 }),
             ICultureIndex.MediaType.NONE,
-            ICultureIndex.RequiredMediaPrefix.NONE
+            ICultureIndex.RequiredMediaPrefix.MIXED
         );
 
         super.deployMock();
@@ -112,7 +112,7 @@ contract CultureIndexRequiredTest is CultureIndexTestSuite {
             0,
             ICultureIndex.PieceMaximums({ name: 100, description: 2100, image: 64_000, text: 256, animationUrl: 100 }),
             ICultureIndex.MediaType.IMAGE,
-            ICultureIndex.RequiredMediaPrefix.NONE
+            ICultureIndex.RequiredMediaPrefix.MIXED
         );
 
         super.deployMock();
@@ -146,7 +146,7 @@ contract CultureIndexRequiredTest is CultureIndexTestSuite {
             0,
             ICultureIndex.PieceMaximums({ name: 100, description: 2100, image: 64_000, text: 256, animationUrl: 100 }),
             ICultureIndex.MediaType.ANIMATION,
-            ICultureIndex.RequiredMediaPrefix.NONE
+            ICultureIndex.RequiredMediaPrefix.MIXED
         );
 
         super.deployMock();
@@ -180,7 +180,7 @@ contract CultureIndexRequiredTest is CultureIndexTestSuite {
             0,
             ICultureIndex.PieceMaximums({ name: 100, description: 2100, image: 64_000, text: 256, animationUrl: 100 }),
             ICultureIndex.MediaType.TEXT,
-            ICultureIndex.RequiredMediaPrefix.NONE
+            ICultureIndex.RequiredMediaPrefix.MIXED
         );
 
         super.deployMock();
@@ -214,7 +214,7 @@ contract CultureIndexRequiredTest is CultureIndexTestSuite {
             0,
             ICultureIndex.PieceMaximums({ name: 100, description: 2100, image: 64_000, text: 256, animationUrl: 100 }),
             ICultureIndex.MediaType.AUDIO,
-            ICultureIndex.RequiredMediaPrefix.NONE
+            ICultureIndex.RequiredMediaPrefix.MIXED
         );
 
         super.deployMock();
