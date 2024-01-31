@@ -53,4 +53,6 @@ contract CultureIndexStorageV1 {
 
     // The address that is allowed to drop art pieces
     address public dropperAdmin;
+
+    ICultureIndex.PieceMaximums public PIECE_MAXIMUMS;
 }

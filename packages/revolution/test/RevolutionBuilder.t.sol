@@ -227,7 +227,16 @@ contract RevolutionBuilderTest is Test {
     }
 
     function setMockCultureIndexParams() internal virtual {
-        setCultureIndexParams("Vrbs", "Our community Vrbs. Must be 32x32.", 100 * 1e18, 1, 1000, 0, 0);
+        setCultureIndexParams(
+            "Vrbs",
+            "Our community Vrbs. Must be 32x32.",
+            100 * 1e18,
+            1,
+            1000,
+            0,
+            0,
+            ICultureIndex.PieceMaximums({ name: 100, description: 2100, image: 64_000, text: 256, animationUrl: 100 })
+        );
     }
 
     function setCultureIndexParams(
@@ -237,7 +246,8 @@ contract RevolutionBuilderTest is Test {
         uint256 _pointsVoteWeight,
         uint256 _quorumVotesBPS,
         uint256 _minVotingPowerToVote,
-        uint256 _minVotingPowerToCreate
+        uint256 _minVotingPowerToCreate,
+        ICultureIndex.PieceMaximums memory _pieceMaximums
     ) internal virtual {
         cultureIndexParams = IRevolutionBuilder.CultureIndexParams({
             name: _name,
@@ -246,7 +256,8 @@ contract RevolutionBuilderTest is Test {
             pointsVoteWeight: _pointsVoteWeight,
             quorumVotesBPS: _quorumVotesBPS,
             minVotingPowerToVote: _minVotingPowerToVote,
-            minVotingPowerToCreate: _minVotingPowerToCreate
+            minVotingPowerToCreate: _minVotingPowerToCreate,
+            pieceMaximums: _pieceMaximums
         });
     }
 

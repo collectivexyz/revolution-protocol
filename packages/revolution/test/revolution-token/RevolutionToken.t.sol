@@ -5,6 +5,7 @@ import { Test } from "forge-std/Test.sol";
 import { RevolutionToken } from "../../src/RevolutionToken.sol";
 import { IRevolutionToken } from "../../src/interfaces/IRevolutionToken.sol";
 import { IDescriptorMinimal } from "../../src/interfaces/IDescriptorMinimal.sol";
+import { ICultureIndex } from "../../src/interfaces/ICultureIndex.sol";
 
 import { ICultureIndex } from "../../src/interfaces/ICultureIndex.sol";
 import { Strings } from "@openzeppelin/contracts/utils/Strings.sol";
@@ -30,7 +31,16 @@ contract RevolutionTokenTestSuite is RevolutionBuilderTest {
 
         super.setRevolutionTokenParams(tokenName, tokenSymbol, "https://example.com/token/", tokenNamePrefix);
 
-        super.setCultureIndexParams("Vrbs", "Our community Vrbs. Must be 32x32.", 10, 1, 200, 0, 0);
+        super.setCultureIndexParams(
+            "Vrbs",
+            "Our community Vrbs. Must be 32x32.",
+            10,
+            1,
+            200,
+            0,
+            0,
+            ICultureIndex.PieceMaximums({ name: 100, description: 2100, image: 64_000, text: 256, animationUrl: 100 })
+        );
 
         super.deployMock();
 

@@ -6,6 +6,7 @@ import { RevolutionPoints } from "../../src/RevolutionPoints.sol";
 import { RevolutionBuilderTest } from "../RevolutionBuilder.t.sol";
 import { IRevolutionBuilder } from "../../src/interfaces/IRevolutionBuilder.sol";
 import { Ownable2StepUpgradeable } from "@openzeppelin/contracts-upgradeable/access/Ownable2StepUpgradeable.sol";
+import { ICultureIndex } from "../../src/interfaces/ICultureIndex.sol";
 
 contract PointsTestSuite is RevolutionBuilderTest {
     function setUp() public override {
@@ -14,7 +15,16 @@ contract PointsTestSuite is RevolutionBuilderTest {
 
         super.setPointsParams("Revolution Governance", "GOV");
 
-        super.setCultureIndexParams("Vrbs", "Our community Vrbs. Must be 32x32.", 10, 1, 200, 0, 0);
+        super.setCultureIndexParams(
+            "Vrbs",
+            "Our community Vrbs. Must be 32x32.",
+            10,
+            1,
+            200,
+            0,
+            0,
+            ICultureIndex.PieceMaximums({ name: 100, description: 2100, image: 64_000, text: 256, animationUrl: 100 })
+        );
 
         super.deployMock();
     }

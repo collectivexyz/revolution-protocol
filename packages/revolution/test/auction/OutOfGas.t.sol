@@ -56,12 +56,12 @@ contract AuctionHouseOutOfGasTest is AuctionHouseTest {
 
         // create the initial art piece
         uint256 tokenId = createArtPieceMultiCreator(
-            createLongString(cultureIndex.MAX_NAME_LENGTH()),
-            createLongString(cultureIndex.MAX_DESCRIPTION_LENGTH()),
+            createLongString(cultureIndex.maxNameLength()),
+            createLongString(cultureIndex.maxDescriptionLength()),
             ICultureIndex.MediaType.ANIMATION,
-            string.concat("ipfs://", createLongString(cultureIndex.MAX_IMAGE_LENGTH() - 7)),
-            string.concat("ipfs://", createLongString(cultureIndex.MAX_TEXT_LENGTH() - 7)),
-            string.concat("ipfs://", createLongString(cultureIndex.MAX_ANIMATION_URL_LENGTH() - 7)),
+            string.concat("ipfs://", createLongString(cultureIndex.maxImageLength() - 7)),
+            string.concat("ipfs://", createLongString(cultureIndex.maxTextLength() - 7)),
+            string.concat("ipfs://", createLongString(cultureIndex.maxAnimationUrlLength() - 7)),
             creatorAddresses,
             creatorBps
         );
@@ -90,12 +90,12 @@ contract AuctionHouseOutOfGasTest is AuctionHouseTest {
 
         // create another art piece so that it's possible to create next auction
         uint256 tokenId2 = createArtPieceMultiCreator(
-            createLongString(cultureIndex.MAX_NAME_LENGTH()),
-            createLongString(cultureIndex.MAX_DESCRIPTION_LENGTH()),
+            createLongString(cultureIndex.maxNameLength()),
+            createLongString(cultureIndex.maxDescriptionLength()),
             ICultureIndex.MediaType.ANIMATION,
-            string.concat("ipfs://", createLongString(cultureIndex.MAX_IMAGE_LENGTH() - 7)),
-            string.concat("ipfs://", createLongString(cultureIndex.MAX_TEXT_LENGTH() - 7)),
-            string.concat("ipfs://", createLongString(cultureIndex.MAX_ANIMATION_URL_LENGTH() - 7)),
+            string.concat("ipfs://", createLongString(cultureIndex.maxImageLength() - 7)),
+            string.concat("ipfs://", createLongString(cultureIndex.maxTextLength() - 7)),
+            string.concat("ipfs://", createLongString(cultureIndex.maxAnimationUrlLength() - 7)),
             creatorAddresses,
             creatorBps
         );

@@ -37,22 +37,15 @@ contract CultureIndex is
     /// @notice The contract upgrade manager
     IRevolutionBuilder private immutable manager;
 
-    // Constant for max number of creators
-    uint256 public constant MAX_NUM_CREATORS = 21;
-
-    // Constant for art piece metadata
-    uint256 public constant MAX_NAME_LENGTH = 100;
-    uint256 public constant MAX_DESCRIPTION_LENGTH = 2100;
-    uint256 public constant MAX_IMAGE_LENGTH = 64_000;
-    uint256 public constant MAX_ANIMATION_URL_LENGTH = 100;
-    uint256 public constant MAX_TEXT_LENGTH = 67_112;
-
-    /// @notice The maximum settable quorum votes basis points
-    uint256 public constant MAX_QUORUM_VOTES_BPS = 6_000; // 6,000 basis points or 60%
-
     /// @notice The EIP-712 typehash for gasless votes
     bytes32 public constant VOTE_TYPEHASH =
         keccak256("Vote(address from,uint256[] pieceIds,uint256 nonce,uint256 deadline)");
+
+    // Constant for max number of creators
+    uint256 public constant MAX_NUM_CREATORS = 21;
+
+    /// @notice The maximum settable quorum votes basis points
+    uint256 public constant MAX_QUORUM_VOTES_BPS = 6_000; // 6,000 basis points or 60%
 
     ///                                                          ///
     ///                         CONSTRUCTOR                      ///
@@ -110,6 +103,14 @@ contract CultureIndex is
         minVotingPowerToCreate = _cultureIndexParams.minVotingPowerToCreate;
         dropperAdmin = _dropperAdmin;
 
+        PIECE_MAXIMUMS = PieceMaximums({
+            name: _cultureIndexParams.pieceMaximums.name,
+            description: _cultureIndexParams.pieceMaximums.description,
+            image: _cultureIndexParams.pieceMaximums.image,
+            animationUrl: _cultureIndexParams.pieceMaximums.animationUrl,
+            text: _cultureIndexParams.pieceMaximums.text
+        });
+
         emit QuorumVotesBPSSet(quorumVotesBPS, _cultureIndexParams.quorumVotesBPS);
 
         // Create maxHeap
@@ -151,7 +152,7 @@ contract CultureIndex is
      * - The media type must be one of the defined types in the MediaType enum.
      * - The corresponding media data must not be empty.
      */
-    function validateMediaType(ArtPieceMetadata calldata metadata) internal pure {
+    function validateMediaType(ArtPieceMetadata calldata metadata) internal view {
         if (uint8(metadata.mediaType) > 3) revert INVALID_MEDIA_TYPE();
 
         if (metadata.mediaType == MediaType.IMAGE) {
@@ -163,16 +164,16 @@ contract CultureIndex is
         }
 
         // ensure all fields of metadata are within reasonable bounds
-        if (bytes(metadata.description).length > MAX_DESCRIPTION_LENGTH) revert INVALID_DESCRIPTION();
+        if (bytes(metadata.description).length > PIECE_MAXIMUMS.description) revert INVALID_DESCRIPTION();
 
         // permit reasonable SVG images
-        if (bytes(metadata.image).length > MAX_IMAGE_LENGTH) revert INVALID_IMAGE();
+        if (bytes(metadata.image).length > PIECE_MAXIMUMS.image) revert INVALID_IMAGE();
 
         // assume animation is always an ipfs hash
-        if (bytes(metadata.animationUrl).length > MAX_ANIMATION_URL_LENGTH) revert INVALID_ANIMATION_URL();
+        if (bytes(metadata.animationUrl).length > PIECE_MAXIMUMS.animationUrl) revert INVALID_ANIMATION_URL();
 
         // permit reasonable text
-        if (bytes(metadata.text).length > MAX_TEXT_LENGTH) revert INVALID_TEXT();
+        if (bytes(metadata.text).length > PIECE_MAXIMUMS.text) revert INVALID_TEXT();
 
         string memory ipfsPrefix = "ipfs://";
         string memory svgPrefix = "data:image/svg+xml;base64,";
@@ -191,7 +192,8 @@ contract CultureIndex is
         ) revert INVALID_IMAGE();
 
         //ensure name is set
-        if (bytes(metadata.name).length == 0 || bytes(metadata.name).length > MAX_NAME_LENGTH) revert INVALID_NAME();
+        if (bytes(metadata.name).length == 0 || bytes(metadata.name).length > PIECE_MAXIMUMS.name)
+            revert INVALID_NAME();
     }
 
     /**
@@ -607,6 +609,26 @@ contract CultureIndex is
                 creators: pieces[pieceId].creators,
                 sponsor: pieces[pieceId].sponsor
             });
+    }
+
+    function maxNameLength() external view returns (uint256) {
+        return PIECE_MAXIMUMS.name;
+    }
+
+    function maxDescriptionLength() external view returns (uint256) {
+        return PIECE_MAXIMUMS.description;
+    }
+
+    function maxImageLength() external view returns (uint256) {
+        return PIECE_MAXIMUMS.image;
+    }
+
+    function maxTextLength() external view returns (uint256) {
+        return PIECE_MAXIMUMS.text;
+    }
+
+    function maxAnimationUrlLength() external view returns (uint256) {
+        return PIECE_MAXIMUMS.animationUrl;
     }
 
     ///                                                          ///
