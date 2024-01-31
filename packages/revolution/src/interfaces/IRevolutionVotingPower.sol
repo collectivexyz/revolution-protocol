@@ -50,6 +50,8 @@ interface IRevolutionVotingPower is IRevolutionVotingPowerEvents {
 
     function points() external returns (IRevolutionPoints);
 
+    function getPointsMinter() external view returns (address);
+
     function getPointsVotes(address account) external view returns (uint256);
 
     function getPastPointsVotes(address account, uint256 blockNumber) external view returns (uint256);
@@ -65,6 +67,8 @@ interface IRevolutionVotingPower is IRevolutionVotingPowerEvents {
      */
 
     function token() external returns (IRevolutionToken);
+
+    function getTokenMinter() external view returns (address);
 
     function getTokenVotes(address account) external view returns (uint256);
 
@@ -115,21 +119,6 @@ interface IRevolutionVotingPower is IRevolutionVotingPowerEvents {
     function getPastTotalVotesSupplyWithWeights(
         uint256 blockNumber,
         uint256 erc20PointsVoteWeight,
-        uint256 erc721TokenVoteWeight
-    ) external view returns (uint256);
-
-    /**
-     * ░░░░░░░░░░░░░░░░░░░░░░░░░░░░░
-     *   TOKEN MINTER
-     * ░░░░░░░░░░░░░░░░░░░░░░░░░░░░░
-     */
-
-    /// @notice useful in the CultureIndex to subtract weight of the AuctionHouse from quorum
-    function _getTokenMinter__TokenVotes() external view returns (uint256);
-    function _getTokenMinter__PastTokenVotes(uint256 blockNumber) external view returns (uint256);
-    function _getTokenMinter__TokenVotes__WithWeight(uint256 erc721TokenVoteWeight) external view returns (uint256);
-    function _getTokenMinter__PastTokenVotes__WithWeight(
-        uint256 blockNumber,
         uint256 erc721TokenVoteWeight
     ) external view returns (uint256);
 

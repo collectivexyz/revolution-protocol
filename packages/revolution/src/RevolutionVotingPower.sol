@@ -420,47 +420,22 @@ contract RevolutionVotingPower is
 
     /**
      * ░░░░░░░░░░░░░░░░░░░░░░░░░░░░░
-     *   TOKEN MINTER
+     *   MINTERS
      * ░░░░░░░░░░░░░░░░░░░░░░░░░░░░░
      */
 
     /**
-     * @notice gets the balance of the minter of the ERC721 token
-     * @dev useful to eg: subtract the AuctionHouse balance when calculating quorum
+     * @notice gets the minter address of the ERC20 token
      */
-    function _getTokenMinter__TokenVotes() external view override returns (uint256) {
-        return token.getVotes(token.minter()) * tokenVoteWeight;
+    function getPointsMinter() external view override returns (address) {
+        return points.minter();
     }
 
     /**
-     * @notice gets the balance of the minter of the ERC721 token
-     * @dev useful to eg: subtract the AuctionHouse balance when calculating quorum
-     * @param _blockNumber The block number at which to calculate the voting power.
+     * @notice gets the minter address of the ERC721 token
      */
-    function _getTokenMinter__PastTokenVotes(uint256 _blockNumber) external view override returns (uint256) {
-        return token.getPastVotes(token.minter(), _blockNumber) * tokenVoteWeight;
-    }
-
-    /**
-     * @notice gets the balance of the minter of the ERC721 token
-     * @param _tokenVoteWeight The ERC721 token vote weight.
-     */
-    function _getTokenMinter__TokenVotes__WithWeight(
-        uint256 _tokenVoteWeight
-    ) external view override returns (uint256) {
-        return token.getVotes(token.minter()) * _tokenVoteWeight;
-    }
-
-    /**
-     * @notice gets the balance of the minter of the ERC721 token
-     * @param _blockNumber The block number at which to calculate the voting power.
-     * @param _tokenVoteWeight The ERC721 token vote weight.
-     */
-    function _getTokenMinter__PastTokenVotes__WithWeight(
-        uint256 _blockNumber,
-        uint256 _tokenVoteWeight
-    ) external view override returns (uint256) {
-        return token.getPastVotes(token.minter(), _blockNumber) * _tokenVoteWeight;
+    function getTokenMinter() external view override returns (address) {
+        return token.minter();
     }
 
     /**

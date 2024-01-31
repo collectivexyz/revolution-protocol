@@ -553,11 +553,21 @@ contract CultureIndex is
             })
         );
 
+        /// @notice We want to subtract the balance of tokens held by the auction since no one can vote with those tokens
+        uint256 tokenMinterVotes = votingPower.calculateVotesWithWeights(
+            //ignore points for token minter
+            IRevolutionVotingPower.BalanceAndWeight({ balance: 0, voteWeight: 0 }),
+            IRevolutionVotingPower.BalanceAndWeight({
+                balance: votingPower.getPastTokenVotes(votingPower.getTokenMinter(), creationBlock),
+                voteWeight: tokenVoteWeight
+            })
+        );
+
         return
             (quorumVotesBPS *
                 (totalVotesSupply -
                     // Subtract the votes for the tokens held by the minter
-                    votingPower._getTokenMinter__PastTokenVotes__WithWeight(creationBlock, tokenVoteWeight))) / 10_000;
+                    tokenMinterVotes)) / 10_000;
     }
 
     /**
