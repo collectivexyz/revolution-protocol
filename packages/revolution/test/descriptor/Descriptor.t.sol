@@ -42,11 +42,15 @@ contract DescriptorTest is RevolutionBuilderTest {
             string(abi.encodePacked(errorMessage, " - Description mismatch"))
         );
         assertEq(imageUrl, expectedMetadata.image, string(abi.encodePacked(errorMessage, " - Image URL mismatch")));
-        assertEq(
-            animationUrl,
-            expectedMetadata.animationUrl,
-            string(abi.encodePacked(errorMessage, " - Animation URL mismatch"))
-        );
+        if (expectedMetadata.mediaType == ICultureIndex.MediaType.IMAGE) {
+            assertEq(animationUrl, "", string(abi.encodePacked(errorMessage, " - Animation URL mismatch")));
+        } else {
+            assertEq(
+                animationUrl,
+                expectedMetadata.animationUrl,
+                string(abi.encodePacked(errorMessage, " - Animation URL mismatch"))
+            );
+        }
     }
 
     // Helper function to parse JSON strings into components
