@@ -26,7 +26,7 @@ contract JsonInjectionAttackTest is DescriptorTest {
             0,
             0,
             ICultureIndex.PieceMaximums({ name: 100, description: 2100, image: 64_000, text: 256, animationUrl: 100 }),
-            ICultureIndex.RequiredMediaType.NONE,
+            ICultureIndex.MediaType.NONE,
             ICultureIndex.RequiredMediaPrefix.NONE
         );
 
@@ -39,15 +39,15 @@ contract JsonInjectionAttackTest is DescriptorTest {
         ICultureIndex.ArtPieceMetadata memory expectedMetadata = ICultureIndex.ArtPieceMetadata({
             name: "Mona Lisa",
             description: "A renowned painting by Leonardo da Vinci",
-            mediaType: ICultureIndex.MediaType.IMAGE,
-            image: "ipfs://realMonaLisa",
+            mediaType: ICultureIndex.MediaType.ANIMATION,
+            animationUrl: "ipfs://realMonaLisa",
             text: "",
-            animationUrl: '", "image": "ipfs://fakeMonaLisa' // malicious string injected
+            image: '", "animationUrl": "ipfs://fakeMonaLisa' // malicious string injected
         });
 
         string memory uri = descriptor.tokenURI(tokenId, expectedMetadata);
 
-        string memory errorMessage = "Token URI should reflect the escaped animation URL";
+        string memory errorMessage = "Token URI should reflect the escaped image URL";
 
         // The token URI should reflect both image and animation URLs
         string memory metadataJson = decodeMetadata(uri);
@@ -64,12 +64,16 @@ contract JsonInjectionAttackTest is DescriptorTest {
             string(abi.encodePacked(expectedMetadata.name, ". ", expectedMetadata.description)),
             string(abi.encodePacked(errorMessage, " - Description mismatch"))
         );
-        assertEq(imageUrl, expectedMetadata.image, string(abi.encodePacked(errorMessage, " - Image URL mismatch")));
         assertEq(
             animationUrl,
-            //escaped characters
-            '\\", \\"image\\": \\"ipfs://fakeMonaLisa',
+            expectedMetadata.animationUrl,
             string(abi.encodePacked(errorMessage, " - Animation URL mismatch"))
+        );
+        assertEq(
+            imageUrl,
+            //escaped characters
+            '\\", \\"animationUrl\\": \\"ipfs://fakeMonaLisa',
+            string(abi.encodePacked(errorMessage, " - Image URL was not escaped correctly"))
         );
     }
 

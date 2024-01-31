@@ -186,7 +186,7 @@ interface IRevolutionBuilder is IUUPS {
         uint256 minVotingPowerToVote;
         uint256 minVotingPowerToCreate;
         ICultureIndex.PieceMaximums pieceMaximums;
-        ICultureIndex.RequiredMediaType requiredMediaType;
+        ICultureIndex.MediaType requiredMediaType;
         ICultureIndex.RequiredMediaPrefix requiredMediaPrefix;
     }
 

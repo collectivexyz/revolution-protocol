@@ -37,7 +37,7 @@ contract CultureIndexTestSuite is RevolutionBuilderTest {
             0,
             0,
             ICultureIndex.PieceMaximums({ name: 100, description: 2100, image: 64_000, text: 256, animationUrl: 100 }),
-            ICultureIndex.RequiredMediaType.NONE,
+            ICultureIndex.MediaType.NONE,
             ICultureIndex.RequiredMediaPrefix.NONE
         );
 

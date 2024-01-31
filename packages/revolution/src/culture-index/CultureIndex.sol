@@ -156,7 +156,12 @@ contract CultureIndex is
      * - The corresponding media data must not be empty.
      */
     function validateMediaType(ArtPieceMetadata calldata metadata) internal view {
-        if (uint8(metadata.mediaType) > 3) revert INVALID_MEDIA_TYPE();
+        if (
+            //invalid media type
+            uint8(metadata.mediaType) > 3 ||
+            // or specific required media type is not adhered to
+            (requiredMediaType != MediaType.NONE && metadata.mediaType != requiredMediaType)
+        ) revert INVALID_MEDIA_TYPE();
 
         if (metadata.mediaType == MediaType.IMAGE) {
             if (bytes(metadata.image).length == 0) revert INVALID_IMAGE();

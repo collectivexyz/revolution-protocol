@@ -156,21 +156,14 @@ interface ICultureIndex is ICultureIndexEvents {
         IPFS
     }
 
-    // Enum representing media type requirement for art pieces.
-    enum RequiredMediaType {
-        NONE,
-        IMAGE,
-        ANIMATION,
-        AUDIO,
-        TEXT
-    }
-
     // Enum representing different media types for art pieces.
+    // uint8(metadata.mediaType) > 3 check is used in CultureIndex, make sure to add new values after TEXT
     enum MediaType {
         IMAGE,
         ANIMATION,
         AUDIO,
-        TEXT
+        TEXT,
+        NONE // never used, just for when using MediaType as a requirement for an index
     }
 
     // Struct defining metadata for an art piece.

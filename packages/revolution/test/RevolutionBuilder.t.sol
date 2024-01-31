@@ -236,7 +236,7 @@ contract RevolutionBuilderTest is Test {
             0,
             0,
             ICultureIndex.PieceMaximums({ name: 100, description: 2100, image: 64_000, text: 256, animationUrl: 100 }),
-            ICultureIndex.RequiredMediaType.NONE,
+            ICultureIndex.MediaType.NONE,
             ICultureIndex.RequiredMediaPrefix.NONE
         );
     }
@@ -250,7 +250,7 @@ contract RevolutionBuilderTest is Test {
         uint256 _minVotingPowerToVote,
         uint256 _minVotingPowerToCreate,
         ICultureIndex.PieceMaximums memory _pieceMaximums,
-        ICultureIndex.RequiredMediaType _requiredMediaType,
+        ICultureIndex.MediaType _requiredMediaType,
         ICultureIndex.RequiredMediaPrefix _requiredMediaPrefix
     ) internal virtual {
         cultureIndexParams = IRevolutionBuilder.CultureIndexParams({

@@ -58,7 +58,7 @@ contract CultureIndexStorageV1 {
     ICultureIndex.PieceMaximums public PIECE_DATA_MAXIMUMS;
 
     // The required media types for art pieces
-    ICultureIndex.RequiredMediaType public requiredMediaType;
+    ICultureIndex.MediaType public requiredMediaType;
 
     // The required file prefixes for art pieces
     ICultureIndex.RequiredMediaPrefix public requiredMediaPrefix;
