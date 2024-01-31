@@ -309,14 +309,7 @@ contract CultureIndex is
         if (pieces[pieceId].isDropped) revert ALREADY_DROPPED();
         if (votes[pieceId][voter].voterAddress != address(0)) revert ALREADY_VOTED();
 
-        // Use the previous block number to calculate the vote weight
-        // to prevent buying votes and selling in the same block
-        uint256 weight = votingPower.getPastVotesWithWeights(
-            voter,
-            pieces[pieceId].creationBlock - 1,
-            pointsVoteWeight,
-            tokenVoteWeight
-        );
+        uint256 weight = getAccountVotingPowerForPiece(pieceId, voter);
         if (weight <= minVotingPowerToVote) revert WEIGHT_TOO_LOW();
 
         votes[pieceId][voter] = Vote(voter, weight);
@@ -549,7 +542,7 @@ contract CultureIndex is
         /// @notice Tokens are assumed to be transferable and thus we need snapshotting for them
         uint256 totalVotesSupply = votingPower.calculateVotesWithWeights(
             IRevolutionVotingPower.BalanceAndWeight({
-                /// @notice Use recent block number to prevent auction
+                /// @notice Use previous block number to prevent auction
                 /// from minting points and throwing off the quorum in the same block
                 balance: votingPower.getPastTokenSupply(block.number - 1),
                 voteWeight: pointsVoteWeight
