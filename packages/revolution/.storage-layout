@@ -22,6 +22,7 @@
 | votes                  | mapping(uint256 => mapping(address => struct ICultureIndex.Vote)) | 12   | 0      | 32    | src/culture-index/CultureIndex.sol:CultureIndex |
 | totalVoteWeights       | mapping(uint256 => uint256)                                       | 13   | 0      | 32    | src/culture-index/CultureIndex.sol:CultureIndex |
 | dropperAdmin           | address                                                           | 14   | 0      | 20    | src/culture-index/CultureIndex.sol:CultureIndex |
+| PIECE_MAXIMUMS         | struct ICultureIndex.PieceMaximums                                | 15   | 0      | 160   | src/culture-index/CultureIndex.sol:CultureIndex |
 
 =======================
 ➡ RevolutionBuilder
