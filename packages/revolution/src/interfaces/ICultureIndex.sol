@@ -88,8 +88,11 @@ interface ICultureIndex is ICultureIndexEvents {
     /// @dev Reverts if the quorum votes basis points exceed the maximum allowed value.
     error INVALID_QUORUM_BPS();
 
-    /// @dev Reverts if the ERC721 voting token weight is invalid (i.e., non-positive).
+    /// @dev Reverts if the ERC721 voting token weight is invalid (i.e., 0).
     error INVALID_ERC721_VOTING_WEIGHT();
+
+    /// @dev Reverts if the ERC20 voting token weight is invalid (i.e., 0).
+    error INVALID_ERC20_VOTING_WEIGHT();
 
     /// @dev Reverts if the total vote weights do not meet the required quorum votes for a piece to be dropped.
     error DOES_NOT_MEET_QUORUM();

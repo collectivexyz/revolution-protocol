@@ -22,16 +22,20 @@ contract RevolutionVotingPower is
     Ownable2StepUpgradeable,
     ReentrancyGuardUpgradeable
 {
-    ///                                                          ///
-    ///                         IMMUTABLES                       ///
-    ///                                                          ///
+    /**
+     * ░░░░░░░░░░░░░░░░░░░░░░░░░░░░░
+     *  IMMUTABLES
+     * ░░░░░░░░░░░░░░░░░░░░░░░░░░░░░
+     */
 
     /// @notice The contract upgrade manager
     IRevolutionBuilder private immutable manager;
 
-    ///                                                          ///
-    ///                           STORAGE                        ///
-    ///                                                          ///
+    /**
+     * ░░░░░░░░░░░░░░░░░░░░░░░░░░░░░
+     *  STORAGE
+     * ░░░░░░░░░░░░░░░░░░░░░░░░░░░░░
+     */
 
     // The ERC20 token used for voting
     IRevolutionPoints public points;
@@ -45,18 +49,22 @@ contract RevolutionVotingPower is
     // The vote weight of the ERC721 token
     uint256 public tokenVoteWeight;
 
-    ///                                                          ///
-    ///                         CONSTRUCTOR                      ///
-    ///                                                          ///
+    /**
+     * ░░░░░░░░░░░░░░░░░░░░░░░░░░░░░
+     *  CONSTRUCTOR
+     * ░░░░░░░░░░░░░░░░░░░░░░░░░░░░░
+     */
 
     /// @param _manager The contract upgrade manager address
     constructor(address _manager) payable initializer {
         manager = IRevolutionBuilder(_manager);
     }
 
-    ///                                                          ///
-    ///                           ERRORS                         ///
-    ///                                                          ///
+    /**
+     * ░░░░░░░░░░░░░░░░░░░░░░░░░░░░░
+     *  ERRORS
+     * ░░░░░░░░░░░░░░░░░░░░░░░░░░░░░
+     */
 
     /// @notice Reverts for address zero
     error INVALID_ADDRESS_ZERO();
@@ -64,24 +72,26 @@ contract RevolutionVotingPower is
     /// @notice Reverts for invalid manager initialization
     error SENDER_NOT_MANAGER();
 
-    ///                                                          ///
-    ///                         INITIALIZER                      ///
-    ///                                                          ///
+    /**
+     * ░░░░░░░░░░░░░░░░░░░░░░░░░░░░░
+     *  INITIALIZER
+     * ░░░░░░░░░░░░░░░░░░░░░░░░░░░░░
+     */
 
     /**
      * @notice Initializes the RevolutionVotingPower contract
      * @param _initialOwner The initial owner of the contract
      * @param _revolutionPoints The address of the ERC20 token used for voting
-     * @param _revolutionPointsVoteWeight The vote weight of the ERC20 token
+     * @param _pointsVoteWeight The vote weight of the ERC20 token
      * @param _revolutionToken The address of the ERC721 token used for voting
-     * @param _revolutionTokenVoteWeight The vote weight of the ERC721 token
+     * @param _tokenVoteWeight The vote weight of the ERC721 token
      */
     function initialize(
         address _initialOwner,
         address _revolutionPoints,
-        uint256 _revolutionPointsVoteWeight,
+        uint256 _pointsVoteWeight,
         address _revolutionToken,
-        uint256 _revolutionTokenVoteWeight
+        uint256 _tokenVoteWeight
     ) public initializer {
         if (msg.sender != address(manager)) revert SENDER_NOT_MANAGER();
         if (_initialOwner == address(0)) revert INVALID_ADDRESS_ZERO();
@@ -93,8 +103,8 @@ contract RevolutionVotingPower is
         token = IRevolutionToken(_revolutionToken);
 
         // Initialize the vote weights
-        pointsVoteWeight = _revolutionPointsVoteWeight;
-        tokenVoteWeight = _revolutionTokenVoteWeight;
+        pointsVoteWeight = _pointsVoteWeight;
+        tokenVoteWeight = _tokenVoteWeight;
 
         __Ownable_init(_initialOwner);
         __ReentrancyGuard_init();
@@ -102,13 +112,15 @@ contract RevolutionVotingPower is
         emit ERC721VotingTokenUpdated(address(token));
         emit ERC20VotingTokenUpdated(address(points));
 
-        emit ERC721VotingPowerUpdated(tokenVoteWeight, _revolutionTokenVoteWeight);
-        emit ERC20VotingPowerUpdated(pointsVoteWeight, _revolutionPointsVoteWeight);
+        emit ERC721VotingPowerUpdated(tokenVoteWeight, _tokenVoteWeight);
+        emit ERC20VotingPowerUpdated(pointsVoteWeight, _pointsVoteWeight);
     }
 
-    ///                                                          ///
-    ///                 INTERNAL FUNCTIONS                       ///
-    ///                                                          ///
+    /**
+     * ░░░░░░░░░░░░░░░░░░░░░░░░░░░░░
+     *  INTERNAL
+     * ░░░░░░░░░░░░░░░░░░░░░░░░░░░░░
+     */
 
     /**
      * @notice Calculates the vote weight of a voter.
@@ -171,9 +183,126 @@ contract RevolutionVotingPower is
             );
     }
 
-    ///                                                          ///
-    ///                      FUNCTIONS                           ///
-    ///                                                          ///
+    /**
+     * ░░░░░░░░░░░░░░░░░░░░░░░░░░░░░
+     *  BALANCES
+     * ░░░░░░░░░░░░░░░░░░░░░░░░░░░░░
+     */
+
+    /**
+     * @notice Returns the ERC20 RevolutionPoints votes balance of a voter.
+     * @param account The address of the voter.
+     * @return The ERC20 RevolutionPoints votes balance of the voter.
+     */
+    function getPointsVotes(address account) external view returns (uint256) {
+        return points.getVotes(account);
+    }
+
+    /**
+     * @notice Returns past ERC20 RevolutionPoints votes balance of a voter at a given block.
+     * @param account The address of the voter.
+     * @return The past ERC20 RevolutionPoints votes balance of the voter at the given block.
+     */
+    function getPastPointsVotes(address account, uint256 blockNumber) external view returns (uint256) {
+        return points.getPastVotes(account, blockNumber);
+    }
+
+    /**
+     * @notice Returns the ERC721 token votes balance of a voter.
+     * @param account The address of the voter.
+     * @return The ERC721 token votes balance of the voter.
+     */
+    function getTokenVotes(address account) external view returns (uint256) {
+        return token.getVotes(account);
+    }
+
+    /**
+     * @notice Returns past ERC721 token votes balance of a voter at a given block.
+     * @param account The address of the voter.
+     * @return The past ERC721 token votes balance of the voter at the given block.
+     */
+    function getPastTokenVotes(address account, uint256 blockNumber) external view returns (uint256) {
+        return token.getPastVotes(account, blockNumber);
+    }
+
+    /**
+     * ░░░░░░░░░░░░░░░░░░░░░░░░░░░░░
+     *  SUPPLY
+     * ░░░░░░░░░░░░░░░░░░░░░░░░░░░░░
+     */
+
+    /**
+     * @notice Returns the total supply of points at the current block.
+     */
+    function getPointsSupply() public view override returns (uint256) {
+        return points.totalSupply();
+    }
+
+    /**
+     * @notice Returns the total supply of points at the current block.
+     */
+    function getTokenSupply() public view override returns (uint256) {
+        return token.totalSupply();
+    }
+
+    /**
+     * @notice Returns the total supply of points at the given block
+     * @param _blockNumber The block number at which to calculate the supply.
+     * @return The total supply of points at the given block.
+     */
+    function getPastPointsSupply(uint256 _blockNumber) public view override returns (uint256) {
+        return points.getPastTotalSupply(_blockNumber);
+    }
+
+    /**
+     * @notice Returns the total supply of tokens at the given block
+     * @param _blockNumber The block number at which to calculate the supply
+     * @return The total supply of tokens at the given block
+     */
+    function getPastTokenSupply(uint256 _blockNumber) public view override returns (uint256) {
+        return token.getPastTotalSupply(_blockNumber);
+    }
+
+    /**
+     * ░░░░░░░░░░░░░░░░░░░░░░░░░░░░░
+     *  CALCULATE VOTES
+     * ░░░░░░░░░░░░░░░░░░░░░░░░░░░░░
+     */
+
+    /**
+     * @notice Calculates the voting power given the balances of points and tokens.
+     * @param pointsBalance The ERC20 RevolutionPoints balance of the voter.
+     * @param tokenBalance The ERC721 token balance of the voter.
+     * @return The calculated voting power
+     */
+    function calculateVotes(uint256 pointsBalance, uint256 tokenBalance) external view override returns (uint256) {
+        return _calculateVoteWeight(pointsBalance, pointsVoteWeight, tokenBalance, tokenVoteWeight);
+    }
+
+    /**
+     * @notice Calculates the voting power given the balances and vote weights.
+     * @param pointsVotes The ERC20 RevolutionPoints balance and vote weight of the voter.
+     * @param tokenVotes The ERC721 token balance and vote weight of the voter.
+     * @return The calculated voting power
+     */
+    function calculateVotesWithWeights(
+        BalanceAndWeight calldata pointsVotes,
+        BalanceAndWeight calldata tokenVotes
+    ) external pure override returns (uint256) {
+        return
+            _calculateVoteWeight(
+                pointsVotes.balance,
+                pointsVotes.voteWeight,
+                tokenVotes.balance,
+                tokenVotes.voteWeight
+            );
+    }
+
+    /**
+     * ░░░░░░░░░░░░░░░░░░░░░░░░░░░░░
+     *  VOTES
+     * ░░░░░░░░░░░░░░░░░░░░░░░░░░░░░
+     */
 
     /**
      * @notice Returns the voting power of a voter at the current block with the default vote weights.
@@ -219,6 +348,12 @@ contract RevolutionVotingPower is
     ) external view override returns (uint256) {
         return _calculateVoteWeight(points.totalSupply(), _pointsVoteWeight, token.totalSupply(), _tokenVoteWeight);
     }
+
+    /**
+     * ░░░░░░░░░░░░░░░░░░░░░░░░░░░░░
+     *  PAST VOTES
+     * ░░░░░░░░░░░░░░░░░░░░░░░░░░░░░
+     */
 
     /**
      * @notice Returns the voting power of a voter at the given blockNumber.
@@ -284,47 +419,30 @@ contract RevolutionVotingPower is
     }
 
     /**
-     * @notice gets the balance of the minter of the ERC721 token
-     * @dev useful to eg: subtract the AuctionHouse balance when calculating quorum
+     * ░░░░░░░░░░░░░░░░░░░░░░░░░░░░░
+     *   MINTERS
+     * ░░░░░░░░░░░░░░░░░░░░░░░░░░░░░
      */
-    function _getTokenMinter__TokenVotes() external view override returns (uint256) {
-        return token.getVotes(token.minter()) * tokenVoteWeight;
+
+    /**
+     * @notice gets the minter address of the ERC20 token
+     */
+    function getPointsMinter() external view override returns (address) {
+        return points.minter();
     }
 
     /**
-     * @notice gets the balance of the minter of the ERC721 token
-     * @dev useful to eg: subtract the AuctionHouse balance when calculating quorum
-     * @param _blockNumber The block number at which to calculate the voting power.
+     * @notice gets the minter address of the ERC721 token
      */
-    function _getTokenMinter__PastTokenVotes(uint256 _blockNumber) external view override returns (uint256) {
-        return token.getPastVotes(token.minter(), _blockNumber) * tokenVoteWeight;
+    function getTokenMinter() external view override returns (address) {
+        return token.minter();
     }
 
     /**
-     * @notice gets the balance of the minter of the ERC721 token
-     * @param _tokenVoteWeight The ERC721 token vote weight.
+     * ░░░░░░░░░░░░░░░░░░░░░░░░░░░░
+     *   REVOLUTION VOTING POWER UPGRADE
+     * ░░░░░░░░░░░░░░░░░░░░░░░░░░░░
      */
-    function _getTokenMinter__TokenVotes__WithWeight(
-        uint256 _tokenVoteWeight
-    ) external view override returns (uint256) {
-        return token.getVotes(token.minter()) * _tokenVoteWeight;
-    }
-
-    /**
-     * @notice gets the balance of the minter of the ERC721 token
-     * @param _blockNumber The block number at which to calculate the voting power.
-     * @param _tokenVoteWeight The ERC721 token vote weight.
-     */
-    function _getTokenMinter__PastTokenVotes__WithWeight(
-        uint256 _blockNumber,
-        uint256 _tokenVoteWeight
-    ) external view override returns (uint256) {
-        return token.getPastVotes(token.minter(), _blockNumber) * _tokenVoteWeight;
-    }
-
-    ///                                                          ///
-    ///             REVOLUTION VOTING POWER UPGRADE              ///
-    ///                                                          ///
 
     /// @notice Ensures the caller is authorized to upgrade the contract and that the new implementation is valid
     /// @dev This function is called in `upgradeTo` & `upgradeToAndCall`

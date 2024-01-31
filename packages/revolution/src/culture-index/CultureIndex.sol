@@ -47,9 +47,6 @@ contract CultureIndex is
     uint256 public constant MAX_ANIMATION_URL_LENGTH = 100;
     uint256 public constant MAX_TEXT_LENGTH = 67_112;
 
-    // The weight of the 721 voting token
-    uint256 public revolutionTokenVoteWeight;
-
     /// @notice The maximum settable quorum votes basis points
     uint256 public constant MAX_QUORUM_VOTES_BPS = 6_000; // 6,000 basis points or 60%
 
@@ -89,7 +86,8 @@ contract CultureIndex is
         if (msg.sender != address(manager)) revert NOT_MANAGER();
 
         if (_cultureIndexParams.quorumVotesBPS > MAX_QUORUM_VOTES_BPS) revert INVALID_QUORUM_BPS();
-        if (_cultureIndexParams.revolutionTokenVoteWeight <= 0) revert INVALID_ERC721_VOTING_WEIGHT();
+        if (_cultureIndexParams.tokenVoteWeight <= 0) revert INVALID_ERC721_VOTING_WEIGHT();
+        if (_cultureIndexParams.pointsVoteWeight <= 0) revert INVALID_ERC20_VOTING_WEIGHT();
         if (_votingPower == address(0)) revert ADDRESS_ZERO();
         if (_initialOwner == address(0)) revert ADDRESS_ZERO();
 
@@ -102,7 +100,9 @@ contract CultureIndex is
         __ReentrancyGuard_init();
 
         votingPower = IRevolutionVotingPower(_votingPower);
-        revolutionTokenVoteWeight = _cultureIndexParams.revolutionTokenVoteWeight;
+        tokenVoteWeight = _cultureIndexParams.tokenVoteWeight;
+        pointsVoteWeight = _cultureIndexParams.pointsVoteWeight;
+
         name = _cultureIndexParams.name;
         description = _cultureIndexParams.description;
         quorumVotesBPS = _cultureIndexParams.quorumVotesBPS;
@@ -284,11 +284,15 @@ contract CultureIndex is
     function getAccountVotingPowerForPiece(uint256 pieceId, address account) public view returns (uint256) {
         if (pieceId >= _currentPieceId) revert INVALID_PIECE_ID();
         return
-            votingPower.getPastVotesWithWeights(
-                account,
-                pieces[pieceId].creationBlock - 1,
-                1,
-                revolutionTokenVoteWeight
+            votingPower.calculateVotesWithWeights(
+                IRevolutionVotingPower.BalanceAndWeight({
+                    balance: votingPower.getPastPointsVotes(account, block.number - 1),
+                    voteWeight: pointsVoteWeight
+                }),
+                IRevolutionVotingPower.BalanceAndWeight({
+                    balance: votingPower.getPastTokenVotes(account, pieces[pieceId].creationBlock - 1),
+                    voteWeight: tokenVoteWeight
+                })
             );
     }
 
@@ -305,13 +309,7 @@ contract CultureIndex is
         if (pieces[pieceId].isDropped) revert ALREADY_DROPPED();
         if (votes[pieceId][voter].voterAddress != address(0)) revert ALREADY_VOTED();
 
-        // Use the previous block number to calculate the vote weight to prevent flash attacks
-        uint256 weight = votingPower.getPastVotesWithWeights(
-            voter,
-            pieces[pieceId].creationBlock - 1,
-            1,
-            revolutionTokenVoteWeight
-        );
+        uint256 weight = getAccountVotingPowerForPiece(pieceId, voter);
         if (weight <= minVotingPowerToVote) revert WEIGHT_TOO_LOW();
 
         votes[pieceId][voter] = Vote(voter, weight);
@@ -319,7 +317,6 @@ contract CultureIndex is
 
         uint256 totalWeight = totalVoteWeights[pieceId];
 
-        // TODO add security consideration here based on block created to prevent flash attacks on drops?
         maxHeap.updateValue(pieceId, totalWeight);
         emit VoteCast(pieceId, voter, weight, totalWeight);
     }
@@ -530,7 +527,8 @@ contract CultureIndex is
      * Differs from `GovernerBravo` which uses fixed amount
      */
     function quorumVotes() public view returns (uint256) {
-        return (quorumVotesBPS * votingPower.getTotalVotesSupplyWithWeights(1, revolutionTokenVoteWeight)) / 10_000;
+        return
+            (quorumVotesBPS * votingPower.getTotalVotesSupplyWithWeights(pointsVoteWeight, tokenVoteWeight)) / 10_000;
     }
 
     /**
@@ -539,14 +537,37 @@ contract CultureIndex is
      */
     function quorumVotesForPiece(uint256 pieceId) public view returns (uint256) {
         uint256 creationBlock = pieces[pieceId].creationBlock;
+
+        /// @notice Points are assumed to be nontransferable and thus we do not need snapshotting for them
+        /// @notice Tokens are assumed to be transferable and thus we need snapshotting for them
+        uint256 totalVotesSupply = votingPower.calculateVotesWithWeights(
+            IRevolutionVotingPower.BalanceAndWeight({
+                /// @notice Use previous block number to prevent auction
+                /// from minting points and throwing off the quorum in the same block
+                balance: votingPower.getPastPointsSupply(block.number - 1),
+                voteWeight: pointsVoteWeight
+            }),
+            IRevolutionVotingPower.BalanceAndWeight({
+                balance: votingPower.getPastTokenSupply(creationBlock),
+                voteWeight: tokenVoteWeight
+            })
+        );
+
+        /// @notice We want to subtract the balance of tokens held by the auction since no one can vote with those tokens
+        uint256 tokenMinterVotes = votingPower.calculateVotesWithWeights(
+            //ignore points for token minter
+            IRevolutionVotingPower.BalanceAndWeight({ balance: 0, voteWeight: 0 }),
+            IRevolutionVotingPower.BalanceAndWeight({
+                balance: votingPower.getPastTokenVotes(votingPower.getTokenMinter(), creationBlock),
+                voteWeight: tokenVoteWeight
+            })
+        );
+
         return
             (quorumVotesBPS *
-                (votingPower.getPastTotalVotesSupplyWithWeights(creationBlock, 1, revolutionTokenVoteWeight) -
+                (totalVotesSupply -
                     // Subtract the votes for the tokens held by the minter
-                    votingPower._getTokenMinter__PastTokenVotes__WithWeight(
-                        creationBlock,
-                        revolutionTokenVoteWeight
-                    ))) / 10_000;
+                    tokenMinterVotes)) / 10_000;
     }
 
     /**
@@ -570,8 +591,7 @@ contract CultureIndex is
 
         uint256 pieceId = topVotedPieceId();
 
-        uint256 pastQuorumVotes = quorumVotesForPiece(pieceId);
-        if (totalVoteWeights[pieceId] < pastQuorumVotes) revert DOES_NOT_MEET_QUORUM();
+        if (totalVoteWeights[pieceId] < quorumVotesForPiece(pieceId)) revert DOES_NOT_MEET_QUORUM();
 
         //set the piece as dropped
         pieces[pieceId].isDropped = true;

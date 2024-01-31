@@ -37,6 +37,8 @@ interface IRevolutionPoints is IERC20, IVotes {
     ///                         FUNCTIONS                        ///
     ///                                                          ///
 
+    function minter() external view returns (address);
+
     function setMinter(address minter) external;
 
     function lockMinter() external;

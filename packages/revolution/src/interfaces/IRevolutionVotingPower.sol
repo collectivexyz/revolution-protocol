@@ -30,44 +30,64 @@ interface IRevolutionVotingPower is IRevolutionVotingPowerEvents {
      * @notice Initializes the RevolutionVotingPower contract
      * @param initialOwner The initial owner of the contract
      * @param revolutionPoints The address of the ERC20 token used for voting
-     * @param revolutionPointsVoteWeight The vote weight of the ERC20 token
+     * @param pointsVoteWeight The vote weight of the ERC20 token
      * @param revolutionToken The address of the ERC721 token used for voting
-     * @param revolutionTokenVoteWeight The vote weight of the ERC721 token
+     * @param tokenVoteWeight The vote weight of the ERC721 token
      */
     function initialize(
         address initialOwner,
         address revolutionPoints,
-        uint256 revolutionPointsVoteWeight,
+        uint256 pointsVoteWeight,
         address revolutionToken,
-        uint256 revolutionTokenVoteWeight
+        uint256 tokenVoteWeight
     ) external;
+
+    /**
+     * ░░░░░░░░░░░░░░░░░░░░░░░░░░░░░
+     *  POINTS
+     * ░░░░░░░░░░░░░░░░░░░░░░░░░░░░░
+     */
 
     function points() external returns (IRevolutionPoints);
 
+    function getPointsMinter() external view returns (address);
+
+    function getPointsVotes(address account) external view returns (uint256);
+
+    function getPastPointsVotes(address account, uint256 blockNumber) external view returns (uint256);
+
+    function getPointsSupply() external view returns (uint256);
+
+    function getPastPointsSupply(uint256 blockNumber) external view returns (uint256);
+
+    /**
+     * ░░░░░░░░░░░░░░░░░░░░░░░░░░░░░
+     *  TOKEN
+     * ░░░░░░░░░░░░░░░░░░░░░░░░░░░░░
+     */
+
     function token() external returns (IRevolutionToken);
 
-    /// @notice useful in the CultureIndex to subtract weight of the AuctionHouse from quorum
-    function _getTokenMinter__TokenVotes() external view returns (uint256);
-    function _getTokenMinter__PastTokenVotes(uint256 blockNumber) external view returns (uint256);
-    function _getTokenMinter__TokenVotes__WithWeight(uint256 erc721TokenVoteWeight) external view returns (uint256);
-    function _getTokenMinter__PastTokenVotes__WithWeight(
-        uint256 blockNumber,
-        uint256 erc721TokenVoteWeight
-    ) external view returns (uint256);
+    function getTokenMinter() external view returns (address);
+
+    function getTokenVotes(address account) external view returns (uint256);
+
+    function getPastTokenVotes(address account, uint256 blockNumber) external view returns (uint256);
+
+    function getTokenSupply() external view returns (uint256);
+
+    function getPastTokenSupply(uint256 blockNumber) external view returns (uint256);
+
+    /**
+     * ░░░░░░░░░░░░░░░░░░░░░░░░░░░░░
+     *  VOTES
+     * ░░░░░░░░░░░░░░░░░░░░░░░░░░░░░
+     */
 
     function getVotes(address account) external view returns (uint256);
 
     function getVotesWithWeights(
         address account,
-        uint256 erc20PointsVoteWeight,
-        uint256 erc721TokenVoteWeight
-    ) external view returns (uint256);
-
-    function getPastVotes(address account, uint256 blockNumber) external view returns (uint256);
-
-    function getPastVotesWithWeights(
-        address account,
-        uint256 blockNumber,
         uint256 erc20PointsVoteWeight,
         uint256 erc721TokenVoteWeight
     ) external view returns (uint256);
@@ -79,6 +99,21 @@ interface IRevolutionVotingPower is IRevolutionVotingPowerEvents {
         uint256 erc721TokenVoteWeight
     ) external view returns (uint256);
 
+    /**
+     * ░░░░░░░░░░░░░░░░░░░░░░░░░░░░░
+     *  PAST VOTES
+     * ░░░░░░░░░░░░░░░░░░░░░░░░░░░░░
+     */
+
+    function getPastVotes(address account, uint256 blockNumber) external view returns (uint256);
+
+    function getPastVotesWithWeights(
+        address account,
+        uint256 blockNumber,
+        uint256 erc20PointsVoteWeight,
+        uint256 erc721TokenVoteWeight
+    ) external view returns (uint256);
+
     function getPastTotalVotesSupply(uint256 blockNumber) external view returns (uint256);
 
     function getPastTotalVotesSupplyWithWeights(
@@ -86,4 +121,22 @@ interface IRevolutionVotingPower is IRevolutionVotingPowerEvents {
         uint256 erc20PointsVoteWeight,
         uint256 erc721TokenVoteWeight
     ) external view returns (uint256);
+
+    /**
+     * ░░░░░░░░░░░░░░░░░░░░░░░░░░░░░
+     *  CALCULATE VOTES
+     * ░░░░░░░░░░░░░░░░░░░░░░░░░░░░░
+     */
+
+    struct BalanceAndWeight {
+        uint256 balance;
+        uint256 voteWeight;
+    }
+
+    function calculateVotesWithWeights(
+        BalanceAndWeight calldata points,
+        BalanceAndWeight calldata token
+    ) external pure returns (uint256);
+
+    function calculateVotes(uint256 pointsBalance, uint256 tokenBalance) external view returns (uint256);
 }

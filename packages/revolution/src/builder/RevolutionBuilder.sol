@@ -223,9 +223,9 @@ contract RevolutionBuilder is
         IRevolutionVotingPower(daoAddressesByToken[revolutionToken].revolutionVotingPower).initialize({
             initialOwner: initialSetup.executor,
             revolutionPoints: daoAddressesByToken[revolutionToken].revolutionPoints,
-            revolutionPointsVoteWeight: _revolutionVotingPowerParams.revolutionPointsVoteWeight,
+            pointsVoteWeight: _revolutionVotingPowerParams.pointsVoteWeight,
             revolutionToken: daoAddressesByToken[revolutionToken].revolutionToken,
-            revolutionTokenVoteWeight: _revolutionVotingPowerParams.revolutionTokenVoteWeight
+            tokenVoteWeight: _revolutionVotingPowerParams.tokenVoteWeight
         });
 
         IRevolutionToken(revolutionToken).initialize({

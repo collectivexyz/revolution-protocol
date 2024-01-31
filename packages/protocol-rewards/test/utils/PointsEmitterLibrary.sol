@@ -1822,7 +1822,7 @@ interface IRevolutionBuilder is IUUPS {
     /// @param votingPeriod The time period to vote on a proposal
     /// @param proposalThresholdBPS The basis points of the token supply required to create a proposal
     /// @param vetoer The address authorized to veto proposals (address(0) if none desired)
-    /// @param revolutionTokenVoteWeight The voting weight of the individual ERC721 tokens
+    /// @param tokenVoteWeight The voting weight of the individual ERC721 tokens
     /// @param daoName The name of the DAO
     /// @param dynamicQuorumParams The dynamic quorum parameters
     struct GovParams {
@@ -1831,7 +1831,7 @@ interface IRevolutionBuilder is IUUPS {
         uint256 votingPeriod;
         uint256 proposalThresholdBPS;
         address vetoer;
-        uint256 revolutionTokenVoteWeight;
+        uint256 tokenVoteWeight;
         string daoName;
         RevolutionDAOStorageV1.DynamicQuorumParams dynamicQuorumParams;
     }
@@ -1874,13 +1874,13 @@ interface IRevolutionBuilder is IUUPS {
     /// @notice The CultureIndex parameters
     /// @param name The name of the culture index
     /// @param description A description for the culture index, can include rules for uploads etc.
-    /// @param revolutionTokenVoteWeight The voting weight of the individual ERC721 tokens. Normally a large multiple to match up with daily emission of ERC20 points
+    /// @param tokenVoteWeight The voting weight of the individual ERC721 tokens. Normally a large multiple to match up with daily emission of ERC20 points
     /// @param quorumVotesBPS The initial quorum votes threshold in basis points
     /// @param minVotingPowerToVote The minimum vote weight in basis points that a voter must have to be able to vote.
     struct CultureIndexParams {
         string name;
         string description;
-        uint256 revolutionTokenVoteWeight;
+        uint256 tokenVoteWeight;
         uint256 quorumVotesBPS;
         uint256 minVotingPowerToVote;
     }
@@ -2026,8 +2026,8 @@ contract RevolutionDAOStorageV1 is RevolutionDAOProxyStorage {
     /// @notice Pending new vetoer
     address public pendingVetoer;
 
-    /// @notice The voting weight of the Revolution ERC721 token eg: owning (2) tokens gets you (2 * revolutionTokenVoteWeight) votes
-    uint256 public revolutionTokenVoteWeight;
+    /// @notice The voting weight of the Revolution ERC721 token eg: owning (2) tokens gets you (2 * tokenVoteWeight) votes
+    uint256 public tokenVoteWeight;
 
     struct Proposal {
         /// @notice Unique id for looking up a proposal

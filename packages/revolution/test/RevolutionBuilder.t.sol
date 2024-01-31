@@ -165,13 +165,10 @@ contract RevolutionBuilderTest is Test {
         setRevolutionVotingPowerParams(1000, 1);
     }
 
-    function setRevolutionVotingPowerParams(
-        uint256 _revolutionTokenVoteWeight,
-        uint256 _revolutionPointsVoteWeight
-    ) internal virtual {
+    function setRevolutionVotingPowerParams(uint256 _tokenVoteWeight, uint256 _pointsVoteWeight) internal virtual {
         revolutionVotingPowerParams = IRevolutionBuilder.RevolutionVotingPowerParams({
-            revolutionTokenVoteWeight: _revolutionTokenVoteWeight,
-            revolutionPointsVoteWeight: _revolutionPointsVoteWeight
+            tokenVoteWeight: _tokenVoteWeight,
+            pointsVoteWeight: _pointsVoteWeight
         });
     }
 
@@ -230,13 +227,14 @@ contract RevolutionBuilderTest is Test {
     }
 
     function setMockCultureIndexParams() internal virtual {
-        setCultureIndexParams("Vrbs", "Our community Vrbs. Must be 32x32.", 100 * 1e18, 1000, 0, 0);
+        setCultureIndexParams("Vrbs", "Our community Vrbs. Must be 32x32.", 100 * 1e18, 1, 1000, 0, 0);
     }
 
     function setCultureIndexParams(
         string memory _name,
         string memory _description,
-        uint256 _revolutionTokenVoteWeight,
+        uint256 _tokenVoteWeight,
+        uint256 _pointsVoteWeight,
         uint256 _quorumVotesBPS,
         uint256 _minVotingPowerToVote,
         uint256 _minVotingPowerToCreate
@@ -244,7 +242,8 @@ contract RevolutionBuilderTest is Test {
         cultureIndexParams = IRevolutionBuilder.CultureIndexParams({
             name: _name,
             description: _description,
-            revolutionTokenVoteWeight: _revolutionTokenVoteWeight,
+            tokenVoteWeight: _tokenVoteWeight,
+            pointsVoteWeight: _pointsVoteWeight,
             quorumVotesBPS: _quorumVotesBPS,
             minVotingPowerToVote: _minVotingPowerToVote,
             minVotingPowerToCreate: _minVotingPowerToCreate

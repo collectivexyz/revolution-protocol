@@ -32,9 +32,9 @@ contract VotingPowerTest is RevolutionBuilderTest {
         IRevolutionVotingPower(revolutionVotingPower).initialize({
             initialOwner: address(executor),
             revolutionPoints: address(revolutionPoints),
-            revolutionPointsVoteWeight: revolutionVotingPowerParams.revolutionPointsVoteWeight,
+            pointsVoteWeight: revolutionVotingPowerParams.pointsVoteWeight,
             revolutionToken: revolutionToken,
-            revolutionTokenVoteWeight: revolutionVotingPowerParams.revolutionTokenVoteWeight
+            tokenVoteWeight: revolutionVotingPowerParams.tokenVoteWeight
         });
     }
 
@@ -82,9 +82,9 @@ contract VotingPowerTest is RevolutionBuilderTest {
         IRevolutionVotingPower(revolutionVotingPower).initialize({
             initialOwner: address(executor),
             revolutionPoints: address(revolutionPoints),
-            revolutionPointsVoteWeight: pointsVoteWeight,
+            pointsVoteWeight: pointsVoteWeight,
             revolutionToken: address(revolutionToken),
-            revolutionTokenVoteWeight: tokenVoteWeight
+            tokenVoteWeight: tokenVoteWeight
         });
 
         uint256 actualVotingPower = IRevolutionVotingPower(revolutionVotingPower).getVotes(voter);
@@ -137,9 +137,9 @@ contract VotingPowerTest is RevolutionBuilderTest {
         IRevolutionVotingPower(revolutionVotingPower).initialize({
             initialOwner: address(executor),
             revolutionPoints: address(revolutionPoints),
-            revolutionPointsVoteWeight: 0,
+            pointsVoteWeight: 0,
             revolutionToken: address(revolutionToken),
-            revolutionTokenVoteWeight: 0
+            tokenVoteWeight: 0
         });
 
         uint256 actualVotingPower = IRevolutionVotingPower(revolutionVotingPower).getVotesWithWeights(
@@ -150,5 +150,167 @@ contract VotingPowerTest is RevolutionBuilderTest {
 
         // Assert: The actual voting power should match the expected voting power
         assertEq(actualVotingPower, expectedVotingPower);
+    }
+
+    function testTotalSupplyMatches() public {
+        uint256 totalPointsSupply = revolutionVotingPower.getPointsSupply();
+        uint256 totalTokenSupply = revolutionVotingPower.getTokenSupply();
+
+        uint256 actualPointsSupply = revolutionPoints.totalSupply();
+        uint256 actualTokenSupply = revolutionToken.totalSupply();
+
+        assertEq(totalTokenSupply, actualTokenSupply, "Total token supply does not match");
+        assertEq(totalPointsSupply, actualPointsSupply, "Total points supply does not match");
+    }
+
+    function mintVotesToVoter(address voter, uint256 pointsBalance, uint256 tokenBalance) public {
+        vm.prank(address(executor));
+        // set culture index quorum to 0
+        cultureIndex._setQuorumVotesBPS(0);
+
+        //mint points and token to address voter
+        vm.prank(address(revolutionPointsEmitter));
+        revolutionPoints.mint(voter, pointsBalance);
+
+        for (uint256 i = 0; i < tokenBalance; i++) {
+            uint256 pieceId = createDefaultArtPiece();
+        }
+
+        vm.roll(vm.getBlockNumber() + 1);
+
+        for (uint256 i = 0; i < tokenBalance; i++) {
+            vm.prank(address(auction));
+            revolutionToken.mint();
+
+            //transfer to voter
+            vm.prank(address(auction));
+            revolutionToken.transferFrom(address(auction), voter, i);
+        }
+    }
+
+    function testGetPointsVotes() public {
+        address voter = address(this);
+
+        uint256 pointsBalance = 1e18;
+
+        mintVotesToVoter(voter, pointsBalance, 0);
+
+        uint256 expectedPointsVotes = revolutionVotingPower.getPointsVotes(address(voter));
+        uint256 actualPointsVotes = revolutionPoints.getVotes(address(voter));
+        assertEq(expectedPointsVotes, actualPointsVotes, "Points votes do not match");
+    }
+
+    function testGetPastPointsVotes() public {
+        address voter = address(this);
+        uint256 blockNumber = block.number;
+
+        uint256 pointsBalance = 1e18;
+
+        mintVotesToVoter(voter, pointsBalance, 0);
+
+        vm.roll(blockNumber + 1);
+
+        uint256 expectedPastPointsVotes = revolutionVotingPower.getPastPointsVotes((voter), blockNumber);
+        uint256 actualPastPointsVotes = revolutionPoints.getPastVotes((voter), blockNumber);
+        assertEq(expectedPastPointsVotes, actualPastPointsVotes, "Past points votes do not match");
+    }
+
+    function testGetTokenVotes() public {
+        address voter = address(this);
+
+        uint256 tokenBalance = 10;
+
+        mintVotesToVoter(voter, 0, tokenBalance);
+
+        uint256 expectedTokenVotes = revolutionVotingPower.getTokenVotes((voter));
+        uint256 actualTokenVotes = revolutionToken.getVotes((voter));
+        assertEq(expectedTokenVotes, actualTokenVotes, "Token votes do not match");
+    }
+
+    function testGetPastTokenVotes() public {
+        address voter = address(this);
+        uint256 blockNumber = block.number;
+
+        uint256 tokenBalance = 10;
+
+        mintVotesToVoter(voter, 0, tokenBalance);
+
+        vm.roll(blockNumber + 1);
+
+        uint256 expectedPastTokenVotes = revolutionVotingPower.getPastTokenVotes((voter), blockNumber);
+        uint256 actualPastTokenVotes = revolutionToken.getPastVotes((voter), blockNumber);
+        assertEq(expectedPastTokenVotes, actualPastTokenVotes, "Past token votes do not match");
+    }
+
+    function testGetPointsSupply() public {
+        mintVotesToVoter(address(this), 1e18, 10);
+        uint256 expectedPointsSupply = revolutionVotingPower.getPointsSupply();
+        uint256 actualPointsSupply = revolutionPoints.totalSupply();
+        assertEq(expectedPointsSupply, actualPointsSupply, "Points supply does not match");
+    }
+
+    function testGetTokenSupply() public {
+        mintVotesToVoter(address(this), 1e18, 10);
+
+        uint256 expectedTokenSupply = revolutionVotingPower.getTokenSupply();
+        uint256 actualTokenSupply = revolutionToken.totalSupply();
+        assertEq(expectedTokenSupply, actualTokenSupply, "Token supply does not match");
+    }
+
+    function testGetPastPointsSupply() public {
+        mintVotesToVoter(address(this), 1e18, 10);
+
+        uint256 blockNumber = block.number;
+        vm.roll(blockNumber + 1);
+
+        uint256 expectedPastPointsSupply = revolutionVotingPower.getPastPointsSupply(blockNumber);
+        uint256 actualPastPointsSupply = revolutionPoints.getPastTotalSupply(blockNumber);
+        assertEq(expectedPastPointsSupply, actualPastPointsSupply, "Past points supply does not match");
+    }
+
+    function testGetPastTokenSupply() public {
+        mintVotesToVoter(address(this), 1e18, 10);
+
+        uint256 blockNumber = block.number;
+
+        vm.roll(blockNumber + 1);
+
+        uint256 expectedPastTokenSupply = revolutionVotingPower.getPastTokenSupply(blockNumber);
+        uint256 actualPastTokenSupply = revolutionToken.getPastTotalSupply(blockNumber);
+        assertEq(expectedPastTokenSupply, actualPastTokenSupply, "Past token supply does not match");
+    }
+
+    function testCalculateVotes() public {
+        uint256 pointsBalance = 500;
+        uint256 tokenBalance = 10;
+
+        uint256 expectedVotingPower = (pointsBalance * revolutionVotingPower.pointsVoteWeight()) +
+            (tokenBalance * revolutionVotingPower.tokenVoteWeight());
+
+        uint256 actualVotingPower = revolutionVotingPower.calculateVotes(pointsBalance, tokenBalance);
+
+        assertEq(expectedVotingPower, actualVotingPower, "Calculated voting power does not match expected");
+    }
+
+    function testCalculateVotesWithWeights() public {
+        IRevolutionVotingPower.BalanceAndWeight memory pointsVotes = IRevolutionVotingPower.BalanceAndWeight({
+            balance: 500,
+            voteWeight: 2e18 // 2 times the default weight
+        });
+        IRevolutionVotingPower.BalanceAndWeight memory tokenVotes = IRevolutionVotingPower.BalanceAndWeight({
+            balance: 10,
+            voteWeight: 3e18 // 3 times the default weight
+        });
+
+        uint256 expectedVotingPower = (pointsVotes.balance * pointsVotes.voteWeight) +
+            (tokenVotes.balance * tokenVotes.voteWeight);
+
+        uint256 actualVotingPower = revolutionVotingPower.calculateVotesWithWeights(pointsVotes, tokenVotes);
+
+        assertEq(
+            expectedVotingPower,
+            actualVotingPower,
+            "Calculated voting power with weights does not match expected"
+        );
     }
 }
