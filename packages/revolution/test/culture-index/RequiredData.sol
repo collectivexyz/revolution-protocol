@@ -6,14 +6,14 @@ import { CultureIndex } from "../../src/culture-index/CultureIndex.sol";
 import { MockERC20 } from "../mock/MockERC20.sol";
 import { ICultureIndex, ICultureIndexEvents } from "../../src/interfaces/ICultureIndex.sol";
 import { RevolutionPoints } from "../../src/RevolutionPoints.sol";
-import { CultureIndexTestSuite } from "./CultureIndex.t.sol";
+import { RevolutionBuilderTest } from "../RevolutionBuilder.t.sol";
 import { ERC721CheckpointableUpgradeable } from "../../src/base/ERC721CheckpointableUpgradeable.sol";
 
 /**
  * @title CultureIndex Required Data Test
  * @dev Test contract for CultureIndex
  */
-contract CultureIndexRequiredTest is CultureIndexTestSuite {
+contract CultureIndexRequiredDataTest is RevolutionBuilderTest {
     /**
      * @dev Setup function for each test case
      */
