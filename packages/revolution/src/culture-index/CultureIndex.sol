@@ -544,7 +544,7 @@ contract CultureIndex is
             IRevolutionVotingPower.BalanceAndWeight({
                 /// @notice Use previous block number to prevent auction
                 /// from minting points and throwing off the quorum in the same block
-                balance: votingPower.getPastTokenSupply(block.number - 1),
+                balance: votingPower.getPastPointsSupply(block.number - 1),
                 voteWeight: pointsVoteWeight
             }),
             IRevolutionVotingPower.BalanceAndWeight({
