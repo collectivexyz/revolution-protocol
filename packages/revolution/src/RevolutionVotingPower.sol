@@ -288,7 +288,7 @@ contract RevolutionVotingPower is
     function calculateVotesWithWeights(
         BalanceAndWeight calldata pointsVotes,
         BalanceAndWeight calldata tokenVotes
-    ) external view override returns (uint256) {
+    ) external pure override returns (uint256) {
         return
             _calculateVoteWeight(
                 pointsVotes.balance,

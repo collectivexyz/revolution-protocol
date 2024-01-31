@@ -284,11 +284,15 @@ contract CultureIndex is
     function getAccountVotingPowerForPiece(uint256 pieceId, address account) public view returns (uint256) {
         if (pieceId >= _currentPieceId) revert INVALID_PIECE_ID();
         return
-            votingPower.getPastVotesWithWeights(
-                account,
-                pieces[pieceId].creationBlock - 1,
-                pointsVoteWeight,
-                tokenVoteWeight
+            votingPower.calculateVotesWithWeights(
+                IRevolutionVotingPower.BalanceAndWeight({
+                    balance: votingPower.getPastPointsVotes(account, block.number - 1),
+                    voteWeight: pointsVoteWeight
+                }),
+                IRevolutionVotingPower.BalanceAndWeight({
+                    balance: votingPower.getPastTokenVotes(account, pieces[pieceId].creationBlock - 1),
+                    voteWeight: tokenVoteWeight
+                })
             );
     }
 
