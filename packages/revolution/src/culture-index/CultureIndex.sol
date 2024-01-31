@@ -156,11 +156,13 @@ contract CultureIndex is
      * - The corresponding media data must not be empty.
      */
     function validateMediaType(ArtPieceMetadata calldata metadata) internal view {
+        MediaType mediaType = MediaType(metadata.mediaType);
+
         if (
             //invalid media type
-            uint8(metadata.mediaType) > 3 ||
+            uint8(mediaType) > 3 ||
             // or specific required media type is not adhered to
-            (requiredMediaType != MediaType.NONE && metadata.mediaType != requiredMediaType)
+            (requiredMediaType != MediaType.NONE && mediaType != requiredMediaType)
         ) revert INVALID_MEDIA_TYPE();
 
         uint256 imageLength = bytes(metadata.image).length;
@@ -168,12 +170,12 @@ contract CultureIndex is
         uint256 textLength = bytes(metadata.text).length;
         uint256 nameLength = bytes(metadata.name).length;
 
-        if (metadata.mediaType == MediaType.IMAGE) {
-            if (imageLength == 0) revert INVALID_IMAGE();
-        } else if (metadata.mediaType == MediaType.ANIMATION || metadata.mediaType == MediaType.AUDIO) {
-            if (animationUrlLength == 0) revert INVALID_ANIMATION_URL();
-        } else if (metadata.mediaType == MediaType.TEXT) {
-            if (textLength == 0) revert INVALID_TEXT();
+        if (mediaType == MediaType.IMAGE && imageLength == 0) {
+            revert INVALID_IMAGE();
+        } else if ((mediaType == MediaType.ANIMATION || mediaType == MediaType.AUDIO) && animationUrlLength == 0) {
+            revert INVALID_ANIMATION_URL();
+        } else if (mediaType == MediaType.TEXT && textLength == 0) {
+            revert INVALID_TEXT();
         }
 
         // ensure all fields of metadata are within reasonable bounds
