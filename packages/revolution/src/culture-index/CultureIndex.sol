@@ -198,8 +198,8 @@ contract CultureIndex is
         if (imageLength > 0) {
             string memory svgPrefix = "data:image/svg+xml;base64,";
 
-            bool startsWithSvg = imageLength > 26 && Strings.equal(_substring(metadata.image, 0, 26), (svgPrefix));
-            bool startsWithIpfs = imageLength > 7 && Strings.equal(_substring(metadata.image, 0, 7), (ipfsPrefix));
+            bool startsWithSvg = imageLength > 25 && Strings.equal(_substring(metadata.image, 0, 26), (svgPrefix));
+            bool startsWithIpfs = imageLength > 6 && Strings.equal(_substring(metadata.image, 0, 7), (ipfsPrefix));
 
             if (requiredMediaPrefix == RequiredMediaPrefix.IPFS && !startsWithIpfs) {
                 revert INVALID_IMAGE();
