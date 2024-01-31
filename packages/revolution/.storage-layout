@@ -5,22 +5,23 @@
 ➡ CultureIndex
 =======================
 
-| Name                      | Type                                                              | Slot | Offset | Bytes | Contract                                        |
-|---------------------------|-------------------------------------------------------------------|------|--------|-------|-------------------------------------------------|
-| nonces                    | mapping(address => uint256)                                       | 0    | 0      | 32    | src/culture-index/CultureIndex.sol:CultureIndex |
-| maxHeap                   | contract MaxHeap                                                  | 1    | 0      | 20    | src/culture-index/CultureIndex.sol:CultureIndex |
-| votingPower               | contract IRevolutionVotingPower                                   | 2    | 0      | 20    | src/culture-index/CultureIndex.sol:CultureIndex |
-| minVotingPowerToVote      | uint256                                                           | 3    | 0      | 32    | src/culture-index/CultureIndex.sol:CultureIndex |
-| minVotingPowerToCreate    | uint256                                                           | 4    | 0      | 32    | src/culture-index/CultureIndex.sol:CultureIndex |
-| quorumVotesBPS            | uint256                                                           | 5    | 0      | 32    | src/culture-index/CultureIndex.sol:CultureIndex |
-| name                      | string                                                            | 6    | 0      | 32    | src/culture-index/CultureIndex.sol:CultureIndex |
-| description               | string                                                            | 7    | 0      | 32    | src/culture-index/CultureIndex.sol:CultureIndex |
-| pieces                    | mapping(uint256 => struct ICultureIndex.ArtPiece)                 | 8    | 0      | 32    | src/culture-index/CultureIndex.sol:CultureIndex |
-| _currentPieceId           | uint256                                                           | 9    | 0      | 32    | src/culture-index/CultureIndex.sol:CultureIndex |
-| votes                     | mapping(uint256 => mapping(address => struct ICultureIndex.Vote)) | 10   | 0      | 32    | src/culture-index/CultureIndex.sol:CultureIndex |
-| totalVoteWeights          | mapping(uint256 => uint256)                                       | 11   | 0      | 32    | src/culture-index/CultureIndex.sol:CultureIndex |
-| dropperAdmin              | address                                                           | 12   | 0      | 20    | src/culture-index/CultureIndex.sol:CultureIndex |
-| revolutionTokenVoteWeight | uint256                                                           | 13   | 0      | 32    | src/culture-index/CultureIndex.sol:CultureIndex |
+| Name                   | Type                                                              | Slot | Offset | Bytes | Contract                                        |
+|------------------------|-------------------------------------------------------------------|------|--------|-------|-------------------------------------------------|
+| nonces                 | mapping(address => uint256)                                       | 0    | 0      | 32    | src/culture-index/CultureIndex.sol:CultureIndex |
+| maxHeap                | contract MaxHeap                                                  | 1    | 0      | 20    | src/culture-index/CultureIndex.sol:CultureIndex |
+| votingPower            | contract IRevolutionVotingPower                                   | 2    | 0      | 20    | src/culture-index/CultureIndex.sol:CultureIndex |
+| minVotingPowerToVote   | uint256                                                           | 3    | 0      | 32    | src/culture-index/CultureIndex.sol:CultureIndex |
+| minVotingPowerToCreate | uint256                                                           | 4    | 0      | 32    | src/culture-index/CultureIndex.sol:CultureIndex |
+| quorumVotesBPS         | uint256                                                           | 5    | 0      | 32    | src/culture-index/CultureIndex.sol:CultureIndex |
+| tokenVoteWeight        | uint256                                                           | 6    | 0      | 32    | src/culture-index/CultureIndex.sol:CultureIndex |
+| pointsVoteWeight       | uint256                                                           | 7    | 0      | 32    | src/culture-index/CultureIndex.sol:CultureIndex |
+| name                   | string                                                            | 8    | 0      | 32    | src/culture-index/CultureIndex.sol:CultureIndex |
+| description            | string                                                            | 9    | 0      | 32    | src/culture-index/CultureIndex.sol:CultureIndex |
+| pieces                 | mapping(uint256 => struct ICultureIndex.ArtPiece)                 | 10   | 0      | 32    | src/culture-index/CultureIndex.sol:CultureIndex |
+| _currentPieceId        | uint256                                                           | 11   | 0      | 32    | src/culture-index/CultureIndex.sol:CultureIndex |
+| votes                  | mapping(uint256 => mapping(address => struct ICultureIndex.Vote)) | 12   | 0      | 32    | src/culture-index/CultureIndex.sol:CultureIndex |
+| totalVoteWeights       | mapping(uint256 => uint256)                                       | 13   | 0      | 32    | src/culture-index/CultureIndex.sol:CultureIndex |
+| dropperAdmin           | address                                                           | 14   | 0      | 20    | src/culture-index/CultureIndex.sol:CultureIndex |
 
 =======================
 ➡ RevolutionBuilder
