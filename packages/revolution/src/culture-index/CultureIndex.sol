@@ -163,42 +163,53 @@ contract CultureIndex is
             (requiredMediaType != MediaType.NONE && metadata.mediaType != requiredMediaType)
         ) revert INVALID_MEDIA_TYPE();
 
+        uint256 imageLength = bytes(metadata.image).length;
+        uint256 animationUrlLength = bytes(metadata.animationUrl).length;
+        uint256 textLength = bytes(metadata.text).length;
+        uint256 nameLength = bytes(metadata.name).length;
+
         if (metadata.mediaType == MediaType.IMAGE) {
-            if (bytes(metadata.image).length == 0) revert INVALID_IMAGE();
+            if (imageLength == 0) revert INVALID_IMAGE();
         } else if (metadata.mediaType == MediaType.ANIMATION || metadata.mediaType == MediaType.AUDIO) {
-            if (bytes(metadata.animationUrl).length == 0) revert INVALID_ANIMATION_URL();
+            if (animationUrlLength == 0) revert INVALID_ANIMATION_URL();
         } else if (metadata.mediaType == MediaType.TEXT) {
-            if (bytes(metadata.text).length == 0) revert INVALID_TEXT();
+            if (textLength == 0) revert INVALID_TEXT();
         }
 
         // ensure all fields of metadata are within reasonable bounds
         if (bytes(metadata.description).length > PIECE_DATA_MAXIMUMS.description) revert INVALID_DESCRIPTION();
 
-        if (bytes(metadata.image).length > PIECE_DATA_MAXIMUMS.image) revert INVALID_IMAGE();
+        if (imageLength > PIECE_DATA_MAXIMUMS.image) revert INVALID_IMAGE();
 
-        if (bytes(metadata.animationUrl).length > PIECE_DATA_MAXIMUMS.animationUrl) revert INVALID_ANIMATION_URL();
+        if (animationUrlLength > PIECE_DATA_MAXIMUMS.animationUrl) revert INVALID_ANIMATION_URL();
 
-        if (bytes(metadata.text).length > PIECE_DATA_MAXIMUMS.text) revert INVALID_TEXT();
+        if (textLength > PIECE_DATA_MAXIMUMS.text) revert INVALID_TEXT();
+
+        //ensure name is not too large
+        if (nameLength > PIECE_DATA_MAXIMUMS.name) revert INVALID_NAME();
 
         string memory ipfsPrefix = "ipfs://";
-        string memory svgPrefix = "data:image/svg+xml;base64,";
 
         // ensure animation url starts with ipfs://
-        if (
-            bytes(metadata.animationUrl).length > 0 &&
-            !Strings.equal(_substring(metadata.animationUrl, 0, 7), (ipfsPrefix))
-        ) revert INVALID_ANIMATION_URL();
+        if (animationUrlLength > 0 && !Strings.equal(_substring(metadata.animationUrl, 0, 7), (ipfsPrefix)))
+            revert INVALID_ANIMATION_URL();
 
         // ensure image url starts with ipfs:// or data:image/svg+xml;base64,
-        if (
-            bytes(metadata.image).length > 0 &&
-            !(Strings.equal(_substring(metadata.image, 0, 7), (ipfsPrefix)) ||
-                Strings.equal(_substring(metadata.image, 0, 26), (svgPrefix)))
-        ) revert INVALID_IMAGE();
+        if (imageLength > 0) {
+            string memory svgPrefix = "data:image/svg+xml;base64,";
 
-        //ensure name is set
-        if (bytes(metadata.name).length == 0 || bytes(metadata.name).length > PIECE_DATA_MAXIMUMS.name)
-            revert INVALID_NAME();
+            bool startsWithSvg = imageLength > 26 && Strings.equal(_substring(metadata.image, 0, 26), (svgPrefix));
+            bool startsWithIpfs = imageLength > 7 && Strings.equal(_substring(metadata.image, 0, 7), (ipfsPrefix));
+
+            if (requiredMediaPrefix == RequiredMediaPrefix.IPFS && !startsWithIpfs) {
+                revert INVALID_IMAGE();
+            } else if (requiredMediaPrefix == RequiredMediaPrefix.SVG && !startsWithSvg) {
+                revert INVALID_IMAGE();
+            } else if (!startsWithIpfs && !startsWithSvg) {
+                // if no required prefix, ensure it starts with ipfs:// or data:image/svg+xml;base64,
+                revert INVALID_IMAGE();
+            }
+        }
     }
 
     /**

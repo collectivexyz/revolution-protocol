@@ -235,4 +235,102 @@ contract CultureIndexRequiredTest is CultureIndexTestSuite {
         vm.expectRevert(abi.encodeWithSignature("INVALID_MEDIA_TYPE()"));
         createAnimation();
     }
+
+    function createImageWithIPFSPrefix() public {
+        createArtPiece(
+            "Mona Lisa",
+            "A masterpiece",
+            ICultureIndex.MediaType.IMAGE,
+            "ipfs://legends",
+            "",
+            "",
+            address(0x1),
+            10000
+        );
+    }
+
+    function createImageWithSVGPrefix() public {
+        createArtPiece(
+            "Mona Lisa",
+            "A masterpiece",
+            ICultureIndex.MediaType.IMAGE,
+            "",
+            "",
+            "ipfs://legends",
+            address(0x1),
+            10000
+        );
+    }
+
+    //test image with IPFS prefix
+    function test__requiredMediaPrefix_IPFS() public {
+        super.setCultureIndexParams(
+            "Vrbs",
+            "Our community Vrbs. Must be 32x32.",
+            10,
+            1,
+            200,
+            0,
+            0,
+            ICultureIndex.PieceMaximums({ name: 100, description: 2100, image: 64_000, text: 256, animationUrl: 100 }),
+            ICultureIndex.MediaType.IMAGE,
+            ICultureIndex.RequiredMediaPrefix.IPFS
+        );
+
+        super.deployMock();
+
+        // ensure you can add only image with IPFS prefix
+        createImageWithIPFSPrefix();
+
+        // expect revert on image with SVG prefix
+        vm.expectRevert(abi.encodeWithSignature("INVALID_IMAGE()"));
+        createImageWithSVGPrefix();
+    }
+
+    //test image with SVG prefix
+    function test__requiredMediaPrefix_SVG() public {
+        super.setCultureIndexParams(
+            "Vrbs",
+            "Our community Vrbs. Must be 32x32.",
+            10,
+            1,
+            200,
+            0,
+            0,
+            ICultureIndex.PieceMaximums({ name: 100, description: 2100, image: 64_000, text: 256, animationUrl: 100 }),
+            ICultureIndex.MediaType.IMAGE,
+            ICultureIndex.RequiredMediaPrefix.SVG
+        );
+
+        super.deployMock();
+
+        // ensure you can add only image with SVG prefix
+        createImageWithSVGPrefix();
+
+        // expect revert on image with IPFS prefix
+        vm.expectRevert(abi.encodeWithSignature("INVALID_IMAGE()"));
+        createImageWithIPFSPrefix();
+    }
+
+    //test image with MIXED prefix
+    function test__requiredMediaPrefix_MIXED() public {
+        super.setCultureIndexParams(
+            "Vrbs",
+            "Our community Vrbs. Must be 32x32.",
+            10,
+            1,
+            200,
+            0,
+            0,
+            ICultureIndex.PieceMaximums({ name: 100, description: 2100, image: 64_000, text: 256, animationUrl: 100 }),
+            ICultureIndex.MediaType.IMAGE,
+            ICultureIndex.RequiredMediaPrefix.MIXED
+        );
+
+        super.deployMock();
+
+        // ensure you can add image with both SVG and IPFS prefix
+        createImageWithSVGPrefix();
+        createImageWithIPFSPrefix();
+    }
 }
