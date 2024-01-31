@@ -159,8 +159,8 @@ contract CultureIndex is
         MediaType mediaType = MediaType(metadata.mediaType);
 
         if (
-            //invalid media type
-            uint8(mediaType) > 3 ||
+            // invalid media type
+            mediaType == MediaType.NONE ||
             // or specific required media type is not adhered to
             (requiredMediaType != MediaType.NONE && mediaType != requiredMediaType)
         ) revert INVALID_MEDIA_TYPE();

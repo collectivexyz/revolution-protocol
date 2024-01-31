@@ -157,13 +157,12 @@ interface ICultureIndex is ICultureIndexEvents {
     }
 
     // Enum representing different media types for art pieces.
-    // uint8(metadata.mediaType) > 3 check is used in CultureIndex, make sure to add new values after TEXT
     enum MediaType {
+        NONE, // never used by end user, only used in CultureIndex when using requriedMediaType
         IMAGE,
         ANIMATION,
         AUDIO,
-        TEXT,
-        NONE // never used by end user, only used in CultureIndex when using requriedMediaType
+        TEXT
     }
 
     // Struct defining metadata for an art piece.
