@@ -208,15 +208,30 @@ contract Descriptor is IDescriptor, VersionedContract, UUPS, Ownable2StepUpgrade
         string memory name,
         ICultureIndex.ArtPieceMetadata memory metadata
     ) public pure returns (string memory) {
-        /// @dev Get name description image and animation_url from CultureIndex
+        /// @notice If image, return a data URI with only an image
+        /// given both image and animation can be set in CultureIndex art piece metadata
+        if (metadata.mediaType == ICultureIndex.MediaType.IMAGE) {
+            return
+                constructTokenURI(
+                    TokenURIParams({
+                        name: name,
+                        description: string(abi.encodePacked(metadata.name, ". ", metadata.description)),
+                        image: metadata.image,
+                        animation_url: ""
+                    })
+                );
+        }
 
-        TokenURIParams memory params = TokenURIParams({
-            name: name,
-            description: string(abi.encodePacked(metadata.name, ". ", metadata.description)),
-            image: metadata.image,
-            animation_url: metadata.animationUrl
-        });
-        return constructTokenURI(params);
+        /// @notice If not an image, return a data URI with all data
+        return
+            constructTokenURI(
+                TokenURIParams({
+                    name: name,
+                    description: string(abi.encodePacked(metadata.name, ". ", metadata.description)),
+                    image: metadata.image,
+                    animation_url: metadata.animationUrl
+                })
+            );
     }
 
     ///                                                          ///
