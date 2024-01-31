@@ -740,7 +740,7 @@ contract CultureIndexVotingBasicTest is CultureIndexTestSuite {
         assertEq(actualQuorumVotes, expectedQuorumVotes, "Quorum votes calculation does not match expected value");
     }
 
-    function testVoteWeightAfterMinting() public {
+    function testVoteWeight_Points() public {
         vm.stopPrank();
         address voter = address(this);
 
@@ -765,6 +765,109 @@ contract CultureIndexVotingBasicTest is CultureIndexTestSuite {
         assertEq(
             actualVoteWeightAdded,
             expectedVoteWeight,
+            "Vote weight added does not match expected vote weight from getAccountVotingPowerForPiece"
+        );
+
+        //expect it to be equal to 100
+        assertEq(
+            cultureIndex.totalVoteWeights(pieceId),
+            100,
+            "Vote weight added does not match expected vote weight from getAccountVotingPowerForPiece"
+        );
+
+        assertEq(
+            actualVoteWeightAdded,
+            cultureIndex.getVote(pieceId, voter).weight,
+            "Vote weight added does not match expected vote weight from getAccountVotingPowerForPiece"
+        );
+    }
+
+    // test to ensure that the vote weight does not count points votes in the same block
+    function testVoteWeight_Points_Block_before() public {
+        vm.stopPrank();
+        address voter = address(this);
+
+        // Mint tokens to the voter
+        vm.prank(address(revolutionPointsEmitter));
+        revolutionPoints.mint(voter, 100);
+        vm.roll(vm.getBlockNumber() + 1);
+
+        uint256 pieceId = createDefaultArtPiece();
+        vm.roll(vm.getBlockNumber() + 1);
+
+        vm.prank(address(revolutionPointsEmitter));
+        revolutionPoints.mint(voter, 100);
+
+        // Cast a vote for the art piece
+        vm.prank(voter);
+        cultureIndex.vote(pieceId);
+
+        // Get the expected vote weight from the contract
+        uint256 expectedVoteWeight = cultureIndex.getAccountVotingPowerForPiece(pieceId, voter);
+
+        // Get the actual vote weight added
+        uint256 actualVoteWeightAdded = cultureIndex.totalVoteWeights(pieceId);
+
+        // Assert that the actual vote weight added matches the expected vote weight
+        assertEq(
+            actualVoteWeightAdded,
+            expectedVoteWeight,
+            "Vote weight added does not match expected vote weight from getAccountVotingPowerForPiece"
+        );
+
+        //expect it to be equal to 200
+        assertEq(
+            cultureIndex.totalVoteWeights(pieceId),
+            100,
+            "Vote weight added does not match expected vote weight from getAccountVotingPowerForPiece"
+        );
+
+        assertEq(
+            actualVoteWeightAdded,
+            cultureIndex.getVote(pieceId, voter).weight,
+            "Vote weight added does not match expected vote weight from getAccountVotingPowerForPiece"
+        );
+    }
+
+    // test to ensure that the vote weight does not count points votes in the same block
+    function testVoteWeight_Points_No_Snapshot() public {
+        vm.stopPrank();
+        address voter = address(this);
+
+        // Mint tokens to the voter
+        vm.prank(address(revolutionPointsEmitter));
+        revolutionPoints.mint(voter, 100);
+        vm.roll(vm.getBlockNumber() + 1);
+
+        uint256 pieceId = createDefaultArtPiece();
+        vm.roll(vm.getBlockNumber() + 1);
+
+        vm.prank(address(revolutionPointsEmitter));
+        revolutionPoints.mint(voter, 100);
+
+        vm.roll(vm.getBlockNumber() + 1);
+
+        // Cast a vote for the art piece
+        vm.prank(voter);
+        cultureIndex.vote(pieceId);
+
+        // Get the expected vote weight from the contract
+        uint256 expectedVoteWeight = cultureIndex.getAccountVotingPowerForPiece(pieceId, voter);
+
+        // Get the actual vote weight added
+        uint256 actualVoteWeightAdded = cultureIndex.totalVoteWeights(pieceId);
+
+        // Assert that the actual vote weight added matches the expected vote weight
+        assertEq(
+            actualVoteWeightAdded,
+            expectedVoteWeight,
+            "Vote weight added does not match expected vote weight from getAccountVotingPowerForPiece"
+        );
+
+        //expect it to be equal to 200
+        assertEq(
+            cultureIndex.totalVoteWeights(pieceId),
+            200,
             "Vote weight added does not match expected vote weight from getAccountVotingPowerForPiece"
         );
 
