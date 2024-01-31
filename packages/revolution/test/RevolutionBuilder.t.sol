@@ -237,7 +237,7 @@ contract RevolutionBuilderTest is Test {
             0,
             ICultureIndex.PieceMaximums({ name: 100, description: 2100, image: 64_000, text: 256, animationUrl: 100 }),
             ICultureIndex.MediaType.NONE,
-            ICultureIndex.RequiredMediaPrefix.NONE
+            ICultureIndex.RequiredMediaPrefix.MIXED
         );
     }
 

@@ -151,7 +151,7 @@ interface ICultureIndex is ICultureIndexEvents {
 
     // Enum representing file type requirements for art pieces.
     enum RequiredMediaPrefix {
-        NONE,
+        MIXED, // IPFS or SVG
         SVG,
         IPFS
     }
