@@ -163,7 +163,7 @@ interface ICultureIndex is ICultureIndexEvents {
         ANIMATION,
         AUDIO,
         TEXT,
-        NONE // never used, just for when using MediaType as a requirement for an index
+        NONE // never used by end user, only used in CultureIndex when using requriedMediaType
     }
 
     // Struct defining metadata for an art piece.
