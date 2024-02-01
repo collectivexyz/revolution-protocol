@@ -53,4 +53,13 @@ contract CultureIndexStorageV1 {
 
     // The address that is allowed to drop art pieces
     address public dropperAdmin;
+
+    // The maximum length for art piece data
+    ICultureIndex.PieceMaximums public PIECE_DATA_MAXIMUMS;
+
+    // The required media types for art pieces
+    ICultureIndex.MediaType public requiredMediaType;
+
+    // The required file prefixes for art pieces
+    ICultureIndex.RequiredMediaPrefix public requiredMediaPrefix;
 }

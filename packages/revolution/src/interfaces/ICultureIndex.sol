@@ -140,8 +140,25 @@ interface ICultureIndex is ICultureIndexEvents {
     ///                         CONSTANTS                        ///
     ///                                                          ///
 
+    // Struct defining maximum lengths for art piece data
+    struct PieceMaximums {
+        uint256 name;
+        uint256 description;
+        uint256 image;
+        uint256 text;
+        uint256 animationUrl;
+    }
+
+    // Enum representing file type requirements for art pieces.
+    enum RequiredMediaPrefix {
+        MIXED, // IPFS or SVG
+        SVG,
+        IPFS
+    }
+
     // Enum representing different media types for art pieces.
     enum MediaType {
+        NONE, // never used by end user, only used in CultureIndex when using requriedMediaType
         IMAGE,
         ANIMATION,
         AUDIO,
@@ -328,4 +345,18 @@ interface ICultureIndex is ICultureIndexEvents {
         address dropperAdmin,
         IRevolutionBuilder.CultureIndexParams calldata cultureIndexParams
     ) external;
+
+    /**
+     * @notice Easily fetch piece maximums
+     * @return Max lengths for piece data
+     */
+    function maxNameLength() external view returns (uint256);
+
+    function maxDescriptionLength() external view returns (uint256);
+
+    function maxImageLength() external view returns (uint256);
+
+    function maxTextLength() external view returns (uint256);
+
+    function maxAnimationUrlLength() external view returns (uint256);
 }

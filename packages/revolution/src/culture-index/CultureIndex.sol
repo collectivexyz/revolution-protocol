@@ -37,22 +37,15 @@ contract CultureIndex is
     /// @notice The contract upgrade manager
     IRevolutionBuilder private immutable manager;
 
-    // Constant for max number of creators
-    uint256 public constant MAX_NUM_CREATORS = 21;
-
-    // Constant for art piece metadata
-    uint256 public constant MAX_NAME_LENGTH = 100;
-    uint256 public constant MAX_DESCRIPTION_LENGTH = 2100;
-    uint256 public constant MAX_IMAGE_LENGTH = 64_000;
-    uint256 public constant MAX_ANIMATION_URL_LENGTH = 100;
-    uint256 public constant MAX_TEXT_LENGTH = 67_112;
-
-    /// @notice The maximum settable quorum votes basis points
-    uint256 public constant MAX_QUORUM_VOTES_BPS = 6_000; // 6,000 basis points or 60%
-
     /// @notice The EIP-712 typehash for gasless votes
     bytes32 public constant VOTE_TYPEHASH =
         keccak256("Vote(address from,uint256[] pieceIds,uint256 nonce,uint256 deadline)");
+
+    // Constant for max number of creators
+    uint256 public constant MAX_NUM_CREATORS = 21;
+
+    /// @notice The maximum settable quorum votes basis points
+    uint256 public constant MAX_QUORUM_VOTES_BPS = 6_000; // 6,000 basis points or 60%
 
     ///                                                          ///
     ///                         CONSTRUCTOR                      ///
@@ -110,6 +103,17 @@ contract CultureIndex is
         minVotingPowerToCreate = _cultureIndexParams.minVotingPowerToCreate;
         dropperAdmin = _dropperAdmin;
 
+        PIECE_DATA_MAXIMUMS = PieceMaximums({
+            name: _cultureIndexParams.pieceMaximums.name,
+            description: _cultureIndexParams.pieceMaximums.description,
+            image: _cultureIndexParams.pieceMaximums.image,
+            animationUrl: _cultureIndexParams.pieceMaximums.animationUrl,
+            text: _cultureIndexParams.pieceMaximums.text
+        });
+
+        requiredMediaType = _cultureIndexParams.requiredMediaType;
+        requiredMediaPrefix = _cultureIndexParams.requiredMediaPrefix;
+
         emit QuorumVotesBPSSet(quorumVotesBPS, _cultureIndexParams.quorumVotesBPS);
 
         // Create maxHeap
@@ -151,47 +155,63 @@ contract CultureIndex is
      * - The media type must be one of the defined types in the MediaType enum.
      * - The corresponding media data must not be empty.
      */
-    function validateMediaType(ArtPieceMetadata calldata metadata) internal pure {
-        if (uint8(metadata.mediaType) > 3) revert INVALID_MEDIA_TYPE();
+    function validateMediaType(ArtPieceMetadata calldata metadata) internal view {
+        MediaType mediaType = MediaType(metadata.mediaType);
 
-        if (metadata.mediaType == MediaType.IMAGE) {
-            if (bytes(metadata.image).length == 0) revert INVALID_IMAGE();
-        } else if (metadata.mediaType == MediaType.ANIMATION || metadata.mediaType == MediaType.AUDIO) {
-            if (bytes(metadata.animationUrl).length == 0) revert INVALID_ANIMATION_URL();
-        } else if (metadata.mediaType == MediaType.TEXT) {
-            if (bytes(metadata.text).length == 0) revert INVALID_TEXT();
+        if (
+            // invalid media type
+            mediaType == MediaType.NONE ||
+            // or specific required media type is not adhered to
+            (requiredMediaType != MediaType.NONE && mediaType != requiredMediaType)
+        ) revert INVALID_MEDIA_TYPE();
+
+        uint256 imageLength = bytes(metadata.image).length;
+        uint256 animationUrlLength = bytes(metadata.animationUrl).length;
+        uint256 textLength = bytes(metadata.text).length;
+        uint256 nameLength = bytes(metadata.name).length;
+
+        if (mediaType == MediaType.IMAGE && imageLength == 0) {
+            revert INVALID_IMAGE();
+        } else if ((mediaType == MediaType.ANIMATION || mediaType == MediaType.AUDIO) && animationUrlLength == 0) {
+            revert INVALID_ANIMATION_URL();
+        } else if (mediaType == MediaType.TEXT && textLength == 0) {
+            revert INVALID_TEXT();
         }
 
         // ensure all fields of metadata are within reasonable bounds
-        if (bytes(metadata.description).length > MAX_DESCRIPTION_LENGTH) revert INVALID_DESCRIPTION();
+        if (bytes(metadata.description).length > PIECE_DATA_MAXIMUMS.description) revert INVALID_DESCRIPTION();
 
-        // permit reasonable SVG images
-        if (bytes(metadata.image).length > MAX_IMAGE_LENGTH) revert INVALID_IMAGE();
+        if (imageLength > PIECE_DATA_MAXIMUMS.image) revert INVALID_IMAGE();
 
-        // assume animation is always an ipfs hash
-        if (bytes(metadata.animationUrl).length > MAX_ANIMATION_URL_LENGTH) revert INVALID_ANIMATION_URL();
+        if (animationUrlLength > PIECE_DATA_MAXIMUMS.animationUrl) revert INVALID_ANIMATION_URL();
 
-        // permit reasonable text
-        if (bytes(metadata.text).length > MAX_TEXT_LENGTH) revert INVALID_TEXT();
+        if (textLength > PIECE_DATA_MAXIMUMS.text) revert INVALID_TEXT();
+
+        //ensure name is not too large
+        if (nameLength > PIECE_DATA_MAXIMUMS.name) revert INVALID_NAME();
 
         string memory ipfsPrefix = "ipfs://";
-        string memory svgPrefix = "data:image/svg+xml;base64,";
 
         // ensure animation url starts with ipfs://
-        if (
-            bytes(metadata.animationUrl).length > 0 &&
-            !Strings.equal(_substring(metadata.animationUrl, 0, 7), (ipfsPrefix))
-        ) revert INVALID_ANIMATION_URL();
+        if (animationUrlLength > 0 && !Strings.equal(_substring(metadata.animationUrl, 0, 7), (ipfsPrefix)))
+            revert INVALID_ANIMATION_URL();
 
         // ensure image url starts with ipfs:// or data:image/svg+xml;base64,
-        if (
-            bytes(metadata.image).length > 0 &&
-            !(Strings.equal(_substring(metadata.image, 0, 7), (ipfsPrefix)) ||
-                Strings.equal(_substring(metadata.image, 0, 26), (svgPrefix)))
-        ) revert INVALID_IMAGE();
+        if (imageLength > 0) {
+            string memory svgPrefix = "data:image/svg+xml;base64,";
 
-        //ensure name is set
-        if (bytes(metadata.name).length == 0 || bytes(metadata.name).length > MAX_NAME_LENGTH) revert INVALID_NAME();
+            bool startsWithSvg = imageLength > 25 && Strings.equal(_substring(metadata.image, 0, 26), (svgPrefix));
+            bool startsWithIpfs = imageLength > 6 && Strings.equal(_substring(metadata.image, 0, 7), (ipfsPrefix));
+
+            if (requiredMediaPrefix == RequiredMediaPrefix.IPFS && !startsWithIpfs) {
+                revert INVALID_IMAGE();
+            } else if (requiredMediaPrefix == RequiredMediaPrefix.SVG && !startsWithSvg) {
+                revert INVALID_IMAGE();
+            } else if (!startsWithIpfs && !startsWithSvg) {
+                // if no required prefix, ensure it starts with ipfs:// or data:image/svg+xml;base64,
+                revert INVALID_IMAGE();
+            }
+        }
     }
 
     /**
@@ -607,6 +627,26 @@ contract CultureIndex is
                 creators: pieces[pieceId].creators,
                 sponsor: pieces[pieceId].sponsor
             });
+    }
+
+    function maxNameLength() external view returns (uint256) {
+        return PIECE_DATA_MAXIMUMS.name;
+    }
+
+    function maxDescriptionLength() external view returns (uint256) {
+        return PIECE_DATA_MAXIMUMS.description;
+    }
+
+    function maxImageLength() external view returns (uint256) {
+        return PIECE_DATA_MAXIMUMS.image;
+    }
+
+    function maxTextLength() external view returns (uint256) {
+        return PIECE_DATA_MAXIMUMS.text;
+    }
+
+    function maxAnimationUrlLength() external view returns (uint256) {
+        return PIECE_DATA_MAXIMUMS.animationUrl;
     }
 
     ///                                                          ///

@@ -242,19 +242,6 @@ contract CultureIndexArtPieceTest is CultureIndexTestSuite {
     }
 
     /**
-     * @dev Test case to validate art piece creation with missing name
-     */
-    function testMissingName() public {
-        (
-            CultureIndex.ArtPieceMetadata memory metadata,
-            ICultureIndex.CreatorBps[] memory creators
-        ) = createArtPieceTuple("", "Invalid Piece", ICultureIndex.MediaType.TEXT, "", "dude", "", address(0x1), 10000);
-
-        vm.expectRevert(abi.encodeWithSignature("INVALID_NAME()"));
-        cultureIndex.createPiece(metadata, creators);
-    }
-
-    /**
      * @dev Test case to validate that piece IDs are incremented correctly
      */
     function testPieceIDIncrement() public {

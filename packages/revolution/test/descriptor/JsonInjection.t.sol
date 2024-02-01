@@ -6,6 +6,7 @@ import { console2 } from "forge-std/console2.sol";
 import { DescriptorTest } from "./Descriptor.t.sol";
 import { ICultureIndex } from "../../src/interfaces/ICultureIndex.sol";
 import { Strings } from "@openzeppelin/contracts/utils/Strings.sol";
+import { ICultureIndex } from "../../src/interfaces/ICultureIndex.sol";
 
 contract JsonInjectionAttackTest is DescriptorTest {
     using Strings for uint256;
@@ -16,7 +17,18 @@ contract JsonInjectionAttackTest is DescriptorTest {
 
         super.setRevolutionTokenParams("Vrbs", "VRBS", "https://example.com/token/", "Vrb");
 
-        super.setCultureIndexParams("Vrbs", "Our community Vrbs. Must be 32x32.", 10, 1, 500, 0, 0);
+        super.setCultureIndexParams(
+            "Vrbs",
+            "Our community Vrbs. Must be 32x32.",
+            10,
+            1,
+            500,
+            0,
+            0,
+            ICultureIndex.PieceMaximums({ name: 100, description: 2100, image: 64_000, text: 256, animationUrl: 100 }),
+            ICultureIndex.MediaType.NONE,
+            ICultureIndex.RequiredMediaPrefix.MIXED
+        );
 
         super.deployMock();
     }
@@ -27,15 +39,15 @@ contract JsonInjectionAttackTest is DescriptorTest {
         ICultureIndex.ArtPieceMetadata memory expectedMetadata = ICultureIndex.ArtPieceMetadata({
             name: "Mona Lisa",
             description: "A renowned painting by Leonardo da Vinci",
-            mediaType: ICultureIndex.MediaType.IMAGE,
-            image: "ipfs://realMonaLisa",
+            mediaType: ICultureIndex.MediaType.ANIMATION,
+            animationUrl: "ipfs://realMonaLisa",
             text: "",
-            animationUrl: '", "image": "ipfs://fakeMonaLisa' // malicious string injected
+            image: '", "animationUrl": "ipfs://fakeMonaLisa' // malicious string injected
         });
 
         string memory uri = descriptor.tokenURI(tokenId, expectedMetadata);
 
-        string memory errorMessage = "Token URI should reflect the escaped animation URL";
+        string memory errorMessage = "Token URI should reflect the escaped image URL";
 
         // The token URI should reflect both image and animation URLs
         string memory metadataJson = decodeMetadata(uri);
@@ -52,12 +64,16 @@ contract JsonInjectionAttackTest is DescriptorTest {
             string(abi.encodePacked(expectedMetadata.name, ". ", expectedMetadata.description)),
             string(abi.encodePacked(errorMessage, " - Description mismatch"))
         );
-        assertEq(imageUrl, expectedMetadata.image, string(abi.encodePacked(errorMessage, " - Image URL mismatch")));
         assertEq(
             animationUrl,
-            //escaped characters
-            '\\", \\"image\\": \\"ipfs://fakeMonaLisa',
+            expectedMetadata.animationUrl,
             string(abi.encodePacked(errorMessage, " - Animation URL mismatch"))
+        );
+        assertEq(
+            imageUrl,
+            //escaped characters
+            '\\", \\"animationUrl\\": \\"ipfs://fakeMonaLisa',
+            string(abi.encodePacked(errorMessage, " - Image URL was not escaped correctly"))
         );
     }
 

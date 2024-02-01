@@ -22,7 +22,7 @@ contract CultureIndexArtMetadataTest is CultureIndexTestSuite {
 
     // Test for exceeding the maximum name length
     function test__ExceedingNameLength() public {
-        string memory longName = createLongString(cultureIndex.MAX_NAME_LENGTH() + 1);
+        string memory longName = createLongString(cultureIndex.maxNameLength() + 1);
         (
             CultureIndex.ArtPieceMetadata memory metadata,
             ICultureIndex.CreatorBps[] memory creators
@@ -42,7 +42,7 @@ contract CultureIndexArtMetadataTest is CultureIndexTestSuite {
 
     // Test for exceeding the maximum description length
     function test__ExceedingDescriptionLength() public {
-        string memory longDescription = createLongString(cultureIndex.MAX_DESCRIPTION_LENGTH() + 1);
+        string memory longDescription = createLongString(cultureIndex.maxDescriptionLength() + 1);
         (
             CultureIndex.ArtPieceMetadata memory metadata,
             ICultureIndex.CreatorBps[] memory creators
@@ -61,7 +61,7 @@ contract CultureIndexArtMetadataTest is CultureIndexTestSuite {
     }
 
     function test__ExceedingImageLength() public {
-        string memory longImageUrl = createLongString(cultureIndex.MAX_IMAGE_LENGTH() + 1);
+        string memory longImageUrl = createLongString(cultureIndex.maxImageLength() + 1);
         (
             CultureIndex.ArtPieceMetadata memory metadata,
             ICultureIndex.CreatorBps[] memory creators
@@ -80,7 +80,7 @@ contract CultureIndexArtMetadataTest is CultureIndexTestSuite {
     }
 
     function test__ExceedingAnimationLength() public {
-        string memory longAnimationUrl = createLongString(cultureIndex.MAX_ANIMATION_URL_LENGTH() + 1);
+        string memory longAnimationUrl = createLongString(cultureIndex.maxAnimationUrlLength() + 1);
         (
             CultureIndex.ArtPieceMetadata memory metadata,
             ICultureIndex.CreatorBps[] memory creators
@@ -99,7 +99,7 @@ contract CultureIndexArtMetadataTest is CultureIndexTestSuite {
     }
 
     function test__ExceedingAudioLength() public {
-        string memory longAudioUrl = createLongString(cultureIndex.MAX_ANIMATION_URL_LENGTH() + 1);
+        string memory longAudioUrl = createLongString(cultureIndex.maxAnimationUrlLength() + 1);
         (
             CultureIndex.ArtPieceMetadata memory metadata,
             ICultureIndex.CreatorBps[] memory creators
@@ -118,7 +118,7 @@ contract CultureIndexArtMetadataTest is CultureIndexTestSuite {
     }
 
     function test__ExceedingTextLength() public {
-        string memory longText = createLongString(cultureIndex.MAX_TEXT_LENGTH() + 1);
+        string memory longText = createLongString(cultureIndex.maxTextLength() + 1);
         (
             CultureIndex.ArtPieceMetadata memory metadata,
             ICultureIndex.CreatorBps[] memory creators

@@ -4,6 +4,7 @@ pragma solidity 0.8.22;
 import { RevolutionDAOStorageV1 } from "../governance/RevolutionDAOInterfaces.sol";
 import { IUUPS } from "./IUUPS.sol";
 import { RevolutionBuilderTypesV1 } from "../builder/types/RevolutionBuilderTypesV1.sol";
+import { ICultureIndex } from "./ICultureIndex.sol";
 
 /// @title IRevolutionBuilder
 /// @notice The external RevolutionBuilder events, errors, structs and functions
@@ -173,6 +174,9 @@ interface IRevolutionBuilder is IUUPS {
     /// @param quorumVotesBPS The initial quorum votes threshold in basis points
     /// @param minVotingPowerToVote The minimum vote weight that a voter must have to be able to vote.
     /// @param minVotingPowerToCreate The minimum vote weight that a voter must have to be able to create an art piece.
+    /// @param pieceMaximums The maxium length for each field in an art piece
+    /// @param requiredMediaType The required media type for each art piece eg: image only
+    /// @param requiredMediaPrefix The required media prefix for each art piece eg: ipfs://
     struct CultureIndexParams {
         string name;
         string description;
@@ -181,6 +185,9 @@ interface IRevolutionBuilder is IUUPS {
         uint256 quorumVotesBPS;
         uint256 minVotingPowerToVote;
         uint256 minVotingPowerToCreate;
+        ICultureIndex.PieceMaximums pieceMaximums;
+        ICultureIndex.MediaType requiredMediaType;
+        ICultureIndex.RequiredMediaPrefix requiredMediaPrefix;
     }
 
     /// @notice The RevolutionVotingPower parameters
