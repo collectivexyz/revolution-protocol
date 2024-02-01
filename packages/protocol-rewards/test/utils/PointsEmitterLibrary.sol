@@ -1351,7 +1351,7 @@ contract RevolutionPointsEmitter is
      */
     int256 public emittedTokenWad;
 
-    // The split of the purchase that is reserved for the creator of the Verb in basis points
+    // The split of the purchase that is reserved for the founders in basis points
     uint256 public creatorRateBps;
 
     // The split of (purchase proceeds * creatorRate) that is sent to the creator as ether in basis points

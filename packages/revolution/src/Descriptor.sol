@@ -178,7 +178,7 @@ contract Descriptor is IDescriptor, VersionedContract, UUPS, Ownable2StepUpgrade
     }
 
     /**
-     * @notice Given a token ID, construct a token URI for an official Vrbs DAO verb.
+     * @notice Given a token ID, construct a token URI for a token.
      * @dev The returned value may be a base64 encoded data URI or an API URL.
      */
     //slither-disable-next-line encode-packed-collision
@@ -192,7 +192,7 @@ contract Descriptor is IDescriptor, VersionedContract, UUPS, Ownable2StepUpgrade
     }
 
     /**
-     * @notice Given a token ID, construct a base64 encoded data URI for an official Vrbs DAO verb.
+     * @notice Given a token ID, construct a base64 encoded data URI for a token.
      */
     function dataURI(
         uint256 tokenId,

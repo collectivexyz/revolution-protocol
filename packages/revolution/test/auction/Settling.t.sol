@@ -32,7 +32,7 @@ contract AuctionHouseSettleTest is AuctionHouseTest {
         auction.settleCurrentAndCreateNewAuction();
         vm.roll(vm.getBlockNumber() + 1);
 
-        assertEq(revolutionToken.ownerOf(0), address(11), "Verb should be transferred to the highest bidder");
+        assertEq(revolutionToken.ownerOf(0), address(11), "Token should be transferred to the highest bidder");
         // cultureIndex currentVotes of highest bidder should be 10
         assertEq(
             cultureIndex.votingPower().getVotesWithWeights(address(11), 1, cultureIndex.tokenVoteWeight()),
@@ -99,7 +99,7 @@ contract AuctionHouseSettleTest is AuctionHouseTest {
 
         // Assuming revolutionToken.burn is called for auctions with no bids
         vm.expectEmit(true, true, true, true);
-        emit IRevolutionToken.VerbBurned(tokenId);
+        emit IRevolutionToken.RevolutionTokenBurned(tokenId);
 
         auction.settleCurrentAndCreateNewAuction();
     }
@@ -407,8 +407,8 @@ contract AuctionHouseSettleTest is AuctionHouseTest {
             );
         }
 
-        // Verify ownership of the verb
-        assertEq(revolutionToken.ownerOf(0), address(21_000), "Verb should be transferred to the highest bidder");
+        // Verify ownership of the token
+        assertEq(revolutionToken.ownerOf(0), address(21_000), "Token should be transferred to the highest bidder");
         // Verify voting weight on culture index is 721 vote weight for winning bidder
         assertEq(
             cultureIndex.votingPower().getVotesWithWeights(address(21_000), 1, cultureIndex.tokenVoteWeight()),
@@ -488,7 +488,11 @@ contract AuctionHouseSettleTest is AuctionHouseTest {
             // "Owner did not receive the correct amount of ETH"
         );
 
-        assertEq(revolutionToken.ownerOf(tokenId), address(21_000), "Verb should be transferred to the highest bidder");
+        assertEq(
+            revolutionToken.ownerOf(tokenId),
+            address(21_000),
+            "Token should be transferred to the highest bidder"
+        );
         // Checking voting weight on culture index is 721 vote weight for winning bidder
         assertEq(
             cultureIndex.votingPower().getVotesWithWeights(address(21_000), 1, cultureIndex.tokenVoteWeight()),

@@ -220,7 +220,7 @@ contract TokenAccessControlTest is RevolutionTokenTestSuite {
         address newDescriptor = address(new ERC1967Proxy(descriptorImpl, ""));
 
         vm.startPrank(address(manager));
-        IDescriptor(newDescriptor).initialize(address(this), "Verb");
+        IDescriptor(newDescriptor).initialize(address(this), "Vrb");
 
         vm.startPrank(address(executor));
         revolutionToken.setDescriptor(IDescriptor(newDescriptor));

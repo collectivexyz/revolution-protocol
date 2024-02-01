@@ -57,7 +57,7 @@ contract RevolutionToken is
     // Whether the descriptor can be updated
     bool public isDescriptorLocked;
 
-    // The internal verb ID tracker
+    // The internal token ID tracker
     uint256 private _currentTokenId;
 
     // IPFS content hash of contract-level metadata
@@ -172,7 +172,7 @@ contract RevolutionToken is
     }
 
     /**
-     * @notice Mint a Verb to the minter.
+     * @notice Mint a token to the minter.
      * @dev Call _mintTo with the to address(es).
      */
     function mint() public override onlyMinter nonReentrant returns (uint256) {
@@ -180,11 +180,11 @@ contract RevolutionToken is
     }
 
     /**
-     * @notice Burn a verb.
+     * @notice Burn a token.
      */
     function burn(uint256 tokenId) public override onlyMinter nonReentrant {
         _burn(tokenId);
-        emit VerbBurned(tokenId);
+        emit RevolutionTokenBurned(tokenId);
     }
 
     /**
@@ -274,7 +274,7 @@ contract RevolutionToken is
      * @return The ArtPiece struct associated with the given ID.
      */
     function getArtPieceById(uint256 tokenId) external view returns (ICultureIndex.ArtPiece memory) {
-        if (tokenId >= _currentTokenId) revert INVALID_PIECE_ID();
+        if (tokenId >= _currentTokenId) revert INVALID_TOKEN_ID();
         return cultureIndex.getPieceById(artPieces[tokenId]);
     }
 
@@ -287,7 +287,7 @@ contract RevolutionToken is
     }
 
     /**
-     * @notice Mint a Verb with `tokenId` to the provided `to` address. Pulls the top voted art piece from the CultureIndex.
+     * @notice Mint a token with `tokenId` to the provided `to` address. Pulls the top voted art piece from the CultureIndex.
      */
     function _mintTo(address to) internal returns (uint256) {
         // Use try/catch to handle potential failure
@@ -298,7 +298,7 @@ contract RevolutionToken is
 
             _mint(to, tokenId);
 
-            emit VerbCreated(tokenId, artPiece);
+            emit RevolutionTokenCreated(tokenId, artPiece);
 
             return tokenId;
         } catch {

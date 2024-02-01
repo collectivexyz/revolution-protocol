@@ -226,7 +226,7 @@ contract AuctionHouseBasicTest is AuctionHouseTest {
         ) = auction.auction();
 
         // Expect auction tokenId to be 0
-        assertEq(tokenId2, 0, "Auction should be for the zeroth verb");
+        assertEq(tokenId2, 0, "Auction should be for tokenId 0");
 
         // Expect auction amount to be bidAmount
         assertEq(amount, bidAmount, "Bid amount should be set correctly");
@@ -254,8 +254,12 @@ contract AuctionHouseBasicTest is AuctionHouseTest {
 
         auction.settleCurrentAndCreateNewAuction(); // This will settle the current auction and create a new one
 
-        // Expect 21 to be the owner of the verb
-        assertEq(revolutionToken.ownerOf(tokenId), address(21), "Verb should be transferred to bidder param");
+        // Expect 21 to be the owner of the revolution token
+        assertEq(
+            revolutionToken.ownerOf(tokenId),
+            address(21),
+            "Revolution token should be transferred to bidder param"
+        );
     }
 
     function test_AuctionCreation() public {
@@ -277,7 +281,7 @@ contract AuctionHouseBasicTest is AuctionHouseTest {
         ) = auction.auction();
         assertEq(auctionStartTime, startTime, "Auction start time should be set correctly");
         assertEq(auctionEndTime, startTime + auction.duration(), "Auction end time should be set correctly");
-        assertEq(tokenId, 0, "Auction should be for the zeroth verb");
+        assertEq(tokenId, 0, "Auction should be for the zeroth tokenId");
         assertEq(amount, 0, "Auction amount should be 0");
         assertEq(bidder, address(0), "Auction bidder should be 0");
         assertEq(settled, false, "Auction should not be settled");
@@ -339,7 +343,11 @@ contract AuctionHouseBasicTest is AuctionHouseTest {
             (, , , , , , bool settled) = auction.auction();
             assertEq(settled, false, "Auction should not be settled because new one created");
         } else {
-            assertEq(revolutionToken.ownerOf(tokenId), address(1), "Verb should be transferred to the auction house");
+            assertEq(
+                revolutionToken.ownerOf(tokenId),
+                address(1),
+                "Revolution token should be transferred to the auction house"
+            );
         }
     }
 
@@ -351,7 +359,11 @@ contract AuctionHouseBasicTest is AuctionHouseTest {
         auction.unpause();
 
         (uint256 tokenId, , , uint256 endTime, , , ) = auction.auction();
-        assertEq(revolutionToken.ownerOf(tokenId), address(auction), "Verb should be transferred to the auction house");
+        assertEq(
+            revolutionToken.ownerOf(tokenId),
+            address(auction),
+            "Revolution token should be transferred to the auction house"
+        );
 
         vm.warp(endTime + 1);
         vm.roll(vm.getBlockNumber() + 1);

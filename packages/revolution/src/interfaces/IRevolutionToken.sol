@@ -28,8 +28,8 @@ interface IRevolutionToken is IERC721Enumerable, IVotes {
     ///                           ERRORS                         ///
     ///                                                          ///
 
-    /// @dev Reverts if the verb ID is invalid (greater than the current verb ID).
-    error INVALID_PIECE_ID();
+    /// @dev Reverts if the token ID is invalid (greater than the current token ID).
+    error INVALID_TOKEN_ID();
 
     /// @dev Reverts if the number of creators for an art piece exceeds the maximum allowed.
     error TOO_MANY_CREATORS();
@@ -56,9 +56,9 @@ interface IRevolutionToken is IERC721Enumerable, IVotes {
     ///                           EVENTS                         ///
     ///                                                          ///
 
-    event VerbCreated(uint256 indexed tokenId, ICultureIndex.ArtPieceCondensed artPiece);
+    event RevolutionTokenCreated(uint256 indexed tokenId, ICultureIndex.ArtPieceCondensed artPiece);
 
-    event VerbBurned(uint256 indexed tokenId);
+    event RevolutionTokenBurned(uint256 indexed tokenId);
 
     event MinterUpdated(address minter);
 

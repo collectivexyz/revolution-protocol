@@ -58,8 +58,8 @@ interface IAuctionHouse is IAuctionHouseEvents {
     /// @dev Reverts if address 0 is passed but not allowed
     error ADDRESS_ZERO();
 
-    /// @dev Reverts if the verb ID does not match the auction's verb ID.
-    error INVALID_VERB_ID();
+    /// @dev Reverts if the supplied token ID for a bid does not match the auction's token ID.
+    error INVALID_TOKEN_ID();
 
     /// @dev Reverts if the auction has already expired.
     error AUCTION_EXPIRED();
@@ -104,7 +104,7 @@ interface IAuctionHouse is IAuctionHouseEvents {
     error AUCTION_ALREADY_IN_PROGRESS();
 
     struct Auction {
-        // ID for the Verb (ERC721 token ID)
+        // ERC721 token ID
         uint256 tokenId;
         // The current highest bid amount
         uint256 amount;
