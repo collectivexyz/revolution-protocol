@@ -1,5 +1,12 @@
 # @collectivexyz/revolution
 
+## 0.3.15
+
+### Patch Changes
+
+- 77d0b4e: remove snapshot for points voting in CultureIndex (assumes nontransferability)
+- 77d0b4e: adds SVG requirement and media type requirements to CultureIndex
+
 ## 0.3.14
 
 ### Patch Changes
