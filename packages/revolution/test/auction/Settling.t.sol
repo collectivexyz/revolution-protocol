@@ -74,7 +74,7 @@ contract AuctionHouseSettleTest is AuctionHouseTest {
 
         uint256 msgValueRemaining = etherToSpendOnGovernanceTotal - feeAmount;
 
-        uint256 pointsEmitterValueGrants = (msgValueRemaining * revolutionPointsEmitter.creatorRateBps()) / 10_000;
+        uint256 pointsEmitterValueGrants = (msgValueRemaining * revolutionPointsEmitter.grantsRateBps()) / 10_000;
         uint256 pointsEmitterValueGrantsDirect = (pointsEmitterValueGrants * revolutionPointsEmitter.entropyRateBps()) /
             10_000;
         uint256 pointsEmitterValueGrantsGov = pointsEmitterValueGrants - pointsEmitterValueGrantsDirect;
@@ -263,7 +263,7 @@ contract AuctionHouseSettleTest is AuctionHouseTest {
 
         uint256 msgValueRemaining = creatorPointsEther - revolutionPointsEmitter.computeTotalReward(creatorPointsEther);
 
-        uint256 grantsShare = (msgValueRemaining * revolutionPointsEmitter.creatorRateBps()) / 10_000;
+        uint256 grantsShare = (msgValueRemaining * revolutionPointsEmitter.grantsRateBps()) / 10_000;
         uint256 buyersShare = msgValueRemaining - grantsShare;
         uint256 grantsDirectPayment = (grantsShare * revolutionPointsEmitter.entropyRateBps()) / 10_000;
         uint256 grantsGovernancePayment = grantsShare - grantsDirectPayment;
@@ -287,9 +287,9 @@ contract AuctionHouseSettleTest is AuctionHouseTest {
 
         uint256 msgValueRemaining = creatorPointsEther - revolutionPointsEmitter.computeTotalReward(creatorPointsEther);
 
-        uint256 grantsShare = (msgValueRemaining * revolutionPointsEmitter.creatorRateBps()) / 10_000;
+        uint256 grantsShare = (msgValueRemaining * revolutionPointsEmitter.grantsRateBps()) / 10_000;
         uint256 buyersShare = msgValueRemaining - grantsShare;
-        uint256 grantsDirectPayment = (grantsShare * revolutionPointsEmitter.entropyRateBps()) / 10_000;
+        uint256 grantsDirectPayment = grantsShare;
         uint256 grantsGovernancePayment = grantsShare - grantsDirectPayment;
 
         return auctioneerPayment + grantsGovernancePayment + buyersShare;
@@ -302,7 +302,7 @@ contract AuctionHouseSettleTest is AuctionHouseTest {
         uint256 msgValueRemaining = creatorsGovernancePayment -
             revolutionPointsEmitter.computeTotalReward(creatorsGovernancePayment);
 
-        uint256 grantsShare = (msgValueRemaining * revolutionPointsEmitter.creatorRateBps()) / 10_000;
+        uint256 grantsShare = (msgValueRemaining * revolutionPointsEmitter.grantsRateBps()) / 10_000;
         uint256 buyersShare = msgValueRemaining - grantsShare;
         return (grantsShare * revolutionPointsEmitter.entropyRateBps()) / 10_000;
     }

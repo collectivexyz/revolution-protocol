@@ -296,8 +296,10 @@ contract RevolutionBuilderTest is Test {
                     priceDecayPercent: _priceDecayPercent,
                     tokensPerTimeUnit: _tokensPerTimeUnit
                 }),
-                creatorParams: IRevolutionBuilder.PointsEmitterCreatorParams({
-                    creatorRateBps: 1000,
+                creatorParams: IRevolutionBuilder.FounderParams({
+                    totalRateBps: 1000,
+                    founderAddress: founder,
+                    rewardsExpirationDate: 1_800_000_000,
                     entropyRateBps: 4_000
                 }),
                 creatorsAddress: _creatorsAddress

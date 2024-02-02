@@ -1323,7 +1323,7 @@ interface IRevolutionPointsEmitter {
         address revolutionPoints,
         address vrgda,
         address creatorsAddress,
-        IRevolutionBuilder.PointsEmitterCreatorParams calldata creatorParams
+        IRevolutionBuilder.FounderParams calldata creatorParams
     ) external;
 }
 
@@ -1404,7 +1404,7 @@ contract RevolutionPointsEmitter is
         address _revolutionPoints,
         address _vrgda,
         address _creatorsAddress,
-        IRevolutionBuilder.PointsEmitterCreatorParams calldata _creatorParams
+        IRevolutionBuilder.FounderParams calldata _creatorParams
     ) external initializer {
         if (msg.sender != address(manager)) revert NOT_MANAGER();
         if (_initialOwner == address(0)) revert ADDRESS_ZERO();
@@ -1849,7 +1849,7 @@ interface IRevolutionBuilder is IUUPS {
     /// @param creatorsAddress // The address to send creator payments to
     struct PointsEmitterParams {
         VRGDAParams vrgdaParams;
-        PointsEmitterCreatorParams creatorParams;
+        FounderParams creatorParams;
         address creatorsAddress;
     }
 
@@ -1866,7 +1866,7 @@ interface IRevolutionBuilder is IUUPS {
     /// @notice The ERC-20 points emitter creator parameters
     /// @param creatorRateBps The creator rate basis points of each auction - the share of the winning bid that is reserved for the creator
     /// @param entropyRateBps The entropy rate basis points of each auction - the portion of the creator's share that is directly sent to the creator in ETH
-    struct PointsEmitterCreatorParams {
+    struct FounderParams {
         uint256 creatorRateBps;
         uint256 entropyRateBps;
     }

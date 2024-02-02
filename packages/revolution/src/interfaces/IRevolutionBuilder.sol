@@ -141,11 +141,10 @@ interface IRevolutionBuilder is IUUPS {
 
     /// @notice The RevolutionPoints ERC-20 emitter VRGDA parameters
     /// @param vrgdaParams // The VRGDA parameters
-    /// @param creatorsAddress // The address to send creator payments to
+    /// @param founderParams // The params to dictate payments to the founder
     struct PointsEmitterParams {
         VRGDAParams vrgdaParams;
-        PointsEmitterCreatorParams creatorParams;
-        address creatorsAddress;
+        FounderParams founderParams;
     }
 
     /// @notice The ERC-20 points emitter VRGDA parameters
@@ -159,11 +158,15 @@ interface IRevolutionBuilder is IUUPS {
     }
 
     /// @notice The ERC-20 points emitter creator parameters
-    /// @param creatorRateBps The creator rate basis points of each auction - the share of the winning bid that is reserved for the creator
-    /// @param entropyRateBps The entropy rate basis points of each auction - the portion of the creator's share that is directly sent to the creator in ETH
-    struct PointsEmitterCreatorParams {
-        uint256 creatorRateBps;
+    /// @param totalRateBps The founder rate in basis points - how much of each purchase to the points emitter is reserved for the founders
+    /// @param entropyRateBps The entropy of the founder rate in basis points - how much ether out of the total rate is sent to founders directly
+    /// @param founderAddress the address to send founder rewards to
+    /// @param rewardsExpirationDate The timestamp in seconds from the initialization block after which the founders reward stops
+    struct FounderParams {
+        uint256 totalRateBps;
         uint256 entropyRateBps;
+        address founderAddress;
+        uint256 rewardsExpirationDate;
     }
 
     /// @notice The CultureIndex parameters

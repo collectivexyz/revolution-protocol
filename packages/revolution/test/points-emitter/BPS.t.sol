@@ -198,8 +198,10 @@ contract PointsEmitterBasicTest is PointsEmitterTest {
             revolutionPoints: address(governanceToken),
             vrgda: vrgdac,
             creatorsAddress: creatorsAddress,
-            creatorParams: IRevolutionBuilder.PointsEmitterCreatorParams({
-                creatorRateBps: 100_000,
+            creatorParams: IRevolutionBuilder.FounderParams({
+                totalRateBps: 100_000,
+                founderAddress: founder,
+                rewardsExpirationDate: 1_800_000_000,
                 entropyRateBps: 50_000
             })
         });

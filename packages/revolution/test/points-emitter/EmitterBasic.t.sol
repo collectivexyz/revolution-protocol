@@ -83,8 +83,10 @@ contract PointsEmitterBasicTest is PointsEmitterTest {
             revolutionPoints: address(governanceToken),
             vrgda: address(revolutionPointsEmitter.vrgda()),
             creatorsAddress: creatorsAddress,
-            creatorParams: IRevolutionBuilder.PointsEmitterCreatorParams({
-                creatorRateBps: 1_000,
+            creatorParams: IRevolutionBuilder.FounderParams({
+                totalRateBps: 1_000,
+                founderAddress: founder,
+                rewardsExpirationDate: 1_800_000_000,
                 entropyRateBps: 5_000
             })
         });
@@ -123,8 +125,10 @@ contract PointsEmitterBasicTest is PointsEmitterTest {
             revolutionPoints: address(governanceToken),
             vrgda: address(revolutionPointsEmitter.vrgda()),
             creatorsAddress: creatorsAddress,
-            creatorParams: IRevolutionBuilder.PointsEmitterCreatorParams({
-                creatorRateBps: 1_000,
+            creatorParams: IRevolutionBuilder.FounderParams({
+                totalRateBps: 1_000,
+                founderAddress: founder,
+                rewardsExpirationDate: 1_800_000_000,
                 entropyRateBps: 5_000
             })
         });
@@ -285,8 +289,10 @@ contract PointsEmitterBasicTest is PointsEmitterTest {
             revolutionPoints: address(governanceToken),
             vrgda: address(revolutionPointsEmitter.vrgda()),
             creatorsAddress: creatorsAddress,
-            creatorParams: IRevolutionBuilder.PointsEmitterCreatorParams({
-                creatorRateBps: 1_000,
+            creatorParams: IRevolutionBuilder.FounderParams({
+                totalRateBps: 1_000,
+                founderAddress: founder,
+                rewardsExpirationDate: 1_800_000_000,
                 entropyRateBps: 5_000
             })
         });
