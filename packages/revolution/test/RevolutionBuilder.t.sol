@@ -286,7 +286,7 @@ contract RevolutionBuilderTest is Test {
         int256 _targetPrice,
         int256 _priceDecayPercent,
         int256 _tokensPerTimeUnit,
-        address _creatorsAddress
+        address _founder
     ) internal virtual {
         revolutionPointsParams = IRevolutionBuilder.RevolutionPointsParams({
             tokenParams: revolutionPointsParams.tokenParams,
@@ -296,13 +296,12 @@ contract RevolutionBuilderTest is Test {
                     priceDecayPercent: _priceDecayPercent,
                     tokensPerTimeUnit: _tokensPerTimeUnit
                 }),
-                creatorParams: IRevolutionBuilder.FounderParams({
+                founderParams: IRevolutionBuilder.FounderParams({
                     totalRateBps: 1000,
-                    founderAddress: founder,
+                    founderAddress: _founder,
                     rewardsExpirationDate: 1_800_000_000,
                     entropyRateBps: 4_000
-                }),
-                creatorsAddress: _creatorsAddress
+                })
             })
         });
     }

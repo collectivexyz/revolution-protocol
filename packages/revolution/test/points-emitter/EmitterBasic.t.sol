@@ -39,9 +39,9 @@ contract PointsEmitterBasicTest is PointsEmitterTest {
     }
 
     function testCannotBuyAsCreators() public {
-        vm.startPrank(revolutionPointsEmitter.creatorsAddress());
+        vm.startPrank(revolutionPointsEmitter.founderAddress());
 
-        vm.deal(revolutionPointsEmitter.creatorsAddress(), 100000 ether);
+        vm.deal(revolutionPointsEmitter.founderAddress(), 100000 ether);
 
         address[] memory recipients = new address[](1);
         recipients[0] = address(1);
@@ -82,8 +82,7 @@ contract PointsEmitterBasicTest is PointsEmitterTest {
             weth: address(weth),
             revolutionPoints: address(governanceToken),
             vrgda: address(revolutionPointsEmitter.vrgda()),
-            creatorsAddress: creatorsAddress,
-            creatorParams: IRevolutionBuilder.FounderParams({
+            founderParams: IRevolutionBuilder.FounderParams({
                 totalRateBps: 1_000,
                 founderAddress: founder,
                 rewardsExpirationDate: 1_800_000_000,
@@ -124,8 +123,7 @@ contract PointsEmitterBasicTest is PointsEmitterTest {
             weth: address(weth),
             revolutionPoints: address(governanceToken),
             vrgda: address(revolutionPointsEmitter.vrgda()),
-            creatorsAddress: creatorsAddress,
-            creatorParams: IRevolutionBuilder.FounderParams({
+            founderParams: IRevolutionBuilder.FounderParams({
                 totalRateBps: 1_000,
                 founderAddress: founder,
                 rewardsExpirationDate: 1_800_000_000,
@@ -240,9 +238,9 @@ contract PointsEmitterBasicTest is PointsEmitterTest {
         // Setting Creators Address by Owner
         address newCreatorsAddress = address(0x123);
         vm.prank(address(executor));
-        revolutionPointsEmitter.setCreatorsAddress(newCreatorsAddress);
+        revolutionPointsEmitter.setGrantsAddress(newCreatorsAddress);
         assertEq(
-            revolutionPointsEmitter.creatorsAddress(),
+            revolutionPointsEmitter.founderAddress(),
             newCreatorsAddress,
             "Owner should be able to set creators address"
         );
@@ -250,7 +248,7 @@ contract PointsEmitterBasicTest is PointsEmitterTest {
         // Attempting to set Creators Address by Non-Owner
         address nonOwner = address(0x4156);
         vm.startPrank(nonOwner);
-        try revolutionPointsEmitter.setCreatorsAddress(nonOwner) {
+        try revolutionPointsEmitter.setGrantsAddress(nonOwner) {
             fail("Non-owner should not be able to set creators address");
         } catch {}
         vm.stopPrank();
@@ -288,8 +286,7 @@ contract PointsEmitterBasicTest is PointsEmitterTest {
             weth: address(weth),
             revolutionPoints: address(governanceToken),
             vrgda: address(revolutionPointsEmitter.vrgda()),
-            creatorsAddress: creatorsAddress,
-            creatorParams: IRevolutionBuilder.FounderParams({
+            founderParams: IRevolutionBuilder.FounderParams({
                 totalRateBps: 1_000,
                 founderAddress: founder,
                 rewardsExpirationDate: 1_800_000_000,

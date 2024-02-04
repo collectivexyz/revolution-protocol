@@ -21,10 +21,9 @@ contract EmissionRatesTest is PointsEmitterTest {
 
         vm.startPrank(address(executor));
         // Set creator and entropy rates
-        revolutionPointsEmitter.setCreatorRateBps(creatorRate);
-        revolutionPointsEmitter.setEntropyRateBps(entropyRate);
-        assertEq(revolutionPointsEmitter.creatorRateBps(), creatorRate, "Creator rate not set correctly");
-        assertEq(revolutionPointsEmitter.entropyRateBps(), entropyRate, "Entropy rate not set correctly");
+        revolutionPointsEmitter.setGrantsRateBps(creatorRate);
+        assertEq(revolutionPointsEmitter.founderRateBps(), creatorRate, "Creator rate not set correctly");
+        assertEq(revolutionPointsEmitter.founderEntropyRateBps(), entropyRate, "Entropy rate not set correctly");
 
         // Setup for buying token
         address[] memory recipients = new address[](1);
@@ -34,9 +33,9 @@ contract EmissionRatesTest is PointsEmitterTest {
         bps[0] = 10000; // 100% of the tokens to the recipient
 
         uint256 valueToSend = 1 ether;
-        revolutionPointsEmitter.setCreatorsAddress(address(80));
-        address creatorsAddress = revolutionPointsEmitter.creatorsAddress();
-        uint256 creatorsInitialEthBalance = address(revolutionPointsEmitter.creatorsAddress()).balance;
+        revolutionPointsEmitter.setGrantsAddress(address(80));
+        address creatorsAddress = revolutionPointsEmitter.founderAddress();
+        uint256 creatorsInitialEthBalance = address(revolutionPointsEmitter.founderAddress()).balance;
 
         uint256 feeAmount = revolutionPointsEmitter.computeTotalReward(valueToSend);
 
@@ -62,11 +61,11 @@ contract EmissionRatesTest is PointsEmitterTest {
         );
 
         // Verify tokens distributed to creator
-        uint256 creatorTokenBalance = revolutionPointsEmitter.balanceOf(revolutionPointsEmitter.creatorsAddress());
+        uint256 creatorTokenBalance = revolutionPointsEmitter.balanceOf(revolutionPointsEmitter.founderAddress());
         assertEq(creatorTokenBalance, expectedCreatorTokens, "Creator did not receive correct amount of tokens");
 
         // Verify ETH sent to creator
-        uint256 creatorsNewEthBalance = address(revolutionPointsEmitter.creatorsAddress()).balance;
+        uint256 creatorsNewEthBalance = address(revolutionPointsEmitter.founderAddress()).balance;
         assertEq(
             creatorsNewEthBalance - creatorsInitialEthBalance,
             expectedCreatorEth,
@@ -110,15 +109,14 @@ contract EmissionRatesTest is PointsEmitterTest {
         vm.stopPrank();
         // set setCreatorsAddress
         vm.prank(address(executor));
-        revolutionPointsEmitter.setCreatorsAddress(address(100));
+        revolutionPointsEmitter.setGrantsAddress(address(100));
 
         // change creatorRateBps to 0
         vm.prank(address(executor));
-        revolutionPointsEmitter.setCreatorRateBps(0);
+        revolutionPointsEmitter.setGrantsRateBps(0);
 
         // set entropyRateBps to 0
         vm.prank(address(executor));
-        revolutionPointsEmitter.setEntropyRateBps(0);
 
         vm.startPrank(address(0));
 
@@ -218,14 +216,13 @@ contract EmissionRatesTest is PointsEmitterTest {
 
         vm.startPrank(revolutionPointsEmitter.owner());
         //set creatorRate and entropyRate
-        revolutionPointsEmitter.setCreatorRateBps(creatorRateBps);
-        revolutionPointsEmitter.setEntropyRateBps(entropyRateBps);
+        revolutionPointsEmitter.setGrantsRateBps(creatorRateBps);
         vm.stopPrank();
 
         vm.deal(address(this), 100000 ether);
 
         //expect balance to start out at 0
-        assertEq(revolutionPoints.balanceOf(revolutionPointsEmitter.creatorsAddress()), 0, "Balance should start at 0");
+        assertEq(revolutionPoints.balanceOf(revolutionPointsEmitter.founderAddress()), 0, "Balance should start at 0");
 
         address[] memory recipients = new address[](1);
         recipients[0] = address(1);
@@ -265,7 +262,7 @@ contract EmissionRatesTest is PointsEmitterTest {
 
         //assert that creatorsAddress balance is correct
         assertEq(
-            uint(revolutionPoints.balanceOf(revolutionPointsEmitter.creatorsAddress())),
+            uint(revolutionPoints.balanceOf(revolutionPointsEmitter.founderAddress())),
             uint(expectedAmountForCreators),
             "Creators should have correct balance"
         );
@@ -294,10 +291,9 @@ contract EmissionRatesTest is PointsEmitterTest {
 
         vm.startPrank(address(executor));
         // Set creator and entropy rates
-        revolutionPointsEmitter.setCreatorRateBps(creatorRate);
-        revolutionPointsEmitter.setEntropyRateBps(entropyRate);
-        assertEq(revolutionPointsEmitter.creatorRateBps(), creatorRate, "Creator rate not set correctly");
-        assertEq(revolutionPointsEmitter.entropyRateBps(), entropyRate, "Entropy rate not set correctly");
+        revolutionPointsEmitter.setGrantsRateBps(creatorRate);
+        assertEq(revolutionPointsEmitter.founderRateBps(), creatorRate, "Creator rate not set correctly");
+        assertEq(revolutionPointsEmitter.founderEntropyRateBps(), entropyRate, "Entropy rate not set correctly");
 
         // Setup for buying token
         address[] memory recipients = new address[](1);

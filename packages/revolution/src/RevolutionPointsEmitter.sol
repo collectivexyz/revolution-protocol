@@ -93,7 +93,7 @@ contract RevolutionPointsEmitter is
      * @param _weth The address of the WETH contract
      * @param _revolutionPoints The ERC-20 token contract address
      * @param _vrgda The VRGDA contract address
-     * @param _creatorsAddress The address to pay the creator reward to
+     * @param _founderParams The founder reward parameters
      */
     function initialize(
         address _initialOwner,

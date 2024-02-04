@@ -22,8 +22,7 @@ contract PointsEmitterBasicTest is PointsEmitterTest {
 
         vm.startPrank(revolutionPointsEmitter.owner());
         //set creatorRate and entropyRate
-        revolutionPointsEmitter.setCreatorRateBps(creatorRateBps);
-        revolutionPointsEmitter.setEntropyRateBps(entropyRateBps);
+        revolutionPointsEmitter.setGrantsRateBps(creatorRateBps);
         vm.stopPrank();
 
         //expect pointsEmitter balance to start out at 0
@@ -56,8 +55,7 @@ contract PointsEmitterBasicTest is PointsEmitterTest {
 
         vm.startPrank(revolutionPointsEmitter.owner());
         //set creatorRate and entropyRate
-        revolutionPointsEmitter.setCreatorRateBps(creatorRateBps);
-        revolutionPointsEmitter.setEntropyRateBps(entropyRateBps);
+        revolutionPointsEmitter.setGrantsRateBps(creatorRateBps);
         vm.stopPrank();
 
         //expect owner balance to start out at 0
