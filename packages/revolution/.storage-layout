@@ -17,14 +17,16 @@
 | pointsVoteWeight       | uint256                                                           | 7    | 0      | 32    | src/culture-index/CultureIndex.sol:CultureIndex |
 | name                   | string                                                            | 8    | 0      | 32    | src/culture-index/CultureIndex.sol:CultureIndex |
 | description            | string                                                            | 9    | 0      | 32    | src/culture-index/CultureIndex.sol:CultureIndex |
-| pieces                 | mapping(uint256 => struct ICultureIndex.ArtPiece)                 | 10   | 0      | 32    | src/culture-index/CultureIndex.sol:CultureIndex |
-| _currentPieceId        | uint256                                                           | 11   | 0      | 32    | src/culture-index/CultureIndex.sol:CultureIndex |
-| votes                  | mapping(uint256 => mapping(address => struct ICultureIndex.Vote)) | 12   | 0      | 32    | src/culture-index/CultureIndex.sol:CultureIndex |
-| totalVoteWeights       | mapping(uint256 => uint256)                                       | 13   | 0      | 32    | src/culture-index/CultureIndex.sol:CultureIndex |
-| dropperAdmin           | address                                                           | 14   | 0      | 20    | src/culture-index/CultureIndex.sol:CultureIndex |
-| PIECE_DATA_MAXIMUMS    | struct ICultureIndex.PieceMaximums                                | 15   | 0      | 160   | src/culture-index/CultureIndex.sol:CultureIndex |
-| requiredMediaType      | enum ICultureIndex.MediaType                                      | 20   | 0      | 1     | src/culture-index/CultureIndex.sol:CultureIndex |
-| requiredMediaPrefix    | enum ICultureIndex.RequiredMediaPrefix                            | 20   | 1      | 1     | src/culture-index/CultureIndex.sol:CultureIndex |
+| checklist              | string                                                            | 10   | 0      | 32    | src/culture-index/CultureIndex.sol:CultureIndex |
+| template               | string                                                            | 11   | 0      | 32    | src/culture-index/CultureIndex.sol:CultureIndex |
+| pieces                 | mapping(uint256 => struct ICultureIndex.ArtPiece)                 | 12   | 0      | 32    | src/culture-index/CultureIndex.sol:CultureIndex |
+| _currentPieceId        | uint256                                                           | 13   | 0      | 32    | src/culture-index/CultureIndex.sol:CultureIndex |
+| votes                  | mapping(uint256 => mapping(address => struct ICultureIndex.Vote)) | 14   | 0      | 32    | src/culture-index/CultureIndex.sol:CultureIndex |
+| totalVoteWeights       | mapping(uint256 => uint256)                                       | 15   | 0      | 32    | src/culture-index/CultureIndex.sol:CultureIndex |
+| dropperAdmin           | address                                                           | 16   | 0      | 20    | src/culture-index/CultureIndex.sol:CultureIndex |
+| PIECE_DATA_MAXIMUMS    | struct ICultureIndex.PieceMaximums                                | 17   | 0      | 160   | src/culture-index/CultureIndex.sol:CultureIndex |
+| requiredMediaType      | enum ICultureIndex.MediaType                                      | 22   | 0      | 1     | src/culture-index/CultureIndex.sol:CultureIndex |
+| requiredMediaPrefix    | enum ICultureIndex.RequiredMediaPrefix                            | 22   | 1      | 1     | src/culture-index/CultureIndex.sol:CultureIndex |
 
 =======================
 ➡ RevolutionBuilder
