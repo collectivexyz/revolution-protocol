@@ -229,7 +229,9 @@ contract RevolutionBuilderTest is Test {
     function setMockCultureIndexParams() internal virtual {
         setCultureIndexParams(
             "Vrbs",
-            "Our community Vrbs. Must be 32x32.",
+            "Our community Vrbs.",
+            "- [ ] Must be 32x32. - [ ] Must include ⌐◨-◨.",
+            "ipfs://",
             100 * 1e18,
             1,
             1000,
@@ -244,6 +246,8 @@ contract RevolutionBuilderTest is Test {
     function setCultureIndexParams(
         string memory _name,
         string memory _description,
+        string memory _checklist,
+        string memory _template,
         uint256 _tokenVoteWeight,
         uint256 _pointsVoteWeight,
         uint256 _quorumVotesBPS,
@@ -256,6 +260,8 @@ contract RevolutionBuilderTest is Test {
         cultureIndexParams = IRevolutionBuilder.CultureIndexParams({
             name: _name,
             description: _description,
+            checklist: _checklist,
+            template: _template,
             tokenVoteWeight: _tokenVoteWeight,
             pointsVoteWeight: _pointsVoteWeight,
             quorumVotesBPS: _quorumVotesBPS,

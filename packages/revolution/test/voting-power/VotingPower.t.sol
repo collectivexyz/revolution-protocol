@@ -202,7 +202,7 @@ contract VotingPowerTest is RevolutionBuilderTest {
 
     function testGetPastPointsVotes() public {
         address voter = address(this);
-        uint256 blockNumber = block.number;
+        uint256 blockNumber = vm.getBlockNumber();
 
         uint256 pointsBalance = 1e18;
 
@@ -229,7 +229,7 @@ contract VotingPowerTest is RevolutionBuilderTest {
 
     function testGetPastTokenVotes() public {
         address voter = address(this);
-        uint256 blockNumber = block.number;
+        uint256 blockNumber = vm.getBlockNumber();
 
         uint256 tokenBalance = 10;
 
@@ -260,7 +260,8 @@ contract VotingPowerTest is RevolutionBuilderTest {
     function testGetPastPointsSupply() public {
         mintVotesToVoter(address(this), 1e18, 10);
 
-        uint256 blockNumber = block.number;
+        uint256 blockNumber = vm.getBlockNumber();
+
         vm.roll(blockNumber + 1);
 
         uint256 expectedPastPointsSupply = revolutionVotingPower.getPastPointsSupply(blockNumber);
@@ -271,7 +272,7 @@ contract VotingPowerTest is RevolutionBuilderTest {
     function testGetPastTokenSupply() public {
         mintVotesToVoter(address(this), 1e18, 10);
 
-        uint256 blockNumber = block.number;
+        uint256 blockNumber = vm.getBlockNumber();
 
         vm.roll(blockNumber + 1);
 
