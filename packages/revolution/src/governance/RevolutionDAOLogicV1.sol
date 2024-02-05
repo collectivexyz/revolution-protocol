@@ -76,14 +76,8 @@ contract RevolutionDAOLogicV1 is
     ///                         IMMUTABLES                       ///
     ///                                                          ///
 
-    /// @notice The name of this revolution
+    /// @notice The name of this contract
     string public name;
-
-    /// @notice The symbol of this revolution
-    string public symbol;
-
-    /// @notice The purpose of this revolution
-    string public purpose;
 
     /// @notice The minimum settable proposal threshold
     uint256 public constant MIN_PROPOSAL_THRESHOLD_BPS = 1; // 1 basis point or 0.01%
@@ -180,7 +174,7 @@ contract RevolutionDAOLogicV1 is
         ) revert INVALID_PROPOSAL_THRESHOLD_BPS();
 
         // Initialize EIP-712 support
-        __EIP712_init(_govParams.name, "1");
+        __EIP712_init(_govParams.daoName, "1");
 
         // Grant ownership to the executor
         __Ownable_init(_executor);
@@ -195,9 +189,7 @@ contract RevolutionDAOLogicV1 is
         votingPeriod = _govParams.votingPeriod;
         votingDelay = _govParams.votingDelay;
         proposalThresholdBPS = _govParams.proposalThresholdBPS;
-        name = _govParams.name;
-        symbol = _govParams.symbol;
-        purpose = _govParams.purpose;
+        name = _govParams.daoName;
 
         _setDynamicQuorumParams(
             _govParams.dynamicQuorumParams.minQuorumVotesBPS,
