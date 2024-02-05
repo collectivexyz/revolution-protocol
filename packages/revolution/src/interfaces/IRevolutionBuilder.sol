@@ -111,7 +111,9 @@ interface IRevolutionBuilder is IUUPS {
     /// @param votingPeriod The time period to vote on a proposal
     /// @param proposalThresholdBPS The basis points of the token supply required to create a proposal
     /// @param vetoer The address authorized to veto proposals (address(0) if none desired)
-    /// @param daoName The name of the DAO
+    /// @param name The name of the DAO
+    /// @param purpose The purpose of the revolution
+    /// @param symbol The symbol of the DAO ⌐◨-◨
     /// @param dynamicQuorumParams The dynamic quorum parameters
     struct GovParams {
         uint256 timelockDelay;
@@ -119,7 +121,9 @@ interface IRevolutionBuilder is IUUPS {
         uint256 votingPeriod;
         uint256 proposalThresholdBPS;
         address vetoer;
-        string daoName;
+        string name;
+        string purpose;
+        string symbol;
         RevolutionDAOStorageV1.DynamicQuorumParams dynamicQuorumParams;
     }
 
