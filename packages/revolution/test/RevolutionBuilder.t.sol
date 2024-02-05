@@ -230,7 +230,7 @@ contract RevolutionBuilderTest is Test {
         setCultureIndexParams(
             "Vrbs",
             "Our community Vrbs.",
-            "- [ ] Must be 32x32. - [ ] Must include ⌐◨-◨.",
+            "- [ ] Must be 32x32. - [ ] Must include the noggles.",
             "ipfs://",
             100 * 1e18,
             1,
