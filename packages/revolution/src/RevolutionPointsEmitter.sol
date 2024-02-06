@@ -114,6 +114,10 @@ contract RevolutionPointsEmitter is
         if (_founderParams.entropyRateBps > 10_000) revert INVALID_BPS();
         if (_founderParams.rewardsExpirationDate < block.timestamp) revert INVALID_REWARDS_TIMESTAMP();
 
+        if (_grantsParams.totalRateBps > 10_000) revert INVALID_BPS();
+
+        if (_grantsParams.totalRateBps + _founderParams.totalRateBps > 10_000) revert INVALID_BPS();
+
         __Pausable_init();
         __ReentrancyGuard_init();
 
@@ -412,6 +416,7 @@ contract RevolutionPointsEmitter is
      */
     function setGrantsRateBps(uint256 _grantsRateBps) external onlyOwner {
         if (_grantsRateBps > 10_000) revert INVALID_BPS();
+        if (_grantsRateBps + founderRateBps > 10_000) revert INVALID_BPS();
 
         emit GrantsRateBpsUpdated(grantsRateBps = _grantsRateBps);
     }

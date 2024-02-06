@@ -16,14 +16,17 @@ import { console2 } from "forge-std/console2.sol";
 
 contract PointsEmitterBasicTest is PointsEmitterTest {
     //test that the pointsEmitter has no balance after someone buys tokens
-    function test_PointsEmitterBalance(uint256 creatorRateBps, uint256 entropyRateBps) public {
+    function test_PointsEmitterBalance(
+        uint256 founderRateBps,
+        uint256 founderEntropyRateBps,
+        uint256 grantsRateBps
+    ) public {
         // Assume valid rates
-        vm.assume(creatorRateBps > 0 && creatorRateBps <= 10000 && entropyRateBps > 0 && entropyRateBps <= 10000);
+        founderRateBps = bound(founderRateBps, 0, 10000);
+        founderEntropyRateBps = bound(founderEntropyRateBps, 0, 10000);
+        grantsRateBps = bound(grantsRateBps, 0, 10000 - founderRateBps);
 
-        vm.startPrank(revolutionPointsEmitter.owner());
-        //set creatorRate and entropyRate
-        revolutionPointsEmitter.setGrantsRateBps(creatorRateBps);
-        vm.stopPrank();
+        setUpWithDifferentRates(founderRateBps, founderEntropyRateBps, grantsRateBps);
 
         //expect pointsEmitter balance to start out at 0
         assertEq(address(revolutionPointsEmitter).balance, 0, "Balance should start at 0");
@@ -49,11 +52,17 @@ contract PointsEmitterBasicTest is PointsEmitterTest {
     }
 
     //test that owner receives correct amount of ether
-    function test_OwnerBalance(uint256 creatorRateBps, uint256 entropyRateBps) public {
+    function test_OwnerBalance(uint256 founderRateBps, uint256 founderEntropyRateBps, uint256 grantsRateBps) public {
         // Assume valid rates
-        vm.assume(creatorRateBps > 0 && creatorRateBps <= 10000 && entropyRateBps > 0 && entropyRateBps <= 10000);
+        founderRateBps = bound(founderRateBps, 0, 10000);
+        founderEntropyRateBps = bound(founderEntropyRateBps, 0, 10000);
+        grantsRateBps = bound(grantsRateBps, 0, 10000 - founderRateBps);
 
-        setUpWithDifferentRates(creatorRateBps, entropyRateBps);
+        setUpWithDifferentRates(founderRateBps, founderEntropyRateBps, grantsRateBps);
+
+        // set grantsRateBps as executor
+        vm.startPrank(revolutionPointsEmitter.owner());
+        revolutionPointsEmitter.setGrantsRateBps(grantsRateBps);
 
         vm.stopPrank();
 
@@ -69,14 +78,16 @@ contract PointsEmitterBasicTest is PointsEmitterTest {
         //get msg value remaining
         uint256 msgValueRemaining = 1 ether - revolutionPointsEmitter.computeTotalReward(1 ether);
 
-        // Calculate share of purchase amount reserved for creators
-        uint256 creatorsShare = (msgValueRemaining * creatorRateBps) / 10_000;
+        // Ether directly sent to founder
+        uint256 founderDirectPayment = (msgValueRemaining * founderRateBps * founderEntropyRateBps) / 10_000 / 10_000;
+
+        // Ether spent on founder governance tokens
+        uint256 founderGovernancePayment = ((msgValueRemaining * founderRateBps) / 10_000) - founderDirectPayment;
+
+        uint256 grantsShare = (msgValueRemaining * grantsRateBps) / 10_000;
 
         // Calculate share of purchase amount reserved for buyers
-        uint256 buyersShare = msgValueRemaining - creatorsShare;
-
-        // Calculate ether directly sent to creators
-        uint256 creatorDirectPayment = (creatorsShare * entropyRateBps) / 10_000;
+        uint256 buyersShare = msgValueRemaining - founderGovernancePayment - founderDirectPayment - grantsShare;
 
         revolutionPointsEmitter.buyToken{ value: 1 ether }(
             recipients,
@@ -91,14 +102,18 @@ contract PointsEmitterBasicTest is PointsEmitterTest {
         //assert that owner balance is correct
         assertEq(
             uint(address(revolutionPointsEmitter.owner()).balance),
-            uint(buyersShare + creatorsShare - creatorDirectPayment),
+            uint(founderGovernancePayment + buyersShare),
             "Owner should have correct balance"
         );
     }
 
     function test_GetTokenAmountForMultiPurchaseGeneral(uint256 payment) public {
-        vm.assume(payment > revolutionPointsEmitter.minPurchaseAmount());
-        vm.assume(payment < revolutionPointsEmitter.maxPurchaseAmount());
+        payment = bound(
+            payment,
+            revolutionPointsEmitter.minPurchaseAmount() + 1,
+            revolutionPointsEmitter.maxPurchaseAmount() - 1
+        );
+
         vm.startPrank(address(0));
 
         uint256 SOME_MAX_EXPECTED_VALUE = uint256(wadDiv(int256(payment), 1 ether)) * 1e18 * tokensPerTimeUnit;

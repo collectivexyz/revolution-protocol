@@ -14,16 +14,26 @@ import { IRevolutionPoints } from "../../src/interfaces/IRevolutionPoints.sol";
 import { ERC1967Proxy } from "../../src/libs/proxy/ERC1967Proxy.sol";
 
 contract EmissionRatesTest is PointsEmitterTest {
-    function testBuyTokenWithDifferentRates(uint256 creatorRate, uint256 entropyRate) public {
+    function testBuyTokenWithDifferentRates(
+        uint256 founderRateBps,
+        uint256 founderEntropyRateBps,
+        uint256 grantsRateBps
+    ) public {
         // Assume valid rates
-        vm.assume(creatorRate <= 10000 && entropyRate <= 10000);
+        founderRateBps = bound(founderRateBps, 0, 10000);
+        founderEntropyRateBps = bound(founderEntropyRateBps, 0, 10000);
+        grantsRateBps = bound(grantsRateBps, 0, 10000 - founderRateBps);
 
-        setUpWithDifferentRates(creatorRate, entropyRate);
+        setUpWithDifferentRates(founderRateBps, founderEntropyRateBps, grantsRateBps);
 
         vm.startPrank(address(executor));
         // Set creator and entropy rates
-        assertEq(revolutionPointsEmitter.founderRateBps(), creatorRate, "Creator rate not set correctly");
-        assertEq(revolutionPointsEmitter.founderEntropyRateBps(), entropyRate, "Entropy rate not set correctly");
+        assertEq(revolutionPointsEmitter.founderRateBps(), founderRateBps, "Creator rate not set correctly");
+        assertEq(
+            revolutionPointsEmitter.founderEntropyRateBps(),
+            founderEntropyRateBps,
+            "Entropy rate not set correctly"
+        );
 
         // Setup for buying token
         address[] memory recipients = new address[](1);
@@ -40,10 +50,11 @@ contract EmissionRatesTest is PointsEmitterTest {
         uint256 feeAmount = revolutionPointsEmitter.computeTotalReward(valueToSend);
 
         // Calculate expected ETH sent to creator
-        uint256 totalPaymentForCreator = ((valueToSend - feeAmount) * creatorRate) / 10000;
-        uint256 expectedCreatorEth = (totalPaymentForCreator * entropyRate) / 10000;
+        uint256 totalPaymentForCreator = ((valueToSend - feeAmount) * founderRateBps) / 10000;
+        uint256 expectedCreatorEth = (totalPaymentForCreator * founderEntropyRateBps) / 10000;
 
-        if (creatorRate == 0 || entropyRate == 10_000) vm.expectRevert(abi.encodeWithSignature("INVALID_PAYMENT()"));
+        if (founderRateBps == 0 || founderEntropyRateBps == 10_000)
+            vm.expectRevert(abi.encodeWithSignature("INVALID_PAYMENT()"));
         uint256 expectedCreatorTokens = uint(
             revolutionPointsEmitter.getTokenQuoteForEther(totalPaymentForCreator - expectedCreatorEth)
         );
@@ -111,7 +122,7 @@ contract EmissionRatesTest is PointsEmitterTest {
         vm.prank(address(executor));
         revolutionPointsEmitter.setGrantsAddress(address(100));
 
-        setUpWithDifferentRates(0, 0);
+        setUpWithDifferentRates(0, 0, 0);
 
         vm.startPrank(address(0));
 
@@ -196,11 +207,13 @@ contract EmissionRatesTest is PointsEmitterTest {
         );
     }
 
-    function test_correctEmitted(uint256 founderRateBps, uint256 entropyRateBps) public {
+    function test_correctEmitted(uint256 founderRateBps, uint256 founderEntropyRateBps, uint256 grantsRateBps) public {
         // Assume valid rates
-        vm.assume(founderRateBps > 0 && founderRateBps < 10000 && entropyRateBps < 10000);
+        founderRateBps = bound(founderRateBps, 0, 10000);
+        founderEntropyRateBps = bound(founderEntropyRateBps, 0, 10000);
+        grantsRateBps = bound(grantsRateBps, 0, 10000 - founderRateBps);
 
-        setUpWithDifferentRates(founderRateBps, entropyRateBps);
+        setUpWithDifferentRates(founderRateBps, founderEntropyRateBps, grantsRateBps);
 
         vm.startPrank(revolutionPointsEmitter.owner());
 
@@ -227,7 +240,7 @@ contract EmissionRatesTest is PointsEmitterTest {
         uint256 toPayOwner = (msgValueRemaining * (10_000 - founderRateBps)) / 10_000;
 
         //Ether directly sent to creators
-        uint256 creatorDirectPayment = ((msgValueRemaining - toPayOwner) * entropyRateBps) / 10_000;
+        uint256 creatorDirectPayment = ((msgValueRemaining - toPayOwner) * founderEntropyRateBps) / 10_000;
 
         //get expected tokens for creators
         int256 expectedAmountForCreators = revolutionPointsEmitter.getTokenQuoteForEther(
@@ -263,25 +276,32 @@ contract EmissionRatesTest is PointsEmitterTest {
     }
 
     function test_BuyingFunctionBreaksAfterAPeriodOfTime(
-        uint256 creatorRate,
-        uint256 entropyRate,
+        uint256 founderRateBps,
+        uint256 founderEntropyRateBps,
+        uint256 grantsRateBps,
         uint256 randomTime
     ) public {
         randomTime = bound(randomTime, 300 days, 700 days);
         // Assume valid rates
-        vm.assume(creatorRate <= 10000 && entropyRate <= 10000);
+        founderRateBps = bound(founderRateBps, 0, 10000);
+        founderEntropyRateBps = bound(founderEntropyRateBps, 0, 10000);
+        grantsRateBps = bound(grantsRateBps, 0, 10000 - founderRateBps);
 
         uint256 currentTime = 1702801400;
 
         // warp to a more realistic time
         vm.warp(block.timestamp + currentTime);
 
-        setUpWithDifferentRates(creatorRate, entropyRate);
+        setUpWithDifferentRates(founderRateBps, founderEntropyRateBps, grantsRateBps);
 
         vm.startPrank(address(executor));
         // Set creator and entropy rates
-        assertEq(revolutionPointsEmitter.founderRateBps(), creatorRate, "Creator rate not set correctly");
-        assertEq(revolutionPointsEmitter.founderEntropyRateBps(), entropyRate, "Entropy rate not set correctly");
+        assertEq(revolutionPointsEmitter.founderRateBps(), founderRateBps, "Creator rate not set correctly");
+        assertEq(
+            revolutionPointsEmitter.founderEntropyRateBps(),
+            founderEntropyRateBps,
+            "Entropy rate not set correctly"
+        );
 
         // Setup for buying token
         address[] memory recipients = new address[](1);
@@ -357,8 +377,9 @@ contract EmissionRatesTest is PointsEmitterTest {
 
     // Test that founder rewards expire after a set expiration time
     function test_FounderRewardsExpireCorrectly(
-        uint256 creatorRate,
-        uint256 entropyRate,
+        uint256 founderRateBps,
+        uint256 founderEntropyRateBps,
+        uint256 grantsRateBps,
         uint256 valueToSend,
         uint256 expiryDuration
     ) public {
@@ -371,10 +392,16 @@ contract EmissionRatesTest is PointsEmitterTest {
         // Calculate value left after sharing protocol rewards
         uint256 msgValueRemaining = valueToSend - revolutionPointsEmitter.computeTotalReward(valueToSend);
 
-        creatorRate = bound(creatorRate, 1, 10000);
-        entropyRate = bound(entropyRate, 1, 10000);
+        founderRateBps = bound(founderRateBps, 1, 10000);
+        founderEntropyRateBps = bound(founderEntropyRateBps, 1, 10000);
+        grantsRateBps = bound(grantsRateBps, 1, 10000 - founderRateBps - 1);
         expiryDuration = bound(expiryDuration, 1 days, 3650 days);
-        setUpWithDifferentRatesAndExpiry(creatorRate, entropyRate, block.timestamp + expiryDuration);
+        setUpWithDifferentRatesAndExpiry(
+            founderRateBps,
+            founderEntropyRateBps,
+            grantsRateBps,
+            block.timestamp + expiryDuration
+        );
 
         // Warp to just before the expiry
         vm.warp(block.timestamp + expiryDuration - 1);
@@ -418,7 +445,7 @@ contract EmissionRatesTest is PointsEmitterTest {
         uint256 ethBalanceBeforeExpiry = address(revolutionPointsEmitter.founderAddress()).balance;
 
         // Check founder balance just before expiry
-        if (entropyRate < 9990) {
+        if (founderEntropyRateBps < 9990) {
             assertGt(pointsBalanceBeforeExpiry, 0, "Founder should have points rewards before expiry");
         }
         assertGt(ethBalanceBeforeExpiry, 0, "Founder should have eth rewards before expiry");
@@ -494,8 +521,9 @@ contract EmissionRatesTest is PointsEmitterTest {
 
     // Test that founder rewards expire after a set expiration time
     function test_FounderRewardsExpireForQuoteUtils(
-        uint256 creatorRate,
-        uint256 entropyRate,
+        uint256 founderRateBps,
+        uint256 founderEntropyRateBps,
+        uint256 grantsRateBps,
         uint256 valueToSend,
         uint256 expiryDuration
     ) public {
@@ -508,12 +536,18 @@ contract EmissionRatesTest is PointsEmitterTest {
         // Calculate value left after sharing protocol rewards
         uint256 msgValueRemaining = valueToSend - revolutionPointsEmitter.computeTotalReward(valueToSend);
 
-        creatorRate = bound(creatorRate, 1, 10000);
-        entropyRate = bound(entropyRate, 1, 10000);
+        founderRateBps = bound(founderRateBps, 1, 10000);
+        founderEntropyRateBps = bound(founderEntropyRateBps, 1, 10000);
+        grantsRateBps = bound(grantsRateBps, 1, 10000 - founderRateBps - 1);
 
         expiryDuration = bound(expiryDuration, 1 days, 3650 days);
 
-        setUpWithDifferentRatesAndExpiry(creatorRate, entropyRate, block.timestamp + expiryDuration);
+        setUpWithDifferentRatesAndExpiry(
+            founderRateBps,
+            founderEntropyRateBps,
+            grantsRateBps,
+            block.timestamp + expiryDuration
+        );
 
         // Warp to just before the expiry
         vm.warp(block.timestamp + expiryDuration - 1);
