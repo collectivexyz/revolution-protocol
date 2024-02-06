@@ -197,7 +197,19 @@ contract RevolutionBuilderTest is Test {
     }
 
     function setMockGovParams() internal virtual {
-        setGovParams(2 days, 1 seconds, 1 weeks, 50, founder, 1000, 1000, 1000, "Vrbs DAO");
+        setGovParams(
+            2 days,
+            1 seconds,
+            1 weeks,
+            50,
+            founder,
+            1000,
+            1000,
+            1000,
+            "Vrbs DAO",
+            "To do good for the public and posterity",
+            unicode"⌐◨-◨"
+        );
     }
 
     function setGovParams(
@@ -209,7 +221,9 @@ contract RevolutionBuilderTest is Test {
         uint16 _minQuorumVotesBPS,
         uint16 _maxQuorumVotesBPS,
         uint16 _quorumCoefficient,
-        string memory _daoName
+        string memory _daoName,
+        string memory _daoPurpose,
+        string memory _daoFlag
     ) internal virtual {
         govParams = IRevolutionBuilder.GovParams({
             timelockDelay: _timelockDelay,
@@ -222,14 +236,18 @@ contract RevolutionBuilderTest is Test {
                 maxQuorumVotesBPS: _maxQuorumVotesBPS,
                 quorumCoefficient: _quorumCoefficient
             }),
-            daoName: _daoName
+            name: _daoName,
+            purpose: _daoPurpose,
+            flag: _daoFlag
         });
     }
 
     function setMockCultureIndexParams() internal virtual {
         setCultureIndexParams(
             "Vrbs",
-            "Our community Vrbs. Must be 32x32.",
+            "Our community Vrbs.",
+            "- [ ] Must be 32x32. - [ ] Must include the noggles.",
+            "ipfs://",
             100 * 1e18,
             1,
             1000,
@@ -244,6 +262,8 @@ contract RevolutionBuilderTest is Test {
     function setCultureIndexParams(
         string memory _name,
         string memory _description,
+        string memory _checklist,
+        string memory _template,
         uint256 _tokenVoteWeight,
         uint256 _pointsVoteWeight,
         uint256 _quorumVotesBPS,
@@ -256,6 +276,8 @@ contract RevolutionBuilderTest is Test {
         cultureIndexParams = IRevolutionBuilder.CultureIndexParams({
             name: _name,
             description: _description,
+            checklist: _checklist,
+            template: _template,
             tokenVoteWeight: _tokenVoteWeight,
             pointsVoteWeight: _pointsVoteWeight,
             quorumVotesBPS: _quorumVotesBPS,

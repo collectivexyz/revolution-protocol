@@ -111,7 +111,9 @@ interface IRevolutionBuilder is IUUPS {
     /// @param votingPeriod The time period to vote on a proposal
     /// @param proposalThresholdBPS The basis points of the token supply required to create a proposal
     /// @param vetoer The address authorized to veto proposals (address(0) if none desired)
-    /// @param daoName The name of the DAO
+    /// @param name The name of the DAO
+    /// @param purpose The purpose of the DAO
+    /// @param flag The symbol of the DAO ⌐◨-◨
     /// @param dynamicQuorumParams The dynamic quorum parameters
     struct GovParams {
         uint256 timelockDelay;
@@ -119,7 +121,9 @@ interface IRevolutionBuilder is IUUPS {
         uint256 votingPeriod;
         uint256 proposalThresholdBPS;
         address vetoer;
-        string daoName;
+        string name;
+        string purpose;
+        string flag;
         RevolutionDAOStorageV1.DynamicQuorumParams dynamicQuorumParams;
     }
 
@@ -171,7 +175,9 @@ interface IRevolutionBuilder is IUUPS {
 
     /// @notice The CultureIndex parameters
     /// @param name The name of the culture index
-    /// @param description A description for the culture index, can include rules for uploads etc.
+    /// @param description A description for the culture index
+    /// @param checklist A checklist for the culture index, can include rules for uploads etc.
+    /// @param template A template for the culture index, an ipfs file that artists can download and use to create art pieces
     /// @param tokenVoteWeight The voting weight of the individual Revolution ERC721 tokens. Normally a large multiple to match up with daily emission of ERC20 points to match up with daily emission of ERC20 points (which normally have 18 decimals)
     /// @param pointsVoteWeight The voting weight of the individual Revolution ERC20 points tokens.
     /// @param quorumVotesBPS The initial quorum votes threshold in basis points
@@ -183,6 +189,8 @@ interface IRevolutionBuilder is IUUPS {
     struct CultureIndexParams {
         string name;
         string description;
+        string checklist;
+        string template;
         uint256 tokenVoteWeight;
         uint256 pointsVoteWeight;
         uint256 quorumVotesBPS;
