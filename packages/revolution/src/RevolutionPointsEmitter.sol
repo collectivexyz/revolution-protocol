@@ -211,6 +211,26 @@ contract RevolutionPointsEmitter is
             buyTokenPaymentShares.founderDirectPayment;
     }
 
+    function _calculatePaymentDistribution(
+        uint256 founderGovernancePoints,
+        IRevolutionPointsEmitter.BuyTokenPaymentShares memory buyTokenPaymentShares
+    ) internal pure returns (PaymentDistribution memory distribution) {
+        // Ether to pay owner() for selling us points
+        distribution.toPayOwner = buyTokenPaymentShares.buyersGovernancePayment;
+        // Ether to pay founder directly
+        distribution.toPayFounder = buyTokenPaymentShares.founderDirectPayment;
+
+        // If the founder is receiving points, add the founder's points payment to the owner's payment
+        if (founderGovernancePoints > 0) {
+            distribution.toPayOwner += buyTokenPaymentShares.founderGovernancePayment;
+        } else if (founderGovernancePoints == 0 && buyTokenPaymentShares.founderGovernancePayment > 0) {
+            // If the founder is not receiving any points, but ETH should be spent to buy them points, just send the ETH to the founder
+            distribution.toPayFounder += buyTokenPaymentShares.founderGovernancePayment;
+        }
+
+        return distribution;
+    }
+
     /**
      * @notice A payable function that allows a user to buy tokens for a list of addresses and a list of basis points to split the token purchase between.
      * @param addresses The addresses to send purchased tokens to.
@@ -247,15 +267,20 @@ contract RevolutionPointsEmitter is
             ? getTokenQuoteForEther(buyTokenPaymentShares.founderGovernancePayment)
             : int(0);
 
-        // Deposit owner's funds, and eth used to buy founder gov. tokens to owner's account
-        _safeTransferETHWithFallback(
-            owner(),
-            buyTokenPaymentShares.buyersGovernancePayment + buyTokenPaymentShares.founderGovernancePayment
+        // Calculate the amount of ether to pay the founder and owner
+        PaymentDistribution memory paymentDistribution = _calculatePaymentDistribution(
+            uint256(totalTokensForFounder),
+            buyTokenPaymentShares
         );
 
+        // Deposit owner's funds to owner's account
+        if (paymentDistribution.toPayOwner > 0) {
+            _safeTransferETHWithFallback(owner(), paymentDistribution.toPayOwner);
+        }
+
         // Transfer ETH to founder
-        if (buyTokenPaymentShares.founderDirectPayment > 0) {
-            _safeTransferETHWithFallback(founderAddress, buyTokenPaymentShares.founderDirectPayment);
+        if (paymentDistribution.toPayFounder > 0) {
+            _safeTransferETHWithFallback(founderAddress, paymentDistribution.toPayFounder);
         }
 
         // Mint tokens to founder
@@ -287,11 +312,11 @@ contract RevolutionPointsEmitter is
         emit PurchaseFinalized(
             msg.sender,
             msg.value,
-            buyTokenPaymentShares.buyersGovernancePayment + buyTokenPaymentShares.founderGovernancePayment,
+            paymentDistribution.toPayOwner,
             msg.value - msgValueRemaining,
             uint256(totalTokensForBuyers),
             uint256(totalTokensForFounder),
-            buyTokenPaymentShares.founderDirectPayment
+            paymentDistribution.toPayFounder
         );
 
         return uint256(totalTokensForBuyers);
@@ -339,11 +364,9 @@ contract RevolutionPointsEmitter is
     function getTokenQuoteForPayment(uint256 paymentAmount) external view returns (int gainedX) {
         if (paymentAmount == 0) revert INVALID_PAYMENT();
 
-        uint256 founderPortion = founderRateBps;
-
-        if (block.timestamp > founderRewardsExpirationDate) {
-            founderPortion = 0;
-        }
+        BuyTokenPaymentShares memory buyTokenPaymentShares = _calculateBuyTokenPaymentShares(
+            paymentAmount - computeTotalReward(paymentAmount)
+        );
 
         // Note: By using toDaysWadUnsafe(block.timestamp - startTime) we are establishing that 1 "unit of time" is 1 day.
         // solhint-disable-next-line not-rely-on-time
@@ -351,7 +374,7 @@ contract RevolutionPointsEmitter is
             vrgda.yToX({
                 timeSinceStart: toDaysWadUnsafe(block.timestamp - startTime),
                 sold: int(token.totalSupply()),
-                amount: int(((paymentAmount - computeTotalReward(paymentAmount)) * (10_000 - founderPortion)) / 10_000)
+                amount: int(buyTokenPaymentShares.buyersGovernancePayment)
             });
     }
 

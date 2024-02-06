@@ -51,6 +51,12 @@ interface IRevolutionPointsEmitter is IRewardSplits {
         uint256 founderGovernancePayment;
     }
 
+    // To find amount of ether to pay founder and owner after calculating the amount of points to emit
+    struct PaymentDistribution {
+        uint256 toPayOwner;
+        uint256 toPayFounder;
+    }
+
     function buyToken(
         address[] calldata addresses,
         uint[] calldata bps,
