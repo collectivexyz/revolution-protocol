@@ -49,6 +49,7 @@ interface IRevolutionPointsEmitter is IRewardSplits {
         uint256 buyersGovernancePayment;
         uint256 founderDirectPayment;
         uint256 founderGovernancePayment;
+        uint256 grantsDirectPayment;
     }
 
     // To find amount of ether to pay founder and owner after calculating the amount of points to emit

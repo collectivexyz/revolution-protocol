@@ -187,11 +187,18 @@ contract RevolutionPointsEmitter is
     function _calculateBuyTokenPaymentShares(
         uint256 msgValueRemaining
     ) internal view returns (BuyTokenPaymentShares memory buyTokenPaymentShares) {
+        // Ether to send to the grants program
+        buyTokenPaymentShares.grantsDirectPayment = (msgValueRemaining * grantsRateBps) / 10_000;
+
+        // Founder no longer receives any rewards
         if (block.timestamp >= founderRewardsExpirationDate) {
-            // Founder no longer receives any rewards
-            buyTokenPaymentShares.buyersGovernancePayment = msgValueRemaining;
+            // Share of purchase amount reserved for buyers
+            buyTokenPaymentShares.buyersGovernancePayment =
+                msgValueRemaining -
+                buyTokenPaymentShares.grantsDirectPayment;
         }
 
+        // Founder should receive rewards
         if (block.timestamp < founderRewardsExpirationDate) {
             // Founder receives rewards per founderRateBps and founderEntropyRateBps
             uint256 founderRate = founderRateBps;
@@ -199,7 +206,8 @@ contract RevolutionPointsEmitter is
             // Share of purchase amount reserved for buyers
             buyTokenPaymentShares.buyersGovernancePayment =
                 msgValueRemaining -
-                ((msgValueRemaining * founderRate) / 10_000);
+                ((msgValueRemaining * founderRate) / 10_000) -
+                buyTokenPaymentShares.grantsDirectPayment;
 
             // Ether directly sent to founder
             buyTokenPaymentShares.founderDirectPayment =
@@ -276,9 +284,14 @@ contract RevolutionPointsEmitter is
             buyTokenPaymentShares
         );
 
-        // Deposit owner's funds to owner's account
+        // Transfer ETH to owner
         if (paymentDistribution.toPayOwner > 0) {
             _safeTransferETHWithFallback(owner(), paymentDistribution.toPayOwner);
+        }
+
+        // Transfer ETH to grants program
+        if (buyTokenPaymentShares.grantsDirectPayment > 0) {
+            _safeTransferETHWithFallback(grantsAddress, buyTokenPaymentShares.grantsDirectPayment);
         }
 
         // Transfer ETH to founder
