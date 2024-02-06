@@ -234,13 +234,13 @@ contract PointsEmitterBasicTest is PointsEmitterTest {
         assertGt(revolutionPointsEmitter.balanceOf(address(1)), revolutionPointsEmitter.balanceOf(address(2)));
     }
 
-    function testSetCreatorsAddress() public {
+    function testSetGrantsAddress() public {
         // Setting Creators Address by Owner
         address newCreatorsAddress = address(0x123);
         vm.prank(address(executor));
         revolutionPointsEmitter.setGrantsAddress(newCreatorsAddress);
         assertEq(
-            revolutionPointsEmitter.founderAddress(),
+            revolutionPointsEmitter.grantsAddress(),
             newCreatorsAddress,
             "Owner should be able to set creators address"
         );
