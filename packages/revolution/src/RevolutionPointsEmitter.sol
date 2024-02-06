@@ -224,11 +224,12 @@ contract RevolutionPointsEmitter is
         distribution.toPayFounder = buyTokenPaymentShares.founderDirectPayment;
 
         // If the founder is receiving points, add the founder's points payment to the owner's payment
-        if (founderGovernancePoints > 0) {
-            distribution.toPayOwner += buyTokenPaymentShares.founderGovernancePayment;
-        } else if (founderGovernancePoints == 0 && buyTokenPaymentShares.founderGovernancePayment > 0) {
+        if (founderGovernancePoints == 0 && buyTokenPaymentShares.founderGovernancePayment > 0) {
             // If the founder is not receiving any points, but ETH should be spent to buy them points, just send the ETH to the founder
             distribution.toPayFounder += buyTokenPaymentShares.founderGovernancePayment;
+        } else {
+            // If the founder is receiving points, add the founder's points payment to the owner's payment
+            distribution.toPayOwner += buyTokenPaymentShares.founderGovernancePayment;
         }
 
         return distribution;
