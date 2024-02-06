@@ -187,28 +187,31 @@ contract RevolutionPointsEmitter is
     function _calculateBuyTokenPaymentShares(
         uint256 msgValueRemaining
     ) internal view returns (BuyTokenPaymentShares memory buyTokenPaymentShares) {
-        // If rewards are expired, founder gets 0
-        uint256 founderPortion = founderRateBps;
-
-        if (block.timestamp > founderRewardsExpirationDate) {
-            founderPortion = 0;
+        if (block.timestamp >= founderRewardsExpirationDate) {
+            // Founder no longer receives any rewards
+            buyTokenPaymentShares.buyersGovernancePayment = msgValueRemaining;
         }
 
-        // Calculate share of purchase amount reserved for buyers
-        buyTokenPaymentShares.buyersGovernancePayment =
-            msgValueRemaining -
-            ((msgValueRemaining * founderPortion) / 10_000);
+        if (block.timestamp < founderRewardsExpirationDate) {
+            // Founder receives rewards per founderRateBps and founderEntropyRateBps
+            uint256 founderRate = founderRateBps;
 
-        // Calculate ether directly sent to founder
-        buyTokenPaymentShares.founderDirectPayment =
-            (msgValueRemaining * founderPortion * founderEntropyRateBps) /
-            10_000 /
-            10_000;
+            // Share of purchase amount reserved for buyers
+            buyTokenPaymentShares.buyersGovernancePayment =
+                msgValueRemaining -
+                ((msgValueRemaining * founderRate) / 10_000);
 
-        // Calculate ether spent on founder governance tokens
-        buyTokenPaymentShares.founderGovernancePayment =
-            ((msgValueRemaining * founderPortion) / 10_000) -
-            buyTokenPaymentShares.founderDirectPayment;
+            // Ether directly sent to founder
+            buyTokenPaymentShares.founderDirectPayment =
+                (msgValueRemaining * founderRate * founderEntropyRateBps) /
+                10_000 /
+                10_000;
+
+            // Ether spent on founder governance tokens
+            buyTokenPaymentShares.founderGovernancePayment =
+                ((msgValueRemaining * founderRate) / 10_000) -
+                buyTokenPaymentShares.founderDirectPayment;
+        }
     }
 
     function _calculatePaymentDistribution(
