@@ -1,5 +1,11 @@
 # @collectivexyz/revolution
 
+## 0.3.16
+
+### Patch Changes
+
+- 4af1ac5: Add flag, purpose to DAO, and checklist and template to culture index
+
 ## 0.3.15
 
 ### Patch Changes
