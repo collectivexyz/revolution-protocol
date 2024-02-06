@@ -42,7 +42,7 @@ contract RevolutionPointsEmitter is
     // The split of the purchase that is reserved for the founder in basis points
     uint256 public founderRateBps;
 
-    // The split of (purchase proceeds * creatorRate) that is sent to the founder as ether in basis points
+    // The split of (purchase proceeds * founderRateBps) that is sent to the founder as ether in basis points
     uint256 public founderEntropyRateBps;
 
     // The account or contract to pay the founder reward to
@@ -187,20 +187,27 @@ contract RevolutionPointsEmitter is
     function _calculateBuyTokenPaymentShares(
         uint256 msgValueRemaining
     ) internal view returns (BuyTokenPaymentShares memory buyTokenPaymentShares) {
+        // If rewards are expired, founder gets 0
+        uint256 founderPortion = founderRateBps;
+
+        if (block.timestamp > founderRewardsExpirationDate) {
+            founderPortion = 0;
+        }
+
         // Calculate share of purchase amount reserved for buyers
         buyTokenPaymentShares.buyersGovernancePayment =
             msgValueRemaining -
-            ((msgValueRemaining * founderRateBps) / 10_000);
+            ((msgValueRemaining * founderPortion) / 10_000);
 
         // Calculate ether directly sent to founder
         buyTokenPaymentShares.founderDirectPayment =
-            (msgValueRemaining * founderRateBps * founderEntropyRateBps) /
+            (msgValueRemaining * founderPortion * founderEntropyRateBps) /
             10_000 /
             10_000;
 
         // Calculate ether spent on founder governance tokens
         buyTokenPaymentShares.founderGovernancePayment =
-            ((msgValueRemaining * founderRateBps) / 10_000) -
+            ((msgValueRemaining * founderPortion) / 10_000) -
             buyTokenPaymentShares.founderDirectPayment;
     }
 
@@ -325,7 +332,7 @@ contract RevolutionPointsEmitter is
     }
 
     /**
-     * @notice Returns the amount of tokens that would be emitted to a buyer for the payment amount, taking into account the protocol rewards and creator rate.
+     * @notice Returns the amount of tokens that would be emitted to a buyer for the payment amount, taking into account the protocol rewards and founder rate.
      * @param paymentAmount the payment amount in wei.
      * @return gainedX The amount of tokens that would be emitted for the payment amount.
      */
@@ -367,7 +374,7 @@ contract RevolutionPointsEmitter is
     @param _to The recipient address
     @param _amount The amount transferring
     */
-    // Assumption + reason for ignoring: Since this function is called in the buyToken public function, but buyToken sends ETH to only owner and creatorsAddress, this function is safe
+    // Assumption + reason for ignoring: Since this function is called in the buyToken public function, but buyToken sends ETH to only owner and founderAddress, this function is safe
     // slither-disable-next-line arbitrary-send-eth
     function _safeTransferETHWithFallback(address _to, uint256 _amount) private {
         // Ensure the contract has enough ETH to transfer
