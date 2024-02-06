@@ -70,6 +70,8 @@
 | quorumParamsCheckpoints | struct RevolutionDAOStorageV1.DynamicQuorumParamsCheckpoint[] | 13   | 0      | 32    | src/governance/RevolutionDAOLogicV1.sol:RevolutionDAOLogicV1 |
 | pendingVetoer           | address                                                       | 14   | 0      | 20    | src/governance/RevolutionDAOLogicV1.sol:RevolutionDAOLogicV1 |
 | name                    | string                                                        | 15   | 0      | 32    | src/governance/RevolutionDAOLogicV1.sol:RevolutionDAOLogicV1 |
+| purpose                 | string                                                        | 16   | 0      | 32    | src/governance/RevolutionDAOLogicV1.sol:RevolutionDAOLogicV1 |
+| flag                    | string                                                        | 17   | 0      | 32    | src/governance/RevolutionDAOLogicV1.sol:RevolutionDAOLogicV1 |
 
 =======================
 ➡ RevolutionVotingPower

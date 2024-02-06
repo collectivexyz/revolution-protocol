@@ -197,7 +197,19 @@ contract RevolutionBuilderTest is Test {
     }
 
     function setMockGovParams() internal virtual {
-        setGovParams(2 days, 1 seconds, 1 weeks, 50, founder, 1000, 1000, 1000, "Vrbs DAO");
+        setGovParams(
+            2 days,
+            1 seconds,
+            1 weeks,
+            50,
+            founder,
+            1000,
+            1000,
+            1000,
+            "Vrbs DAO",
+            "To do good for the public and posterity",
+            unicode"⌐◨-◨"
+        );
     }
 
     function setGovParams(
@@ -209,7 +221,9 @@ contract RevolutionBuilderTest is Test {
         uint16 _minQuorumVotesBPS,
         uint16 _maxQuorumVotesBPS,
         uint16 _quorumCoefficient,
-        string memory _daoName
+        string memory _daoName,
+        string memory _daoPurpose,
+        string memory _daoFlag
     ) internal virtual {
         govParams = IRevolutionBuilder.GovParams({
             timelockDelay: _timelockDelay,
@@ -222,7 +236,9 @@ contract RevolutionBuilderTest is Test {
                 maxQuorumVotesBPS: _maxQuorumVotesBPS,
                 quorumCoefficient: _quorumCoefficient
             }),
-            daoName: _daoName
+            name: _daoName,
+            purpose: _daoPurpose,
+            flag: _daoFlag
         });
     }
 
