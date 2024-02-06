@@ -39,6 +39,8 @@ contract CultureIndexRequiredDataTest is RevolutionBuilderTest {
         super.setCultureIndexParams(
             "Vrbs",
             "Our community Vrbs. Must be 32x32.",
+            "guideline",
+            "template",
             10,
             1,
             200,
