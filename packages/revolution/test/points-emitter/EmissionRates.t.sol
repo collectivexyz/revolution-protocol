@@ -417,6 +417,20 @@ contract EmissionRatesTest is PointsEmitterTest {
             address(founderAddress).balance,
             "Founder should not receive eth rewards after expiry"
         );
+
+        vm.expectEmit(true, true, true, true);
+        emit IRevolutionPointsEmitter.PurchaseFinalized(
+            address(this),
+            valueToSend,
+            buyTokenPaymentShares.buyersGovernancePayment + buyTokenPaymentShares.founderGovernancePayment,
+            valueToSend - msgValueRemaining,
+            uint256(revolutionPointsEmitter.getTokenQuoteForEther(msgValueRemaining)),
+            0,
+            0
+        );
+
+        // Perform token purchase just after expiry
+        performTokenPurchase(valueToSend);
     }
 
     function performTokenPurchase(uint256 valueToSend) internal {
@@ -438,5 +452,59 @@ contract EmissionRatesTest is PointsEmitterTest {
             })
         );
         vm.stopPrank();
+    }
+
+    // Test that founder rewards expire after a set expiration time
+    function test_FounderRewardsExpireForQuoteUtils(uint256 creatorRate, uint256 entropyRate) public {
+        uint256 valueToSend = 1 ether;
+
+        // Calculate value left after sharing protocol rewards
+        uint256 msgValueRemaining = valueToSend - revolutionPointsEmitter.computeTotalReward(valueToSend);
+
+        creatorRate = bound(creatorRate, 1, 10000);
+        entropyRate = bound(entropyRate, 1, 10000);
+        uint256 expiryDuration = 3650 days;
+        // expiryDuration = bound(expiryDuration, 0, 3650 days); // Set expiry to 1 year from now, bounded to ensure it's within a valid range
+        setUpWithDifferentRatesAndExpiry(creatorRate, entropyRate, block.timestamp + expiryDuration);
+
+        // Warp to just before the expiry
+        vm.warp(block.timestamp + expiryDuration - 1 days);
+
+        IRevolutionPointsEmitter.BuyTokenPaymentShares memory buyTokenPaymentSharesOg = _calculateBuyTokenPaymentShares(
+            msgValueRemaining
+        );
+
+        //expect getTokenQuoteForEther (buyergovernancepayment) == getTokenForPayment (valueToSend) since founder has rewards
+        assertEq(
+            buyTokenPaymentSharesOg.buyersGovernancePayment > 0
+                ? uint256(
+                    revolutionPointsEmitter.getTokenQuoteForEther(buyTokenPaymentSharesOg.buyersGovernancePayment)
+                )
+                : 0,
+            uint256(revolutionPointsEmitter.getTokenQuoteForPayment(valueToSend))
+        );
+
+        // Warp to just after the expiry
+        vm.warp(block.timestamp + expiryDuration + 1 days);
+
+        IRevolutionPointsEmitter.BuyTokenPaymentShares memory buyTokenPaymentShares = _calculateBuyTokenPaymentShares(
+            msgValueRemaining
+        );
+
+        //get token quote for ether doesn't account for founder rewards or protocol rewards
+        //get token quote for payment accounts for founder rewards and protocol rewards
+
+        assertEq(
+            uint256(revolutionPointsEmitter.getTokenQuoteForEther(buyTokenPaymentShares.buyersGovernancePayment)),
+            uint256(revolutionPointsEmitter.getTokenQuoteForEther(msgValueRemaining)),
+            "Token quote for payment and ether should be equal for buyerGov payment"
+        );
+
+        //expect getTokenQuoteForEther (msgValueRemaining) ==  getTokenQuoteForPayment (valueToSend) since founder has no rewards
+        assertEq(
+            uint256(revolutionPointsEmitter.getTokenQuoteForPayment(valueToSend)),
+            uint256(revolutionPointsEmitter.getTokenQuoteForEther(msgValueRemaining)),
+            "Token quote for payment and ether should be equal"
+        );
     }
 }
