@@ -39,6 +39,12 @@ contract CultureIndexStorageV1 {
     /// @notice A description of the culture index - can include rules or guidelines
     string public description;
 
+    /// @notice Rules or guidelines for the art piece
+    string public checklist;
+
+    /// @notice A template for the art piece
+    string public template;
+
     // The list of all pieces
     mapping(uint256 => ICultureIndex.ArtPiece) public pieces;
 

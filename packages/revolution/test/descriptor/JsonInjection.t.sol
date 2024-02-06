@@ -20,6 +20,8 @@ contract JsonInjectionAttackTest is DescriptorTest {
         super.setCultureIndexParams(
             "Vrbs",
             "Our community Vrbs. Must be 32x32.",
+            "Must be 32x32.",
+            "ipfs://",
             10,
             1,
             500,

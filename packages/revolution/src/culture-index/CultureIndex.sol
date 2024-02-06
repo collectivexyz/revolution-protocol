@@ -92,12 +92,19 @@ contract CultureIndex is
 
         __ReentrancyGuard_init();
 
+        // Set the voting power info
         votingPower = IRevolutionVotingPower(_votingPower);
         tokenVoteWeight = _cultureIndexParams.tokenVoteWeight;
         pointsVoteWeight = _cultureIndexParams.pointsVoteWeight;
 
+        // Set top level metadata
         name = _cultureIndexParams.name;
         description = _cultureIndexParams.description;
+        checklist = _cultureIndexParams.checklist;
+        template = _cultureIndexParams.template;
+        requiredMediaType = _cultureIndexParams.requiredMediaType;
+        requiredMediaPrefix = _cultureIndexParams.requiredMediaPrefix;
+
         quorumVotesBPS = _cultureIndexParams.quorumVotesBPS;
         minVotingPowerToVote = _cultureIndexParams.minVotingPowerToVote;
         minVotingPowerToCreate = _cultureIndexParams.minVotingPowerToCreate;
@@ -110,9 +117,6 @@ contract CultureIndex is
             animationUrl: _cultureIndexParams.pieceMaximums.animationUrl,
             text: _cultureIndexParams.pieceMaximums.text
         });
-
-        requiredMediaType = _cultureIndexParams.requiredMediaType;
-        requiredMediaPrefix = _cultureIndexParams.requiredMediaPrefix;
 
         emit QuorumVotesBPSSet(quorumVotesBPS, _cultureIndexParams.quorumVotesBPS);
 

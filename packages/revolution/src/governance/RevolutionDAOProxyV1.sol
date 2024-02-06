@@ -61,7 +61,7 @@ contract RevolutionDAOProxyV1 is RevolutionDAOStorageV1, RevolutionDAOEvents {
         delegateTo(
             _implementation,
             abi.encodeWithSignature(
-                "initialize(address,address,(uint256,uint256,uint256,uint256,address,string,(uint16,uint16,uint32)))",
+                "initialize(address,address,(uint256,uint256,uint256,uint256,address,string,string,string,(uint16,uint16,uint32)))",
                 _executor,
                 _votingPower,
                 _govParams
