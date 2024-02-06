@@ -78,4 +78,23 @@ contract PointsEmitterTest is RevolutionBuilderTest {
 
         super.deployMock();
     }
+
+    function setUpWithDifferentRatesAndExpiry(uint256 creatorRate, uint256 entropyRate, uint256 expiry) public {
+        super.setUp();
+        super.setMockParams();
+
+        super.setPointsEmitterParams(
+            1 ether,
+            1e18 / 10,
+            int256(1e18 * tokensPerTimeUnit),
+            IRevolutionBuilder.FounderParams({
+                totalRateBps: creatorRate,
+                founderAddress: address(0x123),
+                rewardsExpirationDate: expiry,
+                entropyRateBps: entropyRate
+            })
+        );
+
+        super.deployMock();
+    }
 }

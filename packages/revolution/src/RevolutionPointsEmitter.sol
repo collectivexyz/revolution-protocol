@@ -338,13 +338,20 @@ contract RevolutionPointsEmitter is
      */
     function getTokenQuoteForPayment(uint256 paymentAmount) external view returns (int gainedX) {
         if (paymentAmount == 0) revert INVALID_PAYMENT();
+
+        uint256 founderPortion = founderRateBps;
+
+        if (block.timestamp > founderRewardsExpirationDate) {
+            founderPortion = 0;
+        }
+
         // Note: By using toDaysWadUnsafe(block.timestamp - startTime) we are establishing that 1 "unit of time" is 1 day.
         // solhint-disable-next-line not-rely-on-time
         return
             vrgda.yToX({
                 timeSinceStart: toDaysWadUnsafe(block.timestamp - startTime),
                 sold: int(token.totalSupply()),
-                amount: int(((paymentAmount - computeTotalReward(paymentAmount)) * (10_000 - founderRateBps)) / 10_000)
+                amount: int(((paymentAmount - computeTotalReward(paymentAmount)) * (10_000 - founderPortion)) / 10_000)
             });
     }
 
