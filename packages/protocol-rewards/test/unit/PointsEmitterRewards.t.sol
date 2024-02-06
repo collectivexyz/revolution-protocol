@@ -38,7 +38,7 @@ contract PointsEmitterRewardsTest is ProtocolRewardsTest {
             vrgda: vrgda,
             founderParams: IRevolutionBuilder.FounderParams({
                 totalRateBps: 1_000,
-                founderAddress: founder,
+                founderAddress: creatorsAddress,
                 rewardsExpirationDate: 1_800_000_000,
                 entropyRateBps: 5_000
             }),
@@ -112,7 +112,7 @@ contract PointsEmitterRewardsTest is ProtocolRewardsTest {
             vrgda: vrgda,
             founderParams: IRevolutionBuilder.FounderParams({
                 totalRateBps: 1_000,
-                founderAddress: founder,
+                founderAddress: creatorsAddress,
                 rewardsExpirationDate: 1_800_000_000,
                 entropyRateBps: 5_000
             }),

@@ -49,7 +49,7 @@ contract RevolutionPointsEmitter is
     address public founderAddress;
 
     // The timestamp in seconds after which the founders reward stops being paid
-    uint256 public rewardsExpirationDate;
+    uint256 public founderRewardsExpirationDate;
 
     // The account to pay grants funds to
     address public grantsAddress;
@@ -122,8 +122,8 @@ contract RevolutionPointsEmitter is
             founderAddress = _founderParams.founderAddress;
         }
 
-        if (rewardsExpirationDate == 0) {
-            rewardsExpirationDate = _founderParams.rewardsExpirationDate;
+        if (founderRewardsExpirationDate == 0) {
+            founderRewardsExpirationDate = _founderParams.rewardsExpirationDate;
         }
 
         vrgda = IVRGDAC(_vrgda);

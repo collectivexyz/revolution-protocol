@@ -65,6 +65,16 @@ interface IRevolutionPointsEmitter is IRewardSplits {
 
     function setGrantsRateBps(uint256 grantsRateBps) external;
 
+    function grantsAddress() external view returns (address);
+
+    function founderAddress() external view returns (address);
+
+    function founderRateBps() external view returns (uint256);
+
+    function founderEntropyRateBps() external view returns (uint256);
+
+    function founderRewardsExpirationDate() external view returns (uint256);
+
     function getTokenQuoteForPayment(uint256 paymentAmount) external returns (int);
 
     function setGrantsAddress(address grants) external;
