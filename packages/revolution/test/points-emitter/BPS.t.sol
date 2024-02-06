@@ -202,7 +202,8 @@ contract PointsEmitterBasicTest is PointsEmitterTest {
                 founderAddress: founder,
                 rewardsExpirationDate: 1_800_000_000,
                 entropyRateBps: 50_000
-            })
+            }),
+            grantsParams: IRevolutionBuilder.GrantsParams({ totalRateBps: 1000, grantsAddress: grantsAddress })
         });
     }
 }

@@ -94,13 +94,15 @@ contract RevolutionPointsEmitter is
      * @param _revolutionPoints The ERC-20 token contract address
      * @param _vrgda The VRGDA contract address
      * @param _founderParams The founder reward parameters
+     * @param _grantsParams The grants reward parameters
      */
     function initialize(
         address _initialOwner,
         address _weth,
         address _revolutionPoints,
         address _vrgda,
-        IRevolutionBuilder.FounderParams calldata _founderParams
+        IRevolutionBuilder.FounderParams calldata _founderParams,
+        IRevolutionBuilder.GrantsParams calldata _grantsParams
     ) external initializer {
         if (msg.sender != address(manager)) revert NOT_MANAGER();
         if (_initialOwner == address(0)) revert ADDRESS_ZERO();
@@ -110,6 +112,7 @@ contract RevolutionPointsEmitter is
 
         if (_founderParams.totalRateBps > 10_000) revert INVALID_BPS();
         if (_founderParams.entropyRateBps > 10_000) revert INVALID_BPS();
+        if (_founderParams.rewardsExpirationDate < block.timestamp) revert INVALID_REWARDS_TIMESTAMP();
 
         __Pausable_init();
         __ReentrancyGuard_init();
@@ -132,6 +135,14 @@ contract RevolutionPointsEmitter is
 
         if (founderEntropyRateBps == 0) {
             founderEntropyRateBps = _founderParams.entropyRateBps;
+        }
+
+        if (grantsAddress == address(0)) {
+            grantsAddress = _grantsParams.grantsAddress;
+        }
+
+        if (grantsRateBps == 0) {
+            grantsRateBps = _grantsParams.totalRateBps;
         }
 
         vrgda = IVRGDAC(_vrgda);

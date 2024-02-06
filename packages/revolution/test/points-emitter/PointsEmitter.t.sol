@@ -41,7 +41,8 @@ contract PointsEmitterTest is RevolutionBuilderTest {
                 founderAddress: founder,
                 rewardsExpirationDate: 1_800_000_000,
                 entropyRateBps: 4_000
-            })
+            }),
+            IRevolutionBuilder.GrantsParams({ totalRateBps: 1000, grantsAddress: grantsAddress })
         );
 
         super.deployMock();
@@ -73,7 +74,8 @@ contract PointsEmitterTest is RevolutionBuilderTest {
                 founderAddress: address(0x123),
                 rewardsExpirationDate: 1_800_000_000,
                 entropyRateBps: entropyRate
-            })
+            }),
+            IRevolutionBuilder.GrantsParams({ totalRateBps: 1000, grantsAddress: grantsAddress })
         );
 
         super.deployMock();
@@ -92,7 +94,8 @@ contract PointsEmitterTest is RevolutionBuilderTest {
                 founderAddress: address(0x123),
                 rewardsExpirationDate: expiry,
                 entropyRateBps: entropyRate
-            })
+            }),
+            IRevolutionBuilder.GrantsParams({ totalRateBps: 1000, grantsAddress: grantsAddress })
         );
 
         super.deployMock();

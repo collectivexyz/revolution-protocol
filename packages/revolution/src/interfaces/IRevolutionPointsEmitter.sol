@@ -39,6 +39,9 @@ interface IRevolutionPointsEmitter is IRewardSplits {
     /// @dev Reverts if the WETH transfer fails
     error WETH_TRANSFER_FAILED();
 
+    /// @dev Reverts if invalid rewards timestamp is passed
+    error INVALID_REWARDS_TIMESTAMP();
+
     struct ProtocolRewardAddresses {
         address builder;
         address purchaseReferral;
@@ -111,12 +114,14 @@ interface IRevolutionPointsEmitter is IRewardSplits {
      * @param revolutionPoints The ERC-20 token contract address
      * @param vrgda The VRGDA contract address
      * @param founderParams The founder rewards parameters
+     * @param grantsParams The grants rewards parameters
      */
     function initialize(
         address initialOwner,
         address weth,
         address revolutionPoints,
         address vrgda,
-        IRevolutionBuilder.FounderParams calldata founderParams
+        IRevolutionBuilder.FounderParams calldata founderParams,
+        IRevolutionBuilder.GrantsParams calldata grantsParams
     ) external;
 }
