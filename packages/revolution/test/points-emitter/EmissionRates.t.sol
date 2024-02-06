@@ -12,16 +12,16 @@ import { IRevolutionBuilder } from "../../src/interfaces/IRevolutionBuilder.sol"
 import { PointsEmitterTest } from "./PointsEmitter.t.sol";
 import { IRevolutionPoints } from "../../src/interfaces/IRevolutionPoints.sol";
 import { ERC1967Proxy } from "../../src/libs/proxy/ERC1967Proxy.sol";
-import { console2 } from "forge-std/console2.sol";
 
 contract EmissionRatesTest is PointsEmitterTest {
     function testBuyTokenWithDifferentRates(uint256 creatorRate, uint256 entropyRate) public {
         // Assume valid rates
         vm.assume(creatorRate <= 10000 && entropyRate <= 10000);
 
+        setUpWithDifferentRates(creatorRate, entropyRate);
+
         vm.startPrank(address(executor));
         // Set creator and entropy rates
-        revolutionPointsEmitter.setGrantsRateBps(creatorRate);
         assertEq(revolutionPointsEmitter.founderRateBps(), creatorRate, "Creator rate not set correctly");
         assertEq(revolutionPointsEmitter.founderEntropyRateBps(), entropyRate, "Entropy rate not set correctly");
 
@@ -111,12 +111,7 @@ contract EmissionRatesTest is PointsEmitterTest {
         vm.prank(address(executor));
         revolutionPointsEmitter.setGrantsAddress(address(100));
 
-        // change creatorRateBps to 0
-        vm.prank(address(executor));
-        revolutionPointsEmitter.setGrantsRateBps(0);
-
-        // set entropyRateBps to 0
-        vm.prank(address(executor));
+        setUpWithDifferentRates(0, 0);
 
         vm.startPrank(address(0));
 
@@ -135,20 +130,11 @@ contract EmissionRatesTest is PointsEmitterTest {
         // save buyer token balance
         uint256 buyerTokenBalance = revolutionPointsEmitter.balanceOf(address(1));
 
-        console2.log("treasuryEthBalance: ", treasuryEthBalance);
-        console2.log("buyerTokenBalance: ", buyerTokenBalance);
-
         // save protocol fees
         uint256 protocolFees = (1e18 * 250) / 10_000;
 
-        console2.log("protocolFees: ", protocolFees);
-
         // convert token balances to ETH
         uint256 buyerTokenBalanceEth = uint256(revolutionPointsEmitter.buyTokenQuote(buyerTokenBalance));
-
-        console2.log("buyerTokenBalanceEth: ", buyerTokenBalanceEth);
-
-        console2.log("total: ", treasuryEthBalance + protocolFees + buyerTokenBalanceEth);
 
         // Sent in ETH should be almost equal (account for precision/rounding) to total ETH plus token value in ETH
         assertGt(1e18 * 2, treasuryEthBalance + protocolFees + buyerTokenBalanceEth, "");
@@ -210,13 +196,14 @@ contract EmissionRatesTest is PointsEmitterTest {
         );
     }
 
-    function test_correctEmitted(uint256 creatorRateBps, uint256 entropyRateBps) public {
+    function test_correctEmitted(uint256 founderRateBps, uint256 entropyRateBps) public {
         // Assume valid rates
-        vm.assume(creatorRateBps > 0 && creatorRateBps < 10000 && entropyRateBps < 10000);
+        vm.assume(founderRateBps > 0 && founderRateBps < 10000 && entropyRateBps < 10000);
+
+        setUpWithDifferentRates(founderRateBps, entropyRateBps);
 
         vm.startPrank(revolutionPointsEmitter.owner());
-        //set creatorRate and entropyRate
-        revolutionPointsEmitter.setGrantsRateBps(creatorRateBps);
+
         vm.stopPrank();
 
         vm.deal(address(this), 100000 ether);
@@ -237,7 +224,7 @@ contract EmissionRatesTest is PointsEmitterTest {
         uint256 msgValueRemaining = 1 ether - revolutionPointsEmitter.computeTotalReward(1 ether);
 
         //Share of purchase amount to send to owner
-        uint256 toPayOwner = (msgValueRemaining * (10_000 - creatorRateBps)) / 10_000;
+        uint256 toPayOwner = (msgValueRemaining * (10_000 - founderRateBps)) / 10_000;
 
         //Ether directly sent to creators
         uint256 creatorDirectPayment = ((msgValueRemaining - toPayOwner) * entropyRateBps) / 10_000;
@@ -281,17 +268,18 @@ contract EmissionRatesTest is PointsEmitterTest {
         uint256 randomTime
     ) public {
         randomTime = bound(randomTime, 300 days, 700 days);
+        // Assume valid rates
+        vm.assume(creatorRate <= 10000 && entropyRate <= 10000);
+
         uint256 currentTime = 1702801400;
 
         // warp to a more realistic time
         vm.warp(block.timestamp + currentTime);
 
-        // Assume valid rates
-        vm.assume(creatorRate <= 10000 && entropyRate <= 10000);
+        setUpWithDifferentRates(creatorRate, entropyRate);
 
         vm.startPrank(address(executor));
         // Set creator and entropy rates
-        revolutionPointsEmitter.setGrantsRateBps(creatorRate);
         assertEq(revolutionPointsEmitter.founderRateBps(), creatorRate, "Creator rate not set correctly");
         assertEq(revolutionPointsEmitter.founderEntropyRateBps(), entropyRate, "Entropy rate not set correctly");
 

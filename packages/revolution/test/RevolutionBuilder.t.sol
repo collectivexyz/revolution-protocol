@@ -301,14 +301,24 @@ contract RevolutionBuilderTest is Test {
     }
 
     function setMockPointsEmitterParams() internal virtual {
-        setPointsEmitterParams(1 ether, 1e18 / 10, 1_000 * 1e18, creatorsAddress);
+        setPointsEmitterParams(
+            1 ether,
+            1e18 / 10,
+            1_000 * 1e18,
+            IRevolutionBuilder.FounderParams({
+                totalRateBps: 1000,
+                founderAddress: founder,
+                rewardsExpirationDate: 1_800_000_000,
+                entropyRateBps: 4_000
+            })
+        );
     }
 
     function setPointsEmitterParams(
         int256 _targetPrice,
         int256 _priceDecayPercent,
         int256 _tokensPerTimeUnit,
-        address _founder
+        IRevolutionBuilder.FounderParams memory _founderParams
     ) internal virtual {
         revolutionPointsParams = IRevolutionBuilder.RevolutionPointsParams({
             tokenParams: revolutionPointsParams.tokenParams,
@@ -318,12 +328,7 @@ contract RevolutionBuilderTest is Test {
                     priceDecayPercent: _priceDecayPercent,
                     tokensPerTimeUnit: _tokensPerTimeUnit
                 }),
-                founderParams: IRevolutionBuilder.FounderParams({
-                    totalRateBps: 1000,
-                    founderAddress: _founder,
-                    rewardsExpirationDate: 1_800_000_000,
-                    entropyRateBps: 4_000
-                })
+                founderParams: _founderParams
             })
         });
     }

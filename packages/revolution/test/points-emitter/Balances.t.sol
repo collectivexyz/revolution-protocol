@@ -53,9 +53,8 @@ contract PointsEmitterBasicTest is PointsEmitterTest {
         // Assume valid rates
         vm.assume(creatorRateBps > 0 && creatorRateBps <= 10000 && entropyRateBps > 0 && entropyRateBps <= 10000);
 
-        vm.startPrank(revolutionPointsEmitter.owner());
-        //set creatorRate and entropyRate
-        revolutionPointsEmitter.setGrantsRateBps(creatorRateBps);
+        setUpWithDifferentRates(creatorRateBps, entropyRateBps);
+
         vm.stopPrank();
 
         //expect owner balance to start out at 0
