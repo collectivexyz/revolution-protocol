@@ -126,10 +126,16 @@ contract RevolutionPointsEmitter is
             founderRewardsExpirationDate = _founderParams.rewardsExpirationDate;
         }
 
+        if (founderRateBps == 0) {
+            founderRateBps = _founderParams.totalRateBps;
+        }
+
+        if (founderEntropyRateBps == 0) {
+            founderEntropyRateBps = _founderParams.entropyRateBps;
+        }
+
         vrgda = IVRGDAC(_vrgda);
         token = IRevolutionPoints(_revolutionPoints);
-        founderRateBps = _founderParams.totalRateBps;
-        founderEntropyRateBps = _founderParams.entropyRateBps;
         WETH = _weth;
 
         // If we are upgrading, don't reset the start time
