@@ -38,7 +38,7 @@
 //    - `_setMaxQuorumVotesBPS(uint16 newMaxQuorumVotesBPS)`
 //    - `_setQuorumCoefficient(uint32 newQuorumCoefficient)`
 // - `minQuorumVotes` and `maxQuorumVotes`, which returns the current min and
-// max quorum votes using the current Verb token and points supply.
+// max quorum votes using the current Revolution token and points supply.
 // - New `Proposal` struct member:
 //    - `totalWeightedSupply` used in dynamic quorum calculation.
 //    - `creationBlock` used for retrieving checkpoints of votes and dynamic quorum params. This now
@@ -926,7 +926,7 @@ contract RevolutionDAOLogicV1 is
     }
 
     /**
-     * @notice Current proposal threshold using Points Total Supply and Verb Total Supply
+     * @notice Current proposal threshold using Points Total Supply and Revolution Token Total Supply
      * Differs from `GovernerBravo` which uses fixed amount
      */
     function proposalThreshold() public view returns (uint256) {
@@ -1061,14 +1061,14 @@ contract RevolutionDAOLogicV1 is
     }
 
     /**
-     * @notice Current min quorum votes using Verb total supply and points total supply
+     * @notice Current min quorum votes using Revolution token total supply and points total supply
      */
     function minQuorumVotes() public view returns (uint256) {
         return bps2Uint(getDynamicQuorumParamsAt(block.number).minQuorumVotesBPS, votingPower.getTotalVotesSupply());
     }
 
     /**
-     * @notice Current max quorum votes using Verb total supply and points total supply
+     * @notice Current max quorum votes using Revolution token total supply and points total supply
      */
     function maxQuorumVotes() public view returns (uint256) {
         return bps2Uint(getDynamicQuorumParamsAt(block.number).maxQuorumVotesBPS, votingPower.getTotalVotesSupply());

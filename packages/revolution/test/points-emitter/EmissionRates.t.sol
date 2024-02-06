@@ -12,19 +12,18 @@ import { IRevolutionBuilder } from "../../src/interfaces/IRevolutionBuilder.sol"
 import { PointsEmitterTest } from "./PointsEmitter.t.sol";
 import { IRevolutionPoints } from "../../src/interfaces/IRevolutionPoints.sol";
 import { ERC1967Proxy } from "../../src/libs/proxy/ERC1967Proxy.sol";
-import { console2 } from "forge-std/console2.sol";
 
 contract EmissionRatesTest is PointsEmitterTest {
     function testBuyTokenWithDifferentRates(uint256 creatorRate, uint256 entropyRate) public {
         // Assume valid rates
         vm.assume(creatorRate <= 10000 && entropyRate <= 10000);
 
+        setUpWithDifferentRates(creatorRate, entropyRate);
+
         vm.startPrank(address(executor));
         // Set creator and entropy rates
-        revolutionPointsEmitter.setCreatorRateBps(creatorRate);
-        revolutionPointsEmitter.setEntropyRateBps(entropyRate);
-        assertEq(revolutionPointsEmitter.creatorRateBps(), creatorRate, "Creator rate not set correctly");
-        assertEq(revolutionPointsEmitter.entropyRateBps(), entropyRate, "Entropy rate not set correctly");
+        assertEq(revolutionPointsEmitter.founderRateBps(), creatorRate, "Creator rate not set correctly");
+        assertEq(revolutionPointsEmitter.founderEntropyRateBps(), entropyRate, "Entropy rate not set correctly");
 
         // Setup for buying token
         address[] memory recipients = new address[](1);
@@ -34,9 +33,9 @@ contract EmissionRatesTest is PointsEmitterTest {
         bps[0] = 10000; // 100% of the tokens to the recipient
 
         uint256 valueToSend = 1 ether;
-        revolutionPointsEmitter.setCreatorsAddress(address(80));
-        address creatorsAddress = revolutionPointsEmitter.creatorsAddress();
-        uint256 creatorsInitialEthBalance = address(revolutionPointsEmitter.creatorsAddress()).balance;
+        revolutionPointsEmitter.setGrantsAddress(address(80));
+        address creatorsAddress = revolutionPointsEmitter.founderAddress();
+        uint256 creatorsInitialEthBalance = address(revolutionPointsEmitter.founderAddress()).balance;
 
         uint256 feeAmount = revolutionPointsEmitter.computeTotalReward(valueToSend);
 
@@ -62,11 +61,11 @@ contract EmissionRatesTest is PointsEmitterTest {
         );
 
         // Verify tokens distributed to creator
-        uint256 creatorTokenBalance = revolutionPointsEmitter.balanceOf(revolutionPointsEmitter.creatorsAddress());
+        uint256 creatorTokenBalance = revolutionPointsEmitter.balanceOf(revolutionPointsEmitter.founderAddress());
         assertEq(creatorTokenBalance, expectedCreatorTokens, "Creator did not receive correct amount of tokens");
 
         // Verify ETH sent to creator
-        uint256 creatorsNewEthBalance = address(revolutionPointsEmitter.creatorsAddress()).balance;
+        uint256 creatorsNewEthBalance = address(revolutionPointsEmitter.founderAddress()).balance;
         assertEq(
             creatorsNewEthBalance - creatorsInitialEthBalance,
             expectedCreatorEth,
@@ -110,15 +109,9 @@ contract EmissionRatesTest is PointsEmitterTest {
         vm.stopPrank();
         // set setCreatorsAddress
         vm.prank(address(executor));
-        revolutionPointsEmitter.setCreatorsAddress(address(100));
+        revolutionPointsEmitter.setGrantsAddress(address(100));
 
-        // change creatorRateBps to 0
-        vm.prank(address(executor));
-        revolutionPointsEmitter.setCreatorRateBps(0);
-
-        // set entropyRateBps to 0
-        vm.prank(address(executor));
-        revolutionPointsEmitter.setEntropyRateBps(0);
+        setUpWithDifferentRates(0, 0);
 
         vm.startPrank(address(0));
 
@@ -137,20 +130,11 @@ contract EmissionRatesTest is PointsEmitterTest {
         // save buyer token balance
         uint256 buyerTokenBalance = revolutionPointsEmitter.balanceOf(address(1));
 
-        console2.log("treasuryEthBalance: ", treasuryEthBalance);
-        console2.log("buyerTokenBalance: ", buyerTokenBalance);
-
         // save protocol fees
         uint256 protocolFees = (1e18 * 250) / 10_000;
 
-        console2.log("protocolFees: ", protocolFees);
-
         // convert token balances to ETH
         uint256 buyerTokenBalanceEth = uint256(revolutionPointsEmitter.buyTokenQuote(buyerTokenBalance));
-
-        console2.log("buyerTokenBalanceEth: ", buyerTokenBalanceEth);
-
-        console2.log("total: ", treasuryEthBalance + protocolFees + buyerTokenBalanceEth);
 
         // Sent in ETH should be almost equal (account for precision/rounding) to total ETH plus token value in ETH
         assertGt(1e18 * 2, treasuryEthBalance + protocolFees + buyerTokenBalanceEth, "");
@@ -212,20 +196,20 @@ contract EmissionRatesTest is PointsEmitterTest {
         );
     }
 
-    function test_correctEmitted(uint256 creatorRateBps, uint256 entropyRateBps) public {
+    function test_correctEmitted(uint256 founderRateBps, uint256 entropyRateBps) public {
         // Assume valid rates
-        vm.assume(creatorRateBps > 0 && creatorRateBps < 10000 && entropyRateBps < 10000);
+        vm.assume(founderRateBps > 0 && founderRateBps < 10000 && entropyRateBps < 10000);
+
+        setUpWithDifferentRates(founderRateBps, entropyRateBps);
 
         vm.startPrank(revolutionPointsEmitter.owner());
-        //set creatorRate and entropyRate
-        revolutionPointsEmitter.setCreatorRateBps(creatorRateBps);
-        revolutionPointsEmitter.setEntropyRateBps(entropyRateBps);
+
         vm.stopPrank();
 
         vm.deal(address(this), 100000 ether);
 
         //expect balance to start out at 0
-        assertEq(revolutionPoints.balanceOf(revolutionPointsEmitter.creatorsAddress()), 0, "Balance should start at 0");
+        assertEq(revolutionPoints.balanceOf(revolutionPointsEmitter.founderAddress()), 0, "Balance should start at 0");
 
         address[] memory recipients = new address[](1);
         recipients[0] = address(1);
@@ -240,7 +224,7 @@ contract EmissionRatesTest is PointsEmitterTest {
         uint256 msgValueRemaining = 1 ether - revolutionPointsEmitter.computeTotalReward(1 ether);
 
         //Share of purchase amount to send to owner
-        uint256 toPayOwner = (msgValueRemaining * (10_000 - creatorRateBps)) / 10_000;
+        uint256 toPayOwner = (msgValueRemaining * (10_000 - founderRateBps)) / 10_000;
 
         //Ether directly sent to creators
         uint256 creatorDirectPayment = ((msgValueRemaining - toPayOwner) * entropyRateBps) / 10_000;
@@ -265,7 +249,7 @@ contract EmissionRatesTest is PointsEmitterTest {
 
         //assert that creatorsAddress balance is correct
         assertEq(
-            uint(revolutionPoints.balanceOf(revolutionPointsEmitter.creatorsAddress())),
+            uint(revolutionPoints.balanceOf(revolutionPointsEmitter.founderAddress())),
             uint(expectedAmountForCreators),
             "Creators should have correct balance"
         );
@@ -284,20 +268,20 @@ contract EmissionRatesTest is PointsEmitterTest {
         uint256 randomTime
     ) public {
         randomTime = bound(randomTime, 300 days, 700 days);
+        // Assume valid rates
+        vm.assume(creatorRate <= 10000 && entropyRate <= 10000);
+
         uint256 currentTime = 1702801400;
 
         // warp to a more realistic time
         vm.warp(block.timestamp + currentTime);
 
-        // Assume valid rates
-        vm.assume(creatorRate <= 10000 && entropyRate <= 10000);
+        setUpWithDifferentRates(creatorRate, entropyRate);
 
         vm.startPrank(address(executor));
         // Set creator and entropy rates
-        revolutionPointsEmitter.setCreatorRateBps(creatorRate);
-        revolutionPointsEmitter.setEntropyRateBps(entropyRate);
-        assertEq(revolutionPointsEmitter.creatorRateBps(), creatorRate, "Creator rate not set correctly");
-        assertEq(revolutionPointsEmitter.entropyRateBps(), entropyRate, "Entropy rate not set correctly");
+        assertEq(revolutionPointsEmitter.founderRateBps(), creatorRate, "Creator rate not set correctly");
+        assertEq(revolutionPointsEmitter.founderEntropyRateBps(), entropyRate, "Entropy rate not set correctly");
 
         // Setup for buying token
         address[] memory recipients = new address[](1);
@@ -318,6 +302,258 @@ contract EmissionRatesTest is PointsEmitterTest {
                 purchaseReferral: address(0),
                 deployer: address(0)
             })
+        );
+    }
+
+    function _calculateBuyTokenPaymentShares(
+        uint256 msgValueRemaining
+    ) internal view returns (IRevolutionPointsEmitter.BuyTokenPaymentShares memory buyTokenPaymentShares) {
+        // If rewards are expired, founder gets 0
+        uint256 founderPortion = revolutionPointsEmitter.founderRateBps();
+
+        if (block.timestamp > revolutionPointsEmitter.founderRewardsExpirationDate()) {
+            founderPortion = 0;
+        }
+
+        // Calculate share of purchase amount reserved for buyers
+        buyTokenPaymentShares.buyersGovernancePayment =
+            msgValueRemaining -
+            ((msgValueRemaining * founderPortion) / 10_000);
+
+        // Calculate ether directly sent to founder
+        buyTokenPaymentShares.founderDirectPayment =
+            (msgValueRemaining * founderPortion * revolutionPointsEmitter.founderEntropyRateBps()) /
+            10_000 /
+            10_000;
+
+        // Calculate ether spent on founder governance tokens
+        buyTokenPaymentShares.founderGovernancePayment =
+            ((msgValueRemaining * founderPortion) / 10_000) -
+            buyTokenPaymentShares.founderDirectPayment;
+    }
+
+    struct PaymentDistribution {
+        uint256 toPayOwner;
+        uint256 toPayFounder;
+    }
+
+    function _calculatePaymentDistribution(
+        uint256 founderGovernancePoints,
+        IRevolutionPointsEmitter.BuyTokenPaymentShares memory buyTokenPaymentShares
+    ) internal pure returns (PaymentDistribution memory distribution) {
+        distribution.toPayOwner = buyTokenPaymentShares.buyersGovernancePayment;
+        distribution.toPayFounder = buyTokenPaymentShares.founderDirectPayment;
+
+        // If the founder is receiving points, add the founder's points payment to the owner's payment
+        if (founderGovernancePoints > 0) {
+            distribution.toPayOwner += buyTokenPaymentShares.founderGovernancePayment;
+        } else if (founderGovernancePoints == 0 && buyTokenPaymentShares.founderGovernancePayment > 0) {
+            // If the founder is not receiving any points, but ETH should be spent to buy them points, just send the ETH to the founder
+            distribution.toPayFounder += buyTokenPaymentShares.founderGovernancePayment;
+        }
+
+        return distribution;
+    }
+
+    // Test that founder rewards expire after a set expiration time
+    function test_FounderRewardsExpireCorrectly(
+        uint256 creatorRate,
+        uint256 entropyRate,
+        uint256 valueToSend,
+        uint256 expiryDuration
+    ) public {
+        valueToSend = bound(
+            valueToSend,
+            revolutionPointsEmitter.minPurchaseAmount() + 1,
+            revolutionPointsEmitter.maxPurchaseAmount() - 1
+        );
+
+        // Calculate value left after sharing protocol rewards
+        uint256 msgValueRemaining = valueToSend - revolutionPointsEmitter.computeTotalReward(valueToSend);
+
+        creatorRate = bound(creatorRate, 1, 10000);
+        entropyRate = bound(entropyRate, 1, 10000);
+        expiryDuration = bound(expiryDuration, 1 days, 3650 days);
+        setUpWithDifferentRatesAndExpiry(creatorRate, entropyRate, block.timestamp + expiryDuration);
+
+        // Warp to just before the expiry
+        vm.warp(block.timestamp + expiryDuration - 1);
+
+        IRevolutionPointsEmitter.BuyTokenPaymentShares memory buyTokenPaymentSharesOg = _calculateBuyTokenPaymentShares(
+            msgValueRemaining
+        );
+
+        uint256 founderGovernancePoints = buyTokenPaymentSharesOg.founderGovernancePayment > 0
+            ? uint256(revolutionPointsEmitter.getTokenQuoteForEther(buyTokenPaymentSharesOg.founderGovernancePayment))
+            : 0;
+
+        PaymentDistribution memory distribution = _calculatePaymentDistribution(
+            founderGovernancePoints,
+            buyTokenPaymentSharesOg
+        );
+
+        vm.expectEmit(true, true, true, true);
+        emit IRevolutionPointsEmitter.PurchaseFinalized(
+            address(this),
+            valueToSend,
+            distribution.toPayOwner,
+            valueToSend - msgValueRemaining,
+            buyTokenPaymentSharesOg.buyersGovernancePayment > 0
+                ? uint256(
+                    //since founder gov shares are purchased first
+                    getTokenQuoteForEtherHelper(
+                        buyTokenPaymentSharesOg.buyersGovernancePayment,
+                        int256(founderGovernancePoints)
+                    )
+                )
+                : 0,
+            founderGovernancePoints,
+            distribution.toPayFounder
+        );
+
+        // Perform token purchase just before expiry
+        performTokenPurchase(valueToSend);
+
+        uint256 pointsBalanceBeforeExpiry = revolutionPoints.balanceOf(revolutionPointsEmitter.founderAddress());
+        uint256 ethBalanceBeforeExpiry = address(revolutionPointsEmitter.founderAddress()).balance;
+
+        // Check founder balance just before expiry
+        if (entropyRate < 9990) {
+            assertGt(pointsBalanceBeforeExpiry, 0, "Founder should have points rewards before expiry");
+        }
+        assertGt(ethBalanceBeforeExpiry, 0, "Founder should have eth rewards before expiry");
+
+        // Warp to just after the expiry
+        vm.warp(block.timestamp + expiryDuration + 1);
+
+        IRevolutionPointsEmitter.BuyTokenPaymentShares memory buyTokenPaymentShares = _calculateBuyTokenPaymentShares(
+            msgValueRemaining
+        );
+
+        vm.expectEmit(true, true, true, true);
+        emit IRevolutionPointsEmitter.PurchaseFinalized(
+            address(this),
+            valueToSend,
+            buyTokenPaymentShares.buyersGovernancePayment + buyTokenPaymentShares.founderGovernancePayment,
+            valueToSend - msgValueRemaining,
+            uint256(revolutionPointsEmitter.getTokenQuoteForPayment(valueToSend)),
+            0,
+            0
+        );
+
+        // Perform token purchase just after expiry
+        performTokenPurchase(valueToSend);
+
+        assertEq(
+            pointsBalanceBeforeExpiry,
+            revolutionPoints.balanceOf(revolutionPointsEmitter.founderAddress()),
+            "Founder should not receive points rewards after expiry"
+        );
+
+        assertEq(
+            ethBalanceBeforeExpiry,
+            address(revolutionPointsEmitter.founderAddress()).balance,
+            "Founder should not receive eth rewards after expiry"
+        );
+
+        vm.expectEmit(true, true, true, true);
+        emit IRevolutionPointsEmitter.PurchaseFinalized(
+            address(this),
+            valueToSend,
+            buyTokenPaymentShares.buyersGovernancePayment + buyTokenPaymentShares.founderGovernancePayment,
+            valueToSend - msgValueRemaining,
+            uint256(revolutionPointsEmitter.getTokenQuoteForEther(msgValueRemaining)),
+            0,
+            0
+        );
+
+        // Perform token purchase just after expiry
+        performTokenPurchase(valueToSend);
+    }
+
+    function performTokenPurchase(uint256 valueToSend) internal {
+        address[] memory recipients = new address[](1);
+        recipients[0] = address(1); // recipient address
+
+        uint256[] memory bps = new uint256[](1);
+        bps[0] = 10000; // 100% of the tokens to the recipient
+
+        // Perform token purchase
+        vm.startPrank(address(this));
+        revolutionPointsEmitter.buyToken{ value: valueToSend }(
+            recipients,
+            bps,
+            IRevolutionPointsEmitter.ProtocolRewardAddresses({
+                builder: address(0),
+                purchaseReferral: address(0),
+                deployer: address(0)
+            })
+        );
+        vm.stopPrank();
+    }
+
+    // Test that founder rewards expire after a set expiration time
+    function test_FounderRewardsExpireForQuoteUtils(
+        uint256 creatorRate,
+        uint256 entropyRate,
+        uint256 valueToSend,
+        uint256 expiryDuration
+    ) public {
+        valueToSend = bound(
+            valueToSend,
+            revolutionPointsEmitter.minPurchaseAmount() + 1,
+            revolutionPointsEmitter.maxPurchaseAmount() - 1
+        );
+
+        // Calculate value left after sharing protocol rewards
+        uint256 msgValueRemaining = valueToSend - revolutionPointsEmitter.computeTotalReward(valueToSend);
+
+        creatorRate = bound(creatorRate, 1, 10000);
+        entropyRate = bound(entropyRate, 1, 10000);
+
+        expiryDuration = bound(expiryDuration, 1 days, 3650 days);
+
+        setUpWithDifferentRatesAndExpiry(creatorRate, entropyRate, block.timestamp + expiryDuration);
+
+        // Warp to just before the expiry
+        vm.warp(block.timestamp + expiryDuration - 1);
+
+        IRevolutionPointsEmitter.BuyTokenPaymentShares memory buyTokenPaymentSharesOg = _calculateBuyTokenPaymentShares(
+            msgValueRemaining
+        );
+
+        //expect getTokenQuoteForEther (buyergovernancepayment) == getTokenForPayment (valueToSend) since founder has rewards
+        assertEq(
+            buyTokenPaymentSharesOg.buyersGovernancePayment > 0
+                ? uint256(
+                    revolutionPointsEmitter.getTokenQuoteForEther(buyTokenPaymentSharesOg.buyersGovernancePayment)
+                )
+                : 0,
+            uint256(revolutionPointsEmitter.getTokenQuoteForPayment(valueToSend)),
+            "Token quote for payment and ether should be equal for buyerGov payment"
+        );
+
+        // Warp to just after the expiry
+        vm.warp(block.timestamp + expiryDuration + 1);
+
+        IRevolutionPointsEmitter.BuyTokenPaymentShares memory buyTokenPaymentShares = _calculateBuyTokenPaymentShares(
+            msgValueRemaining
+        );
+
+        //get token quote for ether doesn't account for founder rewards or protocol rewards
+        //get token quote for payment accounts for founder rewards and protocol rewards
+
+        assertEq(
+            uint256(revolutionPointsEmitter.getTokenQuoteForEther(buyTokenPaymentShares.buyersGovernancePayment)),
+            uint256(revolutionPointsEmitter.getTokenQuoteForEther(msgValueRemaining)),
+            "Token quote for payment and ether should be equal for buyerGov payment"
+        );
+
+        //expect getTokenQuoteForEther (msgValueRemaining) ==  getTokenQuoteForPayment (valueToSend) since founder has no rewards
+        assertEq(
+            uint256(revolutionPointsEmitter.getTokenQuoteForPayment(valueToSend)),
+            uint256(revolutionPointsEmitter.getTokenQuoteForEther(msgValueRemaining)),
+            "Token quote for payment and ether should be equal"
         );
     }
 }

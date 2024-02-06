@@ -1,21 +1,22 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.22;
 
-import { ReentrancyGuardUpgradeable } from "@openzeppelin/contracts-upgradeable/utils/ReentrancyGuardUpgradeable.sol";
-import { PointsEmitterRewards } from "@cobuild/protocol-rewards/src/abstract/PointsEmitter/PointsEmitterRewards.sol";
-import { Ownable2StepUpgradeable } from "@openzeppelin/contracts-upgradeable/access/Ownable2StepUpgradeable.sol";
-import { PausableUpgradeable } from "@openzeppelin/contracts-upgradeable/utils/PausableUpgradeable.sol";
-
 import { IWETH } from "./interfaces/IWETH.sol";
 import { IVRGDAC } from "./interfaces/IVRGDAC.sol";
-import { toDaysWadUnsafe } from "./libs/SignedWadMath.sol";
-import { Strings } from "@openzeppelin/contracts/utils/Strings.sol";
 import { IRevolutionPoints } from "./interfaces/IRevolutionPoints.sol";
 import { IRevolutionPointsEmitter } from "./interfaces/IRevolutionPointsEmitter.sol";
+import { IRevolutionBuilder } from "./interfaces/IRevolutionBuilder.sol";
+
+import { PointsEmitterRewards } from "@cobuild/protocol-rewards/src/abstract/PointsEmitter/PointsEmitterRewards.sol";
+
+import { ReentrancyGuardUpgradeable } from "@openzeppelin/contracts-upgradeable/utils/ReentrancyGuardUpgradeable.sol";
+import { Ownable2StepUpgradeable } from "@openzeppelin/contracts-upgradeable/access/Ownable2StepUpgradeable.sol";
+import { PausableUpgradeable } from "@openzeppelin/contracts-upgradeable/utils/PausableUpgradeable.sol";
+import { Strings } from "@openzeppelin/contracts/utils/Strings.sol";
+
 import { VersionedContract } from "./version/VersionedContract.sol";
 import { UUPS } from "./libs/proxy/UUPS.sol";
-
-import { IRevolutionBuilder } from "./interfaces/IRevolutionBuilder.sol";
+import { toDaysWadUnsafe } from "./libs/SignedWadMath.sol";
 
 contract RevolutionPointsEmitter is
     IRevolutionPointsEmitter,
@@ -38,14 +39,23 @@ contract RevolutionPointsEmitter is
     // solhint-disable-next-line not-rely-on-time
     uint256 public startTime;
 
-    // The split of the purchase that is reserved for the creator of the Verb in basis points
-    uint256 public creatorRateBps;
+    // The split of the purchase that is reserved for the founder in basis points
+    uint256 public founderRateBps;
 
-    // The split of (purchase proceeds * creatorRate) that is sent to the creator as ether in basis points
-    uint256 public entropyRateBps;
+    // The split of (purchase proceeds * founderRateBps) that is sent to the founder as ether in basis points
+    uint256 public founderEntropyRateBps;
 
-    // The account or contract to pay the creator reward to
-    address public creatorsAddress;
+    // The account or contract to pay the founder reward to
+    address public founderAddress;
+
+    // The timestamp in seconds after which the founders reward stops being paid
+    uint256 public founderRewardsExpirationDate;
+
+    // The account to pay grants funds to
+    address public grantsAddress;
+
+    // Split of purchase proceeds sent to the grants system as ether in basis points
+    uint256 public grantsRateBps;
 
     ///                                                          ///
     ///                         IMMUTABLES                       ///
@@ -83,25 +93,23 @@ contract RevolutionPointsEmitter is
      * @param _weth The address of the WETH contract
      * @param _revolutionPoints The ERC-20 token contract address
      * @param _vrgda The VRGDA contract address
-     * @param _creatorsAddress The address to pay the creator reward to
+     * @param _founderParams The founder reward parameters
      */
     function initialize(
         address _initialOwner,
         address _weth,
         address _revolutionPoints,
         address _vrgda,
-        address _creatorsAddress,
-        IRevolutionBuilder.PointsEmitterCreatorParams calldata _creatorParams
+        IRevolutionBuilder.FounderParams calldata _founderParams
     ) external initializer {
         if (msg.sender != address(manager)) revert NOT_MANAGER();
         if (_initialOwner == address(0)) revert ADDRESS_ZERO();
         if (_revolutionPoints == address(0)) revert ADDRESS_ZERO();
         if (_vrgda == address(0)) revert ADDRESS_ZERO();
-        if (_creatorsAddress == address(0)) revert ADDRESS_ZERO();
         if (_weth == address(0)) revert ADDRESS_ZERO();
 
-        if (_creatorParams.creatorRateBps > 10_000) revert INVALID_BPS();
-        if (_creatorParams.entropyRateBps > 10_000) revert INVALID_BPS();
+        if (_founderParams.totalRateBps > 10_000) revert INVALID_BPS();
+        if (_founderParams.entropyRateBps > 10_000) revert INVALID_BPS();
 
         __Pausable_init();
         __ReentrancyGuard_init();
@@ -109,11 +117,25 @@ contract RevolutionPointsEmitter is
         // Set up ownable
         __Ownable_init(_initialOwner);
 
-        creatorsAddress = _creatorsAddress;
+        // Set founder address if not already set
+        if (founderAddress == address(0)) {
+            founderAddress = _founderParams.founderAddress;
+        }
+
+        if (founderRewardsExpirationDate == 0) {
+            founderRewardsExpirationDate = _founderParams.rewardsExpirationDate;
+        }
+
+        if (founderRateBps == 0) {
+            founderRateBps = _founderParams.totalRateBps;
+        }
+
+        if (founderEntropyRateBps == 0) {
+            founderEntropyRateBps = _founderParams.entropyRateBps;
+        }
+
         vrgda = IVRGDAC(_vrgda);
         token = IRevolutionPoints(_revolutionPoints);
-        creatorRateBps = _creatorParams.creatorRateBps;
-        entropyRateBps = _creatorParams.entropyRateBps;
         WETH = _weth;
 
         // If we are upgrading, don't reset the start time
@@ -158,28 +180,58 @@ contract RevolutionPointsEmitter is
     }
 
     /**
-     * @notice A function to calculate the shares of the purchase that go to the buyer's governance purchase, and the creators
+     * @notice A function to calculate the shares of the purchase that go to the buyer's governance purchase, and the founder
      * @param msgValueRemaining The amount of ether left after protocol rewards are taken out
-     * @return buyTokenPaymentShares A struct containing the shares of the purchase that go to the buyer's governance purchase, and the creators
+     * @return buyTokenPaymentShares A struct containing the shares of the purchase that go to the buyer's governance purchase, and the founder
      */
     function _calculateBuyTokenPaymentShares(
         uint256 msgValueRemaining
     ) internal view returns (BuyTokenPaymentShares memory buyTokenPaymentShares) {
-        // Calculate share of purchase amount reserved for buyers
-        buyTokenPaymentShares.buyersGovernancePayment =
-            msgValueRemaining -
-            ((msgValueRemaining * creatorRateBps) / 10_000);
+        if (block.timestamp >= founderRewardsExpirationDate) {
+            // Founder no longer receives any rewards
+            buyTokenPaymentShares.buyersGovernancePayment = msgValueRemaining;
+        }
 
-        // Calculate ether directly sent to creators
-        buyTokenPaymentShares.creatorsDirectPayment =
-            (msgValueRemaining * creatorRateBps * entropyRateBps) /
-            10_000 /
-            10_000;
+        if (block.timestamp < founderRewardsExpirationDate) {
+            // Founder receives rewards per founderRateBps and founderEntropyRateBps
+            uint256 founderRate = founderRateBps;
 
-        // Calculate ether spent on creators governance tokens
-        buyTokenPaymentShares.creatorsGovernancePayment =
-            ((msgValueRemaining * creatorRateBps) / 10_000) -
-            buyTokenPaymentShares.creatorsDirectPayment;
+            // Share of purchase amount reserved for buyers
+            buyTokenPaymentShares.buyersGovernancePayment =
+                msgValueRemaining -
+                ((msgValueRemaining * founderRate) / 10_000);
+
+            // Ether directly sent to founder
+            buyTokenPaymentShares.founderDirectPayment =
+                (msgValueRemaining * founderRate * founderEntropyRateBps) /
+                10_000 /
+                10_000;
+
+            // Ether spent on founder governance tokens
+            buyTokenPaymentShares.founderGovernancePayment =
+                ((msgValueRemaining * founderRate) / 10_000) -
+                buyTokenPaymentShares.founderDirectPayment;
+        }
+    }
+
+    function _calculatePaymentDistribution(
+        uint256 founderGovernancePoints,
+        IRevolutionPointsEmitter.BuyTokenPaymentShares memory buyTokenPaymentShares
+    ) internal pure returns (PaymentDistribution memory distribution) {
+        // Ether to pay owner() for selling us points
+        distribution.toPayOwner = buyTokenPaymentShares.buyersGovernancePayment;
+        // Ether to pay founder directly
+        distribution.toPayFounder = buyTokenPaymentShares.founderDirectPayment;
+
+        // If the founder is not receiving any points, but ETH should be spent to buy them points, just send the ETH to the founder
+        if (founderGovernancePoints == 0 && buyTokenPaymentShares.founderGovernancePayment > 0) {
+            distribution.toPayFounder += buyTokenPaymentShares.founderGovernancePayment;
+        } else {
+            // If the founder is receiving points, add the founder's points payment to the owner's payment
+            distribution.toPayOwner += buyTokenPaymentShares.founderGovernancePayment;
+        }
+
+        return distribution;
     }
 
     /**
@@ -194,8 +246,8 @@ contract RevolutionPointsEmitter is
         uint[] calldata basisPointSplits,
         ProtocolRewardAddresses calldata protocolRewardsRecipients
     ) public payable nonReentrant whenNotPaused returns (uint256 tokensSoldWad) {
-        // Prevent owner and creatorsAddress from buying tokens directly, given they are recipient(s) of the funds
-        if (msg.sender == owner() || msg.sender == creatorsAddress) revert FUNDS_RECIPIENT_CANNOT_BUY_TOKENS();
+        // Prevent owner and founderAddress from buying tokens directly, given they are recipient(s) of the funds
+        if (msg.sender == owner() || msg.sender == founderAddress) revert FUNDS_RECIPIENT_CANNOT_BUY_TOKENS();
 
         // Transaction must send ether to buyTokens
         if (msg.value == 0) revert INVALID_PAYMENT();
@@ -213,25 +265,30 @@ contract RevolutionPointsEmitter is
 
         BuyTokenPaymentShares memory buyTokenPaymentShares = _calculateBuyTokenPaymentShares(msgValueRemaining);
 
-        // Calculate tokens to emit to creators
-        int256 totalTokensForCreators = buyTokenPaymentShares.creatorsGovernancePayment > 0
-            ? getTokenQuoteForEther(buyTokenPaymentShares.creatorsGovernancePayment)
+        // Calculate tokens to emit to founder
+        int256 totalTokensForFounder = buyTokenPaymentShares.founderGovernancePayment > 0
+            ? getTokenQuoteForEther(buyTokenPaymentShares.founderGovernancePayment)
             : int(0);
 
-        // Deposit owner's funds, and eth used to buy creators gov. tokens to owner's account
-        _safeTransferETHWithFallback(
-            owner(),
-            buyTokenPaymentShares.buyersGovernancePayment + buyTokenPaymentShares.creatorsGovernancePayment
+        // Calculate the amount of ether to pay the founder and owner
+        PaymentDistribution memory paymentDistribution = _calculatePaymentDistribution(
+            uint256(totalTokensForFounder),
+            buyTokenPaymentShares
         );
 
-        // Transfer ETH to creators
-        if (buyTokenPaymentShares.creatorsDirectPayment > 0) {
-            _safeTransferETHWithFallback(creatorsAddress, buyTokenPaymentShares.creatorsDirectPayment);
+        // Deposit owner's funds to owner's account
+        if (paymentDistribution.toPayOwner > 0) {
+            _safeTransferETHWithFallback(owner(), paymentDistribution.toPayOwner);
         }
 
-        // Mint tokens to creators
-        if (totalTokensForCreators > 0) {
-            _mint(creatorsAddress, uint256(totalTokensForCreators));
+        // Transfer ETH to founder
+        if (paymentDistribution.toPayFounder > 0) {
+            _safeTransferETHWithFallback(founderAddress, paymentDistribution.toPayFounder);
+        }
+
+        // Mint tokens to founder
+        if (totalTokensForFounder > 0) {
+            _mint(founderAddress, uint256(totalTokensForFounder));
         }
 
         // Stores total bps, ensure it is 10_000 later
@@ -239,7 +296,7 @@ contract RevolutionPointsEmitter is
         uint256 addressesLength = addresses.length;
 
         // Tokens to mint to buyers
-        // ENSURE we do this after minting to creators, so that the total supply is correct
+        // ENSURE we do this after minting to founder, so that the total supply is correct
         int256 totalTokensForBuyers = buyTokenPaymentShares.buyersGovernancePayment > 0
             ? getTokenQuoteForEther(buyTokenPaymentShares.buyersGovernancePayment)
             : int(0);
@@ -258,11 +315,11 @@ contract RevolutionPointsEmitter is
         emit PurchaseFinalized(
             msg.sender,
             msg.value,
-            buyTokenPaymentShares.buyersGovernancePayment + buyTokenPaymentShares.creatorsGovernancePayment,
+            paymentDistribution.toPayOwner,
             msg.value - msgValueRemaining,
             uint256(totalTokensForBuyers),
-            uint256(totalTokensForCreators),
-            buyTokenPaymentShares.creatorsDirectPayment
+            uint256(totalTokensForFounder),
+            paymentDistribution.toPayFounder
         );
 
         return uint256(totalTokensForBuyers);
@@ -303,52 +360,46 @@ contract RevolutionPointsEmitter is
     }
 
     /**
-     * @notice Returns the amount of tokens that would be emitted to a buyer for the payment amount, taking into account the protocol rewards and creator rate.
+     * @notice Returns the amount of tokens that would be emitted to a buyer for the payment amount, taking into account the protocol rewards and founder rate.
      * @param paymentAmount the payment amount in wei.
      * @return gainedX The amount of tokens that would be emitted for the payment amount.
      */
     function getTokenQuoteForPayment(uint256 paymentAmount) external view returns (int gainedX) {
         if (paymentAmount == 0) revert INVALID_PAYMENT();
+
+        BuyTokenPaymentShares memory buyTokenPaymentShares = _calculateBuyTokenPaymentShares(
+            paymentAmount - computeTotalReward(paymentAmount)
+        );
+
         // Note: By using toDaysWadUnsafe(block.timestamp - startTime) we are establishing that 1 "unit of time" is 1 day.
         // solhint-disable-next-line not-rely-on-time
         return
             vrgda.yToX({
                 timeSinceStart: toDaysWadUnsafe(block.timestamp - startTime),
                 sold: int(token.totalSupply()),
-                amount: int(((paymentAmount - computeTotalReward(paymentAmount)) * (10_000 - creatorRateBps)) / 10_000)
+                amount: int(buyTokenPaymentShares.buyersGovernancePayment)
             });
     }
 
     /**
-     * @notice Set the split of (purchase * creatorRate) that is sent to the creator as ether in basis points.
+     * @notice Set the split of the payment that is reserved for founder in basis points.
      * @dev Only callable by the owner.
-     * @param _entropyRateBps New entropy rate in basis points.
+     * @param _grantsRateBps New grants rate in basis points.
      */
-    function setEntropyRateBps(uint256 _entropyRateBps) external onlyOwner {
-        if (_entropyRateBps > 10_000) revert INVALID_BPS();
+    function setGrantsRateBps(uint256 _grantsRateBps) external onlyOwner {
+        if (_grantsRateBps > 10_000) revert INVALID_BPS();
 
-        emit EntropyRateBpsUpdated(entropyRateBps = _entropyRateBps);
+        emit GrantsRateBpsUpdated(grantsRateBps = _grantsRateBps);
     }
 
     /**
-     * @notice Set the split of the payment that is reserved for creators in basis points.
-     * @dev Only callable by the owner.
-     * @param _creatorRateBps New creator rate in basis points.
-     */
-    function setCreatorRateBps(uint256 _creatorRateBps) external onlyOwner {
-        if (_creatorRateBps > 10_000) revert INVALID_BPS();
-
-        emit CreatorRateBpsUpdated(creatorRateBps = _creatorRateBps);
-    }
-
-    /**
-     * @notice Set the creators address to pay the creatorRate to. Can be a contract.
+     * @notice Set the grants address to pay the grantsRate to. Can be a contract.
      * @dev Only callable by the owner.
      */
-    function setCreatorsAddress(address _creatorsAddress) external override onlyOwner nonReentrant {
-        if (_creatorsAddress == address(0)) revert ADDRESS_ZERO();
+    function setGrantsAddress(address _grantsAddress) external override onlyOwner nonReentrant {
+        if (_grantsAddress == address(0)) revert ADDRESS_ZERO();
 
-        emit CreatorsAddressUpdated(creatorsAddress = _creatorsAddress);
+        emit GrantsAddressUpdated(grantsAddress = _grantsAddress);
     }
 
     /**
@@ -356,7 +407,7 @@ contract RevolutionPointsEmitter is
     @param _to The recipient address
     @param _amount The amount transferring
     */
-    // Assumption + reason for ignoring: Since this function is called in the buyToken public function, but buyToken sends ETH to only owner and creatorsAddress, this function is safe
+    // Assumption + reason for ignoring: Since this function is called in the buyToken public function, but buyToken sends ETH to only owner and founderAddress, this function is safe
     // slither-disable-next-line arbitrary-send-eth
     function _safeTransferETHWithFallback(address _to, uint256 _amount) private {
         // Ensure the contract has enough ETH to transfer

@@ -76,7 +76,7 @@ Compiler run [33msuccessful with warnings:[0m
 [1;33mWarning (2072)[0m[1;37m: Unused local variable.[0m
   [34m-->[0m test/points-emitter/EmissionRates.t.sol:38:9:
 [34m   |[0m
-[34m38 |[0m         [33maddress creatorsAddress[0m = revolutionPointsEmitter.creatorsAddress();
+[34m38 |[0m         [33maddress creatorsAddress[0m = revolutionPointsEmitter.founderAddress();
 [34m   |[0m         [1;33m^^^^^^^^^^^^^^^^^^^^^^^[0m
 
 [1;33mWarning (2072)[0m[1;37m: Unused local variable.[0m

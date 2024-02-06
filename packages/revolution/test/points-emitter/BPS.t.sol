@@ -21,8 +21,8 @@ contract PointsEmitterBasicTest is PointsEmitterTest {
         vm.assume(firstBps > 0);
         vm.startPrank(address(0));
 
-        uint256 creatorRateBps = revolutionPointsEmitter.creatorRateBps();
-        uint256 entropyRateBps = revolutionPointsEmitter.entropyRateBps();
+        uint256 creatorRateBps = revolutionPointsEmitter.founderRateBps();
+        uint256 entropyRateBps = revolutionPointsEmitter.founderEntropyRateBps();
 
         address[] memory recipients = new address[](2);
         recipients[0] = address(1);
@@ -100,8 +100,8 @@ contract PointsEmitterBasicTest is PointsEmitterTest {
     function testTotalBasisPoints() public {
         vm.startPrank(address(0));
 
-        uint256 creatorRateBps = revolutionPointsEmitter.creatorRateBps();
-        uint256 entropyRateBps = revolutionPointsEmitter.entropyRateBps();
+        uint256 creatorRateBps = revolutionPointsEmitter.founderRateBps();
+        uint256 entropyRateBps = revolutionPointsEmitter.founderEntropyRateBps();
 
         address[] memory recipients = new address[](2);
         recipients[0] = address(1);
@@ -146,7 +146,7 @@ contract PointsEmitterBasicTest is PointsEmitterTest {
         assertEq(int(emittedWad), expectedBuyerAmount, "Emitted amount should match expected amount");
         // //emitted should match supply
         assertEq(
-            int(emittedWad) + int(revolutionPoints.balanceOf(revolutionPointsEmitter.creatorsAddress())),
+            int(emittedWad) + int(revolutionPoints.balanceOf(revolutionPointsEmitter.founderAddress())),
             totalSupplyAfterValidPurchase,
             "Emitted amount should match total supply"
         );
@@ -197,9 +197,10 @@ contract PointsEmitterBasicTest is PointsEmitterTest {
             weth: address(weth),
             revolutionPoints: address(governanceToken),
             vrgda: vrgdac,
-            creatorsAddress: creatorsAddress,
-            creatorParams: IRevolutionBuilder.PointsEmitterCreatorParams({
-                creatorRateBps: 100_000,
+            founderParams: IRevolutionBuilder.FounderParams({
+                totalRateBps: 100_000,
+                founderAddress: founder,
+                rewardsExpirationDate: 1_800_000_000,
                 entropyRateBps: 50_000
             })
         });

@@ -20,6 +20,93 @@ import { PausableUpgradeable } from "@openzeppelin/contracts-upgradeable/utils/P
 import { Proxy } from "@openzeppelin/contracts/proxy/Proxy.sol";
 import { StorageSlot } from "@openzeppelin/contracts/utils/StorageSlot.sol";
 import { Address } from "@openzeppelin/contracts/utils/Address.sol";
+import { ERC721EnumerableUpgradeable } from "@openzeppelin/contracts-upgradeable/token/ERC721/extensions/ERC721EnumerableUpgradeable.sol";
+import { Initializable } from "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
+import { IERC5805 } from "@openzeppelin/contracts/interfaces/IERC5805.sol";
+import { ContextUpgradeable } from "@openzeppelin/contracts-upgradeable/utils/ContextUpgradeable.sol";
+import { NoncesUpgradeable } from "@openzeppelin/contracts-upgradeable/utils/NoncesUpgradeable.sol";
+import { EIP712Upgradeable } from "@openzeppelin/contracts-upgradeable/utils/cryptography/EIP712Upgradeable.sol";
+import { Checkpoints } from "@openzeppelin/contracts/utils/structs/Checkpoints.sol";
+import { SafeCast } from "@openzeppelin/contracts/utils/math/SafeCast.sol";
+import { ECDSA } from "@openzeppelin/contracts/utils/cryptography/ECDSA.sol";
+import { Time } from "@openzeppelin/contracts/utils/types/Time.sol";
+import { Initializable } from "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
+import { IRewardSplits } from "../../src/abstract/RewardSplits.sol";
+import { IVotes } from "@openzeppelin/contracts/governance/utils/IVotes.sol";
+import { IERC20 } from "@openzeppelin/contracts/token/ERC20/IERC20.sol";
+
+interface IVRGDAC {
+    /**
+     * @notice Initializes the VRGDAC contract
+     * @param initialOwner The initial owner of the contract
+     * @param targetPrice The target price for a token if sold on pace, scaled by 1e18.
+     * @param priceDecayPercent The percent price decays per unit of time with no sales, scaled by 1e18.
+     * @param perTimeUnit The number of tokens to target selling in 1 full unit of time, scaled by 1e18.
+     */
+    function initialize(
+        address initialOwner,
+        int256 targetPrice,
+        int256 priceDecayPercent,
+        int256 perTimeUnit
+    ) external;
+
+    function yToX(int256 timeSinceStart, int256 sold, int256 amount) external view returns (int256);
+
+    function xToY(int256 timeSinceStart, int256 sold, int256 amount) external view returns (int256);
+}
+
+interface IRevolutionPoints is IERC20, IVotes {
+    ///                                                          ///
+    ///                           EVENTS                         ///
+    ///                                                          ///
+
+    event MinterUpdated(address minter);
+
+    event MinterLocked();
+
+    ///                                                          ///
+    ///                           ERRORS                         ///
+    ///                                                          ///
+
+    /// @dev Revert if transfer is attempted. This is a nontransferable token.
+    error TRANSFER_NOT_ALLOWED();
+
+    /// @dev Revert if not the manager
+    error ONLY_MANAGER();
+
+    /// @dev Revert if 0 address
+    error INVALID_ADDRESS_ZERO();
+
+    /// @dev Revert if minter is locked
+    error MINTER_LOCKED();
+
+    /// @dev Revert if not minter
+    error NOT_MINTER();
+
+    ///                                                          ///
+    ///                         FUNCTIONS                        ///
+    ///                                                          ///
+
+    function minter() external view returns (address);
+
+    function setMinter(address minter) external;
+
+    function lockMinter() external;
+
+    function mint(address account, uint256 amount) external;
+
+    function decimals() external view returns (uint8);
+
+    /// @notice Initializes a DAO's ERC-20 governance token contract
+    /// @param initialOwner The address of the initial owner
+    /// @param minter The address of the minter
+    /// @param tokenParams The params of the token
+    function initialize(
+        address initialOwner,
+        address minter,
+        IRevolutionBuilder.PointsTokenParams calldata tokenParams
+    ) external;
+}
 
 interface IWETH {
     function deposit() external payable;
@@ -27,6 +114,266 @@ interface IWETH {
     function withdraw(uint256 wad) external;
 
     function transfer(address to, uint256 value) external returns (bool);
+}
+
+abstract contract VotesUpgradeable is
+    Initializable,
+    ContextUpgradeable,
+    EIP712Upgradeable,
+    NoncesUpgradeable,
+    IERC5805
+{
+    using Checkpoints for Checkpoints.Trace208;
+
+    bytes32 private constant DELEGATION_TYPEHASH =
+        keccak256("Delegation(address delegatee,uint256 nonce,uint256 expiry)");
+
+    /// @custom:storage-location erc7201:openzeppelin.storage.Votes
+    struct VotesStorage {
+        mapping(address account => address) _delegatee;
+        mapping(address delegatee => Checkpoints.Trace208) _delegateCheckpoints;
+        Checkpoints.Trace208 _totalCheckpoints;
+    }
+
+    // keccak256(abi.encode(uint256(keccak256("openzeppelin.storage.Votes")) - 1)) & ~bytes32(uint256(0xff))
+    bytes32 public constant VotesStorageLocation = 0xe8b26c30fad74198956032a3533d903385d56dd795af560196f9c78d4af40d00;
+
+    function _getVotesStorage() private pure returns (VotesStorage storage $) {
+        assembly {
+            $.slot := VotesStorageLocation
+        }
+    }
+
+    /**
+     * @dev The clock was incorrectly modified.
+     */
+    error ERC6372InconsistentClock();
+
+    /**
+     * @dev Lookup to future votes is not available.
+     */
+    error ERC5805FutureLookup(uint256 timepoint, uint48 clock);
+
+    function __Votes_init() internal onlyInitializing {}
+
+    function __Votes_init_unchained() internal onlyInitializing {}
+
+    /**
+     * @dev Clock used for flagging checkpoints. Can be overridden to implement timestamp based
+     * checkpoints (and voting), in which case {CLOCK_MODE} should be overridden as well to match.
+     */
+    function clock() public view virtual returns (uint48) {
+        return Time.blockNumber();
+    }
+
+    /**
+     * @dev Machine-readable description of the clock as specified in EIP-6372.
+     */
+    // solhint-disable-next-line func-name-mixedcase
+    function CLOCK_MODE() public view virtual returns (string memory) {
+        // Check that the clock was not modified
+        if (clock() != Time.blockNumber()) {
+            revert ERC6372InconsistentClock();
+        }
+        return "mode=blocknumber&from=default";
+    }
+
+    /**
+     * @dev Returns the current amount of votes that `account` has.
+     */
+    function getVotes(address account) public view virtual returns (uint256) {
+        VotesStorage storage $ = _getVotesStorage();
+        return $._delegateCheckpoints[account].latest();
+    }
+
+    /**
+     * @dev Returns the amount of votes that `account` had at a specific moment in the past. If the `clock()` is
+     * configured to use block numbers, this will return the value at the end of the corresponding block.
+     *
+     * Requirements:
+     *
+     * - `timepoint` must be in the past. If operating using block numbers, the block must be already mined.
+     */
+    function getPastVotes(address account, uint256 timepoint) public view virtual returns (uint256) {
+        VotesStorage storage $ = _getVotesStorage();
+        uint48 currentTimepoint = clock();
+        if (timepoint >= currentTimepoint) {
+            revert ERC5805FutureLookup(timepoint, currentTimepoint);
+        }
+        return $._delegateCheckpoints[account].upperLookupRecent(SafeCast.toUint48(timepoint));
+    }
+
+    /**
+     * @dev Returns the total supply of votes available at a specific moment in the past. If the `clock()` is
+     * configured to use block numbers, this will return the value at the end of the corresponding block.
+     *
+     * NOTE: This value is the sum of all available votes, which is not necessarily the sum of all delegated votes.
+     * Votes that have not been delegated are still part of total supply, even though they would not participate in a
+     * vote.
+     *
+     * Requirements:
+     *
+     * - `timepoint` must be in the past. If operating using block numbers, the block must be already mined.
+     */
+    function getPastTotalSupply(uint256 timepoint) public view virtual returns (uint256) {
+        VotesStorage storage $ = _getVotesStorage();
+        uint48 currentTimepoint = clock();
+        if (timepoint >= currentTimepoint) {
+            revert ERC5805FutureLookup(timepoint, currentTimepoint);
+        }
+        return $._totalCheckpoints.upperLookupRecent(SafeCast.toUint48(timepoint));
+    }
+
+    /**
+     * @dev Returns the current total supply of votes.
+     */
+    function _getTotalSupply() internal view virtual returns (uint256) {
+        VotesStorage storage $ = _getVotesStorage();
+        return $._totalCheckpoints.latest();
+    }
+
+    // /**
+    //  * @notice Overrides the standard `VotesUpgradeable.sol` delegates mapping to return
+    //  * the accounts's own address if they haven't delegated.
+    //  * This avoids having to delegate to oneself.
+    //  */
+    function delegates(address account) public view virtual returns (address) {
+        VotesStorage storage $ = _getVotesStorage();
+        return $._delegatee[account] == address(0) ? account : $._delegatee[account];
+    }
+
+    /**
+     * @dev Delegates votes from the sender to `delegatee`.
+     */
+    function delegate(address delegatee) public virtual {
+        address account = _msgSender();
+        _delegate(account, delegatee);
+    }
+
+    /**
+     * @dev Delegates votes from signer to `delegatee`.
+     */
+    function delegateBySig(
+        address delegatee,
+        uint256 nonce,
+        uint256 expiry,
+        uint8 v,
+        bytes32 r,
+        bytes32 s
+    ) public virtual {
+        if (block.timestamp > expiry) {
+            revert VotesExpiredSignature(expiry);
+        }
+        address signer = ECDSA.recover(
+            _hashTypedDataV4(keccak256(abi.encode(DELEGATION_TYPEHASH, delegatee, nonce, expiry))),
+            v,
+            r,
+            s
+        );
+        _useCheckedNonce(signer, nonce);
+        _delegate(signer, delegatee);
+    }
+
+    /**
+     * @dev Delegate all of `account`'s voting units to `delegatee`.
+     *
+     * Emits events {IVotes-DelegateChanged} and {IVotes-DelegateVotesChanged}.
+     */
+    function _delegate(address account, address delegatee) internal virtual {
+        VotesStorage storage $ = _getVotesStorage();
+        address oldDelegate = delegates(account);
+        $._delegatee[account] = delegatee;
+
+        emit DelegateChanged(account, oldDelegate, delegatee);
+
+        // Do not allow users to delegate to the zero address
+        // To prevent delegatee from draining all voting units from delegator
+        // As a result of the change in default behavior of "delegates" function
+        // Audit info: https://github.com/code-423n4/2023-12-revolutionprotocol-findings/issues/49
+        require(delegatee != address(0), "Votes: cannot delegate to zero address");
+
+        _moveDelegateVotes(oldDelegate, delegatee, _getVotingUnits(account));
+    }
+
+    /**
+     * @dev Transfers, mints, or burns voting units. To register a mint, `from` should be zero. To register a burn, `to`
+     * should be zero. Total supply of voting units will be adjusted with mints and burns.
+     */
+    function _transferVotingUnits(address from, address to, uint256 amount) internal virtual {
+        VotesStorage storage $ = _getVotesStorage();
+        if (from == address(0)) {
+            _push($._totalCheckpoints, _add, SafeCast.toUint208(amount));
+        }
+        if (to == address(0)) {
+            _push($._totalCheckpoints, _subtract, SafeCast.toUint208(amount));
+        }
+        _moveDelegateVotes(delegates(from), delegates(to), amount);
+    }
+
+    /**
+     * @dev Moves delegated votes from one delegate to another.
+     */
+    function _moveDelegateVotes(address from, address to, uint256 amount) private {
+        VotesStorage storage $ = _getVotesStorage();
+        if (from != to && amount > 0) {
+            if (from != address(0)) {
+                (uint256 oldValue, uint256 newValue) = _push(
+                    $._delegateCheckpoints[from],
+                    _subtract,
+                    SafeCast.toUint208(amount)
+                );
+                emit DelegateVotesChanged(from, oldValue, newValue);
+            }
+            if (to != address(0)) {
+                (uint256 oldValue, uint256 newValue) = _push(
+                    $._delegateCheckpoints[to],
+                    _add,
+                    SafeCast.toUint208(amount)
+                );
+                emit DelegateVotesChanged(to, oldValue, newValue);
+            }
+        }
+    }
+
+    /**
+     * @dev Get number of checkpoints for `account`.
+     */
+    function _numCheckpoints(address account) internal view virtual returns (uint32) {
+        VotesStorage storage $ = _getVotesStorage();
+        return SafeCast.toUint32($._delegateCheckpoints[account].length());
+    }
+
+    /**
+     * @dev Get the `pos`-th checkpoint for `account`.
+     */
+    function _checkpoints(
+        address account,
+        uint32 pos
+    ) internal view virtual returns (Checkpoints.Checkpoint208 memory) {
+        VotesStorage storage $ = _getVotesStorage();
+        return $._delegateCheckpoints[account].at(pos);
+    }
+
+    function _push(
+        Checkpoints.Trace208 storage store,
+        function(uint208, uint208) view returns (uint208) op,
+        uint208 delta
+    ) private returns (uint208, uint208) {
+        return store.push(clock(), op(store.latest(), delta));
+    }
+
+    function _add(uint208 a, uint208 b) private pure returns (uint208) {
+        return a + b;
+    }
+
+    function _subtract(uint208 a, uint208 b) private pure returns (uint208) {
+        return a - b;
+    }
+
+    /**
+     * @dev Must return the voting units held by an account.
+     */
+    function _getVotingUnits(address) internal view virtual returns (uint256);
 }
 
 /// @title IERC1967Upgrade
@@ -1221,7 +1568,7 @@ contract RevolutionPoints is Ownable, ERC20Votes {
     }
 }
 
-interface IRevolutionPointsEmitter {
+interface IRevolutionPointsEmitter is IRewardSplits {
     ///                                                          ///
     ///                           ERRORS                         ///
     ///                                                          ///
@@ -1263,9 +1610,9 @@ interface IRevolutionPointsEmitter {
     }
 
     struct BuyTokenPaymentShares {
-        uint256 buyersShare;
-        uint256 creatorsDirectPayment;
-        uint256 creatorsGovernancePayment;
+        uint256 buyersGovernancePayment;
+        uint256 founderDirectPayment;
+        uint256 founderGovernancePayment;
     }
 
     function buyToken(
@@ -1280,23 +1627,29 @@ interface IRevolutionPointsEmitter {
 
     function balanceOf(address owner) external view returns (uint);
 
-    function setCreatorRateBps(uint256 creatorRateBps) external;
+    function setGrantsRateBps(uint256 grantsRateBps) external;
 
-    function setEntropyRateBps(uint256 entropyRateBps) external;
+    function grantsAddress() external view returns (address);
+
+    function founderAddress() external view returns (address);
+
+    function founderRateBps() external view returns (uint256);
+
+    function founderEntropyRateBps() external view returns (uint256);
+
+    function founderRewardsExpirationDate() external view returns (uint256);
 
     function getTokenQuoteForPayment(uint256 paymentAmount) external returns (int);
 
-    function setCreatorsAddress(address creators) external;
+    function setGrantsAddress(address grants) external;
 
     function pause() external;
 
     function unpause() external;
 
-    event CreatorsAddressUpdated(address creators);
+    event GrantsAddressUpdated(address grants);
 
-    event CreatorRateBpsUpdated(uint256 rateBps);
-
-    event EntropyRateBpsUpdated(uint256 rateBps);
+    event GrantsRateBpsUpdated(uint256 rateBps);
 
     event PurchaseFinalized(
         address indexed buyer,
@@ -1304,8 +1657,8 @@ interface IRevolutionPointsEmitter {
         uint256 ownerAmount,
         uint256 protocolRewardsAmount,
         uint256 buyerTokensEmitted,
-        uint256 creatorTokensEmitted,
-        uint256 creatorDirectPayment
+        uint256 founderTokensEmitted,
+        uint256 founderDirectPayment
     );
 
     /**
@@ -1314,21 +1667,33 @@ interface IRevolutionPointsEmitter {
      * @param weth The address of the WETH contract.
      * @param revolutionPoints The ERC-20 token contract address
      * @param vrgda The VRGDA contract address
-     * @param creatorsAddress The address of the creators
-     * @param creatorParams The creator and entropy rate parameters
+     * @param founderParams The founder rewards parameters
      */
     function initialize(
         address initialOwner,
         address weth,
         address revolutionPoints,
         address vrgda,
-        address creatorsAddress,
-        IRevolutionBuilder.PointsEmitterCreatorParams calldata creatorParams
+        IRevolutionBuilder.FounderParams calldata founderParams
     ) external;
+}
+
+interface IVersionedContract {
+    function contractVersion() external view returns (string memory);
+}
+
+/// @title VersionedContract
+/// @notice Base contract for versioning contracts
+contract VersionedContract is IVersionedContract {
+    /// @notice The version of the contract
+    function contractVersion() external pure override returns (string memory) {
+        return "0.3.16";
+    }
 }
 
 contract RevolutionPointsEmitter is
     IRevolutionPointsEmitter,
+    VersionedContract,
     ReentrancyGuardUpgradeable,
     PointsEmitterRewards,
     Ownable2StepUpgradeable,
@@ -1338,27 +1703,31 @@ contract RevolutionPointsEmitter is
     address public WETH;
 
     // The token that is being minted.
-    RevolutionPoints public token;
+    IRevolutionPoints public token;
 
     // The VRGDA contract
-    VRGDAC public vrgda;
+    IVRGDAC public vrgda;
 
     // solhint-disable-next-line not-rely-on-time
     uint256 public startTime;
 
-    /**
-     * @notice A running total of the amount of tokens emitted.
-     */
-    int256 public emittedTokenWad;
+    // The split of the purchase that is reserved for the founder in basis points
+    uint256 public founderRateBps;
 
-    // The split of the purchase that is reserved for the creator of the Verb in basis points
-    uint256 public creatorRateBps;
+    // The split of (purchase proceeds * creatorRate) that is sent to the founder as ether in basis points
+    uint256 public founderEntropyRateBps;
 
-    // The split of (purchase proceeds * creatorRate) that is sent to the creator as ether in basis points
-    uint256 public entropyRateBps;
+    // The account or contract to pay the founder reward to
+    address public founderAddress;
 
-    // The account or contract to pay the creator reward to
-    address public creatorsAddress;
+    // The timestamp in seconds after which the founders reward stops being paid
+    uint256 public founderRewardsExpirationDate;
+
+    // The account to pay grants funds to
+    address public grantsAddress;
+
+    // Split of purchase proceeds sent to the grants system as ether in basis points
+    uint256 public grantsRateBps;
 
     ///                                                          ///
     ///                         IMMUTABLES                       ///
@@ -1396,25 +1765,23 @@ contract RevolutionPointsEmitter is
      * @param _weth The address of the WETH contract
      * @param _revolutionPoints The ERC-20 token contract address
      * @param _vrgda The VRGDA contract address
-     * @param _creatorsAddress The address to pay the creator reward to
+     * @param _founderParams The founder reward parameters
      */
     function initialize(
         address _initialOwner,
         address _weth,
         address _revolutionPoints,
         address _vrgda,
-        address _creatorsAddress,
-        IRevolutionBuilder.PointsEmitterCreatorParams calldata _creatorParams
+        IRevolutionBuilder.FounderParams calldata _founderParams
     ) external initializer {
         if (msg.sender != address(manager)) revert NOT_MANAGER();
         if (_initialOwner == address(0)) revert ADDRESS_ZERO();
         if (_revolutionPoints == address(0)) revert ADDRESS_ZERO();
         if (_vrgda == address(0)) revert ADDRESS_ZERO();
-        if (_creatorsAddress == address(0)) revert ADDRESS_ZERO();
         if (_weth == address(0)) revert ADDRESS_ZERO();
 
-        if (_creatorParams.creatorRateBps > 10_000) revert INVALID_BPS();
-        if (_creatorParams.entropyRateBps > 10_000) revert INVALID_BPS();
+        if (_founderParams.totalRateBps > 10_000) revert INVALID_BPS();
+        if (_founderParams.entropyRateBps > 10_000) revert INVALID_BPS();
 
         __Pausable_init();
         __ReentrancyGuard_init();
@@ -1422,11 +1789,19 @@ contract RevolutionPointsEmitter is
         // Set up ownable
         __Ownable_init(_initialOwner);
 
-        creatorsAddress = _creatorsAddress;
-        vrgda = VRGDAC(_vrgda);
-        token = RevolutionPoints(_revolutionPoints);
-        creatorRateBps = _creatorParams.creatorRateBps;
-        entropyRateBps = _creatorParams.entropyRateBps;
+        // Set founder address if not already set
+        if (founderAddress == address(0)) {
+            founderAddress = _founderParams.founderAddress;
+        }
+
+        if (founderRewardsExpirationDate == 0) {
+            founderRewardsExpirationDate = _founderParams.rewardsExpirationDate;
+        }
+
+        vrgda = IVRGDAC(_vrgda);
+        token = IRevolutionPoints(_revolutionPoints);
+        founderRateBps = _founderParams.totalRateBps;
+        founderEntropyRateBps = _founderParams.entropyRateBps;
         WETH = _weth;
 
         // If we are upgrading, don't reset the start time
@@ -1471,26 +1846,28 @@ contract RevolutionPointsEmitter is
     }
 
     /**
-     * @notice A function to calculate the shares of the purchase that go to the buyer's governance purchase, and the creators
+     * @notice A function to calculate the shares of the purchase that go to the buyer's governance purchase, and the founder
      * @param msgValueRemaining The amount of ether left after protocol rewards are taken out
-     * @return buyTokenPaymentShares A struct containing the shares of the purchase that go to the buyer's governance purchase, and the creators
+     * @return buyTokenPaymentShares A struct containing the shares of the purchase that go to the buyer's governance purchase, and the founder
      */
     function _calculateBuyTokenPaymentShares(
         uint256 msgValueRemaining
     ) internal view returns (BuyTokenPaymentShares memory buyTokenPaymentShares) {
         // Calculate share of purchase amount reserved for buyers
-        buyTokenPaymentShares.buyersShare = msgValueRemaining - ((msgValueRemaining * creatorRateBps) / 10_000);
+        buyTokenPaymentShares.buyersGovernancePayment =
+            msgValueRemaining -
+            ((msgValueRemaining * founderRateBps) / 10_000);
 
-        // Calculate ether directly sent to creators
-        buyTokenPaymentShares.creatorsDirectPayment =
-            (msgValueRemaining * creatorRateBps * entropyRateBps) /
+        // Calculate ether directly sent to founder
+        buyTokenPaymentShares.founderDirectPayment =
+            (msgValueRemaining * founderRateBps * founderEntropyRateBps) /
             10_000 /
             10_000;
 
-        // Calculate ether spent on creators governance tokens
-        buyTokenPaymentShares.creatorsGovernancePayment =
-            ((msgValueRemaining * creatorRateBps) / 10_000) -
-            buyTokenPaymentShares.creatorsDirectPayment;
+        // Calculate ether spent on founder governance tokens
+        buyTokenPaymentShares.founderGovernancePayment =
+            ((msgValueRemaining * founderRateBps) / 10_000) -
+            buyTokenPaymentShares.founderDirectPayment;
     }
 
     /**
@@ -1505,8 +1882,8 @@ contract RevolutionPointsEmitter is
         uint[] calldata basisPointSplits,
         ProtocolRewardAddresses calldata protocolRewardsRecipients
     ) public payable nonReentrant whenNotPaused returns (uint256 tokensSoldWad) {
-        // Prevent owner and creatorsAddress from buying tokens directly, given they are recipient(s) of the funds
-        if (msg.sender == owner() || msg.sender == creatorsAddress) revert FUNDS_RECIPIENT_CANNOT_BUY_TOKENS();
+        // Prevent owner and founderAddress from buying tokens directly, given they are recipient(s) of the funds
+        if (msg.sender == owner() || msg.sender == founderAddress) revert FUNDS_RECIPIENT_CANNOT_BUY_TOKENS();
 
         // Transaction must send ether to buyTokens
         if (msg.value == 0) revert INVALID_PAYMENT();
@@ -1524,48 +1901,44 @@ contract RevolutionPointsEmitter is
 
         BuyTokenPaymentShares memory buyTokenPaymentShares = _calculateBuyTokenPaymentShares(msgValueRemaining);
 
-        // Calculate tokens to emit to creators
-        int256 totalTokensForCreators = buyTokenPaymentShares.creatorsGovernancePayment > 0
-            ? getTokenQuoteForEther(buyTokenPaymentShares.creatorsGovernancePayment)
+        // Calculate tokens to emit to founder
+        int256 totalTokensForFounder = buyTokenPaymentShares.founderGovernancePayment > 0
+            ? getTokenQuoteForEther(buyTokenPaymentShares.founderGovernancePayment)
             : int(0);
 
-        // Update total tokens emitted for this purchase with tokens for creators
-        if (totalTokensForCreators > 0) emittedTokenWad += totalTokensForCreators;
-
-        // Tokens to emit to buyers
-        int256 totalTokensForBuyers = buyTokenPaymentShares.buyersShare > 0
-            ? getTokenQuoteForEther(buyTokenPaymentShares.buyersShare)
-            : int(0);
-
-        // Update total tokens emitted for this purchase with tokens for buyers
-        if (totalTokensForBuyers > 0) emittedTokenWad += totalTokensForBuyers;
-
-        //Deposit owner's funds, and eth used to buy creators gov. tokens to owner's account
+        // Deposit owner's funds, and eth used to buy founder gov. tokens to owner's account
         _safeTransferETHWithFallback(
             owner(),
-            buyTokenPaymentShares.buyersShare + buyTokenPaymentShares.creatorsGovernancePayment
+            buyTokenPaymentShares.buyersGovernancePayment + buyTokenPaymentShares.founderGovernancePayment
         );
 
-        //Transfer ETH to creators
-        if (buyTokenPaymentShares.creatorsDirectPayment > 0) {
-            _safeTransferETHWithFallback(creatorsAddress, buyTokenPaymentShares.creatorsDirectPayment);
+        // Transfer ETH to founder
+        if (buyTokenPaymentShares.founderDirectPayment > 0) {
+            _safeTransferETHWithFallback(founderAddress, buyTokenPaymentShares.founderDirectPayment);
         }
 
-        //Mint tokens to creators
-        if (totalTokensForCreators > 0 && creatorsAddress != address(0)) {
-            _mint(creatorsAddress, uint256(totalTokensForCreators));
+        // Mint tokens to founder
+        if (totalTokensForFounder > 0) {
+            _mint(founderAddress, uint256(totalTokensForFounder));
         }
 
         // Stores total bps, ensure it is 10_000 later
         uint256 bpsSum = 0;
+        uint256 addressesLength = addresses.length;
+
+        // Tokens to mint to buyers
+        // ENSURE we do this after minting to founder, so that the total supply is correct
+        int256 totalTokensForBuyers = buyTokenPaymentShares.buyersGovernancePayment > 0
+            ? getTokenQuoteForEther(buyTokenPaymentShares.buyersGovernancePayment)
+            : int(0);
 
         //Mint tokens to buyers
-        for (uint256 i = 0; i < addresses.length; i++) {
+        for (uint256 i = 0; i < addressesLength; i++) {
             if (totalTokensForBuyers > 0) {
                 // transfer tokens to address
                 _mint(addresses[i], uint256((totalTokensForBuyers * int(basisPointSplits[i])) / 10_000));
             }
-            bpsSum += basisPointSplits[i];
+            bpsSum = bpsSum + basisPointSplits[i];
         }
 
         if (bpsSum != 10_000) revert INVALID_BPS_SUM();
@@ -1573,11 +1946,11 @@ contract RevolutionPointsEmitter is
         emit PurchaseFinalized(
             msg.sender,
             msg.value,
-            buyTokenPaymentShares.buyersShare + buyTokenPaymentShares.creatorsGovernancePayment,
+            buyTokenPaymentShares.buyersGovernancePayment + buyTokenPaymentShares.founderGovernancePayment,
             msg.value - msgValueRemaining,
             uint256(totalTokensForBuyers),
-            uint256(totalTokensForCreators),
-            buyTokenPaymentShares.creatorsDirectPayment
+            uint256(totalTokensForFounder),
+            buyTokenPaymentShares.founderDirectPayment
         );
 
         return uint256(totalTokensForBuyers);
@@ -1595,7 +1968,7 @@ contract RevolutionPointsEmitter is
         return
             vrgda.xToY({
                 timeSinceStart: toDaysWadUnsafe(block.timestamp - startTime),
-                sold: emittedTokenWad,
+                sold: int(token.totalSupply()),
                 amount: int(amount)
             });
     }
@@ -1612,7 +1985,7 @@ contract RevolutionPointsEmitter is
         return
             vrgda.yToX({
                 timeSinceStart: toDaysWadUnsafe(block.timestamp - startTime),
-                sold: emittedTokenWad,
+                sold: int(token.totalSupply()),
                 amount: int(etherAmount)
             });
     }
@@ -1629,41 +2002,30 @@ contract RevolutionPointsEmitter is
         return
             vrgda.yToX({
                 timeSinceStart: toDaysWadUnsafe(block.timestamp - startTime),
-                sold: emittedTokenWad,
-                amount: int(((paymentAmount - computeTotalReward(paymentAmount)) * (10_000 - creatorRateBps)) / 10_000)
+                sold: int(token.totalSupply()),
+                amount: int(((paymentAmount - computeTotalReward(paymentAmount)) * (10_000 - founderRateBps)) / 10_000)
             });
     }
 
     /**
-     * @notice Set the split of (purchase * creatorRate) that is sent to the creator as ether in basis points.
+     * @notice Set the split of the payment that is reserved for founder in basis points.
      * @dev Only callable by the owner.
-     * @param _entropyRateBps New entropy rate in basis points.
+     * @param _grantsRateBps New grants rate in basis points.
      */
-    function setEntropyRateBps(uint256 _entropyRateBps) external onlyOwner {
-        if (_entropyRateBps > 10_000) revert INVALID_BPS();
+    function setGrantsRateBps(uint256 _grantsRateBps) external onlyOwner {
+        if (_grantsRateBps > 10_000) revert INVALID_BPS();
 
-        emit EntropyRateBpsUpdated(entropyRateBps = _entropyRateBps);
+        emit GrantsRateBpsUpdated(grantsRateBps = _grantsRateBps);
     }
 
     /**
-     * @notice Set the split of the payment that is reserved for creators in basis points.
-     * @dev Only callable by the owner.
-     * @param _creatorRateBps New creator rate in basis points.
-     */
-    function setCreatorRateBps(uint256 _creatorRateBps) external onlyOwner {
-        if (_creatorRateBps > 10_000) revert INVALID_BPS();
-
-        emit CreatorRateBpsUpdated(creatorRateBps = _creatorRateBps);
-    }
-
-    /**
-     * @notice Set the creators address to pay the creatorRate to. Can be a contract.
+     * @notice Set the grants address to pay the grantsRate to. Can be a contract.
      * @dev Only callable by the owner.
      */
-    function setCreatorsAddress(address _creatorsAddress) external override onlyOwner nonReentrant {
-        if (_creatorsAddress == address(0)) revert ADDRESS_ZERO();
+    function setGrantsAddress(address _grantsAddress) external override onlyOwner nonReentrant {
+        if (_grantsAddress == address(0)) revert ADDRESS_ZERO();
 
-        emit CreatorsAddressUpdated(creatorsAddress = _creatorsAddress);
+        emit GrantsAddressUpdated(grantsAddress = _grantsAddress);
     }
 
     /**
@@ -1731,6 +2093,431 @@ interface IUUPS is IERC1967Upgrade, IERC1822Proxiable {
     function upgradeToAndCall(address newImpl, bytes memory data) external payable;
 }
 
+/**
+ * @dev Extension of ERC-721 to support voting and delegation as implemented by {Votes}, where each individual NFT counts
+ * as 1 vote unit.
+ *
+ * Tokens do not count as votes until they are delegated, because votes must be tracked which incurs an additional cost
+ * on every transfer. Token holders can either delegate to a trusted representative who will decide how to make use of
+ * the votes in governance decisions, or they can delegate to themselves to be their own representative.
+ */
+
+/**
+ * @dev MODIFICATIONS
+ * Checkpointing logic from VotesUpgradeable.sol has been used with the following modifications:
+ * - `delegates` is renamed to `_delegates` and is set to private
+ * - `delegates` is a public function that uses the `_delegates` mapping look-up, but unlike
+ *   VotesUpgradeable.sol, returns the delegator's own address if there is no delegate.
+ *   This avoids the delegator needing to "delegate to self" with an additional transaction
+ */
+
+abstract contract ERC721CheckpointableUpgradeable is Initializable, ERC721EnumerableUpgradeable, VotesUpgradeable {
+    function __ERC721Votes_init() internal onlyInitializing {}
+
+    function __ERC721Votes_init_unchained() internal onlyInitializing {}
+
+    /**
+     * @dev See {ERC721-_update}. Adjusts votes when tokens are transferred.
+     *
+     * Emits a {IVotes-DelegateVotesChanged} event.
+     */
+    function _update(address to, uint256 tokenId, address auth) internal virtual override returns (address) {
+        address previousOwner = super._update(to, tokenId, auth);
+
+        _transferVotingUnits(previousOwner, to, 1);
+
+        return previousOwner;
+    }
+
+    function getVotesStorage() private pure returns (VotesStorage storage $) {
+        assembly {
+            $.slot := VotesStorageLocation
+        }
+    }
+
+    // /**
+    //  * @notice Overrides the standard `VotesUpgradeable.sol` delegates mapping to return
+    //  * the accounts's own address if they haven't delegated.
+    //  * This avoids having to delegate to oneself.
+    //  */
+    function delegates(address account) public view override returns (address) {
+        VotesStorage storage $ = getVotesStorage();
+        return $._delegatee[account] == address(0) ? account : $._delegatee[account];
+    }
+
+    /**
+     * @dev Returns the balance of `account`.
+     *
+     * WARNING: Overriding this function will likely result in incorrect vote tracking.
+     */
+    function _getVotingUnits(address account) internal view virtual override returns (uint256) {
+        return balanceOf(account);
+    }
+
+    /**
+     * @dev See {ERC721-_increaseBalance}. We need that to account tokens that were minted in batch.
+     */
+    function _increaseBalance(address account, uint128 amount) internal virtual override {
+        super._increaseBalance(account, amount);
+        _transferVotingUnits(address(0), account, amount);
+    }
+}
+
+/**
+ * @title ICultureIndexEvents
+ * @dev This interface defines the events for the CultureIndex contract.
+ */
+interface ICultureIndexEvents {
+    event ERC721VotingTokenUpdated(ERC721CheckpointableUpgradeable ERC721VotingToken);
+
+    event ERC721VotingTokenLocked();
+
+    /**
+     * @dev Emitted when a new piece is created.
+     * @param pieceId Unique identifier for the newly created piece.
+     * @param sponsor Address that created the piece.
+     * @param metadata Metadata associated with the art piece.
+     * @param creators Creators of the art piece.
+     */
+    event PieceCreated(
+        uint256 indexed pieceId,
+        address indexed sponsor,
+        ICultureIndex.ArtPieceMetadata metadata,
+        ICultureIndex.CreatorBps[] creators
+    );
+
+    /**
+     * @dev Emitted when a top-voted piece is dropped or released.
+     * @param pieceId Unique identifier for the dropped piece.
+     * @param remover Address that initiated the drop.
+     */
+    event PieceDropped(uint256 indexed pieceId, address indexed remover);
+
+    /**
+     * @dev Emitted when a vote is cast for a piece.
+     * @param pieceId Unique identifier for the piece being voted for.
+     * @param voter Address of the voter.
+     * @param weight Weight of the vote.
+     * @param totalWeight Total weight of votes for the piece after the new vote.
+     */
+    event VoteCast(uint256 indexed pieceId, address indexed voter, uint256 weight, uint256 totalWeight);
+
+    /// @notice Emitted when quorum votes basis points is set
+    event QuorumVotesBPSSet(uint256 oldQuorumVotesBPS, uint256 newQuorumVotesBPS);
+
+    /// @notice Emitted when min voting power to vote is set
+    event MinVotingPowerToVoteSet(uint256 oldMinVotingPowerToVote, uint256 newMinVotingPowerToVote);
+
+    /// @notice Emitted when min voting power to create is set
+    event MinVotingPowerToCreateSet(uint256 oldMinVotingPowerToCreate, uint256 newMinVotingPowerToCreate);
+}
+
+/**
+ * @title ICultureIndex
+ * @dev This interface defines the methods for the CultureIndex contract for art piece management and voting.
+ */
+interface ICultureIndex is ICultureIndexEvents {
+    ///                                                          ///
+    ///                           ERRORS                         ///
+    ///                                                          ///
+
+    /// @dev Reverts if the lengths of the provided arrays do not match.
+    error ARRAY_LENGTH_MISMATCH();
+
+    /// @dev Reverts if the specified piece ID is invalid or out of range.
+    error INVALID_PIECE_ID();
+
+    /// @dev Reverts if the art piece has already been dropped.
+    error ALREADY_DROPPED();
+
+    /// @dev Reverts if the voter has already voted for this piece.
+    error ALREADY_VOTED();
+
+    /// @dev Reverts if the voter's weight is below the minimum required vote weight.
+    error WEIGHT_TOO_LOW();
+
+    /// @dev Reverts if the voting signature is invalid
+    error INVALID_SIGNATURE();
+
+    /// @dev Reverts if the function caller is not the manager.
+    error NOT_MANAGER();
+
+    /// @dev Reverts if the quorum votes basis points exceed the maximum allowed value.
+    error INVALID_QUORUM_BPS();
+
+    /// @dev Reverts if the ERC721 voting token weight is invalid (i.e., 0).
+    error INVALID_ERC721_VOTING_WEIGHT();
+
+    /// @dev Reverts if the ERC20 voting token weight is invalid (i.e., 0).
+    error INVALID_ERC20_VOTING_WEIGHT();
+
+    /// @dev Reverts if the total vote weights do not meet the required quorum votes for a piece to be dropped.
+    error DOES_NOT_MEET_QUORUM();
+
+    /// @dev Reverts if the function caller is not the authorized dropper admin.
+    error NOT_DROPPER_ADMIN();
+
+    /// @dev Reverts if the voting signature has expired
+    error SIGNATURE_EXPIRED();
+
+    /// @dev Reverts if the culture index heap is empty.
+    error CULTURE_INDEX_EMPTY();
+
+    /// @dev Reverts if address 0 is passed but not allowed
+    error ADDRESS_ZERO();
+
+    /// @dev Reverts if art piece metadata is invalid
+    error INVALID_MEDIA_TYPE();
+
+    /// @dev Reverts if art piece image is invalid
+    error INVALID_IMAGE();
+
+    /// @dev Reverts if art piece animation url is invalid
+    error INVALID_ANIMATION_URL();
+
+    /// @dev Reverts if art piece text is invalid
+    error INVALID_TEXT();
+
+    /// @dev Reverts if art piece description is invalid
+    error INVALID_DESCRIPTION();
+
+    /// @dev Reverts if art piece name is invalid
+    error INVALID_NAME();
+
+    /// @dev Reverts if substring is invalid
+    error INVALID_SUBSTRING();
+
+    /// @dev Reverts if bps does not sum to 10000
+    error INVALID_BPS_SUM();
+
+    /// @dev Reverts if max number of creators is exceeded
+    error MAX_NUM_CREATORS_EXCEEDED();
+
+    ///                                                          ///
+    ///                         CONSTANTS                        ///
+    ///                                                          ///
+
+    // Struct defining maximum lengths for art piece data
+    struct PieceMaximums {
+        uint256 name;
+        uint256 description;
+        uint256 image;
+        uint256 text;
+        uint256 animationUrl;
+    }
+
+    // Enum representing file type requirements for art pieces.
+    enum RequiredMediaPrefix {
+        MIXED, // IPFS or SVG
+        SVG,
+        IPFS
+    }
+
+    // Enum representing different media types for art pieces.
+    enum MediaType {
+        NONE, // never used by end user, only used in CultureIndex when using requriedMediaType
+        IMAGE,
+        ANIMATION,
+        AUDIO,
+        TEXT
+    }
+
+    // Struct defining metadata for an art piece.
+    struct ArtPieceMetadata {
+        string name;
+        string description;
+        MediaType mediaType;
+        string image;
+        string text;
+        string animationUrl;
+    }
+
+    // Struct representing a creator of an art piece and their basis points.
+    struct CreatorBps {
+        address creator;
+        uint256 bps;
+    }
+
+    /**
+     * @dev Struct defining an art piece.
+     *@param pieceId Unique identifier for the piece.
+     * @param metadata Metadata associated with the art piece.
+     * @param creators Creators of the art piece.
+     * @param sponsor Address that created the piece.
+     * @param isDropped Boolean indicating if the piece has been dropped.
+     * @param creationBlock Block number when the piece was created.
+     */
+    struct ArtPiece {
+        uint256 pieceId;
+        ArtPieceMetadata metadata;
+        CreatorBps[] creators;
+        address sponsor;
+        bool isDropped;
+        uint256 creationBlock;
+    }
+
+    /**
+     * @dev Struct defining an art piece for use in a token
+     *@param pieceId Unique identifier for the piece.
+     * @param creators Creators of the art piece.
+     * @param sponsor Address that created the piece.
+     */
+    struct ArtPieceCondensed {
+        uint256 pieceId;
+        CreatorBps[] creators;
+        address sponsor;
+    }
+
+    // Constant for max number of creators
+    function MAX_NUM_CREATORS() external view returns (uint256);
+
+    // Struct representing a voter and their weight for a specific art piece.
+    struct Vote {
+        address voterAddress;
+        uint256 weight;
+    }
+
+    /**
+     * @notice Returns the total number of art pieces.
+     * @return The total count of art pieces.
+     */
+    function pieceCount() external view returns (uint256);
+
+    /**
+     * @notice Checks if a specific voter has already voted for a given art piece.
+     * @param pieceId The ID of the art piece.
+     * @param voter The address of the voter.
+     * @return A boolean indicating if the voter has voted for the art piece.
+     */
+    function hasVoted(uint256 pieceId, address voter) external view returns (bool);
+
+    /**
+     * @notice Allows a user to create a new art piece.
+     * @param metadata The metadata associated with the art piece.
+     * @param creatorArray An array of creators and their associated basis points.
+     * @return The ID of the newly created art piece.
+     */
+    function createPiece(ArtPieceMetadata memory metadata, CreatorBps[] memory creatorArray) external returns (uint256);
+
+    /**
+     * @notice Allows a user to vote for a specific art piece.
+     * @param pieceId The ID of the art piece.
+     */
+    function vote(uint256 pieceId) external;
+
+    /**
+     * @notice Allows a user to vote for many art pieces.
+     * @param pieceIds The ID of the art pieces.
+     */
+    function voteForMany(uint256[] calldata pieceIds) external;
+
+    /**
+     * @notice Allows a user to vote for a specific art piece using a signature.
+     * @param from The address of the voter.
+     * @param pieceIds The ID of the art piece.
+     * @param deadline The deadline for the vote.
+     * @param v The v component of the signature.
+     * @param r The r component of the signature.
+     * @param s The s component of the signature.
+     */
+    function voteForManyWithSig(
+        address from,
+        uint256[] calldata pieceIds,
+        uint256 deadline,
+        uint8 v,
+        bytes32 r,
+        bytes32 s
+    ) external;
+
+    /**
+     * @notice Allows users to vote for a specific art piece using a signature.
+     * @param from The address of the voter.
+     * @param pieceIds The ID of the art piece.
+     * @param deadline The deadline for the vote.
+     * @param v The v component of the signature.
+     * @param r The r component of the signature.
+     * @param s The s component of the signature.
+     */
+    function batchVoteForManyWithSig(
+        address[] memory from,
+        uint256[][] memory pieceIds,
+        uint256[] memory deadline,
+        uint8[] memory v,
+        bytes32[] memory r,
+        bytes32[] memory s
+    ) external;
+
+    /**
+     * @notice Fetch an art piece by its ID.
+     * @param pieceId The ID of the art piece.
+     * @return The ArtPiece struct associated with the given ID.
+     */
+    function getPieceById(uint256 pieceId) external view returns (ArtPiece memory);
+
+    /**
+     * @notice Fetch the list of voters for a given art piece.
+     * @param pieceId The ID of the art piece.
+     * @param voter The address of the voter.
+     * @return An Voter structs associated with the given art piece ID.
+     */
+    function getVote(uint256 pieceId, address voter) external view returns (Vote memory);
+
+    /**
+     * @notice Retrieve the top-voted art piece based on the accumulated votes.
+     * @return The ArtPiece struct representing the piece with the most votes.
+     */
+    function getTopVotedPiece() external view returns (ArtPiece memory);
+
+    /**
+     * @notice Fetch the ID of the top-voted art piece.
+     * @return The ID of the art piece with the most votes.
+     */
+    function topVotedPieceId() external view returns (uint256);
+
+    /**
+     * @notice Returns true or false depending on whether the top voted piece meets quorum
+     * @return True if the top voted piece meets quorum, false otherwise
+     */
+    function topVotedPieceMeetsQuorum() external view returns (bool);
+
+    /**
+     * @notice Officially release or "drop" the art piece with the most votes.
+     * @dev This function also updates internal state to reflect the piece's dropped status.
+     * @return The ArtPiece struct of the top voted piece that was just dropped.
+     */
+    function dropTopVotedPiece() external returns (ArtPieceCondensed memory);
+
+    /**
+     * @notice Initializes a token's metadata descriptor
+     * @param votingPower The address of the revolution voting power contract
+     * @param initialOwner The owner of the contract, allowed to drop pieces. Commonly updated to the AuctionHouse
+     * @param maxHeap The address of the max heap contract
+     * @param dropperAdmin The address that can drop new art pieces
+     * @param cultureIndexParams The CultureIndex settings
+     */
+    function initialize(
+        address votingPower,
+        address initialOwner,
+        address maxHeap,
+        address dropperAdmin,
+        IRevolutionBuilder.CultureIndexParams calldata cultureIndexParams
+    ) external;
+
+    /**
+     * @notice Easily fetch piece maximums
+     * @return Max lengths for piece data
+     */
+    function maxNameLength() external view returns (uint256);
+
+    function maxDescriptionLength() external view returns (uint256);
+
+    function maxImageLength() external view returns (uint256);
+
+    function maxTextLength() external view returns (uint256);
+
+    function maxAnimationUrlLength() external view returns (uint256);
+}
+
 /// @title IRevolutionBuilder
 /// @notice The external RevolutionBuilder events, errors, structs and functions
 interface IRevolutionBuilder is IUUPS {
@@ -1748,6 +2535,8 @@ interface IRevolutionBuilder is IUUPS {
     /// @param revolutionPointsEmitter The RevolutionPointsEmitter address
     /// @param revolutionPoints The dao address
     /// @param maxHeap The maxHeap address
+    /// @param revolutionVotingPower The revolutionVotingPower address
+    /// @param vrgda The VRGDA address
     event RevolutionDeployed(
         address revolutionToken,
         address descriptor,
@@ -1757,7 +2546,9 @@ interface IRevolutionBuilder is IUUPS {
         address cultureIndex,
         address revolutionPointsEmitter,
         address revolutionPoints,
-        address maxHeap
+        address maxHeap,
+        address revolutionVotingPower,
+        address vrgda
     );
 
     /// @notice Emitted when an upgrade is registered by the Builder DAO
@@ -1769,6 +2560,13 @@ interface IRevolutionBuilder is IUUPS {
     /// @param baseImpl The base implementation address
     /// @param upgradeImpl The upgrade implementation address
     event UpgradeRemoved(address baseImpl, address upgradeImpl);
+
+    ///                                                          ///
+    ///                            ERRORS                        ///
+    ///                                                          ///
+
+    /// @notice The error message when invalid address zero is passed
+    error INVALID_ZERO_ADDRESS();
 
     ///                                                          ///
     ///                            STRUCTS                       ///
@@ -1785,12 +2583,15 @@ interface IRevolutionBuilder is IUUPS {
         string revolutionPoints;
         string revolutionPointsEmitter;
         string maxHeap;
+        string revolutionVotingPower;
+        string vrgda;
     }
 
     /// @notice The ERC-721 token parameters
     /// @param name The token name
     /// @param symbol The token symbol
     /// @param contractURIHash The IPFS content hash of the contract-level metadata
+    /// @param tokenNamePrefix The token name prefix
     struct RevolutionTokenParams {
         string name;
         string symbol;
@@ -1822,8 +2623,9 @@ interface IRevolutionBuilder is IUUPS {
     /// @param votingPeriod The time period to vote on a proposal
     /// @param proposalThresholdBPS The basis points of the token supply required to create a proposal
     /// @param vetoer The address authorized to veto proposals (address(0) if none desired)
-    /// @param tokenVoteWeight The voting weight of the individual ERC721 tokens
-    /// @param daoName The name of the DAO
+    /// @param name The name of the DAO
+    /// @param purpose The purpose of the DAO
+    /// @param flag The symbol of the DAO ⌐◨-◨
     /// @param dynamicQuorumParams The dynamic quorum parameters
     struct GovParams {
         uint256 timelockDelay;
@@ -1831,26 +2633,34 @@ interface IRevolutionBuilder is IUUPS {
         uint256 votingPeriod;
         uint256 proposalThresholdBPS;
         address vetoer;
-        uint256 tokenVoteWeight;
-        string daoName;
+        string name;
+        string purpose;
+        string flag;
         RevolutionDAOStorageV1.DynamicQuorumParams dynamicQuorumParams;
     }
 
-    /// @notice The ERC-20 token parameters
+    /// @notice The RevolutionPoints ERC-20 params
+    /// @param tokenParams // The token parameters
+    /// @param emitterParams // The emitter parameters
+    struct RevolutionPointsParams {
+        PointsTokenParams tokenParams;
+        PointsEmitterParams emitterParams;
+    }
+
+    /// @notice The RevolutionPoints ERC-20 token parameters
     /// @param name The token name
     /// @param symbol The token symbol
-    struct PointsParams {
+    struct PointsTokenParams {
         string name;
         string symbol;
     }
 
-    /// @notice The ERC-20 points emitter VRGDA parameters
+    /// @notice The RevolutionPoints ERC-20 emitter VRGDA parameters
     /// @param vrgdaParams // The VRGDA parameters
-    /// @param creatorsAddress // The address to send creator payments to
+    /// @param founderParams // The params to dictate payments to the founder
     struct PointsEmitterParams {
         VRGDAParams vrgdaParams;
-        PointsEmitterCreatorParams creatorParams;
-        address creatorsAddress;
+        FounderParams founderParams;
     }
 
     /// @notice The ERC-20 points emitter VRGDA parameters
@@ -1864,25 +2674,51 @@ interface IRevolutionBuilder is IUUPS {
     }
 
     /// @notice The ERC-20 points emitter creator parameters
-    /// @param creatorRateBps The creator rate basis points of each auction - the share of the winning bid that is reserved for the creator
-    /// @param entropyRateBps The entropy rate basis points of each auction - the portion of the creator's share that is directly sent to the creator in ETH
-    struct PointsEmitterCreatorParams {
-        uint256 creatorRateBps;
+    /// @param totalRateBps The founder rate in basis points - how much of each purchase to the points emitter is reserved for the founders
+    /// @param entropyRateBps The entropy of the founder rate in basis points - how much ether out of the total rate is sent to founders directly
+    /// @param founderAddress the address to send founder rewards to
+    /// @param rewardsExpirationDate The timestamp in seconds from the initialization block after which the founders reward stops
+    struct FounderParams {
+        uint256 totalRateBps;
         uint256 entropyRateBps;
+        address founderAddress;
+        uint256 rewardsExpirationDate;
     }
 
     /// @notice The CultureIndex parameters
     /// @param name The name of the culture index
-    /// @param description A description for the culture index, can include rules for uploads etc.
-    /// @param tokenVoteWeight The voting weight of the individual ERC721 tokens. Normally a large multiple to match up with daily emission of ERC20 points
+    /// @param description A description for the culture index
+    /// @param checklist A checklist for the culture index, can include rules for uploads etc.
+    /// @param template A template for the culture index, an ipfs file that artists can download and use to create art pieces
+    /// @param tokenVoteWeight The voting weight of the individual Revolution ERC721 tokens. Normally a large multiple to match up with daily emission of ERC20 points to match up with daily emission of ERC20 points (which normally have 18 decimals)
+    /// @param pointsVoteWeight The voting weight of the individual Revolution ERC20 points tokens.
     /// @param quorumVotesBPS The initial quorum votes threshold in basis points
-    /// @param minVotingPowerToVote The minimum vote weight in basis points that a voter must have to be able to vote.
+    /// @param minVotingPowerToVote The minimum vote weight that a voter must have to be able to vote.
+    /// @param minVotingPowerToCreate The minimum vote weight that a voter must have to be able to create an art piece.
+    /// @param pieceMaximums The maxium length for each field in an art piece
+    /// @param requiredMediaType The required media type for each art piece eg: image only
+    /// @param requiredMediaPrefix The required media prefix for each art piece eg: ipfs://
     struct CultureIndexParams {
         string name;
         string description;
+        string checklist;
+        string template;
         uint256 tokenVoteWeight;
+        uint256 pointsVoteWeight;
         uint256 quorumVotesBPS;
         uint256 minVotingPowerToVote;
+        uint256 minVotingPowerToCreate;
+        ICultureIndex.PieceMaximums pieceMaximums;
+        ICultureIndex.MediaType requiredMediaType;
+        ICultureIndex.RequiredMediaPrefix requiredMediaPrefix;
+    }
+
+    /// @notice The RevolutionVotingPower parameters
+    /// @param tokenVoteWeight The voting weight of the individual Revolution ERC721 tokens. Normally a large multiple to match up with daily emission of ERC20 points to match up with daily emission of ERC20 points (which normally have 18 decimals)
+    /// @param pointsVoteWeight The voting weight of the individual Revolution ERC20 points tokens. (usually 1 because of 18 decimals on the ERC20 contract)
+    struct RevolutionVotingPowerParams {
+        uint256 tokenVoteWeight;
+        uint256 pointsVoteWeight;
     }
 
     ///                                                          ///
@@ -1916,15 +2752,18 @@ interface IRevolutionBuilder is IUUPS {
     /// @notice The maxHeap implementation address
     function maxHeapImpl() external view returns (address);
 
+    /// @notice The revolutionVotingPower implementation address
+    function revolutionVotingPowerImpl() external view returns (address);
+
     /// @notice Deploys a DAO with custom token, auction, and governance settings
     /// @param initialOwner The initial owner address
     /// @param weth The WETH address
-    /// @param revolutionTokenParams The ERC-721 token settings
+    /// @param revolutionTokenParams The Revolution ERC-721 token settings
     /// @param auctionParams The auction settings
     /// @param govParams The governance settings
     /// @param cultureIndexParams The CultureIndex settings
-    /// @param revolutionPointsParams The ERC-20 token settings
-    /// @param revolutionPointsEmitterParams The ERC-20 points emitter settings
+    /// @param revolutionPointsParams The RevolutionPoints settings
+    /// @param revolutionVotingPowerParams The RevolutionVotingPower settings
     function deploy(
         address initialOwner,
         address weth,
@@ -1932,8 +2771,8 @@ interface IRevolutionBuilder is IUUPS {
         AuctionParams calldata auctionParams,
         GovParams calldata govParams,
         CultureIndexParams calldata cultureIndexParams,
-        PointsParams calldata revolutionPointsParams,
-        PointsEmitterParams calldata revolutionPointsEmitterParams
+        RevolutionPointsParams calldata revolutionPointsParams,
+        RevolutionVotingPowerParams calldata revolutionVotingPowerParams
     ) external returns (RevolutionBuilderTypesV1.DAOAddresses memory);
 
     /// @notice A DAO's remaining contract addresses from its token address
@@ -1951,7 +2790,9 @@ interface IRevolutionBuilder is IUUPS {
             address cultureIndex,
             address revolutionPoints,
             address revolutionPointsEmitter,
-            address maxHeap
+            address maxHeap,
+            address revolutionVotingPower,
+            address vrgda
         );
 
     /// @notice If an implementation is registered by the Builder DAO as an optional upgrade
@@ -1968,6 +2809,14 @@ interface IRevolutionBuilder is IUUPS {
     /// @param baseImpl The base implementation address
     /// @param upgradeImpl The upgrade implementation address
     function removeUpgrade(address baseImpl, address upgradeImpl) external;
+
+    function getDAOVersions(address token) external view returns (DAOVersionInfo memory);
+
+    function getLatestVersions() external view returns (DAOVersionInfo memory);
+
+    /// @notice Initializes the Revolution builder contract
+    /// @param initialOwner The address of the initial owner
+    function initialize(address initialOwner) external;
 }
 
 contract RevolutionDAOProxyStorage {

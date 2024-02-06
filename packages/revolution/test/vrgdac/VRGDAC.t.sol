@@ -6,7 +6,6 @@ import { RevolutionPoints } from "../../src/RevolutionPoints.sol";
 import { RevolutionBuilderTest } from "../RevolutionBuilder.t.sol";
 import { VRGDAC } from "../../src/libs/VRGDAC.sol";
 import { toDaysWadUnsafe, unsafeWadDiv, wadLn, wadExp, wadMul } from "../../src/libs/SignedWadMath.sol";
-import { console2 } from "forge-std/console2.sol";
 import { ERC1967Proxy } from "../../src/libs/proxy/ERC1967Proxy.sol";
 import { IVRGDAC } from "../../src/interfaces/IVRGDAC.sol";
 
@@ -47,10 +46,6 @@ contract PointsTestSuite is RevolutionBuilderTest {
             sold: 1000000000000000000,
             amount: amount
         });
-
-        console2.log((x));
-        console2.log(uint256(x));
-        console2.log(uint256(x) / 1e18);
 
         assertGe(x, 0, "x should be greater than or equal to zero");
     }

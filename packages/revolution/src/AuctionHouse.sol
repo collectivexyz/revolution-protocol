@@ -143,7 +143,7 @@ contract AuctionHouse is
     }
 
     /**
-     * @notice Settle the current auction, mint a new Verb, and put it up for auction.
+     * @notice Settle the current auction, mint a new token, and put it up for auction.
      */
     // Can technically reenter via cross function reentrancies in _createAuction, auction, and pause, but those are only callable by the owner.
     // @wardens if you can find an exploit here go for it - we might be wrong.
@@ -172,7 +172,7 @@ contract AuctionHouse is
 
         //require bidder is valid address
         if (bidder == address(0)) revert ADDRESS_ZERO();
-        if (_auction.tokenId != tokenId) revert INVALID_VERB_ID();
+        if (_auction.tokenId != tokenId) revert INVALID_TOKEN_ID();
         if (block.timestamp >= _auction.endTime) revert AUCTION_EXPIRED();
         if (msg.value < reservePrice) revert BELOW_RESERVE_PRICE();
         if (msg.value < _auction.amount + ((_auction.amount * minBidIncrementPercentage) / 100)) revert BID_TOO_LOW();
@@ -383,7 +383,7 @@ contract AuctionHouse is
 
                 //Transfer creator's share to the creator, for each creator, and build arrays for revolutionPointsEmitter.buyToken
                 if (creatorsShare > 0) {
-                    //Get the creators of the Verb
+                    //Get the creators of the art
                     ICultureIndex.CreatorBps[] memory creators = revolutionToken
                         .getArtPieceById(_auction.tokenId)
                         .creators;

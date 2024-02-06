@@ -117,7 +117,7 @@ contract TokenMintingTest is RevolutionTokenTestSuite {
         assertEq(totalSupply, 1, "Total supply should be 1");
     }
 
-    /// @dev Tests minting a verb token to itself
+    /// @dev Tests minting a revolution token to itself
     function testMintToItself() public {
         createDefaultArtPiece();
 
@@ -135,7 +135,7 @@ contract TokenMintingTest is RevolutionTokenTestSuite {
         );
     }
 
-    /// @dev Tests burning a verb token
+    /// @dev Tests burning a token
     function testBurn() public {
         createDefaultArtPiece();
         vm.roll(vm.getBlockNumber() + 1);
@@ -191,7 +191,7 @@ contract TokenMintingTest is RevolutionTokenTestSuite {
             assertEq(revolutionToken.totalSupply(), tokenId2 + 1, "CurrentTokenId should increment after second mint");
     }
 
-    /// @dev Checks if the VerbCreated event is emitted with correct parameters on minting
+    /// @dev Checks if the RevolutionTokenCreated event is emitted with correct parameters on minting
     function testMintingEvent() public {
         createDefaultArtPiece();
         vm.roll(vm.getBlockNumber() + 1);
@@ -212,7 +212,7 @@ contract TokenMintingTest is RevolutionTokenTestSuite {
 
         vm.expectEmit(true, true, true, true);
 
-        emit IRevolutionToken.VerbCreated(0, expectedArtPiece);
+        emit IRevolutionToken.RevolutionTokenCreated(0, expectedArtPiece);
 
         revolutionToken.mint();
     }
@@ -228,7 +228,7 @@ contract TokenMintingTest is RevolutionTokenTestSuite {
         uint256 tokenId = revolutionToken.mint();
 
         vm.expectEmit(true, true, true, true);
-        emit IRevolutionToken.VerbBurned(tokenId);
+        emit IRevolutionToken.RevolutionTokenBurned(tokenId);
 
         revolutionToken.burn(tokenId);
         assertEq(revolutionToken.totalSupply(), 0, "Total supply should be 0 after burning");

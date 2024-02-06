@@ -36,9 +36,10 @@ contract PointsEmitterRewardsTest is ProtocolRewardsTest {
             initialOwner: address(this),
             revolutionPoints: address(revolutionPoints),
             vrgda: vrgda,
-            creatorsAddress: creatorsAddress,
-            creatorParams: IRevolutionBuilder.PointsEmitterCreatorParams({
-                creatorRateBps: 1_000,
+            founderParams: IRevolutionBuilder.FounderParams({
+                totalRateBps: 1_000,
+                founderAddress: creatorsAddress,
+                rewardsExpirationDate: 1_800_000_000,
                 entropyRateBps: 5_000
             }),
             weth: address(new MockWETH())
@@ -109,9 +110,10 @@ contract PointsEmitterRewardsTest is ProtocolRewardsTest {
             initialOwner: address(this),
             revolutionPoints: address(govToken2),
             vrgda: vrgda,
-            creatorsAddress: creatorsAddress,
-            creatorParams: IRevolutionBuilder.PointsEmitterCreatorParams({
-                creatorRateBps: 1_000,
+            founderParams: IRevolutionBuilder.FounderParams({
+                totalRateBps: 1_000,
+                founderAddress: creatorsAddress,
+                rewardsExpirationDate: 1_800_000_000,
                 entropyRateBps: 5_000
             }),
             weth: address(new MockWETH())

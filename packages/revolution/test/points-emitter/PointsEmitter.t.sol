@@ -36,7 +36,12 @@ contract PointsEmitterTest is RevolutionBuilderTest {
             oneFullTokenTargetPrice,
             priceDecayPercent,
             int256(1e18 * tokensPerTimeUnit),
-            creatorsAddress
+            IRevolutionBuilder.FounderParams({
+                totalRateBps: 1000,
+                founderAddress: founder,
+                rewardsExpirationDate: 1_800_000_000,
+                entropyRateBps: 4_000
+            })
         );
 
         super.deployMock();
@@ -53,5 +58,43 @@ contract PointsEmitterTest is RevolutionBuilderTest {
                 sold: supply,
                 amount: int(etherAmount)
             });
+    }
+
+    function setUpWithDifferentRates(uint256 creatorRate, uint256 entropyRate) public {
+        super.setUp();
+        super.setMockParams();
+
+        super.setPointsEmitterParams(
+            1 ether,
+            1e18 / 10,
+            int256(1e18 * tokensPerTimeUnit),
+            IRevolutionBuilder.FounderParams({
+                totalRateBps: creatorRate,
+                founderAddress: address(0x123),
+                rewardsExpirationDate: 1_800_000_000,
+                entropyRateBps: entropyRate
+            })
+        );
+
+        super.deployMock();
+    }
+
+    function setUpWithDifferentRatesAndExpiry(uint256 creatorRate, uint256 entropyRate, uint256 expiry) public {
+        super.setUp();
+        super.setMockParams();
+
+        super.setPointsEmitterParams(
+            1 ether,
+            1e18 / 10,
+            int256(1e18 * tokensPerTimeUnit),
+            IRevolutionBuilder.FounderParams({
+                totalRateBps: creatorRate,
+                founderAddress: address(0x123),
+                rewardsExpirationDate: expiry,
+                entropyRateBps: entropyRate
+            })
+        );
+
+        super.deployMock();
     }
 }

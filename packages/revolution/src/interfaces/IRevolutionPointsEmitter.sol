@@ -47,8 +47,14 @@ interface IRevolutionPointsEmitter is IRewardSplits {
 
     struct BuyTokenPaymentShares {
         uint256 buyersGovernancePayment;
-        uint256 creatorsDirectPayment;
-        uint256 creatorsGovernancePayment;
+        uint256 founderDirectPayment;
+        uint256 founderGovernancePayment;
+    }
+
+    // To find amount of ether to pay founder and owner after calculating the amount of points to emit
+    struct PaymentDistribution {
+        uint256 toPayOwner;
+        uint256 toPayFounder;
     }
 
     function buyToken(
@@ -63,23 +69,29 @@ interface IRevolutionPointsEmitter is IRewardSplits {
 
     function balanceOf(address owner) external view returns (uint);
 
-    function setCreatorRateBps(uint256 creatorRateBps) external;
+    function setGrantsRateBps(uint256 grantsRateBps) external;
 
-    function setEntropyRateBps(uint256 entropyRateBps) external;
+    function grantsAddress() external view returns (address);
+
+    function founderAddress() external view returns (address);
+
+    function founderRateBps() external view returns (uint256);
+
+    function founderEntropyRateBps() external view returns (uint256);
+
+    function founderRewardsExpirationDate() external view returns (uint256);
 
     function getTokenQuoteForPayment(uint256 paymentAmount) external returns (int);
 
-    function setCreatorsAddress(address creators) external;
+    function setGrantsAddress(address grants) external;
 
     function pause() external;
 
     function unpause() external;
 
-    event CreatorsAddressUpdated(address creators);
+    event GrantsAddressUpdated(address grants);
 
-    event CreatorRateBpsUpdated(uint256 rateBps);
-
-    event EntropyRateBpsUpdated(uint256 rateBps);
+    event GrantsRateBpsUpdated(uint256 rateBps);
 
     event PurchaseFinalized(
         address indexed buyer,
@@ -87,8 +99,8 @@ interface IRevolutionPointsEmitter is IRewardSplits {
         uint256 ownerAmount,
         uint256 protocolRewardsAmount,
         uint256 buyerTokensEmitted,
-        uint256 creatorTokensEmitted,
-        uint256 creatorDirectPayment
+        uint256 founderTokensEmitted,
+        uint256 founderDirectPayment
     );
 
     /**
@@ -97,15 +109,13 @@ interface IRevolutionPointsEmitter is IRewardSplits {
      * @param weth The address of the WETH contract.
      * @param revolutionPoints The ERC-20 token contract address
      * @param vrgda The VRGDA contract address
-     * @param creatorsAddress The address of the creators
-     * @param creatorParams The creator and entropy rate parameters
+     * @param founderParams The founder rewards parameters
      */
     function initialize(
         address initialOwner,
         address weth,
         address revolutionPoints,
         address vrgda,
-        address creatorsAddress,
-        IRevolutionBuilder.PointsEmitterCreatorParams calldata creatorParams
+        IRevolutionBuilder.FounderParams calldata founderParams
     ) external;
 }

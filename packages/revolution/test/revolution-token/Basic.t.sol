@@ -42,7 +42,7 @@ contract TokenBasicTest is RevolutionTokenTestSuite {
         // Retrieve the expected metadata directly from the art piece for comparison
         (, ICultureIndex.ArtPieceMetadata memory metadata, , , ) = cultureIndex.pieces(artPieceId);
 
-        //assert name equals Verb + tokenId
+        //assert name equals prefix + tokenId
         string memory expectedName = string(abi.encodePacked(tokenNamePrefix, " ", Strings.toString(tokenId)));
 
         // Assert that the token metadata matches the expected metadata from the art piece
