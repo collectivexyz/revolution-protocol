@@ -97,15 +97,18 @@
 ➡ RevolutionPointsEmitter
 =======================
 
-| Name            | Type                       | Slot | Offset | Bytes | Contract                                                |
-|-----------------|----------------------------|------|--------|-------|---------------------------------------------------------|
-| WETH            | address                    | 0    | 0      | 20    | src/RevolutionPointsEmitter.sol:RevolutionPointsEmitter |
-| token           | contract IRevolutionPoints | 1    | 0      | 20    | src/RevolutionPointsEmitter.sol:RevolutionPointsEmitter |
-| vrgda           | contract IVRGDAC           | 2    | 0      | 20    | src/RevolutionPointsEmitter.sol:RevolutionPointsEmitter |
-| startTime       | uint256                    | 3    | 0      | 32    | src/RevolutionPointsEmitter.sol:RevolutionPointsEmitter |
-| creatorRateBps  | uint256                    | 4    | 0      | 32    | src/RevolutionPointsEmitter.sol:RevolutionPointsEmitter |
-| entropyRateBps  | uint256                    | 5    | 0      | 32    | src/RevolutionPointsEmitter.sol:RevolutionPointsEmitter |
-| creatorsAddress | address                    | 6    | 0      | 20    | src/RevolutionPointsEmitter.sol:RevolutionPointsEmitter |
+| Name                         | Type                       | Slot | Offset | Bytes | Contract                                                |
+|------------------------------|----------------------------|------|--------|-------|---------------------------------------------------------|
+| WETH                         | address                    | 0    | 0      | 20    | src/RevolutionPointsEmitter.sol:RevolutionPointsEmitter |
+| token                        | contract IRevolutionPoints | 1    | 0      | 20    | src/RevolutionPointsEmitter.sol:RevolutionPointsEmitter |
+| vrgda                        | contract IVRGDAC           | 2    | 0      | 20    | src/RevolutionPointsEmitter.sol:RevolutionPointsEmitter |
+| startTime                    | uint256                    | 3    | 0      | 32    | src/RevolutionPointsEmitter.sol:RevolutionPointsEmitter |
+| founderRateBps               | uint256                    | 4    | 0      | 32    | src/RevolutionPointsEmitter.sol:RevolutionPointsEmitter |
+| founderEntropyRateBps        | uint256                    | 5    | 0      | 32    | src/RevolutionPointsEmitter.sol:RevolutionPointsEmitter |
+| founderAddress               | address                    | 6    | 0      | 20    | src/RevolutionPointsEmitter.sol:RevolutionPointsEmitter |
+| founderRewardsExpirationDate | uint256                    | 7    | 0      | 32    | src/RevolutionPointsEmitter.sol:RevolutionPointsEmitter |
+| grantsAddress                | address                    | 8    | 0      | 20    | src/RevolutionPointsEmitter.sol:RevolutionPointsEmitter |
+| grantsRateBps                | uint256                    | 9    | 0      | 32    | src/RevolutionPointsEmitter.sol:RevolutionPointsEmitter |
 
 =======================
 ➡ AuctionHouse
