@@ -18,6 +18,7 @@ interface ISplitMain {
     function pointsEmitter() external returns (IRevolutionPointsEmitter);
 
     function createSplit(
+        uint32 pointsPercent,
         address[] calldata accounts,
         uint32[] calldata percentAllocations,
         uint32 distributorFee,
@@ -25,6 +26,7 @@ interface ISplitMain {
     ) external returns (address);
 
     function predictImmutableSplitAddress(
+        uint32 pointsPercent,
         address[] calldata accounts,
         uint32[] calldata percentAllocations,
         uint32 distributorFee
@@ -32,6 +34,7 @@ interface ISplitMain {
 
     function updateSplit(
         address split,
+        uint32 pointsPercent,
         address[] calldata accounts,
         uint32[] calldata percentAllocations,
         uint32 distributorFee
@@ -47,6 +50,7 @@ interface ISplitMain {
 
     function distributeETH(
         address split,
+        uint32 pointsPercent,
         address[] calldata accounts,
         uint32[] calldata percentAllocations,
         uint32 distributorFee,
@@ -55,6 +59,7 @@ interface ISplitMain {
 
     function updateAndDistributeETH(
         address split,
+        uint32 pointsPercent,
         address[] calldata accounts,
         uint32[] calldata percentAllocations,
         uint32 distributorFee,
