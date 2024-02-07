@@ -1,0 +1,39 @@
+name: "Revolution Splits"
+
+on:
+  workflow_call:
+
+jobs:
+  build:
+    uses: ./.github/workflows/build.yml
+    with:
+      package_folder: packages/splits
+
+  test:
+    uses: ./.github/workflows/test.yml
+    with:
+      package_folder: packages/splits
+
+  storage_test:
+    needs: build
+    uses: ./.github/workflows/storage.yml
+    with:
+      package_folder: packages/splits
+
+  contract_sizes:
+    needs: build
+    uses: ./.github/workflows/contract_sizes.yml
+    with:
+      package_folder: packages/splits
+
+  slither:
+    needs: build
+    uses: ./.github/workflows/slither.yml
+    with:
+      package_folder: packages/splits
+
+  coverage:
+    uses: ./.github/workflows/coverage.yml
+    with:
+      package: "splits"
+      files_to_ignore: '"*lib*"'
