@@ -280,7 +280,7 @@ contract SplitMain is ISplitMain, VersionedContract {
         uint32 distributorFee,
         address controller
     ) external override validSplit(pointsPercent, accounts, percentAllocations, distributorFee) returns (address split) {
-        bytes32 splitHash = _hashSplit(accounts, percentAllocations, distributorFee);
+        bytes32 splitHash = _hashSplit(pointsPercent, accounts, percentAllocations, distributorFee);
         if (controller == address(0)) {
             // create immutable split
             split = Clones.cloneDeterministic(walletImplementation, splitHash);
@@ -307,7 +307,7 @@ contract SplitMain is ISplitMain, VersionedContract {
         uint32[] calldata percentAllocations,
         uint32 distributorFee
     ) external view override validSplit(pointsPercent, accounts, percentAllocations, distributorFee) returns (address split) {
-        bytes32 splitHash = _hashSplit(accounts, percentAllocations, distributorFee);
+        bytes32 splitHash = _hashSplit(pointsPercent, accounts, percentAllocations, distributorFee);
         split = Clones.predictDeterministicAddress(walletImplementation, splitHash);
     }
 
@@ -325,7 +325,7 @@ contract SplitMain is ISplitMain, VersionedContract {
         uint32[] calldata percentAllocations,
         uint32 distributorFee
     ) external override onlySplitController(split) validSplit(pointsPercent, accounts, percentAllocations, distributorFee) {
-        _updateSplit(split, accounts, percentAllocations, distributorFee);
+        _updateSplit(split, pointsPercent, accounts, percentAllocations, distributorFee);
     }
 
     /** @notice Begins transfer of the controlling address of mutable split `split` to `newController`
@@ -386,7 +386,7 @@ contract SplitMain is ISplitMain, VersionedContract {
         address distributorAddress
     ) external override validSplit(pointsPercent, accounts, percentAllocations, distributorFee) {
         // use internal fn instead of modifier to avoid stack depth compiler errors
-        _validSplitHash(split, accounts, percentAllocations, distributorFee);
+        _validSplitHash(split, pointsPercent, accounts, percentAllocations, distributorFee);
         _distributeETH(split, accounts, percentAllocations, distributorFee, distributorAddress);
     }
 
@@ -407,7 +407,7 @@ contract SplitMain is ISplitMain, VersionedContract {
         uint32 distributorFee,
         address distributorAddress
     ) external override onlySplitController(split) validSplit(pointsPercent, accounts, percentAllocations, distributorFee) {
-        _updateSplit(split, accounts, percentAllocations, distributorFee);
+        _updateSplit(split, pointsPercent, accounts, percentAllocations, distributorFee);
         // know splitHash is valid immediately after updating; only accessible via controller
         _distributeETH(split, accounts, percentAllocations, distributorFee, distributorAddress);
     }
@@ -419,6 +419,8 @@ contract SplitMain is ISplitMain, VersionedContract {
      *  _scaleAmountByPercentage, but results do not affect ETH & other ERC20 balances
      *  @param split Address of split to distribute balance for
      *  @param token Address of ERC20 to distribute balance for
+          * @param pointsPercent The percentage of the split that will be sent to the points emitter
+
      *  @param accounts Ordered, unique list of addresses with ownership in the split
      *  @param percentAllocations Percent allocations associated with each address
      *  @param distributorFee Keeper fee paid by split to cover gas costs of distribution
@@ -427,14 +429,14 @@ contract SplitMain is ISplitMain, VersionedContract {
     function distributeERC20(
         address split,
         ERC20 token,
+        uint32 pointsPercent,
         address[] calldata accounts,
         uint32[] calldata percentAllocations,
         uint32 distributorFee,
         address distributorAddress
-        // don't handle points emitter here; only for ETH
-    ) external override validSplit(0, accounts, percentAllocations, distributorFee) {
+    ) external override validSplit(pointsPercent, accounts, percentAllocations, distributorFee) {
         // use internal fn instead of modifier to avoid stack depth compiler errors
-        _validSplitHash(split, accounts, percentAllocations, distributorFee);
+        _validSplitHash(split,pointsPercent,  accounts, percentAllocations, distributorFee);
         _distributeERC20(split, token, accounts, percentAllocations, distributorFee, distributorAddress);
     }
 
@@ -444,6 +446,7 @@ contract SplitMain is ISplitMain, VersionedContract {
      *  _scaleAmountByPercentage, but results do not affect ETH & other ERC20 balances
      *  @param split Address of split to distribute balance for
      *  @param token Address of ERC20 to distribute balance for
+     * @param pointsPercent The percentage of the split that will be sent to the points emitter
      *  @param accounts Ordered, unique list of addresses with ownership in the split
      *  @param percentAllocations Percent allocations associated with each address
      *  @param distributorFee Keeper fee paid by split to cover gas costs of distribution
@@ -452,13 +455,13 @@ contract SplitMain is ISplitMain, VersionedContract {
     function updateAndDistributeERC20(
         address split,
         ERC20 token,
+        uint32 pointsPercent,
         address[] calldata accounts,
         uint32[] calldata percentAllocations,
         uint32 distributorFee,
         address distributorAddress
-        // don't handle points emitter here; only for ETH
-    ) external override onlySplitController(split) validSplit(0, accounts, percentAllocations, distributorFee) {
-        _updateSplit(split, accounts, percentAllocations, distributorFee);
+    ) external override onlySplitController(split) validSplit(pointsPercent, accounts, percentAllocations, distributorFee) {
+        _updateSplit(split, pointsPercent, accounts, percentAllocations, distributorFee);
         // know splitHash is valid immediately after updating; only accessible via controller
         _distributeERC20(split, token, accounts, percentAllocations, distributorFee, distributorAddress);
     }
@@ -550,32 +553,36 @@ contract SplitMain is ISplitMain, VersionedContract {
     }
 
     /** @notice Hashes a split
+     *  @param pointsPercent The percentage of the split that will be sent to the points emitter
      *  @param accounts Ordered, unique list of addresses with ownership in the split
      *  @param percentAllocations Percent allocations associated with each address
      *  @param distributorFee Keeper fee paid by split to cover gas costs of distribution
      *  @return computedHash Hash of the split.
      */
     function _hashSplit(
+        uint32 pointsPercent,
         address[] memory accounts,
         uint32[] memory percentAllocations,
         uint32 distributorFee
     ) internal pure returns (bytes32) {
-        return keccak256(abi.encode(accounts, percentAllocations, distributorFee));
+        return keccak256(abi.encode(pointsPercent, accounts, percentAllocations, distributorFee));
     }
 
     /** @notice Updates an existing split with recipients `accounts` with ownerships `percentAllocations` and a keeper fee for splitting of `distributorFee`
      *  @param split Address of mutable split to update
+     *  @param pointsPercent The percentage of the split that will be sent to the points emitter
      *  @param accounts Ordered, unique list of addresses with ownership in the split
      *  @param percentAllocations Percent allocations associated with each address
      *  @param distributorFee Keeper fee paid by split to cover gas costs of distribution
      */
     function _updateSplit(
         address split,
+        uint32 pointsPercent,
         address[] calldata accounts,
         uint32[] calldata percentAllocations,
         uint32 distributorFee
     ) internal {
-        bytes32 splitHash = _hashSplit(accounts, percentAllocations, distributorFee);
+        bytes32 splitHash = _hashSplit(pointsPercent, accounts, percentAllocations, distributorFee);
         // store new hash in storage for future verification
         splits[split].hash = splitHash;
         emit UpdateSplit(split);
@@ -583,17 +590,19 @@ contract SplitMain is ISplitMain, VersionedContract {
 
     /** @notice Checks hash from `accounts`, `percentAllocations`, and `distributorFee` against the hash stored for `split`
      *  @param split Address of hash to check
+     *  @param pointsPercent The percentage of the split that will be sent to the points emitter
      *  @param accounts Ordered, unique list of addresses with ownership in the split
      *  @param percentAllocations Percent allocations associated with each address
      *  @param distributorFee Keeper fee paid by split to cover gas costs of distribution
      */
     function _validSplitHash(
         address split,
+        uint32 pointsPercent,
         address[] memory accounts,
         uint32[] memory percentAllocations,
         uint32 distributorFee
     ) internal view {
-        bytes32 hash = _hashSplit(accounts, percentAllocations, distributorFee);
+        bytes32 hash = _hashSplit(pointsPercent, accounts, percentAllocations, distributorFee);
         if (splits[split].hash != hash) revert InvalidSplit__InvalidHash(hash);
     }
 

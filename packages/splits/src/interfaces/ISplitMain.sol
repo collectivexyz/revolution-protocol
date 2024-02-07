@@ -69,6 +69,7 @@ interface ISplitMain {
     function distributeERC20(
         address split,
         ERC20 token,
+        uint32 pointsPercent,
         address[] calldata accounts,
         uint32[] calldata percentAllocations,
         uint32 distributorFee,
@@ -78,6 +79,7 @@ interface ISplitMain {
     function updateAndDistributeERC20(
         address split,
         ERC20 token,
+        uint32 pointsPercent,
         address[] calldata accounts,
         uint32[] calldata percentAllocations,
         uint32 distributorFee,
