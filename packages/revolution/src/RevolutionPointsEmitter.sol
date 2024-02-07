@@ -347,7 +347,8 @@ contract RevolutionPointsEmitter is
             msg.value - msgValueRemaining,
             uint256(totalTokensForBuyers),
             uint256(totalTokensForFounder),
-            paymentDistribution.toPayFounder
+            paymentDistribution.toPayFounder,
+            buyTokenPaymentShares.grantsDirectPayment
         );
 
         return uint256(totalTokensForBuyers);

@@ -102,9 +102,10 @@ interface IRevolutionPointsEmitter is IRewardSplits {
         uint256 payment,
         uint256 ownerAmount,
         uint256 protocolRewardsAmount,
-        uint256 buyerTokensEmitted,
-        uint256 founderTokensEmitted,
-        uint256 founderDirectPayment
+        uint256 buyerPointsEmitted,
+        uint256 founderPointsEmitted,
+        uint256 founderDirectPayment,
+        uint256 grantsDirectPayment
     );
 
     /**
