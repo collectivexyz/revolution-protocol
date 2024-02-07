@@ -20,6 +20,8 @@ docs/
 
 broadcast
 
+.vscode/
+
 bin
 
 # coverage info
