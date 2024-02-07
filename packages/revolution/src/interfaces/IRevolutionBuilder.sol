@@ -95,6 +95,7 @@ interface IRevolutionBuilder is IUUPS {
     /// @param creatorRateBps The creator rate basis points of each auction - the share of the winning bid that is reserved for the creator
     /// @param entropyRateBps The entropy rate basis points of each auction - the portion of the creator's share that is directly sent to the creator in ETH
     /// @param minCreatorRateBps The minimum creator rate basis points of each auction
+    /// @param grantsParams The grants program parameters
     struct AuctionParams {
         uint256 timeBuffer;
         uint256 reservePrice;
@@ -103,6 +104,7 @@ interface IRevolutionBuilder is IUUPS {
         uint256 creatorRateBps;
         uint256 entropyRateBps;
         uint256 minCreatorRateBps;
+        GrantsParams grantsParams;
     }
 
     /// @notice The governance parameters
