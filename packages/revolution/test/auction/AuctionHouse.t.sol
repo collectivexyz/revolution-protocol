@@ -62,7 +62,5 @@ contract AuctionHouseTest is RevolutionBuilderTest {
         //transfer ownership and accept
         vm.prank(address(founder));
         auction.transferOwnership(address(executor));
-
-        vm.startPrank(address(executor));
     }
 }

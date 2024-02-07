@@ -433,6 +433,10 @@ contract AuctionHouse is
                     _safeTransferETHWithFallback(owner(), paymentShares.owner);
                 }
 
+                if (paymentShares.grants > 0) {
+                    _safeTransferETHWithFallback(grantsAddress, paymentShares.grants);
+                }
+
                 //Transfer creator's share to the creator, for each creator, and build arrays for revolutionPointsEmitter.buyToken
                 for (uint256 i = 0; i < numCreators; i++) {
                     vrgdaReceivers[i] = creators[i].creator;
