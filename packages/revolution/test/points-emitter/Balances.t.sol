@@ -108,11 +108,10 @@ contract PointsEmitterBasicTest is PointsEmitterTest {
     }
 
     function test_GetTokenAmountForMultiPurchaseGeneral(uint256 payment) public {
-        payment = bound(
-            payment,
-            revolutionPointsEmitter.minPurchaseAmount() + 1,
-            revolutionPointsEmitter.maxPurchaseAmount() - 1
-        );
+        payment = bound(payment, revolutionPointsEmitter.minPurchaseAmount() + 1, type(uint160).max);
+
+        // give ether to buyer
+        vm.deal(address(0), payment * 1e18);
 
         vm.startPrank(address(0));
 

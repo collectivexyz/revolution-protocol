@@ -121,6 +121,15 @@ interface IAuctionHouse is IAuctionHouseEvents, IGrantsRevenueStream {
         bool settled;
     }
 
+    struct PaymentShares {
+        // Scaled means it hasn't been divided by 10,000 for BPS to allow for precision in division by
+        // consuming functions
+        uint256 creatorDirectScaled;
+        uint256 creatorGovernance;
+        uint256 owner;
+        uint256 grants;
+    }
+
     function settleAuction() external;
 
     function settleCurrentAndCreateNewAuction() external;

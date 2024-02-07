@@ -18,8 +18,8 @@ import { ERC721CheckpointableUpgradeable } from "../../src/base/ERC721Checkpoint
 /// @title RevolutionTokenTest
 /// @dev The test suite for the RevolutionToken contract
 contract CultureIndexAccessControlTest is CultureIndexTestSuite {
-    function testSetQuorumVotesBPSWithinRange(uint104 newQuorumBPS) public {
-        vm.assume(newQuorumBPS <= cultureIndex.MAX_QUORUM_VOTES_BPS());
+    function testSetQuorumVotesBPSWithinRange(uint256 newQuorumBPS) public {
+        newQuorumBPS = bound(newQuorumBPS, 0, cultureIndex.MAX_QUORUM_VOTES_BPS());
 
         // Set new quorum BPS by owner
         cultureIndex._setQuorumVotesBPS(newQuorumBPS);
@@ -138,9 +138,9 @@ contract CultureIndexAccessControlTest is CultureIndexTestSuite {
         vm.stopPrank();
     }
 
-    function testSetQuorumVotesBPSOutsideRange(uint104 newQuorumBPS) public {
+    function testSetQuorumVotesBPSOutsideRange(uint256 newQuorumBPS) public {
         uint256 currentQuorumBPS = cultureIndex.quorumVotesBPS();
-        vm.assume(newQuorumBPS > cultureIndex.MAX_QUORUM_VOTES_BPS());
+        newQuorumBPS = bound(newQuorumBPS, cultureIndex.MAX_QUORUM_VOTES_BPS() + 1, type(uint256).max - 1);
 
         // Set new quorum BPS by owner
         vm.expectRevert(abi.encodeWithSignature("INVALID_QUORUM_BPS()"));
@@ -164,7 +164,7 @@ contract CultureIndexAccessControlTest is CultureIndexTestSuite {
     }
 
     function testDropTopVotedPieceOnlyIfQuorumIsMet(uint256 quorumBps) public {
-        vm.assume(quorumBps > 200 && quorumBps <= cultureIndex.MAX_QUORUM_VOTES_BPS());
+        quorumBps = bound(quorumBps, 201, cultureIndex.MAX_QUORUM_VOTES_BPS());
 
         // Set quorum BPS
         cultureIndex._setQuorumVotesBPS(quorumBps);

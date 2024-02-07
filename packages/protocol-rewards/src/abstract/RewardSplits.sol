@@ -13,8 +13,6 @@ struct RewardsSettings {
 interface IRewardSplits {
     /// @dev from RewardSplits
     function minPurchaseAmount() external view returns (uint256);
-
-    function maxPurchaseAmount() external view returns (uint256);
 }
 
 /// @notice Common logic for Revolution RevolutionPointsEmitter contracts for protocol reward splits & deposits
@@ -28,7 +26,6 @@ abstract contract RewardSplits is IRewardSplits {
     uint256 internal constant PURCHASE_REFERRAL_BPS = 50;
 
     uint256 public constant minPurchaseAmount = 0.0000001 ether;
-    uint256 public constant maxPurchaseAmount = 50_000 ether;
 
     address internal immutable revolutionRewardRecipient;
     IRevolutionProtocolRewards internal immutable protocolRewards;
@@ -44,7 +41,7 @@ abstract contract RewardSplits is IRewardSplits {
      * @param _paymentAmountWei The amount of ETH being paid for the purchase
      */
     function computeTotalReward(uint256 paymentAmountWei) public pure returns (uint256) {
-        if (paymentAmountWei <= minPurchaseAmount || paymentAmountWei >= maxPurchaseAmount) revert INVALID_ETH_AMOUNT();
+        if (paymentAmountWei <= minPurchaseAmount) revert INVALID_ETH_AMOUNT();
 
         return
             ((paymentAmountWei * BUILDER_REWARD_BPS) / 10_000) +

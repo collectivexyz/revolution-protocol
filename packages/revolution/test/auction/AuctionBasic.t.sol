@@ -325,8 +325,7 @@ contract AuctionHouseBasicTest is AuctionHouseTest {
         //Ether reserved to buy creator governance
         uint256 creatorGovernancePayment = creatorPayment - creatorDirectPayment;
 
-        bool shouldExpectRevert = creatorGovernancePayment <= revolutionPointsEmitter.minPurchaseAmount() ||
-            creatorGovernancePayment >= revolutionPointsEmitter.maxPurchaseAmount();
+        bool shouldExpectRevert = creatorGovernancePayment <= revolutionPointsEmitter.minPurchaseAmount();
 
         // create art piece
         createDefaultArtPiece();

@@ -17,8 +17,8 @@ import { console2 } from "forge-std/console2.sol";
 contract PointsEmitterBasicTest is PointsEmitterTest {
     // test multiple payouts
     function testPercentagePayouts(uint firstBps) public {
-        vm.assume(firstBps < 10000);
-        vm.assume(firstBps > 0);
+        firstBps = bound(firstBps, 1, 10_000 - 1);
+
         vm.startPrank(address(0));
 
         uint256 founderRateBps = revolutionPointsEmitter.founderRateBps();

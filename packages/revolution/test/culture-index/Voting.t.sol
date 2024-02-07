@@ -665,9 +665,10 @@ contract CultureIndexVotingBasicTest is CultureIndexTestSuite {
         cultureIndex.vote(newPieceId);
     }
 
-    function testCalculateVoteWeights(uint200 pointsBalance, uint40 erc721Balance) public {
-        vm.assume(pointsBalance > 0);
-        vm.assume(erc721Balance < 1_000);
+    function testCalculateVoteWeights(uint256 pointsBalance, uint256 erc721Balance) public {
+        pointsBalance = bound(pointsBalance, 1, type(uint160).max - 1);
+        erc721Balance = bound(erc721Balance, 0, 1_000 - 1);
+
         vm.stopPrank();
         vm.startPrank(address(revolutionPointsEmitter));
         revolutionPoints.mint(address(auction), pointsBalance);
@@ -701,9 +702,10 @@ contract CultureIndexVotingBasicTest is CultureIndexTestSuite {
         assertEq(actualVoteWeight, expectedVoteWeight, "Vote weight calculation does not match expected value");
     }
 
-    function testQuorumVotesCalculation(uint200 pointsTotalSupply, uint256 erc721TotalSupply) public {
-        vm.assume(pointsTotalSupply > 0);
-        vm.assume(erc721TotalSupply < 1_000);
+    function testQuorumVotesCalculation(uint256 pointsTotalSupply, uint256 erc721TotalSupply) public {
+        pointsTotalSupply = bound(pointsTotalSupply, 1, type(uint160).max - 1);
+        erc721TotalSupply = bound(erc721TotalSupply, 0, 1_000 - 1);
+
         // Initial settings
         uint256 quorumBPS = cultureIndex.quorumVotesBPS(); // Example quorum BPS (20%)
 

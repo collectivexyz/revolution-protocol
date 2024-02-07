@@ -53,8 +53,7 @@ contract PointsEmitterRewardsTest is ProtocolRewardsTest {
     }
 
     function testDeposit(uint256 msgValue) public {
-        bool shouldExpectRevert = msgValue <= mockPointsEmitter.minPurchaseAmount() ||
-            msgValue >= mockPointsEmitter.maxPurchaseAmount();
+        bool shouldExpectRevert = msgValue <= mockPointsEmitter.minPurchaseAmount();
 
         vm.deal(collector, msgValue);
 
@@ -95,8 +94,7 @@ contract PointsEmitterRewardsTest is ProtocolRewardsTest {
     }
 
     function testNullReferralRecipient(uint256 msgValue) public {
-        bool shouldExpectRevert = msgValue <= mockPointsEmitter.minPurchaseAmount() ||
-            msgValue >= mockPointsEmitter.maxPurchaseAmount();
+        bool shouldExpectRevert = msgValue <= mockPointsEmitter.minPurchaseAmount();
 
         RevolutionPoints govToken2 = new RevolutionPoints(address(this), "Revolution Governance", "GOV");
 
@@ -165,7 +163,7 @@ contract PointsEmitterRewardsTest is ProtocolRewardsTest {
     }
 
     function testRevertInvalidEth(uint16 msgValue) public {
-        vm.assume(msgValue < mockPointsEmitter.minPurchaseAmount() || msgValue > mockPointsEmitter.maxPurchaseAmount());
+        msgValue = bound(msgValue, 0, mockPointsEmitter.minPurchaseAmount());
 
         vm.expectRevert(abi.encodeWithSignature("INVALID_ETH_AMOUNT()"));
         mockPointsEmitter.computePurchaseRewards(msgValue);
