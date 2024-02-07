@@ -163,8 +163,14 @@ contract SplitMain is ISplitMain, VersionedContract {
 
     /// @notice mapping to account ETH balances
     mapping(address => uint256) internal ethBalances;
+
+    /// @notice mapping to points account ETH balances
+    /// to be spent on the points emitter to buy points for the account
+    mapping(address => uint256) internal ethPointsBalances;
+
     /// @notice mapping to account ERC20 balances
     mapping(ERC20 => mapping(address => uint256)) internal erc20Balances;
+
     /// @notice mapping to Split metadata
     mapping(address => Split) internal splits;
 
@@ -512,7 +518,16 @@ contract SplitMain is ISplitMain, VersionedContract {
             percentAllocations,
             distributorFee
         );
-        _distributeETH(split, accounts, percentAllocations, distributorFee, distributorAddress);
+        _distributeETH(
+            split,
+            pointsPercent,
+            pointsAccounts,
+            pointsPercentAllocations,
+            accounts,
+            percentAllocations,
+            distributorFee,
+            distributorAddress
+        );
     }
 
     /** @notice Updates & distributes the ETH balance for split `split`
@@ -558,7 +573,16 @@ contract SplitMain is ISplitMain, VersionedContract {
             distributorFee
         );
         // know splitHash is valid immediately after updating; only accessible via controller
-        _distributeETH(split, accounts, percentAllocations, distributorFee, distributorAddress);
+        _distributeETH(
+            split,
+            pointsPercent,
+            pointsAccounts,
+            pointsPercentAllocations,
+            accounts,
+            percentAllocations,
+            distributorFee,
+            distributorAddress
+        );
     }
 
     /** @notice Distributes the ERC20 `token` balance for split `split`
@@ -838,8 +862,11 @@ contract SplitMain is ISplitMain, VersionedContract {
     }
 
     /** @notice Distributes the ETH balance for split `split`
-     *  @dev `accounts`, `percentAllocations`, and `distributorFee` must be verified before calling
+     *  @dev `pointsAccounts`, `pointsPercentAllocations`, `accounts`, `percentAllocations`, and `distributorFee` must be verified before calling
      *  @param split Address of split to distribute balance for
+     *  @param pointsPercent The percentage of the split that will be sent to the points emitter
+     *  @param pointsAccounts Ordered, unique list of addresses with ownership over the points in the split
+     *  @param pointsPercentAllocations Percent allocations associated with each points address
      *  @param accounts Ordered, unique list of addresses with ownership in the split
      *  @param percentAllocations Percent allocations associated with each address
      *  @param distributorFee Keeper fee paid by split to cover gas costs of distribution
@@ -847,6 +874,9 @@ contract SplitMain is ISplitMain, VersionedContract {
      */
     function _distributeETH(
         address split,
+        uint32 pointsPercent,
+        address[] memory pointsAccounts,
+        uint32[] memory pointsPercentAllocations,
         address[] memory accounts,
         uint32[] memory percentAllocations,
         uint32 distributorFee,
