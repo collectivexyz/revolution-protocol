@@ -13,8 +13,3 @@ jobs:
     name: Revolution Contracts
     uses: ./.github/workflows/revolution_contracts.yml
     secrets: inherit
-
-  contracts-splits:
-    name: Revolution Splits
-    uses: ./.github/workflows/splits_contracts.yml
-    secrets: inherit
