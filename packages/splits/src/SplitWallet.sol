@@ -5,6 +5,7 @@ import { ISplitMain } from "./interfaces/ISplitMain.sol";
 import { ERC20 } from "@openzeppelin/contracts/token/ERC20/ERC20.sol";
 import { SafeTransferLib } from "solmate/src/utils/SafeTransferLib.sol";
 import { SafeERC20 } from "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
+import { VersionedContract } from "./version/VersionedContract.sol";
 
 /**
  * ERRORS
@@ -19,7 +20,7 @@ error Unauthorized();
  * @notice The implementation logic for `SplitProxy`.
  * @dev `SplitProxy` handles `receive()` itself to avoid the gas cost with `DELEGATECALL`.
  */
-contract SplitWallet {
+contract SplitWallet is VersionedContract {
     using SafeTransferLib for address;
 
     /**

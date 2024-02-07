@@ -8,6 +8,7 @@ import { ERC20 } from "@openzeppelin/contracts/token/ERC20/ERC20.sol";
 import { SafeTransferLib } from "solmate/src/utils/SafeTransferLib.sol";
 import { SafeERC20 } from "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
 import { IRevolutionPointsEmitter } from "./interfaces/IPointsEmitterLike.sol";
+import { VersionedContract } from "./version/VersionedContract.sol";
 
 /**
 
@@ -113,7 +114,7 @@ error InvalidNewController(address newController);
  * For these proxies, we extended EIP-1167 Minimal Proxy Contract to avoid `DELEGATECALL` inside `receive()` to accept
  * hard gas-capped `sends` & `transfers`.
  */
-contract SplitMain is ISplitMain {
+contract SplitMain is ISplitMain, VersionedContract {
     using SafeTransferLib for address;
 
     /**

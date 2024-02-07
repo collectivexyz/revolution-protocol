@@ -18,7 +18,6 @@
     "test": "forge test -vvv",
     "test:ci": "forge test -vvv",
     "build:contracts": "forge build",
-    "prettier:check": "prettier --check 'src/**/*.sol' 'test/**/*.sol'",
     "prettier": "prettier --write 'src/**/*.sol' 'test/**/*.sol'",
     "lint": "prettier --check 'src/**/*.sol' 'test/**/*.sol'",
     "copy-abis": "tsx script/bundle-abis.ts",
