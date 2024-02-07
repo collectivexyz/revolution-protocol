@@ -19,6 +19,8 @@ interface ISplitMain {
 
     function createSplit(
         uint32 pointsPercent,
+        address[] calldata pointsAccounts,
+        uint32[] calldata pointsPercentAllocations,
         address[] calldata accounts,
         uint32[] calldata percentAllocations,
         uint32 distributorFee,
@@ -27,6 +29,8 @@ interface ISplitMain {
 
     function predictImmutableSplitAddress(
         uint32 pointsPercent,
+        address[] calldata pointsAccounts,
+        uint32[] calldata pointsPercentAllocations,
         address[] calldata accounts,
         uint32[] calldata percentAllocations,
         uint32 distributorFee
@@ -35,6 +39,8 @@ interface ISplitMain {
     function updateSplit(
         address split,
         uint32 pointsPercent,
+        address[] calldata pointsAccounts,
+        uint32[] calldata pointsPercentAllocations,
         address[] calldata accounts,
         uint32[] calldata percentAllocations,
         uint32 distributorFee
@@ -51,6 +57,8 @@ interface ISplitMain {
     function distributeETH(
         address split,
         uint32 pointsPercent,
+        address[] calldata pointsAccounts,
+        uint32[] calldata pointsPercentAllocations,
         address[] calldata accounts,
         uint32[] calldata percentAllocations,
         uint32 distributorFee,
@@ -60,6 +68,8 @@ interface ISplitMain {
     function updateAndDistributeETH(
         address split,
         uint32 pointsPercent,
+        address[] calldata pointsAccounts,
+        uint32[] calldata pointsPercentAllocations,
         address[] calldata accounts,
         uint32[] calldata percentAllocations,
         uint32 distributorFee,
@@ -70,6 +80,8 @@ interface ISplitMain {
         address split,
         ERC20 token,
         uint32 pointsPercent,
+        address[] calldata pointsAccounts,
+        uint32[] calldata pointsPercentAllocations,
         address[] calldata accounts,
         uint32[] calldata percentAllocations,
         uint32 distributorFee,
@@ -80,6 +92,8 @@ interface ISplitMain {
         address split,
         ERC20 token,
         uint32 pointsPercent,
+        address[] calldata pointsAccounts,
+        uint32[] calldata pointsPercentAllocations,
         address[] calldata accounts,
         uint32[] calldata percentAllocations,
         uint32 distributorFee,
