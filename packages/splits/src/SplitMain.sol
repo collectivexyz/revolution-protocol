@@ -432,7 +432,7 @@ contract SplitMain is ISplitMain, VersionedContract {
      */
     function withdraw(address account, uint256 withdrawETH, ERC20[] calldata tokens) external override {
         uint256[] memory tokenAmounts = new uint256[](tokens.length);
-        uint256 ethAmount;
+        uint256 ethAmount = 0;
         if (withdrawETH != 0) {
             ethAmount = _withdraw(account);
         }
@@ -522,7 +522,7 @@ contract SplitMain is ISplitMain, VersionedContract {
         uint32[] memory percentAllocations,
         uint32 distributorFee
     ) internal pure returns (bytes32) {
-        return keccak256(abi.encodePacked(accounts, percentAllocations, distributorFee));
+        return keccak256(abi.encode(accounts, percentAllocations, distributorFee));
     }
 
     /** @notice Updates an existing split with recipients `accounts` with ownerships `percentAllocations` and a keeper fee for splitting of `distributorFee`
