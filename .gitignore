@@ -20,6 +20,8 @@ docs/
 
 broadcast
 
+.vscode/settings.json
+
 bin
 
 # coverage info

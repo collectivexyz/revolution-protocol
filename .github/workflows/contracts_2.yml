@@ -1,0 +1,10 @@
+name: "Contracts"
+
+on:
+  push:
+
+jobs:
+  contracts-splits:
+    name: Revolution Splits
+    uses: ./.github/workflows/splits_contracts.yml
+    secrets: inherit

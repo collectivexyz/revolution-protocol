@@ -1,0 +1,19 @@
+👁👁 STORAGE LAYOUT snapshot 👁👁
+=======================
+
+=======================
+➡ SplitMain
+=======================
+
+| Name          | Type                                                   | Slot | Offset | Bytes | Contract                    |
+|---------------|--------------------------------------------------------|------|--------|-------|-----------------------------|
+| ethBalances   | mapping(address => uint256)                            | 0    | 0      | 32    | src/SplitMain.sol:SplitMain |
+| erc20Balances | mapping(contract ERC20 => mapping(address => uint256)) | 1    | 0      | 32    | src/SplitMain.sol:SplitMain |
+| splits        | mapping(address => struct SplitMain.Split)             | 2    | 0      | 32    | src/SplitMain.sol:SplitMain |
+
+=======================
+➡ SplitWallet
+=======================
+
+| Name | Type | Slot | Offset | Bytes | Contract |
+|------|------|------|--------|-------|----------|
