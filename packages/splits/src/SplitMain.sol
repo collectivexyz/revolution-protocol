@@ -279,7 +279,12 @@ contract SplitMain is ISplitMain, VersionedContract {
         uint32[] calldata percentAllocations,
         uint32 distributorFee,
         address controller
-    ) external override validSplit(pointsPercent, accounts, percentAllocations, distributorFee) returns (address split) {
+    )
+        external
+        override
+        validSplit(pointsPercent, accounts, percentAllocations, distributorFee)
+        returns (address split)
+    {
         bytes32 splitHash = _hashSplit(pointsPercent, accounts, percentAllocations, distributorFee);
         if (controller == address(0)) {
             // create immutable split
@@ -306,7 +311,13 @@ contract SplitMain is ISplitMain, VersionedContract {
         address[] calldata accounts,
         uint32[] calldata percentAllocations,
         uint32 distributorFee
-    ) external view override validSplit(pointsPercent, accounts, percentAllocations, distributorFee) returns (address split) {
+    )
+        external
+        view
+        override
+        validSplit(pointsPercent, accounts, percentAllocations, distributorFee)
+        returns (address split)
+    {
         bytes32 splitHash = _hashSplit(pointsPercent, accounts, percentAllocations, distributorFee);
         split = Clones.predictDeterministicAddress(walletImplementation, splitHash);
     }
@@ -324,7 +335,12 @@ contract SplitMain is ISplitMain, VersionedContract {
         address[] calldata accounts,
         uint32[] calldata percentAllocations,
         uint32 distributorFee
-    ) external override onlySplitController(split) validSplit(pointsPercent, accounts, percentAllocations, distributorFee) {
+    )
+        external
+        override
+        onlySplitController(split)
+        validSplit(pointsPercent, accounts, percentAllocations, distributorFee)
+    {
         _updateSplit(split, pointsPercent, accounts, percentAllocations, distributorFee);
     }
 
@@ -406,7 +422,12 @@ contract SplitMain is ISplitMain, VersionedContract {
         uint32[] calldata percentAllocations,
         uint32 distributorFee,
         address distributorAddress
-    ) external override onlySplitController(split) validSplit(pointsPercent, accounts, percentAllocations, distributorFee) {
+    )
+        external
+        override
+        onlySplitController(split)
+        validSplit(pointsPercent, accounts, percentAllocations, distributorFee)
+    {
         _updateSplit(split, pointsPercent, accounts, percentAllocations, distributorFee);
         // know splitHash is valid immediately after updating; only accessible via controller
         _distributeETH(split, accounts, percentAllocations, distributorFee, distributorAddress);
@@ -435,7 +456,7 @@ contract SplitMain is ISplitMain, VersionedContract {
         address distributorAddress
     ) external override validSplit(pointsPercent, accounts, percentAllocations, distributorFee) {
         // use internal fn instead of modifier to avoid stack depth compiler errors
-        _validSplitHash(split,pointsPercent,  accounts, percentAllocations, distributorFee);
+        _validSplitHash(split, pointsPercent, accounts, percentAllocations, distributorFee);
         _distributeERC20(split, token, accounts, percentAllocations, distributorFee, distributorAddress);
     }
 
@@ -459,7 +480,12 @@ contract SplitMain is ISplitMain, VersionedContract {
         uint32[] calldata percentAllocations,
         uint32 distributorFee,
         address distributorAddress
-    ) external override onlySplitController(split) validSplit(pointsPercent, accounts, percentAllocations, distributorFee) {
+    )
+        external
+        override
+        onlySplitController(split)
+        validSplit(pointsPercent, accounts, percentAllocations, distributorFee)
+    {
         _updateSplit(split, pointsPercent, accounts, percentAllocations, distributorFee);
         // know splitHash is valid immediately after updating; only accessible via controller
         _distributeERC20(split, token, accounts, percentAllocations, distributorFee, distributorAddress);
