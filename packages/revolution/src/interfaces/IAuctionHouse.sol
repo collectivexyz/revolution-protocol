@@ -18,6 +18,7 @@
 pragma solidity ^0.8.22;
 
 import { IRevolutionBuilder } from "./IRevolutionBuilder.sol";
+import { IGrantsRevenueStream } from "./IGrantsRevenueStream.sol";
 
 interface IAuctionHouseEvents {
     event AuctionCreated(uint256 indexed tokenId, uint256 startTime, uint256 endTime);
@@ -47,7 +48,7 @@ interface IAuctionHouseEvents {
     event EntropyRateBpsUpdated(uint256 rateBps);
 }
 
-interface IAuctionHouse is IAuctionHouseEvents {
+interface IAuctionHouse is IAuctionHouseEvents, IGrantsRevenueStream {
     ///                                                          ///
     ///                           ERRORS                         ///
     ///                                                          ///

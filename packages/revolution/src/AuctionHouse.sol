@@ -77,6 +77,12 @@ contract AuctionHouse is
     // The active auction
     IAuctionHouse.Auction public auction;
 
+    // The account to pay grants funds to
+    address public grantsAddress;
+
+    // Split of purchase proceeds sent to the grants system as ether in basis points
+    uint256 public grantsRateBps;
+
     ///                                                          ///
     ///                         IMMUTABLES                       ///
     ///                                                          ///
@@ -130,16 +136,29 @@ contract AuctionHouse is
         if (_auctionParams.creatorRateBps < _auctionParams.minCreatorRateBps) revert CREATOR_RATE_TOO_LOW();
         if (_auctionParams.reservePrice == 0) revert RESERVE_PRICE_INVALID();
 
+        if (_auctionParams.grantsParams.totalRateBps > 10_000) revert INVALID_BPS();
+
+        if (_auctionParams.grantsParams.totalRateBps + _auctionParams.creatorRateBps > 10_000) revert INVALID_BPS();
+
+        // set contracts
         revolutionToken = IRevolutionToken(_revolutionToken);
         revolutionPointsEmitter = IRevolutionPointsEmitter(_revolutionPointsEmitter);
+        WETH = _weth;
+
+        // set auction params
         timeBuffer = _auctionParams.timeBuffer;
         reservePrice = _auctionParams.reservePrice;
         minBidIncrementPercentage = _auctionParams.minBidIncrementPercentage;
         duration = _auctionParams.duration;
+
+        // set creator payout params
         creatorRateBps = _auctionParams.creatorRateBps;
         entropyRateBps = _auctionParams.entropyRateBps;
         minCreatorRateBps = _auctionParams.minCreatorRateBps;
-        WETH = _weth;
+
+        // set grants payout params
+        grantsRateBps = _auctionParams.grantsParams.totalRateBps;
+        grantsAddress = _auctionParams.grantsParams.grantsAddress;
     }
 
     /**
@@ -463,6 +482,32 @@ contract AuctionHouse is
             // Ensure successful transfer
             if (!wethSuccess) revert("WETH transfer failed");
         }
+    }
+
+    ///                                                          ///
+    ///                        GRANTS PROGRAM                    ///
+    ///                                                          ///
+
+    /**
+     * @notice Set the split of the payment that is reserved for grants program in basis points.
+     * @dev Only callable by the owner.
+     * @param _grantsRateBps New grants rate in basis points.
+     */
+    function setGrantsRateBps(uint256 _grantsRateBps) external onlyOwner nonReentrant {
+        if (_grantsRateBps > 10_000) revert INVALID_BPS();
+        if (_grantsRateBps + creatorRateBps > 10_000) revert INVALID_BPS();
+
+        emit GrantsRateBpsUpdated(grantsRateBps = _grantsRateBps);
+    }
+
+    /**
+     * @notice Set the grants address to pay the grantsRate to. Can be a contract.
+     * @dev Only callable by the owner.
+     */
+    function setGrantsAddress(address _grantsAddress) external override onlyOwner nonReentrant {
+        if (_grantsAddress == address(0)) revert ADDRESS_ZERO();
+
+        emit GrantsAddressUpdated(grantsAddress = _grantsAddress);
     }
 
     ///                                                          ///

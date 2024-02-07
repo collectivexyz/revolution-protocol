@@ -124,30 +124,24 @@ contract RevolutionPointsEmitter is
         // Set up ownable
         __Ownable_init(_initialOwner);
 
-        // Set founder address if not already set
+        // Set founder params if not already set
+        // So an upgrade can't change the founder params
         if (founderAddress == address(0)) {
             founderAddress = _founderParams.founderAddress;
         }
-
         if (founderRewardsExpirationDate == 0) {
             founderRewardsExpirationDate = _founderParams.rewardsExpirationDate;
         }
-
         if (founderRateBps == 0) {
             founderRateBps = _founderParams.totalRateBps;
         }
-
         if (founderEntropyRateBps == 0) {
             founderEntropyRateBps = _founderParams.entropyRateBps;
         }
 
-        if (grantsAddress == address(0)) {
-            grantsAddress = _grantsParams.grantsAddress;
-        }
+        grantsAddress = _grantsParams.grantsAddress;
 
-        if (grantsRateBps == 0) {
-            grantsRateBps = _grantsParams.totalRateBps;
-        }
+        grantsRateBps = _grantsParams.totalRateBps;
 
         vrgda = IVRGDAC(_vrgda);
         token = IRevolutionPoints(_revolutionPoints);
@@ -411,11 +405,11 @@ contract RevolutionPointsEmitter is
     }
 
     /**
-     * @notice Set the split of the payment that is reserved for founder in basis points.
+     * @notice Set the split of the payment that is reserved for grants program in basis points.
      * @dev Only callable by the owner.
      * @param _grantsRateBps New grants rate in basis points.
      */
-    function setGrantsRateBps(uint256 _grantsRateBps) external onlyOwner {
+    function setGrantsRateBps(uint256 _grantsRateBps) external onlyOwner nonReentrant {
         if (_grantsRateBps > 10_000) revert INVALID_BPS();
         if (_grantsRateBps + founderRateBps > 10_000) revert INVALID_BPS();
 
