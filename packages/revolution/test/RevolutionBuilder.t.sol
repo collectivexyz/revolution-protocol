@@ -51,6 +51,7 @@ contract RevolutionBuilderTest is Test {
     address internal creatorsAddress;
     address internal founder;
     address internal founder2;
+    address internal grantsAddress;
     address internal weth;
     address internal protocolRewards;
 
@@ -70,6 +71,7 @@ contract RevolutionBuilderTest is Test {
 
         founder = vm.addr(0xCAB);
         founder2 = vm.addr(0xDAD);
+        grantsAddress = vm.addr(0xBAE);
 
         creatorsAddress = vm.addr(0xCAFEBABE);
 
@@ -310,7 +312,8 @@ contract RevolutionBuilderTest is Test {
                 founderAddress: founder,
                 rewardsExpirationDate: 1_800_000_000,
                 entropyRateBps: 4_000
-            })
+            }),
+            IRevolutionBuilder.GrantsParams({ totalRateBps: 1000, grantsAddress: grantsAddress })
         );
     }
 
@@ -318,7 +321,8 @@ contract RevolutionBuilderTest is Test {
         int256 _targetPrice,
         int256 _priceDecayPercent,
         int256 _tokensPerTimeUnit,
-        IRevolutionBuilder.FounderParams memory _founderParams
+        IRevolutionBuilder.FounderParams memory _founderParams,
+        IRevolutionBuilder.GrantsParams memory _grantsParams
     ) internal virtual {
         revolutionPointsParams = IRevolutionBuilder.RevolutionPointsParams({
             tokenParams: revolutionPointsParams.tokenParams,
@@ -328,7 +332,8 @@ contract RevolutionBuilderTest is Test {
                     priceDecayPercent: _priceDecayPercent,
                     tokensPerTimeUnit: _tokensPerTimeUnit
                 }),
-                founderParams: _founderParams
+                founderParams: _founderParams,
+                grantsParams: _grantsParams
             })
         });
     }

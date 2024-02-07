@@ -146,9 +146,11 @@ interface IRevolutionBuilder is IUUPS {
     /// @notice The RevolutionPoints ERC-20 emitter VRGDA parameters
     /// @param vrgdaParams // The VRGDA parameters
     /// @param founderParams // The params to dictate payments to the founder
+    /// @param grantsParams // The params to dictate payments to the grants program
     struct PointsEmitterParams {
         VRGDAParams vrgdaParams;
         FounderParams founderParams;
+        GrantsParams grantsParams;
     }
 
     /// @notice The ERC-20 points emitter VRGDA parameters
@@ -171,6 +173,14 @@ interface IRevolutionBuilder is IUUPS {
         uint256 entropyRateBps;
         address founderAddress;
         uint256 rewardsExpirationDate;
+    }
+
+    /// @notice Grants program params that detail payments to the grants program
+    /// @param totalRateBps The grants rate in basis points - how much of each purchase to the points emitter is reserved for the grants program
+    /// @param founderAddress the grants program address to send ether to
+    struct GrantsParams {
+        uint256 totalRateBps;
+        address grantsAddress;
     }
 
     /// @notice The CultureIndex parameters

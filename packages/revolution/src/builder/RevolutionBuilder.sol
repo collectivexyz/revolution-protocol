@@ -271,7 +271,8 @@ contract RevolutionBuilder is
             initialOwner: initialSetup.executor,
             weth: _weth,
             vrgda: daoAddressesByToken[revolutionToken].vrgda,
-            founderParams: _revolutionPointsParams.emitterParams.founderParams
+            founderParams: _revolutionPointsParams.emitterParams.founderParams,
+            grantsParams: _revolutionPointsParams.emitterParams.grantsParams
         });
 
         IDAOExecutor(daoAddressesByToken[revolutionToken].executor).initialize({

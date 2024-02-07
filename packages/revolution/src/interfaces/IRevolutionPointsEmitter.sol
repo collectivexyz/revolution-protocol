@@ -39,6 +39,9 @@ interface IRevolutionPointsEmitter is IRewardSplits {
     /// @dev Reverts if the WETH transfer fails
     error WETH_TRANSFER_FAILED();
 
+    /// @dev Reverts if invalid rewards timestamp is passed
+    error INVALID_REWARDS_TIMESTAMP();
+
     struct ProtocolRewardAddresses {
         address builder;
         address purchaseReferral;
@@ -49,6 +52,7 @@ interface IRevolutionPointsEmitter is IRewardSplits {
         uint256 buyersGovernancePayment;
         uint256 founderDirectPayment;
         uint256 founderGovernancePayment;
+        uint256 grantsDirectPayment;
     }
 
     // To find amount of ether to pay founder and owner after calculating the amount of points to emit
@@ -98,9 +102,10 @@ interface IRevolutionPointsEmitter is IRewardSplits {
         uint256 payment,
         uint256 ownerAmount,
         uint256 protocolRewardsAmount,
-        uint256 buyerTokensEmitted,
-        uint256 founderTokensEmitted,
-        uint256 founderDirectPayment
+        uint256 buyerPointsEmitted,
+        uint256 founderPointsEmitted,
+        uint256 founderDirectPayment,
+        uint256 grantsDirectPayment
     );
 
     /**
@@ -110,12 +115,14 @@ interface IRevolutionPointsEmitter is IRewardSplits {
      * @param revolutionPoints The ERC-20 token contract address
      * @param vrgda The VRGDA contract address
      * @param founderParams The founder rewards parameters
+     * @param grantsParams The grants rewards parameters
      */
     function initialize(
         address initialOwner,
         address weth,
         address revolutionPoints,
         address vrgda,
-        IRevolutionBuilder.FounderParams calldata founderParams
+        IRevolutionBuilder.FounderParams calldata founderParams,
+        IRevolutionBuilder.GrantsParams calldata grantsParams
     ) external;
 }

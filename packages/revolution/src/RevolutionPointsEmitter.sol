@@ -94,13 +94,15 @@ contract RevolutionPointsEmitter is
      * @param _revolutionPoints The ERC-20 token contract address
      * @param _vrgda The VRGDA contract address
      * @param _founderParams The founder reward parameters
+     * @param _grantsParams The grants reward parameters
      */
     function initialize(
         address _initialOwner,
         address _weth,
         address _revolutionPoints,
         address _vrgda,
-        IRevolutionBuilder.FounderParams calldata _founderParams
+        IRevolutionBuilder.FounderParams calldata _founderParams,
+        IRevolutionBuilder.GrantsParams calldata _grantsParams
     ) external initializer {
         if (msg.sender != address(manager)) revert NOT_MANAGER();
         if (_initialOwner == address(0)) revert ADDRESS_ZERO();
@@ -110,6 +112,11 @@ contract RevolutionPointsEmitter is
 
         if (_founderParams.totalRateBps > 10_000) revert INVALID_BPS();
         if (_founderParams.entropyRateBps > 10_000) revert INVALID_BPS();
+        if (_founderParams.rewardsExpirationDate < block.timestamp) revert INVALID_REWARDS_TIMESTAMP();
+
+        if (_grantsParams.totalRateBps > 10_000) revert INVALID_BPS();
+
+        if (_grantsParams.totalRateBps + _founderParams.totalRateBps > 10_000) revert INVALID_BPS();
 
         __Pausable_init();
         __ReentrancyGuard_init();
@@ -132,6 +139,14 @@ contract RevolutionPointsEmitter is
 
         if (founderEntropyRateBps == 0) {
             founderEntropyRateBps = _founderParams.entropyRateBps;
+        }
+
+        if (grantsAddress == address(0)) {
+            grantsAddress = _grantsParams.grantsAddress;
+        }
+
+        if (grantsRateBps == 0) {
+            grantsRateBps = _grantsParams.totalRateBps;
         }
 
         vrgda = IVRGDAC(_vrgda);
@@ -187,11 +202,18 @@ contract RevolutionPointsEmitter is
     function _calculateBuyTokenPaymentShares(
         uint256 msgValueRemaining
     ) internal view returns (BuyTokenPaymentShares memory buyTokenPaymentShares) {
+        // Ether to send to the grants program
+        buyTokenPaymentShares.grantsDirectPayment = (msgValueRemaining * grantsRateBps) / 10_000;
+
+        // Founder no longer receives any rewards
         if (block.timestamp >= founderRewardsExpirationDate) {
-            // Founder no longer receives any rewards
-            buyTokenPaymentShares.buyersGovernancePayment = msgValueRemaining;
+            // Share of purchase amount reserved for buyers
+            buyTokenPaymentShares.buyersGovernancePayment =
+                msgValueRemaining -
+                buyTokenPaymentShares.grantsDirectPayment;
         }
 
+        // Founder should receive rewards
         if (block.timestamp < founderRewardsExpirationDate) {
             // Founder receives rewards per founderRateBps and founderEntropyRateBps
             uint256 founderRate = founderRateBps;
@@ -199,7 +221,8 @@ contract RevolutionPointsEmitter is
             // Share of purchase amount reserved for buyers
             buyTokenPaymentShares.buyersGovernancePayment =
                 msgValueRemaining -
-                ((msgValueRemaining * founderRate) / 10_000);
+                ((msgValueRemaining * founderRate) / 10_000) -
+                buyTokenPaymentShares.grantsDirectPayment;
 
             // Ether directly sent to founder
             buyTokenPaymentShares.founderDirectPayment =
@@ -276,9 +299,14 @@ contract RevolutionPointsEmitter is
             buyTokenPaymentShares
         );
 
-        // Deposit owner's funds to owner's account
+        // Transfer ETH to owner
         if (paymentDistribution.toPayOwner > 0) {
             _safeTransferETHWithFallback(owner(), paymentDistribution.toPayOwner);
+        }
+
+        // Transfer ETH to grants program
+        if (buyTokenPaymentShares.grantsDirectPayment > 0) {
+            _safeTransferETHWithFallback(grantsAddress, buyTokenPaymentShares.grantsDirectPayment);
         }
 
         // Transfer ETH to founder
@@ -319,7 +347,8 @@ contract RevolutionPointsEmitter is
             msg.value - msgValueRemaining,
             uint256(totalTokensForBuyers),
             uint256(totalTokensForFounder),
-            paymentDistribution.toPayFounder
+            paymentDistribution.toPayFounder,
+            buyTokenPaymentShares.grantsDirectPayment
         );
 
         return uint256(totalTokensForBuyers);
@@ -388,6 +417,7 @@ contract RevolutionPointsEmitter is
      */
     function setGrantsRateBps(uint256 _grantsRateBps) external onlyOwner {
         if (_grantsRateBps > 10_000) revert INVALID_BPS();
+        if (_grantsRateBps + founderRateBps > 10_000) revert INVALID_BPS();
 
         emit GrantsRateBpsUpdated(grantsRateBps = _grantsRateBps);
     }

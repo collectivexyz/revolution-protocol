@@ -87,7 +87,8 @@ contract PointsEmitterBasicTest is PointsEmitterTest {
                 founderAddress: founder,
                 rewardsExpirationDate: 1_800_000_000,
                 entropyRateBps: 5_000
-            })
+            }),
+            grantsParams: IRevolutionBuilder.GrantsParams({ totalRateBps: 1000, grantsAddress: grantsAddress })
         });
 
         IRevolutionPoints(governanceToken).initialize({
@@ -128,7 +129,8 @@ contract PointsEmitterBasicTest is PointsEmitterTest {
                 founderAddress: founder,
                 rewardsExpirationDate: 1_800_000_000,
                 entropyRateBps: 5_000
-            })
+            }),
+            grantsParams: IRevolutionBuilder.GrantsParams({ totalRateBps: 1000, grantsAddress: grantsAddress })
         });
 
         vm.startPrank(address(executor));
@@ -291,7 +293,8 @@ contract PointsEmitterBasicTest is PointsEmitterTest {
                 founderAddress: founder,
                 rewardsExpirationDate: 1_800_000_000,
                 entropyRateBps: 5_000
-            })
+            }),
+            grantsParams: IRevolutionBuilder.GrantsParams({ totalRateBps: 1000, grantsAddress: grantsAddress })
         });
 
         IRevolutionPoints(governanceToken).initialize({

@@ -41,7 +41,8 @@ contract PointsEmitterTest is RevolutionBuilderTest {
                 founderAddress: founder,
                 rewardsExpirationDate: 1_800_000_000,
                 entropyRateBps: 4_000
-            })
+            }),
+            IRevolutionBuilder.GrantsParams({ totalRateBps: 1000, grantsAddress: grantsAddress })
         );
 
         super.deployMock();
@@ -60,7 +61,7 @@ contract PointsEmitterTest is RevolutionBuilderTest {
             });
     }
 
-    function setUpWithDifferentRates(uint256 creatorRate, uint256 entropyRate) public {
+    function setUpWithDifferentRates(uint256 founderRate, uint256 founderEntropyRate, uint256 grantsRate) public {
         super.setUp();
         super.setMockParams();
 
@@ -69,17 +70,23 @@ contract PointsEmitterTest is RevolutionBuilderTest {
             1e18 / 10,
             int256(1e18 * tokensPerTimeUnit),
             IRevolutionBuilder.FounderParams({
-                totalRateBps: creatorRate,
+                totalRateBps: founderRate,
                 founderAddress: address(0x123),
                 rewardsExpirationDate: 1_800_000_000,
-                entropyRateBps: entropyRate
-            })
+                entropyRateBps: founderEntropyRate
+            }),
+            IRevolutionBuilder.GrantsParams({ totalRateBps: grantsRate, grantsAddress: grantsAddress })
         );
 
         super.deployMock();
     }
 
-    function setUpWithDifferentRatesAndExpiry(uint256 creatorRate, uint256 entropyRate, uint256 expiry) public {
+    function setUpWithDifferentRatesAndExpiry(
+        uint256 founderRate,
+        uint256 founderEntropyRate,
+        uint256 grantsRate,
+        uint256 expiry
+    ) public {
         super.setUp();
         super.setMockParams();
 
@@ -88,11 +95,12 @@ contract PointsEmitterTest is RevolutionBuilderTest {
             1e18 / 10,
             int256(1e18 * tokensPerTimeUnit),
             IRevolutionBuilder.FounderParams({
-                totalRateBps: creatorRate,
+                totalRateBps: founderRate,
                 founderAddress: address(0x123),
                 rewardsExpirationDate: expiry,
-                entropyRateBps: entropyRate
-            })
+                entropyRateBps: founderEntropyRate
+            }),
+            IRevolutionBuilder.GrantsParams({ totalRateBps: grantsRate, grantsAddress: grantsAddress })
         );
 
         super.deployMock();
