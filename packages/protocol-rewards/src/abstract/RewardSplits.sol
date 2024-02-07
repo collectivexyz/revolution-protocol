@@ -15,6 +15,12 @@ interface IRewardSplits {
     function minPurchaseAmount() external view returns (uint256);
 
     function maxPurchaseAmount() external view returns (uint256);
+
+    struct ProtocolRewardAddresses {
+        address builder;
+        address purchaseReferral;
+        address deployer;
+    }
 }
 
 /// @notice Common logic for Revolution RevolutionPointsEmitter contracts for protocol reward splits & deposits

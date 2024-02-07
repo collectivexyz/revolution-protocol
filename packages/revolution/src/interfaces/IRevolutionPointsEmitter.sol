@@ -42,12 +42,6 @@ interface IRevolutionPointsEmitter is IRewardSplits {
     /// @dev Reverts if invalid rewards timestamp is passed
     error INVALID_REWARDS_TIMESTAMP();
 
-    struct ProtocolRewardAddresses {
-        address builder;
-        address purchaseReferral;
-        address deployer;
-    }
-
     struct BuyTokenPaymentShares {
         uint256 buyersGovernancePayment;
         uint256 founderDirectPayment;
