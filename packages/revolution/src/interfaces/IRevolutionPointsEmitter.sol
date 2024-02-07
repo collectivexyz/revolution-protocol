@@ -55,6 +55,12 @@ interface IRevolutionPointsEmitter is IRewardSplits {
         uint256 toPayFounder;
     }
 
+    struct ProtocolRewardAddresses {
+        address builder;
+        address purchaseReferral;
+        address deployer;
+    }
+
     function buyToken(
         address[] calldata addresses,
         uint[] calldata bps,
