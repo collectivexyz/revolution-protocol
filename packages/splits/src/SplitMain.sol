@@ -419,8 +419,7 @@ contract SplitMain is ISplitMain, VersionedContract {
      *  _scaleAmountByPercentage, but results do not affect ETH & other ERC20 balances
      *  @param split Address of split to distribute balance for
      *  @param token Address of ERC20 to distribute balance for
-          * @param pointsPercent The percentage of the split that will be sent to the points emitter
-
+     * @param pointsPercent The percentage of the split that will be sent to the points emitter
      *  @param accounts Ordered, unique list of addresses with ownership in the split
      *  @param percentAllocations Percent allocations associated with each address
      *  @param distributorFee Keeper fee paid by split to cover gas costs of distribution
@@ -446,7 +445,7 @@ contract SplitMain is ISplitMain, VersionedContract {
      *  _scaleAmountByPercentage, but results do not affect ETH & other ERC20 balances
      *  @param split Address of split to distribute balance for
      *  @param token Address of ERC20 to distribute balance for
-     * @param pointsPercent The percentage of the split that will be sent to the points emitter
+     *  @param pointsPercent The percentage of the split that will be sent to the points emitter
      *  @param accounts Ordered, unique list of addresses with ownership in the split
      *  @param percentAllocations Percent allocations associated with each address
      *  @param distributorFee Keeper fee paid by split to cover gas costs of distribution
