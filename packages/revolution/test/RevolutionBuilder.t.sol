@@ -313,7 +313,7 @@ contract RevolutionBuilderTest is Test {
                 rewardsExpirationDate: 1_800_000_000,
                 entropyRateBps: 4_000
             }),
-            IRevolutionBuilder.GrantsParams({ totalRateBps: 1000, grantsAddress: founder })
+            IRevolutionBuilder.GrantsParams({ totalRateBps: 1000, grantsAddress: grantsAddress })
         );
     }
 

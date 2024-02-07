@@ -7,6 +7,7 @@ import { ICultureIndex } from "../../src/interfaces/ICultureIndex.sol";
 import { IRevolutionToken } from "../../src/interfaces/IRevolutionToken.sol";
 import { MockWETH } from "../mock/MockWETH.sol";
 import { toDaysWadUnsafe } from "../../src/libs/SignedWadMath.sol";
+import { IRevolutionPointsEmitter } from "../../src/interfaces/IRevolutionPointsEmitter.sol";
 
 contract AuctionHouseSettleTest is AuctionHouseTest {
     // Fallback function to allow contract to receive Ether
@@ -74,16 +75,18 @@ contract AuctionHouseSettleTest is AuctionHouseTest {
 
         uint256 msgValueRemaining = etherToSpendOnGovernanceTotal - feeAmount;
 
-        uint256 pointsEmitterValueGrants = (msgValueRemaining * revolutionPointsEmitter.founderRateBps()) / 10_000;
-        uint256 pointsEmitterValueGrantsDirect = (pointsEmitterValueGrants *
-            revolutionPointsEmitter.founderEntropyRateBps()) / 10_000;
-        uint256 pointsEmitterValueGrantsGov = pointsEmitterValueGrants - pointsEmitterValueGrantsDirect;
+        uint256 pointsValueFounder = (msgValueRemaining * revolutionPointsEmitter.founderRateBps()) / 10_000;
+        uint256 pointsValueFounderDirect = (pointsValueFounder * revolutionPointsEmitter.founderEntropyRateBps()) /
+            10_000;
+        uint256 pointsValueFounderGov = pointsValueFounder - pointsValueFounderDirect;
 
-        uint256 pointsEmitterValueOwner = msgValueRemaining - pointsEmitterValueGrants;
+        uint256 grantsDirectPayment = (msgValueRemaining * revolutionPointsEmitter.grantsRateBps()) / 10_000;
+
+        uint256 pointsEmitterValueOwner = msgValueRemaining - pointsValueFounder - grantsDirectPayment;
 
         assertEq(
             address(executor).balance,
-            auctioneerPayment + pointsEmitterValueOwner + pointsEmitterValueGrantsGov,
+            auctioneerPayment + pointsEmitterValueOwner + pointsValueFounderGov,
             "Bid amount minus entropy should be transferred to the auction house owner"
         );
     }
@@ -252,11 +255,6 @@ contract AuctionHouseSettleTest is AuctionHouseTest {
         //Total amount of ether going to creator
         uint256 creatorsAuctionShare = bidAmount - auctioneerPayment;
         uint256 ethPaidToCreators = (creatorsAuctionShare * auction.entropyRateBps()) / (10_000);
-        // uint256 ethPaidToCreators = 0;
-        // for (uint256 i = 0; i < numCreators; i++) {
-        //     uint256 paymentAmount = (entropyRateAmount * creators[i].bps) / (10_000 * 10_000);
-        //     ethPaidToCreators += paymentAmount;
-        // }
 
         //amount to buy creators governance with
         uint256 creatorPointsEther = (creatorsAuctionShare - ethPaidToCreators);
@@ -264,15 +262,68 @@ contract AuctionHouseSettleTest is AuctionHouseTest {
         uint256 msgValueRemaining = creatorPointsEther - revolutionPointsEmitter.computeTotalReward(creatorPointsEther);
 
         uint256 founderShare = (msgValueRemaining * revolutionPointsEmitter.founderRateBps()) / 10_000;
-        uint256 buyersShare = msgValueRemaining - founderShare;
-        uint256 grantsDirectPayment = (founderShare * revolutionPointsEmitter.founderEntropyRateBps()) / 10_000;
-        uint256 grantsGovernancePayment = founderShare - grantsDirectPayment;
+        uint256 grantsShare = (msgValueRemaining * revolutionPointsEmitter.grantsRateBps()) / 10_000;
+        uint256 buyersShare = msgValueRemaining - founderShare - grantsShare;
+        uint256 founderDirectPayment = (founderShare * revolutionPointsEmitter.founderEntropyRateBps()) / 10_000;
+        uint256 founderGovernancePayment = founderShare - founderDirectPayment;
 
         int256 expectedGrantsGovernanceTokenPayout = revolutionPointsEmitter.getTokenQuoteForEther(
-            grantsGovernancePayment
+            founderGovernancePayment
         );
 
         return uint256(getTokenQuoteForEtherHelper(buyersShare, expectedGrantsGovernanceTokenPayout));
+    }
+
+    function _calculateBuyTokenPaymentShares(
+        uint256 msgValueRemaining
+    ) internal view returns (IRevolutionPointsEmitter.BuyTokenPaymentShares memory buyTokenPaymentShares) {
+        // If rewards are expired, founder gets 0
+        uint256 founderPortion = revolutionPointsEmitter.founderRateBps();
+
+        if (block.timestamp > revolutionPointsEmitter.founderRewardsExpirationDate()) {
+            founderPortion = 0;
+        }
+
+        // Calculate share of purchase amount reserved for buyers
+        buyTokenPaymentShares.buyersGovernancePayment =
+            msgValueRemaining -
+            ((msgValueRemaining * founderPortion) / 10_000) -
+            ((msgValueRemaining * revolutionPointsEmitter.grantsRateBps()) / 10_000);
+
+        // Calculate ether directly sent to founder
+        buyTokenPaymentShares.founderDirectPayment =
+            (msgValueRemaining * founderPortion * revolutionPointsEmitter.founderEntropyRateBps()) /
+            10_000 /
+            10_000;
+
+        // Calculate ether spent on founder governance tokens
+        buyTokenPaymentShares.founderGovernancePayment =
+            ((msgValueRemaining * founderPortion) / 10_000) -
+            buyTokenPaymentShares.founderDirectPayment;
+
+        buyTokenPaymentShares.grantsDirectPayment =
+            (msgValueRemaining * revolutionPointsEmitter.grantsRateBps()) /
+            10_000;
+    }
+
+    function _getTotalPointsEmitterPayment(
+        uint256 creatorsShare,
+        uint256 directPayment
+    ) internal view returns (uint256) {
+        uint256 ethPaidToCreators = 0;
+
+        // If the amount to be spent on governance for creators is less than the minimum purchase amount for points
+        if ((creatorsShare - (directPayment / 10_000)) <= revolutionPointsEmitter.minPurchaseAmount()) {
+            // Set the amount to the full creators share, so creators are paid fully in ETH
+            // 10_000 assumes 100% in BPS of the creators share is paid to the creators
+            directPayment = creatorsShare * 10_000;
+        }
+
+        for (uint256 i = 0; i < 1; i++) {
+            ethPaidToCreators += (directPayment * 10_000) / (10_000 * 10_000);
+        }
+
+        return creatorsShare - ethPaidToCreators;
     }
 
     //assuming dao owns both auction and revolutionPointsEmitter
@@ -281,30 +332,43 @@ contract AuctionHouseSettleTest is AuctionHouseTest {
         uint256 auctioneerPayment = (bidAmount * (10_000 - auction.creatorRateBps())) / 10_000;
 
         //Total amount of ether going to creator
-        uint256 creatorsAuctionShare = bidAmount - auctioneerPayment;
+        uint256 creatorsShare = bidAmount - auctioneerPayment;
 
-        uint256 creatorPointsEther = (creatorsAuctionShare * (10_000 - auction.entropyRateBps())) / 10_000;
+        uint256 creatorPointsPayment = _getTotalPointsEmitterPayment(
+            creatorsShare,
+            (creatorsShare * auction.entropyRateBps())
+        );
 
-        uint256 msgValueRemaining = creatorPointsEther - revolutionPointsEmitter.computeTotalReward(creatorPointsEther);
+        uint256 msgValueRemaining = creatorPointsPayment -
+            revolutionPointsEmitter.computeTotalReward(creatorPointsPayment);
 
-        uint256 founderShare = (msgValueRemaining * revolutionPointsEmitter.founderRateBps()) / 10_000;
-        uint256 buyersShare = msgValueRemaining - founderShare;
-        uint256 grantsDirectPayment = (founderShare * revolutionPointsEmitter.founderEntropyRateBps()) / 10_000;
-        uint256 grantsGovernancePayment = founderShare - grantsDirectPayment;
+        IRevolutionPointsEmitter.BuyTokenPaymentShares memory buyTokenPaymentShares = _calculateBuyTokenPaymentShares(
+            msgValueRemaining
+        );
 
-        return auctioneerPayment + grantsGovernancePayment + buyersShare;
+        return (buyTokenPaymentShares.buyersGovernancePayment +
+            buyTokenPaymentShares.founderGovernancePayment +
+            auctioneerPayment);
     }
 
     function getFounderDirectPayment(uint bidAmount) public returns (uint) {
-        uint256 creatorsAuctionShare = (bidAmount * auction.creatorRateBps()) / 10_000;
-        uint256 creatorsGovernancePayment = (creatorsAuctionShare * (10_000 - auction.entropyRateBps())) / 10_000;
+        uint256 auctioneerPayment = (bidAmount * (10_000 - auction.creatorRateBps())) / 10_000;
 
-        uint256 msgValueRemaining = creatorsGovernancePayment -
-            revolutionPointsEmitter.computeTotalReward(creatorsGovernancePayment);
+        uint256 creatorsShare = bidAmount - auctioneerPayment;
 
-        uint256 founderShare = (msgValueRemaining * revolutionPointsEmitter.founderRateBps()) / 10_000;
-        uint256 buyersShare = msgValueRemaining - founderShare;
-        return (founderShare * revolutionPointsEmitter.founderEntropyRateBps()) / 10_000;
+        uint256 creatorPointsPayment = _getTotalPointsEmitterPayment(
+            creatorsShare,
+            (creatorsShare * auction.entropyRateBps())
+        );
+
+        uint256 msgValueRemaining = creatorPointsPayment -
+            revolutionPointsEmitter.computeTotalReward(creatorPointsPayment);
+
+        IRevolutionPointsEmitter.BuyTokenPaymentShares memory buyTokenPaymentShares = _calculateBuyTokenPaymentShares(
+            msgValueRemaining
+        );
+
+        return buyTokenPaymentShares.founderDirectPayment;
     }
 
     function test__SettlingAuctionWithMultipleCreators(uint8 nCreators) public {
@@ -472,20 +536,24 @@ contract AuctionHouseSettleTest is AuctionHouseTest {
             "Creator did not receive the correct amount of ETH"
         );
 
-        uint256 expectedGrantsDirectPayout = getFounderDirectPayment(bidAmount);
-
-        assertApproxEqAbs(
+        assertEq(
             address(revolutionPointsEmitter.founderAddress()).balance,
-            expectedGrantsDirectPayout,
-            // "Grants address did not receive the correct amount of ETH"
-            10
+            getFounderDirectPayment(bidAmount),
+            "Founder address did not receive the correct amount of ETH"
         );
 
-        assertApproxEqAbs(
+        assertEq(
             address(executor).balance - balanceBeforeOwner,
             getDAOPayout(bidAmount),
-            // "Owner did not receive the correct amount of ETH"
-            10
+            "Owner did not receive the correct amount of ETH"
+        );
+
+        // ensure grant address balance is correct
+        assertEq(
+            address(revolutionPointsEmitter.grantsAddress()).balance,
+            ((creatorsGovernancePayment - revolutionPointsEmitter.computeTotalReward(creatorsGovernancePayment)) *
+                revolutionPointsEmitter.grantsRateBps()) / 10_000,
+            "Grants address should have correct balance"
         );
 
         assertEq(
