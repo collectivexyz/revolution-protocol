@@ -16,5 +16,5 @@ jobs:
 
   contracts-splits:
     name: Revolution Splits
-    uses: ./.github/workflows/split.yml
+    uses: ./.github/workflows/splits.yml
     secrets: inherit
