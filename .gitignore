@@ -20,7 +20,7 @@ docs/
 
 broadcast
 
-.vscode/
+.vscode/settings.json
 
 bin
 
