@@ -684,7 +684,7 @@ contract SplitMain is ISplitMain, VersionedContract {
     }
 
     /** @notice Distributes the ETH balance for split `split`
-     *  @dev `pointsAccounts`, `pointsPercentAllocations`, `accounts`, `percentAllocations`, and `distributorFee` must be verified before calling
+     *  @dev `pointsData`, `accounts`, `percentAllocations`, and `distributorFee` must be verified before calling
      *  @param split Address of split to distribute balance for
      *  @param pointsData PointsData struct containing percentOfEther, pointsAccounts, and pointsPercentAllocations
      *  @param accounts Ordered, unique list of addresses with ownership in the split
