@@ -159,7 +159,7 @@ contract CultureIndex is
      * - The media type must be one of the defined types in the MediaType enum.
      * - The corresponding media data must not be empty.
      */
-    function validateMediaType(ArtPieceMetadata calldata metadata) internal view {
+    function _validMediaMetadata(ArtPieceMetadata calldata metadata) internal view {
         MediaType mediaType = MediaType(metadata.mediaType);
 
         if (
@@ -221,13 +221,12 @@ contract CultureIndex is
     /**
      * @notice Checks the total basis points from an array of creators and returns the length
      * @param creatorArray An array of Creator structs containing address and basis points.
-     * @return Returns the total basis points calculated from the array of creators.
      *
      * Requirements:
      * - The `creatorArray` must not contain any zero addresses.
      * - The function will return the length of the `creatorArray`.
      */
-    function validateCreatorsArray(CreatorBps[] calldata creatorArray) internal pure returns (uint256) {
+    function _validCreatorsArray(CreatorBps[] calldata creatorArray) internal pure {
         uint256 creatorArrayLength = creatorArray.length;
         //Require that creatorArray is not more than MAX_NUM_CREATORS to prevent gas limit issues
         if (creatorArrayLength > MAX_NUM_CREATORS) revert MAX_NUM_CREATORS_EXCEEDED();
@@ -239,33 +238,49 @@ contract CultureIndex is
         }
 
         if (totalBps != 10_000) revert INVALID_BPS_SUM();
+    }
 
-        return creatorArrayLength;
+    /**
+     * @notice Modifier to check if the piece is valid
+     * @param msgSender The address of the sender
+     * @param creatorArray An array of Creator structs containing address and basis points.
+     * @param metadata The metadata associated with the art piece.
+     */
+    modifier validPiece(
+        address msgSender,
+        CreatorBps[] calldata creatorArray,
+        ArtPieceMetadata calldata metadata
+    ) {
+        if (votingPower.getVotes(msgSender) < minVotingPowerToCreate) revert WEIGHT_TOO_LOW();
+
+        _validCreatorsArray(creatorArray);
+
+        _validMediaMetadata(metadata);
+
+        _;
     }
 
     /**
      * @notice Creates a new piece of art with associated metadata and creators.
-     * @param metadata The metadata associated with the art piece, including name, description, image, and optional animation URL.
+     * @param metadata The metadata associated with the art piece, including name, description, and media URL.
      * @param creatorArray An array of creators who contributed to the piece, along with their respective basis points that must sum up to 10,000.
-     * @return Returns the unique ID of the newly created art piece.
+     * @return pieceId the unique ID of the newly created art piece.
      *
      * Emits a {PieceCreated} event for the newly created piece.
      *
+     *  Sets `isFinalized` to true
+     *
      * Requirements:
-     * - `metadata` must include name, description, and image. Animation URL is optional.
+     * - `metadata` must include name, and one of Image, Text, or Animation URL.
      * - `creatorArray` must not contain any zero addresses.
+     * - `metadata.mediaType` must be one of the defined types in the MediaType enum and potentially adhere to the required media type.
      * - The sum of basis points in `creatorArray` must be exactly 10,000.
      */
     function createPiece(
         ArtPieceMetadata calldata metadata,
         CreatorBps[] calldata creatorArray
-    ) public returns (uint256) {
-        if (votingPower.getVotes(msg.sender) < minVotingPowerToCreate) revert WEIGHT_TOO_LOW();
-
-        uint256 creatorArrayLength = validateCreatorsArray(creatorArray);
-
-        // Validate the media type and associated data
-        validateMediaType(metadata);
+    ) public validPiece(msg.sender, creatorArray, metadata) returns (uint256) {
+        uint256 creatorArrayLength = creatorArray.length;
 
         uint256 pieceId = _currentPieceId++;
 
