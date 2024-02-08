@@ -186,7 +186,7 @@ contract AuctionHouse is
      * @param tokenId The ID of the Token to bid on.
      * @param bidder The address of the bidder.
      * @param referral The address of the referral account who referred the current highest bidder.
-     * @param comment The comment of the bidder.
+     * @param comment The reason for the bid :)
      */
     function createBid(
         uint256 tokenId,
