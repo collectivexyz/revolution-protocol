@@ -108,6 +108,9 @@ interface IAuctionHouse is IAuctionHouseEvents, IGrantsRevenueStream {
     /// @dev Reverts if the top voted piece does not meet quorum.
     error QUORUM_NOT_MET();
 
+    /// @dev Reverts if the bid comment is too long
+    error COMMENT_TOO_LONG();
+
     /// @dev Reverts if an existing auction is in progress.
     error AUCTION_ALREADY_IN_PROGRESS();
 

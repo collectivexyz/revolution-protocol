@@ -202,6 +202,7 @@ contract AuctionHouse is
         if (block.timestamp >= _auction.endTime) revert AUCTION_EXPIRED();
         if (msg.value < reservePrice) revert BELOW_RESERVE_PRICE();
         if (msg.value < _auction.amount + ((_auction.amount * minBidIncrementPercentage) / 100)) revert BID_TOO_LOW();
+        if (bytes(comment).length > 2048) revert COMMENT_TOO_LONG();
 
         address payable lastBidder = _auction.bidder;
 

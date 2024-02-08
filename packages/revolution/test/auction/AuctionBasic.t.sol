@@ -162,6 +162,26 @@ contract AuctionHouseBasicTest is AuctionHouseTest {
         auction.setMinCreatorRateBps(lowerMinCreatorRateBps);
     }
 
+    function testBidWithLongComment() public {
+        uint256 bidAmount = auction.reservePrice();
+        uint256 tokenId = createDefaultArtPiece();
+        string memory longComment = new string(2049);
+        bytes memory longCommentBytes = bytes(longComment);
+        for (uint256 i = 0; i < 2049; i++) {
+            longCommentBytes[i] = "a";
+        }
+
+        vm.roll(vm.getBlockNumber() + 1);
+
+        vm.startPrank(auction.owner());
+        auction.unpause();
+        vm.stopPrank();
+
+        vm.deal(address(1), bidAmount + 1 ether);
+        vm.expectRevert(abi.encodeWithSignature("COMMENT_TOO_LONG()"));
+        auction.createBid{ value: bidAmount }(tokenId, address(1), address(0), longComment);
+    }
+
     function testValueUpdates(uint256 newCreatorRateBps, uint256 newEntropyRateBps) public {
         vm.assume(newCreatorRateBps > auction.minCreatorRateBps());
         vm.assume(newCreatorRateBps <= 10_000);
