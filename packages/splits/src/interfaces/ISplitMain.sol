@@ -9,15 +9,14 @@ import { IRevolutionPointsEmitter } from "./IPointsEmitterLike.sol";
  * @author 0xSplits <will@0xSplits.xyz>
  */
 interface ISplitMain {
-
     /**
      * STRUCTS
      */
-     struct PointsData {
+    struct PointsData {
         uint32 percentOfEther;
         address[] accounts;
         uint32[] percentAllocations;
-     }
+    }
 
     /**
      * FUNCTIONS
