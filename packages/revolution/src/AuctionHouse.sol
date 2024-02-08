@@ -386,7 +386,9 @@ contract AuctionHouse is
         auction.settled = true;
 
         uint256 pointsPaidToCreators = 0;
-        uint256 ethPaidToCreators = 0;
+
+        // Calculate the shares to each party
+        PaymentShares memory paymentShares = _calculatePaymentShares(_auction.amount);
 
         // Check if contract balance is greater than reserve price
         if (_auction.amount < reservePrice) {
@@ -407,18 +409,14 @@ contract AuctionHouse is
             }
 
             if (_auction.amount > 0) {
-                address deployer = revolutionToken.getArtPieceById(_auction.tokenId).sponsor;
-                uint256 numCreators = revolutionToken.getArtPieceById(_auction.tokenId).creators.length;
-
                 //Get the creators of the art
                 ICultureIndex.CreatorBps[] memory creators = revolutionToken.getArtPieceById(_auction.tokenId).creators;
+
+                uint256 numCreators = creators.length;
 
                 //Build arrays for revolutionPointsEmitter.buyToken
                 uint256[] memory vrgdaSplits = new uint256[](numCreators);
                 address[] memory vrgdaReceivers = new address[](numCreators);
-
-                // Calculate the shares to each party
-                PaymentShares memory paymentShares = _calculatePaymentShares(_auction.amount);
 
                 //Transfer auction amount to the owner
                 if (paymentShares.owner > 0) {
@@ -434,14 +432,13 @@ contract AuctionHouse is
                     vrgdaReceivers[i] = creators[i].creator;
                     vrgdaSplits[i] = creators[i].bps;
 
-                    //Calculate paymentAmount for specific creator based on BPS splits - same as multiplying by creatorDirectScaled
+                    //Calculate paymentAmount for specific creator based on BPS splits
                     //Do division at the end of operations to avoid rounding errors, don't divide before multiplying
                     //Divides by 10_000 three times to scale down creators[i].bps, creatorRateBps, and entropyRateBps
                     uint256 paymentAmount = (paymentShares.creatorDirectScaled * creators[i].bps) /
                         10_000 /
                         10_000 /
                         10_000;
-                    ethPaidToCreators += paymentAmount;
 
                     //Transfer creator's share to the creator
                     if (paymentAmount > 0) {
@@ -457,7 +454,7 @@ contract AuctionHouse is
                         IRevolutionPointsEmitter.ProtocolRewardAddresses({
                             builder: address(0),
                             purchaseReferral: _auction.referral,
-                            deployer: deployer
+                            deployer: revolutionToken.getArtPieceById(_auction.tokenId).sponsor
                         })
                     );
                 }
@@ -469,7 +466,7 @@ contract AuctionHouse is
             _auction.bidder,
             _auction.amount,
             pointsPaidToCreators,
-            ethPaidToCreators
+            paymentShares.creatorDirectScaled / 10_000 / 10_000
         );
     }
 
