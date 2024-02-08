@@ -175,7 +175,16 @@ contract RevolutionBuilderTest is Test {
     }
 
     function setMockAuctionParams() internal virtual {
-        setAuctionParams(15 minutes, 1 ether, 24 hours, 5, 1000, 1000, 1000);
+        setAuctionParams(
+            15 minutes,
+            1 ether,
+            24 hours,
+            5,
+            1000,
+            1000,
+            1000,
+            IRevolutionBuilder.GrantsParams({ totalRateBps: 1000, grantsAddress: grantsAddress })
+        );
     }
 
     function setAuctionParams(
@@ -185,7 +194,8 @@ contract RevolutionBuilderTest is Test {
         uint8 _minBidIncrementPercentage,
         uint256 _creatorRateBps,
         uint256 _entropyRateBps,
-        uint256 _minCreatorRateBps
+        uint256 _minCreatorRateBps,
+        IRevolutionBuilder.GrantsParams memory _grantsParams
     ) internal virtual {
         auctionParams = IRevolutionBuilder.AuctionParams({
             timeBuffer: _timeBuffer,
@@ -194,7 +204,8 @@ contract RevolutionBuilderTest is Test {
             minBidIncrementPercentage: _minBidIncrementPercentage,
             creatorRateBps: _creatorRateBps,
             entropyRateBps: _entropyRateBps,
-            minCreatorRateBps: _minCreatorRateBps
+            minCreatorRateBps: _minCreatorRateBps,
+            grantsParams: _grantsParams
         });
     }
 
@@ -313,7 +324,8 @@ contract RevolutionBuilderTest is Test {
                 rewardsExpirationDate: 1_800_000_000,
                 entropyRateBps: 4_000
             }),
-            IRevolutionBuilder.GrantsParams({ totalRateBps: 1000, grantsAddress: grantsAddress })
+            //todo set back to 1000
+            IRevolutionBuilder.GrantsParams({ totalRateBps: 0, grantsAddress: grantsAddress })
         );
     }
 

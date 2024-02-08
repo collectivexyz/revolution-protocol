@@ -18,6 +18,7 @@ contract AuctionHouseSettleTest is AuctionHouseTest {
         createDefaultArtPiece();
 
         vm.roll(vm.getBlockNumber() + 1);
+        vm.prank(auction.owner());
 
         auction.unpause();
 
@@ -46,6 +47,7 @@ contract AuctionHouseSettleTest is AuctionHouseTest {
         createDefaultArtPiece();
         createDefaultArtPiece();
         vm.roll(vm.getBlockNumber() + 1); // roll block number to enable voting snapshot
+        vm.prank(auction.owner());
 
         auction.unpause();
 
@@ -95,6 +97,7 @@ contract AuctionHouseSettleTest is AuctionHouseTest {
         uint256 tokenId = createDefaultArtPiece();
         createDefaultArtPiece();
         vm.roll(vm.getBlockNumber() + 1); // roll block number to enable voting snapshot
+        vm.prank(auction.owner());
 
         auction.unpause();
 
@@ -112,6 +115,7 @@ contract AuctionHouseSettleTest is AuctionHouseTest {
         createDefaultArtPiece();
 
         vm.roll(vm.getBlockNumber() + 1); // roll block number to enable voting snapshot
+        vm.prank(auction.owner());
 
         auction.unpause();
 
@@ -120,14 +124,13 @@ contract AuctionHouseSettleTest is AuctionHouseTest {
     }
 
     function test__TransferFailureAndFallbackToWETH(uint256 amount) public {
-        vm.assume(amount > revolutionPointsEmitter.minPurchaseAmount());
-        vm.assume(amount > auction.reservePrice());
-        vm.assume(amount < revolutionPointsEmitter.maxPurchaseAmount());
+        amount = bound(amount, auction.reservePrice(), 1e12 ether);
 
         createDefaultArtPiece();
         createDefaultArtPiece();
         vm.roll(vm.getBlockNumber() + 1); // roll block number to enable voting snapshot
 
+        vm.startPrank(auction.owner());
         auction.unpause();
 
         address recipient = address(new ContractThatRejectsEther());
@@ -150,8 +153,12 @@ contract AuctionHouseSettleTest is AuctionHouseTest {
 
         // Check if the recipient received WETH instead of Ether
         uint256 creatorRate = auction.creatorRateBps();
-        assertEq(IERC20(address(weth)).balanceOf(recipient), (amount * (10_000 - creatorRate)) / 10_000);
-        assertEq(recipient.balance, 0); // Ether balance should still be 0
+        uint256 grantsRate = auction.grantsRateBps();
+        uint256 expectedOwner = amount - ((amount * creatorRate) / 10_000) - ((amount * grantsRate) / 10_000);
+        assertEq(IERC20(address(weth)).balanceOf(recipient), expectedOwner, "Owner should receive WETH");
+
+        assertEq(recipient.balance, 0, "Ether balance should still be 0"); // Ether balance should still be 0
+
         //make sure voting weight on culture index is 721 vote weight for winning bidder
         assertEq(
             cultureIndex.votingPower().getVotesWithWeights(address(this), 1, cultureIndex.tokenVoteWeight()),
@@ -165,6 +172,7 @@ contract AuctionHouseSettleTest is AuctionHouseTest {
         createDefaultArtPiece();
         vm.roll(vm.getBlockNumber() + 1); // roll block number to enable voting snapshot
 
+        vm.startPrank(auction.owner());
         auction.unpause();
 
         address recipient = address(0x123); // Some EOA address
@@ -196,14 +204,13 @@ contract AuctionHouseSettleTest is AuctionHouseTest {
     }
 
     function test__TransferToContractWithoutReceiveOrFallback(uint256 amount) public {
-        vm.assume(amount > revolutionPointsEmitter.minPurchaseAmount());
-        vm.assume(amount > auction.reservePrice());
-        vm.assume(amount < revolutionPointsEmitter.maxPurchaseAmount());
+        amount = bound(amount, auction.reservePrice(), 1e12 ether);
 
         createDefaultArtPiece();
         createDefaultArtPiece();
         vm.roll(vm.getBlockNumber() + 1); // roll block number to enable voting snapshot
 
+        vm.startPrank(auction.owner());
         auction.unpause();
 
         address recipient = address(new ContractWithoutReceiveOrFallback());
@@ -227,8 +234,12 @@ contract AuctionHouseSettleTest is AuctionHouseTest {
         // Check if the recipient received WETH instead of Ether
         uint256 creatorRate = auction.creatorRateBps();
 
-        assertEq(IERC20(address(weth)).balanceOf(recipient), (amount * (10_000 - creatorRate)) / 10_000);
-        assertEq(recipient.balance, 0); // Ether balance should still be 0
+        assertEq(
+            IERC20(address(weth)).balanceOf(recipient),
+            amount - ((amount * creatorRate) / 10_000) - ((amount * auction.grantsRateBps()) / 10_000),
+            "Owner should receive WETH"
+        );
+        assertEq(recipient.balance, 0, "Ether balance should still be 0");
         //make sure voting weight on culture index is 721 vote weight for winning bidder
         assertEq(
             cultureIndex.votingPower().getVotesWithWeights(address(this), 1, cultureIndex.tokenVoteWeight()),
@@ -312,13 +323,6 @@ contract AuctionHouseSettleTest is AuctionHouseTest {
     ) internal view returns (uint256) {
         uint256 ethPaidToCreators = 0;
 
-        // If the amount to be spent on governance for creators is less than the minimum purchase amount for points
-        if ((creatorsShare - (directPayment / 10_000)) <= revolutionPointsEmitter.minPurchaseAmount()) {
-            // Set the amount to the full creators share, so creators are paid fully in ETH
-            // 10_000 assumes 100% in BPS of the creators share is paid to the creators
-            directPayment = creatorsShare * 10_000;
-        }
-
         for (uint256 i = 0; i < 1; i++) {
             ethPaidToCreators += (directPayment * 10_000) / (10_000 * 10_000);
         }
@@ -328,11 +332,11 @@ contract AuctionHouseSettleTest is AuctionHouseTest {
 
     //assuming dao owns both auction and revolutionPointsEmitter
     function getDAOPayout(uint bidAmount) public returns (uint) {
-        // Ether going to owner of the auction
-        uint256 auctioneerPayment = (bidAmount * (10_000 - auction.creatorRateBps())) / 10_000;
+        uint256 grantsShare = (bidAmount * auction.grantsRateBps()) / 10_000;
+        uint256 creatorsShare = (bidAmount * auction.creatorRateBps()) / 10_000;
 
-        //Total amount of ether going to creator
-        uint256 creatorsShare = bidAmount - auctioneerPayment;
+        // Ether going to owner of the auction
+        uint256 auctioneerPayment = bidAmount - creatorsShare - grantsShare;
 
         uint256 creatorPointsPayment = _getTotalPointsEmitterPayment(
             creatorsShare,
@@ -352,9 +356,11 @@ contract AuctionHouseSettleTest is AuctionHouseTest {
     }
 
     function getFounderDirectPayment(uint bidAmount) public returns (uint) {
-        uint256 auctioneerPayment = (bidAmount * (10_000 - auction.creatorRateBps())) / 10_000;
+        uint256 grantsShare = (bidAmount * auction.grantsRateBps()) / 10_000;
+        uint256 creatorsShare = (bidAmount * auction.creatorRateBps()) / 10_000;
 
-        uint256 creatorsShare = bidAmount - auctioneerPayment;
+        // Ether going to owner of the auction
+        uint256 auctioneerPayment = bidAmount - creatorsShare - grantsShare;
 
         uint256 creatorPointsPayment = _getTotalPointsEmitterPayment(
             creatorsShare,
@@ -371,10 +377,9 @@ contract AuctionHouseSettleTest is AuctionHouseTest {
         return buyTokenPaymentShares.founderDirectPayment;
     }
 
-    function test__SettlingAuctionWithMultipleCreators(uint8 nCreators) public {
+    function test__SettlingAuctionWithMultipleCreators(uint256 nCreators) public {
         vm.stopPrank();
-        vm.assume(nCreators > 0);
-        vm.assume(nCreators < cultureIndex.MAX_NUM_CREATORS());
+        nCreators = bound(nCreators, 1, cultureIndex.MAX_NUM_CREATORS() - 1);
 
         address[] memory creatorAddresses = new address[](nCreators);
         uint256[] memory creatorBps = new uint256[](nCreators);
@@ -447,7 +452,7 @@ contract AuctionHouseSettleTest is AuctionHouseTest {
         auction.settleCurrentAndCreateNewAuction();
 
         //assert auctionHouse balance is 0
-        assertEq(address(auction).balance, 0);
+        assertEq(address(auction).balance, 0, "Auction house balance should be 0");
 
         // Verify each creator's payout
         for (uint256 i = 0; i < creatorAddresses.length; i++) {
@@ -482,9 +487,7 @@ contract AuctionHouseSettleTest is AuctionHouseTest {
     }
 
     function test__SettlingAuctionWithWinningBidAndCreatorPayout(uint256 bidAmount) public {
-        vm.assume(bidAmount > revolutionPointsEmitter.minPurchaseAmount());
-        vm.assume(bidAmount > auction.reservePrice());
-        vm.assume(bidAmount < revolutionPointsEmitter.maxPurchaseAmount());
+        bidAmount = bound(bidAmount, auction.reservePrice(), 1e12 ether);
 
         uint256 tokenId = createArtPiece(
             "Art Piece",
@@ -498,6 +501,7 @@ contract AuctionHouseSettleTest is AuctionHouseTest {
         );
         vm.roll(vm.getBlockNumber() + 1); // roll block number to enable voting snapshot
 
+        vm.prank(auction.owner());
         auction.unpause();
 
         vm.deal(address(21_000), bidAmount);
@@ -519,11 +523,14 @@ contract AuctionHouseSettleTest is AuctionHouseTest {
 
         auction.settleCurrentAndCreateNewAuction();
 
-        // Ether going to owner of the auction
-        uint256 auctioneerPayment = (bidAmount * (10_000 - auction.creatorRateBps())) / 10_000;
-
         //Total amount of ether going to creator
-        uint256 creatorsShare = bidAmount - auctioneerPayment;
+        uint256 creatorsShare = (bidAmount * auction.creatorRateBps()) / 10_000;
+
+        //Amount going to grants program
+        uint256 grantsShare = (bidAmount * auction.grantsRateBps()) / 10_000;
+
+        // Ether going to owner of the auction
+        uint256 auctioneerPayment = bidAmount - creatorsShare - grantsShare;
 
         uint256 creatorsDirectPayment = (creatorsShare * (auction.entropyRateBps())) / 10_000;
 
@@ -577,20 +584,26 @@ contract AuctionHouseSettleTest is AuctionHouseTest {
 
     function test__EntropyPecentCannotLeadToDos(uint256 bidAmount) public {
         //set entropy to 9999
+        vm.prank(auction.owner());
         auction.setEntropyRateBps(9999);
 
-        // Ensure bidAmount is within bounds to make creatorGovernancePayment <= minPurchaseAmount
-        uint256 minPurchaseAmount = revolutionPointsEmitter.minPurchaseAmount();
-        uint256 minCreatorsShare = (minPurchaseAmount * 10_000) / (10_000 - auction.entropyRateBps());
+        // Ensure bidAmount is within bounds to make creatorGovernancePayment <= minPurchase
+        uint256 minPurchase = 1e6 wei;
+        uint256 minCreatorsShare = (minPurchase * 10_000) / (10_000 - auction.entropyRateBps());
 
         uint256 maxBidAmount = minCreatorsShare / (1 - (10_000 - auction.creatorRateBps()) / 10_000);
 
-        bidAmount = bound(bidAmount, 1, maxBidAmount);
+        bidAmount = bound(bidAmount, 1e8 wei, maxBidAmount);
 
         // Ether going to owner of the auction
-        uint256 auctioneerPayment = (bidAmount * (10_000 - auction.creatorRateBps())) / 10_000;
+        uint256 auctioneerPayment = bidAmount -
+            (bidAmount * auction.creatorRateBps()) /
+            10_000 -
+            (bidAmount * auction.grantsRateBps()) /
+            10_000;
 
         //set reserve price to the bid amount
+        vm.prank(auction.owner());
         auction.setReservePrice(bidAmount);
 
         // create 2 art pieces
@@ -605,6 +618,7 @@ contract AuctionHouseSettleTest is AuctionHouseTest {
         vm.deal(alice, bidAmount);
 
         // start the first auction
+        vm.prank(auction.owner());
         auction.unpause();
         vm.stopPrank();
 
@@ -622,15 +636,30 @@ contract AuctionHouseSettleTest is AuctionHouseTest {
         //ensure creator got no governance, but got ETH
         address creator = cultureIndex.getPieceById(pieceId).creators[0].creator;
 
-        assertEq(revolutionPoints.balanceOf(creator), 0);
+        // Ether directly sent to creator(s)
+        // Scaled means it hasn't been divided by 10,000 for BPS to allow for precision in division by
+        // consuming functions
+        uint256 creatorDirectScaled = (bidAmount * auction.entropyRateBps() * auction.creatorRateBps());
+
+        // Ether spent on creator(s) governance tokens
+        uint256 creatorGovernance = ((bidAmount * auction.creatorRateBps()) / 10_000) -
+            (creatorDirectScaled / 10_000 / 10_000);
+
+        int256 expectedTokens = revolutionPointsEmitter.getTokenQuoteForPayment(creatorGovernance);
+
+        assertEq(
+            revolutionPoints.balanceOf(creator),
+            uint256(expectedTokens),
+            "Creator should receive governance tokens"
+        );
 
         //Total amount of ether going to creator
-        uint256 creatorsShare = bidAmount - auctioneerPayment;
 
-        assertEq(creator.balance, creatorsShare);
+        assertEq(creator.balance, creatorDirectScaled / 10_000 / 10_000, "Creator should receive ETH");
     }
 
     function test__SettleAuctionZeroEntropyRate() public {
+        vm.prank(auction.owner());
         // set entropy rate to 0
         auction.setEntropyRateBps(0);
 
@@ -638,6 +667,7 @@ contract AuctionHouseSettleTest is AuctionHouseTest {
         createDefaultArtPiece();
         vm.roll(vm.getBlockNumber() + 1); // roll block number to enable voting snapshot
 
+        vm.prank(auction.owner());
         auction.unpause();
 
         address recipient = address(0x123); // Some EOA address
@@ -656,20 +686,20 @@ contract AuctionHouseSettleTest is AuctionHouseTest {
         vm.stopPrank();
         uint256 pointsSupply = 1000;
 
-        vm.startPrank(address(revolutionPointsEmitter));
+        vm.prank(address(revolutionPointsEmitter));
         revolutionPoints.mint(address(this), pointsSupply);
         vm.roll(vm.getBlockNumber() + 1);
 
         uint256 pieceId = createDefaultArtPiece();
 
         // Cast votes
-        vm.startPrank(address(this));
+        vm.prank(address(this));
         cultureIndex.vote(pieceId);
 
         // Mint token and govTokens, create a new piece and check fields
-        vm.startPrank(address(executor));
         vm.roll(vm.getBlockNumber() + 1);
 
+        vm.prank(auction.owner());
         auction.unpause();
 
         ICultureIndex.ArtPiece memory newPiece = cultureIndex.getPieceById(pieceId);

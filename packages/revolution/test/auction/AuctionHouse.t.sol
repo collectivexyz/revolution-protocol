@@ -20,6 +20,7 @@ import { RevolutionProtocolRewards } from "@cobuild/protocol-rewards/src/Revolut
 import { PointsEmitterRewards } from "@cobuild/protocol-rewards/src/abstract/PointsEmitter/PointsEmitterRewards.sol";
 import { ERC721CheckpointableUpgradeable } from "../../src/base/ERC721CheckpointableUpgradeable.sol";
 import { RevolutionBuilderTest } from "../RevolutionBuilder.t.sol";
+import { IRevolutionBuilder } from "../../src/interfaces/IRevolutionBuilder.sol";
 
 contract AuctionHouseTest is RevolutionBuilderTest {
     function setUp() public virtual override {
@@ -52,7 +53,8 @@ contract AuctionHouseTest is RevolutionBuilderTest {
             5, // minBidIncrementPercentage
             2_000, // creatorRateBps
             5_000, //entropyRateBps
-            1_000 //minCreatorRateBps
+            1_000, //minCreatorRateBps
+            IRevolutionBuilder.GrantsParams({ totalRateBps: 0, grantsAddress: grantsAddress })
         );
 
         super.deployMock();
@@ -60,7 +62,5 @@ contract AuctionHouseTest is RevolutionBuilderTest {
         //transfer ownership and accept
         vm.prank(address(founder));
         auction.transferOwnership(address(executor));
-
-        vm.startPrank(address(executor));
     }
 }

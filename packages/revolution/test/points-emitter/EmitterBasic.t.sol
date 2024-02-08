@@ -257,10 +257,7 @@ contract PointsEmitterBasicTest is PointsEmitterTest {
     }
 
     function test_purchaseBounds(int256 amount) public {
-        vm.assume(
-            amount <= int(revolutionPointsEmitter.minPurchaseAmount()) ||
-                amount >= int(revolutionPointsEmitter.maxPurchaseAmount())
-        );
+        amount = bound(amount, 1, type(int256).max);
 
         vm.expectRevert();
         revolutionPointsEmitter.buyToken{ value: uint256(amount) }(

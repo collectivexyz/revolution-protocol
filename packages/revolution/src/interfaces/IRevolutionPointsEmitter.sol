@@ -2,9 +2,9 @@
 pragma solidity ^0.8.22;
 
 import { IRevolutionBuilder } from "./IRevolutionBuilder.sol";
-import { IRewardSplits } from "@cobuild/protocol-rewards/src/abstract/RewardSplits.sol";
+import { IGrantsRevenueStream } from "./IGrantsRevenueStream.sol";
 
-interface IRevolutionPointsEmitter is IRewardSplits {
+interface IRevolutionPointsEmitter is IGrantsRevenueStream {
     ///                                                          ///
     ///                           ERRORS                         ///
     ///                                                          ///
@@ -73,10 +73,6 @@ interface IRevolutionPointsEmitter is IRewardSplits {
 
     function balanceOf(address owner) external view returns (uint);
 
-    function setGrantsRateBps(uint256 grantsRateBps) external;
-
-    function grantsAddress() external view returns (address);
-
     function founderAddress() external view returns (address);
 
     function founderRateBps() external view returns (uint256);
@@ -87,15 +83,9 @@ interface IRevolutionPointsEmitter is IRewardSplits {
 
     function getTokenQuoteForPayment(uint256 paymentAmount) external returns (int);
 
-    function setGrantsAddress(address grants) external;
-
     function pause() external;
 
     function unpause() external;
-
-    event GrantsAddressUpdated(address grants);
-
-    event GrantsRateBpsUpdated(uint256 rateBps);
 
     event PurchaseFinalized(
         address indexed buyer,

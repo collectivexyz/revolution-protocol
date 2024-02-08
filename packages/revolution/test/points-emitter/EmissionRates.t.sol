@@ -390,11 +390,7 @@ contract EmissionRatesTest is PointsEmitterTest {
         uint256 valueToSend,
         uint256 expiryDuration
     ) public {
-        valueToSend = bound(
-            valueToSend,
-            revolutionPointsEmitter.minPurchaseAmount() + 1,
-            revolutionPointsEmitter.maxPurchaseAmount() - 1
-        );
+        valueToSend = bound(valueToSend, 0.00000001 ether, 1e12 ether);
 
         // Calculate value left after sharing protocol rewards
         uint256 msgValueRemaining = valueToSend - revolutionPointsEmitter.computeTotalReward(valueToSend);
@@ -519,6 +515,9 @@ contract EmissionRatesTest is PointsEmitterTest {
         uint256[] memory bps = new uint256[](1);
         bps[0] = 10000; // 100% of the tokens to the recipient
 
+        //vm deal valueToSend
+        vm.deal(address(this), valueToSend);
+
         // Perform token purchase
         vm.startPrank(address(this));
         revolutionPointsEmitter.buyToken{ value: valueToSend }(
@@ -541,11 +540,7 @@ contract EmissionRatesTest is PointsEmitterTest {
         uint256 valueToSend,
         uint256 expiryDuration
     ) public {
-        valueToSend = bound(
-            valueToSend,
-            revolutionPointsEmitter.minPurchaseAmount() + 1,
-            revolutionPointsEmitter.maxPurchaseAmount() - 1
-        );
+        valueToSend = bound(valueToSend, 1, 1e12 ether);
 
         // Calculate value left after sharing protocol rewards
         uint256 msgValueRemaining = valueToSend - revolutionPointsEmitter.computeTotalReward(valueToSend);

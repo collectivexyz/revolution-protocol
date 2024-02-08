@@ -120,11 +120,8 @@ contract PointsTestSuite is RevolutionBuilderTest {
     }
 
     function testSupplyInvariants(uint256 mintAmount1) public {
-        vm.assume(mintAmount1 < type(uint208).max);
+        mintAmount1 = bound(mintAmount1, 0, type(uint208).max / 20);
 
-        uint256 total = mintAmount1 + mintAmount1 / 10;
-
-        vm.assume(total < type(uint208).max);
         address account1 = address(0x7);
         address account2 = address(0x8);
 

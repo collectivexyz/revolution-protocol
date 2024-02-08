@@ -5,6 +5,8 @@ import { AuctionHouseTest } from "./AuctionHouse.t.sol";
 
 contract AuctionHouseMintTest is AuctionHouseTest {
     function test__MintFailureDueToEmptyNFTList() public {
+        vm.startPrank(auction.owner());
+
         // Pre-conditions setup to ensure the CultureIndex is empty
         vm.expectRevert(abi.encodeWithSignature("QUORUM_NOT_MET()"));
         auction.unpause();
@@ -14,6 +16,8 @@ contract AuctionHouseMintTest is AuctionHouseTest {
     }
 
     function test__BehaviorOnMintFailureDuringAuctionCreation() public {
+        vm.startPrank(auction.owner());
+
         //check auction paused emitted
         vm.expectRevert(abi.encodeWithSignature("QUORUM_NOT_MET()"));
         auction.unpause();

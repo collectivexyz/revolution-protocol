@@ -77,6 +77,12 @@ contract AuctionHouse is
     // The active auction
     IAuctionHouse.Auction public auction;
 
+    // The account to pay grants funds to
+    address public grantsAddress;
+
+    // Split of purchase proceeds sent to the grants system as ether in basis points
+    uint256 public grantsRateBps;
+
     ///                                                          ///
     ///                         IMMUTABLES                       ///
     ///                                                          ///
@@ -130,16 +136,29 @@ contract AuctionHouse is
         if (_auctionParams.creatorRateBps < _auctionParams.minCreatorRateBps) revert CREATOR_RATE_TOO_LOW();
         if (_auctionParams.reservePrice == 0) revert RESERVE_PRICE_INVALID();
 
+        if (_auctionParams.grantsParams.totalRateBps > 10_000) revert INVALID_BPS();
+
+        if (_auctionParams.grantsParams.totalRateBps + _auctionParams.creatorRateBps > 10_000) revert INVALID_BPS();
+
+        // set contracts
         revolutionToken = IRevolutionToken(_revolutionToken);
         revolutionPointsEmitter = IRevolutionPointsEmitter(_revolutionPointsEmitter);
+        WETH = _weth;
+
+        // set auction params
         timeBuffer = _auctionParams.timeBuffer;
         reservePrice = _auctionParams.reservePrice;
         minBidIncrementPercentage = _auctionParams.minBidIncrementPercentage;
         duration = _auctionParams.duration;
+
+        // set creator payout params
         creatorRateBps = _auctionParams.creatorRateBps;
         entropyRateBps = _auctionParams.entropyRateBps;
         minCreatorRateBps = _auctionParams.minCreatorRateBps;
-        WETH = _weth;
+
+        // set grants payout params
+        grantsRateBps = _auctionParams.grantsParams.totalRateBps;
+        grantsAddress = _auctionParams.grantsParams.grantsAddress;
     }
 
     /**
@@ -328,6 +347,29 @@ contract AuctionHouse is
     }
 
     /**
+     * @notice A function to calculate the shares of the winning bid that go to the auction owner, the creator, and the grants program.
+     * @param amount The amount of the winning bid
+     * @return paymentShares A struct containing the shares of the winning bid that go to the auction owner, the creator, and the grants program. Scaled by 1e4
+     */
+    function _calculatePaymentShares(uint256 amount) internal view returns (PaymentShares memory paymentShares) {
+        // Ether to send to the grants program
+        paymentShares.grants = (amount * grantsRateBps) / 10_000;
+
+        // Share of purchase amount reserved for owner of the auction
+        paymentShares.owner = amount - ((amount * creatorRateBps) / 10_000) - paymentShares.grants;
+
+        // Ether directly sent to creator(s)
+        // Scaled means it hasn't been divided by 10,000 for BPS to allow for precision in division by
+        // consuming functions
+        paymentShares.creatorDirectScaled = (amount * entropyRateBps * creatorRateBps);
+
+        // Ether spent on creator(s) governance tokens
+        paymentShares.creatorGovernance =
+            ((amount * creatorRateBps) / 10_000) -
+            (paymentShares.creatorDirectScaled / 10_000 / 10_000);
+    }
+
+    /**
      * @notice Settle an auction, finalizing the bid and paying out to the owner. Pays out to the creator and the owner based on the creatorRateBps and entropyRateBps.
      * @dev If there are no bids, the Token is burned.
      */
@@ -344,7 +386,9 @@ contract AuctionHouse is
         auction.settled = true;
 
         uint256 pointsPaidToCreators = 0;
-        uint256 ethPaidToCreators = 0;
+
+        // Calculate the shares to each party
+        PaymentShares memory paymentShares = _calculatePaymentShares(_auction.amount);
 
         // Check if contract balance is greater than reserve price
         if (_auction.amount < reservePrice) {
@@ -365,62 +409,52 @@ contract AuctionHouse is
             }
 
             if (_auction.amount > 0) {
-                // Ether going to owner of the auction
-                uint256 auctioneerPayment = (_auction.amount * (10_000 - creatorRateBps)) / 10_000;
+                //Get the creators of the art
+                ICultureIndex.CreatorBps[] memory creators = revolutionToken.getArtPieceById(_auction.tokenId).creators;
 
-                //Total amount of ether going to creator
-                uint256 creatorsShare = _auction.amount - auctioneerPayment;
-
-                uint256 numCreators = revolutionToken.getArtPieceById(_auction.tokenId).creators.length;
-                address deployer = revolutionToken.getArtPieceById(_auction.tokenId).sponsor;
+                uint256 numCreators = creators.length;
 
                 //Build arrays for revolutionPointsEmitter.buyToken
                 uint256[] memory vrgdaSplits = new uint256[](numCreators);
                 address[] memory vrgdaReceivers = new address[](numCreators);
 
                 //Transfer auction amount to the owner
-                _safeTransferETHWithFallback(owner(), auctioneerPayment);
+                if (paymentShares.owner > 0) {
+                    _safeTransferETHWithFallback(owner(), paymentShares.owner);
+                }
+
+                if (paymentShares.grants > 0) {
+                    _safeTransferETHWithFallback(grantsAddress, paymentShares.grants);
+                }
 
                 //Transfer creator's share to the creator, for each creator, and build arrays for revolutionPointsEmitter.buyToken
-                if (creatorsShare > 0) {
-                    //Get the creators of the art
-                    ICultureIndex.CreatorBps[] memory creators = revolutionToken
-                        .getArtPieceById(_auction.tokenId)
-                        .creators;
+                for (uint256 i = 0; i < numCreators; i++) {
+                    vrgdaReceivers[i] = creators[i].creator;
+                    vrgdaSplits[i] = creators[i].bps;
 
-                    //Calculate the amount to be paid to the creators
-                    uint256 directPayment = creatorsShare * entropyRateBps;
+                    //Calculate paymentAmount for specific creator based on BPS splits
+                    //Do division at the end of operations to avoid rounding errors, don't divide before multiplying
+                    //Divides by 10_000 three times to scale down creators[i].bps, creatorRateBps, and entropyRateBps
+                    uint256 paymentAmount = (paymentShares.creatorDirectScaled * creators[i].bps) /
+                        10_000 /
+                        10_000 /
+                        10_000;
 
-                    //If the amount to be spent on governance for creators is less than the minimum purchase amount for points
-                    if ((creatorsShare - (directPayment / 10_000)) <= revolutionPointsEmitter.minPurchaseAmount()) {
-                        //Set the amount to the full creators share, so creators are paid fully in ETH
-                        //10_000 assumes 100% in BPS of the creators share is paid to the creators
-                        directPayment = creatorsShare * 10_000;
-                    }
-
-                    for (uint256 i = 0; i < numCreators; i++) {
-                        vrgdaReceivers[i] = creators[i].creator;
-                        vrgdaSplits[i] = creators[i].bps;
-
-                        //Calculate paymentAmount for specific creator based on BPS splits - same as multiplying by creatorDirectPayment
-                        //Do division at the end of operations to avoid rounding errors, don't divide before multiplying
-                        uint256 paymentAmount = (directPayment * creators[i].bps) / (10_000 * 10_000);
-                        ethPaidToCreators += paymentAmount;
-
-                        //Transfer creator's share to the creator
+                    //Transfer creator's share to the creator
+                    if (paymentAmount > 0) {
                         _safeTransferETHWithFallback(creators[i].creator, paymentAmount);
                     }
                 }
 
                 //Buy token from RevolutionPointsEmitter for all the creators
-                if (creatorsShare > ethPaidToCreators) {
-                    pointsPaidToCreators = revolutionPointsEmitter.buyToken{ value: creatorsShare - ethPaidToCreators }(
+                if (paymentShares.creatorGovernance > 0) {
+                    pointsPaidToCreators = revolutionPointsEmitter.buyToken{ value: paymentShares.creatorGovernance }(
                         vrgdaReceivers,
                         vrgdaSplits,
                         IRevolutionPointsEmitter.ProtocolRewardAddresses({
                             builder: address(0),
                             purchaseReferral: _auction.referral,
-                            deployer: deployer
+                            deployer: revolutionToken.getArtPieceById(_auction.tokenId).sponsor
                         })
                     );
                 }
@@ -432,7 +466,7 @@ contract AuctionHouse is
             _auction.bidder,
             _auction.amount,
             pointsPaidToCreators,
-            ethPaidToCreators
+            paymentShares.creatorDirectScaled / 10_000 / 10_000
         );
     }
 
@@ -463,6 +497,30 @@ contract AuctionHouse is
             // Ensure successful transfer
             if (!wethSuccess) revert("WETH transfer failed");
         }
+    }
+
+    ///                                                          ///
+    ///                        GRANTS PROGRAM                    ///
+    ///                                                          ///
+
+    /**
+     * @notice Set the split of the payment that is reserved for grants program in basis points.
+     * @dev Only callable by the owner.
+     * @param _grantsRateBps New grants rate in basis points.
+     */
+    function setGrantsRateBps(uint256 _grantsRateBps) external onlyOwner nonReentrant {
+        if (_grantsRateBps > 10_000) revert INVALID_BPS();
+        if (_grantsRateBps + creatorRateBps > 10_000) revert INVALID_BPS();
+
+        emit GrantsRateBpsUpdated(grantsRateBps = _grantsRateBps);
+    }
+
+    /**
+     * @notice Set the grants address to pay the grantsRate to. Can be a contract.
+     * @dev Only callable by the owner.
+     */
+    function setGrantsAddress(address _grantsAddress) external override onlyOwner nonReentrant {
+        emit GrantsAddressUpdated(grantsAddress = _grantsAddress);
     }
 
     ///                                                          ///

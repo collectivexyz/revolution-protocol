@@ -7,6 +7,7 @@ import { wadMul, wadDiv } from "../../src/libs/SignedWadMath.sol";
 
 contract AuctionHouseBasicTest is AuctionHouseTest {
     function testEventEmission(uint256 newCreatorRateBps, uint256 newEntropyRateBps) public {
+        vm.startPrank(auction.owner());
         vm.assume(newCreatorRateBps > auction.minCreatorRateBps());
         vm.assume(newCreatorRateBps <= 10_000);
         vm.assume(newEntropyRateBps <= 10_000);
@@ -30,6 +31,7 @@ contract AuctionHouseBasicTest is AuctionHouseTest {
         // roll
         vm.roll(vm.getBlockNumber() + 1);
 
+        vm.prank(auction.owner());
         auction.unpause();
         vm.deal(address(1), bidAmount + 2 ether);
         vm.stopPrank();
@@ -41,6 +43,7 @@ contract AuctionHouseBasicTest is AuctionHouseTest {
     }
 
     function testSetEntropyRateBps(uint256 newEntropyRateBps) public {
+        vm.startPrank(auction.owner());
         vm.assume(newEntropyRateBps <= 10_000);
 
         // Expect an event emission
@@ -66,6 +69,7 @@ contract AuctionHouseBasicTest is AuctionHouseTest {
     }
 
     function testSetEntropyRateBpsInvalidValues(uint256 invalidEntropyRateBps) public {
+        vm.startPrank(auction.owner());
         vm.assume(invalidEntropyRateBps > 10_000);
 
         uint256 oldEntropyRateBps = auction.entropyRateBps();
@@ -88,6 +92,7 @@ contract AuctionHouseBasicTest is AuctionHouseTest {
     }
 
     function testSetMinCreatorRateBps(uint256 newMinCreatorRateBps, uint256 creatorRateBps) public {
+        vm.startPrank(auction.owner());
         if (creatorRateBps > 10_000) {
             vm.expectRevert(abi.encodeWithSignature("INVALID_BPS()"));
         } else if (creatorRateBps < auction.minCreatorRateBps()) {
@@ -128,19 +133,21 @@ contract AuctionHouseBasicTest is AuctionHouseTest {
         vm.stopPrank();
     }
 
-    function testSetMinCreatorRateBpsInvalidValues(int256 invalidMinCreatorRateBps) public {
-        vm.assume(uint256(invalidMinCreatorRateBps) < auction.creatorRateBps());
+    function testSetMinCreatorRateBpsInvalidValues(uint256 invalidMinCreatorRateBps) public {
+        vm.startPrank(auction.owner());
+        invalidMinCreatorRateBps = bound(invalidMinCreatorRateBps, 0, 10_000);
 
         // Attempt to set an invalid minimum creator rate
         if (uint256(invalidMinCreatorRateBps) <= auction.minCreatorRateBps()) {
             vm.expectRevert(abi.encodeWithSignature("MIN_CREATOR_RATE_NOT_INCREASED()"));
-        } else if (uint256(invalidMinCreatorRateBps) > 10_000) {
-            vm.expectRevert("Min creator rate must be less than or equal to 10_000");
+        } else if (uint256(invalidMinCreatorRateBps) > auction.creatorRateBps()) {
+            vm.expectRevert(abi.encodeWithSignature("MIN_CREATOR_RATE_ABOVE_CREATOR_RATE()"));
         }
         auction.setMinCreatorRateBps(uint256(invalidMinCreatorRateBps));
     }
 
     function testMinCreatorRateLoweringRestriction(uint256 lowerMinCreatorRateBps) public {
+        vm.startPrank(auction.owner());
         vm.assume(lowerMinCreatorRateBps < auction.minCreatorRateBps());
 
         // Attempt to set a lower minimum creator rate than the current one
@@ -154,10 +161,12 @@ contract AuctionHouseBasicTest is AuctionHouseTest {
         vm.assume(newEntropyRateBps <= 10_000);
 
         // Change creatorRateBps as the owner
+        vm.prank(auction.owner());
         auction.setCreatorRateBps(newCreatorRateBps);
         assertEq(auction.creatorRateBps(), newCreatorRateBps, "creatorRateBps should be updated");
 
         // Change entropyRateBps as the owner
+        vm.prank(auction.owner());
         auction.setEntropyRateBps(newEntropyRateBps);
         assertEq(auction.entropyRateBps(), newEntropyRateBps, "entropyRateBps should be updated");
     }
@@ -199,6 +208,7 @@ contract AuctionHouseBasicTest is AuctionHouseTest {
         // roll
         vm.roll(vm.getBlockNumber() + 1);
 
+        vm.prank(auction.owner());
         auction.unpause();
         vm.deal(address(1), bidAmount + 2 ether);
 
@@ -267,6 +277,7 @@ contract AuctionHouseBasicTest is AuctionHouseTest {
 
         vm.roll(vm.getBlockNumber() + 1); // roll block number to enable voting snapshot
 
+        vm.prank(auction.owner());
         auction.unpause();
         uint256 startTime = block.timestamp;
 
@@ -296,6 +307,7 @@ contract AuctionHouseBasicTest is AuctionHouseTest {
 
         vm.roll(vm.getBlockNumber() + 1); // roll block number to enable voting snapshot
 
+        vm.prank(auction.owner());
         auction.unpause();
         vm.deal(address(1), bidAmount + 2 ether);
 
@@ -325,30 +337,17 @@ contract AuctionHouseBasicTest is AuctionHouseTest {
         //Ether reserved to buy creator governance
         uint256 creatorGovernancePayment = creatorPayment - creatorDirectPayment;
 
-        bool shouldExpectRevert = creatorGovernancePayment <= revolutionPointsEmitter.minPurchaseAmount() ||
-            creatorGovernancePayment >= revolutionPointsEmitter.maxPurchaseAmount();
-
         // create art piece
         createDefaultArtPiece();
         vm.roll(vm.getBlockNumber() + 1);
 
-        // // BPS too small to issue rewards
-        if (shouldExpectRevert) {
-            //expect INVALID_ETH_AMOUNT()
-            vm.expectRevert();
-        }
         auction.settleCurrentAndCreateNewAuction(); // This will settle the current auction and create a new one
 
-        if (shouldExpectRevert) {
-            (, , , , , , bool settled) = auction.auction();
-            assertEq(settled, false, "Auction should not be settled because new one created");
-        } else {
-            assertEq(
-                revolutionToken.ownerOf(tokenId),
-                address(1),
-                "Revolution token should be transferred to the auction house"
-            );
-        }
+        assertEq(
+            revolutionToken.ownerOf(tokenId),
+            address(1),
+            "Revolution token should be transferred to the auction house"
+        );
     }
 
     function testSettlingAuctions() public {
@@ -356,6 +355,7 @@ contract AuctionHouseBasicTest is AuctionHouseTest {
 
         vm.roll(vm.getBlockNumber() + 1);
 
+        vm.prank(auction.owner());
         auction.unpause();
 
         (uint256 tokenId, , , uint256 endTime, , , ) = auction.auction();
@@ -389,6 +389,7 @@ contract AuctionHouseBasicTest is AuctionHouseTest {
     ) public {
         newReservePrice = bound(newReservePrice, 1, 10_000_000 ether);
 
+        vm.startPrank(auction.owner());
         auction.setTimeBuffer(newTimeBuffer);
         assertEq(auction.timeBuffer(), newTimeBuffer, "Time buffer should be updated correctly");
 

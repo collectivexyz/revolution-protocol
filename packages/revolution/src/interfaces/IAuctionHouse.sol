@@ -18,6 +18,7 @@
 pragma solidity ^0.8.22;
 
 import { IRevolutionBuilder } from "./IRevolutionBuilder.sol";
+import { IGrantsRevenueStream } from "./IGrantsRevenueStream.sol";
 
 interface IAuctionHouseEvents {
     event AuctionCreated(uint256 indexed tokenId, uint256 startTime, uint256 endTime);
@@ -47,7 +48,7 @@ interface IAuctionHouseEvents {
     event EntropyRateBpsUpdated(uint256 rateBps);
 }
 
-interface IAuctionHouse is IAuctionHouseEvents {
+interface IAuctionHouse is IAuctionHouseEvents, IGrantsRevenueStream {
     ///                                                          ///
     ///                           ERRORS                         ///
     ///                                                          ///
@@ -118,6 +119,15 @@ interface IAuctionHouse is IAuctionHouseEvents {
         address payable referral;
         // Whether or not the auction has been settled
         bool settled;
+    }
+
+    struct PaymentShares {
+        // Scaled means it hasn't been divided by 10,000 for BPS to allow for precision in division by
+        // consuming functions
+        uint256 creatorDirectScaled;
+        uint256 creatorGovernance;
+        uint256 owner;
+        uint256 grants;
     }
 
     function settleAuction() external;

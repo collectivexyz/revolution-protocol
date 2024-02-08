@@ -151,8 +151,9 @@ contract TokenMintingTest is RevolutionTokenTestSuite {
     }
 
     /// @dev Ensures _currentTokenId increments correctly after each mint
-    function test_MintingIncrement(uint200 voteWeight) public {
-        vm.assume(voteWeight < type(uint200).max / 2);
+    function test_MintingIncrement(uint256 voteWeight) public {
+        voteWeight = bound(voteWeight, 0, type(uint200).max / 2 - 1);
+
         vm.stopPrank();
         vm.startPrank(address(revolutionPointsEmitter));
         revolutionPoints.mint(address(1), 10000);

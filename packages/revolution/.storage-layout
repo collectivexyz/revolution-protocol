@@ -127,6 +127,8 @@
 | entropyRateBps            | uint256                           | 8    | 0      | 32    | src/AuctionHouse.sol:AuctionHouse |
 | duration                  | uint256                           | 9    | 0      | 32    | src/AuctionHouse.sol:AuctionHouse |
 | auction                   | struct IAuctionHouse.Auction      | 10   | 0      | 192   | src/AuctionHouse.sol:AuctionHouse |
+| grantsAddress             | address                           | 16   | 0      | 20    | src/AuctionHouse.sol:AuctionHouse |
+| grantsRateBps             | uint256                           | 17   | 0      | 32    | src/AuctionHouse.sol:AuctionHouse |
 
 =======================
 ➡ MaxHeap

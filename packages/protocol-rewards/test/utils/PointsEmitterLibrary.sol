@@ -31,7 +31,6 @@ import { SafeCast } from "@openzeppelin/contracts/utils/math/SafeCast.sol";
 import { ECDSA } from "@openzeppelin/contracts/utils/cryptography/ECDSA.sol";
 import { Time } from "@openzeppelin/contracts/utils/types/Time.sol";
 import { Initializable } from "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
-import { IRewardSplits } from "../../src/abstract/RewardSplits.sol";
 import { IVotes } from "@openzeppelin/contracts/governance/utils/IVotes.sol";
 import { IERC20 } from "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 
@@ -1568,7 +1567,7 @@ contract RevolutionPoints is Ownable, ERC20Votes {
     }
 }
 
-interface IRevolutionPointsEmitter is IRewardSplits {
+interface IRevolutionPointsEmitter {
     ///                                                          ///
     ///                           ERRORS                         ///
     ///                                                          ///

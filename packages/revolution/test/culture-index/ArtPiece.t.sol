@@ -297,8 +297,8 @@ contract CultureIndexArtPieceTest is CultureIndexTestSuite {
     }
 
     function testArtPieceCreationAndVoting(uint256 pointsSupply, uint256 quorumVotesBPS) public {
-        vm.assume(pointsSupply > 0 && pointsSupply < 2 ** 200);
-        vm.assume(quorumVotesBPS <= cultureIndex.MAX_QUORUM_VOTES_BPS());
+        pointsSupply = bound(pointsSupply, 1, 2 ** 200 - 1);
+        quorumVotesBPS = bound(quorumVotesBPS, 0, cultureIndex.MAX_QUORUM_VOTES_BPS());
 
         // Set the quorum BPS
         cultureIndex._setQuorumVotesBPS(quorumVotesBPS);
