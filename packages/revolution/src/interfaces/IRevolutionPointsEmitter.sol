@@ -3,9 +3,8 @@ pragma solidity ^0.8.22;
 
 import { IRevolutionBuilder } from "./IRevolutionBuilder.sol";
 import { IGrantsRevenueStream } from "./IGrantsRevenueStream.sol";
-import { IRewardSplits } from "@cobuild/protocol-rewards/src/abstract/RewardSplits.sol";
 
-interface IRevolutionPointsEmitter is IRewardSplits, IGrantsRevenueStream {
+interface IRevolutionPointsEmitter is IGrantsRevenueStream {
     ///                                                          ///
     ///                           ERRORS                         ///
     ///                                                          ///

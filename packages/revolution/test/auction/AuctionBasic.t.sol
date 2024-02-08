@@ -337,29 +337,17 @@ contract AuctionHouseBasicTest is AuctionHouseTest {
         //Ether reserved to buy creator governance
         uint256 creatorGovernancePayment = creatorPayment - creatorDirectPayment;
 
-        bool shouldExpectRevert = creatorGovernancePayment <= revolutionPointsEmitter.minPurchaseAmount();
-
         // create art piece
         createDefaultArtPiece();
         vm.roll(vm.getBlockNumber() + 1);
 
-        // // BPS too small to issue rewards
-        if (shouldExpectRevert) {
-            //expect INVALID_ETH_AMOUNT()
-            vm.expectRevert();
-        }
         auction.settleCurrentAndCreateNewAuction(); // This will settle the current auction and create a new one
 
-        if (shouldExpectRevert) {
-            (, , , , , , bool settled) = auction.auction();
-            assertEq(settled, false, "Auction should not be settled because new one created");
-        } else {
-            assertEq(
-                revolutionToken.ownerOf(tokenId),
-                address(1),
-                "Revolution token should be transferred to the auction house"
-            );
-        }
+        assertEq(
+            revolutionToken.ownerOf(tokenId),
+            address(1),
+            "Revolution token should be transferred to the auction house"
+        );
     }
 
     function testSettlingAuctions() public {

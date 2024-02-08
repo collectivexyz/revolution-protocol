@@ -15,8 +15,6 @@ abstract contract PointsEmitterRewards is RewardSplits {
         address purchaseReferral,
         address deployer
     ) internal returns (uint256) {
-        if (msgValue < computeTotalReward(msgValue)) revert INVALID_ETH_AMOUNT();
-
         return msgValue - _depositPurchaseRewards(msgValue, builderReferral, purchaseReferral, deployer);
     }
 }

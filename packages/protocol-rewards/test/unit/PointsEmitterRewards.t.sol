@@ -53,8 +53,7 @@ contract PointsEmitterRewardsTest is ProtocolRewardsTest {
     }
 
     function testDeposit(uint256 msgValue) public {
-        msgValue = bound(msgValue, 0, 1e12 ether);
-        bool shouldExpectRevert = msgValue <= mockPointsEmitter.minPurchaseAmount();
+        msgValue = bound(msgValue, 1, 1e12 ether);
 
         vm.deal(collector, msgValue);
 
@@ -65,11 +64,6 @@ contract PointsEmitterRewardsTest is ProtocolRewardsTest {
         bps[0] = 10_000;
 
         vm.prank(collector);
-        // // BPS too small to issue rewards
-        if (shouldExpectRevert) {
-            //expect INVALID_ETH_AMOUNT()
-            vm.expectRevert();
-        }
 
         IRevolutionPointsEmitter.ProtocolRewardAddresses memory rewardAddrs = IRevolutionPointsEmitter
             .ProtocolRewardAddresses({
@@ -80,24 +74,17 @@ contract PointsEmitterRewardsTest is ProtocolRewardsTest {
 
         mockPointsEmitter.buyToken{ value: msgValue }(addresses, bps, rewardAddrs);
 
-        if (shouldExpectRevert) {
-            vm.expectRevert();
-        }
         (RewardsSettings memory settings, uint256 totalReward) = mockPointsEmitter.computePurchaseRewards(msgValue);
 
-        if (!shouldExpectRevert) {
-            assertApproxEqAbs(protocolRewards.totalRewardsSupply(), totalReward, 5);
-            assertApproxEqAbs(protocolRewards.balanceOf(builderReferral), settings.builderReferralReward, 5);
-            assertApproxEqAbs(protocolRewards.balanceOf(purchaseReferral), settings.purchaseReferralReward, 5);
-            assertApproxEqAbs(protocolRewards.balanceOf(deployer), settings.deployerReward, 5);
-            assertApproxEqAbs(protocolRewards.balanceOf(revolution), settings.revolutionReward, 5);
-        }
+        assertApproxEqAbs(protocolRewards.totalRewardsSupply(), totalReward, 5);
+        assertApproxEqAbs(protocolRewards.balanceOf(builderReferral), settings.builderReferralReward, 5);
+        assertApproxEqAbs(protocolRewards.balanceOf(purchaseReferral), settings.purchaseReferralReward, 5);
+        assertApproxEqAbs(protocolRewards.balanceOf(deployer), settings.deployerReward, 5);
+        assertApproxEqAbs(protocolRewards.balanceOf(revolution), settings.revolutionReward, 5);
     }
 
     function testNullReferralRecipient(uint256 msgValue) public {
-        msgValue = bound(msgValue, 0, 1e12 ether);
-        bool shouldExpectRevert = msgValue <= mockPointsEmitter.minPurchaseAmount();
-
+        msgValue = bound(msgValue, 1, 1e12 ether);
         RevolutionPoints govToken2 = new RevolutionPoints(address(this), "Revolution Governance", "GOV");
 
         address mockPointsEmitterImpl = address(
@@ -132,10 +119,7 @@ contract PointsEmitterRewardsTest is ProtocolRewardsTest {
         vm.deal(collector, msgValue);
 
         vm.prank(collector);
-        if (shouldExpectRevert) {
-            //expect INVALID_ETH_AMOUNT()
-            vm.expectRevert();
-        }
+
         mockPointsEmitter.buyToken{ value: msgValue }(
             addresses,
             bps,
@@ -146,28 +130,15 @@ contract PointsEmitterRewardsTest is ProtocolRewardsTest {
             })
         );
 
-        if (shouldExpectRevert) {
-            //expect INVALID_ETH_AMOUNT()
-            vm.expectRevert();
-        }
         (RewardsSettings memory settings, uint256 totalReward) = mockPointsEmitter.computePurchaseRewards(msgValue);
 
-        if (!shouldExpectRevert) {
-            assertApproxEqAbs(protocolRewards.totalRewardsSupply(), totalReward, 5);
-            assertApproxEqAbs(protocolRewards.balanceOf(builderReferral), settings.builderReferralReward, 5);
-            assertApproxEqAbs(protocolRewards.balanceOf(deployer), settings.deployerReward, 5);
-            assertApproxEqAbs(
-                protocolRewards.balanceOf(revolution),
-                settings.purchaseReferralReward + settings.revolutionReward,
-                5
-            );
-        }
-    }
-
-    function testRevertInvalidEth(uint256 msgValue) public {
-        msgValue = bound(msgValue, 0, mockPointsEmitter.minPurchaseAmount() - 1);
-
-        vm.expectRevert(abi.encodeWithSignature("INVALID_ETH_AMOUNT()"));
-        mockPointsEmitter.computePurchaseRewards(msgValue);
+        assertApproxEqAbs(protocolRewards.totalRewardsSupply(), totalReward, 5);
+        assertApproxEqAbs(protocolRewards.balanceOf(builderReferral), settings.builderReferralReward, 5);
+        assertApproxEqAbs(protocolRewards.balanceOf(deployer), settings.deployerReward, 5);
+        assertApproxEqAbs(
+            protocolRewards.balanceOf(revolution),
+            settings.purchaseReferralReward + settings.revolutionReward,
+            5
+        );
     }
 }

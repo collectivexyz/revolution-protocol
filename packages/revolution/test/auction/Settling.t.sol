@@ -323,13 +323,6 @@ contract AuctionHouseSettleTest is AuctionHouseTest {
     ) internal view returns (uint256) {
         uint256 ethPaidToCreators = 0;
 
-        // If the amount to be spent on governance for creators is less than the minimum purchase amount for points
-        if ((creatorsShare - (directPayment / 10_000)) <= revolutionPointsEmitter.minPurchaseAmount()) {
-            // Set the amount to the full creators share, so creators are paid fully in ETH
-            // 10_000 assumes 100% in BPS of the creators share is paid to the creators
-            directPayment = creatorsShare * 10_000;
-        }
-
         for (uint256 i = 0; i < 1; i++) {
             ethPaidToCreators += (directPayment * 10_000) / (10_000 * 10_000);
         }
@@ -594,9 +587,9 @@ contract AuctionHouseSettleTest is AuctionHouseTest {
         vm.prank(auction.owner());
         auction.setEntropyRateBps(9999);
 
-        // Ensure bidAmount is within bounds to make creatorGovernancePayment <= minPurchaseAmount
-        uint256 minPurchaseAmount = revolutionPointsEmitter.minPurchaseAmount();
-        uint256 minCreatorsShare = (minPurchaseAmount * 10_000) / (10_000 - auction.entropyRateBps());
+        // Ensure bidAmount is within bounds to make creatorGovernancePayment <= minPurchase
+        uint256 minPurchase = 1 wei;
+        uint256 minCreatorsShare = (minPurchase * 10_000) / (10_000 - auction.entropyRateBps());
 
         uint256 maxBidAmount = minCreatorsShare / (1 - (10_000 - auction.creatorRateBps()) / 10_000);
 

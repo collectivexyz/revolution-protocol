@@ -24,7 +24,7 @@ contract PointsTestSuite is RevolutionBuilderTest {
         targetPrice = bound(targetPrice, 1 * 1e10, 1_000 * 1e18);
         priceDecayPercent = bound(priceDecayPercent, 1e18 / 1000, 1e18 / 2);
 
-        amount = bound(amount, int(revolutionPointsEmitter.minPurchaseAmount()), 1e12 ether);
+        amount = bound(amount, 1, 1e12 ether);
 
         address vrgdac = address(new ERC1967Proxy(vrgdaImpl, ""));
 
@@ -59,7 +59,7 @@ contract PointsTestSuite is RevolutionBuilderTest {
         randomTime = bound(randomTime, 10 days, 7665 days);
         priceDecayPercent = bound(priceDecayPercent, 1e18 / 1000, 1e18 / 2);
 
-        amount = bound(amount, int(revolutionPointsEmitter.minPurchaseAmount()), 1e12 ether);
+        amount = bound(amount, 1, 1e12 ether);
 
         address vrgdac = address(new ERC1967Proxy(vrgdaImpl, ""));
 
@@ -97,7 +97,7 @@ contract PointsTestSuite is RevolutionBuilderTest {
         perTimeUnit = bound(perTimeUnit, 1 * 1e18, 1_000_000 * 1e18);
         randomTime = bound(randomTime, 10 days, 7665 days);
         priceDecayPercent = bound(priceDecayPercent, 1e18 / 1000, 1e18 / 2);
-        amount = bound(amount, int(revolutionPointsEmitter.minPurchaseAmount()), 1e12 ether);
+        amount = bound(amount, 1, 1e12 ether);
 
         address vrgdac = address(new ERC1967Proxy(vrgdaImpl, ""));
 

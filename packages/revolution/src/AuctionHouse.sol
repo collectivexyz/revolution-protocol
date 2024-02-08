@@ -367,14 +367,6 @@ contract AuctionHouse is
         paymentShares.creatorGovernance =
             ((amount * creatorRateBps) / 10_000) -
             (paymentShares.creatorDirectScaled / 10_000 / 10_000);
-
-        //If the amount to be spent on governance for creators is less than the minimum purchase amount for points
-        if (paymentShares.creatorGovernance <= revolutionPointsEmitter.minPurchaseAmount()) {
-            //Set the amount to the full creators share, so creators are paid fully in ETH
-            //10_000 because assumes full entropy rate
-            paymentShares.creatorDirectScaled = amount * creatorRateBps * 10_000;
-            paymentShares.creatorGovernance = 0;
-        }
     }
 
     /**
