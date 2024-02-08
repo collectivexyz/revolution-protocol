@@ -79,28 +79,40 @@ import { VersionedContract } from "./version/VersionedContract.sol";
 /// @notice Unauthorized sender `sender`
 /// @param sender Transaction sender
 error Unauthorized(address sender);
+
+/// @notice Invalid percent specified to split with the Points Emitter `pointsPercent`
+/// @param pointsPercent percent specified to go to the Points Emitter
+error InvalidSplit__InvalidPointsPercent(uint32 pointsPercent);
+
 /// @notice Invalid number of accounts `accountsLength`, must have at least 2
 /// @param accountsLength Length of accounts array
 error InvalidSplit__TooFewAccounts(uint256 accountsLength);
+
 /// @notice Array lengths of accounts & percentAllocations don't match (`accountsLength` != `allocationsLength`)
 /// @param accountsLength Length of accounts array
 /// @param allocationsLength Length of percentAllocations array
 error InvalidSplit__AccountsAndAllocationsMismatch(uint256 accountsLength, uint256 allocationsLength);
+
 /// @notice Invalid percentAllocations sum `allocationsSum` must equal `PERCENTAGE_SCALE`
 /// @param allocationsSum Sum of percentAllocations array
 error InvalidSplit__InvalidAllocationsSum(uint32 allocationsSum);
+
 /// @notice Invalid accounts ordering at `index`
 /// @param index Index of out-of-order account
 error InvalidSplit__AccountsOutOfOrder(uint256 index);
+
 /// @notice Invalid percentAllocation of zero at `index`
 /// @param index Index of zero percentAllocation
 error InvalidSplit__AllocationMustBePositive(uint256 index);
+
 /// @notice Invalid distributorFee `distributorFee` cannot be greater than 10% (1e5)
 /// @param distributorFee Invalid distributorFee amount
 error InvalidSplit__InvalidDistributorFee(uint32 distributorFee);
+
 /// @notice Invalid hash `hash` from split data (accounts, percentAllocations, distributorFee)
 /// @param hash Invalid hash
 error InvalidSplit__InvalidHash(bytes32 hash);
+
 /// @notice Invalid new controlling address `newController` for mutable split
 /// @param newController Invalid new controller
 error InvalidNewController(address newController);
@@ -151,8 +163,14 @@ contract SplitMain is ISplitMain, VersionedContract {
 
     /// @notice mapping to account ETH balances
     mapping(address => uint256) internal ethBalances;
+
+    /// @notice mapping to points account ETH balances
+    /// to be spent on the points emitter to buy points for the account
+    mapping(address => uint256) internal ethBalancesPoints;
+
     /// @notice mapping to account ERC20 balances
     mapping(ERC20 => mapping(address => uint256)) internal erc20Balances;
+
     /// @notice mapping to Split metadata
     mapping(address => Split) internal splits;
 
@@ -177,21 +195,49 @@ contract SplitMain is ISplitMain, VersionedContract {
     }
 
     /** @notice Reverts if the split with recipients represented by `accounts` and `percentAllocations` is malformed
+     * @param pointsData PointsData struct containing percentOfEther, pointsAccounts, and pointsPercentAllocations
      *  @param accounts Ordered, unique list of addresses with ownership in the split
      *  @param percentAllocations Percent allocations associated with each address
      *  @param distributorFee Keeper fee paid by split to cover gas costs of distribution
      */
     modifier validSplit(
+        PointsData calldata pointsData,
         address[] memory accounts,
         uint32[] memory percentAllocations,
         uint32 distributorFee
     ) {
-        if (accounts.length < 2) revert InvalidSplit__TooFewAccounts(accounts.length);
+        // points percent is nonzero
+        if (pointsData.percentOfEther == uint32(0))
+            revert InvalidSplit__InvalidPointsPercent(pointsData.percentOfEther);
+
+        // at least 1 account
+        // @notice this was changed from 2 to 1 because funds are split with the points emitter by default
+        if (accounts.length < 1) revert InvalidSplit__TooFewAccounts(accounts.length);
+
+        // at least 1 points account
+        if (pointsData.accounts.length < 1) revert InvalidSplit__TooFewAccounts(pointsData.accounts.length);
+
+        // accounts & percentAllocations must be equal length
         if (accounts.length != percentAllocations.length)
             revert InvalidSplit__AccountsAndAllocationsMismatch(accounts.length, percentAllocations.length);
-        // _getSum should overflow if any percentAllocation[i] < 0
-        if (_getSum(percentAllocations) != PERCENTAGE_SCALE)
-            revert InvalidSplit__InvalidAllocationsSum(_getSum(percentAllocations));
+
+        // pointsAccounts & pointsPercentAllocations must be equal length
+        if (pointsData.accounts.length != pointsData.percentAllocations.length)
+            revert InvalidSplit__AccountsAndAllocationsMismatch(
+                pointsData.accounts.length,
+                pointsData.percentAllocations.length
+            );
+
+        // _getSum should overflow if any percentAllocation[i] < 0 and sum + pointsPercent != PERCENTAGE_SCALE
+        if (_getSum(percentAllocations) + pointsData.percentOfEther != PERCENTAGE_SCALE)
+            revert InvalidSplit__InvalidAllocationsSum(_getSum(percentAllocations) + pointsData.percentOfEther);
+
+        // _getSum should overflow if any pointsPercentAllocations[i] < 0
+        if (_getSum(pointsData.percentAllocations) != PERCENTAGE_SCALE)
+            revert InvalidSplit__InvalidAllocationsSum(_getSum(pointsData.percentAllocations));
+
+        // accounts are ordered and unique
+        // percent allocations are nonzero
         unchecked {
             // overflow should be impossible in for-loop index
             // cache accounts length to save gas
@@ -204,6 +250,24 @@ contract SplitMain is ISplitMain, VersionedContract {
             // overflow should be impossible in array access math with validated equal array lengths
             if (percentAllocations[loopLength] == uint32(0)) revert InvalidSplit__AllocationMustBePositive(loopLength);
         }
+
+        // pointsAccounts are ordered and unique
+        // pointsPercentAllocations are nonzero
+        unchecked {
+            // overflow should be impossible in for-loop index
+            // cache pointsAccounts length to save gas
+            uint256 loopLength = pointsData.accounts.length - 1;
+            for (uint256 i = 0; i < loopLength; ++i) {
+                // overflow should be impossible in array access math
+                if (pointsData.accounts[i] >= pointsData.accounts[i + 1]) revert InvalidSplit__AccountsOutOfOrder(i);
+                if (pointsData.percentAllocations[i] == uint32(0)) revert InvalidSplit__AllocationMustBePositive(i);
+            }
+            // overflow should be impossible in array access math with validated equal array lengths
+            if (pointsData.percentAllocations[loopLength] == uint32(0))
+                revert InvalidSplit__AllocationMustBePositive(loopLength);
+        }
+
+        // distributorFee is lte than max
         if (distributorFee > MAX_DISTRIBUTOR_FEE) revert InvalidSplit__InvalidDistributorFee(distributorFee);
         _;
     }
@@ -240,6 +304,7 @@ contract SplitMain is ISplitMain, VersionedContract {
     receive() external payable {}
 
     /** @notice Creates a new split with recipients `accounts` with ownerships `percentAllocations`, a keeper fee for splitting of `distributorFee` and the controlling address `controller`
+     *  @param pointsData PointsData struct containing percentOfEther, pointsAccounts, and pointsPercentAllocations
      *  @param accounts Ordered, unique list of addresses with ownership in the split
      *  @param percentAllocations Percent allocations associated with each address
      *  @param distributorFee Keeper fee paid by split to cover gas costs of distribution
@@ -247,12 +312,13 @@ contract SplitMain is ISplitMain, VersionedContract {
      *  @return split Address of newly created split
      */
     function createSplit(
+        PointsData calldata pointsData,
         address[] calldata accounts,
         uint32[] calldata percentAllocations,
         uint32 distributorFee,
         address controller
-    ) external override validSplit(accounts, percentAllocations, distributorFee) returns (address split) {
-        bytes32 splitHash = _hashSplit(accounts, percentAllocations, distributorFee);
+    ) external override validSplit(pointsData, accounts, percentAllocations, distributorFee) returns (address split) {
+        bytes32 splitHash = _hashSplit(pointsData, accounts, percentAllocations, distributorFee);
         if (controller == address(0)) {
             // create immutable split
             split = Clones.cloneDeterministic(walletImplementation, splitHash);
@@ -267,33 +333,48 @@ contract SplitMain is ISplitMain, VersionedContract {
     }
 
     /** @notice Predicts the address for an immutable split created with recipients `accounts` with ownerships `percentAllocations` and a keeper fee for splitting of `distributorFee`
+     *  @param pointsData PointsData struct containing percentOfEther, pointsAccounts, and pointsPercentAllocations
      *  @param accounts Ordered, unique list of addresses with ownership in the split
      *  @param percentAllocations Percent allocations associated with each address
      *  @param distributorFee Keeper fee paid by split to cover gas costs of distribution
      *  @return split Predicted address of such an immutable split
      */
     function predictImmutableSplitAddress(
+        PointsData calldata pointsData,
         address[] calldata accounts,
         uint32[] calldata percentAllocations,
         uint32 distributorFee
-    ) external view override validSplit(accounts, percentAllocations, distributorFee) returns (address split) {
-        bytes32 splitHash = _hashSplit(accounts, percentAllocations, distributorFee);
+    )
+        external
+        view
+        override
+        validSplit(pointsData, accounts, percentAllocations, distributorFee)
+        returns (address split)
+    {
+        bytes32 splitHash = _hashSplit(pointsData, accounts, percentAllocations, distributorFee);
         split = Clones.predictDeterministicAddress(walletImplementation, splitHash);
     }
 
     /** @notice Updates an existing split with recipients `accounts` with ownerships `percentAllocations` and a keeper fee for splitting of `distributorFee`
      *  @param split Address of mutable split to update
+     *  @param pointsData PointsData struct containing percentOfEther, pointsAccounts, and pointsPercentAllocations
      *  @param accounts Ordered, unique list of addresses with ownership in the split
      *  @param percentAllocations Percent allocations associated with each address
      *  @param distributorFee Keeper fee paid by split to cover gas costs of distribution
      */
     function updateSplit(
         address split,
+        PointsData calldata pointsData,
         address[] calldata accounts,
         uint32[] calldata percentAllocations,
         uint32 distributorFee
-    ) external override onlySplitController(split) validSplit(accounts, percentAllocations, distributorFee) {
-        _updateSplit(split, accounts, percentAllocations, distributorFee);
+    )
+        external
+        override
+        onlySplitController(split)
+        validSplit(pointsData, accounts, percentAllocations, distributorFee)
+    {
+        _updateSplit(split, pointsData, accounts, percentAllocations, distributorFee);
     }
 
     /** @notice Begins transfer of the controlling address of mutable split `split` to `newController`
@@ -339,6 +420,7 @@ contract SplitMain is ISplitMain, VersionedContract {
      *  @dev `accounts`, `percentAllocations`, and `distributorFee` are verified by hashing
      *  & comparing to the hash in storage associated with split `split`
      *  @param split Address of split to distribute balance for
+     *  @param pointsData PointsData struct containing percentOfEther, pointsAccounts, and pointsPercentAllocations
      *  @param accounts Ordered, unique list of addresses with ownership in the split
      *  @param percentAllocations Percent allocations associated with each address
      *  @param distributorFee Keeper fee paid by split to cover gas costs of distribution
@@ -346,19 +428,21 @@ contract SplitMain is ISplitMain, VersionedContract {
      */
     function distributeETH(
         address split,
+        PointsData calldata pointsData,
         address[] calldata accounts,
         uint32[] calldata percentAllocations,
         uint32 distributorFee,
         address distributorAddress
-    ) external override validSplit(accounts, percentAllocations, distributorFee) {
+    ) external override validSplit(pointsData, accounts, percentAllocations, distributorFee) {
         // use internal fn instead of modifier to avoid stack depth compiler errors
-        _validSplitHash(split, accounts, percentAllocations, distributorFee);
-        _distributeETH(split, accounts, percentAllocations, distributorFee, distributorAddress);
+        _validSplitHash(split, pointsData, accounts, percentAllocations, distributorFee);
+        _distributeETH(split, pointsData, accounts, percentAllocations, distributorFee, distributorAddress);
     }
 
     /** @notice Updates & distributes the ETH balance for split `split`
      *  @dev only callable by SplitController
      *  @param split Address of split to distribute balance for
+     *  @param pointsData PointsData struct containing percentOfEther, pointsAccounts, and pointsPercentAllocations
      *  @param accounts Ordered, unique list of addresses with ownership in the split
      *  @param percentAllocations Percent allocations associated with each address
      *  @param distributorFee Keeper fee paid by split to cover gas costs of distribution
@@ -366,14 +450,20 @@ contract SplitMain is ISplitMain, VersionedContract {
      */
     function updateAndDistributeETH(
         address split,
+        PointsData calldata pointsData,
         address[] calldata accounts,
         uint32[] calldata percentAllocations,
         uint32 distributorFee,
         address distributorAddress
-    ) external override onlySplitController(split) validSplit(accounts, percentAllocations, distributorFee) {
-        _updateSplit(split, accounts, percentAllocations, distributorFee);
+    )
+        external
+        override
+        onlySplitController(split)
+        validSplit(pointsData, accounts, percentAllocations, distributorFee)
+    {
+        _updateSplit(split, pointsData, accounts, percentAllocations, distributorFee);
         // know splitHash is valid immediately after updating; only accessible via controller
-        _distributeETH(split, accounts, percentAllocations, distributorFee, distributorAddress);
+        _distributeETH(split, pointsData, accounts, percentAllocations, distributorFee, distributorAddress);
     }
 
     /** @notice Distributes the ERC20 `token` balance for split `split`
@@ -383,6 +473,7 @@ contract SplitMain is ISplitMain, VersionedContract {
      *  _scaleAmountByPercentage, but results do not affect ETH & other ERC20 balances
      *  @param split Address of split to distribute balance for
      *  @param token Address of ERC20 to distribute balance for
+     *  @param pointsData PointsData struct containing percentOfEther, pointsAccounts, and pointsPercentAllocations
      *  @param accounts Ordered, unique list of addresses with ownership in the split
      *  @param percentAllocations Percent allocations associated with each address
      *  @param distributorFee Keeper fee paid by split to cover gas costs of distribution
@@ -391,13 +482,14 @@ contract SplitMain is ISplitMain, VersionedContract {
     function distributeERC20(
         address split,
         ERC20 token,
+        PointsData calldata pointsData,
         address[] calldata accounts,
         uint32[] calldata percentAllocations,
         uint32 distributorFee,
         address distributorAddress
-    ) external override validSplit(accounts, percentAllocations, distributorFee) {
+    ) external override validSplit(pointsData, accounts, percentAllocations, distributorFee) {
         // use internal fn instead of modifier to avoid stack depth compiler errors
-        _validSplitHash(split, accounts, percentAllocations, distributorFee);
+        _validSplitHash(split, pointsData, accounts, percentAllocations, distributorFee);
         _distributeERC20(split, token, accounts, percentAllocations, distributorFee, distributorAddress);
     }
 
@@ -407,6 +499,7 @@ contract SplitMain is ISplitMain, VersionedContract {
      *  _scaleAmountByPercentage, but results do not affect ETH & other ERC20 balances
      *  @param split Address of split to distribute balance for
      *  @param token Address of ERC20 to distribute balance for
+     *  @param pointsData PointsData struct containing percentOfEther, pointsAccounts, and pointsPercentAllocations
      *  @param accounts Ordered, unique list of addresses with ownership in the split
      *  @param percentAllocations Percent allocations associated with each address
      *  @param distributorFee Keeper fee paid by split to cover gas costs of distribution
@@ -415,26 +508,42 @@ contract SplitMain is ISplitMain, VersionedContract {
     function updateAndDistributeERC20(
         address split,
         ERC20 token,
+        PointsData calldata pointsData,
         address[] calldata accounts,
         uint32[] calldata percentAllocations,
         uint32 distributorFee,
         address distributorAddress
-    ) external override onlySplitController(split) validSplit(accounts, percentAllocations, distributorFee) {
-        _updateSplit(split, accounts, percentAllocations, distributorFee);
+    )
+        external
+        override
+        onlySplitController(split)
+        validSplit(pointsData, accounts, percentAllocations, distributorFee)
+    {
+        _updateSplit(split, pointsData, accounts, percentAllocations, distributorFee);
         // know splitHash is valid immediately after updating; only accessible via controller
         _distributeERC20(split, token, accounts, percentAllocations, distributorFee, distributorAddress);
     }
 
-    /** @notice Withdraw ETH &/ ERC20 balances for account `account`
+    /** @notice Withdraw ETH, ETH as Points, &/ ERC20 balances for account `account`
      *  @param account Address to withdraw on behalf of
      *  @param withdrawETH Withdraw all ETH if nonzero
+     *  @param withdrawPoints Withdraw all Points if nonzero
      *  @param tokens Addresses of ERC20s to withdraw
      */
-    function withdraw(address account, uint256 withdrawETH, ERC20[] calldata tokens) external override {
+    function withdraw(
+        address account,
+        uint256 withdrawETH,
+        uint256 withdrawPoints,
+        ERC20[] calldata tokens
+    ) external override {
         uint256[] memory tokenAmounts = new uint256[](tokens.length);
         uint256 ethAmount = 0;
+        uint256 pointsSold = 0;
         if (withdrawETH != 0) {
             ethAmount = _withdraw(account);
+        }
+        if (withdrawPoints != 0) {
+            pointsSold = _withdrawPoints(account);
         }
         unchecked {
             // overflow should be impossible in for-loop index
@@ -442,7 +551,7 @@ contract SplitMain is ISplitMain, VersionedContract {
                 // overflow should be impossible in array length math
                 tokenAmounts[i] = _withdrawERC20(account, tokens[i]);
             }
-            emit Withdrawal(account, ethAmount, tokens, tokenAmounts);
+            emit Withdrawal(account, ethAmount, tokens, tokenAmounts, pointsSold);
         }
     }
 
@@ -512,32 +621,46 @@ contract SplitMain is ISplitMain, VersionedContract {
     }
 
     /** @notice Hashes a split
+     *  @param pointsData PointsData struct containing percentOfEther, pointsAccounts, and pointsPercentAllocations
      *  @param accounts Ordered, unique list of addresses with ownership in the split
      *  @param percentAllocations Percent allocations associated with each address
      *  @param distributorFee Keeper fee paid by split to cover gas costs of distribution
      *  @return computedHash Hash of the split.
      */
     function _hashSplit(
+        PointsData calldata pointsData,
         address[] memory accounts,
         uint32[] memory percentAllocations,
         uint32 distributorFee
     ) internal pure returns (bytes32) {
-        return keccak256(abi.encode(accounts, percentAllocations, distributorFee));
+        return
+            keccak256(
+                abi.encode(
+                    pointsData.percentOfEther,
+                    pointsData.accounts,
+                    pointsData.percentAllocations,
+                    accounts,
+                    percentAllocations,
+                    distributorFee
+                )
+            );
     }
 
     /** @notice Updates an existing split with recipients `accounts` with ownerships `percentAllocations` and a keeper fee for splitting of `distributorFee`
      *  @param split Address of mutable split to update
+     * @param pointsData PointsData struct containing percentOfEther, pointsAccounts, and pointsPercentAllocations
      *  @param accounts Ordered, unique list of addresses with ownership in the split
      *  @param percentAllocations Percent allocations associated with each address
      *  @param distributorFee Keeper fee paid by split to cover gas costs of distribution
      */
     function _updateSplit(
         address split,
+        PointsData calldata pointsData,
         address[] calldata accounts,
         uint32[] calldata percentAllocations,
         uint32 distributorFee
     ) internal {
-        bytes32 splitHash = _hashSplit(accounts, percentAllocations, distributorFee);
+        bytes32 splitHash = _hashSplit(pointsData, accounts, percentAllocations, distributorFee);
         // store new hash in storage for future verification
         splits[split].hash = splitHash;
         emit UpdateSplit(split);
@@ -545,23 +668,26 @@ contract SplitMain is ISplitMain, VersionedContract {
 
     /** @notice Checks hash from `accounts`, `percentAllocations`, and `distributorFee` against the hash stored for `split`
      *  @param split Address of hash to check
+     *  @param pointsData PointsData struct containing percentOfEther, pointsAccounts, and pointsPercentAllocations
      *  @param accounts Ordered, unique list of addresses with ownership in the split
      *  @param percentAllocations Percent allocations associated with each address
      *  @param distributorFee Keeper fee paid by split to cover gas costs of distribution
      */
     function _validSplitHash(
         address split,
+        PointsData calldata pointsData,
         address[] memory accounts,
         uint32[] memory percentAllocations,
         uint32 distributorFee
     ) internal view {
-        bytes32 hash = _hashSplit(accounts, percentAllocations, distributorFee);
+        bytes32 hash = _hashSplit(pointsData, accounts, percentAllocations, distributorFee);
         if (splits[split].hash != hash) revert InvalidSplit__InvalidHash(hash);
     }
 
     /** @notice Distributes the ETH balance for split `split`
-     *  @dev `accounts`, `percentAllocations`, and `distributorFee` must be verified before calling
+     *  @dev `pointsData`, `accounts`, `percentAllocations`, and `distributorFee` must be verified before calling
      *  @param split Address of split to distribute balance for
+     *  @param pointsData PointsData struct containing percentOfEther, pointsAccounts, and pointsPercentAllocations
      *  @param accounts Ordered, unique list of addresses with ownership in the split
      *  @param percentAllocations Percent allocations associated with each address
      *  @param distributorFee Keeper fee paid by split to cover gas costs of distribution
@@ -569,6 +695,7 @@ contract SplitMain is ISplitMain, VersionedContract {
      */
     function _distributeETH(
         address split,
+        PointsData calldata pointsData,
         address[] memory accounts,
         uint32[] memory percentAllocations,
         uint32 distributorFee,
@@ -599,6 +726,22 @@ contract SplitMain is ISplitMain, VersionedContract {
                 amountToSplit -= distributorFeeAmount;
             }
         }
+
+        //distribute etherBalance for points to points accounts
+        uint256 pointsAmount = _scaleAmountByPercentage(amountToSplit, pointsData.percentOfEther);
+
+        // cache pointsAccounts length to save gas
+        uint256 pointsAccountsLength = pointsData.accounts.length;
+        for (uint256 i = 0; i < pointsAccountsLength; ++i) {
+            ethBalancesPoints[pointsData.accounts[i]] += _scaleAmountByPercentage(
+                pointsAmount,
+                pointsData.percentAllocations[i]
+            );
+        }
+
+        // don't subtract pointsAmount from amountToSplit, as percentOfEther is included in percentAllocations
+        // and checked against PERCENTAGE_SCALE in validSplit
+
         unchecked {
             // distribute remaining balance
             // overflow should be impossible in for-loop index
@@ -713,6 +856,34 @@ contract SplitMain is ISplitMain, VersionedContract {
         withdrawn = ethBalances[account] - 1;
         ethBalances[account] = 1;
         account.safeTransferETH(withdrawn);
+    }
+
+    /** @notice Withdraw points for account `account`
+     *  @param account Account to withdrawn points for
+     *  @return tokensSoldWad Amount of points purchased
+     */
+    function _withdrawPoints(address account) internal returns (uint256 tokensSoldWad) {
+        // leave balance of 1 for gas efficiency
+        // underflow if ethBalance is 0
+        uint256 withdrawn = ethBalancesPoints[account] - 1;
+        ethBalancesPoints[account] = 1;
+
+        address[] memory addresses = new address[](1);
+        addresses[0] = account;
+
+        uint256[] memory bps = new uint256[](1);
+        bps[0] = 10_000;
+
+        // slither-disable-next-line arbitrary-send-eth
+        tokensSoldWad = pointsEmitter.buyToken{ value: withdrawn }(
+            addresses,
+            bps,
+            IRevolutionPointsEmitter.ProtocolRewardAddresses({
+                builder: address(0),
+                deployer: address(0),
+                purchaseReferral: address(0)
+            })
+        );
     }
 
     /** @notice Withdraw ERC20 `token` for account `account`

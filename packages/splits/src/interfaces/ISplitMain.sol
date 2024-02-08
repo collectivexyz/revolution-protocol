@@ -10,6 +10,15 @@ import { IRevolutionPointsEmitter } from "./IPointsEmitterLike.sol";
  */
 interface ISplitMain {
     /**
+     * STRUCTS
+     */
+    struct PointsData {
+        uint32 percentOfEther;
+        address[] accounts;
+        uint32[] percentAllocations;
+    }
+
+    /**
      * FUNCTIONS
      */
 
@@ -18,6 +27,7 @@ interface ISplitMain {
     function pointsEmitter() external returns (IRevolutionPointsEmitter);
 
     function createSplit(
+        PointsData calldata pointsData,
         address[] calldata accounts,
         uint32[] calldata percentAllocations,
         uint32 distributorFee,
@@ -25,6 +35,7 @@ interface ISplitMain {
     ) external returns (address);
 
     function predictImmutableSplitAddress(
+        PointsData calldata pointsData,
         address[] calldata accounts,
         uint32[] calldata percentAllocations,
         uint32 distributorFee
@@ -32,6 +43,7 @@ interface ISplitMain {
 
     function updateSplit(
         address split,
+        PointsData calldata pointsData,
         address[] calldata accounts,
         uint32[] calldata percentAllocations,
         uint32 distributorFee
@@ -47,6 +59,7 @@ interface ISplitMain {
 
     function distributeETH(
         address split,
+        PointsData calldata pointsData,
         address[] calldata accounts,
         uint32[] calldata percentAllocations,
         uint32 distributorFee,
@@ -55,6 +68,7 @@ interface ISplitMain {
 
     function updateAndDistributeETH(
         address split,
+        PointsData calldata pointsData,
         address[] calldata accounts,
         uint32[] calldata percentAllocations,
         uint32 distributorFee,
@@ -64,6 +78,7 @@ interface ISplitMain {
     function distributeERC20(
         address split,
         ERC20 token,
+        PointsData calldata pointsData,
         address[] calldata accounts,
         uint32[] calldata percentAllocations,
         uint32 distributorFee,
@@ -73,13 +88,14 @@ interface ISplitMain {
     function updateAndDistributeERC20(
         address split,
         ERC20 token,
+        PointsData calldata pointsData,
         address[] calldata accounts,
         uint32[] calldata percentAllocations,
         uint32 distributorFee,
         address distributorAddress
     ) external;
 
-    function withdraw(address account, uint256 withdrawETH, ERC20[] calldata tokens) external;
+    function withdraw(address account, uint256 withdrawETH, uint256 withdrawPoints, ERC20[] calldata tokens) external;
 
     /**
      * EVENTS
@@ -138,6 +154,13 @@ interface ISplitMain {
      *  @param ethAmount Amount of ETH withdrawn
      *  @param tokens Addresses of ERC20s withdrawn
      *  @param tokenAmounts Amounts of corresponding ERC20s withdrawn
+     *  @param pointsSold Amount of points withdrawn
      */
-    event Withdrawal(address indexed account, uint256 ethAmount, ERC20[] tokens, uint256[] tokenAmounts);
+    event Withdrawal(
+        address indexed account,
+        uint256 ethAmount,
+        ERC20[] tokens,
+        uint256[] tokenAmounts,
+        uint256 pointsSold
+    );
 }

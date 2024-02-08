@@ -25,6 +25,7 @@ interface IRevolutionBuilder is IUUPS {
     /// @param maxHeap The maxHeap address
     /// @param revolutionVotingPower The revolutionVotingPower address
     /// @param vrgda The VRGDA address
+    /// @param splitsCreator The splits factory address
     event RevolutionDeployed(
         address revolutionToken,
         address descriptor,
@@ -36,7 +37,8 @@ interface IRevolutionBuilder is IUUPS {
         address revolutionPoints,
         address maxHeap,
         address revolutionVotingPower,
-        address vrgda
+        address vrgda,
+        address splitsCreator
     );
 
     /// @notice Emitted when an upgrade is registered by the Builder DAO
@@ -292,7 +294,8 @@ interface IRevolutionBuilder is IUUPS {
             address revolutionPointsEmitter,
             address maxHeap,
             address revolutionVotingPower,
-            address vrgda
+            address vrgda,
+            address splitsCreator
         );
 
     /// @notice If an implementation is registered by the Builder DAO as an optional upgrade

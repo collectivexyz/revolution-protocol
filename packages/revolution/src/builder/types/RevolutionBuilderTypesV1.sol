@@ -29,12 +29,15 @@ interface RevolutionBuilderTypesV1 {
         address revolutionVotingPower;
         /// @notice Address for deployed VRGDA contract
         address vrgda;
+        /// @notice Address for the deployed splits factory contract
+        address splitsCreator;
     }
 
     struct InitialProxySetup {
         address revolutionToken;
         address executor;
         address revolutionVotingPower;
+        address revolutionPointsEmitter;
         address dao;
         bytes32 salt;
     }
