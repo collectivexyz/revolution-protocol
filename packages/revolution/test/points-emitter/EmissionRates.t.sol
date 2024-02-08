@@ -390,7 +390,7 @@ contract EmissionRatesTest is PointsEmitterTest {
         uint256 valueToSend,
         uint256 expiryDuration
     ) public {
-        valueToSend = bound(valueToSend, 1, 1e12 ether);
+        valueToSend = bound(valueToSend, 0.00000001 ether, 1e12 ether);
 
         // Calculate value left after sharing protocol rewards
         uint256 msgValueRemaining = valueToSend - revolutionPointsEmitter.computeTotalReward(valueToSend);
