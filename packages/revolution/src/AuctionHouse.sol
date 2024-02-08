@@ -523,8 +523,6 @@ contract AuctionHouse is
      * @dev Only callable by the owner.
      */
     function setGrantsAddress(address _grantsAddress) external override onlyOwner nonReentrant {
-        if (_grantsAddress == address(0)) revert ADDRESS_ZERO();
-
         emit GrantsAddressUpdated(grantsAddress = _grantsAddress);
     }
 
