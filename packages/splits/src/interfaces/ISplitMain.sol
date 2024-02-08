@@ -95,7 +95,7 @@ interface ISplitMain {
         address distributorAddress
     ) external;
 
-    function withdraw(address account, uint256 withdrawETH, ERC20[] calldata tokens) external;
+    function withdraw(address account, uint256 withdrawETH, uint256 withdrawPoints, ERC20[] calldata tokens) external;
 
     /**
      * EVENTS
@@ -154,6 +154,13 @@ interface ISplitMain {
      *  @param ethAmount Amount of ETH withdrawn
      *  @param tokens Addresses of ERC20s withdrawn
      *  @param tokenAmounts Amounts of corresponding ERC20s withdrawn
+     *  @param pointsSold Amount of points withdrawn
      */
-    event Withdrawal(address indexed account, uint256 ethAmount, ERC20[] tokens, uint256[] tokenAmounts);
+    event Withdrawal(
+        address indexed account,
+        uint256 ethAmount,
+        ERC20[] tokens,
+        uint256[] tokenAmounts,
+        uint256 pointsSold
+    );
 }

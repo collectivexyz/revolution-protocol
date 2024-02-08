@@ -166,7 +166,7 @@ contract SplitMain is ISplitMain, VersionedContract {
 
     /// @notice mapping to points account ETH balances
     /// to be spent on the points emitter to buy points for the account
-    mapping(address => uint256) internal ethPointsBalances;
+    mapping(address => uint256) internal ethBalancesPoints;
 
     /// @notice mapping to account ERC20 balances
     mapping(ERC20 => mapping(address => uint256)) internal erc20Balances;
@@ -523,16 +523,26 @@ contract SplitMain is ISplitMain, VersionedContract {
         _distributeERC20(split, token, accounts, percentAllocations, distributorFee, distributorAddress);
     }
 
-    /** @notice Withdraw ETH &/ ERC20 balances for account `account`
+    /** @notice Withdraw ETH, ETH as Points, &/ ERC20 balances for account `account`
      *  @param account Address to withdraw on behalf of
      *  @param withdrawETH Withdraw all ETH if nonzero
+     *  @param withdrawPoints Withdraw all Points if nonzero
      *  @param tokens Addresses of ERC20s to withdraw
      */
-    function withdraw(address account, uint256 withdrawETH, ERC20[] calldata tokens) external override {
+    function withdraw(
+        address account,
+        uint256 withdrawETH,
+        uint256 withdrawPoints,
+        ERC20[] calldata tokens
+    ) external override {
         uint256[] memory tokenAmounts = new uint256[](tokens.length);
         uint256 ethAmount = 0;
+        uint256 pointsSold = 0;
         if (withdrawETH != 0) {
             ethAmount = _withdraw(account);
+        }
+        if (withdrawPoints != 0) {
+            pointsSold = _withdrawPoints(account);
         }
         unchecked {
             // overflow should be impossible in for-loop index
@@ -540,7 +550,7 @@ contract SplitMain is ISplitMain, VersionedContract {
                 // overflow should be impossible in array length math
                 tokenAmounts[i] = _withdrawERC20(account, tokens[i]);
             }
-            emit Withdrawal(account, ethAmount, tokens, tokenAmounts);
+            emit Withdrawal(account, ethAmount, tokens, tokenAmounts, pointsSold);
         }
     }
 
@@ -715,6 +725,22 @@ contract SplitMain is ISplitMain, VersionedContract {
                 amountToSplit -= distributorFeeAmount;
             }
         }
+
+        //distribute etherBalance for points to points accounts
+        uint256 pointsAmount = _scaleAmountByPercentage(amountToSplit, pointsData.percentOfEther);
+
+        // cache pointsAccounts length to save gas
+        uint256 pointsAccountsLength = pointsData.accounts.length;
+        for (uint256 i = 0; i < pointsAccountsLength; ++i) {
+            ethBalancesPoints[pointsData.accounts[i]] += _scaleAmountByPercentage(
+                pointsAmount,
+                pointsData.percentAllocations[i]
+            );
+        }
+
+        // don't subtract pointsAmount from amountToSplit, as percentOfEther is included in percentAllocations
+        // and checked against PERCENTAGE_SCALE in validSplit
+
         unchecked {
             // distribute remaining balance
             // overflow should be impossible in for-loop index
@@ -829,6 +855,33 @@ contract SplitMain is ISplitMain, VersionedContract {
         withdrawn = ethBalances[account] - 1;
         ethBalances[account] = 1;
         account.safeTransferETH(withdrawn);
+    }
+
+    /** @notice Withdraw points for account `account`
+     *  @param account Account to withdrawn points for
+     *  @return tokensSoldWad Amount of points purchased
+     */
+    function _withdrawPoints(address account) internal returns (uint256 tokensSoldWad) {
+        // leave balance of 1 for gas efficiency
+        // underflow if ethBalance is 0
+        uint256 withdrawn = ethBalancesPoints[account] - 1;
+        ethBalancesPoints[account] = 1;
+
+        address[] memory addresses = new address[](1);
+        addresses[0] = account;
+
+        uint256[] memory bps = new uint256[](1);
+        bps[0] = 1000000;
+
+        tokensSoldWad = pointsEmitter.buyToken{ value: withdrawn }(
+            addresses,
+            bps,
+            IRevolutionPointsEmitter.ProtocolRewardAddresses({
+                builder: address(0),
+                deployer: address(0),
+                purchaseReferral: address(0)
+            })
+        );
     }
 
     /** @notice Withdraw ERC20 `token` for account `account`
