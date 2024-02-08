@@ -23,7 +23,14 @@ import { IGrantsRevenueStream } from "./IGrantsRevenueStream.sol";
 interface IAuctionHouseEvents {
     event AuctionCreated(uint256 indexed tokenId, uint256 startTime, uint256 endTime);
 
-    event AuctionBid(uint256 indexed tokenId, address bidder, address sender, uint256 value, bool extended);
+    event AuctionBid(
+        uint256 indexed tokenId,
+        address bidder,
+        address sender,
+        uint256 value,
+        bool extended,
+        string comment
+    );
 
     event AuctionExtended(uint256 indexed tokenId, uint256 endTime);
 
@@ -134,7 +141,7 @@ interface IAuctionHouse is IAuctionHouseEvents, IGrantsRevenueStream {
 
     function settleCurrentAndCreateNewAuction() external;
 
-    function createBid(uint256 tokenId, address bidder, address referral) external payable;
+    function createBid(uint256 tokenId, address bidder, address referral, string calldata comment) external payable;
 
     function pause() external;
 

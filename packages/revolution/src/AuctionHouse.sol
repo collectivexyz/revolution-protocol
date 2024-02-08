@@ -185,8 +185,15 @@ contract AuctionHouse is
      * @dev This contract only accepts payment in ETH.
      * @param tokenId The ID of the Token to bid on.
      * @param bidder The address of the bidder.
+     * @param referral The address of the referral account who referred the current highest bidder.
+     * @param comment The comment of the bidder.
      */
-    function createBid(uint256 tokenId, address bidder, address referral) external payable override nonReentrant {
+    function createBid(
+        uint256 tokenId,
+        address bidder,
+        address referral,
+        string calldata comment
+    ) external payable override nonReentrant {
         IAuctionHouse.Auction memory _auction = auction;
 
         //require bidder is valid address
@@ -209,7 +216,7 @@ contract AuctionHouse is
         // Refund the last bidder, if applicable
         if (lastBidder != address(0)) _safeTransferETHWithFallback(lastBidder, _auction.amount);
 
-        emit AuctionBid(_auction.tokenId, bidder, msg.sender, msg.value, extended);
+        emit AuctionBid(_auction.tokenId, bidder, msg.sender, msg.value, extended, comment);
 
         if (extended) emit AuctionExtended(_auction.tokenId, _auction.endTime);
     }
