@@ -58,7 +58,7 @@ contract GrantsPaymentsTest is AuctionHouseTest {
         vm.deal(address(1), bidAmount + 2 ether);
 
         vm.prank(address(1));
-        auction.createBid{ value: bidAmount }(0, address(1), address(0)); // Assuming the first auction's tokenId is 0
+        auction.createBid{ value: bidAmount }(0, address(1), address(0), ""); // Assuming the first auction's tokenId is 0
         (uint256 tokenId, uint256 amount, , uint256 endTime, address payable bidder, , ) = auction.auction();
 
         assertEq(amount, bidAmount, "Bid amount should be set correctly");

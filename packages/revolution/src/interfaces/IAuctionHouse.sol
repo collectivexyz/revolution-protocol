@@ -23,7 +23,14 @@ import { IGrantsRevenueStream } from "./IGrantsRevenueStream.sol";
 interface IAuctionHouseEvents {
     event AuctionCreated(uint256 indexed tokenId, uint256 startTime, uint256 endTime);
 
-    event AuctionBid(uint256 indexed tokenId, address bidder, address sender, uint256 value, bool extended);
+    event AuctionBid(
+        uint256 indexed tokenId,
+        address bidder,
+        address sender,
+        uint256 value,
+        bool extended,
+        string comment
+    );
 
     event AuctionExtended(uint256 indexed tokenId, uint256 endTime);
 
@@ -101,6 +108,9 @@ interface IAuctionHouse is IAuctionHouseEvents, IGrantsRevenueStream {
     /// @dev Reverts if the top voted piece does not meet quorum.
     error QUORUM_NOT_MET();
 
+    /// @dev Reverts if the bid comment is too long
+    error COMMENT_TOO_LONG();
+
     /// @dev Reverts if an existing auction is in progress.
     error AUCTION_ALREADY_IN_PROGRESS();
 
@@ -134,7 +144,7 @@ interface IAuctionHouse is IAuctionHouseEvents, IGrantsRevenueStream {
 
     function settleCurrentAndCreateNewAuction() external;
 
-    function createBid(uint256 tokenId, address bidder, address referral) external payable;
+    function createBid(uint256 tokenId, address bidder, address referral, string calldata comment) external payable;
 
     function pause() external;
 

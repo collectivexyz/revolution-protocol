@@ -38,8 +38,15 @@ contract AuctionHouseBasicTest is AuctionHouseTest {
         vm.prank(address(1));
         // Expect an event emission
         vm.expectEmit(true, true, true, true);
-        emit IAuctionHouseEvents.AuctionBid(tokenId, address(21), address(1), bidAmount, false);
-        auction.createBid{ value: bidAmount }(0, address(21), address(0)); // Assuming the first auction's tokenId is 0
+        emit IAuctionHouseEvents.AuctionBid(
+            tokenId,
+            address(21),
+            address(1),
+            bidAmount,
+            false,
+            "for posterity and good magic for all"
+        );
+        auction.createBid{ value: bidAmount }(0, address(21), address(0), "for posterity and good magic for all"); // Assuming the first auction's tokenId is 0
     }
 
     function testSetEntropyRateBps(uint256 newEntropyRateBps) public {
@@ -155,6 +162,26 @@ contract AuctionHouseBasicTest is AuctionHouseTest {
         auction.setMinCreatorRateBps(lowerMinCreatorRateBps);
     }
 
+    function testBidWithLongComment() public {
+        uint256 bidAmount = auction.reservePrice();
+        uint256 tokenId = createDefaultArtPiece();
+        string memory longComment = new string(2049);
+        bytes memory longCommentBytes = bytes(longComment);
+        for (uint256 i = 0; i < 2049; i++) {
+            longCommentBytes[i] = "a";
+        }
+
+        vm.roll(vm.getBlockNumber() + 1);
+
+        vm.startPrank(auction.owner());
+        auction.unpause();
+        vm.stopPrank();
+
+        vm.deal(address(1), bidAmount + 1 ether);
+        vm.expectRevert(abi.encodeWithSignature("COMMENT_TOO_LONG()"));
+        auction.createBid{ value: bidAmount }(tokenId, address(1), address(0), longComment);
+    }
+
     function testValueUpdates(uint256 newCreatorRateBps, uint256 newEntropyRateBps) public {
         vm.assume(newCreatorRateBps > auction.minCreatorRateBps());
         vm.assume(newCreatorRateBps <= 10_000);
@@ -217,12 +244,12 @@ contract AuctionHouseBasicTest is AuctionHouseTest {
         // try to bid with bidder address(0) first and expect revert
         vm.expectRevert(abi.encodeWithSignature("ADDRESS_ZERO()"));
         vm.startPrank(address(1));
-        auction.createBid{ value: bidAmount }(0, address(0), address(0)); // Assuming the first auction's tokenId is 0
+        auction.createBid{ value: bidAmount }(0, address(0), address(0), ""); // Assuming the first auction's tokenId is 0
 
         // Expect an event emission
         vm.expectEmit(true, true, true, true);
-        emit IAuctionHouseEvents.AuctionBid(tokenId, address(21), address(1), bidAmount, false);
-        auction.createBid{ value: bidAmount }(0, address(21), address(0)); // Assuming the first auction's tokenId is 0
+        emit IAuctionHouseEvents.AuctionBid(tokenId, address(21), address(1), bidAmount, false, "for posterity");
+        auction.createBid{ value: bidAmount }(0, address(21), address(0), "for posterity"); // Assuming the first auction's tokenId is 0
 
         // Retrieve auction details once and perform all assertions
         (
@@ -312,7 +339,7 @@ contract AuctionHouseBasicTest is AuctionHouseTest {
         vm.deal(address(1), bidAmount + 2 ether);
 
         vm.startPrank(address(1));
-        auction.createBid{ value: bidAmount }(0, address(1), address(0)); // Assuming the first auction's tokenId is 0
+        auction.createBid{ value: bidAmount }(0, address(1), address(0), ""); // Assuming the first auction's tokenId is 0
         (uint256 tokenId, uint256 amount, , uint256 endTime, address payable bidder, , ) = auction.auction();
 
         assertEq(amount, bidAmount, "Bid amount should be set correctly");

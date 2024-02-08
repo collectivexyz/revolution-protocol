@@ -83,7 +83,7 @@ contract AuctionHouseOutOfGasTest is AuctionHouseTest {
         uint256 bidAmount = auction.reservePrice();
         vm.deal(address(creators[nCreators - 1]), bidAmount + 1 ether);
         vm.startPrank(address(creators[nCreators - 1]));
-        auction.createBid{ value: bidAmount }(0, address(creators[nCreators - 1]), address(0));
+        auction.createBid{ value: bidAmount }(0, address(creators[nCreators - 1]), address(0), "");
         vm.stopPrank();
 
         vm.warp(block.timestamp + auction.duration() + 1); // Fast forward time to end the auction
