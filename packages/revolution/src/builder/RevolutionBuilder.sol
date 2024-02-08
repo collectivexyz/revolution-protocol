@@ -24,6 +24,7 @@ pragma solidity 0.8.22;
 
 import { Ownable2StepUpgradeable } from "@openzeppelin/contracts-upgradeable/access/Ownable2StepUpgradeable.sol";
 
+import { SplitMain } from "@cobuild/splits/src/SplitMain.sol";
 import { RevolutionBuilderStorageV1 } from "./storage/RevolutionBuilderStorageV1.sol";
 import { IRevolutionBuilder } from "../interfaces/IRevolutionBuilder.sol";
 import { IRevolutionToken } from "../interfaces/IRevolutionToken.sol";
@@ -155,13 +156,16 @@ contract RevolutionBuilder is
             new RevolutionDAOProxyV1{ salt: salt }(executor, revolutionVotingPower, _govParams, daoImpl, executor)
         );
 
+        address revolutionPointsEmitter = address(new ERC1967Proxy{ salt: salt }(revolutionPointsEmitterImpl, ""));
+
         return
             InitialProxySetup({
                 revolutionToken: revolutionToken,
                 executor: executor,
                 revolutionVotingPower: revolutionVotingPower,
                 dao: dao,
-                salt: salt
+                salt: salt,
+                revolutionPointsEmitter: revolutionPointsEmitter
             });
     }
 
@@ -192,15 +196,14 @@ contract RevolutionBuilder is
 
         // Deploy the remaining DAO contracts
         daoAddressesByToken[initialSetup.revolutionToken] = DAOAddresses({
-            revolutionPointsEmitter: address(
-                new ERC1967Proxy{ salt: initialSetup.salt }(revolutionPointsEmitterImpl, "")
-            ),
             revolutionPoints: address(new ERC1967Proxy{ salt: initialSetup.salt }(revolutionPointsImpl, "")),
             descriptor: address(new ERC1967Proxy{ salt: initialSetup.salt }(descriptorImpl, "")),
             vrgda: address(new ERC1967Proxy{ salt: initialSetup.salt }(vrgdaImpl, "")),
             auction: address(new ERC1967Proxy{ salt: initialSetup.salt }(auctionImpl, "")),
             cultureIndex: address(new ERC1967Proxy{ salt: initialSetup.salt }(cultureIndexImpl, "")),
             maxHeap: address(new ERC1967Proxy{ salt: initialSetup.salt }(maxHeapImpl, "")),
+            splitsCreator: address(new SplitMain(initialSetup.revolutionPointsEmitter)),
+            revolutionPointsEmitter: initialSetup.revolutionPointsEmitter,
             revolutionVotingPower: initialSetup.revolutionVotingPower,
             revolutionToken: revolutionToken,
             executor: initialSetup.executor,
@@ -283,15 +286,16 @@ contract RevolutionBuilder is
         emit RevolutionDeployed({
             revolutionPointsEmitter: daoAddressesByToken[revolutionToken].revolutionPointsEmitter,
             revolutionPoints: daoAddressesByToken[revolutionToken].revolutionPoints,
+            splitsCreator: daoAddressesByToken[revolutionToken].splitsCreator,
             cultureIndex: daoAddressesByToken[revolutionToken].cultureIndex,
             descriptor: daoAddressesByToken[revolutionToken].descriptor,
+            revolutionVotingPower: initialSetup.revolutionVotingPower,
             auction: daoAddressesByToken[revolutionToken].auction,
             maxHeap: daoAddressesByToken[revolutionToken].maxHeap,
-            revolutionVotingPower: initialSetup.revolutionVotingPower,
+            vrgda: daoAddressesByToken[revolutionToken].vrgda,
             revolutionToken: revolutionToken,
             executor: initialSetup.executor,
-            dao: initialSetup.dao,
-            vrgda: daoAddressesByToken[revolutionToken].vrgda
+            dao: initialSetup.dao
         });
 
         return daoAddressesByToken[revolutionToken];
@@ -314,6 +318,7 @@ contract RevolutionBuilder is
     /// @return maxHeap MaxHeap deployed address
     /// @return revolutionVotingPower RevolutionVotingPower deployed address
     /// @return vrgda VRGDAC deployed address
+    /// @return splitsCreator SplitsCreator deployed address
     function getAddresses(
         address _token
     )
@@ -330,7 +335,8 @@ contract RevolutionBuilder is
             address revolutionPointsEmitter,
             address maxHeap,
             address revolutionVotingPower,
-            address vrgda
+            address vrgda,
+            address splitsCreator
         )
     {
         DAOAddresses storage addresses = daoAddressesByToken[_token];
@@ -347,6 +353,7 @@ contract RevolutionBuilder is
         maxHeap = addresses.maxHeap;
         revolutionVotingPower = addresses.revolutionVotingPower;
         vrgda = addresses.vrgda;
+        splitsCreator = addresses.splitsCreator;
     }
 
     ///                                                          ///
@@ -401,7 +408,8 @@ contract RevolutionBuilder is
             address revolutionPointsEmitter,
             address maxHeap,
             address revolutionVotingPower,
-            address vrgda
+            address vrgda,
+
         ) = getAddresses(token);
         return
             DAOVersionInfo({

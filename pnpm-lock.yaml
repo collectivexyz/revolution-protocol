@@ -75,6 +75,9 @@ importers:
       '@cobuild/protocol-rewards':
         specifier: workspace:*
         version: link:../protocol-rewards
+      '@cobuild/splits':
+        specifier: workspace:*
+        version: link:../splits
       '@openzeppelin/contracts':
         specifier: 5.0.0
         version: 5.0.0

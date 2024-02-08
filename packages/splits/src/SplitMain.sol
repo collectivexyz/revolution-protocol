@@ -210,8 +210,9 @@ contract SplitMain is ISplitMain, VersionedContract {
         if (pointsData.percentOfEther == uint32(0))
             revert InvalidSplit__InvalidPointsPercent(pointsData.percentOfEther);
 
-        // at least 2 accounts
-        if (accounts.length < 2) revert InvalidSplit__TooFewAccounts(accounts.length);
+        // at least 1 account
+        // @notice this was changed from 2 to 1 because funds are split with the points emitter by default
+        if (accounts.length < 1) revert InvalidSplit__TooFewAccounts(accounts.length);
 
         // at least 1 points account
         if (pointsData.accounts.length < 1) revert InvalidSplit__TooFewAccounts(pointsData.accounts.length);
@@ -871,7 +872,7 @@ contract SplitMain is ISplitMain, VersionedContract {
         addresses[0] = account;
 
         uint256[] memory bps = new uint256[](1);
-        bps[0] = 1000000;
+        bps[0] = 10_000;
 
         // slither-disable-next-line arbitrary-send-eth
         tokensSoldWad = pointsEmitter.buyToken{ value: withdrawn }(
