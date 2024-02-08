@@ -9,6 +9,16 @@ import { IRevolutionPointsEmitter } from "./IPointsEmitterLike.sol";
  * @author 0xSplits <will@0xSplits.xyz>
  */
 interface ISplitMain {
+
+    /**
+     * STRUCTS
+     */
+     struct PointsData {
+        uint32 percentOfEther;
+        address[] accounts;
+        uint32[] percentAllocations;
+     }
+
     /**
      * FUNCTIONS
      */
@@ -18,9 +28,7 @@ interface ISplitMain {
     function pointsEmitter() external returns (IRevolutionPointsEmitter);
 
     function createSplit(
-        uint32 pointsPercent,
-        address[] calldata pointsAccounts,
-        uint32[] calldata pointsPercentAllocations,
+        PointsData calldata pointsData,
         address[] calldata accounts,
         uint32[] calldata percentAllocations,
         uint32 distributorFee,
@@ -28,9 +36,7 @@ interface ISplitMain {
     ) external returns (address);
 
     function predictImmutableSplitAddress(
-        uint32 pointsPercent,
-        address[] calldata pointsAccounts,
-        uint32[] calldata pointsPercentAllocations,
+        PointsData calldata pointsData,
         address[] calldata accounts,
         uint32[] calldata percentAllocations,
         uint32 distributorFee
@@ -38,9 +44,7 @@ interface ISplitMain {
 
     function updateSplit(
         address split,
-        uint32 pointsPercent,
-        address[] calldata pointsAccounts,
-        uint32[] calldata pointsPercentAllocations,
+        PointsData calldata pointsData,
         address[] calldata accounts,
         uint32[] calldata percentAllocations,
         uint32 distributorFee
@@ -56,9 +60,7 @@ interface ISplitMain {
 
     function distributeETH(
         address split,
-        uint32 pointsPercent,
-        address[] calldata pointsAccounts,
-        uint32[] calldata pointsPercentAllocations,
+        PointsData calldata pointsData,
         address[] calldata accounts,
         uint32[] calldata percentAllocations,
         uint32 distributorFee,
@@ -67,9 +69,7 @@ interface ISplitMain {
 
     function updateAndDistributeETH(
         address split,
-        uint32 pointsPercent,
-        address[] calldata pointsAccounts,
-        uint32[] calldata pointsPercentAllocations,
+        PointsData calldata pointsData,
         address[] calldata accounts,
         uint32[] calldata percentAllocations,
         uint32 distributorFee,
@@ -79,9 +79,7 @@ interface ISplitMain {
     function distributeERC20(
         address split,
         ERC20 token,
-        uint32 pointsPercent,
-        address[] calldata pointsAccounts,
-        uint32[] calldata pointsPercentAllocations,
+        PointsData calldata pointsData,
         address[] calldata accounts,
         uint32[] calldata percentAllocations,
         uint32 distributorFee,
@@ -91,9 +89,7 @@ interface ISplitMain {
     function updateAndDistributeERC20(
         address split,
         ERC20 token,
-        uint32 pointsPercent,
-        address[] calldata pointsAccounts,
-        uint32[] calldata pointsPercentAllocations,
+        PointsData calldata pointsData,
         address[] calldata accounts,
         uint32[] calldata percentAllocations,
         uint32 distributorFee,
