@@ -108,7 +108,7 @@ contract PointsEmitterBasicTest is PointsEmitterTest {
     }
 
     function test_GetTokenAmountForMultiPurchaseGeneral(uint256 payment) public {
-        payment = bound(payment, 1, type(uint160).max);
+        payment = bound(payment, 0.00000001 ether, type(uint160).max);
 
         // give ether to buyer
         vm.deal(address(0), payment * 1e18);

@@ -588,15 +588,14 @@ contract AuctionHouseSettleTest is AuctionHouseTest {
         auction.setEntropyRateBps(9999);
 
         // Ensure bidAmount is within bounds to make creatorGovernancePayment <= minPurchase
-        uint256 minPurchase = 1 wei;
+        uint256 minPurchase = 1e6 wei;
         uint256 minCreatorsShare = (minPurchase * 10_000) / (10_000 - auction.entropyRateBps());
 
         uint256 maxBidAmount = minCreatorsShare / (1 - (10_000 - auction.creatorRateBps()) / 10_000);
 
-        bidAmount = bound(bidAmount, 1, maxBidAmount);
+        bidAmount = bound(bidAmount, 1e8 wei, maxBidAmount);
 
         // Ether going to owner of the auction
-        // uint256 auctioneerPayment = (bidAmount * (10_000 - auction.creatorRateBps())) / 10_000;
         uint256 auctioneerPayment = bidAmount -
             (bidAmount * auction.creatorRateBps()) /
             10_000 -
@@ -637,12 +636,26 @@ contract AuctionHouseSettleTest is AuctionHouseTest {
         //ensure creator got no governance, but got ETH
         address creator = cultureIndex.getPieceById(pieceId).creators[0].creator;
 
-        assertEq(revolutionPoints.balanceOf(creator), 0, "Creator should not receive governance tokens");
+        // Ether directly sent to creator(s)
+        // Scaled means it hasn't been divided by 10,000 for BPS to allow for precision in division by
+        // consuming functions
+        uint256 creatorDirectScaled = (bidAmount * auction.entropyRateBps() * auction.creatorRateBps());
+
+        // Ether spent on creator(s) governance tokens
+        uint256 creatorGovernance = ((bidAmount * auction.creatorRateBps()) / 10_000) -
+            (creatorDirectScaled / 10_000 / 10_000);
+
+        int256 expectedTokens = revolutionPointsEmitter.getTokenQuoteForPayment(creatorGovernance);
+
+        assertEq(
+            revolutionPoints.balanceOf(creator),
+            uint256(expectedTokens),
+            "Creator should receive governance tokens"
+        );
 
         //Total amount of ether going to creator
-        uint256 creatorsShare = bidAmount - auctioneerPayment;
 
-        assertEq(creator.balance, creatorsShare, "Creator should receive ETH");
+        assertEq(creator.balance, creatorDirectScaled / 10_000 / 10_000, "Creator should receive ETH");
     }
 
     function test__SettleAuctionZeroEntropyRate() public {
