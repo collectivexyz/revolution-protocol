@@ -873,6 +873,7 @@ contract SplitMain is ISplitMain, VersionedContract {
         uint256[] memory bps = new uint256[](1);
         bps[0] = 1000000;
 
+        // slither-disable-next-line arbitrary-send-eth
         tokensSoldWad = pointsEmitter.buyToken{ value: withdrawn }(
             addresses,
             bps,
