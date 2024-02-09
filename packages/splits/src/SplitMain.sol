@@ -9,7 +9,6 @@ import { SafeTransferLib } from "solmate/src/utils/SafeTransferLib.sol";
 import { SafeERC20 } from "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
 import { IRevolutionPointsEmitter } from "./interfaces/IPointsEmitterLike.sol";
 import { VersionedContract } from "@cobuild/utility-contracts/src/version/VersionedContract.sol";
-import { VersionedContract } from "@cobuild/utility-contracts/src/version/VersionedContract.sol";
 import { UUPS } from "@cobuild/utility-contracts/src/proxy/UUPS.sol";
 import { OwnableUpgradeable } from "@openzeppelin/contracts-upgradeable/access/OwnableUpgradeable.sol";
 import { IUpgradeManager } from "@cobuild/utility-contracts/src/interfaces/IUpgradeManager.sol";

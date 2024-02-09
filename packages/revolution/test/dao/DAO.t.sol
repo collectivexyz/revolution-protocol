@@ -7,7 +7,7 @@ import { RevolutionBuilderTest } from "../RevolutionBuilder.t.sol";
 import { VRGDAC } from "../../src/libs/VRGDAC.sol";
 import { toDaysWadUnsafe, unsafeWadDiv, wadLn, wadExp, wadMul } from "../../src/libs/SignedWadMath.sol";
 import { console2 } from "forge-std/console2.sol";
-import { ERC1967Proxy } from "../../src/libs/proxy/ERC1967Proxy.sol";
+import { ERC1967Proxy } from "@cobuild/utility-contracts/src/proxy/ERC1967Proxy.sol";
 import { IVRGDAC } from "../../src/interfaces/IVRGDAC.sol";
 
 contract DAOTestSuite is RevolutionBuilderTest {

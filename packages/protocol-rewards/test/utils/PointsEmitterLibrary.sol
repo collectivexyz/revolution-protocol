@@ -1733,7 +1733,7 @@ contract RevolutionPointsEmitter is
     ///                                                          ///
 
     /// @notice The contract upgrade manager
-    IRevolutionBuilder private immutable manager;
+    IUpgradeManager private immutable manager;
 
     ///                                                          ///
     ///                         CONSTRUCTOR                      ///
@@ -1751,7 +1751,7 @@ contract RevolutionPointsEmitter is
         if (_protocolRewards == address(0)) revert ADDRESS_ZERO();
         if (_protocolFeeRecipient == address(0)) revert ADDRESS_ZERO();
 
-        manager = IRevolutionBuilder(_manager);
+        manager = IUpgradeManager(_manager);
     }
 
     ///                                                          ///

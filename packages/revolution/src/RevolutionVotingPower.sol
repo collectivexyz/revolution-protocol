@@ -3,10 +3,11 @@ pragma solidity ^0.8.22;
 
 import { Ownable2StepUpgradeable } from "@openzeppelin/contracts-upgradeable/access/Ownable2StepUpgradeable.sol";
 import { ReentrancyGuardUpgradeable } from "@openzeppelin/contracts-upgradeable/utils/ReentrancyGuardUpgradeable.sol";
-import { IRevolutionBuilder } from "./interfaces/IRevolutionBuilder.sol";
+import { IUpgradeManager } from "@cobuild/utility-contracts/src/interfaces/IUpgradeManager.sol";
 
-import { UUPS } from "./libs/proxy/UUPS.sol";
-import { VersionedContract } from "./version/VersionedContract.sol";
+import { UUPS } from "@cobuild/utility-contracts/src/proxy/UUPS.sol";
+
+import { VersionedContract } from "@cobuild/utility-contracts/src/version/VersionedContract.sol";
 
 import { IRevolutionToken } from "./interfaces/IRevolutionToken.sol";
 import { IRevolutionPoints } from "./interfaces/IRevolutionPoints.sol";
@@ -29,7 +30,7 @@ contract RevolutionVotingPower is
      */
 
     /// @notice The contract upgrade manager
-    IRevolutionBuilder private immutable manager;
+    IUpgradeManager private immutable manager;
 
     /**
      * ░░░░░░░░░░░░░░░░░░░░░░░░░░░░░
@@ -57,7 +58,7 @@ contract RevolutionVotingPower is
 
     /// @param _manager The contract upgrade manager address
     constructor(address _manager) payable initializer {
-        manager = IRevolutionBuilder(_manager);
+        manager = IUpgradeManager(_manager);
     }
 
     /**

@@ -18,7 +18,8 @@ const makePackageVersionFile = async (version) => {
 // SPDX-License-Identifier: GPL-3.0-or-later
 pragma solidity 0.8.22;
 
-import { IVersionedContract } from "../interfaces/IVersionedContract.sol";
+import { VersionedContract } from "@cobuild/utility-contracts/src/version/VersionedContract.sol";
+
 
 /// @title VersionedContract
 /// @notice Base contract for versioning contracts

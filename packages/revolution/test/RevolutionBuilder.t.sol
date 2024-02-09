@@ -19,7 +19,8 @@ import { MaxHeap } from "../src/culture-index/MaxHeap.sol";
 import { RevolutionDAOStorageV1 } from "../src/governance/RevolutionDAOInterfaces.sol";
 import { RevolutionProtocolRewards } from "@cobuild/protocol-rewards/src/RevolutionProtocolRewards.sol";
 import { RevolutionBuilderTypesV1 } from "../src/builder/types/RevolutionBuilderTypesV1.sol";
-import { ERC1967Proxy } from "../src/libs/proxy/ERC1967Proxy.sol";
+import { ERC1967Proxy } from "@cobuild/utility-contracts/src/proxy/ERC1967Proxy.sol";
+
 import { MockERC721 } from "./mock/MockERC721.sol";
 import { MockERC1155 } from "./mock/MockERC1155.sol";
 import { MockWETH } from "./mock/MockWETH.sol";

@@ -54,8 +54,9 @@ pragma solidity ^0.8.22;
 
 import { Ownable2StepUpgradeable } from "@openzeppelin/contracts-upgradeable/access/Ownable2StepUpgradeable.sol";
 
-import { UUPS } from "../libs/proxy/UUPS.sol";
-import { VersionedContract } from "../version/VersionedContract.sol";
+import { UUPS } from "@cobuild/utility-contracts/src/proxy/UUPS.sol";
+import { VersionedContract } from "@cobuild/utility-contracts/src/version/VersionedContract.sol";
+import { IUpgradeManager } from "@cobuild/utility-contracts/src/interfaces/IUpgradeManager.sol";
 
 import "./RevolutionDAOInterfaces.sol";
 import { IRevolutionDAO } from "../interfaces/IRevolutionDAO.sol";
@@ -143,7 +144,7 @@ contract RevolutionDAOLogicV1 is
 
     /// @param _manager The contract upgrade manager address
     constructor(address _manager) payable initializer {
-        manager = IRevolutionBuilder(_manager);
+        manager = IUpgradeManager(_manager);
     }
 
     ///                                                          ///

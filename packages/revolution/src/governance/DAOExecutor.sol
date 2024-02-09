@@ -31,8 +31,8 @@
 pragma solidity ^0.8.22;
 
 import { Initializable } from "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
-import { IRevolutionBuilder } from "../interfaces/IRevolutionBuilder.sol";
-import { VersionedContract } from "../version/VersionedContract.sol";
+import { VersionedContract } from "@cobuild/utility-contracts/src/version/VersionedContract.sol";
+import { IUpgradeManager } from "@cobuild/utility-contracts/src/interfaces/IUpgradeManager.sol";
 
 contract DAOExecutor is Initializable, VersionedContract {
     event NewAdmin(address indexed newAdmin);
@@ -74,7 +74,7 @@ contract DAOExecutor is Initializable, VersionedContract {
     ///                                                          ///
 
     /// @notice The contract upgrade manager
-    IRevolutionBuilder private immutable manager;
+    IUpgradeManager private immutable manager;
 
     uint256 public constant GRACE_PERIOD = 14 days;
     uint256 public constant MINIMUM_DELAY = 2 days;
@@ -86,7 +86,7 @@ contract DAOExecutor is Initializable, VersionedContract {
 
     /// @param _manager The contract upgrade manager address
     constructor(address _manager) payable initializer {
-        manager = IRevolutionBuilder(_manager);
+        manager = IUpgradeManager(_manager);
     }
 
     ///                                                          ///

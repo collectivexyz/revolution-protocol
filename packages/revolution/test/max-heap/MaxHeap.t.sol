@@ -3,7 +3,7 @@ pragma solidity ^0.8.22;
 
 import { MaxHeap } from "../../src/culture-index/MaxHeap.sol";
 import { RevolutionBuilderTest } from "../RevolutionBuilder.t.sol";
-import { ERC1967Proxy } from "../../src/libs/proxy/ERC1967Proxy.sol";
+import { ERC1967Proxy } from "@cobuild/utility-contracts/src/proxy/ERC1967Proxy.sol";
 
 /// @title MaxHeapTestSuite
 /// @dev The test suite for the MaxHeap contract

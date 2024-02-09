@@ -2,9 +2,9 @@
 pragma solidity 0.8.22;
 
 import { wadExp, wadLn, wadMul, wadDiv, unsafeWadDiv, wadPow } from "./SignedWadMath.sol";
-import { VersionedContract } from "../version/VersionedContract.sol";
-import { IRevolutionBuilder } from "../interfaces/IRevolutionBuilder.sol";
-import { UUPS } from "./proxy/UUPS.sol";
+import { VersionedContract } from "@cobuild/utility-contracts/src/version/VersionedContract.sol";
+import { IUpgradeManager } from "@cobuild/utility-contracts/src/interfaces/IUpgradeManager.sol";
+import { UUPS } from "@cobuild/utility-contracts/src/proxy/UUPS.sol";
 import { OwnableUpgradeable } from "@openzeppelin/contracts-upgradeable/access/OwnableUpgradeable.sol";
 import { IVRGDAC } from "../interfaces/IVRGDAC.sol";
 
@@ -19,7 +19,7 @@ contract VRGDAC is IVRGDAC, VersionedContract, UUPS, OwnableUpgradeable {
     ///                                                          ///
 
     /// @notice The contract upgrade manager
-    IRevolutionBuilder private immutable manager;
+    IUpgradeManager private immutable manager;
 
     /*//////////////////////////////////////////////////////////////
                             VRGDA PARAMETERS
@@ -42,7 +42,7 @@ contract VRGDAC is IVRGDAC, VersionedContract, UUPS, OwnableUpgradeable {
 
     /// @param _manager The contract upgrade manager address
     constructor(address _manager) payable initializer {
-        manager = IRevolutionBuilder(_manager);
+        manager = IUpgradeManager(_manager);
     }
 
     ///                                                          ///

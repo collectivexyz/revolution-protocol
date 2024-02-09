@@ -22,13 +22,15 @@ import { EIP712Upgradeable } from "@openzeppelin/contracts-upgradeable/utils/cry
 import { ReentrancyGuardUpgradeable } from "@openzeppelin/contracts-upgradeable/utils/ReentrancyGuardUpgradeable.sol";
 import { IERC20 } from "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 
+import { VersionedContract } from "@cobuild/utility-contracts/src/version/VersionedContract.sol";
+import { UUPS } from "@cobuild/utility-contracts/src/proxy/UUPS.sol";
+import { IUpgradeManager } from "@cobuild/utility-contracts/src/interfaces/IUpgradeManager.sol";
+
 import { ERC20VotesUpgradeable } from "./base/erc20/ERC20VotesUpgradeable.sol";
-import { VersionedContract } from "./version/VersionedContract.sol";
-import { UUPS } from "./libs/proxy/UUPS.sol";
 import { ERC20Upgradeable } from "./base/erc20/ERC20Upgradeable.sol";
 
-import { IRevolutionBuilder } from "./interfaces/IRevolutionBuilder.sol";
 import { IRevolutionPoints } from "./interfaces/IRevolutionPoints.sol";
+import { IRevolutionBuilder } from "./interfaces/IRevolutionBuilder.sol";
 
 contract RevolutionPoints is
     IRevolutionPoints,
@@ -49,7 +51,7 @@ contract RevolutionPoints is
     ///                                                          ///
 
     /// @notice The contract upgrade manager
-    IRevolutionBuilder private immutable manager;
+    IUpgradeManager private immutable manager;
 
     ///                                                          ///
     ///                          MODIFIERS                       ///
@@ -77,7 +79,7 @@ contract RevolutionPoints is
 
     /// @param _manager The contract upgrade manager address
     constructor(address _manager) initializer {
-        manager = IRevolutionBuilder(_manager);
+        manager = IUpgradeManager(_manager);
     }
 
     ///                                                          ///

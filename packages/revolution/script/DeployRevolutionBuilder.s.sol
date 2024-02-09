@@ -18,7 +18,8 @@ import { RevolutionPoints } from "../src/RevolutionPoints.sol";
 import { RevolutionVotingPower } from "../src/RevolutionVotingPower.sol";
 import { RevolutionPointsEmitter } from "../src/RevolutionPointsEmitter.sol";
 import { IDAOExecutor } from "../src/governance/RevolutionDAOInterfaces.sol";
-import { ERC1967Proxy } from "../src/libs/proxy/ERC1967Proxy.sol";
+import { ERC1967Proxy } from "@cobuild/utility-contracts/src/proxy/ERC1967Proxy.sol";
+
 import { VRGDAC } from "../src/libs/VRGDAC.sol";
 
 contract DeployContracts is Script {

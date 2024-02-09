@@ -39,12 +39,11 @@ import { IRevolutionPointsEmitter } from "../interfaces/IRevolutionPointsEmitter
 import { IRevolutionPoints } from "../interfaces/IRevolutionPoints.sol";
 import { IVRGDAC } from "../interfaces/IVRGDAC.sol";
 
-import { ERC1967Proxy } from "../libs/proxy/ERC1967Proxy.sol";
-import { UUPS } from "../libs/proxy/UUPS.sol";
+import { ERC1967Proxy } from "@cobuild/utility-contracts/src/proxy/ERC1967Proxy.sol";
+import { UUPS } from "@cobuild/utility-contracts/src/proxy/UUPS.sol";
+import { IVersionedContract } from "@cobuild/utility-contracts/src/interfaces/IVersionedContract.sol";
 import { RevolutionDAOProxyV1 } from "../governance/RevolutionDAOProxyV1.sol";
-
-import { VersionedContract } from "../version/VersionedContract.sol";
-import { IVersionedContract } from "../interfaces/IVersionedContract.sol";
+import { VersionedContract } from "@cobuild/utility-contracts/src/version/VersionedContract.sol";
 
 /// @title RevolutionBuilder
 /// @notice The Revolution DAO deployer and upgrade manager

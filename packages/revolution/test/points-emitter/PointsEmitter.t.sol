@@ -11,7 +11,7 @@ import { wadDiv } from "../../src/libs/SignedWadMath.sol";
 import { IRevolutionBuilder } from "../../src/interfaces/IRevolutionBuilder.sol";
 import { RevolutionBuilderTest } from "../RevolutionBuilder.t.sol";
 import { IRevolutionPoints } from "../../src/interfaces/IRevolutionPoints.sol";
-import { ERC1967Proxy } from "../../src/libs/proxy/ERC1967Proxy.sol";
+import { ERC1967Proxy } from "@cobuild/utility-contracts/src/proxy/ERC1967Proxy.sol";
 import { console2 } from "forge-std/console2.sol";
 
 contract PointsEmitterTest is RevolutionBuilderTest {

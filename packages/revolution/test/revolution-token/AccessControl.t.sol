@@ -13,7 +13,7 @@ import { Descriptor } from "../../src/Descriptor.sol";
 import "../utils/Base64Decode.sol";
 import "../utils/JsmnSolLib.sol";
 import { RevolutionTokenTestSuite } from "./RevolutionToken.t.sol";
-import { ERC1967Proxy } from "../../src/libs/proxy/ERC1967Proxy.sol";
+import { ERC1967Proxy } from "@cobuild/utility-contracts/src/proxy/ERC1967Proxy.sol";
 
 /// @title RevolutionTokenTest
 /// @dev The test suite for the RevolutionToken contract
