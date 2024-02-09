@@ -22,6 +22,12 @@ interface ISplitMain {
      * FUNCTIONS
      */
 
+    /**
+     * @notice Initializes the SplitMain contract
+     * @param pointsEmitter The address of the points emitter to buy tokens through
+     */
+    function initialize(address pointsEmitter) external;
+
     function walletImplementation() external returns (address);
 
     function pointsEmitter() external returns (IRevolutionPointsEmitter);
