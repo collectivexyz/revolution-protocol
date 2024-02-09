@@ -31,7 +31,7 @@ importers:
     dependencies:
       '@cobuild/utility-contracts':
         specifier: workspace:*
-        version: link:../utils
+        version: link:../utility-contracts
       '@openzeppelin/contracts':
         specifier: 5.0.0
         version: 5.0.0
@@ -83,7 +83,7 @@ importers:
         version: link:../splits
       '@cobuild/utility-contracts':
         specifier: workspace:*
-        version: link:../utils
+        version: link:../utility-contracts
       '@openzeppelin/contracts':
         specifier: 5.0.0
         version: 5.0.0
@@ -135,7 +135,7 @@ importers:
         version: link:../protocol-rewards
       '@cobuild/utility-contracts':
         specifier: workspace:*
-        version: link:../utils
+        version: link:../utility-contracts
       '@openzeppelin/contracts':
         specifier: 5.0.0
         version: 5.0.0
@@ -180,7 +180,7 @@ importers:
         specifier: ^4.6.2
         version: 4.7.0
 
-  packages/utils:
+  packages/utility-contracts:
     dependencies:
       '@openzeppelin/contracts':
         specifier: 5.0.0
