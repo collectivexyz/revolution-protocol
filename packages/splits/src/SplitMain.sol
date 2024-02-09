@@ -8,7 +8,11 @@ import { ERC20 } from "@openzeppelin/contracts/token/ERC20/ERC20.sol";
 import { SafeTransferLib } from "solmate/src/utils/SafeTransferLib.sol";
 import { SafeERC20 } from "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
 import { IRevolutionPointsEmitter } from "./interfaces/IPointsEmitterLike.sol";
-import { VersionedContract } from "./version/VersionedContract.sol";
+import { VersionedContract } from "@cobuild/utility-contracts/src/version/VersionedContract.sol";
+import { VersionedContract } from "@cobuild/utility-contracts/src/version/VersionedContract.sol";
+import { UUPS } from "@cobuild/utility-contracts/src/proxy/UUPS.sol";
+import { OwnableUpgradeable } from "@openzeppelin/contracts-upgradeable/access/OwnableUpgradeable.sol";
+import { IUpgradeManager } from "@cobuild/utility-contracts/src/interfaces/IUpgradeManager.sol";
 
 /**
 
@@ -117,6 +121,9 @@ error InvalidSplit__InvalidHash(bytes32 hash);
 /// @param newController Invalid new controller
 error InvalidNewController(address newController);
 
+/// @notice Invalid manager sender
+error SenderNotManager();
+
 /**
  * @title SplitMain
  * @author 0xSplits <will@0xSplits.xyz>
@@ -126,7 +133,7 @@ error InvalidNewController(address newController);
  * For these proxies, we extended EIP-1167 Minimal Proxy Contract to avoid `DELEGATECALL` inside `receive()` to accept
  * hard gas-capped `sends` & `transfers`.
  */
-contract SplitMain is ISplitMain, VersionedContract {
+contract SplitMain is ISplitMain, VersionedContract, OwnableUpgradeable, UUPS {
     using SafeTransferLib for address;
 
     /**
@@ -153,11 +160,11 @@ contract SplitMain is ISplitMain, VersionedContract {
     /// @notice maximum distributor fee; 1e5 = 10% * PERCENTAGE_SCALE
     uint256 internal constant MAX_DISTRIBUTOR_FEE = 1e5;
     /// @notice address of wallet implementation for split proxies
-    address public immutable override walletImplementation;
+    address public override walletImplementation;
     /// @notice the RevolutionPointsEmitter contract
-    IRevolutionPointsEmitter public immutable override pointsEmitter;
+    IRevolutionPointsEmitter public override pointsEmitter;
     /// @notice The contract upgrade manager
-    address private immutable manager;
+    IUpgradeManager private immutable manager;
 
     /**
      * STORAGE - VARIABLES - PRIVATE & INTERNAL
@@ -290,7 +297,7 @@ contract SplitMain is ISplitMain, VersionedContract {
      *  @param _manager The contract upgrade manager address
      */
     constructor(address _manager) payable initializer {
-        manager = _manager;
+        manager = IUpgradeManager(_manager);
     }
 
     /**
@@ -301,7 +308,7 @@ contract SplitMain is ISplitMain, VersionedContract {
      *  @param _pointsEmitter The address of the community's points emitter contract to buy points from
      */
     function initialize(address _pointsEmitter) public initializer {
-        if (msg.sender != manager) revert SENDER_NOT_MANAGER();
+        if (msg.sender != address(manager)) revert SenderNotManager();
 
         pointsEmitter = IRevolutionPointsEmitter(_pointsEmitter);
         walletImplementation = address(new SplitWallet());
@@ -914,5 +921,13 @@ contract SplitMain is ISplitMain, VersionedContract {
         withdrawn = erc20Balances[token][account] - 1;
         erc20Balances[token][account] = 1;
         SafeERC20.safeTransfer(token, account, withdrawn);
+    }
+
+    /// @notice Ensures the caller is authorized to upgrade the contract and that the new implementation is valid
+    /// @dev This function is called in `upgradeTo` & `upgradeToAndCall`
+    /// @param _newImpl The new implementation address
+    function _authorizeUpgrade(address _newImpl) internal view override onlyOwner {
+        // Ensure the new implementation is a registered upgrade
+        if (!manager.isRegisteredUpgrade(_getImplementation(), _newImpl)) revert INVALID_UPGRADE(_newImpl);
     }
 }

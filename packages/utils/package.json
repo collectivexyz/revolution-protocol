@@ -1,0 +1,48 @@
+{
+  "name": "@cobuild/utility-contracts",
+  "repository": "https://github.com/collectivexyz/revolution-protocol.git",
+  "license": "MIT",
+  "files": [
+    "dist/",
+    "src/",
+    "package/",
+    "abis/"
+  ],
+  "version": "0.10.1",
+  "publishConfig": {
+    "access": "public"
+  },
+  "scripts": {
+    "build:sizes": "forge build --sizes",
+    "dev": "FOUNDRY_PROFILE=dev forge test --watch -vvvv",
+    "test": "forge test -vvv",
+    "test:ci": "forge test -vvv",
+    "build:contracts": "forge build",
+    "prettier": "prettier --write 'src/**/*.sol' 'test/**/*.sol'",
+    "lint": "prettier --check 'src/**/*.sol' 'test/**/*.sol'",
+    "copy-abis": "tsx script/bundle-abis.ts",
+    "build": "pnpm run wagmi && pnpm run copy-abis && tsup",
+    "wagmi": "FOUNDRY_PROFILE=dev forge build && wagmi generate",
+    "write-gas-report": "forge test --gas-report > ../../gas-reports/splits.ansi",
+    "clean": "forge cache clean && if [ -d out ]; then forge clean; fi",
+    "storage-inspect:check": "./script/storage-check.sh check SplitMain SplitWallet",
+    "storage-inspect:generate": "./script/storage-check.sh generate SplitMain SplitWallet"
+  },
+  "dependencies": {
+    "@openzeppelin/contracts": "5.0.0",
+    "@wagmi/cli": "^1.5.2",
+    "ds-test": "https://github.com/dapphub/ds-test#cd98eff28324bfac652e63a239a60632a761790b",
+    "forge-std": "https://github.com/foundry-rs/forge-std#87a2a0afc5fafd6297538a45a52ac19e71a84562",
+    "solmate": "^6.1.0"
+  },
+  "devDependencies": {
+    "@types/node": "^20.10.4",
+    "glob": "^10.3.10",
+    "pathe": "^1.1.1",
+    "prettier": "2.8.8",
+    "prettier-plugin-solidity": "1.2.0",
+    "solhint": "3.4.1",
+    "tsup": "^8.0.1",
+    "tsx": "^4.6.2"
+  }
+}

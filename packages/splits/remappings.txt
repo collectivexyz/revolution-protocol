@@ -1,5 +1,7 @@
 ds-test/=node_modules/ds-test/src/
 forge-std/=node_modules/forge-std/src/
 @openzeppelin/contracts/=node_modules/@openzeppelin/contracts/
+@openzeppelin/contracts-upgradeable/=node_modules/@openzeppelin/contracts-upgradeable/
 solmate=node_modules/solmate/
 @cobuild/protocol-rewards/src/=node_modules/@cobuild/protocol-rewards/src/
+@cobuild/utility-contracts/src/=node_modules/@cobuild/utility-contracts/src/
