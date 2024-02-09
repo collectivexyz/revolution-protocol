@@ -33,6 +33,7 @@ import { Time } from "@openzeppelin/contracts/utils/types/Time.sol";
 import { Initializable } from "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
 import { IVotes } from "@openzeppelin/contracts/governance/utils/IVotes.sol";
 import { IERC20 } from "@openzeppelin/contracts/token/ERC20/IERC20.sol";
+import { IUpgradeManager } from "@cobuild/utility-contracts/src/interfaces/IUpgradeManager.sol";
 
 interface IVRGDAC {
     /**

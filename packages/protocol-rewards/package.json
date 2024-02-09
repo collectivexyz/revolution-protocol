@@ -29,6 +29,7 @@
     "storage-inspect:generate": "./script/storage-check.sh generate RevolutionProtocolRewards RewardSplits PointsEmitterRewards"
   },
   "dependencies": {
+    "@cobuild/utility-contracts": "workspace:*",
     "@openzeppelin/contracts": "5.0.0",
     "@openzeppelin/contracts-upgradeable": "5.0.0",
     "@wagmi/cli": "^1.5.2",

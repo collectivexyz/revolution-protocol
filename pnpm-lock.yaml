@@ -29,6 +29,9 @@ importers:
 
   packages/protocol-rewards:
     dependencies:
+      '@cobuild/utility-contracts':
+        specifier: workspace:*
+        version: link:../utils
       '@openzeppelin/contracts':
         specifier: 5.0.0
         version: 5.0.0
