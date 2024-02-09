@@ -156,6 +156,8 @@ contract SplitMain is ISplitMain, VersionedContract {
     address public immutable override walletImplementation;
     /// @notice the RevolutionPointsEmitter contract
     IRevolutionPointsEmitter public immutable override pointsEmitter;
+    /// @notice The contract upgrade manager
+    address private immutable manager;
 
     /**
      * STORAGE - VARIABLES - PRIVATE & INTERNAL
@@ -284,7 +286,23 @@ contract SplitMain is ISplitMain, VersionedContract {
      * CONSTRUCTOR
      */
 
-    constructor(address _pointsEmitter) {
+    /** @notice Create the contract with a given manager
+     *  @param _manager The contract upgrade manager address
+     */
+    constructor(address _manager) payable initializer {
+        manager = _manager;
+    }
+
+    /**
+     * INITIALIZER
+     */
+
+    /** @notice Initialize the contract
+     *  @param _pointsEmitter The address of the community's points emitter contract to buy points from
+     */
+    function initialize(address _pointsEmitter) public initializer {
+        if (msg.sender != manager) revert SENDER_NOT_MANAGER();
+
         pointsEmitter = IRevolutionPointsEmitter(_pointsEmitter);
         walletImplementation = address(new SplitWallet());
     }
