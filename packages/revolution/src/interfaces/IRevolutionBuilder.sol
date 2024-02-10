@@ -9,6 +9,30 @@ import { ICultureIndex } from "./ICultureIndex.sol";
 /// @title IRevolutionBuilder
 /// @notice The external RevolutionBuilder events, errors, structs and functions
 interface IRevolutionBuilder is IUpgradeManager {
+    struct TokenImplementations {
+        address revolutionToken;
+        address descriptor;
+        address auction;
+    }
+
+    struct DAOImplementations {
+        address executor;
+        address dao;
+        address revolutionVotingPower;
+    }
+
+    struct CultureIndexImplementations {
+        address cultureIndex;
+        address maxHeap;
+    }
+
+    struct PointsImplementations {
+        address revolutionPoints;
+        address revolutionPointsEmitter;
+        address vrgda;
+        address splitMain;
+    }
+
     ///                                                          ///
     ///                            EVENTS                        ///
     ///                                                          ///

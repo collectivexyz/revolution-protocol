@@ -19,6 +19,7 @@ import { RevolutionVotingPower } from "../src/RevolutionVotingPower.sol";
 import { RevolutionPointsEmitter } from "../src/RevolutionPointsEmitter.sol";
 import { IDAOExecutor } from "../src/governance/RevolutionDAOInterfaces.sol";
 import { ERC1967Proxy } from "@cobuild/utility-contracts/src/proxy/ERC1967Proxy.sol";
+import { SplitMain } from "@cobuild/splits/src/SplitMain.sol";
 
 import { VRGDAC } from "../src/libs/VRGDAC.sol";
 
@@ -41,6 +42,7 @@ contract DeployContracts is Script {
         address revolutionVotingPowerImpl;
         address builderImpl;
         address vrgdaImpl;
+        address splitMainImpl;
     }
 
     // Define the struct for deployed contracts
@@ -74,17 +76,23 @@ contract DeployContracts is Script {
     function deployRevolutionBuilderContracts(address owner) private {
         deployedContracts.builderImpl0 = address(
             new RevolutionBuilder(
-                address(0),
-                address(0),
-                address(0),
-                address(0),
-                address(0),
-                address(0),
-                address(0),
-                address(0),
-                address(0),
-                address(0),
-                address(0)
+                IRevolutionBuilder.PointsImplementations({
+                    revolutionPointsEmitter: address(0),
+                    revolutionPoints: address(0),
+                    splitMain: address(0),
+                    vrgda: address(0)
+                }),
+                IRevolutionBuilder.TokenImplementations({
+                    revolutionToken: address(0),
+                    descriptor: address(0),
+                    auction: address(0)
+                }),
+                IRevolutionBuilder.DAOImplementations({
+                    revolutionVotingPower: address(0),
+                    executor: address(0),
+                    dao: address(0)
+                }),
+                IRevolutionBuilder.CultureIndexImplementations({ cultureIndex: address(0), maxHeap: address(0) })
             )
         );
 
@@ -119,20 +127,30 @@ contract DeployContracts is Script {
             new RevolutionVotingPower(address(deployedContracts.builderProxy))
         );
         deployedContracts.vrgdaImpl = address(new VRGDAC(address(deployedContracts.builderProxy)));
+        deployedContracts.splitMainImpl = address(new VRGDAC(address(deployedContracts.builderProxy)));
 
         deployedContracts.builderImpl = address(
             new RevolutionBuilder(
-                deployedContracts.revolutionTokenImpl,
-                deployedContracts.descriptorImpl,
-                deployedContracts.auctionImpl,
-                deployedContracts.executorImpl,
-                deployedContracts.daoImpl,
-                deployedContracts.cultureIndexImpl,
-                deployedContracts.revolutionPointsImpl,
-                deployedContracts.revolutionPointsEmitterImpl,
-                deployedContracts.maxHeapImpl,
-                deployedContracts.revolutionVotingPowerImpl,
-                deployedContracts.vrgdaImpl
+                IRevolutionBuilder.PointsImplementations({
+                    revolutionPoints: deployedContracts.revolutionPointsImpl,
+                    revolutionPointsEmitter: deployedContracts.revolutionPointsEmitterImpl,
+                    vrgda: deployedContracts.vrgdaImpl,
+                    splitMain: deployedContracts.splitMainImpl
+                }),
+                IRevolutionBuilder.TokenImplementations({
+                    revolutionToken: deployedContracts.revolutionTokenImpl,
+                    descriptor: deployedContracts.descriptorImpl,
+                    auction: deployedContracts.auctionImpl
+                }),
+                IRevolutionBuilder.DAOImplementations({
+                    revolutionVotingPower: deployedContracts.revolutionVotingPowerImpl,
+                    executor: deployedContracts.executorImpl,
+                    dao: deployedContracts.daoImpl
+                }),
+                IRevolutionBuilder.CultureIndexImplementations({
+                    cultureIndex: deployedContracts.cultureIndexImpl,
+                    maxHeap: deployedContracts.maxHeapImpl
+                })
             )
         );
     }
@@ -206,6 +224,14 @@ contract DeployContracts is Script {
                 )
             )
         );
+        vm.writeLine(
+            filePath,
+            string(abi.encodePacked("VRGDAC implementation: ", addressToString(deployedContracts.vrgdaImpl)))
+        );
+        vm.writeLine(
+            filePath,
+            string(abi.encodePacked("SplitMain implementation: ", addressToString(deployedContracts.splitMainImpl)))
+        );
 
         console2.log("~~~~~~~~~~ MANAGER IMPL 0 ~~~~~~~~~~~");
         console2.logAddress(deployedContracts.builderImpl0);
@@ -231,6 +257,35 @@ contract DeployContracts is Script {
 
         console2.log("~~~~~~~~~~ DAO IMPL ~~~~~~~~~~~");
         console2.logAddress(deployedContracts.daoImpl);
+
+        console2.log("~~~~~~~~~~ CULTURE INDEX IMPL ~~~~~~~~~~~");
+        console2.logAddress(deployedContracts.cultureIndexImpl);
+
+        console2.log("~~~~~~~~~~ MAX HEAP IMPL ~~~~~~~~~~~");
+        console2.logAddress(deployedContracts.maxHeapImpl);
+
+        console2.log("~~~~~~~~~~ POINTS IMPL ~~~~~~~~~~~");
+        console2.logAddress(deployedContracts.revolutionPointsImpl);
+
+        console2.log("~~~~~~~~~~ POINTS EMITTER IMPL ~~~~~~~~~~~");
+        console2.logAddress(deployedContracts.revolutionPointsEmitterImpl);
+
+        console2.log("~~~~~~~~~~ VOTING POWER IMPL ~~~~~~~~~~~");
+        console2.logAddress(deployedContracts.revolutionVotingPowerImpl);
+
+        console2.log("~~~~~~~~~~ VRGDAC IMPL ~~~~~~~~~~~");
+        console2.logAddress(deployedContracts.vrgdaImpl);
+
+        console2.log("~~~~~~~~~~ SPLIT MAIN IMPL ~~~~~~~~~~~");
+        console2.logAddress(deployedContracts.splitMainImpl);
+
+        console2.log("~~~~~~~~~~ PROTOCOL REWARDS ~~~~~~~~~~~");
+        console2.logAddress(deployedContracts.protocolRewards);
+
+        console2.log("~~~~~~~~~~ DEPLOYMENT DETAILS WRITTEN TO FILE ~~~~~~~~~~~");
+        console2.log(filePath);
+
+        console2.log("~~~~~~~~~~ DEPLOYMENT COMPLETE ~~~~~~~~~~~");
     }
 
     function addressToString(address _addr) private pure returns (string memory) {

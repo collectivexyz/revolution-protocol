@@ -24,7 +24,6 @@ pragma solidity 0.8.22;
 
 import { Ownable2StepUpgradeable } from "@openzeppelin/contracts-upgradeable/access/Ownable2StepUpgradeable.sol";
 
-import { SplitMain } from "@cobuild/splits/src/SplitMain.sol";
 import { RevolutionBuilderStorageV1 } from "./storage/RevolutionBuilderStorageV1.sol";
 import { IRevolutionBuilder } from "../interfaces/IRevolutionBuilder.sol";
 import { IRevolutionToken } from "../interfaces/IRevolutionToken.sol";
@@ -38,11 +37,12 @@ import { IMaxHeap } from "../interfaces/IMaxHeap.sol";
 import { IRevolutionPointsEmitter } from "../interfaces/IRevolutionPointsEmitter.sol";
 import { IRevolutionPoints } from "../interfaces/IRevolutionPoints.sol";
 import { IVRGDAC } from "../interfaces/IVRGDAC.sol";
+import { RevolutionDAOProxyV1 } from "../governance/RevolutionDAOProxyV1.sol";
 
 import { ERC1967Proxy } from "@cobuild/utility-contracts/src/proxy/ERC1967Proxy.sol";
 import { UUPS } from "@cobuild/utility-contracts/src/proxy/UUPS.sol";
 import { IVersionedContract } from "@cobuild/utility-contracts/src/interfaces/IVersionedContract.sol";
-import { RevolutionDAOProxyV1 } from "../governance/RevolutionDAOProxyV1.sol";
+import { ISplitMain } from "@cobuild/splits/src/interfaces/ISplitMain.sol";
 import { VersionedContract } from "@cobuild/utility-contracts/src/version/VersionedContract.sol";
 
 /// @title RevolutionBuilder
@@ -91,34 +91,34 @@ contract RevolutionBuilder is
     /// @notice The VRGDAC implementation address
     address public immutable vrgdaImpl;
 
+    /// @notice The SplitsCreator implementation address
+    address public immutable splitMainImpl;
+
     ///                                                          ///
     ///                          CONSTRUCTOR                     ///
     ///                                                          ///
 
     constructor(
-        address _revolutionTokenImpl,
-        address _descriptorImpl,
-        address _auctionImpl,
-        address _executorImpl,
-        address _daoImpl,
-        address _cultureIndexImpl,
-        address _revolutionPointsImpl,
-        address _revolutionPointsEmitterImpl,
-        address _maxHeapImpl,
-        address _revolutionVotingPowerImpl,
-        address _vrgdaImpl
+        PointsImplementations memory _pointsImplementations,
+        TokenImplementations memory _tokenImplementations,
+        DAOImplementations memory _daoImplementations,
+        CultureIndexImplementations memory _cultureIndexImplementations
     ) payable initializer {
-        revolutionTokenImpl = _revolutionTokenImpl;
-        descriptorImpl = _descriptorImpl;
-        auctionImpl = _auctionImpl;
-        executorImpl = _executorImpl;
-        daoImpl = _daoImpl;
-        cultureIndexImpl = _cultureIndexImpl;
-        revolutionPointsImpl = _revolutionPointsImpl;
-        revolutionPointsEmitterImpl = _revolutionPointsEmitterImpl;
-        maxHeapImpl = _maxHeapImpl;
-        revolutionVotingPowerImpl = _revolutionVotingPowerImpl;
-        vrgdaImpl = _vrgdaImpl;
+        revolutionTokenImpl = _tokenImplementations.revolutionToken;
+        descriptorImpl = _tokenImplementations.descriptor;
+        auctionImpl = _tokenImplementations.auction;
+
+        revolutionVotingPowerImpl = _daoImplementations.revolutionVotingPower;
+        executorImpl = _daoImplementations.executor;
+        daoImpl = _daoImplementations.dao;
+
+        cultureIndexImpl = _cultureIndexImplementations.cultureIndex;
+        maxHeapImpl = _cultureIndexImplementations.maxHeap;
+
+        revolutionPointsEmitterImpl = _pointsImplementations.revolutionPointsEmitter;
+        revolutionPointsImpl = _pointsImplementations.revolutionPoints;
+        splitMainImpl = _pointsImplementations.splitMain;
+        vrgdaImpl = _pointsImplementations.vrgda;
     }
 
     ///                                                          ///
@@ -196,17 +196,21 @@ contract RevolutionBuilder is
         // Deploy the remaining DAO contracts
         daoAddressesByToken[initialSetup.revolutionToken] = DAOAddresses({
             revolutionPoints: address(new ERC1967Proxy{ salt: initialSetup.salt }(revolutionPointsImpl, "")),
-            descriptor: address(new ERC1967Proxy{ salt: initialSetup.salt }(descriptorImpl, "")),
-            vrgda: address(new ERC1967Proxy{ salt: initialSetup.salt }(vrgdaImpl, "")),
-            auction: address(new ERC1967Proxy{ salt: initialSetup.salt }(auctionImpl, "")),
             cultureIndex: address(new ERC1967Proxy{ salt: initialSetup.salt }(cultureIndexImpl, "")),
+            splitsCreator: address(new ERC1967Proxy{ salt: initialSetup.salt }(splitMainImpl, "")),
+            descriptor: address(new ERC1967Proxy{ salt: initialSetup.salt }(descriptorImpl, "")),
+            auction: address(new ERC1967Proxy{ salt: initialSetup.salt }(auctionImpl, "")),
             maxHeap: address(new ERC1967Proxy{ salt: initialSetup.salt }(maxHeapImpl, "")),
-            splitsCreator: address(new SplitMain(initialSetup.revolutionPointsEmitter)),
+            vrgda: address(new ERC1967Proxy{ salt: initialSetup.salt }(vrgdaImpl, "")),
             revolutionPointsEmitter: initialSetup.revolutionPointsEmitter,
             revolutionVotingPower: initialSetup.revolutionVotingPower,
             revolutionToken: revolutionToken,
             executor: initialSetup.executor,
             dao: initialSetup.dao
+        });
+
+        ISplitMain(daoAddressesByToken[revolutionToken].splitsCreator).initialize({
+            pointsEmitter: initialSetup.revolutionPointsEmitter
         });
 
         // Initialize each instance with the provided settings

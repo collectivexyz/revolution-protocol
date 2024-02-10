@@ -3,6 +3,8 @@ pragma solidity 0.8.22;
 
 import { Test } from "forge-std/Test.sol";
 
+import { SplitMain } from "@cobuild/splits/src/SplitMain.sol";
+
 import { IRevolutionBuilder } from "../src/interfaces/IRevolutionBuilder.sol";
 import { RevolutionBuilder } from "../src/builder/RevolutionBuilder.sol";
 import { RevolutionToken, IRevolutionToken } from "../src/RevolutionToken.sol";
@@ -46,6 +48,7 @@ contract RevolutionBuilderTest is Test {
     address internal maxHeapImpl;
     address internal revolutionVotingPowerImpl;
     address internal vrgdaImpl;
+    address internal splitMainImpl;
 
     address internal nounsDAO;
     address internal revolutionDAO;
@@ -84,17 +87,23 @@ contract RevolutionBuilderTest is Test {
 
         managerImpl0 = address(
             new RevolutionBuilder(
-                address(0),
-                address(0),
-                address(0),
-                address(0),
-                address(0),
-                address(0),
-                address(0),
-                address(0),
-                address(0),
-                address(0),
-                address(0)
+                IRevolutionBuilder.PointsImplementations({
+                    revolutionPointsEmitter: address(0),
+                    revolutionPoints: address(0),
+                    splitMain: address(0),
+                    vrgda: address(0)
+                }),
+                IRevolutionBuilder.TokenImplementations({
+                    revolutionToken: address(0),
+                    descriptor: address(0),
+                    auction: address(0)
+                }),
+                IRevolutionBuilder.DAOImplementations({
+                    revolutionVotingPower: address(0),
+                    executor: address(0),
+                    dao: address(0)
+                }),
+                IRevolutionBuilder.CultureIndexImplementations({ cultureIndex: address(0), maxHeap: address(0) })
             )
         );
         manager = RevolutionBuilder(
@@ -114,20 +123,27 @@ contract RevolutionBuilderTest is Test {
         maxHeapImpl = address(new MaxHeap(address(manager)));
         revolutionVotingPowerImpl = address(new RevolutionVotingPower(address(manager)));
         vrgdaImpl = address(new VRGDAC(address(manager)));
+        splitMainImpl = address(new SplitMain(address(manager)));
 
         managerImpl = address(
             new RevolutionBuilder(
-                revolutionTokenImpl,
-                descriptorImpl,
-                auctionImpl,
-                executorImpl,
-                daoImpl,
-                cultureIndexImpl,
-                revolutionPointsImpl,
-                revolutionPointsEmitterImpl,
-                maxHeapImpl,
-                revolutionVotingPowerImpl,
-                vrgdaImpl
+                IRevolutionBuilder.PointsImplementations({
+                    revolutionPoints: revolutionPointsImpl,
+                    revolutionPointsEmitter: revolutionPointsEmitterImpl,
+                    vrgda: vrgdaImpl,
+                    splitMain: splitMainImpl
+                }),
+                IRevolutionBuilder.TokenImplementations({
+                    revolutionToken: revolutionTokenImpl,
+                    descriptor: descriptorImpl,
+                    auction: auctionImpl
+                }),
+                IRevolutionBuilder.DAOImplementations({
+                    revolutionVotingPower: revolutionVotingPowerImpl,
+                    executor: executorImpl,
+                    dao: daoImpl
+                }),
+                IRevolutionBuilder.CultureIndexImplementations({ cultureIndex: cultureIndexImpl, maxHeap: maxHeapImpl })
             )
         );
 
