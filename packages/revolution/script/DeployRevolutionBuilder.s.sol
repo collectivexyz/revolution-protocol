@@ -127,7 +127,7 @@ contract DeployContracts is Script {
             new RevolutionVotingPower(address(deployedContracts.builderProxy))
         );
         deployedContracts.vrgdaImpl = address(new VRGDAC(address(deployedContracts.builderProxy)));
-        deployedContracts.splitMainImpl = address(new VRGDAC(address(deployedContracts.builderProxy)));
+        deployedContracts.splitMainImpl = address(new SplitMain(address(deployedContracts.builderProxy)));
 
         deployedContracts.builderImpl = address(
             new RevolutionBuilder(
