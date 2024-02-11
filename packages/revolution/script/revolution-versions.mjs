@@ -20,7 +20,6 @@ pragma solidity 0.8.22;
 
 import { IVersionedContract } from "@cobuild/utility-contracts/src/interfaces/IVersionedContract.sol";
 
-
 /// @title RevolutionVersion
 /// @notice Base contract for versioning contracts
 contract RevolutionVersion is IVersionedContract {
