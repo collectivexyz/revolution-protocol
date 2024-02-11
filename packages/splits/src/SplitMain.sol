@@ -621,7 +621,7 @@ contract SplitMain is ISplitMain, SplitsVersion, OwnableUpgradeable, UUPS {
      *  @param account Account to return ETH points balance for
      *  @return Account's balance of ETH that will be used to buy points
      */
-    function getETHPointsBalance(address account) external view returns (uint256) {
+    function getETHPointsBalance(address account) public view returns (uint256) {
         return ethBalancesPoints[account] + (splits[account].hash != 0 ? account.balance : 0);
     }
 
