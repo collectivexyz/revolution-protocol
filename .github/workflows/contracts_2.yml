@@ -11,5 +11,5 @@ jobs:
 
   contracts-utils:
     name: Utility Contracts
-    uses: ./.github/workflows/utils_contracts.yml
+    uses: ./.github/workflows/utility_contracts.yml
     secrets: inherit
