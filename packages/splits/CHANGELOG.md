@@ -1,5 +1,13 @@
 # @cobuild/splits
 
+## 0.11.1
+
+### Patch Changes
+
+- Updated dependencies [025ccff]
+  - @cobuild/utility-contracts@0.11.1
+  - @cobuild/protocol-rewards@0.11.1
+
 ## 0.11.0
 
 ### Minor Changes
