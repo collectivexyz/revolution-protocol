@@ -1,5 +1,25 @@
 # @collectivexyz/revolution
 
+## 0.4.0
+
+### Minor Changes
+
+- 33f69f7: Add splits functionality to RevolutionBuilder
+- abc6d39: Adds new utility contracts for proxy + upgrade contracts, makes SplitMain upgradeable + initialized in RevolutionBuilder
+
+### Patch Changes
+
+- bb7fe93: Points Emitter creator -> founder rewards
+- 2329ce1: Bid with reason :)
+- 2329ce1: Add grants payments to Auction House
+- 89f920c: Add grants payments on PointsEmitter
+- Updated dependencies [bb7fe93]
+- Updated dependencies [33f69f7]
+- Updated dependencies [abc6d39]
+  - @cobuild/protocol-rewards@0.11.0
+  - @cobuild/splits@0.11.0
+  - @cobuild/utility-contracts@0.11.0
+
 ## 0.3.16
 
 ### Patch Changes
