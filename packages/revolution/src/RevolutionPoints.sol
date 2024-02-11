@@ -22,7 +22,7 @@ import { EIP712Upgradeable } from "@openzeppelin/contracts-upgradeable/utils/cry
 import { ReentrancyGuardUpgradeable } from "@openzeppelin/contracts-upgradeable/utils/ReentrancyGuardUpgradeable.sol";
 import { IERC20 } from "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 
-import { VersionedContract } from "@cobuild/utility-contracts/src/version/VersionedContract.sol";
+import { RevolutionVersion } from "./version/RevolutionVersion.sol";
 import { UUPS } from "@cobuild/utility-contracts/src/proxy/UUPS.sol";
 import { IUpgradeManager } from "@cobuild/utility-contracts/src/interfaces/IUpgradeManager.sol";
 
@@ -34,7 +34,7 @@ import { IRevolutionBuilder } from "./interfaces/IRevolutionBuilder.sol";
 
 contract RevolutionPoints is
     IRevolutionPoints,
-    VersionedContract,
+    RevolutionVersion,
     UUPS,
     Ownable2StepUpgradeable,
     ReentrancyGuardUpgradeable,

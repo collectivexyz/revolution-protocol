@@ -14,7 +14,7 @@ import { Ownable2StepUpgradeable } from "@openzeppelin/contracts-upgradeable/acc
 import { PausableUpgradeable } from "@openzeppelin/contracts-upgradeable/utils/PausableUpgradeable.sol";
 import { Strings } from "@openzeppelin/contracts/utils/Strings.sol";
 
-import { VersionedContract } from "@cobuild/utility-contracts/src/version/VersionedContract.sol";
+import { RevolutionVersion } from "./version/RevolutionVersion.sol";
 import { IUpgradeManager } from "@cobuild/utility-contracts/src/interfaces/IUpgradeManager.sol";
 import { UUPS } from "@cobuild/utility-contracts/src/proxy/UUPS.sol";
 
@@ -22,7 +22,7 @@ import { toDaysWadUnsafe } from "./libs/SignedWadMath.sol";
 
 contract RevolutionPointsEmitter is
     IRevolutionPointsEmitter,
-    VersionedContract,
+    RevolutionVersion,
     UUPS,
     ReentrancyGuardUpgradeable,
     PointsEmitterRewards,

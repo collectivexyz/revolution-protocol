@@ -5,14 +5,14 @@ import { Ownable2StepUpgradeable } from "@openzeppelin/contracts-upgradeable/acc
 import { ReentrancyGuardUpgradeable } from "@openzeppelin/contracts-upgradeable/utils/ReentrancyGuardUpgradeable.sol";
 import { IUpgradeManager } from "@cobuild/utility-contracts/src/interfaces/IUpgradeManager.sol";
 import { UUPS } from "@cobuild/utility-contracts/src/proxy/UUPS.sol";
-import { VersionedContract } from "@cobuild/utility-contracts/src/version/VersionedContract.sol";
+import { RevolutionVersion } from "../version/RevolutionVersion.sol";
 
 import { IMaxHeap } from "../interfaces/IMaxHeap.sol";
 
 /// @title MaxHeap implementation in Solidity
 /// @dev This contract implements a Max Heap data structure with basic operations
 /// @author Written by rocketman and gpt4
-contract MaxHeap is IMaxHeap, VersionedContract, UUPS, Ownable2StepUpgradeable, ReentrancyGuardUpgradeable {
+contract MaxHeap is IMaxHeap, RevolutionVersion, UUPS, Ownable2StepUpgradeable, ReentrancyGuardUpgradeable {
     /// @notice The parent contract that is allowed to update the data store
     address public admin;
 

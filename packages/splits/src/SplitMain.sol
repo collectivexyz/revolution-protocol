@@ -8,7 +8,7 @@ import { ERC20 } from "@openzeppelin/contracts/token/ERC20/ERC20.sol";
 import { SafeTransferLib } from "solmate/src/utils/SafeTransferLib.sol";
 import { SafeERC20 } from "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
 import { IRevolutionPointsEmitter } from "./interfaces/IPointsEmitterLike.sol";
-import { VersionedContract } from "@cobuild/utility-contracts/src/version/VersionedContract.sol";
+import { SplitsVersion } from "./version/SplitsVersion.sol";
 import { UUPS } from "@cobuild/utility-contracts/src/proxy/UUPS.sol";
 import { OwnableUpgradeable } from "@openzeppelin/contracts-upgradeable/access/OwnableUpgradeable.sol";
 import { IUpgradeManager } from "@cobuild/utility-contracts/src/interfaces/IUpgradeManager.sol";
@@ -132,7 +132,7 @@ error SenderNotManager();
  * For these proxies, we extended EIP-1167 Minimal Proxy Contract to avoid `DELEGATECALL` inside `receive()` to accept
  * hard gas-capped `sends` & `transfers`.
  */
-contract SplitMain is ISplitMain, VersionedContract, OwnableUpgradeable, UUPS {
+contract SplitMain is ISplitMain, SplitsVersion, OwnableUpgradeable, UUPS {
     using SafeTransferLib for address;
 
     /**

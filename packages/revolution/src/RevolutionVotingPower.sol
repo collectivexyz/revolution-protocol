@@ -7,7 +7,7 @@ import { IUpgradeManager } from "@cobuild/utility-contracts/src/interfaces/IUpgr
 
 import { UUPS } from "@cobuild/utility-contracts/src/proxy/UUPS.sol";
 
-import { VersionedContract } from "@cobuild/utility-contracts/src/version/VersionedContract.sol";
+import { RevolutionVersion } from "./version/RevolutionVersion.sol";
 
 import { IRevolutionToken } from "./interfaces/IRevolutionToken.sol";
 import { IRevolutionPoints } from "./interfaces/IRevolutionPoints.sol";
@@ -18,7 +18,7 @@ import { IRevolutionVotingPower } from "./interfaces/IRevolutionVotingPower.sol"
 /// @author rocketman
 contract RevolutionVotingPower is
     IRevolutionVotingPower,
-    VersionedContract,
+    RevolutionVersion,
     UUPS,
     Ownable2StepUpgradeable,
     ReentrancyGuardUpgradeable

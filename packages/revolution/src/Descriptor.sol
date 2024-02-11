@@ -20,7 +20,7 @@ pragma solidity ^0.8.22;
 import { Ownable2StepUpgradeable } from "@openzeppelin/contracts-upgradeable/access/Ownable2StepUpgradeable.sol";
 
 import { UUPS } from "@cobuild/utility-contracts/src/proxy/UUPS.sol";
-import { VersionedContract } from "@cobuild/utility-contracts/src/version/VersionedContract.sol";
+import { RevolutionVersion } from "./version/RevolutionVersion.sol";
 
 import { Strings } from "@openzeppelin/contracts/utils/Strings.sol";
 import { IDescriptor } from "./interfaces/IDescriptor.sol";
@@ -28,7 +28,7 @@ import { Base64 } from "@openzeppelin/contracts/utils/Base64.sol";
 import { ICultureIndex } from "./interfaces/ICultureIndex.sol";
 import { IUpgradeManager } from "@cobuild/utility-contracts/src/interfaces/IUpgradeManager.sol";
 
-contract Descriptor is IDescriptor, VersionedContract, UUPS, Ownable2StepUpgradeable {
+contract Descriptor is IDescriptor, RevolutionVersion, UUPS, Ownable2StepUpgradeable {
     using Strings for uint256;
 
     // Whether or not `tokenURI` should be returned as a data URI (Default: true)

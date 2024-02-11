@@ -2,7 +2,7 @@
 pragma solidity 0.8.22;
 
 import { wadExp, wadLn, wadMul, wadDiv, unsafeWadDiv, wadPow } from "./SignedWadMath.sol";
-import { VersionedContract } from "@cobuild/utility-contracts/src/version/VersionedContract.sol";
+import { RevolutionVersion } from "../version/RevolutionVersion.sol";
 import { IUpgradeManager } from "@cobuild/utility-contracts/src/interfaces/IUpgradeManager.sol";
 import { UUPS } from "@cobuild/utility-contracts/src/proxy/UUPS.sol";
 import { OwnableUpgradeable } from "@openzeppelin/contracts-upgradeable/access/OwnableUpgradeable.sol";
@@ -13,7 +13,7 @@ import { IVRGDAC } from "../interfaces/IVRGDAC.sol";
 /// @author FrankieIsLost <frankie@paradigm.xyz>
 /// @author Dan Robinson <dan@paradigm.xyz>
 /// @notice Sell tokens roughly according to an issuance schedule.
-contract VRGDAC is IVRGDAC, VersionedContract, UUPS, OwnableUpgradeable {
+contract VRGDAC is IVRGDAC, RevolutionVersion, UUPS, OwnableUpgradeable {
     ///                                                          ///
     ///                         IMMUTABLES                       ///
     ///                                                          ///

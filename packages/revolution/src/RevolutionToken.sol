@@ -23,7 +23,7 @@ import { IERC721 } from "@openzeppelin/contracts/token/ERC721/IERC721.sol";
 
 import { UUPS } from "@cobuild/utility-contracts/src/proxy/UUPS.sol";
 
-import { VersionedContract } from "@cobuild/utility-contracts/src/version/VersionedContract.sol";
+import { RevolutionVersion } from "./version/RevolutionVersion.sol";
 
 import { ERC721CheckpointableUpgradeable } from "./base/ERC721CheckpointableUpgradeable.sol";
 
@@ -35,7 +35,7 @@ import { IUpgradeManager } from "@cobuild/utility-contracts/src/interfaces/IUpgr
 
 contract RevolutionToken is
     IRevolutionToken,
-    VersionedContract,
+    RevolutionVersion,
     UUPS,
     Ownable2StepUpgradeable,
     ReentrancyGuardUpgradeable,

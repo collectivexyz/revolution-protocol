@@ -36,11 +36,11 @@ import { IRevolutionBuilder } from "./interfaces/IRevolutionBuilder.sol";
 
 import { UUPS } from "@cobuild/utility-contracts/src/proxy/UUPS.sol";
 import { IUpgradeManager } from "@cobuild/utility-contracts/src/interfaces/IUpgradeManager.sol";
-import { VersionedContract } from "@cobuild/utility-contracts/src/version/VersionedContract.sol";
+import { RevolutionVersion } from "./version/RevolutionVersion.sol";
 
 contract AuctionHouse is
     IAuctionHouse,
-    VersionedContract,
+    RevolutionVersion,
     UUPS,
     PausableUpgradeable,
     ReentrancyGuardUpgradeable,

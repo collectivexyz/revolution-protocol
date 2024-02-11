@@ -55,7 +55,7 @@ pragma solidity ^0.8.22;
 import { Ownable2StepUpgradeable } from "@openzeppelin/contracts-upgradeable/access/Ownable2StepUpgradeable.sol";
 
 import { UUPS } from "@cobuild/utility-contracts/src/proxy/UUPS.sol";
-import { VersionedContract } from "@cobuild/utility-contracts/src/version/VersionedContract.sol";
+import { RevolutionVersion } from "../version/RevolutionVersion.sol";
 import { IUpgradeManager } from "@cobuild/utility-contracts/src/interfaces/IUpgradeManager.sol";
 
 import "./RevolutionDAOInterfaces.sol";
@@ -66,7 +66,7 @@ import { EIP712Upgradeable } from "@openzeppelin/contracts-upgradeable/utils/cry
 
 contract RevolutionDAOLogicV1 is
     IRevolutionDAO,
-    VersionedContract,
+    RevolutionVersion,
     Ownable2StepUpgradeable,
     UUPS,
     EIP712Upgradeable,

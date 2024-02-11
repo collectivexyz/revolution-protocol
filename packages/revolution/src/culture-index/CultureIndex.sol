@@ -7,12 +7,12 @@ import { EIP712Upgradeable } from "@openzeppelin/contracts-upgradeable/utils/cry
 import { Strings } from "@openzeppelin/contracts/utils/Strings.sol";
 
 import { UUPS } from "@cobuild/utility-contracts/src/proxy/UUPS.sol";
-import { VersionedContract } from "@cobuild/utility-contracts/src/version/VersionedContract.sol";
 import { IUpgradeManager } from "@cobuild/utility-contracts/src/interfaces/IUpgradeManager.sol";
 
 import { IRevolutionBuilder } from "../interfaces/IRevolutionBuilder.sol";
 import { IRevolutionVotingPower } from "../interfaces/IRevolutionVotingPower.sol";
 import { ICultureIndex } from "../interfaces/ICultureIndex.sol";
+import { RevolutionVersion } from "../version/RevolutionVersion.sol";
 
 import { ERC20VotesUpgradeable } from "../base/erc20/ERC20VotesUpgradeable.sol";
 import { MaxHeap } from "./MaxHeap.sol";
@@ -22,7 +22,7 @@ import { ERC721CheckpointableUpgradeable } from "../base/ERC721CheckpointableUpg
 
 contract CultureIndex is
     ICultureIndex,
-    VersionedContract,
+    RevolutionVersion,
     UUPS,
     Ownable2StepUpgradeable,
     ReentrancyGuardUpgradeable,

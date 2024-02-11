@@ -18,12 +18,12 @@ const makePackageVersionFile = async (version) => {
 // SPDX-License-Identifier: GPL-3.0-or-later
 pragma solidity 0.8.22;
 
-import { VersionedContract } from "@cobuild/utility-contracts/src/version/VersionedContract.sol";
+import { IVersionedContract } from "@cobuild/utility-contracts/src/interfaces/IVersionedContract.sol";
 
 
-/// @title VersionedContract
+/// @title RevolutionVersion
 /// @notice Base contract for versioning contracts
-contract VersionedContract is IVersionedContract {
+contract RevolutionVersion is IVersionedContract {
     /// @notice The version of the contract
     function contractVersion() external pure override returns (string memory) {
         return "${version}";
@@ -37,7 +37,7 @@ contract VersionedContract is IVersionedContract {
     "..",
     "src",
     "version",
-    "VersionedContract.sol"
+    "RevolutionVersion.sol"
   );
 
   console.log("generated contract version code:", packageVersionCode);

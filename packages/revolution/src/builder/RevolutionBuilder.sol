@@ -43,13 +43,13 @@ import { ERC1967Proxy } from "@cobuild/utility-contracts/src/proxy/ERC1967Proxy.
 import { UUPS } from "@cobuild/utility-contracts/src/proxy/UUPS.sol";
 import { IVersionedContract } from "@cobuild/utility-contracts/src/interfaces/IVersionedContract.sol";
 import { ISplitMain } from "@cobuild/splits/src/interfaces/ISplitMain.sol";
-import { VersionedContract } from "@cobuild/utility-contracts/src/version/VersionedContract.sol";
+import { RevolutionVersion } from "../version/RevolutionVersion.sol";
 
 /// @title RevolutionBuilder
 /// @notice The Revolution DAO deployer and upgrade manager
 contract RevolutionBuilder is
     IRevolutionBuilder,
-    VersionedContract,
+    RevolutionVersion,
     UUPS,
     Ownable2StepUpgradeable,
     RevolutionBuilderStorageV1
