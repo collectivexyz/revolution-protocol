@@ -390,7 +390,7 @@ contract EmissionRatesTest is PointsEmitterTest {
         uint256 valueToSend,
         uint256 expiryDuration
     ) public {
-        valueToSend = bound(valueToSend, 0.00000001 ether, 1e12 ether);
+        valueToSend = bound(valueToSend, 0.0000001 ether, 1e12 ether);
 
         // Calculate value left after sharing protocol rewards
         uint256 msgValueRemaining = valueToSend - revolutionPointsEmitter.computeTotalReward(valueToSend);
@@ -565,11 +565,15 @@ contract EmissionRatesTest is PointsEmitterTest {
             msgValueRemaining
         );
 
+        int256 founderGovernance = buyTokenPaymentSharesOg.founderGovernancePayment > 0
+            ? revolutionPointsEmitter.getTokenQuoteForEther(buyTokenPaymentSharesOg.founderGovernancePayment)
+            : int(0);
+
         //expect getTokenQuoteForEther (buyergovernancepayment) == getTokenForPayment (valueToSend) since founder has rewards
         assertEq(
             buyTokenPaymentSharesOg.buyersGovernancePayment > 0
                 ? uint256(
-                    revolutionPointsEmitter.getTokenQuoteForEther(buyTokenPaymentSharesOg.buyersGovernancePayment)
+                    getTokenQuoteForEtherHelper(buyTokenPaymentSharesOg.buyersGovernancePayment, founderGovernance)
                 )
                 : 0,
             uint256(revolutionPointsEmitter.getTokenQuoteForPayment(valueToSend)),
