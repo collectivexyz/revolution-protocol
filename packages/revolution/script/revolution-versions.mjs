@@ -31,7 +31,7 @@ contract RevolutionVersion is IVersionedContract {
 }
 `;
 
-  // write the file to __dirname__/../src/version/VersionedContract.sol:
+  // write the file to __dirname__/../src/version/RevolutionVersion.sol:
   const filePath = path.join(
     __dirname,
     "..",

@@ -8,12 +8,9 @@ export default defineConfig({
       forge: {
         build: false,
       },
-      include: [
-        "VersionedContract",
-        "UUPS",
-        "ERC1967Proxy",
-        "ERC1967Upgrade",
-      ].map((contractName) => `${contractName}.json`),
+      include: ["UUPS", "ERC1967Proxy", "ERC1967Upgrade"].map(
+        (contractName) => `${contractName}.json`
+      ),
     }),
   ],
 });
