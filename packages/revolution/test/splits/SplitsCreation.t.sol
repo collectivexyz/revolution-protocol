@@ -132,7 +132,7 @@ contract CreateSplitsTest is SplitsTest {
             ISplitMain(splits).withdraw(accounts[i], 0, 1, new ERC20[](0));
         }
 
-        // Check ETH balances for each account
+        // Check points balances for each account
         for (uint256 i = 0; i < accounts.length; i++) {
             assertEq(
                 IRevolutionPoints(revolutionPoints).balanceOf(accounts[i]),
