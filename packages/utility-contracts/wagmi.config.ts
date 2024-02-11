@@ -9,9 +9,10 @@ export default defineConfig({
         build: false,
       },
       include: [
-        "RevolutionProtocolRewards",
-        "PointsEmitterRewards",
-        "RewardSplits",
+        "VersionedContract",
+        "UUPS",
+        "ERC1967Proxy",
+        "ERC1967Upgrade",
       ].map((contractName) => `${contractName}.json`),
     }),
   ],
