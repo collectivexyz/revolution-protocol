@@ -8,11 +8,9 @@ export default defineConfig({
       forge: {
         build: false,
       },
-      include: [
-        "RevolutionProtocolRewards",
-        "PointsEmitterRewards",
-        "RewardSplits",
-      ].map((contractName) => `${contractName}.json`),
+      include: ["SplitMain", "SplitWallet", "Clones"].map(
+        (contractName) => `${contractName}.json`
+      ),
     }),
   ],
 });
