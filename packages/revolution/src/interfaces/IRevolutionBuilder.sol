@@ -30,7 +30,7 @@ interface IRevolutionBuilder is IUpgradeManager {
         address revolutionPoints;
         address revolutionPointsEmitter;
         address vrgda;
-        address splitMain;
+        address splitsCreator;
     }
 
     ///                                                          ///

@@ -92,7 +92,7 @@ contract RevolutionBuilder is
     address public immutable vrgdaImpl;
 
     /// @notice The SplitsCreator implementation address
-    address public immutable splitMainImpl;
+    address public immutable splitsCreatorImpl;
 
     ///                                                          ///
     ///                          CONSTRUCTOR                     ///
@@ -117,7 +117,7 @@ contract RevolutionBuilder is
 
         revolutionPointsEmitterImpl = _pointsImplementations.revolutionPointsEmitter;
         revolutionPointsImpl = _pointsImplementations.revolutionPoints;
-        splitMainImpl = _pointsImplementations.splitMain;
+        splitsCreatorImpl = _pointsImplementations.splitsCreator;
         vrgdaImpl = _pointsImplementations.vrgda;
     }
 
@@ -197,7 +197,7 @@ contract RevolutionBuilder is
         daoAddressesByToken[initialSetup.revolutionToken] = DAOAddresses({
             revolutionPoints: address(new ERC1967Proxy{ salt: initialSetup.salt }(revolutionPointsImpl, "")),
             cultureIndex: address(new ERC1967Proxy{ salt: initialSetup.salt }(cultureIndexImpl, "")),
-            splitsCreator: address(new ERC1967Proxy{ salt: initialSetup.salt }(splitMainImpl, "")),
+            splitsCreator: address(new ERC1967Proxy{ salt: initialSetup.salt }(splitsCreatorImpl, "")),
             descriptor: address(new ERC1967Proxy{ salt: initialSetup.salt }(descriptorImpl, "")),
             auction: address(new ERC1967Proxy{ salt: initialSetup.salt }(auctionImpl, "")),
             maxHeap: address(new ERC1967Proxy{ salt: initialSetup.salt }(maxHeapImpl, "")),

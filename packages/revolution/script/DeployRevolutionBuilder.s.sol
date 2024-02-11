@@ -42,7 +42,7 @@ contract DeployContracts is Script {
         address revolutionVotingPowerImpl;
         address builderImpl;
         address vrgdaImpl;
-        address splitMainImpl;
+        address splitsCreatorImpl;
     }
 
     // Define the struct for deployed contracts
@@ -79,7 +79,7 @@ contract DeployContracts is Script {
                 IRevolutionBuilder.PointsImplementations({
                     revolutionPointsEmitter: address(0),
                     revolutionPoints: address(0),
-                    splitMain: address(0),
+                    splitsCreator: address(0),
                     vrgda: address(0)
                 }),
                 IRevolutionBuilder.TokenImplementations({
@@ -127,7 +127,7 @@ contract DeployContracts is Script {
             new RevolutionVotingPower(address(deployedContracts.builderProxy))
         );
         deployedContracts.vrgdaImpl = address(new VRGDAC(address(deployedContracts.builderProxy)));
-        deployedContracts.splitMainImpl = address(new SplitMain(address(deployedContracts.builderProxy)));
+        deployedContracts.splitsCreatorImpl = address(new SplitMain(address(deployedContracts.builderProxy)));
 
         deployedContracts.builderImpl = address(
             new RevolutionBuilder(
@@ -135,7 +135,7 @@ contract DeployContracts is Script {
                     revolutionPoints: deployedContracts.revolutionPointsImpl,
                     revolutionPointsEmitter: deployedContracts.revolutionPointsEmitterImpl,
                     vrgda: deployedContracts.vrgdaImpl,
-                    splitMain: deployedContracts.splitMainImpl
+                    splitsCreator: deployedContracts.splitsCreatorImpl
                 }),
                 IRevolutionBuilder.TokenImplementations({
                     revolutionToken: deployedContracts.revolutionTokenImpl,
@@ -230,7 +230,7 @@ contract DeployContracts is Script {
         );
         vm.writeLine(
             filePath,
-            string(abi.encodePacked("SplitMain implementation: ", addressToString(deployedContracts.splitMainImpl)))
+            string(abi.encodePacked("SplitMain implementation: ", addressToString(deployedContracts.splitsCreatorImpl)))
         );
 
         console2.log("~~~~~~~~~~ MANAGER IMPL 0 ~~~~~~~~~~~");
@@ -277,7 +277,7 @@ contract DeployContracts is Script {
         console2.logAddress(deployedContracts.vrgdaImpl);
 
         console2.log("~~~~~~~~~~ SPLIT MAIN IMPL ~~~~~~~~~~~");
-        console2.logAddress(deployedContracts.splitMainImpl);
+        console2.logAddress(deployedContracts.splitsCreatorImpl);
 
         console2.log("~~~~~~~~~~ PROTOCOL REWARDS ~~~~~~~~~~~");
         console2.logAddress(deployedContracts.protocolRewards);
