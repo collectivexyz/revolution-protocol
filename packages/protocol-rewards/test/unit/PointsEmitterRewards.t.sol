@@ -2,8 +2,8 @@
 pragma solidity 0.8.22;
 
 import "../ProtocolRewardsTest.sol";
-import { RewardsSettings } from "../../src/abstract/RewardSplits.sol";
 import { MockWETH } from "../mock/MockWETH.sol";
+import { IRewardSplits } from "../../src/interfaces/IRewardSplits.sol";
 import { RevolutionPoints, IRevolutionPointsEmitter, IRevolutionBuilder, VRGDAC, ERC1967Proxy, RevolutionPointsEmitter } from "../utils/PointsEmitterLibrary.sol";
 
 contract PointsEmitterRewardsTest is ProtocolRewardsTest {
@@ -74,7 +74,9 @@ contract PointsEmitterRewardsTest is ProtocolRewardsTest {
 
         mockPointsEmitter.buyToken{ value: msgValue }(addresses, bps, rewardAddrs);
 
-        (RewardsSettings memory settings, uint256 totalReward) = mockPointsEmitter.computePurchaseRewards(msgValue);
+        (IRewardSplits.RewardsSettings memory settings, uint256 totalReward) = mockPointsEmitter.computePurchaseRewards(
+            msgValue
+        );
 
         assertApproxEqAbs(protocolRewards.totalRewardsSupply(), totalReward, 5);
         assertApproxEqAbs(protocolRewards.balanceOf(builderReferral), settings.builderReferralReward, 5);
@@ -130,7 +132,9 @@ contract PointsEmitterRewardsTest is ProtocolRewardsTest {
             })
         );
 
-        (RewardsSettings memory settings, uint256 totalReward) = mockPointsEmitter.computePurchaseRewards(msgValue);
+        (IRewardSplits.RewardsSettings memory settings, uint256 totalReward) = mockPointsEmitter.computePurchaseRewards(
+            msgValue
+        );
 
         assertApproxEqAbs(protocolRewards.totalRewardsSupply(), totalReward, 5);
         assertApproxEqAbs(protocolRewards.balanceOf(builderReferral), settings.builderReferralReward, 5);

@@ -210,7 +210,8 @@ contract RevolutionBuilder is
         });
 
         ISplitMain(daoAddressesByToken[revolutionToken].splitsCreator).initialize({
-            pointsEmitter: initialSetup.revolutionPointsEmitter
+            pointsEmitter: initialSetup.revolutionPointsEmitter,
+            initialOwner: initialSetup.executor
         });
 
         // Initialize each instance with the provided settings
