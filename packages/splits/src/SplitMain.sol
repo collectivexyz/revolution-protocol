@@ -91,22 +91,43 @@ error InvalidSplit__InvalidPointsPercent(uint32 pointsPercent);
 /// @param accountsLength Length of accounts array
 error InvalidSplit__TooFewAccounts(uint256 accountsLength);
 
+/// @notice Invalid number of points accounts `accountsLength`, must have at least 1
+/// @param pointsAccountsLength Length of points accounts array
+error InvalidSplit__TooFewPointsAccounts(uint256 pointsAccountsLength);
+
 /// @notice Array lengths of accounts & percentAllocations don't match (`accountsLength` != `allocationsLength`)
 /// @param accountsLength Length of accounts array
 /// @param allocationsLength Length of percentAllocations array
 error InvalidSplit__AccountsAndAllocationsMismatch(uint256 accountsLength, uint256 allocationsLength);
 
+/// @notice Array lengths of points accounts & percentAllocations don't match (`accountsLength` != `allocationsLength`)
+/// @param accountsLength Length of points accounts array
+/// @param allocationsLength Length of points percentAllocations array
+error InvalidSplit__PointsAccountsAndAllocationsMismatch(uint256 accountsLength, uint256 allocationsLength);
+
 /// @notice Invalid percentAllocations sum `allocationsSum` must equal `PERCENTAGE_SCALE`
 /// @param allocationsSum Sum of percentAllocations array
 error InvalidSplit__InvalidAllocationsSum(uint32 allocationsSum);
+
+/// @notice Invalid points percentAllocations sum `allocationsSum` must equal `PERCENTAGE_SCALE`
+/// @param allocationsSum Sum of points percentAllocations array
+error InvalidSplit__InvalidPointsAllocationsSum(uint32 allocationsSum);
 
 /// @notice Invalid accounts ordering at `index`
 /// @param index Index of out-of-order account
 error InvalidSplit__AccountsOutOfOrder(uint256 index);
 
+/// @notice Invalid points accounts ordering at `index`
+/// @param index Index of out-of-order account
+error InvalidSplit__PointsAccountsOutOfOrder(uint256 index);
+
 /// @notice Invalid percentAllocation of zero at `index`
 /// @param index Index of zero percentAllocation
 error InvalidSplit__AllocationMustBePositive(uint256 index);
+
+/// @notice Invalid points percentAllocation of zero at `index`
+/// @param index Index of zero percentAllocation
+error InvalidSplit__PointsAllocationMustBePositive(uint256 index);
 
 /// @notice Invalid distributorFee `distributorFee` cannot be greater than 10% (1e5)
 /// @param distributorFee Invalid distributorFee amount
@@ -219,11 +240,11 @@ contract SplitMain is ISplitMain, SplitsVersion, OwnableUpgradeable, UUPS {
             revert InvalidSplit__InvalidPointsPercent(pointsData.percentOfEther);
 
         // at least 1 account
-        // @notice this was changed from 2 to 1 because funds are split with the points emitter by default
+        // @notice this was changed from 2 to 1 because some funds are split with the points emitter by default
         if (accounts.length < 1) revert InvalidSplit__TooFewAccounts(accounts.length);
 
         // at least 1 points account
-        if (pointsData.accounts.length < 1) revert InvalidSplit__TooFewAccounts(pointsData.accounts.length);
+        if (pointsData.accounts.length < 1) revert InvalidSplit__TooFewPointsAccounts(pointsData.accounts.length);
 
         // accounts & percentAllocations must be equal length
         if (accounts.length != percentAllocations.length)
@@ -231,7 +252,7 @@ contract SplitMain is ISplitMain, SplitsVersion, OwnableUpgradeable, UUPS {
 
         // pointsAccounts & pointsPercentAllocations must be equal length
         if (pointsData.accounts.length != pointsData.percentAllocations.length)
-            revert InvalidSplit__AccountsAndAllocationsMismatch(
+            revert InvalidSplit__PointsAccountsAndAllocationsMismatch(
                 pointsData.accounts.length,
                 pointsData.percentAllocations.length
             );
@@ -242,7 +263,7 @@ contract SplitMain is ISplitMain, SplitsVersion, OwnableUpgradeable, UUPS {
 
         // _getSum should overflow if any pointsPercentAllocations[i] < 0
         if (_getSum(pointsData.percentAllocations) != PERCENTAGE_SCALE)
-            revert InvalidSplit__InvalidAllocationsSum(_getSum(pointsData.percentAllocations));
+            revert InvalidSplit__InvalidPointsAllocationsSum(_getSum(pointsData.percentAllocations));
 
         // accounts are ordered and unique
         // percent allocations are nonzero
@@ -267,12 +288,14 @@ contract SplitMain is ISplitMain, SplitsVersion, OwnableUpgradeable, UUPS {
             uint256 loopLength = pointsData.accounts.length - 1;
             for (uint256 i = 0; i < loopLength; ++i) {
                 // overflow should be impossible in array access math
-                if (pointsData.accounts[i] >= pointsData.accounts[i + 1]) revert InvalidSplit__AccountsOutOfOrder(i);
-                if (pointsData.percentAllocations[i] == uint32(0)) revert InvalidSplit__AllocationMustBePositive(i);
+                if (pointsData.accounts[i] >= pointsData.accounts[i + 1])
+                    revert InvalidSplit__PointsAccountsOutOfOrder(i);
+                if (pointsData.percentAllocations[i] == uint32(0))
+                    revert InvalidSplit__PointsAllocationMustBePositive(i);
             }
             // overflow should be impossible in array access math with validated equal array lengths
             if (pointsData.percentAllocations[loopLength] == uint32(0))
-                revert InvalidSplit__AllocationMustBePositive(loopLength);
+                revert InvalidSplit__PointsAllocationMustBePositive(loopLength);
         }
 
         // distributorFee is lte than max
