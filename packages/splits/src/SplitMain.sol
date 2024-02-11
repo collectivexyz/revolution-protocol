@@ -625,6 +625,18 @@ contract SplitMain is ISplitMain, VersionedContract, OwnableUpgradeable, UUPS {
         return ethBalancesPoints[account] + (splits[account].hash != 0 ? account.balance : 0);
     }
 
+    /** @notice Returns the current points balance of account `account` if withdrawed right now
+     *  @param account Account to return points balance for
+     *  @return Account's balance of points
+     */
+    function getPointsBalance(address account) external view returns (int256) {
+        // Subtract 1 since _withdraw will always leave 1 wei in the account
+        return
+            pointsEmitter.getTokenQuoteForPayment(
+                ethBalancesPoints[account] + (splits[account].hash != 0 ? account.balance : 0) - 1
+            );
+    }
+
     /** @notice Returns the ERC20 balance of token `token` for account `account`
      *  @param account Account to return ERC20 `token` balance for
      *  @param token Token to return balance for

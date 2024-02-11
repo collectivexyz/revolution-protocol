@@ -13,4 +13,6 @@ interface IRevolutionPointsEmitter {
         uint[] calldata bps,
         ProtocolRewardAddresses calldata protocolRewardsRecipients
     ) external payable returns (uint);
+
+    function getTokenQuoteForPayment(uint256 paymentAmount) external view returns (int256);
 }

@@ -64,6 +64,8 @@ interface ISplitMain {
 
     function getETHPointsBalance(address account) external view returns (uint256);
 
+    function getPointsBalance(address account) external view returns (int256);
+
     function transferControl(address split, address newController) external;
 
     function cancelControlTransfer(address split) external;

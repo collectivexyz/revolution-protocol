@@ -104,7 +104,6 @@ contract CreateSplitsTest is SplitsTest {
     }
 
     function withdrawEthPointsBalances(address[] memory accounts) public {
-        emit log_string("withdrawEthPointsBalances");
         //build array of expected balances
         int256[] memory expectedPointsBalances = new int256[](accounts.length);
 
@@ -112,8 +111,6 @@ contract CreateSplitsTest is SplitsTest {
             uint256 expectedEtherToSpend = ISplitMain(splits).getETHPointsBalance(accounts[i]) - 1;
 
             uint256 founderPayment = getFounderGovernancePayment(expectedEtherToSpend);
-
-            emit log_named_uint("founderPayment", founderPayment);
 
             int256 expectedFounderPoints = founderPayment > 0
                 ? IRevolutionPointsEmitter(pointsEmitter).getTokenQuoteForEther(founderPayment)
@@ -125,6 +122,11 @@ contract CreateSplitsTest is SplitsTest {
             );
 
             expectedPointsBalances[i] = buyerGovShares;
+
+            int256 expected = ISplitMain(splits).getPointsBalance(accounts[i]);
+
+            //assert eq
+            assertEq(expected, expectedPointsBalances[i], "Incorrect points balance for account");
         }
 
         for (uint256 i = 0; i < accounts.length; i++) {
@@ -137,7 +139,7 @@ contract CreateSplitsTest is SplitsTest {
             assertEq(
                 IRevolutionPoints(revolutionPoints).balanceOf(accounts[i]),
                 uint256(expectedPointsBalances[i]),
-                "Incorrect ETH balance for account"
+                "Incorrect points balance for account"
             );
             assertEq(ISplitMain(splits).getETHPointsBalance(accounts[i]), 1, "ETH points balance should be wiped");
         }
