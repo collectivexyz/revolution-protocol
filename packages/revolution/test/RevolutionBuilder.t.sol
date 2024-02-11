@@ -48,7 +48,7 @@ contract RevolutionBuilderTest is Test {
     address internal maxHeapImpl;
     address internal revolutionVotingPowerImpl;
     address internal vrgdaImpl;
-    address internal splitMainImpl;
+    address internal splitsCreatorImpl;
 
     address internal nounsDAO;
     address internal revolutionDAO;
@@ -90,7 +90,7 @@ contract RevolutionBuilderTest is Test {
                 IRevolutionBuilder.PointsImplementations({
                     revolutionPointsEmitter: address(0),
                     revolutionPoints: address(0),
-                    splitMain: address(0),
+                    splitsCreator: address(0),
                     vrgda: address(0)
                 }),
                 IRevolutionBuilder.TokenImplementations({
@@ -123,7 +123,7 @@ contract RevolutionBuilderTest is Test {
         maxHeapImpl = address(new MaxHeap(address(manager)));
         revolutionVotingPowerImpl = address(new RevolutionVotingPower(address(manager)));
         vrgdaImpl = address(new VRGDAC(address(manager)));
-        splitMainImpl = address(new SplitMain(address(manager)));
+        splitsCreatorImpl = address(new SplitMain(address(manager)));
 
         managerImpl = address(
             new RevolutionBuilder(
@@ -131,7 +131,7 @@ contract RevolutionBuilderTest is Test {
                     revolutionPoints: revolutionPointsImpl,
                     revolutionPointsEmitter: revolutionPointsEmitterImpl,
                     vrgda: vrgdaImpl,
-                    splitMain: splitMainImpl
+                    splitsCreator: splitsCreatorImpl
                 }),
                 IRevolutionBuilder.TokenImplementations({
                     revolutionToken: revolutionTokenImpl,
