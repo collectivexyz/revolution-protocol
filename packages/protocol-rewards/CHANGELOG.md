@@ -1,5 +1,11 @@
 # @collectivexyz/protocol-rewards
 
+## 0.11.2
+
+### Patch Changes
+
+- e316500: fix abi types
+
 ## 0.11.1
 
 ### Patch Changes

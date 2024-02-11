@@ -1,5 +1,14 @@
 # @collectivexyz/revolution
 
+## 0.4.2
+
+### Patch Changes
+
+- e316500: fix abi types
+- Updated dependencies [e316500]
+  - @cobuild/protocol-rewards@0.11.2
+  - @cobuild/splits@0.11.2
+
 ## 0.4.1
 
 ### Patch Changes
