@@ -39,5 +39,9 @@
     "url": "git+https://github.com/collectivexyz/revolution-protocol.git"
   },
   "version": "0.0.1",
-  "dependencies": {}
+  "dependencies": {
+    "@wagmi/cli": "^2.1.0",
+    "glob": "^10.3.10",
+    "pathe": "^1.1.2"
+  }
 }
