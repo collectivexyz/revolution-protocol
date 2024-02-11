@@ -631,10 +631,7 @@ contract SplitMain is ISplitMain, SplitsVersion, OwnableUpgradeable, UUPS {
      */
     function getPointsBalance(address account) external view returns (int256) {
         // Subtract 1 since _withdraw will always leave 1 wei in the account
-        return
-            pointsEmitter.getTokenQuoteForPayment(
-                ethBalancesPoints[account] + (splits[account].hash != 0 ? account.balance : 0) - 1
-            );
+        return pointsEmitter.getTokenQuoteForPayment(getETHPointsBalance(account) - 1);
     }
 
     /** @notice Returns the ERC20 balance of token `token` for account `account`
