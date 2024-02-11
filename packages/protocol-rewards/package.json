@@ -25,8 +25,8 @@
     "wagmi": "FOUNDRY_PROFILE=dev forge build && wagmi generate",
     "write-gas-report": "forge test --gas-report > ../../gas-reports/protocol-rewards.ansi",
     "clean": "forge cache clean && if [ -d out ]; then forge clean; fi",
-    "storage-inspect:check": "./script/storage-check.sh check RevolutionProtocolRewards RewardSplits PointsEmitterRewards",
-    "storage-inspect:generate": "./script/storage-check.sh generate RevolutionProtocolRewards RewardSplits PointsEmitterRewards"
+    "storage-inspect:check": "../../script/storage-check.sh check RevolutionProtocolRewards RewardSplits PointsEmitterRewards",
+    "storage-inspect:generate": "../../script/storage-check.sh generate RevolutionProtocolRewards RewardSplits PointsEmitterRewards"
   },
   "dependencies": {
     "@cobuild/utility-contracts": "workspace:*",

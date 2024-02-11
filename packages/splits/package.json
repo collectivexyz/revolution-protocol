@@ -25,8 +25,8 @@
     "wagmi": "FOUNDRY_PROFILE=dev forge build && wagmi generate",
     "write-gas-report": "forge test --gas-report > ../../gas-reports/splits.ansi",
     "clean": "forge cache clean && if [ -d out ]; then forge clean; fi",
-    "storage-inspect:check": "./script/storage-check.sh check SplitMain SplitWallet",
-    "storage-inspect:generate": "./script/storage-check.sh generate SplitMain SplitWallet"
+    "storage-inspect:check": "../../script/storage-check.sh check SplitMain SplitWallet",
+    "storage-inspect:generate": "../../script/storage-check.sh generate SplitMain SplitWallet"
   },
   "dependencies": {
     "@cobuild/protocol-rewards": "workspace:*",
