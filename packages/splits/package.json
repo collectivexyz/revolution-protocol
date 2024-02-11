@@ -30,7 +30,6 @@
   },
   "dependencies": {
     "@cobuild/protocol-rewards": "workspace:*",
-    "@cobuild/revolution": "workspace:^",
     "@cobuild/utility-contracts": "workspace:*",
     "@openzeppelin/contracts": "5.0.0",
     "@openzeppelin/contracts-upgradeable": "5.0.0",

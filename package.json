@@ -39,7 +39,5 @@
     "url": "git+https://github.com/collectivexyz/revolution-protocol.git"
   },
   "version": "0.0.1",
-  "dependencies": {
-    "@cobuild/protocol-rewards": "workspace:^"
-  }
+  "dependencies": {}
 }

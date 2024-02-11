@@ -7,10 +7,6 @@ settings:
 importers:
 
   .:
-    dependencies:
-      '@cobuild/protocol-rewards':
-        specifier: workspace:^
-        version: link:packages/protocol-rewards
     devDependencies:
       '@changesets/cli':
         specifier: ^2.27.1
@@ -137,9 +133,6 @@ importers:
       '@cobuild/protocol-rewards':
         specifier: workspace:*
         version: link:../protocol-rewards
-      '@cobuild/revolution':
-        specifier: workspace:^
-        version: link:../revolution
       '@cobuild/utility-contracts':
         specifier: workspace:*
         version: link:../utility-contracts
