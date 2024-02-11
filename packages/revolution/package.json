@@ -25,7 +25,7 @@
     "clean": "forge cache clean && if [ -d out ]; then forge clean; fi",
     "storage-inspect:check": "../../script/storage-check.sh check CultureIndex RevolutionBuilder DAOExecutor RevolutionDAOLogicV1 RevolutionVotingPower RevolutionPoints RevolutionPointsEmitter AuctionHouse MaxHeap RevolutionToken Descriptor",
     "storage-inspect:generate": "../../script/storage-check.sh generate CultureIndex RevolutionBuilder DAOExecutor RevolutionDAOLogicV1 RevolutionVotingPower RevolutionPoints RevolutionPointsEmitter AuctionHouse MaxHeap RevolutionToken Descriptor",
-    "update-contract-version": "node script/update-contract-version.mjs"
+    "update-contract-version": "node script/revolution-versions.mjs"
   },
   "files": [
     "dist/",

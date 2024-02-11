@@ -26,7 +26,8 @@
     "write-gas-report": "forge test --gas-report > ../../gas-reports/splits.ansi",
     "clean": "forge cache clean && if [ -d out ]; then forge clean; fi",
     "storage-inspect:check": "../../script/storage-check.sh check VersionedContract ERC1967Proxy ERC1967Upgrade UUPS",
-    "storage-inspect:generate": "../../script/storage-check.sh generate VersionedContract ERC1967Proxy ERC1967Upgrade UUPS"
+    "storage-inspect:generate": "../../script/storage-check.sh generate VersionedContract ERC1967Proxy ERC1967Upgrade UUPS",
+    "update-contract-version": "node script/utility-contracts-versions.mjs"
   },
   "dependencies": {
     "@openzeppelin/contracts": "5.0.0",
