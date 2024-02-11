@@ -1,5 +1,17 @@
 # @collectivexyz/protocol-rewards
 
+## 0.11.0
+
+### Minor Changes
+
+- abc6d39: Adds new utility contracts for proxy + upgrade contracts, makes SplitMain upgradeable + initialized in RevolutionBuilder
+
+### Patch Changes
+
+- bb7fe93: Points Emitter creator -> founder rewards
+- Updated dependencies [abc6d39]
+  - @cobuild/utility-contracts@0.11.0
+
 ## 0.10.1
 
 ### Patch Changes
