@@ -25,20 +25,22 @@ pragma solidity ^0.8.22;
 
 import { PausableUpgradeable } from "@openzeppelin/contracts-upgradeable/utils/PausableUpgradeable.sol";
 import { ReentrancyGuardUpgradeable } from "@openzeppelin/contracts-upgradeable/utils/ReentrancyGuardUpgradeable.sol";
+import { OwnableUpgradeable } from "@openzeppelin/contracts-upgradeable/access/OwnableUpgradeable.sol";
+
 import { IAuctionHouse } from "./interfaces/IAuctionHouse.sol";
 import { IRevolutionToken } from "./interfaces/IRevolutionToken.sol";
 import { IWETH } from "./interfaces/IWETH.sol";
 import { IRevolutionPointsEmitter } from "./interfaces/IRevolutionPointsEmitter.sol";
 import { ICultureIndex } from "./interfaces/ICultureIndex.sol";
 import { IRevolutionBuilder } from "./interfaces/IRevolutionBuilder.sol";
-import { OwnableUpgradeable } from "@openzeppelin/contracts-upgradeable/access/OwnableUpgradeable.sol";
 
-import { UUPS } from "./libs/proxy/UUPS.sol";
-import { VersionedContract } from "./version/VersionedContract.sol";
+import { UUPS } from "@cobuild/utility-contracts/src/proxy/UUPS.sol";
+import { IUpgradeManager } from "@cobuild/utility-contracts/src/interfaces/IUpgradeManager.sol";
+import { RevolutionVersion } from "./version/RevolutionVersion.sol";
 
 contract AuctionHouse is
     IAuctionHouse,
-    VersionedContract,
+    RevolutionVersion,
     UUPS,
     PausableUpgradeable,
     ReentrancyGuardUpgradeable,
@@ -88,7 +90,7 @@ contract AuctionHouse is
     ///                                                          ///
 
     /// @notice The contract upgrade manager
-    IRevolutionBuilder public immutable manager;
+    IUpgradeManager public immutable manager;
 
     // The minimum gasleft() threshold for creating an auction (required to mint a RevolutionToken)
     uint32 public constant MIN_TOKEN_MINT_GAS_THRESHOLD = 500_000;
@@ -100,7 +102,7 @@ contract AuctionHouse is
     /// @param _manager The contract upgrade manager address
     constructor(address _manager) payable initializer {
         if (_manager == address(0)) revert ADDRESS_ZERO();
-        manager = IRevolutionBuilder(_manager);
+        manager = IUpgradeManager(_manager);
     }
 
     ///                                                          ///

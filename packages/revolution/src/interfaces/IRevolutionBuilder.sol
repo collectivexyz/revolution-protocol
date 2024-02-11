@@ -1,14 +1,38 @@
-// SPDX-License-Identifier: MIT
+// SPDX-License-Identifier: GPL-3.0-or-later
 pragma solidity 0.8.22;
 
 import { RevolutionDAOStorageV1 } from "../governance/RevolutionDAOInterfaces.sol";
-import { IUUPS } from "./IUUPS.sol";
+import { IUpgradeManager } from "@cobuild/utility-contracts/src/interfaces/IUpgradeManager.sol";
 import { RevolutionBuilderTypesV1 } from "../builder/types/RevolutionBuilderTypesV1.sol";
 import { ICultureIndex } from "./ICultureIndex.sol";
 
 /// @title IRevolutionBuilder
 /// @notice The external RevolutionBuilder events, errors, structs and functions
-interface IRevolutionBuilder is IUUPS {
+interface IRevolutionBuilder is IUpgradeManager {
+    struct TokenImplementations {
+        address revolutionToken;
+        address descriptor;
+        address auction;
+    }
+
+    struct DAOImplementations {
+        address executor;
+        address dao;
+        address revolutionVotingPower;
+    }
+
+    struct CultureIndexImplementations {
+        address cultureIndex;
+        address maxHeap;
+    }
+
+    struct PointsImplementations {
+        address revolutionPoints;
+        address revolutionPointsEmitter;
+        address vrgda;
+        address splitsCreator;
+    }
+
     ///                                                          ///
     ///                            EVENTS                        ///
     ///                                                          ///
@@ -297,21 +321,6 @@ interface IRevolutionBuilder is IUUPS {
             address vrgda,
             address splitsCreator
         );
-
-    /// @notice If an implementation is registered by the Builder DAO as an optional upgrade
-    /// @param baseImpl The base implementation address
-    /// @param upgradeImpl The upgrade implementation address
-    function isRegisteredUpgrade(address baseImpl, address upgradeImpl) external view returns (bool);
-
-    /// @notice Called by the Builder DAO to offer opt-in implementation upgrades for all other DAOs
-    /// @param baseImpl The base implementation address
-    /// @param upgradeImpl The upgrade implementation address
-    function registerUpgrade(address baseImpl, address upgradeImpl) external;
-
-    /// @notice Called by the Builder DAO to remove an upgrade
-    /// @param baseImpl The base implementation address
-    /// @param upgradeImpl The upgrade implementation address
-    function removeUpgrade(address baseImpl, address upgradeImpl) external;
 
     function getDAOVersions(address token) external view returns (DAOVersionInfo memory);
 

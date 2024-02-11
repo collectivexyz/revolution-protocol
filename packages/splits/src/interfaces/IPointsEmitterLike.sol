@@ -1,4 +1,4 @@
-// SPDX-License-Identifier: MIT
+// SPDX-License-Identifier: GPL-3.0-or-later
 pragma solidity ^0.8.22;
 
 interface IRevolutionPointsEmitter {
@@ -13,4 +13,6 @@ interface IRevolutionPointsEmitter {
         uint[] calldata bps,
         ProtocolRewardAddresses calldata protocolRewardsRecipients
     ) external payable returns (uint);
+
+    function getTokenQuoteForPayment(uint256 paymentAmount) external view returns (int256);
 }

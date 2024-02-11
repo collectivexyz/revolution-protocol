@@ -19,16 +19,16 @@ pragma solidity ^0.8.22;
 
 import { Ownable2StepUpgradeable } from "@openzeppelin/contracts-upgradeable/access/Ownable2StepUpgradeable.sol";
 
-import { UUPS } from "./libs/proxy/UUPS.sol";
-import { VersionedContract } from "./version/VersionedContract.sol";
+import { UUPS } from "@cobuild/utility-contracts/src/proxy/UUPS.sol";
+import { RevolutionVersion } from "./version/RevolutionVersion.sol";
 
 import { Strings } from "@openzeppelin/contracts/utils/Strings.sol";
 import { IDescriptor } from "./interfaces/IDescriptor.sol";
 import { Base64 } from "@openzeppelin/contracts/utils/Base64.sol";
 import { ICultureIndex } from "./interfaces/ICultureIndex.sol";
-import { IRevolutionBuilder } from "./interfaces/IRevolutionBuilder.sol";
+import { IUpgradeManager } from "@cobuild/utility-contracts/src/interfaces/IUpgradeManager.sol";
 
-contract Descriptor is IDescriptor, VersionedContract, UUPS, Ownable2StepUpgradeable {
+contract Descriptor is IDescriptor, RevolutionVersion, UUPS, Ownable2StepUpgradeable {
     using Strings for uint256;
 
     // Whether or not `tokenURI` should be returned as a data URI (Default: true)
@@ -57,7 +57,7 @@ contract Descriptor is IDescriptor, VersionedContract, UUPS, Ownable2StepUpgrade
     bytes32 constant COPYRIGHT_CC0_1_0_UNIVERSAL_LICENSE = 0xa2010f343487d3f7618affe54f789f5487602331c0a8d03f49e9a7c547cf0499;
 
     /// @notice The contract upgrade manager
-    IRevolutionBuilder private immutable manager;
+    IUpgradeManager private immutable manager;
 
     ///                                                          ///
     ///                           ERRORS                         ///
@@ -75,7 +75,7 @@ contract Descriptor is IDescriptor, VersionedContract, UUPS, Ownable2StepUpgrade
 
     /// @param _manager The contract upgrade manager address
     constructor(address _manager) payable initializer {
-        manager = IRevolutionBuilder(_manager);
+        manager = IUpgradeManager(_manager);
     }
 
     ///                                                          ///

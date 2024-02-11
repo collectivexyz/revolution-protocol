@@ -1,7 +1,7 @@
-// SPDX-License-Identifier: MIT
+// SPDX-License-Identifier: GPL-3.0-or-later
 pragma solidity 0.8.22;
 
-import { IUUPS } from "../../interfaces/IUUPS.sol";
+import { IUUPS } from "../interfaces/IUUPS.sol";
 import { ERC1967Upgrade } from "./ERC1967Upgrade.sol";
 
 /// @title UUPS

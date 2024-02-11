@@ -1,4 +1,4 @@
-// SPDX-License-Identifier: MIT
+// SPDX-License-Identifier: GPL-3.0-or-later
 pragma solidity ^0.8.22;
 
 import { Test } from "forge-std/Test.sol";
@@ -6,7 +6,7 @@ import { RevolutionPoints } from "../../src/RevolutionPoints.sol";
 import { RevolutionBuilderTest } from "../RevolutionBuilder.t.sol";
 import { IRevolutionBuilder } from "../../src/interfaces/IRevolutionBuilder.sol";
 import { Ownable2StepUpgradeable } from "@openzeppelin/contracts-upgradeable/access/Ownable2StepUpgradeable.sol";
-import { ERC1967Proxy } from "../../src/libs/proxy/ERC1967Proxy.sol";
+import { ERC1967Proxy } from "@cobuild/utility-contracts/src/proxy/ERC1967Proxy.sol";
 
 import { IRevolutionVotingPower } from "../../src/interfaces/IRevolutionVotingPower.sol";
 import { IRevolutionToken } from "../../src/interfaces/IRevolutionToken.sol";

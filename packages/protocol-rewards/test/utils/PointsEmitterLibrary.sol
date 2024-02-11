@@ -1,4 +1,4 @@
-// SPDX-License-Identifier: MIT
+// SPDX-License-Identifier: GPL-3.0-or-later
 pragma solidity ^0.8.22;
 
 import { IERC1822Proxiable } from "@openzeppelin/contracts/interfaces/draft-IERC1822.sol";
@@ -33,6 +33,7 @@ import { Time } from "@openzeppelin/contracts/utils/types/Time.sol";
 import { Initializable } from "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
 import { IVotes } from "@openzeppelin/contracts/governance/utils/IVotes.sol";
 import { IERC20 } from "@openzeppelin/contracts/token/ERC20/IERC20.sol";
+import { IUpgradeManager } from "@cobuild/utility-contracts/src/interfaces/IUpgradeManager.sol";
 
 interface IVRGDAC {
     /**
@@ -1733,7 +1734,7 @@ contract RevolutionPointsEmitter is
     ///                                                          ///
 
     /// @notice The contract upgrade manager
-    IRevolutionBuilder private immutable manager;
+    IUpgradeManager private immutable manager;
 
     ///                                                          ///
     ///                         CONSTRUCTOR                      ///
@@ -1751,7 +1752,7 @@ contract RevolutionPointsEmitter is
         if (_protocolRewards == address(0)) revert ADDRESS_ZERO();
         if (_protocolFeeRecipient == address(0)) revert ADDRESS_ZERO();
 
-        manager = IRevolutionBuilder(_manager);
+        manager = IUpgradeManager(_manager);
     }
 
     ///                                                          ///

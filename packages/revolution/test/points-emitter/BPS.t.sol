@@ -1,4 +1,4 @@
-// SPDX-License-Identifier: MIT
+// SPDX-License-Identifier: GPL-3.0-or-later
 pragma solidity ^0.8.22;
 
 import { Test } from "forge-std/Test.sol";
@@ -11,7 +11,7 @@ import { wadDiv } from "../../src/libs/SignedWadMath.sol";
 import { IRevolutionBuilder } from "../../src/interfaces/IRevolutionBuilder.sol";
 import { PointsEmitterTest } from "./PointsEmitter.t.sol";
 import { IRevolutionPoints } from "../../src/interfaces/IRevolutionPoints.sol";
-import { ERC1967Proxy } from "../../src/libs/proxy/ERC1967Proxy.sol";
+import { ERC1967Proxy } from "@cobuild/utility-contracts/src/proxy/ERC1967Proxy.sol";
 import { console2 } from "forge-std/console2.sol";
 
 contract PointsEmitterBasicTest is PointsEmitterTest {

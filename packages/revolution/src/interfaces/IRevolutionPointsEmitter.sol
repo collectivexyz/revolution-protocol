@@ -1,10 +1,12 @@
-// SPDX-License-Identifier: MIT
+// SPDX-License-Identifier: GPL-3.0-or-later
 pragma solidity ^0.8.22;
 
 import { IRevolutionBuilder } from "./IRevolutionBuilder.sol";
 import { IGrantsRevenueStream } from "./IGrantsRevenueStream.sol";
+import { IVRGDAC } from "./IVRGDAC.sol";
+import { IRewardSplits } from "@cobuild/protocol-rewards/src/interfaces/IRewardSplits.sol";
 
-interface IRevolutionPointsEmitter is IGrantsRevenueStream {
+interface IRevolutionPointsEmitter is IGrantsRevenueStream, IRewardSplits {
     ///                                                          ///
     ///                           ERRORS                         ///
     ///                                                          ///
@@ -65,15 +67,19 @@ interface IRevolutionPointsEmitter is IGrantsRevenueStream {
         address[] calldata addresses,
         uint[] calldata bps,
         ProtocolRewardAddresses calldata protocolRewardsRecipients
-    ) external payable returns (uint);
+    ) external payable returns (uint256);
 
     function WETH() external view returns (address);
 
-    function totalSupply() external view returns (uint);
+    function totalSupply() external view returns (uint256);
 
-    function balanceOf(address owner) external view returns (uint);
+    function balanceOf(address owner) external view returns (uint256);
 
     function founderAddress() external view returns (address);
+
+    function startTime() external view returns (uint256);
+
+    function vrgda() external view returns (IVRGDAC);
 
     function founderRateBps() external view returns (uint256);
 
@@ -81,7 +87,9 @@ interface IRevolutionPointsEmitter is IGrantsRevenueStream {
 
     function founderRewardsExpirationDate() external view returns (uint256);
 
-    function getTokenQuoteForPayment(uint256 paymentAmount) external returns (int);
+    function getTokenQuoteForPayment(uint256 paymentAmount) external returns (int256);
+
+    function getTokenQuoteForEther(uint256 etherAmount) external returns (int256);
 
     function pause() external;
 

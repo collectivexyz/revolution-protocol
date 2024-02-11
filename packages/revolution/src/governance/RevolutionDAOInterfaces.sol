@@ -30,6 +30,7 @@
 
 import { IDAOExecutor } from "../interfaces/IDAOExecutor.sol";
 import { IRevolutionBuilder } from "../interfaces/IRevolutionBuilder.sol";
+import { IUpgradeManager } from "@cobuild/utility-contracts/src/interfaces/IUpgradeManager.sol";
 import { IRevolutionVotingPower } from "../interfaces/IRevolutionVotingPower.sol";
 
 pragma solidity 0.8.22;
@@ -257,7 +258,7 @@ contract RevolutionDAOStorageV1 is RevolutionDAOProxyStorage {
     ///                                                          ///
 
     /// @notice The contract upgrade manager
-    IRevolutionBuilder public immutable manager;
+    IUpgradeManager public immutable manager;
 
     /// @notice Vetoer who has the ability to veto any proposal
     address public vetoer;

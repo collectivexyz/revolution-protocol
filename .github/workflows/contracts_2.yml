@@ -8,3 +8,8 @@ jobs:
     name: Revolution Splits
     uses: ./.github/workflows/splits_contracts.yml
     secrets: inherit
+
+  contracts-utils:
+    name: Utility Contracts
+    uses: ./.github/workflows/utility_contracts.yml
+    secrets: inherit

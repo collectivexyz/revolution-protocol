@@ -21,8 +21,9 @@ import { Ownable2StepUpgradeable } from "@openzeppelin/contracts-upgradeable/acc
 import { ReentrancyGuardUpgradeable } from "@openzeppelin/contracts-upgradeable/utils/ReentrancyGuardUpgradeable.sol";
 import { IERC721 } from "@openzeppelin/contracts/token/ERC721/IERC721.sol";
 
-import { UUPS } from "./libs/proxy/UUPS.sol";
-import { VersionedContract } from "./version/VersionedContract.sol";
+import { UUPS } from "@cobuild/utility-contracts/src/proxy/UUPS.sol";
+
+import { RevolutionVersion } from "./version/RevolutionVersion.sol";
 
 import { ERC721CheckpointableUpgradeable } from "./base/ERC721CheckpointableUpgradeable.sol";
 
@@ -30,10 +31,11 @@ import { IDescriptorMinimal } from "./interfaces/IDescriptorMinimal.sol";
 import { ICultureIndex } from "./interfaces/ICultureIndex.sol";
 import { IRevolutionToken } from "./interfaces/IRevolutionToken.sol";
 import { IRevolutionBuilder } from "./interfaces/IRevolutionBuilder.sol";
+import { IUpgradeManager } from "@cobuild/utility-contracts/src/interfaces/IUpgradeManager.sol";
 
 contract RevolutionToken is
     IRevolutionToken,
-    VersionedContract,
+    RevolutionVersion,
     UUPS,
     Ownable2StepUpgradeable,
     ReentrancyGuardUpgradeable,
@@ -107,7 +109,7 @@ contract RevolutionToken is
     ///                                                          ///
 
     /// @notice The contract upgrade manager
-    IRevolutionBuilder private immutable manager;
+    IUpgradeManager private immutable manager;
 
     ///                                                          ///
     ///                         CONSTRUCTOR                      ///
@@ -115,7 +117,7 @@ contract RevolutionToken is
 
     /// @param _manager The contract upgrade manager address
     constructor(address _manager) payable initializer {
-        manager = IRevolutionBuilder(_manager);
+        manager = IUpgradeManager(_manager);
     }
 
     ///                                                          ///

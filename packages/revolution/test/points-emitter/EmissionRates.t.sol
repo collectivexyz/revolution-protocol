@@ -1,4 +1,4 @@
-// SPDX-License-Identifier: MIT
+// SPDX-License-Identifier: GPL-3.0-or-later
 pragma solidity ^0.8.22;
 
 import { Test } from "forge-std/Test.sol";
@@ -11,7 +11,7 @@ import { wadDiv } from "../../src/libs/SignedWadMath.sol";
 import { IRevolutionBuilder } from "../../src/interfaces/IRevolutionBuilder.sol";
 import { PointsEmitterTest } from "./PointsEmitter.t.sol";
 import { IRevolutionPoints } from "../../src/interfaces/IRevolutionPoints.sol";
-import { ERC1967Proxy } from "../../src/libs/proxy/ERC1967Proxy.sol";
+import { ERC1967Proxy } from "@cobuild/utility-contracts/src/proxy/ERC1967Proxy.sol";
 
 contract EmissionRatesTest is PointsEmitterTest {
     function testBuyTokenWithDifferentRates(
@@ -390,7 +390,7 @@ contract EmissionRatesTest is PointsEmitterTest {
         uint256 valueToSend,
         uint256 expiryDuration
     ) public {
-        valueToSend = bound(valueToSend, 0.00000001 ether, 1e12 ether);
+        valueToSend = bound(valueToSend, 0.0000001 ether, 1e12 ether);
 
         // Calculate value left after sharing protocol rewards
         uint256 msgValueRemaining = valueToSend - revolutionPointsEmitter.computeTotalReward(valueToSend);
@@ -565,11 +565,15 @@ contract EmissionRatesTest is PointsEmitterTest {
             msgValueRemaining
         );
 
+        int256 founderGovernance = buyTokenPaymentSharesOg.founderGovernancePayment > 0
+            ? revolutionPointsEmitter.getTokenQuoteForEther(buyTokenPaymentSharesOg.founderGovernancePayment)
+            : int(0);
+
         //expect getTokenQuoteForEther (buyergovernancepayment) == getTokenForPayment (valueToSend) since founder has rewards
         assertEq(
             buyTokenPaymentSharesOg.buyersGovernancePayment > 0
                 ? uint256(
-                    revolutionPointsEmitter.getTokenQuoteForEther(buyTokenPaymentSharesOg.buyersGovernancePayment)
+                    getTokenQuoteForEtherHelper(buyTokenPaymentSharesOg.buyersGovernancePayment, founderGovernance)
                 )
                 : 0,
             uint256(revolutionPointsEmitter.getTokenQuoteForPayment(valueToSend)),

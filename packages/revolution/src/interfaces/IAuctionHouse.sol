@@ -19,6 +19,7 @@ pragma solidity ^0.8.22;
 
 import { IRevolutionBuilder } from "./IRevolutionBuilder.sol";
 import { IGrantsRevenueStream } from "./IGrantsRevenueStream.sol";
+import { IUpgradeManager } from "@cobuild/utility-contracts/src/interfaces/IUpgradeManager.sol";
 
 interface IAuctionHouseEvents {
     event AuctionCreated(uint256 indexed tokenId, uint256 startTime, uint256 endTime);
@@ -164,7 +165,7 @@ interface IAuctionHouse is IAuctionHouseEvents, IGrantsRevenueStream {
 
     function WETH() external view returns (address);
 
-    function manager() external returns (IRevolutionBuilder);
+    function manager() external returns (IUpgradeManager);
 
     /**
      * @notice Initialize the auction house and base contracts.

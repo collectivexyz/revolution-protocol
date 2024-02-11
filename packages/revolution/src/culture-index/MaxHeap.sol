@@ -3,16 +3,16 @@ pragma solidity ^0.8.22;
 
 import { Ownable2StepUpgradeable } from "@openzeppelin/contracts-upgradeable/access/Ownable2StepUpgradeable.sol";
 import { ReentrancyGuardUpgradeable } from "@openzeppelin/contracts-upgradeable/utils/ReentrancyGuardUpgradeable.sol";
-import { IRevolutionBuilder } from "../interfaces/IRevolutionBuilder.sol";
+import { IUpgradeManager } from "@cobuild/utility-contracts/src/interfaces/IUpgradeManager.sol";
+import { UUPS } from "@cobuild/utility-contracts/src/proxy/UUPS.sol";
+import { RevolutionVersion } from "../version/RevolutionVersion.sol";
 
-import { UUPS } from "../libs/proxy/UUPS.sol";
-import { VersionedContract } from "../version/VersionedContract.sol";
 import { IMaxHeap } from "../interfaces/IMaxHeap.sol";
 
 /// @title MaxHeap implementation in Solidity
 /// @dev This contract implements a Max Heap data structure with basic operations
 /// @author Written by rocketman and gpt4
-contract MaxHeap is IMaxHeap, VersionedContract, UUPS, Ownable2StepUpgradeable, ReentrancyGuardUpgradeable {
+contract MaxHeap is IMaxHeap, RevolutionVersion, UUPS, Ownable2StepUpgradeable, ReentrancyGuardUpgradeable {
     /// @notice The parent contract that is allowed to update the data store
     address public admin;
 
@@ -21,7 +21,7 @@ contract MaxHeap is IMaxHeap, VersionedContract, UUPS, Ownable2StepUpgradeable, 
     ///                                                          ///
 
     /// @notice The contract upgrade manager
-    IRevolutionBuilder private immutable manager;
+    IUpgradeManager private immutable manager;
 
     ///                                                          ///
     ///                         CONSTRUCTOR                      ///
@@ -29,7 +29,7 @@ contract MaxHeap is IMaxHeap, VersionedContract, UUPS, Ownable2StepUpgradeable, 
 
     /// @param _manager The contract upgrade manager address
     constructor(address _manager) payable initializer {
-        manager = IRevolutionBuilder(_manager);
+        manager = IUpgradeManager(_manager);
     }
 
     ///                                                          ///

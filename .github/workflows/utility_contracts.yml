@@ -1,0 +1,39 @@
+name: "Utility Contracts"
+
+on:
+  workflow_call:
+
+jobs:
+  build:
+    uses: ./.github/workflows/build.yml
+    with:
+      package_folder: packages/utility-contracts
+
+  test:
+    uses: ./.github/workflows/test.yml
+    with:
+      package_folder: packages/utility-contracts
+
+  storage_test:
+    needs: build
+    uses: ./.github/workflows/storage.yml
+    with:
+      package_folder: packages/utility-contracts
+
+  contract_sizes:
+    needs: build
+    uses: ./.github/workflows/contract_sizes.yml
+    with:
+      package_folder: packages/utility-contracts
+
+  slither:
+    needs: build
+    uses: ./.github/workflows/slither.yml
+    with:
+      package_folder: packages/utility-contracts
+
+  # coverage:
+  #   uses: ./.github/workflows/coverage.yml
+  #   with:
+  #     package: "utility-contracts"
+  #     files_to_ignore: '"*lib*"'

@@ -1,9 +1,9 @@
-// SPDX-License-Identifier: MIT
+// SPDX-License-Identifier: GPL-3.0-or-later
 pragma solidity 0.8.22;
 
 import { Proxy } from "@openzeppelin/contracts/proxy/Proxy.sol";
 
-import { IERC1967Upgrade } from "../../interfaces/IERC1967Upgrade.sol";
+import { IERC1967Upgrade } from "../interfaces/IERC1967Upgrade.sol";
 import { ERC1967Upgrade } from "./ERC1967Upgrade.sol";
 
 /// @title ERC1967Proxy

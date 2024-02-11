@@ -5,12 +5,14 @@
 ➡ SplitMain
 =======================
 
-| Name              | Type                                                   | Slot | Offset | Bytes | Contract                    |
-|-------------------|--------------------------------------------------------|------|--------|-------|-----------------------------|
-| ethBalances       | mapping(address => uint256)                            | 0    | 0      | 32    | src/SplitMain.sol:SplitMain |
-| ethBalancesPoints | mapping(address => uint256)                            | 1    | 0      | 32    | src/SplitMain.sol:SplitMain |
-| erc20Balances     | mapping(contract ERC20 => mapping(address => uint256)) | 2    | 0      | 32    | src/SplitMain.sol:SplitMain |
-| splits            | mapping(address => struct SplitMain.Split)             | 3    | 0      | 32    | src/SplitMain.sol:SplitMain |
+| Name                 | Type                                                   | Slot | Offset | Bytes | Contract                    |
+|----------------------|--------------------------------------------------------|------|--------|-------|-----------------------------|
+| walletImplementation | address                                                | 0    | 0      | 20    | src/SplitMain.sol:SplitMain |
+| pointsEmitter        | contract IRevolutionPointsEmitter                      | 1    | 0      | 20    | src/SplitMain.sol:SplitMain |
+| ethBalances          | mapping(address => uint256)                            | 2    | 0      | 32    | src/SplitMain.sol:SplitMain |
+| ethBalancesPoints    | mapping(address => uint256)                            | 3    | 0      | 32    | src/SplitMain.sol:SplitMain |
+| erc20Balances        | mapping(contract ERC20 => mapping(address => uint256)) | 4    | 0      | 32    | src/SplitMain.sol:SplitMain |
+| splits               | mapping(address => struct SplitMain.Split)             | 5    | 0      | 32    | src/SplitMain.sol:SplitMain |
 
 =======================
 ➡ SplitWallet

@@ -1,4 +1,4 @@
-// SPDX-License-Identifier: MIT
+// SPDX-License-Identifier: GPL-3.0-or-later
 pragma solidity ^0.8.22;
 
 import { IWETH } from "./interfaces/IWETH.sol";
@@ -14,13 +14,15 @@ import { Ownable2StepUpgradeable } from "@openzeppelin/contracts-upgradeable/acc
 import { PausableUpgradeable } from "@openzeppelin/contracts-upgradeable/utils/PausableUpgradeable.sol";
 import { Strings } from "@openzeppelin/contracts/utils/Strings.sol";
 
-import { VersionedContract } from "./version/VersionedContract.sol";
-import { UUPS } from "./libs/proxy/UUPS.sol";
+import { RevolutionVersion } from "./version/RevolutionVersion.sol";
+import { IUpgradeManager } from "@cobuild/utility-contracts/src/interfaces/IUpgradeManager.sol";
+import { UUPS } from "@cobuild/utility-contracts/src/proxy/UUPS.sol";
+
 import { toDaysWadUnsafe } from "./libs/SignedWadMath.sol";
 
 contract RevolutionPointsEmitter is
     IRevolutionPointsEmitter,
-    VersionedContract,
+    RevolutionVersion,
     UUPS,
     ReentrancyGuardUpgradeable,
     PointsEmitterRewards,
@@ -62,7 +64,7 @@ contract RevolutionPointsEmitter is
     ///                                                          ///
 
     /// @notice The contract upgrade manager
-    IRevolutionBuilder private immutable manager;
+    IUpgradeManager private immutable manager;
 
     ///                                                          ///
     ///                         CONSTRUCTOR                      ///
@@ -80,7 +82,7 @@ contract RevolutionPointsEmitter is
         if (_protocolRewards == address(0)) revert ADDRESS_ZERO();
         if (_protocolFeeRecipient == address(0)) revert ADDRESS_ZERO();
 
-        manager = IRevolutionBuilder(_manager);
+        manager = IUpgradeManager(_manager);
     }
 
     ///                                                          ///
@@ -394,12 +396,24 @@ contract RevolutionPointsEmitter is
             paymentAmount - computeTotalReward(paymentAmount)
         );
 
+        int256 timeSinceStart = toDaysWadUnsafe(block.timestamp - startTime);
+
+        // Founder gets paid governance shares first
+        int256 forFounder = buyTokenPaymentShares.founderGovernancePayment > 0
+            ? vrgda.yToX({
+                timeSinceStart: timeSinceStart,
+                sold: int(token.totalSupply()),
+                amount: int(buyTokenPaymentShares.founderGovernancePayment)
+            })
+            : int(0);
+
         // Note: By using toDaysWadUnsafe(block.timestamp - startTime) we are establishing that 1 "unit of time" is 1 day.
         // solhint-disable-next-line not-rely-on-time
         return
             vrgda.yToX({
-                timeSinceStart: toDaysWadUnsafe(block.timestamp - startTime),
-                sold: int(token.totalSupply()),
+                timeSinceStart: timeSinceStart,
+                // Total supply is increased by the amount of tokens that would be minted for the founder first
+                sold: int(token.totalSupply()) + forFounder,
                 amount: int(buyTokenPaymentShares.buyersGovernancePayment)
             });
     }

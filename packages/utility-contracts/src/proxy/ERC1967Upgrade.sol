@@ -1,10 +1,10 @@
-// SPDX-License-Identifier: MIT
+// SPDX-License-Identifier: GPL-3.0-or-later
 pragma solidity 0.8.22;
 
 import { IERC1822Proxiable } from "@openzeppelin/contracts/interfaces/draft-IERC1822.sol";
 import { StorageSlot } from "@openzeppelin/contracts/utils/StorageSlot.sol";
 
-import { IERC1967Upgrade } from "../../interfaces/IERC1967Upgrade.sol";
+import { IERC1967Upgrade } from "../interfaces/IERC1967Upgrade.sol";
 import { Address } from "@openzeppelin/contracts/utils/Address.sol";
 
 /// @title ERC1967Upgrade

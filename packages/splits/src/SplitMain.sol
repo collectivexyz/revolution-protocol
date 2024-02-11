@@ -8,7 +8,10 @@ import { ERC20 } from "@openzeppelin/contracts/token/ERC20/ERC20.sol";
 import { SafeTransferLib } from "solmate/src/utils/SafeTransferLib.sol";
 import { SafeERC20 } from "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
 import { IRevolutionPointsEmitter } from "./interfaces/IPointsEmitterLike.sol";
-import { VersionedContract } from "./version/VersionedContract.sol";
+import { SplitsVersion } from "./version/SplitsVersion.sol";
+import { UUPS } from "@cobuild/utility-contracts/src/proxy/UUPS.sol";
+import { OwnableUpgradeable } from "@openzeppelin/contracts-upgradeable/access/OwnableUpgradeable.sol";
+import { IUpgradeManager } from "@cobuild/utility-contracts/src/interfaces/IUpgradeManager.sol";
 
 /**
 
@@ -88,22 +91,43 @@ error InvalidSplit__InvalidPointsPercent(uint32 pointsPercent);
 /// @param accountsLength Length of accounts array
 error InvalidSplit__TooFewAccounts(uint256 accountsLength);
 
+/// @notice Invalid number of points accounts `accountsLength`, must have at least 1
+/// @param pointsAccountsLength Length of points accounts array
+error InvalidSplit__TooFewPointsAccounts(uint256 pointsAccountsLength);
+
 /// @notice Array lengths of accounts & percentAllocations don't match (`accountsLength` != `allocationsLength`)
 /// @param accountsLength Length of accounts array
 /// @param allocationsLength Length of percentAllocations array
 error InvalidSplit__AccountsAndAllocationsMismatch(uint256 accountsLength, uint256 allocationsLength);
 
+/// @notice Array lengths of points accounts & percentAllocations don't match (`accountsLength` != `allocationsLength`)
+/// @param accountsLength Length of points accounts array
+/// @param allocationsLength Length of points percentAllocations array
+error InvalidSplit__PointsAccountsAndAllocationsMismatch(uint256 accountsLength, uint256 allocationsLength);
+
 /// @notice Invalid percentAllocations sum `allocationsSum` must equal `PERCENTAGE_SCALE`
 /// @param allocationsSum Sum of percentAllocations array
 error InvalidSplit__InvalidAllocationsSum(uint32 allocationsSum);
+
+/// @notice Invalid points percentAllocations sum `allocationsSum` must equal `PERCENTAGE_SCALE`
+/// @param allocationsSum Sum of points percentAllocations array
+error InvalidSplit__InvalidPointsAllocationsSum(uint32 allocationsSum);
 
 /// @notice Invalid accounts ordering at `index`
 /// @param index Index of out-of-order account
 error InvalidSplit__AccountsOutOfOrder(uint256 index);
 
+/// @notice Invalid points accounts ordering at `index`
+/// @param index Index of out-of-order account
+error InvalidSplit__PointsAccountsOutOfOrder(uint256 index);
+
 /// @notice Invalid percentAllocation of zero at `index`
 /// @param index Index of zero percentAllocation
 error InvalidSplit__AllocationMustBePositive(uint256 index);
+
+/// @notice Invalid points percentAllocation of zero at `index`
+/// @param index Index of zero percentAllocation
+error InvalidSplit__PointsAllocationMustBePositive(uint256 index);
 
 /// @notice Invalid distributorFee `distributorFee` cannot be greater than 10% (1e5)
 /// @param distributorFee Invalid distributorFee amount
@@ -117,6 +141,9 @@ error InvalidSplit__InvalidHash(bytes32 hash);
 /// @param newController Invalid new controller
 error InvalidNewController(address newController);
 
+/// @notice Invalid manager sender
+error SenderNotManager();
+
 /**
  * @title SplitMain
  * @author 0xSplits <will@0xSplits.xyz>
@@ -126,7 +153,7 @@ error InvalidNewController(address newController);
  * For these proxies, we extended EIP-1167 Minimal Proxy Contract to avoid `DELEGATECALL` inside `receive()` to accept
  * hard gas-capped `sends` & `transfers`.
  */
-contract SplitMain is ISplitMain, VersionedContract {
+contract SplitMain is ISplitMain, SplitsVersion, OwnableUpgradeable, UUPS {
     using SafeTransferLib for address;
 
     /**
@@ -153,9 +180,11 @@ contract SplitMain is ISplitMain, VersionedContract {
     /// @notice maximum distributor fee; 1e5 = 10% * PERCENTAGE_SCALE
     uint256 internal constant MAX_DISTRIBUTOR_FEE = 1e5;
     /// @notice address of wallet implementation for split proxies
-    address public immutable override walletImplementation;
+    address public override walletImplementation;
     /// @notice the RevolutionPointsEmitter contract
-    IRevolutionPointsEmitter public immutable override pointsEmitter;
+    IRevolutionPointsEmitter public override pointsEmitter;
+    /// @notice The contract upgrade manager
+    IUpgradeManager private immutable manager;
 
     /**
      * STORAGE - VARIABLES - PRIVATE & INTERNAL
@@ -211,11 +240,11 @@ contract SplitMain is ISplitMain, VersionedContract {
             revert InvalidSplit__InvalidPointsPercent(pointsData.percentOfEther);
 
         // at least 1 account
-        // @notice this was changed from 2 to 1 because funds are split with the points emitter by default
+        // @notice this was changed from 2 to 1 because some funds are split with the points emitter by default
         if (accounts.length < 1) revert InvalidSplit__TooFewAccounts(accounts.length);
 
         // at least 1 points account
-        if (pointsData.accounts.length < 1) revert InvalidSplit__TooFewAccounts(pointsData.accounts.length);
+        if (pointsData.accounts.length < 1) revert InvalidSplit__TooFewPointsAccounts(pointsData.accounts.length);
 
         // accounts & percentAllocations must be equal length
         if (accounts.length != percentAllocations.length)
@@ -223,7 +252,7 @@ contract SplitMain is ISplitMain, VersionedContract {
 
         // pointsAccounts & pointsPercentAllocations must be equal length
         if (pointsData.accounts.length != pointsData.percentAllocations.length)
-            revert InvalidSplit__AccountsAndAllocationsMismatch(
+            revert InvalidSplit__PointsAccountsAndAllocationsMismatch(
                 pointsData.accounts.length,
                 pointsData.percentAllocations.length
             );
@@ -234,7 +263,7 @@ contract SplitMain is ISplitMain, VersionedContract {
 
         // _getSum should overflow if any pointsPercentAllocations[i] < 0
         if (_getSum(pointsData.percentAllocations) != PERCENTAGE_SCALE)
-            revert InvalidSplit__InvalidAllocationsSum(_getSum(pointsData.percentAllocations));
+            revert InvalidSplit__InvalidPointsAllocationsSum(_getSum(pointsData.percentAllocations));
 
         // accounts are ordered and unique
         // percent allocations are nonzero
@@ -259,12 +288,14 @@ contract SplitMain is ISplitMain, VersionedContract {
             uint256 loopLength = pointsData.accounts.length - 1;
             for (uint256 i = 0; i < loopLength; ++i) {
                 // overflow should be impossible in array access math
-                if (pointsData.accounts[i] >= pointsData.accounts[i + 1]) revert InvalidSplit__AccountsOutOfOrder(i);
-                if (pointsData.percentAllocations[i] == uint32(0)) revert InvalidSplit__AllocationMustBePositive(i);
+                if (pointsData.accounts[i] >= pointsData.accounts[i + 1])
+                    revert InvalidSplit__PointsAccountsOutOfOrder(i);
+                if (pointsData.percentAllocations[i] == uint32(0))
+                    revert InvalidSplit__PointsAllocationMustBePositive(i);
             }
             // overflow should be impossible in array access math with validated equal array lengths
             if (pointsData.percentAllocations[loopLength] == uint32(0))
-                revert InvalidSplit__AllocationMustBePositive(loopLength);
+                revert InvalidSplit__PointsAllocationMustBePositive(loopLength);
         }
 
         // distributorFee is lte than max
@@ -284,9 +315,27 @@ contract SplitMain is ISplitMain, VersionedContract {
      * CONSTRUCTOR
      */
 
-    constructor(address _pointsEmitter) {
+    /** @notice Create the contract with a given manager
+     *  @param _manager The contract upgrade manager address
+     */
+    constructor(address _manager) payable initializer {
+        manager = IUpgradeManager(_manager);
+    }
+
+    /**
+     * INITIALIZER
+     */
+
+    /** @notice Initialize the contract
+     *  @param _pointsEmitter The address of the community's points emitter contract to buy points from
+     */
+    function initialize(address _initialOwner, address _pointsEmitter) public initializer {
+        if (msg.sender != address(manager)) revert SenderNotManager();
+
         pointsEmitter = IRevolutionPointsEmitter(_pointsEmitter);
         walletImplementation = address(new SplitWallet());
+
+        __Ownable_init(_initialOwner);
     }
 
     /**
@@ -589,6 +638,23 @@ contract SplitMain is ISplitMain, VersionedContract {
      */
     function getETHBalance(address account) external view returns (uint256) {
         return ethBalances[account] + (splits[account].hash != 0 ? account.balance : 0);
+    }
+
+    /** @notice Returns the current ETH points balance of account `account`
+     *  @param account Account to return ETH points balance for
+     *  @return Account's balance of ETH that will be used to buy points
+     */
+    function getETHPointsBalance(address account) public view returns (uint256) {
+        return ethBalancesPoints[account] + (splits[account].hash != 0 ? account.balance : 0);
+    }
+
+    /** @notice Returns the current points balance of account `account` if withdrawed right now
+     *  @param account Account to return points balance for
+     *  @return Account's balance of points
+     */
+    function getPointsBalance(address account) external view returns (int256) {
+        // Subtract 1 since _withdraw will always leave 1 wei in the account
+        return pointsEmitter.getTokenQuoteForPayment(getETHPointsBalance(account) - 1);
     }
 
     /** @notice Returns the ERC20 balance of token `token` for account `account`
@@ -896,5 +962,13 @@ contract SplitMain is ISplitMain, VersionedContract {
         withdrawn = erc20Balances[token][account] - 1;
         erc20Balances[token][account] = 1;
         SafeERC20.safeTransfer(token, account, withdrawn);
+    }
+
+    /// @notice Ensures the caller is authorized to upgrade the contract and that the new implementation is valid
+    /// @dev This function is called in `upgradeTo` & `upgradeToAndCall`
+    /// @param _newImpl The new implementation address
+    function _authorizeUpgrade(address _newImpl) internal view override onlyOwner {
+        // Ensure the new implementation is a registered upgrade
+        if (!manager.isRegisteredUpgrade(_getImplementation(), _newImpl)) revert INVALID_UPGRADE(_newImpl);
     }
 }
