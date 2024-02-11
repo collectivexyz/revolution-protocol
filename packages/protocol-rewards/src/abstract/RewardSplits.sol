@@ -2,16 +2,10 @@
 pragma solidity 0.8.22;
 
 import { IRevolutionProtocolRewards } from "../interfaces/IRevolutionProtocolRewards.sol";
-
-struct RewardsSettings {
-    uint256 builderReferralReward;
-    uint256 purchaseReferralReward;
-    uint256 deployerReward;
-    uint256 revolutionReward;
-}
+import { IRewardSplits } from "../interfaces/IRewardSplits.sol";
 
 /// @notice Common logic for Revolution RevolutionPointsEmitter contracts for protocol reward splits & deposits
-abstract contract RewardSplits {
+abstract contract RewardSplits is IRewardSplits {
     // 2.5% total
     uint256 internal constant DEPLOYER_REWARD_BPS = 25;
     uint256 internal constant REVOLUTION_REWARD_BPS = 75;
@@ -31,7 +25,7 @@ abstract contract RewardSplits {
     /*
      * @param _paymentAmountWei The amount of ETH being paid for the purchase
      */
-    function computeTotalReward(uint256 paymentAmountWei) public pure returns (uint256) {
+    function computeTotalReward(uint256 paymentAmountWei) public pure override returns (uint256) {
         return
             ((paymentAmountWei * BUILDER_REWARD_BPS) / 10_000) +
             ((paymentAmountWei * PURCHASE_REFERRAL_BPS) / 10_000) +
@@ -39,7 +33,9 @@ abstract contract RewardSplits {
             ((paymentAmountWei * REVOLUTION_REWARD_BPS) / 10_000);
     }
 
-    function computePurchaseRewards(uint256 paymentAmountWei) public pure returns (RewardsSettings memory, uint256) {
+    function computePurchaseRewards(
+        uint256 paymentAmountWei
+    ) public pure override returns (RewardsSettings memory, uint256) {
         return (
             RewardsSettings({
                 builderReferralReward: (paymentAmountWei * BUILDER_REWARD_BPS) / 10_000,

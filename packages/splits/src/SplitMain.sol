@@ -306,11 +306,13 @@ contract SplitMain is ISplitMain, VersionedContract, OwnableUpgradeable, UUPS {
     /** @notice Initialize the contract
      *  @param _pointsEmitter The address of the community's points emitter contract to buy points from
      */
-    function initialize(address _pointsEmitter) public initializer {
+    function initialize(address _initialOwner, address _pointsEmitter) public initializer {
         if (msg.sender != address(manager)) revert SenderNotManager();
 
         pointsEmitter = IRevolutionPointsEmitter(_pointsEmitter);
         walletImplementation = address(new SplitWallet());
+
+        __Ownable_init(_initialOwner);
     }
 
     /**
@@ -613,6 +615,14 @@ contract SplitMain is ISplitMain, VersionedContract, OwnableUpgradeable, UUPS {
      */
     function getETHBalance(address account) external view returns (uint256) {
         return ethBalances[account] + (splits[account].hash != 0 ? account.balance : 0);
+    }
+
+    /** @notice Returns the current ETH points balance of account `account`
+     *  @param account Account to return ETH points balance for
+     *  @return Account's balance of ETH that will be used to buy points
+     */
+    function getETHPointsBalance(address account) external view returns (uint256) {
+        return ethBalancesPoints[account] + (splits[account].hash != 0 ? account.balance : 0);
     }
 
     /** @notice Returns the ERC20 balance of token `token` for account `account`

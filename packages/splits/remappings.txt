@@ -5,3 +5,4 @@ forge-std/=node_modules/forge-std/src/
 solmate=node_modules/solmate/
 @cobuild/protocol-rewards/src/=node_modules/@cobuild/protocol-rewards/src/
 @cobuild/utility-contracts/src/=node_modules/@cobuild/utility-contracts/src/
+@cobuild/revolution/src/=node_modules/@cobuild/revolution/src/

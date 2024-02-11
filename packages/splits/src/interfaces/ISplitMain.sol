@@ -24,9 +24,10 @@ interface ISplitMain {
 
     /**
      * @notice Initializes the SplitMain contract
+     * @param initialOwner The address to set as the initial owner of the contract
      * @param pointsEmitter The address of the points emitter to buy tokens through
      */
-    function initialize(address pointsEmitter) external;
+    function initialize(address initialOwner, address pointsEmitter) external;
 
     function walletImplementation() external returns (address);
 
@@ -54,6 +55,14 @@ interface ISplitMain {
         uint32[] calldata percentAllocations,
         uint32 distributorFee
     ) external;
+
+    function PERCENTAGE_SCALE() external returns (uint256);
+
+    function getHash(address split) external view returns (bytes32);
+
+    function getETHBalance(address account) external view returns (uint256);
+
+    function getETHPointsBalance(address account) external view returns (uint256);
 
     function transferControl(address split, address newController) external;
 
