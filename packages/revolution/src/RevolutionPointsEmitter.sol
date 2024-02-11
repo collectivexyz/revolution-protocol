@@ -399,11 +399,13 @@ contract RevolutionPointsEmitter is
         int256 timeSinceStart = toDaysWadUnsafe(block.timestamp - startTime);
 
         // Founder gets paid governance shares first
-        int256 forFounder = vrgda.yToX({
-            timeSinceStart: timeSinceStart,
-            sold: int(token.totalSupply()),
-            amount: int(buyTokenPaymentShares.founderGovernancePayment)
-        });
+        int256 forFounder = buyTokenPaymentShares.founderGovernancePayment > 0
+            ? vrgda.yToX({
+                timeSinceStart: timeSinceStart,
+                sold: int(token.totalSupply()),
+                amount: int(buyTokenPaymentShares.founderGovernancePayment)
+            })
+            : int(0);
 
         // Note: By using toDaysWadUnsafe(block.timestamp - startTime) we are establishing that 1 "unit of time" is 1 day.
         // solhint-disable-next-line not-rely-on-time
