@@ -378,7 +378,7 @@ contract SplitMain is ISplitMain, SplitsVersion, OwnableUpgradeable, UUPS {
         }
         // store split's hash in storage for future verification
         splits[split].hash = splitHash;
-        emit CreateSplit(split);
+        emit CreateSplit(split, pointsData, accounts, percentAllocations, distributorFee, controller);
     }
 
     /** @notice Predicts the address for an immutable split created with recipients `accounts` with ownerships `percentAllocations` and a keeper fee for splitting of `distributorFee`
