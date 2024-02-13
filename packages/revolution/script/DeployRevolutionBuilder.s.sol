@@ -115,9 +115,7 @@ contract DeployContracts is Script {
         deployedContracts.revolutionTokenImpl = address(new RevolutionToken(address(deployedContracts.builderProxy)));
         deployedContracts.descriptorImpl = address(new Descriptor(address(deployedContracts.builderProxy)));
         deployedContracts.auctionImpl = address(
-            new AuctionHouse(address(deployedContracts.builderProxy)),
-            protocolRewards,
-            rewardsRecipient
+            new AuctionHouse(address(deployedContracts.builderProxy), protocolRewards, rewardsRecipient)
         );
         deployedContracts.executorImpl = address(new DAOExecutor(address(deployedContracts.builderProxy)));
         deployedContracts.daoImpl = address(new RevolutionDAOLogicV1(address(deployedContracts.builderProxy)));
