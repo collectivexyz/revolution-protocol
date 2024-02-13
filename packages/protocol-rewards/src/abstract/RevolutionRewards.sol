@@ -1,9 +1,9 @@
 // SPDX-License-Identifier: GPL-3.0-or-later
 pragma solidity 0.8.22;
 
-import { RewardSplits } from "../RewardSplits.sol";
+import { RewardSplits } from "./RewardSplits.sol";
 
-abstract contract PointsEmitterRewards is RewardSplits {
+abstract contract RevolutionRewards is RewardSplits {
     constructor(
         address _protocolRewards,
         address _revolutionRewardRecipient

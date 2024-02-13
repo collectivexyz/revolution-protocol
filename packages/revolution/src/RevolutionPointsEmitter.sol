@@ -7,7 +7,7 @@ import { IRevolutionPoints } from "./interfaces/IRevolutionPoints.sol";
 import { IRevolutionPointsEmitter } from "./interfaces/IRevolutionPointsEmitter.sol";
 import { IRevolutionBuilder } from "./interfaces/IRevolutionBuilder.sol";
 
-import { PointsEmitterRewards } from "@cobuild/protocol-rewards/src/abstract/PointsEmitter/PointsEmitterRewards.sol";
+import { RevolutionRewards } from "@cobuild/protocol-rewards/src/abstract/RevolutionRewards.sol";
 
 import { ReentrancyGuardUpgradeable } from "@openzeppelin/contracts-upgradeable/utils/ReentrancyGuardUpgradeable.sol";
 import { Ownable2StepUpgradeable } from "@openzeppelin/contracts-upgradeable/access/Ownable2StepUpgradeable.sol";
@@ -25,7 +25,7 @@ contract RevolutionPointsEmitter is
     RevolutionVersion,
     UUPS,
     ReentrancyGuardUpgradeable,
-    PointsEmitterRewards,
+    RevolutionRewards,
     Ownable2StepUpgradeable,
     PausableUpgradeable
 {
@@ -77,7 +77,7 @@ contract RevolutionPointsEmitter is
         address _manager,
         address _protocolRewards,
         address _protocolFeeRecipient
-    ) payable PointsEmitterRewards(_protocolRewards, _protocolFeeRecipient) initializer {
+    ) payable RevolutionRewards(_protocolRewards, _protocolFeeRecipient) initializer {
         if (_manager == address(0)) revert ADDRESS_ZERO();
         if (_protocolRewards == address(0)) revert ADDRESS_ZERO();
         if (_protocolFeeRecipient == address(0)) revert ADDRESS_ZERO();

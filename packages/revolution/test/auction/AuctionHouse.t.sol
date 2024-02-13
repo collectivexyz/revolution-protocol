@@ -17,7 +17,6 @@ import { RevolutionPointsEmitter } from "../../src/RevolutionPointsEmitter.sol";
 import { IRevolutionPointsEmitter } from "../../src/interfaces/IRevolutionPointsEmitter.sol";
 import { wadMul, wadDiv } from "../../src/libs/SignedWadMath.sol";
 import { RevolutionProtocolRewards } from "@cobuild/protocol-rewards/src/RevolutionProtocolRewards.sol";
-import { PointsEmitterRewards } from "@cobuild/protocol-rewards/src/abstract/PointsEmitter/PointsEmitterRewards.sol";
 import { ERC721CheckpointableUpgradeable } from "../../src/base/ERC721CheckpointableUpgradeable.sol";
 import { RevolutionBuilderTest } from "../RevolutionBuilder.t.sol";
 import { IRevolutionBuilder } from "../../src/interfaces/IRevolutionBuilder.sol";
