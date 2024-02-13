@@ -53,7 +53,7 @@ contract AuctionHouseTest is RevolutionBuilderTest {
             2_000, // creatorRateBps
             5_000, //entropyRateBps
             1_000, //minCreatorRateBps
-            IRevolutionBuilder.GrantsParams({ totalRateBps: 0, grantsAddress: grantsAddress })
+            IRevolutionBuilder.GrantsParams({ totalRateBps: 1_000, grantsAddress: grantsAddress })
         );
 
         super.deployMock();
