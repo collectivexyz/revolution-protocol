@@ -8,7 +8,7 @@ export default defineConfig({
       forge: {
         build: false,
       },
-      include: ["ProtocolRewards", "PointsEmitterRewards", "RewardSplits"].map(
+      include: ["ProtocolRewards", "RevolutionRewards", "RewardSplits"].map(
         (contractName) => `${contractName}.json`
       ),
     }),
