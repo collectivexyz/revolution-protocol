@@ -7,7 +7,7 @@ import { SplitWallet } from "../src/SplitWallet.sol";
 import { ISplitMain } from "../src/interfaces/ISplitMain.sol";
 import { ERC20 } from "@openzeppelin/contracts/token/ERC20/ERC20.sol";
 import { ERC1967Proxy } from "@cobuild/utility-contracts/src/proxy/ERC1967Proxy.sol";
-import { RevolutionProtocolRewards } from "@cobuild/protocol-rewards/src/RevolutionProtocolRewards.sol";
+import { ProtocolRewards } from "@cobuild/protocol-rewards/src/ProtocolRewards.sol";
 
 contract SplitsTest is Test {
     SplitMain splitsMainImpl;

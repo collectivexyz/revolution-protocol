@@ -2,15 +2,15 @@
 =======================
 
 =======================
-➡ RevolutionProtocolRewards
+➡ ProtocolRewards
 =======================
 
 | Name             | Type                        | Slot | Offset | Bytes | Contract                                                    |
 |------------------|-----------------------------|------|--------|-------|-------------------------------------------------------------|
-| _nameFallback    | string                      | 0    | 0      | 32    | src/RevolutionProtocolRewards.sol:RevolutionProtocolRewards |
-| _versionFallback | string                      | 1    | 0      | 32    | src/RevolutionProtocolRewards.sol:RevolutionProtocolRewards |
-| balanceOf        | mapping(address => uint256) | 2    | 0      | 32    | src/RevolutionProtocolRewards.sol:RevolutionProtocolRewards |
-| nonces           | mapping(address => uint256) | 3    | 0      | 32    | src/RevolutionProtocolRewards.sol:RevolutionProtocolRewards |
+| _nameFallback    | string                      | 0    | 0      | 32    | src/ProtocolRewards.sol:ProtocolRewards |
+| _versionFallback | string                      | 1    | 0      | 32    | src/ProtocolRewards.sol:ProtocolRewards |
+| balanceOf        | mapping(address => uint256) | 2    | 0      | 32    | src/ProtocolRewards.sol:ProtocolRewards |
+| nonces           | mapping(address => uint256) | 3    | 0      | 32    | src/ProtocolRewards.sol:ProtocolRewards |
 
 =======================
 ➡ RewardSplits
@@ -20,7 +20,7 @@
 |------|------|------|--------|-------|----------|
 
 =======================
-➡ PointsEmitterRewards
+➡ RevolutionRewards
 =======================
 
 | Name | Type | Slot | Offset | Bytes | Contract |

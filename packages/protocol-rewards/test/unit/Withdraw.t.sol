@@ -19,7 +19,7 @@ contract WithdrawTest is ProtocolRewardsTest {
             keccak256(
                 abi.encode(
                     keccak256("EIP712Domain(string name,string version,uint256 chainId,address verifyingContract)"),
-                    keccak256(bytes("RevolutionProtocolRewards")),
+                    keccak256(bytes("ProtocolRewards")),
                     keccak256(bytes("1")),
                     block.chainid,
                     address(protocolRewards)

@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: GPL-3.0-or-later
 pragma solidity 0.8.22;
 
-import { IRevolutionProtocolRewards } from "../interfaces/IRevolutionProtocolRewards.sol";
+import { IProtocolRewards } from "../interfaces/IProtocolRewards.sol";
 import { IRewardSplits } from "../interfaces/IRewardSplits.sol";
 
 /// @notice Common logic for Revolution RevolutionPointsEmitter contracts for protocol reward splits & deposits
@@ -13,12 +13,12 @@ abstract contract RewardSplits is IRewardSplits {
     uint256 internal constant PURCHASE_REFERRAL_BPS = 50;
 
     address internal immutable revolutionRewardRecipient;
-    IRevolutionProtocolRewards internal immutable protocolRewards;
+    IProtocolRewards internal immutable protocolRewards;
 
     constructor(address _protocolRewards, address _revolutionRewardRecipient) payable {
         if (_protocolRewards == address(0) || _revolutionRewardRecipient == address(0)) revert("Invalid Address Zero");
 
-        protocolRewards = IRevolutionProtocolRewards(_protocolRewards);
+        protocolRewards = IProtocolRewards(_protocolRewards);
         revolutionRewardRecipient = _revolutionRewardRecipient;
     }
 

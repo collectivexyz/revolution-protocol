@@ -5,7 +5,7 @@ import { console2 } from "forge-std/console2.sol";
 import { Script } from "forge-std/Script.sol";
 import { Strings } from "@openzeppelin/contracts/utils/Strings.sol";
 
-import { RevolutionProtocolRewards } from "../src/RevolutionProtocolRewards.sol";
+import { ProtocolRewards } from "../src/ProtocolRewards.sol";
 
 contract DeployContracts is Script {
     using Strings for uint256;
@@ -28,17 +28,14 @@ contract DeployContracts is Script {
     }
 
     function deployProtocolRewards() private returns (address) {
-        return address(new RevolutionProtocolRewards());
+        return address(new ProtocolRewards());
     }
 
     function writeDeploymentDetailsToFile(uint256 chainID) private {
         string memory filePath = string(abi.encodePacked("deploys/", chainID.toString(), ".txt"));
 
         vm.writeFile(filePath, "");
-        vm.writeLine(
-            filePath,
-            string(abi.encodePacked("RevolutionProtocolRewards: ", addressToString(protocolRewards)))
-        );
+        vm.writeLine(filePath, string(abi.encodePacked("ProtocolRewards: ", addressToString(protocolRewards))));
     }
 
     function addressToString(address _addr) private pure returns (string memory) {

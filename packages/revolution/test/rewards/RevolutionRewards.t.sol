@@ -6,7 +6,7 @@ import { MockWETH } from "../mock/MockWETH.sol";
 import { IRewardSplits } from "@cobuild/protocol-rewards/src/interfaces/IRewardSplits.sol";
 import { RevolutionPointsEmitter } from "../../src/RevolutionPointsEmitter.sol";
 import { RevolutionPoints } from "../../src/RevolutionPoints.sol";
-import { RevolutionProtocolRewards } from "@cobuild/protocol-rewards/src/RevolutionProtocolRewards.sol";
+import { ProtocolRewards } from "@cobuild/protocol-rewards/src/ProtocolRewards.sol";
 import { VRGDAC } from "../../src/libs/VRGDAC.sol";
 import { ERC1967Proxy } from "@cobuild/utility-contracts/src/proxy/ERC1967Proxy.sol";
 import { IRevolutionBuilder } from "../../src/interfaces/IRevolutionBuilder.sol";
@@ -64,23 +64,19 @@ contract RevolutionRewardsTest is RevolutionBuilderTest {
         (IRewardSplits.RewardsSettings memory settings, uint256 totalReward) = revolutionPointsEmitter
             .computePurchaseRewards(msgValue);
 
-        assertApproxEqAbs(RevolutionProtocolRewards(protocolRewards).totalRewardsSupply(), totalReward, 5);
+        assertApproxEqAbs(ProtocolRewards(protocolRewards).totalRewardsSupply(), totalReward, 5);
         assertApproxEqAbs(
-            RevolutionProtocolRewards(protocolRewards).balanceOf(builderReferral),
+            ProtocolRewards(protocolRewards).balanceOf(builderReferral),
             settings.builderReferralReward,
             5
         );
         assertApproxEqAbs(
-            RevolutionProtocolRewards(protocolRewards).balanceOf(purchaseReferral),
+            ProtocolRewards(protocolRewards).balanceOf(purchaseReferral),
             settings.purchaseReferralReward,
             5
         );
-        assertApproxEqAbs(RevolutionProtocolRewards(protocolRewards).balanceOf(deployer), settings.deployerReward, 5);
-        assertApproxEqAbs(
-            RevolutionProtocolRewards(protocolRewards).balanceOf(revolutionDAO),
-            settings.revolutionReward,
-            5
-        );
+        assertApproxEqAbs(ProtocolRewards(protocolRewards).balanceOf(deployer), settings.deployerReward, 5);
+        assertApproxEqAbs(ProtocolRewards(protocolRewards).balanceOf(revolutionDAO), settings.revolutionReward, 5);
     }
 
     function testNullReferralRecipient(uint256 msgValue) public {
@@ -109,15 +105,15 @@ contract RevolutionRewardsTest is RevolutionBuilderTest {
         (IRewardSplits.RewardsSettings memory settings, uint256 totalReward) = revolutionPointsEmitter
             .computePurchaseRewards(msgValue);
 
-        assertApproxEqAbs(RevolutionProtocolRewards(protocolRewards).totalRewardsSupply(), totalReward, 5);
+        assertApproxEqAbs(ProtocolRewards(protocolRewards).totalRewardsSupply(), totalReward, 5);
         assertApproxEqAbs(
-            RevolutionProtocolRewards(protocolRewards).balanceOf(builderReferral),
+            ProtocolRewards(protocolRewards).balanceOf(builderReferral),
             settings.builderReferralReward,
             5
         );
-        assertApproxEqAbs(RevolutionProtocolRewards(protocolRewards).balanceOf(deployer), settings.deployerReward, 5);
+        assertApproxEqAbs(ProtocolRewards(protocolRewards).balanceOf(deployer), settings.deployerReward, 5);
         assertApproxEqAbs(
-            RevolutionProtocolRewards(protocolRewards).balanceOf(revolutionDAO),
+            ProtocolRewards(protocolRewards).balanceOf(revolutionDAO),
             settings.purchaseReferralReward + settings.revolutionReward,
             5
         );

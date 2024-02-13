@@ -6,7 +6,7 @@ import { unsafeWadDiv, toDaysWadUnsafe } from "../../src/libs/SignedWadMath.sol"
 import { RevolutionPointsEmitter } from "../../src/RevolutionPointsEmitter.sol";
 import { IRevolutionPointsEmitter } from "../../src/interfaces/IRevolutionPointsEmitter.sol";
 import { RevolutionPoints } from "../../src/RevolutionPoints.sol";
-import { RevolutionProtocolRewards } from "@cobuild/protocol-rewards/src/RevolutionProtocolRewards.sol";
+import { ProtocolRewards } from "@cobuild/protocol-rewards/src/ProtocolRewards.sol";
 import { wadDiv } from "../../src/libs/SignedWadMath.sol";
 import { IRevolutionBuilder } from "../../src/interfaces/IRevolutionBuilder.sol";
 import { AuctionHouseTest } from "./AuctionHouse.t.sol";

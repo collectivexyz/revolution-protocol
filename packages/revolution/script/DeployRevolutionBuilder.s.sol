@@ -12,7 +12,7 @@ import { IAuctionHouse, AuctionHouse } from "../src/AuctionHouse.sol";
 import { RevolutionDAOLogicV1 } from "../src/governance/RevolutionDAOLogicV1.sol";
 import { DAOExecutor } from "../src/governance/DAOExecutor.sol";
 import { CultureIndex } from "../src/culture-index/CultureIndex.sol";
-import { RevolutionProtocolRewards } from "@cobuild/protocol-rewards/src/RevolutionProtocolRewards.sol";
+import { ProtocolRewards } from "@cobuild/protocol-rewards/src/ProtocolRewards.sol";
 import { MaxHeap } from "../src/culture-index/MaxHeap.sol";
 import { RevolutionPoints } from "../src/RevolutionPoints.sol";
 import { RevolutionVotingPower } from "../src/RevolutionVotingPower.sol";
@@ -70,7 +70,7 @@ contract DeployContracts is Script {
     }
 
     function deployProtocolRewards() private returns (address) {
-        return address(new RevolutionProtocolRewards());
+        return address(new ProtocolRewards());
     }
 
     function deployRevolutionBuilderContracts(address owner) private {

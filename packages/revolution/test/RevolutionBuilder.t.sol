@@ -19,7 +19,7 @@ import { RevolutionVotingPower } from "../src/RevolutionVotingPower.sol";
 import { RevolutionPointsEmitter } from "../src/RevolutionPointsEmitter.sol";
 import { MaxHeap } from "../src/culture-index/MaxHeap.sol";
 import { RevolutionDAOStorageV1 } from "../src/governance/RevolutionDAOInterfaces.sol";
-import { RevolutionProtocolRewards } from "@cobuild/protocol-rewards/src/RevolutionProtocolRewards.sol";
+import { ProtocolRewards } from "@cobuild/protocol-rewards/src/ProtocolRewards.sol";
 import { RevolutionBuilderTypesV1 } from "../src/builder/types/RevolutionBuilderTypesV1.sol";
 import { ERC1967Proxy } from "@cobuild/utility-contracts/src/proxy/ERC1967Proxy.sol";
 
@@ -71,7 +71,7 @@ contract RevolutionBuilderTest is Test {
         nounsDAO = vm.addr(0xA11CE);
         revolutionDAO = vm.addr(0xB0B);
 
-        protocolRewards = address(new RevolutionProtocolRewards());
+        protocolRewards = address(new ProtocolRewards());
 
         founder = vm.addr(0xCAB);
         founder2 = vm.addr(0xDAD);

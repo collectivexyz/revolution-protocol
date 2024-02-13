@@ -3,12 +3,12 @@ pragma solidity 0.8.22;
 
 import "forge-std/Test.sol";
 
-import "../src/RevolutionProtocolRewards.sol";
+import "../src/ProtocolRewards.sol";
 
 contract ProtocolRewardsTest is Test {
     uint256 internal constant ETH_SUPPLY = 120_200_000 ether;
 
-    RevolutionProtocolRewards internal protocolRewards;
+    ProtocolRewards internal protocolRewards;
 
     address internal collector;
     address internal builderReferral;
@@ -17,7 +17,7 @@ contract ProtocolRewardsTest is Test {
     address internal revolution;
 
     function setUp() public virtual {
-        protocolRewards = new RevolutionProtocolRewards();
+        protocolRewards = new ProtocolRewards();
 
         vm.label(address(protocolRewards), "protocolRewards");
 
