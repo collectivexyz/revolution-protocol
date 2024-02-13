@@ -131,6 +131,11 @@ interface IAuctionHouse is IAuctionHouseEvents, IGrantsRevenueStream {
         uint256 grants;
     }
 
+    struct PaidToCreators {
+        uint256 points;
+        uint256 eth;
+    }
+
     function settleAuction() external;
 
     function settleCurrentAndCreateNewAuction() external;
