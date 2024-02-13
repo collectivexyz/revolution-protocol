@@ -33,10 +33,11 @@ import { IWETH } from "./interfaces/IWETH.sol";
 import { IRevolutionPointsEmitter } from "./interfaces/IRevolutionPointsEmitter.sol";
 import { ICultureIndex } from "./interfaces/ICultureIndex.sol";
 import { IRevolutionBuilder } from "./interfaces/IRevolutionBuilder.sol";
+import { RevolutionVersion } from "./version/RevolutionVersion.sol";
 
 import { UUPS } from "@cobuild/utility-contracts/src/proxy/UUPS.sol";
 import { IUpgradeManager } from "@cobuild/utility-contracts/src/interfaces/IUpgradeManager.sol";
-import { RevolutionVersion } from "./version/RevolutionVersion.sol";
+import { RevolutionRewards } from "@cobuild/protocol-rewards/src/abstract/RevolutionRewards.sol";
 
 contract AuctionHouse is
     IAuctionHouse,
@@ -44,7 +45,8 @@ contract AuctionHouse is
     UUPS,
     PausableUpgradeable,
     ReentrancyGuardUpgradeable,
-    OwnableUpgradeable
+    OwnableUpgradeable,
+    RevolutionRewards
 {
     // The Revolution ERC721 token contract
     IRevolutionToken public revolutionToken;
@@ -100,8 +102,17 @@ contract AuctionHouse is
     ///                                                          ///
 
     /// @param _manager The contract upgrade manager address
-    constructor(address _manager) payable initializer {
+    /// @param _protocolRewards The protocol rewards contract address
+    /// @param _protocolFeeRecipient The protocol fee recipient addres
+    constructor(
+        address _manager,
+        address _protocolRewards,
+        address _protocolFeeRecipient
+    ) payable RevolutionRewards(_protocolRewards, _protocolFeeRecipient) initializer {
         if (_manager == address(0)) revert ADDRESS_ZERO();
+        if (_protocolRewards == address(0)) revert ADDRESS_ZERO();
+        if (_protocolFeeRecipient == address(0)) revert ADDRESS_ZERO();
+
         manager = IUpgradeManager(_manager);
     }
 
