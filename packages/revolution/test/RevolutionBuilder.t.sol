@@ -112,7 +112,7 @@ contract RevolutionBuilderTest is Test {
 
         revolutionTokenImpl = address(new RevolutionToken(address(manager)));
         descriptorImpl = address(new Descriptor(address(manager)));
-        auctionImpl = address(new AuctionHouse(address(manager)));
+        auctionImpl = address(new AuctionHouse(address(manager), address(protocolRewards), revolutionDAO));
         executorImpl = address(new DAOExecutor(address(manager)));
         daoImpl = address(new RevolutionDAOLogicV1(address(manager)));
         revolutionPointsImpl = address(new RevolutionPoints(address(manager)));

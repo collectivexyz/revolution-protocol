@@ -68,7 +68,9 @@ contract GrantsPaymentsTest is AuctionHouseTest {
         createDefaultArtPiece();
         // Ether going to owner of the auction
 
-        uint256 grantsPayment = (bidAmount * grantsRateBps) / 10000;
+        uint256 msgValueRemaining = bidAmount - auction.computeTotalReward(bidAmount);
+
+        uint256 grantsPayment = (msgValueRemaining * grantsRateBps) / 10000;
 
         auction.settleCurrentAndCreateNewAuction(); // This will settle the current auction and create a new one
 
