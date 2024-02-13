@@ -188,14 +188,8 @@ contract AuctionHouse is
      * @param tokenId The ID of the Token to bid on.
      * @param bidder The address of the bidder.
      * @param referral The address of the referral account who referred the current highest bidder.
-     * @param comment The reason for the bid :)
      */
-    function createBid(
-        uint256 tokenId,
-        address bidder,
-        address referral,
-        string calldata comment
-    ) external payable override nonReentrant {
+    function createBid(uint256 tokenId, address bidder, address referral) external payable override nonReentrant {
         IAuctionHouse.Auction memory _auction = auction;
 
         //require bidder is valid address
@@ -204,7 +198,6 @@ contract AuctionHouse is
         if (block.timestamp >= _auction.endTime) revert AUCTION_EXPIRED();
         if (msg.value < reservePrice) revert BELOW_RESERVE_PRICE();
         if (msg.value < _auction.amount + ((_auction.amount * minBidIncrementPercentage) / 100)) revert BID_TOO_LOW();
-        if (bytes(comment).length > 2048) revert COMMENT_TOO_LONG();
 
         address payable lastBidder = _auction.bidder;
 
@@ -219,7 +212,7 @@ contract AuctionHouse is
         // Refund the last bidder, if applicable
         if (lastBidder != address(0)) _safeTransferETHWithFallback(lastBidder, _auction.amount);
 
-        emit AuctionBid(_auction.tokenId, bidder, msg.sender, msg.value, extended, comment);
+        emit AuctionBid(_auction.tokenId, bidder, msg.sender, msg.value, extended);
 
         if (extended) emit AuctionExtended(_auction.tokenId, _auction.endTime);
     }
