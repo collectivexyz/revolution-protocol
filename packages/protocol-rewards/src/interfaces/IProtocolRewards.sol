@@ -3,7 +3,7 @@ pragma solidity 0.8.22;
 
 /// @title IProtocolRewards
 /// @notice The interface for deposits & withdrawals for Protocol Rewards
-interface IRevolutionProtocolRewards {
+interface IProtocolRewards {
     /// @notice Rewards Deposit Event
     /// @param builderReferral Builder referral
     /// @param purchaseReferral Purchase referral user

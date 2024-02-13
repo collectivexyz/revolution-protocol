@@ -14,7 +14,7 @@ import { IRevolutionPointsEmitter } from "../../src/interfaces/IRevolutionPoints
 import { IRevolutionPoints } from "../../src/interfaces/IRevolutionPoints.sol";
 import { VRGDAC } from "../../src/libs/VRGDAC.sol";
 import { IVRGDAC } from "../../src/interfaces/IVRGDAC.sol";
-import { RevolutionProtocolRewards } from "@cobuild/protocol-rewards/src/RevolutionProtocolRewards.sol";
+import { ProtocolRewards } from "@cobuild/protocol-rewards/src/ProtocolRewards.sol";
 
 contract SplitsTest is Test {
     SplitMain splitsMainImpl;
@@ -59,7 +59,7 @@ contract SplitsTest is Test {
     }
 
     function createPointsEmitter() public {
-        address protocolRewards = address(new RevolutionProtocolRewards());
+        address protocolRewards = address(new ProtocolRewards());
 
         address pointsEmitterImpl = address(new RevolutionPointsEmitter(manager, protocolRewards, feeRecipient));
         address pointsImpl = address(new RevolutionPoints(manager));

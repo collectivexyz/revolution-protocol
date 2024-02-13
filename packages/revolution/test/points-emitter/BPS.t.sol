@@ -6,7 +6,7 @@ import { unsafeWadDiv, toDaysWadUnsafe } from "../../src/libs/SignedWadMath.sol"
 import { RevolutionPointsEmitter } from "../../src/RevolutionPointsEmitter.sol";
 import { IRevolutionPointsEmitter } from "../../src/interfaces/IRevolutionPointsEmitter.sol";
 import { RevolutionPoints } from "../../src/RevolutionPoints.sol";
-import { RevolutionProtocolRewards } from "@cobuild/protocol-rewards/src/RevolutionProtocolRewards.sol";
+import { ProtocolRewards } from "@cobuild/protocol-rewards/src/ProtocolRewards.sol";
 import { wadDiv } from "../../src/libs/SignedWadMath.sol";
 import { IRevolutionBuilder } from "../../src/interfaces/IRevolutionBuilder.sol";
 import { PointsEmitterTest } from "./PointsEmitter.t.sol";
@@ -204,7 +204,7 @@ contract PointsEmitterBasicTest is PointsEmitterTest {
     function test_bpsInitialization() public {
         address owner = address(0x123);
 
-        RevolutionProtocolRewards protocolRewards = new RevolutionProtocolRewards();
+        ProtocolRewards protocolRewards = new ProtocolRewards();
 
         address governanceToken = address(new ERC1967Proxy(revolutionPointsImpl, ""));
 

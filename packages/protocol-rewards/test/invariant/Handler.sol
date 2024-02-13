@@ -7,7 +7,7 @@ import "../ProtocolRewardsTest.sol";
 
 contract Handler is CommonBase, StdCheats, StdUtils {
     uint256 internal constant ETH_SUPPLY = 120_200_000 ether;
-    RevolutionProtocolRewards internal immutable rewards;
+    ProtocolRewards internal immutable rewards;
 
     uint256 public ghost_depositSum;
     uint256 public ghost_withdrawSum;
@@ -16,7 +16,7 @@ contract Handler is CommonBase, StdCheats, StdUtils {
     uint256 public numActors;
     mapping(uint256 => address) public actors;
 
-    constructor(RevolutionProtocolRewards _rewards) {
+    constructor(ProtocolRewards _rewards) {
         rewards = _rewards;
 
         vm.deal(address(this), ETH_SUPPLY);

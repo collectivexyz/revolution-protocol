@@ -2,17 +2,17 @@
 pragma solidity 0.8.22;
 
 import { EIP712 } from "@openzeppelin/contracts/utils/cryptography/EIP712.sol";
-import { IRevolutionProtocolRewards } from "./interfaces/IRevolutionProtocolRewards.sol";
+import { IProtocolRewards } from "./interfaces/IProtocolRewards.sol";
 
 // LICENSE
-// RevolutionProtocolRewards.sol is a modified version of Zora's ProtocolRewards.sol:
+// ProtocolRewards.sol is a modified version of Zora's ProtocolRewards.sol:
 // https://github.com/ourzora/zora-protocol/blob/38e9e788c258426037d9bc8a1e8821bf3ce8acf6/packages/protocol-rewards/src/ProtocolRewards.sol
 //
 // ProtocolRewards.sol source code Copyright Zora licensed under the MIT license.
 
-/// @title RevolutionProtocolRewards
+/// @title ProtocolRewards
 /// @notice Manager of deposits & withdrawals for protocol rewards
-contract RevolutionProtocolRewards is IRevolutionProtocolRewards, EIP712 {
+contract ProtocolRewards is IProtocolRewards, EIP712 {
     /// @notice The EIP-712 typehash for gasless withdraws
     bytes32 public constant WITHDRAW_TYPEHASH =
         keccak256("Withdraw(address from,address to,uint256 amount,uint256 nonce,uint256 deadline)");
@@ -23,7 +23,7 @@ contract RevolutionProtocolRewards is IRevolutionProtocolRewards, EIP712 {
     /// @notice An account's nonce for gasless withdraws
     mapping(address => uint256) public nonces;
 
-    constructor() payable EIP712("RevolutionProtocolRewards", "1") {}
+    constructor() payable EIP712("ProtocolRewards", "1") {}
 
     /// @notice The total amount of ETH held in the contract
     function totalRewardsSupply() external view returns (uint256) {
