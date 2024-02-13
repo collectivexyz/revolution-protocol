@@ -363,6 +363,7 @@ contract AuctionHouse is
     /**
      * @notice A function to calculate the shares of the winning bid that go to the auction owner, the creator, and the grants program.
      * @param amount The amount of the winning bid
+     * @notice *IMPORTANT* Assumes that the amount has already been split with the protocol rewards `handleRewardsAndGetValueToSend` function
      * @return paymentShares A struct containing the shares of the winning bid that go to the auction owner, the creator, and the grants program. Scaled by 1e4
      */
     function _calculatePaymentShares(uint256 amount) internal view returns (PaymentShares memory paymentShares) {
