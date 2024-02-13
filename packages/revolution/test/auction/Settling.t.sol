@@ -25,7 +25,7 @@ contract AuctionHouseSettleTest is AuctionHouseTest {
         uint256 bidAmount = auction.reservePrice();
         vm.deal(address(11), bidAmount);
         vm.startPrank(address(11));
-        auction.createBid{ value: bidAmount }(0, address(11), address(0), ""); // Assuming first auction's tokenId is 0
+        auction.createBid{ value: bidAmount }(0, address(11), address(0)); // Assuming first auction's tokenId is 0
         vm.stopPrank();
 
         vm.warp(block.timestamp + auction.duration() + nDays); // Fast forward time to end the auction
@@ -54,7 +54,7 @@ contract AuctionHouseSettleTest is AuctionHouseTest {
         uint256 bidAmount = auction.reservePrice();
         vm.deal(address(11), bidAmount);
         vm.startPrank(address(11));
-        auction.createBid{ value: bidAmount }(0, address(11), address(0), ""); // Assuming first auction's tokenId is 0
+        auction.createBid{ value: bidAmount }(0, address(11), address(0)); // Assuming first auction's tokenId is 0
         vm.stopPrank();
 
         vm.warp(block.timestamp + auction.duration() + nDays); // Fast forward time to end the auction
@@ -140,7 +140,7 @@ contract AuctionHouseSettleTest is AuctionHouseTest {
         vm.startPrank(address(auction));
 
         vm.deal(address(auction), amount);
-        auction.createBid{ value: amount }(0, address(this), address(0), ""); // Assuming first auction's tokenId is 0
+        auction.createBid{ value: amount }(0, address(this), address(0)); // Assuming first auction's tokenId is 0
 
         // Initially, recipient should have 0 ether and 0 WETH
         assertEq(recipient.balance, 0);
@@ -182,7 +182,7 @@ contract AuctionHouseSettleTest is AuctionHouseTest {
 
         vm.startPrank(address(auction));
         vm.deal(address(auction), amount);
-        auction.createBid{ value: amount }(0, address(this), address(0), ""); // Assuming first auction's tokenId is 0
+        auction.createBid{ value: amount }(0, address(this), address(0)); // Assuming first auction's tokenId is 0
 
         // Initially, recipient should have 0 ether
         assertEq(recipient.balance, 0);
@@ -220,7 +220,7 @@ contract AuctionHouseSettleTest is AuctionHouseTest {
         vm.startPrank(address(auction));
 
         vm.deal(address(auction), amount);
-        auction.createBid{ value: amount }(0, address(this), address(0), ""); // Assuming first auction's tokenId is 0
+        auction.createBid{ value: amount }(0, address(this), address(0)); // Assuming first auction's tokenId is 0
 
         // Initially, recipient should have 0 ether and 0 WETH
         assertEq(recipient.balance, 0);
@@ -432,7 +432,7 @@ contract AuctionHouseSettleTest is AuctionHouseTest {
 
         vm.deal(address(21_000), auction.reservePrice() + 1 ether);
         vm.startPrank(address(21_000));
-        auction.createBid{ value: auction.reservePrice() }(0, address(21_000), address(0), "");
+        auction.createBid{ value: auction.reservePrice() }(0, address(21_000), address(0));
         vm.stopPrank();
 
         vm.warp(block.timestamp + auction.duration() + 1); // Fast forward time to end the auction
@@ -506,7 +506,7 @@ contract AuctionHouseSettleTest is AuctionHouseTest {
 
         vm.deal(address(21_000), bidAmount);
         vm.startPrank(address(21_000));
-        auction.createBid{ value: bidAmount }(tokenId, address(21_000), address(0), "");
+        auction.createBid{ value: bidAmount }(tokenId, address(21_000), address(0));
         vm.stopPrank();
 
         vm.warp(block.timestamp + auction.duration() + 1); // Fast forward time to end the auction
@@ -624,7 +624,7 @@ contract AuctionHouseSettleTest is AuctionHouseTest {
 
         // have alice create a  bid
         vm.prank(alice);
-        auction.createBid{ value: bidAmount }(0, alice, address(0), "");
+        auction.createBid{ value: bidAmount }(0, alice, address(0));
 
         // warp to the end of the auction
         (, , , uint256 endTime, , , ) = auction.auction();
@@ -675,7 +675,7 @@ contract AuctionHouseSettleTest is AuctionHouseTest {
 
         vm.startPrank(address(auction));
         vm.deal(address(auction), amount);
-        auction.createBid{ value: amount }(0, address(this), address(0), ""); // Assuming first auction's tokenId is 0
+        auction.createBid{ value: amount }(0, address(this), address(0)); // Assuming first auction's tokenId is 0
         //go in future
         vm.warp(block.timestamp + auction.duration() + 1); // Fast forward time to end the auction
 
