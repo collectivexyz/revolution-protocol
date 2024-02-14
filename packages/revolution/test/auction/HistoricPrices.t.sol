@@ -33,8 +33,13 @@ contract HistoricPriceTest is AuctionHouseTest {
         auction.settleCurrentAndCreateNewAuction();
 
         // ensure auctions mapping by tokenId contains the historic price
-        uint256 historicalPrice = auction.auctions(tokenId);
+        (uint256 historicalPrice, address winner) = auction.auctions(tokenId);
         assertEq(historicalPrice, 1.1 ether, "Auction history should contain the historic price");
+        assertEq(winner, bidder, "Auction history winner should be the bidder");
+
+        IAuctionHouse.AuctionHistory memory historicalData = auction.getPastAuction(tokenId);
+        assertEq(historicalData.amount, 1.1 ether, "Auction history should contain the historic price");
+        assertEq(historicalData.winner, bidder, "Auction history winner should be the bidder");
     }
 
     // create multiple auctions and then make sure the historic prices are saved
@@ -73,14 +78,17 @@ contract HistoricPriceTest is AuctionHouseTest {
         auction.settleCurrentAndCreateNewAuction();
 
         // ensure auctions mapping by tokenId contains the historic price
-        uint256 historicalPrice1 = auction.auctions(tokenId1);
-        uint256 historicalPrice2 = auction.auctions(tokenId2);
+        (uint256 historicalPrice1, address winner1) = auction.auctions(tokenId1);
+        (uint256 historicalPrice2, address winner2) = auction.auctions(tokenId2);
         assertEq(historicalPrice1, 1.1 ether, "Auction history should contain the historic price");
         assertEq(historicalPrice2, 1.2 ether, "Auction history should contain the historic price");
+        assertEq(winner1, bidder, "Auction history winner should be the bidder");
+        assertEq(winner2, bidder, "Auction history winner should be the bidder");
 
         // ensure tokenId 3 has no historic price
-        uint256 historicalPrice3 = auction.auctions(tokenId3);
+        (uint256 historicalPrice3, address winner3) = auction.auctions(tokenId3);
         assertEq(historicalPrice3, 0, "Auction history should contain the historic price");
+        assertEq(winner3, address(0), "Auction history winner should be 0");
     }
 
     // ensure if token burned because no bids, historic price is still 0
@@ -96,8 +104,9 @@ contract HistoricPriceTest is AuctionHouseTest {
         auction.settleCurrentAndCreateNewAuction();
 
         // ensure auctions mapping by tokenId contains the historic price
-        uint256 historicalPrice = auction.auctions(tokenId);
+        (uint256 historicalPrice, address winner) = auction.auctions(tokenId);
         assertEq(historicalPrice, 0, "Auction history should contain the historic price");
+        assertEq(winner, address(0), "Auction history winner should be 0");
     }
 
     // ensure historical price is not sent if the vrb is burned because below reserve price
@@ -124,7 +133,8 @@ contract HistoricPriceTest is AuctionHouseTest {
         auction.settleCurrentAndCreateNewAuction();
 
         // ensure auctions mapping by tokenId contains the historic price
-        uint256 historicalPrice = auction.auctions(tokenId);
+        (uint256 historicalPrice, address winner) = auction.auctions(tokenId);
         assertEq(historicalPrice, 0, "Auction history should contain the historic price");
+        assertEq(winner, address(0), "Auction history winner should be 0");
     }
 }
