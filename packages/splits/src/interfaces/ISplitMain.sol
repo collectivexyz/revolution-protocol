@@ -121,7 +121,14 @@ interface ISplitMain {
     /** @notice emitted after each successful split creation
      *  @param split Address of the created split
      */
-    event CreateSplit(address indexed split);
+    event CreateSplit(
+        address indexed split,
+        PointsData pointsData,
+        address[] accounts,
+        uint32[] percentAllocations,
+        uint32 distributorFee,
+        address controller
+    );
 
     /** @notice emitted after each successful split update
      *  @param split Address of the updated split

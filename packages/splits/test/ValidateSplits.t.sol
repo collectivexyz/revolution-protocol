@@ -27,40 +27,25 @@ contract ValidateSplitsTest is SplitsTest {
         bytes4 selector = bytes4(keccak256("InvalidSplit__InvalidPointsPercent(uint32)"));
 
         vm.expectRevert(abi.encodeWithSelector(selector, 0));
-        address split = ISplitMain(splits).createSplit(
-            pointsData,
-            accounts,
-            percentAllocations,
-            distributorFee,
-            controller
-        );
+        ISplitMain(splits).createSplit(pointsData, accounts, percentAllocations, distributorFee, controller);
     }
 
-    function test__Revert_TooFewSplitAccounts() public {
+    function test__NO_Revert_TooFewSplitAccounts() public {
         address[] memory accounts = new address[](1);
         accounts[0] = address(this);
 
-        uint32[] memory percentAllocations = new uint32[](1);
-        percentAllocations[0] = 1e6 / 2; // 100% allocation
+        uint32[] memory pointsAllocations = new uint32[](1);
+        pointsAllocations[0] = 1e6; // 100% allocation
         uint32 distributorFee = 0;
         address controller = address(this);
 
         SplitMain.PointsData memory pointsData = ISplitMain.PointsData({
-            percentOfEther: 1e6 / 2,
+            percentOfEther: 1e6,
             accounts: accounts,
-            percentAllocations: percentAllocations
+            percentAllocations: pointsAllocations
         });
 
-        bytes4 selector = bytes4(keccak256("InvalidSplit__TooFewAccounts(uint256)"));
-
-        vm.expectRevert(abi.encodeWithSelector(selector, 0));
-        address split = ISplitMain(splits).createSplit(
-            pointsData,
-            new address[](0),
-            percentAllocations,
-            distributorFee,
-            controller
-        );
+        ISplitMain(splits).createSplit(pointsData, new address[](0), new uint32[](0), distributorFee, controller);
     }
 
     function test__Revert_TooFewPointsAccounts() public {
@@ -80,13 +65,7 @@ contract ValidateSplitsTest is SplitsTest {
         bytes4 selector = bytes4(keccak256("InvalidSplit__TooFewPointsAccounts(uint256)"));
 
         vm.expectRevert(abi.encodeWithSelector(selector, 0));
-        address split = ISplitMain(splits).createSplit(
-            pointsData,
-            accounts,
-            percentAllocations,
-            distributorFee,
-            controller
-        );
+        ISplitMain(splits).createSplit(pointsData, accounts, percentAllocations, distributorFee, controller);
     }
 
     function test__Revert_LargeTreasurySplit() public {
@@ -106,13 +85,7 @@ contract ValidateSplitsTest is SplitsTest {
         bytes4 selector = bytes4(keccak256("InvalidSplit__InvalidAllocationsSum(uint32)"));
 
         vm.expectRevert(abi.encodeWithSelector(selector, 1e6 + 2));
-        address split = ISplitMain(splits).createSplit(
-            pointsData,
-            accounts,
-            percentAllocations,
-            distributorFee,
-            controller
-        );
+        ISplitMain(splits).createSplit(pointsData, accounts, percentAllocations, distributorFee, controller);
     }
 
     // test that percentAllocations in pointsData must sum to 1e6
@@ -136,13 +109,7 @@ contract ValidateSplitsTest is SplitsTest {
         bytes4 selector = bytes4(keccak256("InvalidSplit__InvalidPointsAllocationsSum(uint32)"));
 
         vm.expectRevert(abi.encodeWithSelector(selector, 1e6 - 1));
-        address split = ISplitMain(splits).createSplit(
-            pointsData,
-            accounts,
-            percentAllocations,
-            distributorFee,
-            controller
-        );
+        ISplitMain(splits).createSplit(pointsData, accounts, percentAllocations, distributorFee, controller);
     }
 
     // test that percentAllocations in pointsData must sum to 1e6
@@ -166,13 +133,7 @@ contract ValidateSplitsTest is SplitsTest {
         bytes4 selector = bytes4(keccak256("InvalidSplit__InvalidPointsAllocationsSum(uint32)"));
 
         vm.expectRevert(abi.encodeWithSelector(selector, 1e6 + 1));
-        address split = ISplitMain(splits).createSplit(
-            pointsData,
-            accounts,
-            percentAllocations,
-            distributorFee,
-            controller
-        );
+        ISplitMain(splits).createSplit(pointsData, accounts, percentAllocations, distributorFee, controller);
     }
 
     //test that PointsAccountsAndAllocationsMismatch is thrown when points accounts and percents have differing lengths
@@ -198,13 +159,7 @@ contract ValidateSplitsTest is SplitsTest {
         bytes4 selector = bytes4(keccak256("InvalidSplit__AccountsAndAllocationsMismatch(uint256,uint256)"));
 
         vm.expectRevert(abi.encodeWithSelector(selector, 2, 1));
-        address split = ISplitMain(splits).createSplit(
-            pointsData,
-            accounts,
-            percentAllocations,
-            distributorFee,
-            controller
-        );
+        ISplitMain(splits).createSplit(pointsData, accounts, percentAllocations, distributorFee, controller);
     }
 
     //same as above function except with points data
@@ -230,13 +185,7 @@ contract ValidateSplitsTest is SplitsTest {
         bytes4 selector = bytes4(keccak256("InvalidSplit__PointsAccountsAndAllocationsMismatch(uint256,uint256)"));
 
         vm.expectRevert(abi.encodeWithSelector(selector, 1, 2));
-        address split = ISplitMain(splits).createSplit(
-            pointsData,
-            accounts,
-            percentAllocations,
-            distributorFee,
-            controller
-        );
+        ISplitMain(splits).createSplit(pointsData, accounts, percentAllocations, distributorFee, controller);
     }
 
     // ensure all points percent allocations are > 0 - expect revert InvalidSplit__AllocationMustBePositive if not
@@ -265,13 +214,7 @@ contract ValidateSplitsTest is SplitsTest {
         bytes4 selector = bytes4(keccak256("InvalidSplit__PointsAllocationMustBePositive(uint256)"));
 
         vm.expectRevert(abi.encodeWithSelector(selector, 0));
-        address split = ISplitMain(splits).createSplit(
-            pointsData,
-            accounts,
-            percentAllocations,
-            distributorFee,
-            controller
-        );
+        ISplitMain(splits).createSplit(pointsData, accounts, percentAllocations, distributorFee, controller);
     }
 
     // ensure all points percent allocations are > 0 - expect revert InvalidSplit__AllocationMustBePositive if not
@@ -300,12 +243,6 @@ contract ValidateSplitsTest is SplitsTest {
         bytes4 selector = bytes4(keccak256("InvalidSplit__PointsAccountsOutOfOrder(uint256)"));
 
         vm.expectRevert(abi.encodeWithSelector(selector, 0));
-        address split = ISplitMain(splits).createSplit(
-            pointsData,
-            accounts,
-            percentAllocations,
-            distributorFee,
-            controller
-        );
+        ISplitMain(splits).createSplit(pointsData, accounts, percentAllocations, distributorFee, controller);
     }
 }
