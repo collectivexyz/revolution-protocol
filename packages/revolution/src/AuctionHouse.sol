@@ -87,6 +87,9 @@ contract AuctionHouse is
     // Split of purchase proceeds sent to the grants system as ether in basis points
     uint256 public grantsRateBps;
 
+    // The new revolution member's acceptance speech
+    mapping(uint256 => AcceptanceManifesto) public manifestos;
+
     ///                                                          ///
     ///                         IMMUTABLES                       ///
     ///                                                          ///
@@ -418,6 +421,9 @@ contract AuctionHouse is
             } else {
                 //If someone has bid and won, transfer the token to the winning bidder
                 revolutionToken.transferFrom(address(this), _auction.bidder, _auction.tokenId);
+
+                // Set the blank acceptance speech for the new member
+                manifestos[_auction.tokenId] = AcceptanceManifesto({ winner: _auction.bidder, speech: "" });
             }
 
             if (_auction.amount > 0) {

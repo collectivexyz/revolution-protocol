@@ -136,6 +136,13 @@ interface IAuctionHouse is IAuctionHouseEvents, IGrantsRevenueStream {
         uint256 eth;
     }
 
+    // A new community member has joined the revolution.
+    // What do you have to say for yourself?
+    struct AcceptanceManifesto {
+        address winner;
+        string speech;
+    }
+
     function settleAuction() external;
 
     function settleCurrentAndCreateNewAuction() external;
