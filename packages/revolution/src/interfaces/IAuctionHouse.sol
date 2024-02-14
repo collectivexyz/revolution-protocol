@@ -107,8 +107,11 @@ interface IAuctionHouse is IAuctionHouseEvents, IGrantsRevenueStream {
     /// @dev Reverts if an existing auction is in progress.
     error AUCTION_ALREADY_IN_PROGRESS();
 
-    /// @dev Reverts if updateManifesto sender is not the initial winner of the tokenId
+    /// @dev Reverts if `updateManifesto` msg.sender is not the initial winner of the tokenId
     error NOT_INITIAL_TOKEN_OWNER();
+
+    /// @dev Reverts if the manifesto speech specified in `updateManifesto` is too long.
+    error MANIFESTO_TOO_LONG();
 
     struct Auction {
         // ERC721 token ID
