@@ -130,6 +130,11 @@ interface IAuctionHouse is IAuctionHouseEvents, IGrantsRevenueStream {
         bool settled;
     }
 
+    struct AuctionHistory {
+        // The winning bid amount
+        uint256 amount;
+    }
+
     struct PaymentShares {
         // Scaled means it hasn't been divided by 10,000 for BPS to allow for precision in division by
         // consuming functions

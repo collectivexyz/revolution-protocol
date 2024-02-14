@@ -90,6 +90,9 @@ contract AuctionHouse is
     // The new revolution member's acceptance speech
     mapping(uint256 => AcceptanceManifesto) public manifestos;
 
+    // Historical data for the auction house
+    mapping(uint256 => IAuctionHouse.AuctionHistory) public auctions;
+
     ///                                                          ///
     ///                         IMMUTABLES                       ///
     ///                                                          ///
@@ -402,6 +405,8 @@ contract AuctionHouse is
         if (block.timestamp < _auction.endTime) revert AUCTION_NOT_COMPLETED();
 
         auction.settled = true;
+
+        auctions[_auction.tokenId] = IAuctionHouse.AuctionHistory({ amount: _auction.amount });
 
         PaidToCreators memory paidToCreators = PaidToCreators({ eth: 0, points: 0 });
 
