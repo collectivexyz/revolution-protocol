@@ -139,7 +139,7 @@ interface IAuctionHouse is IAuctionHouseEvents, IGrantsRevenueStream {
     // A new community member has joined the revolution.
     // What do you have to say for yourself?
     struct AcceptanceManifesto {
-        address winner;
+        address member;
         string speech;
     }
 

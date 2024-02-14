@@ -423,7 +423,7 @@ contract AuctionHouse is
                 revolutionToken.transferFrom(address(this), _auction.bidder, _auction.tokenId);
 
                 // Set the blank acceptance speech for the new member
-                manifestos[_auction.tokenId] = AcceptanceManifesto({ winner: _auction.bidder, speech: "" });
+                manifestos[_auction.tokenId] = AcceptanceManifesto({ member: _auction.bidder, speech: "" });
             }
 
             if (_auction.amount > 0) {
