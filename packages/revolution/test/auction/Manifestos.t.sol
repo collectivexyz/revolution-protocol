@@ -260,7 +260,9 @@ contract ManifestosTest is AuctionHouseTest {
         assertEq(speech, acceptanceSpeech, "Manifesto speech should match");
         assertEq(member, bidder, "Manifesto member should be the new owner");
 
-        string memory newSpeech = string(abi.encodePacked(acceptanceSpeech, "21"));
+        string memory newSpeech = string(
+            abi.encodePacked(acceptanceSpeech, "This will push us to the limits of the known universe.")
+        );
 
         vm.expectRevert(abi.encodeWithSignature("MANIFESTO_TOO_LONG()"));
         vm.prank(bidder);
