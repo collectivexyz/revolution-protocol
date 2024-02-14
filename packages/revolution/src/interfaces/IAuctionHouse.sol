@@ -28,6 +28,8 @@ interface IAuctionHouseEvents {
 
     event AuctionExtended(uint256 indexed tokenId, uint256 endTime);
 
+    event ManifestoUpdated(uint256 indexed tokenId, address member, string speech);
+
     event AuctionSettled(
         uint256 indexed tokenId,
         address winner,
@@ -105,6 +107,12 @@ interface IAuctionHouse is IAuctionHouseEvents, IGrantsRevenueStream {
     /// @dev Reverts if an existing auction is in progress.
     error AUCTION_ALREADY_IN_PROGRESS();
 
+    /// @dev Reverts if `updateManifesto` msg.sender is not the initial winner of the tokenId
+    error NOT_INITIAL_TOKEN_OWNER();
+
+    /// @dev Reverts if the manifesto speech specified in `updateManifesto` is too long.
+    error MANIFESTO_TOO_LONG();
+
     struct Auction {
         // ERC721 token ID
         uint256 tokenId;
@@ -134,6 +142,13 @@ interface IAuctionHouse is IAuctionHouseEvents, IGrantsRevenueStream {
     struct PaidToCreators {
         uint256 points;
         uint256 eth;
+    }
+
+    // A new community member has joined the revolution.
+    // What do you have to say for yourself?
+    struct AcceptanceManifesto {
+        address member;
+        string speech;
     }
 
     function settleAuction() external;

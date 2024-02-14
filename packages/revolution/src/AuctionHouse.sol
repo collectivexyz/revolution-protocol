@@ -87,6 +87,9 @@ contract AuctionHouse is
     // Split of purchase proceeds sent to the grants system as ether in basis points
     uint256 public grantsRateBps;
 
+    // The new revolution member's acceptance speech
+    mapping(uint256 => AcceptanceManifesto) public manifestos;
+
     ///                                                          ///
     ///                         IMMUTABLES                       ///
     ///                                                          ///
@@ -418,6 +421,9 @@ contract AuctionHouse is
             } else {
                 //If someone has bid and won, transfer the token to the winning bidder
                 revolutionToken.transferFrom(address(this), _auction.bidder, _auction.tokenId);
+
+                // Set the blank acceptance speech for the new member
+                manifestos[_auction.tokenId] = AcceptanceManifesto({ member: _auction.bidder, speech: "" });
             }
 
             if (_auction.amount > 0) {
@@ -521,6 +527,24 @@ contract AuctionHouse is
             // Ensure successful transfer
             if (!wethSuccess) revert("WETH transfer failed");
         }
+    }
+
+    /**
+     * @notice Allows a member to update their manifesto.
+     * @param tokenId The ID of the token for which the manifesto is to be updated.
+     * @param newSpeech The new manifesto speech.
+     */
+    function updateManifesto(uint256 tokenId, string calldata newSpeech) external {
+        AcceptanceManifesto memory manifesto = manifestos[tokenId];
+
+        // Ensure the new manifesto speech is not too long ("we choose to go to the moon" - JFK)
+        if (bytes(newSpeech).length > 12_096) revert MANIFESTO_TOO_LONG();
+
+        if (msg.sender != manifesto.member) revert NOT_INITIAL_TOKEN_OWNER();
+
+        manifestos[tokenId].speech = newSpeech;
+
+        emit ManifestoUpdated(tokenId, msg.sender, newSpeech);
     }
 
     ///                                                          ///
