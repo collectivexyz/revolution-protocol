@@ -537,7 +537,7 @@ contract AuctionHouse is
     function updateManifesto(uint256 tokenId, string calldata newSpeech) external {
         AcceptanceManifesto memory manifesto = manifestos[tokenId];
 
-        // Ensure the new manifesto speech is not too long ("we choose to go to the moon" speech)
+        // Ensure the new manifesto speech is not too long ("we choose to go to the moon" - JFK)
         if (bytes(manifesto.speech).length > 12_065) revert MANIFESTO_TOO_LONG();
 
         if (msg.sender != manifesto.member) revert NOT_INITIAL_TOKEN_OWNER();
