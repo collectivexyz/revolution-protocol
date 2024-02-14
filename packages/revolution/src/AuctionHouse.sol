@@ -406,8 +406,6 @@ contract AuctionHouse is
 
         auction.settled = true;
 
-        auctions[_auction.tokenId] = IAuctionHouse.AuctionHistory({ amount: _auction.amount });
-
         PaidToCreators memory paidToCreators = PaidToCreators({ eth: 0, points: 0 });
 
         // Check if contract balance is greater than reserve price
@@ -429,6 +427,8 @@ contract AuctionHouse is
 
                 // Set the blank acceptance speech for the new member
                 manifestos[_auction.tokenId] = AcceptanceManifesto({ member: _auction.bidder, speech: "" });
+
+                auctions[_auction.tokenId] = IAuctionHouse.AuctionHistory({ amount: _auction.amount });
             }
 
             if (_auction.amount > 0) {

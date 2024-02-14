@@ -82,4 +82,49 @@ contract HistoricPriceTest is AuctionHouseTest {
         uint256 historicalPrice3 = auction.auctions(tokenId3);
         assertEq(historicalPrice3, 0, "Auction history should contain the historic price");
     }
+
+    // ensure if token burned because no bids, historic price is still 0
+    function test__HistoricPriceBurned() public {
+        uint256 tokenId = createDefaultArtPiece();
+        createDefaultArtPiece();
+        vm.roll(vm.getBlockNumber() + 1); // roll block number to enable voting snapshot
+        vm.prank(auction.owner());
+        auction.unpause();
+
+        vm.warp(block.timestamp + auction.duration()); // Fast forward time to end the auction
+
+        auction.settleCurrentAndCreateNewAuction();
+
+        // ensure auctions mapping by tokenId contains the historic price
+        uint256 historicalPrice = auction.auctions(tokenId);
+        assertEq(historicalPrice, 0, "Auction history should contain the historic price");
+    }
+
+    // ensure historical price is not sent if the vrb is burned because below reserve price
+    function test__HistoricPriceBurnedBelowReserve() public {
+        vm.prank(address(executor));
+        auction.setReservePrice(1 ether);
+
+        uint256 tokenId = createDefaultArtPiece();
+        createDefaultArtPiece();
+        vm.roll(vm.getBlockNumber() + 1); // roll block number to enable voting snapshot
+        vm.prank(auction.owner());
+        auction.unpause();
+
+        address bidder = makeAddr("bidder");
+
+        auction.createBid{ value: 1 ether }(0, bidder, address(0));
+
+        // now set higher reserve price
+        vm.prank(address(executor));
+        auction.setReservePrice(2 ether);
+
+        vm.warp(block.timestamp + auction.duration()); // Fast forward time to end the auction
+
+        auction.settleCurrentAndCreateNewAuction();
+
+        // ensure auctions mapping by tokenId contains the historic price
+        uint256 historicalPrice = auction.auctions(tokenId);
+        assertEq(historicalPrice, 0, "Auction history should contain the historic price");
+    }
 }
