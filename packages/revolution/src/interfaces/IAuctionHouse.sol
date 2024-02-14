@@ -28,6 +28,8 @@ interface IAuctionHouseEvents {
 
     event AuctionExtended(uint256 indexed tokenId, uint256 endTime);
 
+    event ManifestoUpdated(uint256 indexed tokenId, address member, string speech);
+
     event AuctionSettled(
         uint256 indexed tokenId,
         address winner,
@@ -104,6 +106,9 @@ interface IAuctionHouse is IAuctionHouseEvents, IGrantsRevenueStream {
 
     /// @dev Reverts if an existing auction is in progress.
     error AUCTION_ALREADY_IN_PROGRESS();
+
+    /// @dev Reverts if updateManifesto sender is not the initial winner of the tokenId
+    error NOT_INITIAL_TOKEN_OWNER();
 
     struct Auction {
         // ERC721 token ID

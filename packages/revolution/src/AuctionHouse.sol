@@ -529,6 +529,21 @@ contract AuctionHouse is
         }
     }
 
+    /**
+     * @notice Allows a member to update their manifesto.
+     * @param tokenId The ID of the token for which the manifesto is to be updated.
+     * @param newSpeech The new manifesto speech.
+     */
+    function updateManifesto(uint256 tokenId, string calldata newSpeech) external {
+        AcceptanceManifesto memory manifesto = manifestos[tokenId];
+
+        if (msg.sender != manifesto.member) revert NOT_INITIAL_TOKEN_OWNER();
+
+        manifestos[tokenId].speech = newSpeech;
+
+        emit ManifestoUpdated(tokenId, msg.sender, newSpeech);
+    }
+
     ///                                                          ///
     ///                        GRANTS PROGRAM                    ///
     ///                                                          ///
