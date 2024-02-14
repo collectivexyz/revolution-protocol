@@ -130,6 +130,7 @@
 | grantsAddress             | address                                                      | 16   | 0      | 20    | src/AuctionHouse.sol:AuctionHouse |
 | grantsRateBps             | uint256                                                      | 17   | 0      | 32    | src/AuctionHouse.sol:AuctionHouse |
 | manifestos                | mapping(uint256 => struct IAuctionHouse.AcceptanceManifesto) | 18   | 0      | 32    | src/AuctionHouse.sol:AuctionHouse |
+| auctions                  | mapping(uint256 => struct IAuctionHouse.AuctionHistory)      | 19   | 0      | 32    | src/AuctionHouse.sol:AuctionHouse |
 
 =======================
 ➡ MaxHeap
