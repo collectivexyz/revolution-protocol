@@ -33,7 +33,7 @@ contract HistoricPriceTest is AuctionHouseTest {
         auction.settleCurrentAndCreateNewAuction();
 
         // ensure auctions mapping by tokenId contains the historic price
-        (uint256 historicalPrice, address winner) = auction.auctions(tokenId);
+        (uint256 historicalPrice, address winner, uint256 amountPaidToOwner) = auction.auctions(tokenId);
         assertEq(historicalPrice, 1.1 ether, "Auction history should contain the historic price");
         assertEq(winner, bidder, "Auction history winner should be the bidder");
 
@@ -78,15 +78,15 @@ contract HistoricPriceTest is AuctionHouseTest {
         auction.settleCurrentAndCreateNewAuction();
 
         // ensure auctions mapping by tokenId contains the historic price
-        (uint256 historicalPrice1, address winner1) = auction.auctions(tokenId1);
-        (uint256 historicalPrice2, address winner2) = auction.auctions(tokenId2);
+        (uint256 historicalPrice1, address winner1, uint256 amountPaidToOwner1) = auction.auctions(tokenId1);
+        (uint256 historicalPrice2, address winner2, uint256 amountPaidToOwner2) = auction.auctions(tokenId2);
         assertEq(historicalPrice1, 1.1 ether, "Auction history should contain the historic price");
         assertEq(historicalPrice2, 1.2 ether, "Auction history should contain the historic price");
         assertEq(winner1, bidder, "Auction history winner should be the bidder");
         assertEq(winner2, bidder, "Auction history winner should be the bidder");
 
         // ensure tokenId 3 has no historic price
-        (uint256 historicalPrice3, address winner3) = auction.auctions(tokenId3);
+        (uint256 historicalPrice3, address winner3, uint256 amountPaidToOwner3) = auction.auctions(tokenId3);
         assertEq(historicalPrice3, 0, "Auction history should contain the historic price");
         assertEq(winner3, address(0), "Auction history winner should be 0");
     }
@@ -104,7 +104,7 @@ contract HistoricPriceTest is AuctionHouseTest {
         auction.settleCurrentAndCreateNewAuction();
 
         // ensure auctions mapping by tokenId contains the historic price
-        (uint256 historicalPrice, address winner) = auction.auctions(tokenId);
+        (uint256 historicalPrice, address winner, uint256 amountPaidToOwner) = auction.auctions(tokenId);
         assertEq(historicalPrice, 0, "Auction history should contain the historic price");
         assertEq(winner, address(0), "Auction history winner should be 0");
     }
@@ -133,7 +133,7 @@ contract HistoricPriceTest is AuctionHouseTest {
         auction.settleCurrentAndCreateNewAuction();
 
         // ensure auctions mapping by tokenId contains the historic price
-        (uint256 historicalPrice, address winner) = auction.auctions(tokenId);
+        (uint256 historicalPrice, address winner, uint256 amountPaidToOwner) = auction.auctions(tokenId);
         assertEq(historicalPrice, 0, "Auction history should contain the historic price");
         assertEq(winner, address(0), "Auction history winner should be 0");
     }
