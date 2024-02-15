@@ -135,6 +135,8 @@ interface IAuctionHouse is IAuctionHouseEvents, IGrantsRevenueStream {
         uint256 amount;
         // The winning bidder
         address winner;
+        // The amount paid to owner() - the DAO
+        uint256 amountPaidToOwner;
     }
 
     struct PaymentShares {

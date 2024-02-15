@@ -430,7 +430,8 @@ contract AuctionHouse is
 
                 auctions[_auction.tokenId] = IAuctionHouse.AuctionHistory({
                     amount: _auction.amount,
-                    winner: _auction.bidder
+                    winner: _auction.bidder,
+                    amountPaidToOwner: 0
                 });
             }
 
@@ -457,6 +458,9 @@ contract AuctionHouse is
 
                 //Transfer auction amount to the owner
                 if (paymentShares.owner > 0) {
+                    // Set the amount paid to the owner
+                    auctions[_auction.tokenId].amountPaidToOwner = paymentShares.owner;
+
                     _safeTransferETHWithFallback(owner(), paymentShares.owner);
                 }
 
