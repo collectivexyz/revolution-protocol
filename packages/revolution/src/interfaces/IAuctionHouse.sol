@@ -130,6 +130,13 @@ interface IAuctionHouse is IAuctionHouseEvents, IGrantsRevenueStream {
         bool settled;
     }
 
+    struct AuctionHistory {
+        // The winning bid amount
+        uint256 amount;
+        // The winning bidder
+        address winner;
+    }
+
     struct PaymentShares {
         // Scaled means it hasn't been divided by 10,000 for BPS to allow for precision in division by
         // consuming functions
@@ -176,6 +183,8 @@ interface IAuctionHouse is IAuctionHouseEvents, IGrantsRevenueStream {
     function WETH() external view returns (address);
 
     function manager() external returns (IUpgradeManager);
+
+    function getPastAuction(uint256 tokenId) external view returns (AuctionHistory memory);
 
     /**
      * @notice Initialize the auction house and base contracts.

@@ -90,6 +90,9 @@ contract AuctionHouse is
     // The new revolution member's acceptance speech
     mapping(uint256 => AcceptanceManifesto) public manifestos;
 
+    // Historical data for the auction house
+    mapping(uint256 => IAuctionHouse.AuctionHistory) public auctions;
+
     ///                                                          ///
     ///                         IMMUTABLES                       ///
     ///                                                          ///
@@ -424,6 +427,11 @@ contract AuctionHouse is
 
                 // Set the blank acceptance speech for the new member
                 manifestos[_auction.tokenId] = AcceptanceManifesto({ member: _auction.bidder, speech: "" });
+
+                auctions[_auction.tokenId] = IAuctionHouse.AuctionHistory({
+                    amount: _auction.amount,
+                    winner: _auction.bidder
+                });
             }
 
             if (_auction.amount > 0) {
@@ -545,6 +553,15 @@ contract AuctionHouse is
         manifestos[tokenId].speech = newSpeech;
 
         emit ManifestoUpdated(tokenId, msg.sender, newSpeech);
+    }
+
+    /**
+     * @notice Get historic auction data for a token.
+     * @param tokenId The ID of the token for which the manifesto is to be updated.
+     * @return AuctionHistory The historic auction data for the token.
+     */
+    function getPastAuction(uint256 tokenId) external view override returns (AuctionHistory memory) {
+        return auctions[tokenId];
     }
 
     ///                                                          ///
