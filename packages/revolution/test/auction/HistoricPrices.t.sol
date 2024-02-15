@@ -17,6 +17,20 @@ import { IRevolutionToken } from "../../src/interfaces/IRevolutionToken.sol";
 import { IAuctionHouse } from "../../src/interfaces/IAuctionHouse.sol";
 
 contract HistoricPriceTest is AuctionHouseTest {
+    function calculateAmountPaidToOwner(uint256 amount) public view returns (uint256) {
+        // subtract auction.computeTotalReward
+        amount = amount - auction.computeTotalReward(amount);
+
+        // Accessing creatorRateBps and grantsRateBps from the auction contract
+        uint256 creatorRateBps = auction.creatorRateBps();
+        uint256 grantsRateBps = auction.grantsRateBps();
+
+        uint256 creatorShare = (amount * creatorRateBps) / 10_000;
+        uint256 grantsShare = (amount * grantsRateBps) / 10_000;
+        uint256 amountPaidToOwner = amount - creatorShare - grantsShare;
+        return amountPaidToOwner;
+    }
+
     function test__HistoricPriceSaved() public {
         uint256 tokenId = createDefaultArtPiece();
         createDefaultArtPiece();
@@ -36,6 +50,11 @@ contract HistoricPriceTest is AuctionHouseTest {
         (uint256 historicalPrice, address winner, uint256 amountPaidToOwner) = auction.auctions(tokenId);
         assertEq(historicalPrice, 1.1 ether, "Auction history should contain the historic price");
         assertEq(winner, bidder, "Auction history winner should be the bidder");
+        assertEq(
+            amountPaidToOwner,
+            calculateAmountPaidToOwner(1.1 ether),
+            "Auction history amountPaidToOwner should be correct"
+        );
 
         IAuctionHouse.AuctionHistory memory historicalData = auction.getPastAuction(tokenId);
         assertEq(historicalData.amount, 1.1 ether, "Auction history should contain the historic price");
@@ -84,11 +103,22 @@ contract HistoricPriceTest is AuctionHouseTest {
         assertEq(historicalPrice2, 1.2 ether, "Auction history should contain the historic price");
         assertEq(winner1, bidder, "Auction history winner should be the bidder");
         assertEq(winner2, bidder, "Auction history winner should be the bidder");
+        assertEq(
+            amountPaidToOwner1,
+            calculateAmountPaidToOwner(1.1 ether),
+            "Auction history amountPaidToOwner should be correct"
+        );
+        assertEq(
+            amountPaidToOwner2,
+            calculateAmountPaidToOwner(1.2 ether),
+            "Auction history amountPaidToOwner should be correct"
+        );
 
         // ensure tokenId 3 has no historic price
         (uint256 historicalPrice3, address winner3, uint256 amountPaidToOwner3) = auction.auctions(tokenId3);
         assertEq(historicalPrice3, 0, "Auction history should contain the historic price");
         assertEq(winner3, address(0), "Auction history winner should be 0");
+        assertEq(amountPaidToOwner3, calculateAmountPaidToOwner(0), "Auction history amountPaidToOwner should be 0");
     }
 
     // ensure if token burned because no bids, historic price is still 0
@@ -107,6 +137,7 @@ contract HistoricPriceTest is AuctionHouseTest {
         (uint256 historicalPrice, address winner, uint256 amountPaidToOwner) = auction.auctions(tokenId);
         assertEq(historicalPrice, 0, "Auction history should contain the historic price");
         assertEq(winner, address(0), "Auction history winner should be 0");
+        assertEq(amountPaidToOwner, calculateAmountPaidToOwner(0), "Auction history amountPaidToOwner should be 0");
     }
 
     // ensure historical price is not sent if the vrb is burned because below reserve price
@@ -136,5 +167,6 @@ contract HistoricPriceTest is AuctionHouseTest {
         (uint256 historicalPrice, address winner, uint256 amountPaidToOwner) = auction.auctions(tokenId);
         assertEq(historicalPrice, 0, "Auction history should contain the historic price");
         assertEq(winner, address(0), "Auction history winner should be 0");
+        assertEq(amountPaidToOwner, calculateAmountPaidToOwner(0), "Auction history amountPaidToOwner should be 0");
     }
 }
