@@ -444,12 +444,18 @@ contract AuctionHouse is
                 // Calculate the payments to each party
                 PaymentShares memory paymentShares = _calculatePaymentShares(
                     // Calculate value left and share protocol rewards
-                    _handleRewardsAndGetValueToSend(
-                        _auction.amount,
-                        address(0),
-                        _auction.referral,
-                        revolutionToken.getArtPieceById(_auction.tokenId).sponsor
-                    )
+                    _auction.amount - computeTotalReward(_auction.amount)
+                );
+
+                // Set the amount paid to the owner
+                auctions[_auction.tokenId].amountPaidToOwner = paymentShares.owner;
+
+                // Send protocol rewards
+                _handleRewardsAndGetValueToSend(
+                    _auction.amount,
+                    address(0),
+                    _auction.referral,
+                    revolutionToken.getArtPieceById(_auction.tokenId).sponsor
                 );
 
                 uint256 numCreators = creators.length;
@@ -460,9 +466,6 @@ contract AuctionHouse is
 
                 //Transfer auction amount to the owner
                 if (paymentShares.owner > 0) {
-                    // Set the amount paid to the owner
-                    auctions[_auction.tokenId].amountPaidToOwner = paymentShares.owner;
-
                     _safeTransferETHWithFallback(owner(), paymentShares.owner);
                 }
 
