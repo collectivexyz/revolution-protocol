@@ -368,25 +368,29 @@ contract AuctionHouse is
 
     /**
      * @notice A function to calculate the shares of the winning bid that go to the auction owner, the creator, and the grants program.
-     * @param amount The amount of the winning bid
-     * @notice *IMPORTANT* Assumes that the amount has already been split with the protocol rewards `handleRewardsAndGetValueToSend` function
+     * @param _amount The amount of the winning bid
+     * @notice *IMPORTANT* Removes total reward from the amount, but DOES NOT SEND IT. This is done in _handleRewardsAndGetValueToSend
      * @return paymentShares A struct containing the shares of the winning bid that go to the auction owner, the creator, and the grants program. Scaled by 1e4
      */
-    function _calculatePaymentShares(uint256 amount) internal view returns (PaymentShares memory paymentShares) {
+    function _calculatePaymentSharesMinusReward(
+        uint256 _amount
+    ) internal view returns (PaymentShares memory paymentShares) {
+        uint256 valueRemaining = _amount - computeTotalReward(_amount);
+
         // Ether to send to the grants program
-        paymentShares.grants = (amount * grantsRateBps) / 10_000;
+        paymentShares.grants = (valueRemaining * grantsRateBps) / 10_000;
 
         // Share of purchase amount reserved for owner of the auction
-        paymentShares.owner = amount - ((amount * creatorRateBps) / 10_000) - paymentShares.grants;
+        paymentShares.owner = valueRemaining - ((valueRemaining * creatorRateBps) / 10_000) - paymentShares.grants;
 
         // Ether directly sent to creator(s)
         // Scaled means it hasn't been divided by 10,000 for BPS to allow for precision in division by
         // consuming functions
-        paymentShares.creatorDirectScaled = (amount * entropyRateBps * creatorRateBps);
+        paymentShares.creatorDirectScaled = (valueRemaining * entropyRateBps * creatorRateBps);
 
         // Ether spent on creator(s) governance tokens
         paymentShares.creatorGovernance =
-            ((amount * creatorRateBps) / 10_000) -
+            ((valueRemaining * creatorRateBps) / 10_000) -
             (paymentShares.creatorDirectScaled / 10_000 / 10_000);
     }
 
@@ -442,10 +446,7 @@ contract AuctionHouse is
                 ICultureIndex.CreatorBps[] memory creators = revolutionToken.getArtPieceById(_auction.tokenId).creators;
 
                 // Calculate the payments to each party
-                PaymentShares memory paymentShares = _calculatePaymentShares(
-                    // Calculate value left after sharing protocol rewards
-                    _auction.amount - computeTotalReward(_auction.amount)
-                );
+                PaymentShares memory paymentShares = _calculatePaymentSharesMinusReward(_auction.amount);
 
                 // Set the amount paid to the owner
                 auctions[_auction.tokenId].amountPaidToOwner = paymentShares.owner;
