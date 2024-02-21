@@ -429,6 +429,7 @@ contract AuctionHouse is
                 // Set the blank acceptance speech for the new member
                 manifestos[_auction.tokenId] = AcceptanceManifesto({ member: _auction.bidder, speech: "" });
 
+                // slither-disable-next-line reentrancy-no-eth
                 auctions[_auction.tokenId] = IAuctionHouse.AuctionHistory({
                     amount: _auction.amount,
                     winner: _auction.bidder,
