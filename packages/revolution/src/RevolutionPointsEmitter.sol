@@ -59,6 +59,9 @@ contract RevolutionPointsEmitter is
     // Split of purchase proceeds sent to the grants system as ether in basis points
     uint256 public grantsRateBps;
 
+    // Historical purchases by account - tracks amount spent
+    mapping(address => IRevolutionPointsEmitter.AccountPurchaseHistory) public purchaseHistory;
+
     ///                                                          ///
     ///                         IMMUTABLES                       ///
     ///                                                          ///
@@ -328,6 +331,13 @@ contract RevolutionPointsEmitter is
         //Mint tokens to buyers
         for (uint256 i = 0; i < addressesLength; i++) {
             if (totalTokensForBuyers > 0) {
+                // save cost basis and average purchase block for recipient
+                _savePurchaseHistory(
+                    addresses[i],
+                    uint256((totalTokensForBuyers * int(basisPointSplits[i])) / 10_000),
+                    (buyTokenPaymentShares.buyersGovernancePayment * basisPointSplits[i]) / 10_000
+                );
+
                 // transfer tokens to address
                 _mint(addresses[i], uint256((totalTokensForBuyers * int(basisPointSplits[i])) / 10_000));
             }
@@ -348,6 +358,38 @@ contract RevolutionPointsEmitter is
         );
 
         return uint256(totalTokensForBuyers);
+    }
+
+    /**
+     * @notice Save purchase history details for an account including points bought, ether sent to owner, and average purchase block
+     * @param _account The account to save purchase history for
+     * @param _pointsBought The amount of points bought
+     * @param _etherToOwnerForAccountPoints The amount of ether spent to buy the points
+     */
+    function _savePurchaseHistory(
+        address _account,
+        uint256 _pointsBought,
+        uint256 _etherToOwnerForAccountPoints
+    ) internal {
+        AccountPurchaseHistory memory recipientHistory = purchaseHistory[_account];
+
+        // save tokens minted to account purchase history
+        purchaseHistory[_account].tokensBought = recipientHistory.tokensBought + _pointsBought;
+
+        // save amount paid to owner for tokens for recipient
+        purchaseHistory[_account].amountPaidToOwner =
+            recipientHistory.amountPaidToOwner +
+            _etherToOwnerForAccountPoints;
+
+        // calculate average purchase block based on proportion of amount paid to owner
+        purchaseHistory[_account].averagePurchaseBlockWad =
+            // numerator is average purchase block * total amount paid to owner + current block number * amount of ether spent
+            (recipientHistory.averagePurchaseBlockWad *
+                recipientHistory.amountPaidToOwner +
+                block.number *
+                _etherToOwnerForAccountPoints) /
+            //denominator is total amount paid to owner
+            (recipientHistory.amountPaidToOwner + _etherToOwnerForAccountPoints);
     }
 
     /**
@@ -471,7 +513,17 @@ contract RevolutionPointsEmitter is
         }
     }
 
-    ///                                                          ///
+    /**
+     * @notice Get the associated purchase data for an account including tokens bought, amount paid to owner, and average purchase block
+     * @param _account The account to get purchase history for
+     * @return AccountPurchaseHistory The purchase history for the account
+     */
+    function getAccountPurchaseHistory(
+        address _account
+    ) external view override returns (AccountPurchaseHistory memory) {
+        return purchaseHistory[_account];
+    }
+
     ///                 POINTS EMITTER UPGRADE                   ///
     ///                                                          ///
 

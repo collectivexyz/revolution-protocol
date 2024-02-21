@@ -135,7 +135,7 @@ interface IAuctionHouse is IAuctionHouseEvents, IGrantsRevenueStream {
         uint256 amount;
         // The winning bidder
         address winner;
-        // The amount paid to owner() - the DAO
+        // The amount paid to owner() (the DAO)
         uint256 amountPaidToOwner;
         // The block number at which the auction was settled, scaled by 1e18
         uint256 settledBlockWad;

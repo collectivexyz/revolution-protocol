@@ -63,6 +63,15 @@ interface IRevolutionPointsEmitter is IGrantsRevenueStream, IRewardSplits {
         address deployer;
     }
 
+    struct AccountPurchaseHistory {
+        // The amount of tokens bought
+        uint256 tokensBought;
+        // The amount paid to owner()
+        uint256 amountPaidToOwner;
+        // The average block number at which the purchases occured
+        uint256 averagePurchaseBlockWad;
+    }
+
     function buyToken(
         address[] calldata addresses,
         uint[] calldata bps,
@@ -95,13 +104,15 @@ interface IRevolutionPointsEmitter is IGrantsRevenueStream, IRewardSplits {
 
     function unpause() external;
 
+    function getAccountPurchaseHistory(address account) external view returns (AccountPurchaseHistory memory);
+
     event PurchaseFinalized(
         address indexed buyer,
         uint256 payment,
         uint256 ownerAmount,
         uint256 protocolRewardsAmount,
-        uint256 buyerPointsEmitted,
-        uint256 founderPointsEmitted,
+        uint256 buyerTokensEmitted,
+        uint256 founderTokensEmitted,
         uint256 founderDirectPayment,
         uint256 grantsDirectPayment
     );
