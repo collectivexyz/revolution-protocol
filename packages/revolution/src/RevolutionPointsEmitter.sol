@@ -363,8 +363,8 @@ contract RevolutionPointsEmitter is
     /**
      * @notice Save purchase history details for an account including points bought, ether sent to owner, and average purchase block
      * @param _account The account to save purchase history for
-     * @param _pointsBought The amount of points bought
-     * @param _etherToOwnerForAccountPoints The amount of ether spent to buy the points
+     * @param _pointsBought The amount of points bought for the account
+     * @param _etherToOwnerForAccountPoints The amount of ether spent to buy the points for the account (sent to owner)
      */
     function _savePurchaseHistory(
         address _account,
