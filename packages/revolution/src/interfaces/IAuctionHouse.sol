@@ -137,6 +137,8 @@ interface IAuctionHouse is IAuctionHouseEvents, IGrantsRevenueStream {
         address winner;
         // The amount paid to owner() - the DAO
         uint256 amountPaidToOwner;
+        // The block number at which the auction was settled, scaled by 1e18
+        uint256 settledBlockWad;
     }
 
     struct PaymentShares {
