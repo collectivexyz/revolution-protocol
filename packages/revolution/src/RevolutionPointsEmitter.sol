@@ -237,19 +237,19 @@ contract RevolutionPointsEmitter is
     }
 
     function _calculatePaymentDistribution(
-        uint256 founderGovernancePoints,
+        uint256 founderGovernanceTokens,
         IRevolutionPointsEmitter.BuyTokenPaymentShares memory buyTokenPaymentShares
     ) internal pure returns (PaymentDistribution memory distribution) {
-        // Ether to pay owner() for selling us points
+        // Ether to pay owner() for selling us tokens
         distribution.toPayOwner = buyTokenPaymentShares.buyersGovernancePayment;
         // Ether to pay founder directly
         distribution.toPayFounder = buyTokenPaymentShares.founderDirectPayment;
 
-        // If the founder is not receiving any points, but ETH should be spent to buy them points, just send the ETH to the founder
-        if (founderGovernancePoints == 0 && buyTokenPaymentShares.founderGovernancePayment > 0) {
+        // If the founder is not receiving any tokens, but ETH should be spent to buy them tokens, just send the ETH to the founder
+        if (founderGovernanceTokens == 0 && buyTokenPaymentShares.founderGovernancePayment > 0) {
             distribution.toPayFounder += buyTokenPaymentShares.founderGovernancePayment;
         } else {
-            // If the founder is receiving points, add the founder's points payment to the owner's payment
+            // If the founder is receiving tokens, add the founder's tokens payment to the owner's payment
             distribution.toPayOwner += buyTokenPaymentShares.founderGovernancePayment;
         }
 
