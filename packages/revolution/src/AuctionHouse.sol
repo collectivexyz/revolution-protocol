@@ -423,19 +423,18 @@ contract AuctionHouse is
                 //If no one has bid, burn the token
                 revolutionToken.burn(_auction.tokenId);
             } else {
-                //If someone has bid and won, transfer the token to the winning bidder
-                revolutionToken.transferFrom(address(this), _auction.bidder, _auction.tokenId);
-
                 // Set the blank acceptance speech for the new member
                 manifestos[_auction.tokenId] = AcceptanceManifesto({ member: _auction.bidder, speech: "" });
 
-                // slither-disable-next-line reentrancy-no-eth
                 auctions[_auction.tokenId] = IAuctionHouse.AuctionHistory({
                     amount: _auction.amount,
                     winner: _auction.bidder,
                     amountPaidToOwner: 0,
                     settledBlockWad: block.number * 1e18
                 });
+
+                //If someone has bid and won, transfer the token to the winning bidder
+                revolutionToken.transferFrom(address(this), _auction.bidder, _auction.tokenId);
             }
 
             if (_auction.amount > 0) {
