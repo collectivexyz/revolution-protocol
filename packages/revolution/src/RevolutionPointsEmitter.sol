@@ -361,15 +361,15 @@ contract RevolutionPointsEmitter is
     }
 
     /**
-     * @notice Save purchase history details for an account including points bought, ether sent to owner, and average purchase block
+     * @notice Save purchase history details for an account including tokens bought, ether sent to owner, and average purchase block
      * @param _account The account to save purchase history for
-     * @param _pointsBought The amount of points bought for the account
-     * @param _etherToOwnerForAccountPoints The amount of ether spent to buy the points for the account (sent to owner)
+     * @param _pointsBought The amount of tokens bought for the account
+     * @param _etherToOwnerForAccountPurchase The amount of ether spent to buy the tokens for the account (sent to owner)
      */
     function _savePurchaseHistory(
         address _account,
         uint256 _pointsBought,
-        uint256 _etherToOwnerForAccountPoints
+        uint256 _etherToOwnerForAccountPurchase
     ) internal {
         AccountPurchaseHistory memory recipientHistory = purchaseHistory[_account];
 
@@ -379,7 +379,7 @@ contract RevolutionPointsEmitter is
         // save amount paid to owner for tokens for recipient
         purchaseHistory[_account].amountPaidToOwner =
             recipientHistory.amountPaidToOwner +
-            _etherToOwnerForAccountPoints;
+            _etherToOwnerForAccountPurchase;
 
         // calculate average purchase block based on proportion of amount paid to owner
         purchaseHistory[_account].averagePurchaseBlockWad =
@@ -387,9 +387,9 @@ contract RevolutionPointsEmitter is
             (recipientHistory.averagePurchaseBlockWad *
                 recipientHistory.amountPaidToOwner +
                 block.number *
-                _etherToOwnerForAccountPoints) /
+                _etherToOwnerForAccountPurchase) /
             //denominator is total amount paid to owner
-            (recipientHistory.amountPaidToOwner + _etherToOwnerForAccountPoints);
+            (recipientHistory.amountPaidToOwner + _etherToOwnerForAccountPurchase);
     }
 
     /**
