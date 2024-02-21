@@ -159,9 +159,11 @@ contract AccountPurchaseHistoryTest is PointsEmitterTest {
     }
 
     // test that purchase account history is saved after multiple purchases for the same account
-    function test__PurchaseHistorySavedMultiplePurchases() public {
-        // purchase for the first account
-        uint256 value = 1 ether;
+    function test__PurchaseHistorySavedMultiplePurchases(uint256 value, uint256 secondValue) public {
+        value = bound(value, 0.0000001 ether, 1e9 ether);
+        secondValue = bound(secondValue, 0.0000001 ether, 1e9 ether);
+
+        vm.deal(address(this), value + secondValue);
 
         address[] memory recipients = new address[](1);
         recipients[0] = address(1); // Assuming address(1) is the recipient for simplicity
@@ -188,9 +190,6 @@ contract AccountPurchaseHistoryTest is PointsEmitterTest {
         uint256 firstBlockNumber = vm.getBlockNumber();
 
         vm.roll(firstBlockNumber + 1e2);
-
-        // Second purchase, different value
-        uint256 secondValue = 2 ether;
 
         uint256 msgValueRemaining2 = secondValue - revolutionPointsEmitter.computeTotalReward(secondValue);
 
@@ -238,5 +237,76 @@ contract AccountPurchaseHistoryTest is PointsEmitterTest {
             averageBlock,
             "averagePurchaseBlockWad should be correct"
         );
+    }
+
+    // basic test for buying for multiple accounts w/correct values
+    function test__BuyingForMultipleAccountsWithCorrectValues(uint256 value, uint256 numRecipients) public {
+        value = bound(value, 0.0000001 ether, 1e9 ether);
+        numRecipients = bound(numRecipients, 1, 1e3);
+
+        vm.deal(address(this), value);
+
+        address[] memory recipients = new address[](numRecipients);
+        uint256[] memory bps = new uint256[](numRecipients);
+        uint256 totalBps = 0;
+        for (uint256 i = 0; i < numRecipients; i++) {
+            recipients[i] = address(uint160(i + 2)); // Assuming addresses start from address(2)
+            if (i < numRecipients - 1) {
+                bps[i] = 10000 / numRecipients; // Evenly distribute bps among recipients
+                totalBps += bps[i];
+            } else {
+                // On the last iteration, add any remaining bps to ensure total is 10000
+                bps[i] = 10000 - totalBps;
+            }
+        }
+
+        uint256 msgValueRemaining = value - revolutionPointsEmitter.computeTotalReward(value);
+
+        uint256 amountPaidToOwner = calculateAmountForBuyers(msgValueRemaining);
+
+        int256 expectedFounderPoints = revolutionPointsEmitter.getTokenQuoteForEther(
+            calculateFounderGovernancePayment(msgValueRemaining)
+        );
+
+        int256 expectedBuyerAmount = getTokenQuoteForEtherHelper(amountPaidToOwner, expectedFounderPoints);
+
+        revolutionPointsEmitter.buyToken{ value: value }(
+            recipients,
+            bps,
+            IRevolutionPointsEmitter.ProtocolRewardAddresses({
+                builder: address(0),
+                purchaseReferral: address(0),
+                deployer: address(0)
+            })
+        );
+
+        // Check the account purchase history for each account
+        for (uint256 i = 0; i < recipients.length; i++) {
+            IRevolutionPointsEmitter.AccountPurchaseHistory memory accountPurchaseHistory = revolutionPointsEmitter
+                .getAccountPurchaseHistory(recipients[i]);
+
+            // assert amount paid to owner is > 0 and correct
+            assertGt(accountPurchaseHistory.amountPaidToOwner, 0, "amountPaidToOwner should be greater than 0");
+            assertEq(
+                accountPurchaseHistory.amountPaidToOwner,
+                (amountPaidToOwner * bps[i]) / 10000, // Adjusting for the correct proportion based on bps
+                "amountPaidToOwner should be correct"
+            );
+
+            // assert tokensBought
+            assertGt(accountPurchaseHistory.tokensBought, 0, "tokensBought should be greater than 0");
+            assertEq(
+                accountPurchaseHistory.tokensBought,
+                uint256((expectedBuyerAmount * int256(bps[i])) / 10000), // Adjusting for the correct proportion based on bps
+                "tokensBought should be correct"
+            );
+
+            // assert averagePurchaseBlockWad is > 0
+            assertGt(
+                accountPurchaseHistory.averagePurchaseBlockWad,
+                0,
+                "averagePurchaseBlockWad should be greater than 0"
+            );
+        }
     }
 }
