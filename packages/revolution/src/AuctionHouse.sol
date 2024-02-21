@@ -431,7 +431,8 @@ contract AuctionHouse is
                 auctions[_auction.tokenId] = IAuctionHouse.AuctionHistory({
                     amount: _auction.amount,
                     winner: _auction.bidder,
-                    amountPaidToOwner: 0
+                    amountPaidToOwner: 0,
+                    settledBlockWad: uint256(block.number) * 1e18
                 });
             }
 
