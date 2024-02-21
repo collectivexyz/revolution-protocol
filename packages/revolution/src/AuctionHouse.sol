@@ -426,9 +426,6 @@ contract AuctionHouse is
             // Calculate the payments to each party
             PaymentShares memory paymentShares = _calculatePaymentSharesMinusReward(_auction.amount);
 
-            // Set the amount paid to the owner
-            auctions[_auction.tokenId].amountPaidToOwner = paymentShares.owner;
-
             if (_auction.bidder == address(0)) {
                 //If no one has bid, burn the token
                 revolutionToken.burn(_auction.tokenId);
@@ -439,7 +436,7 @@ contract AuctionHouse is
                 auctions[_auction.tokenId] = IAuctionHouse.AuctionHistory({
                     amount: _auction.amount,
                     winner: _auction.bidder,
-                    amountPaidToOwner: 0,
+                    amountPaidToOwner: paymentShares.owner,
                     settledBlockWad: block.number * 1e18
                 });
 
