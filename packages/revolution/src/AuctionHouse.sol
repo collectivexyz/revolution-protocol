@@ -423,6 +423,12 @@ contract AuctionHouse is
             // And then burn the token
             revolutionToken.burn(_auction.tokenId);
         } else {
+            // Calculate the payments to each party
+            PaymentShares memory paymentShares = _calculatePaymentSharesMinusReward(_auction.amount);
+
+            // Set the amount paid to the owner
+            auctions[_auction.tokenId].amountPaidToOwner = paymentShares.owner;
+
             if (_auction.bidder == address(0)) {
                 //If no one has bid, burn the token
                 revolutionToken.burn(_auction.tokenId);
@@ -442,15 +448,6 @@ contract AuctionHouse is
             }
 
             if (_auction.amount > 0) {
-                //Get the creators of the art
-                ICultureIndex.CreatorBps[] memory creators = revolutionToken.getArtPieceById(_auction.tokenId).creators;
-
-                // Calculate the payments to each party
-                PaymentShares memory paymentShares = _calculatePaymentSharesMinusReward(_auction.amount);
-
-                // Set the amount paid to the owner
-                auctions[_auction.tokenId].amountPaidToOwner = paymentShares.owner;
-
                 // Send protocol rewards
                 _handleRewardsAndGetValueToSend(
                     _auction.amount,
@@ -458,6 +455,9 @@ contract AuctionHouse is
                     _auction.referral,
                     revolutionToken.getArtPieceById(_auction.tokenId).sponsor
                 );
+
+                //Get the creators of the art
+                ICultureIndex.CreatorBps[] memory creators = revolutionToken.getArtPieceById(_auction.tokenId).creators;
 
                 uint256 numCreators = creators.length;
 
