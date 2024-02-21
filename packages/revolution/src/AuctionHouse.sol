@@ -405,6 +405,7 @@ contract AuctionHouse is
         if (block.timestamp < _auction.endTime) revert AUCTION_NOT_COMPLETED();
 
         auction.settled = true;
+        auctions[_auction.tokenId].settledBlockWad = uint256(block.number) * 1e18;
 
         PaidToCreators memory paidToCreators = PaidToCreators({ eth: 0, points: 0 });
 
