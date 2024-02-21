@@ -443,7 +443,7 @@ contract AuctionHouse is
 
                 // Calculate the payments to each party
                 PaymentShares memory paymentShares = _calculatePaymentShares(
-                    // Calculate value left and share protocol rewards
+                    // Calculate value left after sharing protocol rewards
                     _auction.amount - computeTotalReward(_auction.amount)
                 );
 
