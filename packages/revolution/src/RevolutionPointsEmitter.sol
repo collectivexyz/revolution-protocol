@@ -388,8 +388,10 @@ contract RevolutionPointsEmitter is
                 recipientHistory.amountPaidToOwner +
                 block.number *
                 _etherToOwnerForAccountPurchase) /
-            //denominator is total amount paid to owner
-            (recipientHistory.amountPaidToOwner + _etherToOwnerForAccountPurchase);
+            // denominator is total amount paid to owner
+            // need to ensure denominator is not 0 or can't be abused
+            recipientHistory.amountPaidToOwner +
+            _etherToOwnerForAccountPurchase;
     }
 
     /**
