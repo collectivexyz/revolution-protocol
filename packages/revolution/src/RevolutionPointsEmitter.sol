@@ -377,7 +377,7 @@ contract RevolutionPointsEmitter is
     }
 
     /**
-     * @notice Save purchase history details for an account including tokens bought, ether sent to owner, and average purchase block
+     * @notice Save purchase history details for an account including tokens bought, ether sent to owner
      * @param _account The account to save purchase history for
      * @param _tokensBought The amount of tokens bought for the account
      * @param _etherToOwnerForAccountPurchase The amount of ether spent to buy the tokens for the account (sent to owner)
@@ -520,7 +520,7 @@ contract RevolutionPointsEmitter is
     }
 
     /**
-     * @notice Get the associated purchase data for an account including tokens bought, amount paid to owner, and average purchase block
+     * @notice Get the associated purchase data for an account including tokens bought, amount paid to owner
      * @param _account The account to get purchase history for
      * @return AccountPurchaseHistory The purchase history for the account
      */
