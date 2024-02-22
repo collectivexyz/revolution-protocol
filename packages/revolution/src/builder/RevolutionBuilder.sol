@@ -361,6 +361,40 @@ contract RevolutionBuilder is
     }
 
     ///                                                          ///
+    ///                         CULTURE INDEX                    ///
+    ///                                                          ///
+
+    /// @notice Deploys a culture index for a given token
+    /// @param votingPower The voting power address
+    /// @param initialOwner The initial owner address
+    /// @param dropperAdmin The dropper admin address
+    /// @param cultureIndexParams The CultureIndex settings
+    /// @return The deployed culture index address
+    function deployCultureIndex(
+        address votingPower,
+        address initialOwner,
+        address dropperAdmin,
+        CultureIndexParams calldata cultureIndexParams
+    ) external override returns (CultureIndexImplementations memory) {
+        address cultureIndex = address(new ERC1967Proxy(cultureIndexImpl, ""));
+        address maxHeap = address(new ERC1967Proxy(maxHeapImpl, ""));
+
+        ICultureIndex(cultureIndex).initialize({
+            votingPower: votingPower,
+            initialOwner: initialOwner,
+            dropperAdmin: dropperAdmin,
+            cultureIndexParams: cultureIndexParams,
+            maxHeap: maxHeap
+        });
+
+        IMaxHeap(maxHeap).initialize({ initialOwner: initialOwner, admin: cultureIndex });
+
+        emit CultureIndexDeployed(cultureIndex, maxHeap, votingPower);
+
+        return CultureIndexImplementations({ cultureIndex: cultureIndex, maxHeap: maxHeap });
+    }
+
+    ///                                                          ///
     ///                          DAO UPGRADES                    ///
     ///                                                          ///
 

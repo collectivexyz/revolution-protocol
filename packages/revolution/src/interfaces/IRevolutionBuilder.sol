@@ -75,6 +75,12 @@ interface IRevolutionBuilder is IUpgradeManager {
     /// @param upgradeImpl The upgrade implementation address
     event UpgradeRemoved(address baseImpl, address upgradeImpl);
 
+    /// @notice Emitted when a culture index is deployed
+    /// @param cultureIndex The culture index address
+    /// @param maxHeap The max heap address
+    /// @param votingPower The voting power address
+    event CultureIndexDeployed(address cultureIndex, address maxHeap, address votingPower);
+
     ///                                                          ///
     ///                            ERRORS                        ///
     ///                                                          ///
@@ -300,6 +306,18 @@ interface IRevolutionBuilder is IUpgradeManager {
         RevolutionPointsParams calldata revolutionPointsParams,
         RevolutionVotingPowerParams calldata revolutionVotingPowerParams
     ) external returns (RevolutionBuilderTypesV1.DAOAddresses memory);
+
+    /// @notice Deploys a culture index
+    /// @param votingPower The voting power contract
+    /// @param initialOwner The initial owner address
+    /// @param dropperAdmin The address who can remove pieces from the culture index
+    /// @param cultureIndexParams The CultureIndex settings
+    function deployCultureIndex(
+        address votingPower,
+        address initialOwner,
+        address dropperAdmin,
+        CultureIndexParams calldata cultureIndexParams
+    ) external returns (CultureIndexImplementations memory);
 
     /// @notice A DAO's remaining contract addresses from its token address
     /// @param token The ERC-721 token address
