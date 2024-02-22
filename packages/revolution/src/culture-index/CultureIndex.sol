@@ -236,6 +236,7 @@ contract CultureIndex is
         uint256 totalBps;
         for (uint i; i < creatorArrayLength; i++) {
             if (creatorArray[i].creator == address(0)) revert ADDRESS_ZERO();
+            if (creatorArray[i].bps == 0) revert INVALID_CREATOR_BPS();
             totalBps += creatorArray[i].bps;
         }
 

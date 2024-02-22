@@ -429,4 +429,44 @@ contract CultureIndexArtPieceTest is CultureIndexTestSuite {
         meetsQuorum = cultureIndex.topVotedPieceMeetsQuorum();
         assertTrue(meetsQuorum, "Top voted piece should meet quorum");
     }
+
+    // ensure creator bps can't be zero
+    function test__NonZeroCreators(uint256 nCreators) public {
+        vm.stopPrank();
+        nCreators = bound(nCreators, 2, cultureIndex.MAX_NUM_CREATORS() - 1);
+        address[] memory creatorAddresses = new address[](nCreators);
+        uint256[] memory creatorBps = new uint256[](nCreators);
+        uint256 totalBps = 0;
+
+        // Assume n creators with equal share
+        for (uint256 i = 0; i < nCreators; i++) {
+            creatorAddresses[i] = address(uint160(i + 1)); // Example creator addresses
+            if (i == nCreators - 2) {
+                creatorBps[i] = 10_000 - totalBps;
+            } else if (i == nCreators - 1) {
+                creatorBps[i] = 0;
+            } else {
+                creatorBps[i] = (10_000) / (nCreators - 1);
+            }
+
+            totalBps += creatorBps[i];
+        }
+
+        //mint 1 more token
+        vm.prank(address(revolutionPointsEmitter));
+        revolutionPoints.mint(address(this), 1000);
+        vm.roll(vm.getBlockNumber() + 1);
+
+        vm.expectRevert(abi.encodeWithSignature("INVALID_CREATOR_BPS()"));
+        uint256 pieceId = createArtPieceMultiCreator(
+            "Multi Creator Art",
+            "An art piece with multiple creators",
+            ICultureIndex.MediaType.IMAGE,
+            "ipfs://multi-creator-art",
+            "",
+            "",
+            creatorAddresses,
+            creatorBps
+        );
+    }
 }

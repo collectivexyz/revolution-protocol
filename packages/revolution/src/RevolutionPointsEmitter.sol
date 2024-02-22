@@ -59,6 +59,9 @@ contract RevolutionPointsEmitter is
     // Split of purchase proceeds sent to the grants system as ether in basis points
     uint256 public grantsRateBps;
 
+    // Historical purchases by account - tracks amount spent
+    mapping(address => IRevolutionPointsEmitter.AccountPurchaseHistory) public purchaseHistory;
+
     ///                                                          ///
     ///                         IMMUTABLES                       ///
     ///                                                          ///
@@ -234,19 +237,19 @@ contract RevolutionPointsEmitter is
     }
 
     function _calculatePaymentDistribution(
-        uint256 founderGovernancePoints,
+        uint256 founderGovernanceTokens,
         IRevolutionPointsEmitter.BuyTokenPaymentShares memory buyTokenPaymentShares
     ) internal pure returns (PaymentDistribution memory distribution) {
-        // Ether to pay owner() for selling us points
+        // Ether to pay owner() for selling us tokens
         distribution.toPayOwner = buyTokenPaymentShares.buyersGovernancePayment;
         // Ether to pay founder directly
         distribution.toPayFounder = buyTokenPaymentShares.founderDirectPayment;
 
-        // If the founder is not receiving any points, but ETH should be spent to buy them points, just send the ETH to the founder
-        if (founderGovernancePoints == 0 && buyTokenPaymentShares.founderGovernancePayment > 0) {
+        // If the founder is not receiving any tokens, but ETH should be spent to buy them tokens, just send the ETH to the founder
+        if (founderGovernanceTokens == 0 && buyTokenPaymentShares.founderGovernancePayment > 0) {
             distribution.toPayFounder += buyTokenPaymentShares.founderGovernancePayment;
         } else {
-            // If the founder is receiving points, add the founder's points payment to the owner's payment
+            // If the founder is receiving tokens, add the founder's tokens payment to the owner's payment
             distribution.toPayOwner += buyTokenPaymentShares.founderGovernancePayment;
         }
 
@@ -274,25 +277,62 @@ contract RevolutionPointsEmitter is
         // Ensure the same number of addresses and bps
         if (addresses.length != basisPointSplits.length) revert PARALLEL_ARRAYS_REQUIRED();
 
-        // Calculate value left after sharing protocol rewards
-        uint256 msgValueRemaining = _handleRewardsAndGetValueToSend(
-            msg.value,
-            protocolRewardsRecipients.builder,
-            protocolRewardsRecipients.purchaseReferral,
-            protocolRewardsRecipients.deployer
+        // Calculate payment shares for each recipient
+        BuyTokenPaymentShares memory buyTokenPaymentShares = _calculateBuyTokenPaymentShares(
+            msg.value - computeTotalReward(msg.value)
         );
 
-        BuyTokenPaymentShares memory buyTokenPaymentShares = _calculateBuyTokenPaymentShares(msgValueRemaining);
+        // Calculate tokens to emit to founder and buyers
+        int256 timeSinceStart = toDaysWadUnsafe(block.timestamp - startTime);
 
         // Calculate tokens to emit to founder
         int256 totalTokensForFounder = buyTokenPaymentShares.founderGovernancePayment > 0
-            ? getTokenQuoteForEther(buyTokenPaymentShares.founderGovernancePayment)
+            ? vrgda.yToX({
+                timeSinceStart: timeSinceStart,
+                sold: int(token.totalSupply()),
+                amount: int(buyTokenPaymentShares.founderGovernancePayment)
+            })
+            : int(0);
+
+        // Tokens to mint to buyers
+        int256 totalTokensForBuyers = buyTokenPaymentShares.buyersGovernancePayment > 0
+            ? vrgda.yToX({
+                // ensure we add totalTokensForFounder to the total supply
+                timeSinceStart: timeSinceStart,
+                sold: int(token.totalSupply()) + totalTokensForFounder,
+                amount: int(buyTokenPaymentShares.buyersGovernancePayment)
+            })
             : int(0);
 
         // Calculate the amount of ether to pay the founder and owner
         PaymentDistribution memory paymentDistribution = _calculatePaymentDistribution(
             uint256(totalTokensForFounder),
             buyTokenPaymentShares
+        );
+
+        // Stores total bps, ensure it is 10_000 later
+        uint256 bpsSum = 0;
+        uint256 addressesLength = addresses.length;
+
+        // Save cost basis for recipients
+        for (uint256 i = 0; i < addressesLength; i++) {
+            _savePurchaseHistory(
+                addresses[i],
+                uint256((totalTokensForBuyers * int(basisPointSplits[i])) / 10_000),
+                (buyTokenPaymentShares.buyersGovernancePayment * basisPointSplits[i]) / 10_000
+            );
+
+            bpsSum = bpsSum + basisPointSplits[i];
+        }
+
+        if (bpsSum != 10_000) revert INVALID_BPS_SUM();
+
+        // Share protocol rewards
+        _handleRewardsAndGetValueToSend(
+            msg.value,
+            protocolRewardsRecipients.builder,
+            protocolRewardsRecipients.purchaseReferral,
+            protocolRewardsRecipients.deployer
         );
 
         // Transfer ETH to owner
@@ -315,32 +355,18 @@ contract RevolutionPointsEmitter is
             _mint(founderAddress, uint256(totalTokensForFounder));
         }
 
-        // Stores total bps, ensure it is 10_000 later
-        uint256 bpsSum = 0;
-        uint256 addressesLength = addresses.length;
-
-        // Tokens to mint to buyers
-        // ENSURE we do this after minting to founder, so that the total supply is correct
-        int256 totalTokensForBuyers = buyTokenPaymentShares.buyersGovernancePayment > 0
-            ? getTokenQuoteForEther(buyTokenPaymentShares.buyersGovernancePayment)
-            : int(0);
-
-        //Mint tokens to buyers
-        for (uint256 i = 0; i < addressesLength; i++) {
-            if (totalTokensForBuyers > 0) {
-                // transfer tokens to address
+        // Mint tokens to buyers
+        if (totalTokensForBuyers > 0) {
+            for (uint256 i = 0; i < addressesLength; i++) {
                 _mint(addresses[i], uint256((totalTokensForBuyers * int(basisPointSplits[i])) / 10_000));
             }
-            bpsSum = bpsSum + basisPointSplits[i];
         }
-
-        if (bpsSum != 10_000) revert INVALID_BPS_SUM();
 
         emit PurchaseFinalized(
             msg.sender,
             msg.value,
             paymentDistribution.toPayOwner,
-            msg.value - msgValueRemaining,
+            computeTotalReward(msg.value),
             uint256(totalTokensForBuyers),
             uint256(totalTokensForFounder),
             paymentDistribution.toPayFounder,
@@ -351,11 +377,31 @@ contract RevolutionPointsEmitter is
     }
 
     /**
+     * @notice Save purchase history details for an account including tokens bought, ether sent to owner
+     * @param _account The account to save purchase history for
+     * @param _tokensBoughtForAccount The amount of tokens bought for the account
+     * @param _etherToOwnerForAccount The amount of ether spent to buy the tokens for the account (sent to owner)
+     */
+    function _savePurchaseHistory(
+        address _account,
+        uint256 _tokensBoughtForAccount,
+        uint256 _etherToOwnerForAccount
+    ) internal {
+        AccountPurchaseHistory memory recipientHistory = purchaseHistory[_account];
+
+        // save tokens minted to account purchase history
+        purchaseHistory[_account].tokensBought = recipientHistory.tokensBought + _tokensBoughtForAccount;
+
+        // save amount paid to owner for tokens for recipient
+        purchaseHistory[_account].amountPaidToOwner = recipientHistory.amountPaidToOwner + _etherToOwnerForAccount;
+    }
+
+    /**
      * @notice Returns the amount of wei that would be spent to buy an amount of tokens. Does not take into account the protocol rewards.
      * @param amount the amount of tokens to buy.
      * @return spentY The cost in wei of the token purchase.
      */
-    function buyTokenQuote(uint256 amount) public view returns (int spentY) {
+    function buyTokenQuote(uint256 amount) external view returns (int spentY) {
         if (amount == 0) revert INVALID_AMOUNT();
         // Note: By using toDaysWadUnsafe(block.timestamp - startTime) we are establishing that 1 "unit of time" is 1 day.
         // solhint-disable-next-line not-rely-on-time
@@ -372,7 +418,7 @@ contract RevolutionPointsEmitter is
      * @param etherAmount the payment amount in wei.
      * @return gainedX The amount of tokens that would be emitted for the payment amount.
      */
-    function getTokenQuoteForEther(uint256 etherAmount) public view returns (int gainedX) {
+    function getTokenQuoteForEther(uint256 etherAmount) external view returns (int gainedX) {
         if (etherAmount == 0) revert INVALID_PAYMENT();
         // Note: By using toDaysWadUnsafe(block.timestamp - startTime) we are establishing that 1 "unit of time" is 1 day.
         // solhint-disable-next-line not-rely-on-time
@@ -471,7 +517,17 @@ contract RevolutionPointsEmitter is
         }
     }
 
-    ///                                                          ///
+    /**
+     * @notice Get the associated purchase data for an account including tokens bought, amount paid to owner
+     * @param _account The account to get purchase history for
+     * @return AccountPurchaseHistory The purchase history for the account
+     */
+    function getAccountPurchaseHistory(
+        address _account
+    ) external view override returns (AccountPurchaseHistory memory) {
+        return purchaseHistory[_account];
+    }
+
     ///                 POINTS EMITTER UPGRADE                   ///
     ///                                                          ///
 

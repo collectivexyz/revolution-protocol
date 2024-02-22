@@ -136,6 +136,9 @@ interface ICultureIndex is ICultureIndexEvents {
     /// @dev Reverts if max number of creators is exceeded
     error MAX_NUM_CREATORS_EXCEEDED();
 
+    /// @dev Reverts if the creator's BPS specified is invalid
+    error INVALID_CREATOR_BPS();
+
     ///                                                          ///
     ///                         CONSTANTS                        ///
     ///                                                          ///

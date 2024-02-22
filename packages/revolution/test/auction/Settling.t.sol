@@ -399,7 +399,7 @@ contract AuctionHouseSettleTest is AuctionHouseTest {
     function test__SettlingAuctionWithMultipleCreators(uint256 nCreators, uint256 bidAmount) public {
         bidAmount = bound(bidAmount, auction.reservePrice(), 1e12 ether);
         vm.stopPrank();
-        nCreators = bound(nCreators, 1, cultureIndex.MAX_NUM_CREATORS() - 1);
+        nCreators = bound(nCreators, 2, cultureIndex.MAX_NUM_CREATORS() - 1);
 
         address[] memory creatorAddresses = new address[](nCreators);
         uint256[] memory creatorBps = new uint256[](nCreators);
@@ -411,7 +411,7 @@ contract AuctionHouseSettleTest is AuctionHouseTest {
             if (i == nCreators - 1) {
                 creatorBps[i] = 10_000 - totalBps;
             } else {
-                creatorBps[i] = (10_000) / (nCreators - 1);
+                creatorBps[i] = (10_000) / (nCreators);
             }
 
             totalBps += creatorBps[i];
