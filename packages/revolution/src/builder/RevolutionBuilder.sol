@@ -369,15 +369,16 @@ contract RevolutionBuilder is
     /// @param initialOwner The initial owner address
     /// @param dropperAdmin The dropper admin address
     /// @param cultureIndexParams The CultureIndex settings
-    /// @return The deployed culture index address
+    /// @return cultureIndex The deployed culture index address
+    /// @return maxHeap The deployed max heap address
     function deployCultureIndex(
         address votingPower,
         address initialOwner,
         address dropperAdmin,
         CultureIndexParams calldata cultureIndexParams
-    ) external override returns (CultureIndexImplementations memory) {
-        address cultureIndex = address(new ERC1967Proxy(cultureIndexImpl, ""));
-        address maxHeap = address(new ERC1967Proxy(maxHeapImpl, ""));
+    ) external override returns (address cultureIndex, address maxHeap) {
+        cultureIndex = address(new ERC1967Proxy(cultureIndexImpl, ""));
+        maxHeap = address(new ERC1967Proxy(maxHeapImpl, ""));
 
         ICultureIndex(cultureIndex).initialize({
             votingPower: votingPower,
@@ -391,7 +392,7 @@ contract RevolutionBuilder is
 
         emit CultureIndexDeployed(cultureIndex, maxHeap, votingPower);
 
-        return CultureIndexImplementations({ cultureIndex: cultureIndex, maxHeap: maxHeap });
+        return (cultureIndex, maxHeap);
     }
 
     ///                                                          ///

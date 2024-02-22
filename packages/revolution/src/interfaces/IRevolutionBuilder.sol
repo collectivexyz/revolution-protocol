@@ -317,7 +317,7 @@ interface IRevolutionBuilder is IUpgradeManager {
         address initialOwner,
         address dropperAdmin,
         CultureIndexParams calldata cultureIndexParams
-    ) external returns (CultureIndexImplementations memory);
+    ) external returns (address, address);
 
     /// @notice A DAO's remaining contract addresses from its token address
     /// @param token The ERC-721 token address
