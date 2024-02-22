@@ -316,14 +316,13 @@ contract RevolutionPointsEmitter is
 
         //Mint tokens to buyers
         for (uint256 i = 0; i < addressesLength; i++) {
-            if (totalTokensForBuyers > 0) {
-                // save cost basis for recipient
-                _savePurchaseHistory(
-                    addresses[i],
-                    uint256((totalTokensForBuyers * int(basisPointSplits[i])) / 10_000),
-                    (buyTokenPaymentShares.buyersGovernancePayment * basisPointSplits[i]) / 10_000
-                );
-            }
+            // save cost basis for recipient
+            _savePurchaseHistory(
+                addresses[i],
+                uint256((totalTokensForBuyers * int(basisPointSplits[i])) / 10_000),
+                (buyTokenPaymentShares.buyersGovernancePayment * basisPointSplits[i]) / 10_000
+            );
+
             bpsSum = bpsSum + basisPointSplits[i];
         }
 
