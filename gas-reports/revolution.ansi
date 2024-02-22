@@ -1,1 +1,613 @@
 Compiling 188 files with 0.8.22
+Solc 0.8.22 finished in 1621.45s
+Compiler run [33msuccessful with warnings:[0m
+[1;33mWarning (5740)[0m[1;37m: Unreachable code.[0m
+   [34m-->[0m src/base/erc20/ERC20Upgradeable.sol:139:9:
+[34m    |[0m
+[34m139 |[0m         [33mreturn true[0m;
+[34m    |[0m         [1;33m^^^^^^^^^^^[0m
+
+[1;33mWarning (5740)[0m[1;37m: Unreachable code.[0m
+   [34m-->[0m src/base/erc20/ERC20Upgradeable.sol:163:9:
+[34m    |[0m
+[34m163 |[0m         [33mreturn true[0m;
+[34m    |[0m         [1;33m^^^^^^^^^^^[0m
+
+[1;33mWarning (5740)[0m[1;37m: Unreachable code.[0m
+   [34m-->[0m src/base/erc20/ERC20Upgradeable.sol:185:9:
+[34m    |[0m
+[34m185 |[0m         [33m_transfer(from, to, value)[0m;
+[34m    |[0m         [1;33m^^^^^^^^^^^^^^^^^^^^^^^^^^[0m
+
+[1;33mWarning (5740)[0m[1;37m: Unreachable code.[0m
+   [34m-->[0m src/base/erc20/ERC20Upgradeable.sol:186:9:
+[34m    |[0m
+[34m186 |[0m         [33mreturn true[0m;
+[34m    |[0m         [1;33m^^^^^^^^^^^[0m
+
+[1;33mWarning (2072)[0m[1;37m: Unused local variable.[0m
+   [34m-->[0m test/auction/AuctionBasic.t.sol:338:9:
+[34m    |[0m
+[34m338 |[0m         [33muint256 creatorGovernancePayment[0m = creatorPayment - creatorDirectPayment;
+[34m    |[0m         [1;33m^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^[0m
+
+[1;33mWarning (2072)[0m[1;37m: Unused local variable.[0m
+  [34m-->[0m test/auction/AuctionMinting.t.sol:31:13:
+[34m   |[0m
+[34m31 |[0m             [33maddress payable referral[0m,
+[34m   |[0m             [1;33m^^^^^^^^^^^^^^^^^^^^^^^^[0m
+
+[1;33mWarning (2072)[0m[1;37m: Unused local variable.[0m
+  [34m-->[0m test/auction/GrantsPayments.t.sol:62:10:
+[34m   |[0m
+[34m62 |[0m         ([33muint256 tokenId[0m, uint256 amount, , uint256 endTime, address payable bidder, , ) = auction.auction();
+[34m   |[0m          [1;33m^^^^^^^^^^^^^^^[0m
+
+[1;33mWarning (2072)[0m[1;37m: Unused local variable.[0m
+   [34m-->[0m test/auction/Settling.t.sol:246:9:
+[34m    |[0m
+[34m246 |[0m         [33muint256 grantsRate[0m = auction.grantsRateBps();
+[34m    |[0m         [1;33m^^^^^^^^^^^^^^^^^^[0m
+
+[1;33mWarning (2072)[0m[1;37m: Unused local variable.[0m
+   [34m-->[0m test/auction/Settling.t.sol:382:9:
+[34m    |[0m
+[34m382 |[0m         [33muint256 auctioneerPayment[0m = msgValueRemainingAuction - creatorsShare - grantsShare;
+[34m    |[0m         [1;33m^^^^^^^^^^^^^^^^^^^^^^^^^[0m
+
+[1;33mWarning (2072)[0m[1;37m: Unused local variable.[0m
+   [34m-->[0m test/auction/Settling.t.sol:557:9:
+[34m    |[0m
+[34m557 |[0m         [33muint256 auctioneerPayment[0m = msgValueRemaining - creatorsShare - grantsShare;
+[34m    |[0m         [1;33m^^^^^^^^^^^^^^^^^^^^^^^^^[0m
+
+[1;33mWarning (2072)[0m[1;37m: Unused local variable.[0m
+   [34m-->[0m test/auction/Settling.t.sol:561:9:
+[34m    |[0m
+[34m561 |[0m         [33muint256 creatorsGovernancePayment[0m = creatorsShare - creatorsDirectPayment;
+[34m    |[0m         [1;33m^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^[0m
+
+[1;33mWarning (2072)[0m[1;37m: Unused local variable.[0m
+   [34m-->[0m test/auction/Settling.t.sol:624:9:
+[34m    |[0m
+[34m624 |[0m         [33muint256 auctioneerPayment[0m = msgValueRemaining -
+[34m    |[0m         [1;33m^^^^^^^^^^^^^^^^^^^^^^^^^[0m
+
+[1;33mWarning (2072)[0m[1;37m: Unused local variable.[0m
+   [34m-->[0m test/auction/Settling.t.sol:698:9:
+[34m    |[0m
+[34m698 |[0m         [33maddress recipient[0m = address(0x123); // Some EOA address
+[34m    |[0m         [1;33m^^^^^^^^^^^^^^^^^[0m
+
+[1;33mWarning (2072)[0m[1;37m: Unused local variable.[0m
+  [34m-->[0m test/culture-index/EdgeCases.t.sol:46:9:
+[34m   |[0m
+[34m46 |[0m         [33maddress voter[0m = address(89);
+[34m   |[0m         [1;33m^^^^^^^^^^^^^[0m
+
+[1;33mWarning (2072)[0m[1;37m: Unused local variable.[0m
+   [34m-->[0m test/culture-index/Voting.t.sol:206:9:
+[34m    |[0m
+[34m206 |[0m         [33muint256 pieceId[0m = createDefaultArtPiece();
+[34m    |[0m         [1;33m^^^^^^^^^^^^^^^[0m
+
+[1;33mWarning (2072)[0m[1;37m: Unused local variable.[0m
+   [34m-->[0m test/points-emitter/AccountPurchaseHistory.t.sol:130:9:
+[34m    |[0m
+[34m130 |[0m         [33mint256 expectedBuyerAmount[0m = getTokenQuoteForEtherHelper(amountPaidToOwner, expectedFounderPoints);
+[34m    |[0m         [1;33m^^^^^^^^^^^^^^^^^^^^^^^^^^[0m
+
+[1;33mWarning (2072)[0m[1;37m: Unused local variable.[0m
+  [34m-->[0m test/points-emitter/BPS.t.sol:48:9:
+[34m   |[0m
+[34m48 |[0m         [33mint256 expectedAmount[0m = expectedFounderPoints + expectedBuyerAmount;
+[34m   |[0m         [1;33m^^^^^^^^^^^^^^^^^^^^^[0m
+
+[1;33mWarning (2072)[0m[1;37m: Unused local variable.[0m
+   [34m-->[0m test/points-emitter/BPS.t.sol:207:9:
+[34m    |[0m
+[34m207 |[0m         [33mProtocolRewards protocolRewards[0m = new ProtocolRewards();
+[34m    |[0m         [1;33m^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^[0m
+
+[1;33mWarning (2072)[0m[1;37m: Unused local variable.[0m
+  [34m-->[0m test/points-emitter/EmissionRates.t.sol:47:9:
+[34m   |[0m
+[34m47 |[0m         [33maddress creatorsAddress[0m = revolutionPointsEmitter.founderAddress();
+[34m   |[0m         [1;33m^^^^^^^^^^^^^^^^^^^^^^^[0m
+
+[1;33mWarning (2072)[0m[1;37m: Unused local variable.[0m
+  [34m-->[0m test/points-emitter/EmissionRates.t.sol:97:9:
+[34m   |[0m
+[34m97 |[0m         [33mint256 priceAfterManyPurchases[0m = revolutionPointsEmitter.buyTokenQuote(1e18);
+[34m   |[0m         [1;33m^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^[0m
+
+[1;33mWarning (2072)[0m[1;37m: Unused local variable.[0m
+   [34m-->[0m test/points-emitter/EmissionRates.t.sol:319:9:
+[34m    |[0m
+[34m319 |[0m         [33muint256 tokensSold[0m = revolutionPointsEmitter.buyToken{ value: valueToSend }(
+[34m    |[0m         [1;33m^^^^^^^^^^^^^^^^^^[0m
+
+[1;33mWarning (2072)[0m[1;37m: Unused local variable.[0m
+  [34m-->[0m test/points-emitter/EmitterBasic.t.sol:73:9:
+[34m   |[0m
+[34m73 |[0m         [33mProtocolRewards protocolRewards[0m = new ProtocolRewards();
+[34m   |[0m         [1;33m^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^[0m
+
+[1;33mWarning (2072)[0m[1;37m: Unused local variable.[0m
+  [34m-->[0m test/revolution-builder/Versions.t.sol:20:9:
+[34m   |[0m
+[34m20 |[0m         [33mIRevolutionBuilder.DAOVersionInfo memory versions[0m = manager.getLatestVersions();
+[34m   |[0m         [1;33m^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^[0m
+
+[1;33mWarning (2072)[0m[1;37m: Unused local variable.[0m
+   [34m-->[0m test/revolution-token/TokenMinting.t.sol:200:10:
+[34m    |[0m
+[34m200 |[0m         ([33muint256 pieceId[0m, ICultureIndex.ArtPieceMetadata memory metadata, , , ) = cultureIndex.pieces(0);
+[34m    |[0m          [1;33m^^^^^^^^^^^^^^^[0m
+
+[1;33mWarning (2072)[0m[1;37m: Unused local variable.[0m
+   [34m-->[0m test/revolution-token/TokenMinting.t.sol:200:27:
+[34m    |[0m
+[34m200 |[0m         (uint256 pieceId, [33mICultureIndex.ArtPieceMetadata memory metadata[0m, , , ) = cultureIndex.pieces(0);
+[34m    |[0m                           [1;33m^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^[0m
+
+[1;33mWarning (2072)[0m[1;37m: Unused local variable.[0m
+  [34m-->[0m test/splits/SplitsCreation.t.sol:22:13:
+[34m   |[0m
+[34m22 |[0m             [33muint32[] memory pointsAllocations[0m,
+[34m   |[0m             [1;33m^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^[0m
+
+[1;33mWarning (2072)[0m[1;37m: Unused local variable.[0m
+  [34m-->[0m test/splits/SplitsCreation.t.sol:57:13:
+[34m   |[0m
+[34m57 |[0m             [33muint32[] memory pointsAllocations[0m,
+[34m   |[0m             [1;33m^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^[0m
+
+[1;33mWarning (2072)[0m[1;37m: Unused local variable.[0m
+   [34m-->[0m test/voting-power/VotingPower.t.sol:176:13:
+[34m    |[0m
+[34m176 |[0m             [33muint256 pieceId[0m = createDefaultArtPiece();
+[34m    |[0m             [1;33m^^^^^^^^^^^^^^^[0m
+
+[1;33mWarning (2018)[0m[1;37m: Function state mutability can be restricted to view[0m
+   [34m-->[0m test/auction/Settling.t.sol:277:5:
+[34m    |[0m
+[34m277 |[0m     [33mfunction getCreatorGovernancePayoutHelper(uint bidAmount) public returns (uint) {[0m
+[34m    |[0m     [1;33m^ (Relevant source part starts here and spans across multiple lines).[0m
+
+[1;33mWarning (2018)[0m[1;37m: Function state mutability can be restricted to pure[0m
+   [34m-->[0m test/auction/Settling.t.sol:336:5:
+[34m    |[0m
+[34m336 |[0m     [33mfunction _getTotalPointsEmitterPayment([0m
+[34m    |[0m     [1;33m^ (Relevant source part starts here and spans across multiple lines).[0m
+
+[1;33mWarning (2018)[0m[1;37m: Function state mutability can be restricted to view[0m
+   [34m-->[0m test/auction/Settling.t.sol:350:5:
+[34m    |[0m
+[34m350 |[0m     [33mfunction getDAOPayout(uint bidAmount) public returns (uint) {[0m
+[34m    |[0m     [1;33m^ (Relevant source part starts here and spans across multiple lines).[0m
+
+[1;33mWarning (2018)[0m[1;37m: Function state mutability can be restricted to view[0m
+   [34m-->[0m test/auction/Settling.t.sol:375:5:
+[34m    |[0m
+[34m375 |[0m     [33mfunction getFounderDirectPayment(uint bidAmount) public returns (uint) {[0m
+[34m    |[0m     [1;33m^ (Relevant source part starts here and spans across multiple lines).[0m
+
+[1;33mWarning (2018)[0m[1;37m: Function state mutability can be restricted to pure[0m
+  [34m-->[0m test/descriptor/Descriptor.t.sol:57:5:
+[34m   |[0m
+[34m57 |[0m     [33mfunction parseJson([0m
+[34m   |[0m     [1;33m^ (Relevant source part starts here and spans across multiple lines).[0m
+
+[1;33mWarning (2018)[0m[1;37m: Function state mutability can be restricted to view[0m
+  [34m-->[0m test/points-emitter/PointsEmitter.t.sol:53:5:
+[34m   |[0m
+[34m53 |[0m     [33mfunction getTokenQuoteForEtherHelper(uint256 etherAmount, int256 supply) public returns (int gainedX) {[0m
+[34m   |[0m     [1;33m^ (Relevant source part starts here and spans across multiple lines).[0m
+
+[1;33mWarning (2018)[0m[1;37m: Function state mutability can be restricted to view[0m
+  [34m-->[0m test/revolution-builder/Versions.t.sol:18:5:
+[34m   |[0m
+[34m18 |[0m     [33mfunction test_getDAOVersions() public {[0m
+[34m   |[0m     [1;33m^ (Relevant source part starts here and spans across multiple lines).[0m
+
+[1;33mWarning (2018)[0m[1;37m: Function state mutability can be restricted to pure[0m
+   [34m-->[0m test/revolution-token/Basic.t.sol:469:5:
+[34m    |[0m
+[34m469 |[0m     [33mfunction parseJson([0m
+[34m    |[0m     [1;33m^ (Relevant source part starts here and spans across multiple lines).[0m
+
+[1;33mWarning (2018)[0m[1;37m: Function state mutability can be restricted to view[0m
+   [34m-->[0m test/splits/RevolutionSplits.t.sol:211:5:
+[34m    |[0m
+[34m211 |[0m     [33mfunction setupBasicSplit()[0m
+[34m    |[0m     [1;33m^ (Relevant source part starts here and spans across multiple lines).[0m
+
+
+Running 2 tests for test/dao/DAO.t.sol:DAOTestSuite
+[32m[PASS][0m testDAOPurpose() (gas: 20927)
+[32m[PASS][0m testDAOSymbol() (gas: 16268)
+Test result: [32mok[0m. [32m2[0m passed; [31m0[0m failed; [33m0[0m skipped; finished in 5.28ms
+
+Running 13 tests for test/max-heap/MaxHeap.t.sol:MaxHeapTestSuite
+[32m[PASS][0m testCannotRemoveMaxWhenEmpty() (gas: 18157)
+[32m[PASS][0m testExtractMaxOnlyOwner() (gas: 69174)
+[32m[PASS][0m testHeapEmptyAfterAllRemoved() (gas: 140129)
+[32m[PASS][0m testHeapProperty() (gas: 506192)
+[32m[PASS][0m testHeapify() (gas: 323764)
+[32m[PASS][0m testHeapifyOnNonRoot() (gas: 345370)
+[32m[PASS][0m testInsert() (gas: 223680)
+[32m[PASS][0m testInsertDuplicateValues() (gas: 223974)
+[32m[PASS][0m testInsertOnlyOwner() (gas: 95497)
+[32m[PASS][0m testOldHeapEntriesNotRemove2() (gas: 267330)
+[32m[PASS][0m testOldHeapEntriesNotRemoved() (gas: 218360)
+[32m[PASS][0m testRemoveMax() (gas: 211061)
+[32m[PASS][0m testUpdateValueOnlyOwner() (gas: 90724)
+Test result: [32mok[0m. [32m13[0m passed; [31m0[0m failed; [33m0[0m skipped; finished in 8.12ms
+
+Running 14 tests for test/revolution-token/AccessControl.t.sol:TokenAccessControlTest
+[32m[PASS][0m testBurningPermission() (gas: 559715)
+[32m[PASS][0m testCultureIndexUpdateAndLock() (gas: 34240)
+[32m[PASS][0m testDescriptorLocking() (gas: 227780)
+[32m[PASS][0m testDescriptorUpdateAndLock() (gas: 40572)
+[32m[PASS][0m testLockAdminFunctions() (gas: 40927)
+[32m[PASS][0m testLockMinter() (gas: 31831)
+[32m[PASS][0m testMinterAssignment() (gas: 32155)
+[32m[PASS][0m testMinterAssignmentAndLocking() (gas: 622829)
+[32m[PASS][0m testNonOwnerCannotCallDropTopVotedPiece() (gas: 375650)
+[32m[PASS][0m testOwnerPrivileges() (gas: 29777)
+[32m[PASS][0m testRevertOnNonMinterMint() (gas: 17168)
+[32m[PASS][0m testRevertOnNonOwnerSettingContractURI() (gas: 18229)
+[32m[PASS][0m testSetContractURIByOwner() (gas: 23688)
+[32m[PASS][0m testSetMinter() (gas: 29772)
+Test result: [32mok[0m. [32m14[0m passed; [31m0[0m failed; [33m0[0m skipped; finished in 10.93ms
+
+Running 16 tests for test/descriptor/UriData.t.sol:DescriptorURIDataTest
+[32m[PASS][0m testBaselineTokenURIWithDataURIEnabled() (gas: 81378)
+[32m[PASS][0m testDataURI() (gas: 72487)
+[32m[PASS][0m testGenericDataURI() (gas: 73134)
+[32m[PASS][0m testSetBaseURI() (gas: 40602)
+[32m[PASS][0m testSetBaseURIEvent() (gas: 42700)
+[32m[PASS][0m testSetBaseURI_AccessControl() (gas: 27152)
+[32m[PASS][0m testToggleDataURIEnabled() (gas: 17229)
+[32m[PASS][0m testToggleDataURIEnabledAccessControl() (gas: 17371)
+[32m[PASS][0m testToggleDataURIEnabledEvent() (gas: 19618)
+[32m[PASS][0m testTokenURIWithDataURIEnabled() (gas: 27355)
+[32m[PASS][0m testTokenURIWithFullMetadata() (gas: 289575)
+[32m[PASS][0m testTokenURIWithHTTPURL() (gas: 51625)
+[32m[PASS][0m testTokenURIWithMixedMediaMetadata() (gas: 343057)
+[32m[PASS][0m testTokenURIWithOnlyImageMetadata() (gas: 205537)
+[32m[PASS][0m testTransferOwnership() (gas: 34051)
+[32m[PASS][0m testTransferOwnershipAccessControl() (gas: 27855)
+Test result: [32mok[0m. [32m16[0m passed; [31m0[0m failed; [33m0[0m skipped; finished in 13.33ms
+
+Running 7 tests for test/culture-index/SignatureVoting.t.sol:CultureIndexVotingSignaturesTest
+[32m[PASS][0m testRevert_InvalidNonce() (gas: 413811)
+[32m[PASS][0m testRevert_InvalidReplay() (gas: 688799)
+[32m[PASS][0m testRevert_InvalidSigner() (gas: 413978)
+[32m[PASS][0m testRevert_InvalidVoteForManyWithSigToAddress() (gas: 416359)
+[32m[PASS][0m testRevert_InvalidVotes() (gas: 868854)
+[32m[PASS][0m testRevert_SigExpired() (gas: 385434)
+[32m[PASS][0m test_VoteForManyWithSig() (gas: 688643)
+Test result: [32mok[0m. [32m7[0m passed; [31m0[0m failed; [33m0[0m skipped; finished in 16.91ms
+
+Running 2 tests for test/splits/SplitsCreation.t.sol:CreateSplitsTest
+[32m[PASS][0m test__CreateBasicSplit__EthPayouts() (gas: 258630)
+[32m[PASS][0m test__CreateBasicSplit__PointsPayouts() (gas: 809103)
+Test result: [32mok[0m. [32m2[0m passed; [31m0[0m failed; [33m0[0m skipped; finished in 2.47ms
+
+Running 21 tests for test/culture-index/Metadata.t.sol:CultureIndexArtMetadataTest
+[32m[PASS][0m test__ExceedingAnimationLength() (gas: 90087)
+[32m[PASS][0m test__ExceedingAudioLength() (gas: 90152)
+[32m[PASS][0m test__ExceedingDescriptionLength() (gas: 396522)
+[32m[PASS][0m test__ExceedingImageLength() (gas: 10064700)
+[32m[PASS][0m test__ExceedingNameLength() (gas: 94077)
+[32m[PASS][0m test__ExceedingTextLength() (gas: 116170)
+[32m[PASS][0m test__InvalidAnimationPrefix() (gas: 79402)
+[32m[PASS][0m test__InvalidAnimationPrefixFullHash() (gas: 79016)
+[32m[PASS][0m test__InvalidBothHashesAnimation() (gas: 79482)
+[32m[PASS][0m test__InvalidBothHashesImage() (gas: 79613)
+[32m[PASS][0m test__InvalidImagePrefix() (gas: 86304)
+[32m[PASS][0m test__InvalidImagePrefixFullHash() (gas: 65776)
+[32m[PASS][0m test__InvalidOneHashAnimation_1() (gas: 89212)
+[32m[PASS][0m test__InvalidOneHashAnimation_2() (gas: 79790)
+[32m[PASS][0m test__InvalidOneHashImage_1() (gas: 88881)
+[32m[PASS][0m test__InvalidOneHashImage_2() (gas: 80202)
+[32m[PASS][0m test__MissingMediaDataAudio() (gas: 65751)
+[32m[PASS][0m test__MissingMediaDataText() (gas: 66260)
+[32m[PASS][0m test__ValidHashesAnimation_SVG() (gas: 453769)
+[32m[PASS][0m test__ValidImagePrefixIpfs() (gas: 357024)
+[32m[PASS][0m test__ValidImagePrefixSvg() (gas: 363228)
+Test result: [32mok[0m. [32m21[0m passed; [31m0[0m failed; [33m0[0m skipped; finished in 42.19ms
+
+Running 2 tests for test/culture-index/MultiVoting.t.sol:CultureIndexVotingTestManager
+[32m[PASS][0m testVoteOnMultiplePieces() (gas: 1058251)
+[32m[PASS][0m testVotingWithDifferentWeights() (gas: 788035)
+Test result: [32mok[0m. [32m2[0m passed; [31m0[0m failed; [33m0[0m skipped; finished in 5.62ms
+
+Running 1 test for test/culture-index/OnchainSvg.t.sol:CultureIndexRequiredDataTest
+[32m[PASS][0m test__largeSVG() (gas: 29883793)
+Test result: [32mok[0m. [32m1[0m passed; [31m0[0m failed; [33m0[0m skipped; finished in 5.82ms
+
+Running 4 tests for test/points-emitter/BPS.t.sol:PointsEmitterBasicTest
+[32m[PASS][0m testPercentagePayouts(uint256) (runs: 256, μ: 698286, ~: 698303)
+[32m[PASS][0m testTotalBasisPoints() (gas: 804028)
+[32m[PASS][0m test_bpsInitialization() (gas: 1053645)
+[32m[PASS][0m test_revertMismatchedLengthArrays() (gas: 34200)
+Test result: [32mok[0m. [32m4[0m passed; [31m0[0m failed; [33m0[0m skipped; finished in 147.32ms
+
+Running 3 tests for test/vrgdac/VRGDAC.t.sol:PointsTestSuite
+[32m[PASS][0m test_noNegatives(int256,int256,int256,int256) (runs: 256, μ: 276337, ~: 276291)
+[32m[PASS][0m test_yToX_ManyPurchasesAfterLongTime(int256,int256,int256,int256,int256,int256) (runs: 256, μ: 281609, ~: 282017)
+[32m[PASS][0m test_yToX_NoPurchasesAfterLongTime(int256,int256,int256,int256,int256,int256) (runs: 256, μ: 281458, ~: 281092)
+Test result: [32mok[0m. [32m3[0m passed; [31m0[0m failed; [33m0[0m skipped; finished in 234.81ms
+
+Running 1 test for test/revolution-builder/Versions.t.sol:RevolutionBuilderBasicTest
+[32m[PASS][0m test_getDAOVersions() (gas: 69570)
+Test result: [32mok[0m. [32m1[0m passed; [31m0[0m failed; [33m0[0m skipped; finished in 4.87ms
+
+Running 10 tests for test/revolution-token/TokenMinting.t.sol:TokenMintingTest
+[32m[PASS][0m testBurn() (gas: 561233)
+[32m[PASS][0m testBurnFunction() (gas: 561715)
+[32m[PASS][0m testMint() (gas: 603300)
+[32m[PASS][0m testMintToItself() (gas: 606445)
+[32m[PASS][0m testMintWithNoPieces() (gas: 54145)
+[32m[PASS][0m testMintingEvent() (gas: 617911)
+[32m[PASS][0m testTokenURI() (gas: 717929)
+[32m[PASS][0m test_DroppedArtPieceMatchesTopVoted() (gas: 879565)
+[32m[PASS][0m test_MintingIncrement(uint256) (runs: 256, μ: 1407406, ~: 1453988)
+[32m[PASS][0m test_TopVotedPieceMinting() (gas: 841626)
+Test result: [32mok[0m. [32m10[0m passed; [31m0[0m failed; [33m0[0m skipped; finished in 302.03ms
+
+Running 10 tests for test/culture-index/AccessControl.t.sol:CultureIndexAccessControlTest
+[32m[PASS][0m testDropTopVotedPieceOnlyIfQuorumIsMet(uint256) (runs: 256, μ: 840052, ~: 840142)
+[32m[PASS][0m testRevertCreatingWithWeightTooLow() (gas: 243100)
+[32m[PASS][0m testRevertNonOwnerSetMinVotingPowerToCreate() (gas: 17387)
+[32m[PASS][0m testRevertNonOwnerSetMinVotingPowerToVote() (gas: 16727)
+[32m[PASS][0m testRevertNonOwnerSetQuorumVotesBPS() (gas: 16947)
+[32m[PASS][0m testRevertVotingWithWeightTooLow() (gas: 570385)
+[32m[PASS][0m testSetMinVotingPowerToCreateOnlyOwnerCanCall() (gas: 48751)
+[32m[PASS][0m testSetMinVotingPowerToVoteOnlyOwnerCanCall() (gas: 48223)
+[32m[PASS][0m testSetQuorumVotesBPSOutsideRange(uint256) (runs: 256, μ: 28058, ~: 27979)
+[32m[PASS][0m testSetQuorumVotesBPSWithinRange(uint256) (runs: 256, μ: 29423, ~: 29820)
+Test result: [32mok[0m. [32m10[0m passed; [31m0[0m failed; [33m0[0m skipped; finished in 370.03ms
+
+Running 3 tests for test/revolution-points/AccessControl.t.sol:PointsTestSuite
+[32m[PASS][0m test__MinterAccessControl() (gas: 204988)
+[32m[PASS][0m test__MinterLocking() (gas: 210230)
+[32m[PASS][0m test__basicAccessControl() (gas: 187640)
+Test result: [32mok[0m. [32m3[0m passed; [31m0[0m failed; [33m0[0m skipped; finished in 13.64ms
+
+Running 2 tests for test/points-emitter/Initialization.t.sol:PointsEmitterInitializationTest
+[32m[PASS][0m test__FounderFieldsInitialization() (gas: 26324)
+[32m[PASS][0m test__GrantsFieldsInitialization() (gas: 19035)
+Test result: [32mok[0m. [32m2[0m passed; [31m0[0m failed; [33m0[0m skipped; finished in 4.79ms
+
+Running 1 test for test/descriptor/JsonInjection.t.sol:JsonInjectionAttackTest
+[32m[PASS][0m testTokenURIWithMixedMediaMetadata() (gas: 361684)
+Test result: [32mok[0m. [32m1[0m passed; [31m0[0m failed; [33m0[0m skipped; finished in 6.07ms
+
+Running 8 tests for test/auction/Manifestos.t.sol:ManifestosTest
+[32m[PASS][0m test_MultipleAuctions_ManifestosEmpty_CorrectWinner_SetAndVerifyLast() (gas: 6589033)
+[32m[PASS][0m test__Bids_SettlingAuctionAndSettingManifesto() (gas: 2173123)
+[32m[PASS][0m test__Bids_SettlingAuctionEmptyManifesto() (gas: 2050476)
+[32m[PASS][0m test__Bids_UpdateManifesto_NotInitialOwner() (gas: 2054421)
+[32m[PASS][0m test__NoBids_SettlingAuctionEmptyManifesto() (gas: 1188554)
+[32m[PASS][0m test__TransferToken_UpdateManifesto_NotInitialOwner() (gas: 2118179)
+[32m[PASS][0m test__UpdateManifesto() (gas: 2122595)
+[32m[PASS][0m test__UpdateManifesto_TooLong() (gas: 10926443)
+Test result: [32mok[0m. [32m8[0m passed; [31m0[0m failed; [33m0[0m skipped; finished in 20.94ms
+
+Running 1 test for test/revolution-token/Voting.t.sol:TokenSecurityTest
+[32m[PASS][0m testBlockingOfTransferAndRedelegating() (gas: 1825539)
+Test result: [32mok[0m. [32m1[0m passed; [31m0[0m failed; [33m0[0m skipped; finished in 5.71ms
+
+Running 18 tests for test/auction/AuctionBasic.t.sol:AuctionHouseBasicTest
+[32m[PASS][0m testAccessControl() (gas: 26647)
+[32m[PASS][0m testAdministrativeFunctions(uint256,uint256,uint8) (runs: 256, μ: 48145, ~: 48746)
+[32m[PASS][0m testEventEmission(uint256,uint256) (runs: 256, μ: 39334, ~: 39353)
+[32m[PASS][0m testInitializationParameters() (gas: 31152)
+[32m[PASS][0m testMinCreatorRateLoweringRestriction(uint256) (runs: 256, μ: 24326, ~: 24326)
+[32m[PASS][0m testOwnerOnlyAccess() (gas: 26651)
+[32m[PASS][0m testSetEntropyRateBps(uint256) (runs: 256, μ: 27149, ~: 27712)
+[32m[PASS][0m testSetEntropyRateBpsInvalidValues(uint256) (runs: 256, μ: 28656, ~: 28656)
+[32m[PASS][0m testSetEntropyRateBpsRestrictToOwner() (gas: 17372)
+[32m[PASS][0m testSetMinCreatorRateBps(uint256,uint256) (runs: 256, μ: 29848, ~: 28818)
+[32m[PASS][0m testSetMinCreatorRateBpsInvalidValues(uint256) (runs: 256, μ: 27858, ~: 27790)
+[32m[PASS][0m testSetMinCreatorRateBpsRestrictToOwner(uint256) (runs: 256, μ: 20089, ~: 20089)
+[32m[PASS][0m testSettlingAuctions() (gas: 1319762)
+[32m[PASS][0m testValueUpdates(uint256,uint256) (runs: 256, μ: 42021, ~: 42040)
+[32m[PASS][0m test_AuctionCreation() (gas: 702363)
+[32m[PASS][0m test_BidEventEmission() (gas: 762865)
+[32m[PASS][0m test_BidForAnotherAccount() (gas: 2094837)
+[32m[PASS][0m test_BiddingProcess(uint256) (runs: 256, μ: 2382314, ~: 2382314)
+Test result: [32mok[0m. [32m18[0m passed; [31m0[0m failed; [33m0[0m skipped; finished in 1.58s
+
+Running 2 tests for test/auction/AuctionMinting.t.sol:AuctionHouseMintTest
+[32m[PASS][0m test__BehaviorOnMintFailureDuringAuctionCreation() (gas: 74981)
+[32m[PASS][0m test__MintFailureDueToEmptyNFTList() (gas: 63916)
+Test result: [32mok[0m. [32m2[0m passed; [31m0[0m failed; [33m0[0m skipped; finished in 8.85ms
+
+Running 18 tests for test/max-heap/Updates.t.sol:MaxHeapUpdateTestSuite
+[32m[PASS][0m testCannotRemoveMaxWhenEmpty() (gas: 18201)
+[32m[PASS][0m testExtractMaxOnlyOwner() (gas: 69192)
+[32m[PASS][0m testExtractUpdateError() (gas: 309247)
+[32m[PASS][0m testHeapEmptyAfterAllRemoved() (gas: 140164)
+[32m[PASS][0m testHeapProperty() (gas: 506227)
+[32m[PASS][0m testHeapify() (gas: 323808)
+[32m[PASS][0m testHeapifyOnNonRoot() (gas: 345509)
+[32m[PASS][0m testInitialInsertAndMax() (gas: 224827)
+[32m[PASS][0m testInsert() (gas: 223768)
+[32m[PASS][0m testInsertDuplicateValues() (gas: 224108)
+[32m[PASS][0m testInsertOnlyOwner() (gas: 95541)
+[32m[PASS][0m testOldHeapEntriesNotRemove2() (gas: 267418)
+[32m[PASS][0m testOldHeapEntriesNotRemoved() (gas: 218395)
+[32m[PASS][0m testRemoveMax() (gas: 211149)
+[32m[PASS][0m testUpdateValueDecrease() (gas: 227021)
+[32m[PASS][0m testUpdateValueIncrease() (gas: 224623)
+[32m[PASS][0m testUpdateValueOnlyOwner() (gas: 90724)
+[32m[PASS][0m testUpdateValueWithHeapify() (gas: 366471)
+Test result: [32mok[0m. [32m18[0m passed; [31m0[0m failed; [33m0[0m skipped; finished in 7.92ms
+
+Running 4 tests for test/auction/HistoricPrices.t.sol:HistoricPriceTest
+[32m[PASS][0m test__HistoricPriceBurned() (gas: 1196645)
+[32m[PASS][0m test__HistoricPriceBurnedBelowReserve() (gas: 1262725)
+[32m[PASS][0m test__HistoricPriceSaved() (gas: 2062511)
+[32m[PASS][0m test__MultipleHistoricPricesSaved() (gas: 3245907)
+Test result: [32mok[0m. [32m4[0m passed; [31m0[0m failed; [33m0[0m skipped; finished in 54.90ms
+
+Running 2 tests for test/culture-index/Initialization.t.sol:CultureIndexInitializationTest
+[32m[PASS][0m testChecklistInitialization() (gas: 15810)
+[32m[PASS][0m testTemplateInitialization() (gas: 15260)
+Test result: [32mok[0m. [32m2[0m passed; [31m0[0m failed; [33m0[0m skipped; finished in 17.19ms
+
+Running 4 tests for test/points-emitter/Balances.t.sol:PointsEmitterBasicTest
+[32m[PASS][0m test_GetTokenAmountForMultiPurchaseEdgeCases() (gas: 86741)
+[32m[PASS][0m test_GetTokenAmountForMultiPurchaseGeneral(uint256) (runs: 256, μ: 622398, ~: 618135)
+[32m[PASS][0m test_OwnerBalance(uint256,uint256,uint256) (runs: 256, μ: 47884150, ~: 47916321)
+[32m[PASS][0m test_PointsEmitterBalance(uint256,uint256,uint256) (runs: 256, μ: 47852433, ~: 47883381)
+Test result: [32mok[0m. [32m4[0m passed; [31m0[0m failed; [33m0[0m skipped; finished in 2.78s
+
+Running 21 tests for test/revolution-token/Basic.t.sol:TokenBasicTest
+[32m[PASS][0m testContractURI() (gas: 18948)
+[32m[PASS][0m testCorrectArtAssociation() (gas: 603429)
+[32m[PASS][0m testCreatePieceWithExcessCreators() (gas: 145642)
+[32m[PASS][0m testCreatePieceWithInvalidBasisPoints() (gas: 63128)
+[32m[PASS][0m testCreatePieceWithValidParameters() (gas: 382972)
+[32m[PASS][0m testCreatePieceWithZeroAddress() (gas: 63130)
+[32m[PASS][0m testCultureIndexInteraction() (gas: 605920)
+[32m[PASS][0m testDoubleVotingRestriction() (gas: 635286)
+[32m[PASS][0m testDropTopVotedPieceOnEmptyHeap() (gas: 54172)
+[32m[PASS][0m testInitialVariablesState() (gas: 27625)
+[32m[PASS][0m testName() (gas: 17619)
+[32m[PASS][0m testPieceCountIncrement() (gas: 665563)
+[32m[PASS][0m testRetrievingVotesForNonExistentArtPiece() (gas: 17816)
+[32m[PASS][0m testSymbol() (gas: 18213)
+[32m[PASS][0m testTokenMetadataIntegrity() (gas: 837217)
+[32m[PASS][0m testVotingOnDroppedPiece() (gas: 760987)
+[32m[PASS][0m testVotingOnNonExistentArtPiece() (gas: 184086)
+[32m[PASS][0m testVotingWithZeroBalance() (gas: 391646)
+[32m[PASS][0m test_DropTopVotedPiece() (gas: 854552)
+[32m[PASS][0m test_GetTopVotedPiece() (gas: 1111983)
+[32m[PASS][0m test_VotingOnArtPiece() (gas: 632292)
+Test result: [32mok[0m. [32m21[0m passed; [31m0[0m failed; [33m0[0m skipped; finished in 24.49ms
+
+Running 3 tests for test/points-emitter/GrantsPayments.t.sol:PointsEmitterBasicTest
+[32m[PASS][0m test_GrantsBalance(uint256,uint256,uint256) (runs: 256, μ: 47894718, ~: 47931121)
+[32m[PASS][0m test_InitializationGrantsFounderRateBounds(uint256,uint256) (runs: 256, μ: 51847785, ~: 52017359)
+[32m[PASS][0m test_SetGrantsRate(uint256) (runs: 256, μ: 47814, ~: 48099)
+Test result: [32mok[0m. [32m3[0m passed; [31m0[0m failed; [33m0[0m skipped; finished in 3.02s
+
+Running 9 tests for test/points-emitter/EmitterBasic.t.sol:PointsEmitterBasicTest
+[32m[PASS][0m testBuyToken() (gas: 508444)
+[32m[PASS][0m testBuyTokenPriceIncreases() (gas: 736275)
+[32m[PASS][0m testBuyTokenReentrancy() (gas: 914506)
+[32m[PASS][0m testBuyingLaterIsBetter() (gas: 85361)
+[32m[PASS][0m testCannotBuyAsCreators() (gas: 37015)
+[32m[PASS][0m testCannotBuyAsOwner() (gas: 35751)
+[32m[PASS][0m testSetGrantsAddress() (gas: 30777)
+[32m[PASS][0m testTransferTokenContractOwnership() (gas: 2561994)
+[32m[PASS][0m test_purchaseBounds(int256) (runs: 256, μ: 147973, ~: 116322)
+Test result: [32mok[0m. [32m9[0m passed; [31m0[0m failed; [33m0[0m skipped; finished in 40.82ms
+
+Running 14 tests for test/culture-index/ArtPiece.t.sol:CultureIndexArtPieceTest
+[32m[PASS][0m testArtPieceCreationAndVoting(uint256,uint256) (runs: 256, μ: 1778392, ~: 1778560)
+[32m[PASS][0m testCreatePiece() (gas: 373791)
+[32m[PASS][0m testCreatePieceWithMultipleCreators() (gas: 418166)
+[32m[PASS][0m testCreatePieceWithMultipleCreatorsInvalidBPS() (gas: 63325)
+[32m[PASS][0m testCreatorArrayLengthConstraint() (gas: 134916)
+[32m[PASS][0m testExcessiveTotalBasisPoints() (gas: 62877)
+[32m[PASS][0m testFirstPieceId() (gas: 357661)
+[32m[PASS][0m testInvalidCreatorAddress() (gas: 62197)
+[32m[PASS][0m testMissingMediaDataAnimation() (gas: 65889)
+[32m[PASS][0m testMissingMediaDataImage() (gas: 65913)
+[32m[PASS][0m testMissingMediaDataText() (gas: 65847)
+[32m[PASS][0m testPieceIDIncrement() (gas: 662688)
+[32m[PASS][0m testTooFewTotalBasisPoints() (gas: 62349)
+[32m[PASS][0m testTopVotedPieceMeetsQuorum() (gas: 1335585)
+Test result: [32mok[0m. [32m14[0m passed; [31m0[0m failed; [33m0[0m skipped; finished in 400.04ms
+
+Running 8 tests for test/revolution-points/Points.t.sol:PointsTestSuite
+[32m[PASS][0m testApprovalRestrictions() (gas: 25739)
+[32m[PASS][0m testEdgeCases() (gas: 70419)
+[32m[PASS][0m testMintingBehavior() (gas: 183272)
+[32m[PASS][0m testOwnershipTransferAndManagerRevert() (gas: 206278)
+[32m[PASS][0m testSupplyInvariants(uint256) (runs: 256, μ: 232675, ~: 249791)
+[32m[PASS][0m testTokenMetadata() (gas: 22162)
+[32m[PASS][0m testTransferRestrictions() (gas: 174152)
+[32m[PASS][0m testVotingAndDelegation() (gas: 245134)
+Test result: [32mok[0m. [32m8[0m passed; [31m0[0m failed; [33m0[0m skipped; finished in 51.00ms
+
+Running 8 tests for test/culture-index/RequiredData.t.sol:CultureIndexRequiredDataTest
+[32m[PASS][0m test__requiredMediaPrefix_IPFS() (gas: 5378322)
+[32m[PASS][0m test__requiredMediaPrefix_MIXED() (gas: 5708747)
+[32m[PASS][0m test__requiredMediaPrefix_SVG() (gas: 5422880)
+[32m[PASS][0m test__requiredMediaType_ANIMATION() (gas: 5395010)
+[32m[PASS][0m test__requiredMediaType_AUDIO() (gas: 5395424)
+[32m[PASS][0m test__requiredMediaType_IMAGE() (gas: 5396077)
+[32m[PASS][0m test__requiredMediaType_NONE() (gas: 6237494)
+[32m[PASS][0m test__requiredMediaType_TEXT() (gas: 5392861)
+Test result: [32mok[0m. [32m8[0m passed; [31m0[0m failed; [33m0[0m skipped; finished in 11.99ms
+
+Running 2 tests for test/rewards/RevolutionRewards.t.sol:RevolutionRewardsTest
+[32m[PASS][0m testDeposit(uint256) (runs: 256, μ: 426659, ~: 562047)
+[32m[PASS][0m testNullReferralRecipient(uint256) (runs: 256, μ: 402428, ~: 459407)
+Test result: [32mok[0m. [32m2[0m passed; [31m0[0m failed; [33m0[0m skipped; finished in 272.63ms
+
+Running 10 tests for test/revolution-token/Security.t.sol:TokenSecurityTest
+[32m[PASS][0m testApprovalChecks() (gas: 738220)
+[32m[PASS][0m testBasisPointsSum() (gas: 60214)
+[32m[PASS][0m testCreatorArrayLimit() (gas: 131296)
+[32m[PASS][0m testEventEmission() (gas: 372156)
+[32m[PASS][0m testFunctionalityUnderMaximumLoad() (gas: 1328329)
+[32m[PASS][0m testMintToDropTopVotedPieceFailure() (gas: 474825)
+[32m[PASS][0m testPrivilegeEscalation() (gas: 60842)
+[32m[PASS][0m testReentrancyOnMint() (gas: 498781)
+[32m[PASS][0m testReentrancyOtherFunctions() (gas: 499743)
+[32m[PASS][0m testZeroAddressInCreatorArray() (gas: 58823)
+Test result: [32mok[0m. [32m10[0m passed; [31m0[0m failed; [33m0[0m skipped; finished in 7.99ms
+
+Running 3 tests for test/auction/GrantsPayments.t.sol:GrantsPaymentsTest
+[32m[PASS][0m test_GrantsBalance(uint256,uint256,uint256,uint256) (runs: 256, μ: 54152638, ~: 54172789)
+[32m[PASS][0m test_InitializationGrantsFounderRateBounds(uint256,uint256) (runs: 256, μ: 51571437, ~: 51156519)
+[32m[PASS][0m test_SetGrantsRate(uint256) (runs: 256, μ: 46521, ~: 46884)
+Test result: [32mok[0m. [32m3[0m passed; [31m0[0m failed; [33m0[0m skipped; finished in 1.73s
+
+Running 1 test for test/splits/Setup.t.sol:SplitsTestSetupTest
+[32m[PASS][0m test__BuyToken() (gas: 558778)
+Test result: [32mok[0m. [32m1[0m passed; [31m0[0m failed; [33m0[0m skipped; finished in 2.01ms
+
+Running 9 tests for test/points-emitter/EmissionRates.t.sol:EmissionRatesTest
+[32m[PASS][0m testBuyTokenTotalVal() (gas: 47686513)
+[32m[PASS][0m testBuyTokenWithDifferentRates(uint256,uint256,uint256) (runs: 256, μ: 47881834, ~: 47914126)
+[32m[PASS][0m testBuyingTwiceAmountIsNotMoreThanTwiceEmittedTokens() (gas: 605203)
+[32m[PASS][0m testGetTokenPrice() (gas: 66350)
+[32m[PASS][0m test_BuyingFunctionBreaksAfterAPeriodOfTime(uint256,uint256,uint256,uint256) (runs: 256, μ: 47846872, ~: 47888951)
+[32m[PASS][0m test_FounderRewardsExpireCorrectly(uint256,uint256,uint256,uint256,uint256) (runs: 256, μ: 48082711, ~: 48092980)
+[32m[PASS][0m test_FounderRewardsExpireForQuoteUtils(uint256,uint256,uint256,uint256,uint256) (runs: 256, μ: 47541416, ~: 47544248)
+[32m[PASS][0m test_correctEmitted(uint256,uint256,uint256) (runs: 256, μ: 47879013, ~: 47915904)
+[32m[PASS][0m test_revertNoPayment() (gas: 27540)
+Test result: [32mok[0m. [32m9[0m passed; [31m0[0m failed; [33m0[0m skipped; finished in 6.03s
+
+Running 13 tests for test/auction/Settling.t.sol:AuctionHouseSettleTest
+[32m[PASS][0m test_CreateAuctionWithoutSettle() (gas: 1348190)
+[32m[PASS][0m test__EntropyPecentCannotLeadToDos(uint256) (runs: 256, μ: 2051948, ~: 2116540)
+[32m[PASS][0m test__OwnerPayment(uint8) (runs: 256, μ: 2371064, ~: 2371064)
+[32m[PASS][0m test__RevertTopVotedPieceMeetsQuorum() (gas: 1426094)
+[32m[PASS][0m test__SettleAuctionZeroEntropyRate() (gas: 2011958)
+[32m[PASS][0m test__SettlingAuctionPrematurely() (gas: 1004115)
+[31m[FAIL. Reason: panic: division or modulo by zero (0x12); counterexample: calldata=0x9884a33f15555555555555555555555555555555555555555555555555555555555555560000000000000000000000000000000000000000000000000000000000000000 args=[9649340769776349618630915417390658987772498722136713669954798667326094136662 [2;49;39m[9.649e75][0m, 0]][0m test__SettlingAuctionWithMultipleCreators(uint256,uint256) (runs: 128, μ: 6501507, ~: 6072066)
+[32m[PASS][0m test__SettlingAuctionWithNoBids(uint8) (runs: 256, μ: 1180767, ~: 1180767)
+[32m[PASS][0m test__SettlingAuctionWithWinningBidAndCreatorPayout(uint256) (runs: 256, μ: 2203845, ~: 2203937)
+[32m[PASS][0m test__TransferFailureAndFallbackToWETH(uint256) (runs: 256, μ: 2178363, ~: 2178472)
+[32m[PASS][0m test__TransferToContractWithoutReceiveOrFallback(uint256) (runs: 256, μ: 2164491, ~: 2164593)
+[32m[PASS][0m test__TransferToEOA() (gas: 2094606)
+[32m[PASS][0m test__VotesCount(uint8) (runs: 256, μ: 2369184, ~: 2369184)
+Test result: [31mFAILED[0m. [32m12[0m passed; [31m1[0m failed; [33m0[0m skipped; finished in 2.79s
+
+Running 4 tests for test/points-emitter/AccountPurchaseHistory.t.sol:AccountPurchaseHistoryTest
+[32m[PASS][0m test__BuyingForMultipleAccountsWithCorrectValues(uint256,uint256) (runs: 256, μ: 72946416, ~: 73019175)
+[32m[PASS][0m test__PurchaseHistorySaved() (gas: 541408)
+[32m[PASS][0m test__PurchaseHistorySavedMultiplePurchases(uint256,uint256) (runs: 256, μ: 729298, ~: 729236)
+[32m[PASS][0m test__PurchaseHistoryZeroesGrantsRateHigh() (gas: 401045)
+Test result: [32mok[0m. [32m4[0m passed; [31m0[0m failed; [33m0[0m skipped; finished in 8.30s
