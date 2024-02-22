@@ -1,5 +1,0 @@
----
-"@cobuild/revolution": patch
----
-
-Manifestos

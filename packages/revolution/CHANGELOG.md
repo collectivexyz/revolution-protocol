@@ -1,5 +1,19 @@
 # @collectivexyz/revolution
 
+## 0.4.3
+
+### Patch Changes
+
+- 28b7503: rm bwr
+- 3e6ce28: Add settledBlockWad to historical auction data
+- 5c591c2: Save amuont paid to owner in historical auctions
+- 7ac3648: Add historical auction prices
+- 24a194b: Add function to deploy create culture index
+- 3b48eb1: Save purchase history and cost basis on the points emitter
+- c463b00: Manifestos
+- Updated dependencies [abc7062]
+  - @cobuild/splits@0.11.3
+
 ## 0.4.2
 
 ### Patch Changes
