@@ -379,23 +379,21 @@ contract RevolutionPointsEmitter is
     /**
      * @notice Save purchase history details for an account including tokens bought, ether sent to owner
      * @param _account The account to save purchase history for
-     * @param _tokensBought The amount of tokens bought for the account
-     * @param _etherToOwnerForAccountPurchase The amount of ether spent to buy the tokens for the account (sent to owner)
+     * @param _tokensBoughtForAccount The amount of tokens bought for the account
+     * @param _etherToOwnerForAccount The amount of ether spent to buy the tokens for the account (sent to owner)
      */
     function _savePurchaseHistory(
         address _account,
-        uint256 _tokensBought,
-        uint256 _etherToOwnerForAccountPurchase
+        uint256 _tokensBoughtForAccount,
+        uint256 _etherToOwnerForAccount
     ) internal {
         AccountPurchaseHistory memory recipientHistory = purchaseHistory[_account];
 
         // save tokens minted to account purchase history
-        purchaseHistory[_account].tokensBought = recipientHistory.tokensBought + _tokensBought;
+        purchaseHistory[_account].tokensBought = recipientHistory.tokensBought + _tokensBoughtForAccount;
 
         // save amount paid to owner for tokens for recipient
-        purchaseHistory[_account].amountPaidToOwner =
-            recipientHistory.amountPaidToOwner +
-            _etherToOwnerForAccountPurchase;
+        purchaseHistory[_account].amountPaidToOwner = recipientHistory.amountPaidToOwner + _etherToOwnerForAccount;
     }
 
     /**
