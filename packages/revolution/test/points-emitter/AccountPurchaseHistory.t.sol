@@ -54,8 +54,6 @@ contract AccountPurchaseHistoryTest is PointsEmitterTest {
         IRevolutionPointsEmitter.AccountPurchaseHistory memory accountPurchaseHistory0 = revolutionPointsEmitter
             .getAccountPurchaseHistory(address(1));
 
-        // assert averagePurchaseBlockWad is 0
-        assertEq(accountPurchaseHistory0.averagePurchaseBlockWad, 0, "averagePurchaseBlockWad should be 0");
         assertEq(accountPurchaseHistory0.amountPaidToOwner, 0, "amountPaidToOwner should be 0");
         assertEq(accountPurchaseHistory0.tokensBought, 0, "tokensBought should be 0");
 
@@ -89,15 +87,6 @@ contract AccountPurchaseHistoryTest is PointsEmitterTest {
         // assert tokensBought
         assertGt(accountPurchaseHistory.tokensBought, 0, "tokensBought should be greater than 0");
         assertEq(accountPurchaseHistory.tokensBought, uint256(expectedBuyerAmount), "tokensBought should be correct");
-
-        // assert averagePurchaseBlockWad is > 0
-        assertGt(accountPurchaseHistory.averagePurchaseBlockWad, 0, "averagePurchaseBlockWad should be greater than 0");
-        // no purchases have been made previously so averagePurchaseBlockWad should be the current block
-        assertEq(
-            accountPurchaseHistory.averagePurchaseBlockWad,
-            vm.getBlockNumber(),
-            "averagePurchaseBlockWad should be the current block"
-        );
     }
 
     // test that only 0 values are saved to the account purchase history if founder rate is super high
@@ -115,8 +104,6 @@ contract AccountPurchaseHistoryTest is PointsEmitterTest {
         IRevolutionPointsEmitter.AccountPurchaseHistory memory accountPurchaseHistory0 = revolutionPointsEmitter
             .getAccountPurchaseHistory(address(1));
 
-        // assert averagePurchaseBlockWad is 0
-        assertEq(accountPurchaseHistory0.averagePurchaseBlockWad, 0, "averagePurchaseBlockWad should be 0");
         assertEq(accountPurchaseHistory0.amountPaidToOwner, 0, "amountPaidToOwner should be 0");
         assertEq(accountPurchaseHistory0.tokensBought, 0, "tokensBought should be 0");
 
@@ -153,9 +140,6 @@ contract AccountPurchaseHistoryTest is PointsEmitterTest {
 
         // assert tokensBought is 0
         assertEq(accountPurchaseHistory.tokensBought, 0, "tokensBought should be 0");
-
-        // assert averagePurchaseBlock
-        assertEq(accountPurchaseHistory.averagePurchaseBlockWad, 0, "averagePurchaseBlockWad should be 0");
     }
 
     // test that purchase account history is saved after multiple purchases for the same account
@@ -225,18 +209,6 @@ contract AccountPurchaseHistoryTest is PointsEmitterTest {
             uint256(expectedBuyerAmount + expectedBuyerAmount2),
             "tokensBought should be correct"
         );
-
-        // assert averagePurchaseBlockWad is > 0
-        assertGt(accountPurchaseHistory.averagePurchaseBlockWad, 0, "averagePurchaseBlockWad should be greater than 0");
-
-        // calculate the average block number
-        uint256 averageBlock = (firstBlockNumber * amountPaidToOwner + vm.getBlockNumber() * amountPaidToOwner2) /
-            (amountPaidToOwner + amountPaidToOwner2);
-        assertEq(
-            accountPurchaseHistory.averagePurchaseBlockWad,
-            averageBlock,
-            "averagePurchaseBlockWad should be correct"
-        );
     }
 
     // basic test for buying for multiple accounts w/correct values
@@ -299,13 +271,6 @@ contract AccountPurchaseHistoryTest is PointsEmitterTest {
                 accountPurchaseHistory.tokensBought,
                 uint256((expectedBuyerAmount * int256(bps[i])) / 10000), // Adjusting for the correct proportion based on bps
                 "tokensBought should be correct"
-            );
-
-            // assert averagePurchaseBlockWad is > 0
-            assertGt(
-                accountPurchaseHistory.averagePurchaseBlockWad,
-                0,
-                "averagePurchaseBlockWad should be greater than 0"
             );
         }
     }

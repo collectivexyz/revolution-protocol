@@ -380,18 +380,6 @@ contract RevolutionPointsEmitter is
         purchaseHistory[_account].amountPaidToOwner =
             recipientHistory.amountPaidToOwner +
             _etherToOwnerForAccountPurchase;
-
-        // calculate average purchase block based on proportion of amount paid to owner
-        purchaseHistory[_account].averagePurchaseBlockWad =
-            // numerator is average purchase block * total amount paid to owner + current block number * amount of ether spent
-            (recipientHistory.averagePurchaseBlockWad *
-                recipientHistory.amountPaidToOwner +
-                block.number *
-                _etherToOwnerForAccountPurchase) /
-            // denominator is total amount paid to owner
-            // need to ensure denominator is not 0 or can't be abused
-            recipientHistory.amountPaidToOwner +
-            _etherToOwnerForAccountPurchase;
     }
 
     /**

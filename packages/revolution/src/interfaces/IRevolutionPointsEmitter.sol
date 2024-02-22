@@ -68,8 +68,6 @@ interface IRevolutionPointsEmitter is IGrantsRevenueStream, IRewardSplits {
         uint256 tokensBought;
         // The amount paid to owner()
         uint256 amountPaidToOwner;
-        // The average block number at which the purchases occured
-        uint256 averagePurchaseBlockWad;
     }
 
     function buyToken(
