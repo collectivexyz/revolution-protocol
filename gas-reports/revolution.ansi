@@ -1,5 +1,5 @@
-Compiling 188 files with 0.8.22
-Solc 0.8.22 finished in 1621.45s
+Compiling 1 files with 0.8.22
+Solc 0.8.22 finished in 114.02s
 Compiler run [33msuccessful with warnings:[0m
 [1;33mWarning (5740)[0m[1;37m: Unreachable code.[0m
    [34m-->[0m src/base/erc20/ERC20Upgradeable.sol:139:9:
@@ -25,209 +25,49 @@ Compiler run [33msuccessful with warnings:[0m
 [34m186 |[0m         [33mreturn true[0m;
 [34m    |[0m         [1;33m^^^^^^^^^^^[0m
 
-[1;33mWarning (2072)[0m[1;37m: Unused local variable.[0m
-   [34m-->[0m test/auction/AuctionBasic.t.sol:338:9:
-[34m    |[0m
-[34m338 |[0m         [33muint256 creatorGovernancePayment[0m = creatorPayment - creatorDirectPayment;
-[34m    |[0m         [1;33m^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^[0m
 
-[1;33mWarning (2072)[0m[1;37m: Unused local variable.[0m
-  [34m-->[0m test/auction/AuctionMinting.t.sol:31:13:
-[34m   |[0m
-[34m31 |[0m             [33maddress payable referral[0m,
-[34m   |[0m             [1;33m^^^^^^^^^^^^^^^^^^^^^^^^[0m
-
-[1;33mWarning (2072)[0m[1;37m: Unused local variable.[0m
-  [34m-->[0m test/auction/GrantsPayments.t.sol:62:10:
-[34m   |[0m
-[34m62 |[0m         ([33muint256 tokenId[0m, uint256 amount, , uint256 endTime, address payable bidder, , ) = auction.auction();
-[34m   |[0m          [1;33m^^^^^^^^^^^^^^^[0m
-
-[1;33mWarning (2072)[0m[1;37m: Unused local variable.[0m
-   [34m-->[0m test/auction/Settling.t.sol:246:9:
-[34m    |[0m
-[34m246 |[0m         [33muint256 grantsRate[0m = auction.grantsRateBps();
-[34m    |[0m         [1;33m^^^^^^^^^^^^^^^^^^[0m
-
-[1;33mWarning (2072)[0m[1;37m: Unused local variable.[0m
-   [34m-->[0m test/auction/Settling.t.sol:382:9:
-[34m    |[0m
-[34m382 |[0m         [33muint256 auctioneerPayment[0m = msgValueRemainingAuction - creatorsShare - grantsShare;
-[34m    |[0m         [1;33m^^^^^^^^^^^^^^^^^^^^^^^^^[0m
-
-[1;33mWarning (2072)[0m[1;37m: Unused local variable.[0m
-   [34m-->[0m test/auction/Settling.t.sol:557:9:
-[34m    |[0m
-[34m557 |[0m         [33muint256 auctioneerPayment[0m = msgValueRemaining - creatorsShare - grantsShare;
-[34m    |[0m         [1;33m^^^^^^^^^^^^^^^^^^^^^^^^^[0m
-
-[1;33mWarning (2072)[0m[1;37m: Unused local variable.[0m
-   [34m-->[0m test/auction/Settling.t.sol:561:9:
-[34m    |[0m
-[34m561 |[0m         [33muint256 creatorsGovernancePayment[0m = creatorsShare - creatorsDirectPayment;
-[34m    |[0m         [1;33m^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^[0m
-
-[1;33mWarning (2072)[0m[1;37m: Unused local variable.[0m
-   [34m-->[0m test/auction/Settling.t.sol:624:9:
-[34m    |[0m
-[34m624 |[0m         [33muint256 auctioneerPayment[0m = msgValueRemaining -
-[34m    |[0m         [1;33m^^^^^^^^^^^^^^^^^^^^^^^^^[0m
-
-[1;33mWarning (2072)[0m[1;37m: Unused local variable.[0m
-   [34m-->[0m test/auction/Settling.t.sol:698:9:
-[34m    |[0m
-[34m698 |[0m         [33maddress recipient[0m = address(0x123); // Some EOA address
-[34m    |[0m         [1;33m^^^^^^^^^^^^^^^^^[0m
-
-[1;33mWarning (2072)[0m[1;37m: Unused local variable.[0m
-  [34m-->[0m test/culture-index/EdgeCases.t.sol:46:9:
-[34m   |[0m
-[34m46 |[0m         [33maddress voter[0m = address(89);
-[34m   |[0m         [1;33m^^^^^^^^^^^^^[0m
-
-[1;33mWarning (2072)[0m[1;37m: Unused local variable.[0m
-   [34m-->[0m test/culture-index/Voting.t.sol:206:9:
-[34m    |[0m
-[34m206 |[0m         [33muint256 pieceId[0m = createDefaultArtPiece();
-[34m    |[0m         [1;33m^^^^^^^^^^^^^^^[0m
-
-[1;33mWarning (2072)[0m[1;37m: Unused local variable.[0m
-   [34m-->[0m test/points-emitter/AccountPurchaseHistory.t.sol:130:9:
-[34m    |[0m
-[34m130 |[0m         [33mint256 expectedBuyerAmount[0m = getTokenQuoteForEtherHelper(amountPaidToOwner, expectedFounderPoints);
-[34m    |[0m         [1;33m^^^^^^^^^^^^^^^^^^^^^^^^^^[0m
-
-[1;33mWarning (2072)[0m[1;37m: Unused local variable.[0m
-  [34m-->[0m test/points-emitter/BPS.t.sol:48:9:
-[34m   |[0m
-[34m48 |[0m         [33mint256 expectedAmount[0m = expectedFounderPoints + expectedBuyerAmount;
-[34m   |[0m         [1;33m^^^^^^^^^^^^^^^^^^^^^[0m
-
-[1;33mWarning (2072)[0m[1;37m: Unused local variable.[0m
-   [34m-->[0m test/points-emitter/BPS.t.sol:207:9:
-[34m    |[0m
-[34m207 |[0m         [33mProtocolRewards protocolRewards[0m = new ProtocolRewards();
-[34m    |[0m         [1;33m^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^[0m
-
-[1;33mWarning (2072)[0m[1;37m: Unused local variable.[0m
-  [34m-->[0m test/points-emitter/EmissionRates.t.sol:47:9:
-[34m   |[0m
-[34m47 |[0m         [33maddress creatorsAddress[0m = revolutionPointsEmitter.founderAddress();
-[34m   |[0m         [1;33m^^^^^^^^^^^^^^^^^^^^^^^[0m
-
-[1;33mWarning (2072)[0m[1;37m: Unused local variable.[0m
-  [34m-->[0m test/points-emitter/EmissionRates.t.sol:97:9:
-[34m   |[0m
-[34m97 |[0m         [33mint256 priceAfterManyPurchases[0m = revolutionPointsEmitter.buyTokenQuote(1e18);
-[34m   |[0m         [1;33m^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^[0m
-
-[1;33mWarning (2072)[0m[1;37m: Unused local variable.[0m
-   [34m-->[0m test/points-emitter/EmissionRates.t.sol:319:9:
-[34m    |[0m
-[34m319 |[0m         [33muint256 tokensSold[0m = revolutionPointsEmitter.buyToken{ value: valueToSend }(
-[34m    |[0m         [1;33m^^^^^^^^^^^^^^^^^^[0m
-
-[1;33mWarning (2072)[0m[1;37m: Unused local variable.[0m
-  [34m-->[0m test/points-emitter/EmitterBasic.t.sol:73:9:
-[34m   |[0m
-[34m73 |[0m         [33mProtocolRewards protocolRewards[0m = new ProtocolRewards();
-[34m   |[0m         [1;33m^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^[0m
-
-[1;33mWarning (2072)[0m[1;37m: Unused local variable.[0m
-  [34m-->[0m test/revolution-builder/Versions.t.sol:20:9:
-[34m   |[0m
-[34m20 |[0m         [33mIRevolutionBuilder.DAOVersionInfo memory versions[0m = manager.getLatestVersions();
-[34m   |[0m         [1;33m^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^[0m
-
-[1;33mWarning (2072)[0m[1;37m: Unused local variable.[0m
-   [34m-->[0m test/revolution-token/TokenMinting.t.sol:200:10:
-[34m    |[0m
-[34m200 |[0m         ([33muint256 pieceId[0m, ICultureIndex.ArtPieceMetadata memory metadata, , , ) = cultureIndex.pieces(0);
-[34m    |[0m          [1;33m^^^^^^^^^^^^^^^[0m
-
-[1;33mWarning (2072)[0m[1;37m: Unused local variable.[0m
-   [34m-->[0m test/revolution-token/TokenMinting.t.sol:200:27:
-[34m    |[0m
-[34m200 |[0m         (uint256 pieceId, [33mICultureIndex.ArtPieceMetadata memory metadata[0m, , , ) = cultureIndex.pieces(0);
-[34m    |[0m                           [1;33m^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^[0m
-
-[1;33mWarning (2072)[0m[1;37m: Unused local variable.[0m
-  [34m-->[0m test/splits/SplitsCreation.t.sol:22:13:
-[34m   |[0m
-[34m22 |[0m             [33muint32[] memory pointsAllocations[0m,
-[34m   |[0m             [1;33m^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^[0m
-
-[1;33mWarning (2072)[0m[1;37m: Unused local variable.[0m
-  [34m-->[0m test/splits/SplitsCreation.t.sol:57:13:
-[34m   |[0m
-[34m57 |[0m             [33muint32[] memory pointsAllocations[0m,
-[34m   |[0m             [1;33m^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^[0m
-
-[1;33mWarning (2072)[0m[1;37m: Unused local variable.[0m
-   [34m-->[0m test/voting-power/VotingPower.t.sol:176:13:
-[34m    |[0m
-[34m176 |[0m             [33muint256 pieceId[0m = createDefaultArtPiece();
-[34m    |[0m             [1;33m^^^^^^^^^^^^^^^[0m
-
-[1;33mWarning (2018)[0m[1;37m: Function state mutability can be restricted to view[0m
-   [34m-->[0m test/auction/Settling.t.sol:277:5:
-[34m    |[0m
-[34m277 |[0m     [33mfunction getCreatorGovernancePayoutHelper(uint bidAmount) public returns (uint) {[0m
-[34m    |[0m     [1;33m^ (Relevant source part starts here and spans across multiple lines).[0m
-
-[1;33mWarning (2018)[0m[1;37m: Function state mutability can be restricted to pure[0m
-   [34m-->[0m test/auction/Settling.t.sol:336:5:
-[34m    |[0m
-[34m336 |[0m     [33mfunction _getTotalPointsEmitterPayment([0m
-[34m    |[0m     [1;33m^ (Relevant source part starts here and spans across multiple lines).[0m
-
-[1;33mWarning (2018)[0m[1;37m: Function state mutability can be restricted to view[0m
-   [34m-->[0m test/auction/Settling.t.sol:350:5:
-[34m    |[0m
-[34m350 |[0m     [33mfunction getDAOPayout(uint bidAmount) public returns (uint) {[0m
-[34m    |[0m     [1;33m^ (Relevant source part starts here and spans across multiple lines).[0m
-
-[1;33mWarning (2018)[0m[1;37m: Function state mutability can be restricted to view[0m
-   [34m-->[0m test/auction/Settling.t.sol:375:5:
-[34m    |[0m
-[34m375 |[0m     [33mfunction getFounderDirectPayment(uint bidAmount) public returns (uint) {[0m
-[34m    |[0m     [1;33m^ (Relevant source part starts here and spans across multiple lines).[0m
-
-[1;33mWarning (2018)[0m[1;37m: Function state mutability can be restricted to pure[0m
-  [34m-->[0m test/descriptor/Descriptor.t.sol:57:5:
-[34m   |[0m
-[34m57 |[0m     [33mfunction parseJson([0m
-[34m   |[0m     [1;33m^ (Relevant source part starts here and spans across multiple lines).[0m
-
-[1;33mWarning (2018)[0m[1;37m: Function state mutability can be restricted to view[0m
-  [34m-->[0m test/points-emitter/PointsEmitter.t.sol:53:5:
-[34m   |[0m
-[34m53 |[0m     [33mfunction getTokenQuoteForEtherHelper(uint256 etherAmount, int256 supply) public returns (int gainedX) {[0m
-[34m   |[0m     [1;33m^ (Relevant source part starts here and spans across multiple lines).[0m
-
-[1;33mWarning (2018)[0m[1;37m: Function state mutability can be restricted to view[0m
-  [34m-->[0m test/revolution-builder/Versions.t.sol:18:5:
-[34m   |[0m
-[34m18 |[0m     [33mfunction test_getDAOVersions() public {[0m
-[34m   |[0m     [1;33m^ (Relevant source part starts here and spans across multiple lines).[0m
-
-[1;33mWarning (2018)[0m[1;37m: Function state mutability can be restricted to pure[0m
-   [34m-->[0m test/revolution-token/Basic.t.sol:469:5:
-[34m    |[0m
-[34m469 |[0m     [33mfunction parseJson([0m
-[34m    |[0m     [1;33m^ (Relevant source part starts here and spans across multiple lines).[0m
-
-[1;33mWarning (2018)[0m[1;37m: Function state mutability can be restricted to view[0m
-   [34m-->[0m test/splits/RevolutionSplits.t.sol:211:5:
-[34m    |[0m
-[34m211 |[0m     [33mfunction setupBasicSplit()[0m
-[34m    |[0m     [1;33m^ (Relevant source part starts here and spans across multiple lines).[0m
-
+Running 2 tests for test/points-emitter/Initialization.t.sol:PointsEmitterInitializationTest
+[32m[PASS][0m test__FounderFieldsInitialization() (gas: 26324)
+[32m[PASS][0m test__GrantsFieldsInitialization() (gas: 19035)
+Test result: [32mok[0m. [32m2[0m passed; [31m0[0m failed; [33m0[0m skipped; finished in 5.20ms
 
 Running 2 tests for test/dao/DAO.t.sol:DAOTestSuite
 [32m[PASS][0m testDAOPurpose() (gas: 20927)
 [32m[PASS][0m testDAOSymbol() (gas: 16268)
-Test result: [32mok[0m. [32m2[0m passed; [31m0[0m failed; [33m0[0m skipped; finished in 5.28ms
+Test result: [32mok[0m. [32m2[0m passed; [31m0[0m failed; [33m0[0m skipped; finished in 4.83ms
+
+Running 3 tests for test/revolution-points/AccessControl.t.sol:PointsTestSuite
+[32m[PASS][0m test__MinterAccessControl() (gas: 204988)
+[32m[PASS][0m test__MinterLocking() (gas: 210230)
+[32m[PASS][0m test__basicAccessControl() (gas: 187640)
+Test result: [32mok[0m. [32m3[0m passed; [31m0[0m failed; [33m0[0m skipped; finished in 5.13ms
+
+Running 14 tests for test/revolution-token/AccessControl.t.sol:TokenAccessControlTest
+[32m[PASS][0m testBurningPermission() (gas: 559828)
+[32m[PASS][0m testCultureIndexUpdateAndLock() (gas: 34240)
+[32m[PASS][0m testDescriptorLocking() (gas: 227780)
+[32m[PASS][0m testDescriptorUpdateAndLock() (gas: 40572)
+[32m[PASS][0m testLockAdminFunctions() (gas: 40927)
+[32m[PASS][0m testLockMinter() (gas: 31831)
+[32m[PASS][0m testMinterAssignment() (gas: 32155)
+[32m[PASS][0m testMinterAssignmentAndLocking() (gas: 622942)
+[32m[PASS][0m testNonOwnerCannotCallDropTopVotedPiece() (gas: 375763)
+[32m[PASS][0m testOwnerPrivileges() (gas: 29777)
+[32m[PASS][0m testRevertOnNonMinterMint() (gas: 17168)
+[32m[PASS][0m testRevertOnNonOwnerSettingContractURI() (gas: 18229)
+[32m[PASS][0m testSetContractURIByOwner() (gas: 23688)
+[32m[PASS][0m testSetMinter() (gas: 29772)
+Test result: [32mok[0m. [32m14[0m passed; [31m0[0m failed; [33m0[0m skipped; finished in 6.58ms
+
+Running 7 tests for test/culture-index/SignatureVoting.t.sol:CultureIndexVotingSignaturesTest
+[32m[PASS][0m testRevert_InvalidNonce() (gas: 413924)
+[32m[PASS][0m testRevert_InvalidReplay() (gas: 688912)
+[32m[PASS][0m testRevert_InvalidSigner() (gas: 414091)
+[32m[PASS][0m testRevert_InvalidVoteForManyWithSigToAddress() (gas: 416472)
+[32m[PASS][0m testRevert_InvalidVotes() (gas: 868967)
+[32m[PASS][0m testRevert_SigExpired() (gas: 385547)
+[32m[PASS][0m test_VoteForManyWithSig() (gas: 688756)
+Test result: [32mok[0m. [32m7[0m passed; [31m0[0m failed; [33m0[0m skipped; finished in 10.83ms
 
 Running 13 tests for test/max-heap/MaxHeap.t.sol:MaxHeapTestSuite
 [32m[PASS][0m testCannotRemoveMaxWhenEmpty() (gas: 18157)
@@ -243,24 +83,196 @@ Running 13 tests for test/max-heap/MaxHeap.t.sol:MaxHeapTestSuite
 [32m[PASS][0m testOldHeapEntriesNotRemoved() (gas: 218360)
 [32m[PASS][0m testRemoveMax() (gas: 211061)
 [32m[PASS][0m testUpdateValueOnlyOwner() (gas: 90724)
-Test result: [32mok[0m. [32m13[0m passed; [31m0[0m failed; [33m0[0m skipped; finished in 8.12ms
+Test result: [32mok[0m. [32m13[0m passed; [31m0[0m failed; [33m0[0m skipped; finished in 12.43ms
 
-Running 14 tests for test/revolution-token/AccessControl.t.sol:TokenAccessControlTest
-[32m[PASS][0m testBurningPermission() (gas: 559715)
-[32m[PASS][0m testCultureIndexUpdateAndLock() (gas: 34240)
-[32m[PASS][0m testDescriptorLocking() (gas: 227780)
-[32m[PASS][0m testDescriptorUpdateAndLock() (gas: 40572)
-[32m[PASS][0m testLockAdminFunctions() (gas: 40927)
-[32m[PASS][0m testLockMinter() (gas: 31831)
-[32m[PASS][0m testMinterAssignment() (gas: 32155)
-[32m[PASS][0m testMinterAssignmentAndLocking() (gas: 622829)
-[32m[PASS][0m testNonOwnerCannotCallDropTopVotedPiece() (gas: 375650)
-[32m[PASS][0m testOwnerPrivileges() (gas: 29777)
-[32m[PASS][0m testRevertOnNonMinterMint() (gas: 17168)
-[32m[PASS][0m testRevertOnNonOwnerSettingContractURI() (gas: 18229)
-[32m[PASS][0m testSetContractURIByOwner() (gas: 23688)
-[32m[PASS][0m testSetMinter() (gas: 29772)
-Test result: [32mok[0m. [32m14[0m passed; [31m0[0m failed; [33m0[0m skipped; finished in 10.93ms
+Running 1 test for test/descriptor/JsonInjection.t.sol:JsonInjectionAttackTest
+[32m[PASS][0m testTokenURIWithMixedMediaMetadata() (gas: 361684)
+Test result: [32mok[0m. [32m1[0m passed; [31m0[0m failed; [33m0[0m skipped; finished in 6.05ms
+
+Running 2 tests for test/auction/AuctionMinting.t.sol:AuctionHouseMintTest
+[32m[PASS][0m test__BehaviorOnMintFailureDuringAuctionCreation() (gas: 74981)
+[32m[PASS][0m test__MintFailureDueToEmptyNFTList() (gas: 63916)
+Test result: [32mok[0m. [32m2[0m passed; [31m0[0m failed; [33m0[0m skipped; finished in 11.17ms
+
+Running 2 tests for test/splits/SplitsCreation.t.sol:CreateSplitsTest
+[32m[PASS][0m test__CreateBasicSplit__EthPayouts() (gas: 258630)
+[32m[PASS][0m test__CreateBasicSplit__PointsPayouts() (gas: 786460)
+Test result: [32mok[0m. [32m2[0m passed; [31m0[0m failed; [33m0[0m skipped; finished in 2.48ms
+
+Running 8 tests for test/auction/Manifestos.t.sol:ManifestosTest
+[32m[PASS][0m test_MultipleAuctions_ManifestosEmpty_CorrectWinner_SetAndVerifyLast() (gas: 6564096)
+[32m[PASS][0m test__Bids_SettlingAuctionAndSettingManifesto() (gas: 2150706)
+[32m[PASS][0m test__Bids_SettlingAuctionEmptyManifesto() (gas: 2028059)
+[32m[PASS][0m test__Bids_UpdateManifesto_NotInitialOwner() (gas: 2032004)
+[32m[PASS][0m test__NoBids_SettlingAuctionEmptyManifesto() (gas: 1188780)
+[32m[PASS][0m test__TransferToken_UpdateManifesto_NotInitialOwner() (gas: 2095762)
+[32m[PASS][0m test__UpdateManifesto() (gas: 2100178)
+[32m[PASS][0m test__UpdateManifesto_TooLong() (gas: 10904026)
+Test result: [32mok[0m. [32m8[0m passed; [31m0[0m failed; [33m0[0m skipped; finished in 31.40ms
+
+Running 8 tests for test/revolution-points/Points.t.sol:PointsTestSuite
+[32m[PASS][0m testApprovalRestrictions() (gas: 25739)
+[32m[PASS][0m testEdgeCases() (gas: 70419)
+[32m[PASS][0m testMintingBehavior() (gas: 183272)
+[32m[PASS][0m testOwnershipTransferAndManagerRevert() (gas: 206278)
+[32m[PASS][0m testSupplyInvariants(uint256) (runs: 256, μ: 239220, ~: 249791)
+[32m[PASS][0m testTokenMetadata() (gas: 22162)
+[32m[PASS][0m testTransferRestrictions() (gas: 174152)
+[32m[PASS][0m testVotingAndDelegation() (gas: 245134)
+Test result: [32mok[0m. [32m8[0m passed; [31m0[0m failed; [33m0[0m skipped; finished in 49.26ms
+
+Running 21 tests for test/culture-index/Metadata.t.sol:CultureIndexArtMetadataTest
+[32m[PASS][0m test__ExceedingAnimationLength() (gas: 90200)
+[32m[PASS][0m test__ExceedingAudioLength() (gas: 90265)
+[32m[PASS][0m test__ExceedingDescriptionLength() (gas: 396635)
+[32m[PASS][0m test__ExceedingImageLength() (gas: 10064813)
+[32m[PASS][0m test__ExceedingNameLength() (gas: 94190)
+[32m[PASS][0m test__ExceedingTextLength() (gas: 116283)
+[32m[PASS][0m test__InvalidAnimationPrefix() (gas: 79515)
+[32m[PASS][0m test__InvalidAnimationPrefixFullHash() (gas: 79129)
+[32m[PASS][0m test__InvalidBothHashesAnimation() (gas: 79595)
+[32m[PASS][0m test__InvalidBothHashesImage() (gas: 79726)
+[32m[PASS][0m test__InvalidImagePrefix() (gas: 86417)
+[32m[PASS][0m test__InvalidImagePrefixFullHash() (gas: 65889)
+[32m[PASS][0m test__InvalidOneHashAnimation_1() (gas: 89325)
+[32m[PASS][0m test__InvalidOneHashAnimation_2() (gas: 79903)
+[32m[PASS][0m test__InvalidOneHashImage_1() (gas: 88994)
+[32m[PASS][0m test__InvalidOneHashImage_2() (gas: 80315)
+[32m[PASS][0m test__MissingMediaDataAudio() (gas: 65864)
+[32m[PASS][0m test__MissingMediaDataText() (gas: 66373)
+[32m[PASS][0m test__ValidHashesAnimation_SVG() (gas: 453882)
+[32m[PASS][0m test__ValidImagePrefixIpfs() (gas: 357137)
+[32m[PASS][0m test__ValidImagePrefixSvg() (gas: 363341)
+Test result: [32mok[0m. [32m21[0m passed; [31m0[0m failed; [33m0[0m skipped; finished in 69.12ms
+
+Running 2 tests for test/culture-index/MultiVoting.t.sol:CultureIndexVotingTestManager
+[32m[PASS][0m testVoteOnMultiplePieces() (gas: 1058477)
+[32m[PASS][0m testVotingWithDifferentWeights() (gas: 788148)
+Test result: [32mok[0m. [32m2[0m passed; [31m0[0m failed; [33m0[0m skipped; finished in 5.69ms
+
+Running 8 tests for test/culture-index/RequiredData.t.sol:CultureIndexRequiredDataTest
+[32m[PASS][0m test__requiredMediaPrefix_IPFS() (gas: 5378548)
+[32m[PASS][0m test__requiredMediaPrefix_MIXED() (gas: 5708973)
+[32m[PASS][0m test__requiredMediaPrefix_SVG() (gas: 5423106)
+[32m[PASS][0m test__requiredMediaType_ANIMATION() (gas: 5395462)
+[32m[PASS][0m test__requiredMediaType_AUDIO() (gas: 5395876)
+[32m[PASS][0m test__requiredMediaType_IMAGE() (gas: 5396529)
+[32m[PASS][0m test__requiredMediaType_NONE() (gas: 6238059)
+[32m[PASS][0m test__requiredMediaType_TEXT() (gas: 5393313)
+Test result: [32mok[0m. [32m8[0m passed; [31m0[0m failed; [33m0[0m skipped; finished in 18.87ms
+
+Running 1 test for test/culture-index/OnchainSvg.t.sol:CultureIndexRequiredDataTest
+[32m[PASS][0m test__largeSVG() (gas: 29884019)
+Test result: [32mok[0m. [32m1[0m passed; [31m0[0m failed; [33m0[0m skipped; finished in 11.04ms
+
+Running 4 tests for test/points-emitter/BPS.t.sol:PointsEmitterBasicTest
+[32m[PASS][0m testPercentagePayouts(uint256) (runs: 256, μ: 652945, ~: 652959)
+[32m[PASS][0m testTotalBasisPoints() (gas: 757140)
+[32m[PASS][0m test_bpsInitialization() (gas: 1053645)
+[32m[PASS][0m test_revertMismatchedLengthArrays() (gas: 34200)
+Test result: [32mok[0m. [32m4[0m passed; [31m0[0m failed; [33m0[0m skipped; finished in 152.98ms
+
+Running 10 tests for test/culture-index/AccessControl.t.sol:CultureIndexAccessControlTest
+[32m[PASS][0m testDropTopVotedPieceOnlyIfQuorumIsMet(uint256) (runs: 256, μ: 840153, ~: 840255)
+[32m[PASS][0m testRevertCreatingWithWeightTooLow() (gas: 243100)
+[32m[PASS][0m testRevertNonOwnerSetMinVotingPowerToCreate() (gas: 17387)
+[32m[PASS][0m testRevertNonOwnerSetMinVotingPowerToVote() (gas: 16727)
+[32m[PASS][0m testRevertNonOwnerSetQuorumVotesBPS() (gas: 16947)
+[32m[PASS][0m testRevertVotingWithWeightTooLow() (gas: 570498)
+[32m[PASS][0m testSetMinVotingPowerToCreateOnlyOwnerCanCall() (gas: 48751)
+[32m[PASS][0m testSetMinVotingPowerToVoteOnlyOwnerCanCall() (gas: 48223)
+[32m[PASS][0m testSetQuorumVotesBPSOutsideRange(uint256) (runs: 256, μ: 28069, ~: 27979)
+[32m[PASS][0m testSetQuorumVotesBPSWithinRange(uint256) (runs: 256, μ: 29507, ~: 29820)
+Test result: [32mok[0m. [32m10[0m passed; [31m0[0m failed; [33m0[0m skipped; finished in 253.82ms
+
+Running 10 tests for test/revolution-token/TokenMinting.t.sol:TokenMintingTest
+[32m[PASS][0m testBurn() (gas: 561346)
+[32m[PASS][0m testBurnFunction() (gas: 561828)
+[32m[PASS][0m testMint() (gas: 603413)
+[32m[PASS][0m testMintToItself() (gas: 606558)
+[32m[PASS][0m testMintWithNoPieces() (gas: 54145)
+[32m[PASS][0m testMintingEvent() (gas: 618024)
+[32m[PASS][0m testTokenURI() (gas: 718042)
+[32m[PASS][0m test_DroppedArtPieceMatchesTopVoted() (gas: 879678)
+[32m[PASS][0m test_MintingIncrement(uint256) (runs: 256, μ: 1409391, ~: 1454214)
+[32m[PASS][0m test_TopVotedPieceMinting() (gas: 841739)
+Test result: [32mok[0m. [32m10[0m passed; [31m0[0m failed; [33m0[0m skipped; finished in 235.84ms
+
+Running 2 tests for test/rewards/RevolutionRewards.t.sol:RevolutionRewardsTest
+[32m[PASS][0m testDeposit(uint256) (runs: 256, μ: 420050, ~: 500553)
+[32m[PASS][0m testNullReferralRecipient(uint256) (runs: 256, μ: 411038, ~: 514466)
+Test result: [32mok[0m. [32m2[0m passed; [31m0[0m failed; [33m0[0m skipped; finished in 178.64ms
+
+Running 10 tests for test/revolution-token/Security.t.sol:TokenSecurityTest
+[32m[PASS][0m testApprovalChecks() (gas: 738333)
+[32m[PASS][0m testBasisPointsSum() (gas: 60440)
+[32m[PASS][0m testCreatorArrayLimit() (gas: 131296)
+[32m[PASS][0m testEventEmission() (gas: 372269)
+[32m[PASS][0m testFunctionalityUnderMaximumLoad() (gas: 1330702)
+[32m[PASS][0m testMintToDropTopVotedPieceFailure() (gas: 474938)
+[32m[PASS][0m testPrivilegeEscalation() (gas: 60842)
+[32m[PASS][0m testReentrancyOnMint() (gas: 498894)
+[32m[PASS][0m testReentrancyOtherFunctions() (gas: 499856)
+[32m[PASS][0m testZeroAddressInCreatorArray() (gas: 58823)
+Test result: [32mok[0m. [32m10[0m passed; [31m0[0m failed; [33m0[0m skipped; finished in 7.12ms
+
+Running 1 test for test/splits/Setup.t.sol:SplitsTestSetupTest
+[32m[PASS][0m test__BuyToken() (gas: 536135)
+Test result: [32mok[0m. [32m1[0m passed; [31m0[0m failed; [33m0[0m skipped; finished in 2.01ms
+
+Running 15 tests for test/culture-index/ArtPiece.t.sol:CultureIndexArtPieceTest
+[32m[PASS][0m testArtPieceCreationAndVoting(uint256,uint256) (runs: 256, μ: 1778866, ~: 1779072)
+[32m[PASS][0m testCreatePiece() (gas: 373937)
+[32m[PASS][0m testCreatePieceWithMultipleCreators() (gas: 418392)
+[32m[PASS][0m testCreatePieceWithMultipleCreatorsInvalidBPS() (gas: 63573)
+[32m[PASS][0m testCreatorArrayLengthConstraint() (gas: 134916)
+[32m[PASS][0m testExcessiveTotalBasisPoints() (gas: 63012)
+[32m[PASS][0m testFirstPieceId() (gas: 357807)
+[32m[PASS][0m testInvalidCreatorAddress() (gas: 62197)
+[32m[PASS][0m testMissingMediaDataAnimation() (gas: 66024)
+[32m[PASS][0m testMissingMediaDataImage() (gas: 66048)
+[32m[PASS][0m testMissingMediaDataText() (gas: 65960)
+[32m[PASS][0m testPieceIDIncrement() (gas: 663002)
+[32m[PASS][0m testTooFewTotalBasisPoints() (gas: 62462)
+[32m[PASS][0m testTopVotedPieceMeetsQuorum() (gas: 1335877)
+[32m[PASS][0m test__NonZeroCreators(uint256) (runs: 256, μ: 242312, ~: 242582)
+Test result: [32mok[0m. [32m15[0m passed; [31m0[0m failed; [33m0[0m skipped; finished in 496.01ms
+
+Running 4 tests for test/auction/HistoricPrices.t.sol:HistoricPriceTest
+[32m[PASS][0m test__HistoricPriceBurned() (gas: 1196871)
+[32m[PASS][0m test__HistoricPriceBurnedBelowReserve() (gas: 1262951)
+[32m[PASS][0m test__HistoricPriceSaved() (gas: 2040094)
+[32m[PASS][0m test__MultipleHistoricPricesSaved() (gas: 3222860)
+Test result: [32mok[0m. [32m4[0m passed; [31m0[0m failed; [33m0[0m skipped; finished in 10.58ms
+
+Running 2 tests for test/culture-index/Initialization.t.sol:CultureIndexInitializationTest
+[32m[PASS][0m testChecklistInitialization() (gas: 15810)
+[32m[PASS][0m testTemplateInitialization() (gas: 15260)
+Test result: [32mok[0m. [32m2[0m passed; [31m0[0m failed; [33m0[0m skipped; finished in 5.71ms
+
+Running 21 tests for test/revolution-token/Basic.t.sol:TokenBasicTest
+[32m[PASS][0m testContractURI() (gas: 18948)
+[32m[PASS][0m testCorrectArtAssociation() (gas: 603542)
+[32m[PASS][0m testCreatePieceWithExcessCreators() (gas: 145642)
+[32m[PASS][0m testCreatePieceWithInvalidBasisPoints() (gas: 63241)
+[32m[PASS][0m testCreatePieceWithValidParameters() (gas: 383085)
+[32m[PASS][0m testCreatePieceWithZeroAddress() (gas: 63130)
+[32m[PASS][0m testCultureIndexInteraction() (gas: 606033)
+[32m[PASS][0m testDoubleVotingRestriction() (gas: 635399)
+[32m[PASS][0m testDropTopVotedPieceOnEmptyHeap() (gas: 54172)
+[32m[PASS][0m testInitialVariablesState() (gas: 27625)
+[32m[PASS][0m testName() (gas: 17619)
+[32m[PASS][0m testPieceCountIncrement() (gas: 665789)
+[32m[PASS][0m testRetrievingVotesForNonExistentArtPiece() (gas: 17816)
+[32m[PASS][0m testSymbol() (gas: 18213)
+[32m[PASS][0m testTokenMetadataIntegrity() (gas: 837330)
+[32m[PASS][0m testVotingOnDroppedPiece() (gas: 761100)
+[32m[PASS][0m testVotingOnNonExistentArtPiece() (gas: 184086)
+[32m[PASS][0m testVotingWithZeroBalance() (gas: 391759)
+[32m[PASS][0m test_DropTopVotedPiece() (gas: 854665)
+[32m[PASS][0m test_GetTopVotedPiece() (gas: 1112209)
+[32m[PASS][0m test_VotingOnArtPiece() (gas: 632405)
+Test result: [32mok[0m. [32m21[0m passed; [31m0[0m failed; [33m0[0m skipped; finished in 20.72ms
 
 Running 16 tests for test/descriptor/UriData.t.sol:DescriptorURIDataTest
 [32m[PASS][0m testBaselineTokenURIWithDataURIEnabled() (gas: 81378)
@@ -279,154 +291,7 @@ Running 16 tests for test/descriptor/UriData.t.sol:DescriptorURIDataTest
 [32m[PASS][0m testTokenURIWithOnlyImageMetadata() (gas: 205537)
 [32m[PASS][0m testTransferOwnership() (gas: 34051)
 [32m[PASS][0m testTransferOwnershipAccessControl() (gas: 27855)
-Test result: [32mok[0m. [32m16[0m passed; [31m0[0m failed; [33m0[0m skipped; finished in 13.33ms
-
-Running 7 tests for test/culture-index/SignatureVoting.t.sol:CultureIndexVotingSignaturesTest
-[32m[PASS][0m testRevert_InvalidNonce() (gas: 413811)
-[32m[PASS][0m testRevert_InvalidReplay() (gas: 688799)
-[32m[PASS][0m testRevert_InvalidSigner() (gas: 413978)
-[32m[PASS][0m testRevert_InvalidVoteForManyWithSigToAddress() (gas: 416359)
-[32m[PASS][0m testRevert_InvalidVotes() (gas: 868854)
-[32m[PASS][0m testRevert_SigExpired() (gas: 385434)
-[32m[PASS][0m test_VoteForManyWithSig() (gas: 688643)
-Test result: [32mok[0m. [32m7[0m passed; [31m0[0m failed; [33m0[0m skipped; finished in 16.91ms
-
-Running 2 tests for test/splits/SplitsCreation.t.sol:CreateSplitsTest
-[32m[PASS][0m test__CreateBasicSplit__EthPayouts() (gas: 258630)
-[32m[PASS][0m test__CreateBasicSplit__PointsPayouts() (gas: 809103)
-Test result: [32mok[0m. [32m2[0m passed; [31m0[0m failed; [33m0[0m skipped; finished in 2.47ms
-
-Running 21 tests for test/culture-index/Metadata.t.sol:CultureIndexArtMetadataTest
-[32m[PASS][0m test__ExceedingAnimationLength() (gas: 90087)
-[32m[PASS][0m test__ExceedingAudioLength() (gas: 90152)
-[32m[PASS][0m test__ExceedingDescriptionLength() (gas: 396522)
-[32m[PASS][0m test__ExceedingImageLength() (gas: 10064700)
-[32m[PASS][0m test__ExceedingNameLength() (gas: 94077)
-[32m[PASS][0m test__ExceedingTextLength() (gas: 116170)
-[32m[PASS][0m test__InvalidAnimationPrefix() (gas: 79402)
-[32m[PASS][0m test__InvalidAnimationPrefixFullHash() (gas: 79016)
-[32m[PASS][0m test__InvalidBothHashesAnimation() (gas: 79482)
-[32m[PASS][0m test__InvalidBothHashesImage() (gas: 79613)
-[32m[PASS][0m test__InvalidImagePrefix() (gas: 86304)
-[32m[PASS][0m test__InvalidImagePrefixFullHash() (gas: 65776)
-[32m[PASS][0m test__InvalidOneHashAnimation_1() (gas: 89212)
-[32m[PASS][0m test__InvalidOneHashAnimation_2() (gas: 79790)
-[32m[PASS][0m test__InvalidOneHashImage_1() (gas: 88881)
-[32m[PASS][0m test__InvalidOneHashImage_2() (gas: 80202)
-[32m[PASS][0m test__MissingMediaDataAudio() (gas: 65751)
-[32m[PASS][0m test__MissingMediaDataText() (gas: 66260)
-[32m[PASS][0m test__ValidHashesAnimation_SVG() (gas: 453769)
-[32m[PASS][0m test__ValidImagePrefixIpfs() (gas: 357024)
-[32m[PASS][0m test__ValidImagePrefixSvg() (gas: 363228)
-Test result: [32mok[0m. [32m21[0m passed; [31m0[0m failed; [33m0[0m skipped; finished in 42.19ms
-
-Running 2 tests for test/culture-index/MultiVoting.t.sol:CultureIndexVotingTestManager
-[32m[PASS][0m testVoteOnMultiplePieces() (gas: 1058251)
-[32m[PASS][0m testVotingWithDifferentWeights() (gas: 788035)
-Test result: [32mok[0m. [32m2[0m passed; [31m0[0m failed; [33m0[0m skipped; finished in 5.62ms
-
-Running 1 test for test/culture-index/OnchainSvg.t.sol:CultureIndexRequiredDataTest
-[32m[PASS][0m test__largeSVG() (gas: 29883793)
-Test result: [32mok[0m. [32m1[0m passed; [31m0[0m failed; [33m0[0m skipped; finished in 5.82ms
-
-Running 4 tests for test/points-emitter/BPS.t.sol:PointsEmitterBasicTest
-[32m[PASS][0m testPercentagePayouts(uint256) (runs: 256, μ: 698286, ~: 698303)
-[32m[PASS][0m testTotalBasisPoints() (gas: 804028)
-[32m[PASS][0m test_bpsInitialization() (gas: 1053645)
-[32m[PASS][0m test_revertMismatchedLengthArrays() (gas: 34200)
-Test result: [32mok[0m. [32m4[0m passed; [31m0[0m failed; [33m0[0m skipped; finished in 147.32ms
-
-Running 3 tests for test/vrgdac/VRGDAC.t.sol:PointsTestSuite
-[32m[PASS][0m test_noNegatives(int256,int256,int256,int256) (runs: 256, μ: 276337, ~: 276291)
-[32m[PASS][0m test_yToX_ManyPurchasesAfterLongTime(int256,int256,int256,int256,int256,int256) (runs: 256, μ: 281609, ~: 282017)
-[32m[PASS][0m test_yToX_NoPurchasesAfterLongTime(int256,int256,int256,int256,int256,int256) (runs: 256, μ: 281458, ~: 281092)
-Test result: [32mok[0m. [32m3[0m passed; [31m0[0m failed; [33m0[0m skipped; finished in 234.81ms
-
-Running 1 test for test/revolution-builder/Versions.t.sol:RevolutionBuilderBasicTest
-[32m[PASS][0m test_getDAOVersions() (gas: 69570)
-Test result: [32mok[0m. [32m1[0m passed; [31m0[0m failed; [33m0[0m skipped; finished in 4.87ms
-
-Running 10 tests for test/revolution-token/TokenMinting.t.sol:TokenMintingTest
-[32m[PASS][0m testBurn() (gas: 561233)
-[32m[PASS][0m testBurnFunction() (gas: 561715)
-[32m[PASS][0m testMint() (gas: 603300)
-[32m[PASS][0m testMintToItself() (gas: 606445)
-[32m[PASS][0m testMintWithNoPieces() (gas: 54145)
-[32m[PASS][0m testMintingEvent() (gas: 617911)
-[32m[PASS][0m testTokenURI() (gas: 717929)
-[32m[PASS][0m test_DroppedArtPieceMatchesTopVoted() (gas: 879565)
-[32m[PASS][0m test_MintingIncrement(uint256) (runs: 256, μ: 1407406, ~: 1453988)
-[32m[PASS][0m test_TopVotedPieceMinting() (gas: 841626)
-Test result: [32mok[0m. [32m10[0m passed; [31m0[0m failed; [33m0[0m skipped; finished in 302.03ms
-
-Running 10 tests for test/culture-index/AccessControl.t.sol:CultureIndexAccessControlTest
-[32m[PASS][0m testDropTopVotedPieceOnlyIfQuorumIsMet(uint256) (runs: 256, μ: 840052, ~: 840142)
-[32m[PASS][0m testRevertCreatingWithWeightTooLow() (gas: 243100)
-[32m[PASS][0m testRevertNonOwnerSetMinVotingPowerToCreate() (gas: 17387)
-[32m[PASS][0m testRevertNonOwnerSetMinVotingPowerToVote() (gas: 16727)
-[32m[PASS][0m testRevertNonOwnerSetQuorumVotesBPS() (gas: 16947)
-[32m[PASS][0m testRevertVotingWithWeightTooLow() (gas: 570385)
-[32m[PASS][0m testSetMinVotingPowerToCreateOnlyOwnerCanCall() (gas: 48751)
-[32m[PASS][0m testSetMinVotingPowerToVoteOnlyOwnerCanCall() (gas: 48223)
-[32m[PASS][0m testSetQuorumVotesBPSOutsideRange(uint256) (runs: 256, μ: 28058, ~: 27979)
-[32m[PASS][0m testSetQuorumVotesBPSWithinRange(uint256) (runs: 256, μ: 29423, ~: 29820)
-Test result: [32mok[0m. [32m10[0m passed; [31m0[0m failed; [33m0[0m skipped; finished in 370.03ms
-
-Running 3 tests for test/revolution-points/AccessControl.t.sol:PointsTestSuite
-[32m[PASS][0m test__MinterAccessControl() (gas: 204988)
-[32m[PASS][0m test__MinterLocking() (gas: 210230)
-[32m[PASS][0m test__basicAccessControl() (gas: 187640)
-Test result: [32mok[0m. [32m3[0m passed; [31m0[0m failed; [33m0[0m skipped; finished in 13.64ms
-
-Running 2 tests for test/points-emitter/Initialization.t.sol:PointsEmitterInitializationTest
-[32m[PASS][0m test__FounderFieldsInitialization() (gas: 26324)
-[32m[PASS][0m test__GrantsFieldsInitialization() (gas: 19035)
-Test result: [32mok[0m. [32m2[0m passed; [31m0[0m failed; [33m0[0m skipped; finished in 4.79ms
-
-Running 1 test for test/descriptor/JsonInjection.t.sol:JsonInjectionAttackTest
-[32m[PASS][0m testTokenURIWithMixedMediaMetadata() (gas: 361684)
-Test result: [32mok[0m. [32m1[0m passed; [31m0[0m failed; [33m0[0m skipped; finished in 6.07ms
-
-Running 8 tests for test/auction/Manifestos.t.sol:ManifestosTest
-[32m[PASS][0m test_MultipleAuctions_ManifestosEmpty_CorrectWinner_SetAndVerifyLast() (gas: 6589033)
-[32m[PASS][0m test__Bids_SettlingAuctionAndSettingManifesto() (gas: 2173123)
-[32m[PASS][0m test__Bids_SettlingAuctionEmptyManifesto() (gas: 2050476)
-[32m[PASS][0m test__Bids_UpdateManifesto_NotInitialOwner() (gas: 2054421)
-[32m[PASS][0m test__NoBids_SettlingAuctionEmptyManifesto() (gas: 1188554)
-[32m[PASS][0m test__TransferToken_UpdateManifesto_NotInitialOwner() (gas: 2118179)
-[32m[PASS][0m test__UpdateManifesto() (gas: 2122595)
-[32m[PASS][0m test__UpdateManifesto_TooLong() (gas: 10926443)
-Test result: [32mok[0m. [32m8[0m passed; [31m0[0m failed; [33m0[0m skipped; finished in 20.94ms
-
-Running 1 test for test/revolution-token/Voting.t.sol:TokenSecurityTest
-[32m[PASS][0m testBlockingOfTransferAndRedelegating() (gas: 1825539)
-Test result: [32mok[0m. [32m1[0m passed; [31m0[0m failed; [33m0[0m skipped; finished in 5.71ms
-
-Running 18 tests for test/auction/AuctionBasic.t.sol:AuctionHouseBasicTest
-[32m[PASS][0m testAccessControl() (gas: 26647)
-[32m[PASS][0m testAdministrativeFunctions(uint256,uint256,uint8) (runs: 256, μ: 48145, ~: 48746)
-[32m[PASS][0m testEventEmission(uint256,uint256) (runs: 256, μ: 39334, ~: 39353)
-[32m[PASS][0m testInitializationParameters() (gas: 31152)
-[32m[PASS][0m testMinCreatorRateLoweringRestriction(uint256) (runs: 256, μ: 24326, ~: 24326)
-[32m[PASS][0m testOwnerOnlyAccess() (gas: 26651)
-[32m[PASS][0m testSetEntropyRateBps(uint256) (runs: 256, μ: 27149, ~: 27712)
-[32m[PASS][0m testSetEntropyRateBpsInvalidValues(uint256) (runs: 256, μ: 28656, ~: 28656)
-[32m[PASS][0m testSetEntropyRateBpsRestrictToOwner() (gas: 17372)
-[32m[PASS][0m testSetMinCreatorRateBps(uint256,uint256) (runs: 256, μ: 29848, ~: 28818)
-[32m[PASS][0m testSetMinCreatorRateBpsInvalidValues(uint256) (runs: 256, μ: 27858, ~: 27790)
-[32m[PASS][0m testSetMinCreatorRateBpsRestrictToOwner(uint256) (runs: 256, μ: 20089, ~: 20089)
-[32m[PASS][0m testSettlingAuctions() (gas: 1319762)
-[32m[PASS][0m testValueUpdates(uint256,uint256) (runs: 256, μ: 42021, ~: 42040)
-[32m[PASS][0m test_AuctionCreation() (gas: 702363)
-[32m[PASS][0m test_BidEventEmission() (gas: 762865)
-[32m[PASS][0m test_BidForAnotherAccount() (gas: 2094837)
-[32m[PASS][0m test_BiddingProcess(uint256) (runs: 256, μ: 2382314, ~: 2382314)
-Test result: [32mok[0m. [32m18[0m passed; [31m0[0m failed; [33m0[0m skipped; finished in 1.58s
-
-Running 2 tests for test/auction/AuctionMinting.t.sol:AuctionHouseMintTest
-[32m[PASS][0m test__BehaviorOnMintFailureDuringAuctionCreation() (gas: 74981)
-[32m[PASS][0m test__MintFailureDueToEmptyNFTList() (gas: 63916)
-Test result: [32mok[0m. [32m2[0m passed; [31m0[0m failed; [33m0[0m skipped; finished in 8.85ms
+Test result: [32mok[0m. [32m16[0m passed; [31m0[0m failed; [33m0[0m skipped; finished in 9.62ms
 
 Running 18 tests for test/max-heap/Updates.t.sol:MaxHeapUpdateTestSuite
 [32m[PASS][0m testCannotRemoveMaxWhenEmpty() (gas: 18201)
@@ -447,167 +312,456 @@ Running 18 tests for test/max-heap/Updates.t.sol:MaxHeapUpdateTestSuite
 [32m[PASS][0m testUpdateValueIncrease() (gas: 224623)
 [32m[PASS][0m testUpdateValueOnlyOwner() (gas: 90724)
 [32m[PASS][0m testUpdateValueWithHeapify() (gas: 366471)
-Test result: [32mok[0m. [32m18[0m passed; [31m0[0m failed; [33m0[0m skipped; finished in 7.92ms
+Test result: [32mok[0m. [32m18[0m passed; [31m0[0m failed; [33m0[0m skipped; finished in 7.01ms
 
-Running 4 tests for test/auction/HistoricPrices.t.sol:HistoricPriceTest
-[32m[PASS][0m test__HistoricPriceBurned() (gas: 1196645)
-[32m[PASS][0m test__HistoricPriceBurnedBelowReserve() (gas: 1262725)
-[32m[PASS][0m test__HistoricPriceSaved() (gas: 2062511)
-[32m[PASS][0m test__MultipleHistoricPricesSaved() (gas: 3245907)
-Test result: [32mok[0m. [32m4[0m passed; [31m0[0m failed; [33m0[0m skipped; finished in 54.90ms
+Running 3 tests for test/vrgdac/VRGDAC.t.sol:PointsTestSuite
+[32m[PASS][0m test_noNegatives(int256,int256,int256,int256) (runs: 256, μ: 276349, ~: 276291)
+[32m[PASS][0m test_yToX_ManyPurchasesAfterLongTime(int256,int256,int256,int256,int256,int256) (runs: 256, μ: 281676, ~: 282081)
+[32m[PASS][0m test_yToX_NoPurchasesAfterLongTime(int256,int256,int256,int256,int256,int256) (runs: 256, μ: 281546, ~: 281192)
+Test result: [32mok[0m. [32m3[0m passed; [31m0[0m failed; [33m0[0m skipped; finished in 187.91ms
 
-Running 2 tests for test/culture-index/Initialization.t.sol:CultureIndexInitializationTest
-[32m[PASS][0m testChecklistInitialization() (gas: 15810)
-[32m[PASS][0m testTemplateInitialization() (gas: 15260)
-Test result: [32mok[0m. [32m2[0m passed; [31m0[0m failed; [33m0[0m skipped; finished in 17.19ms
+Running 1 test for test/revolution-builder/Versions.t.sol:RevolutionBuilderBasicTest
+[32m[PASS][0m test_getDAOVersions() (gas: 69570)
+Test result: [32mok[0m. [32m1[0m passed; [31m0[0m failed; [33m0[0m skipped; finished in 4.79ms
+
+Running 1 test for test/revolution-token/Voting.t.sol:TokenSecurityTest
+[32m[PASS][0m testBlockingOfTransferAndRedelegating() (gas: 1825878)
+Test result: [32mok[0m. [32m1[0m passed; [31m0[0m failed; [33m0[0m skipped; finished in 5.79ms
 
 Running 4 tests for test/points-emitter/Balances.t.sol:PointsEmitterBasicTest
 [32m[PASS][0m test_GetTokenAmountForMultiPurchaseEdgeCases() (gas: 86741)
-[32m[PASS][0m test_GetTokenAmountForMultiPurchaseGeneral(uint256) (runs: 256, μ: 622398, ~: 618135)
-[32m[PASS][0m test_OwnerBalance(uint256,uint256,uint256) (runs: 256, μ: 47884150, ~: 47916321)
-[32m[PASS][0m test_PointsEmitterBalance(uint256,uint256,uint256) (runs: 256, μ: 47852433, ~: 47883381)
-Test result: [32mok[0m. [32m4[0m passed; [31m0[0m failed; [33m0[0m skipped; finished in 2.78s
-
-Running 21 tests for test/revolution-token/Basic.t.sol:TokenBasicTest
-[32m[PASS][0m testContractURI() (gas: 18948)
-[32m[PASS][0m testCorrectArtAssociation() (gas: 603429)
-[32m[PASS][0m testCreatePieceWithExcessCreators() (gas: 145642)
-[32m[PASS][0m testCreatePieceWithInvalidBasisPoints() (gas: 63128)
-[32m[PASS][0m testCreatePieceWithValidParameters() (gas: 382972)
-[32m[PASS][0m testCreatePieceWithZeroAddress() (gas: 63130)
-[32m[PASS][0m testCultureIndexInteraction() (gas: 605920)
-[32m[PASS][0m testDoubleVotingRestriction() (gas: 635286)
-[32m[PASS][0m testDropTopVotedPieceOnEmptyHeap() (gas: 54172)
-[32m[PASS][0m testInitialVariablesState() (gas: 27625)
-[32m[PASS][0m testName() (gas: 17619)
-[32m[PASS][0m testPieceCountIncrement() (gas: 665563)
-[32m[PASS][0m testRetrievingVotesForNonExistentArtPiece() (gas: 17816)
-[32m[PASS][0m testSymbol() (gas: 18213)
-[32m[PASS][0m testTokenMetadataIntegrity() (gas: 837217)
-[32m[PASS][0m testVotingOnDroppedPiece() (gas: 760987)
-[32m[PASS][0m testVotingOnNonExistentArtPiece() (gas: 184086)
-[32m[PASS][0m testVotingWithZeroBalance() (gas: 391646)
-[32m[PASS][0m test_DropTopVotedPiece() (gas: 854552)
-[32m[PASS][0m test_GetTopVotedPiece() (gas: 1111983)
-[32m[PASS][0m test_VotingOnArtPiece() (gas: 632292)
-Test result: [32mok[0m. [32m21[0m passed; [31m0[0m failed; [33m0[0m skipped; finished in 24.49ms
-
-Running 3 tests for test/points-emitter/GrantsPayments.t.sol:PointsEmitterBasicTest
-[32m[PASS][0m test_GrantsBalance(uint256,uint256,uint256) (runs: 256, μ: 47894718, ~: 47931121)
-[32m[PASS][0m test_InitializationGrantsFounderRateBounds(uint256,uint256) (runs: 256, μ: 51847785, ~: 52017359)
-[32m[PASS][0m test_SetGrantsRate(uint256) (runs: 256, μ: 47814, ~: 48099)
-Test result: [32mok[0m. [32m3[0m passed; [31m0[0m failed; [33m0[0m skipped; finished in 3.02s
+[32m[PASS][0m test_GetTokenAmountForMultiPurchaseGeneral(uint256) (runs: 256, μ: 600111, ~: 595552)
+[32m[PASS][0m test_OwnerBalance(uint256,uint256,uint256) (runs: 256, μ: 47820549, ~: 47851215)
+[32m[PASS][0m test_PointsEmitterBalance(uint256,uint256,uint256) (runs: 256, μ: 47782481, ~: 47818236)
+Test result: [32mok[0m. [32m4[0m passed; [31m0[0m failed; [33m0[0m skipped; finished in 2.11s
 
 Running 9 tests for test/points-emitter/EmitterBasic.t.sol:PointsEmitterBasicTest
-[32m[PASS][0m testBuyToken() (gas: 508444)
-[32m[PASS][0m testBuyTokenPriceIncreases() (gas: 736275)
+[32m[PASS][0m testBuyToken() (gas: 485801)
+[32m[PASS][0m testBuyTokenPriceIncreases() (gas: 690989)
 [32m[PASS][0m testBuyTokenReentrancy() (gas: 914506)
 [32m[PASS][0m testBuyingLaterIsBetter() (gas: 85361)
 [32m[PASS][0m testCannotBuyAsCreators() (gas: 37015)
 [32m[PASS][0m testCannotBuyAsOwner() (gas: 35751)
 [32m[PASS][0m testSetGrantsAddress() (gas: 30777)
-[32m[PASS][0m testTransferTokenContractOwnership() (gas: 2561994)
-[32m[PASS][0m test_purchaseBounds(int256) (runs: 256, μ: 147973, ~: 116322)
-Test result: [32mok[0m. [32m9[0m passed; [31m0[0m failed; [33m0[0m skipped; finished in 40.82ms
-
-Running 14 tests for test/culture-index/ArtPiece.t.sol:CultureIndexArtPieceTest
-[32m[PASS][0m testArtPieceCreationAndVoting(uint256,uint256) (runs: 256, μ: 1778392, ~: 1778560)
-[32m[PASS][0m testCreatePiece() (gas: 373791)
-[32m[PASS][0m testCreatePieceWithMultipleCreators() (gas: 418166)
-[32m[PASS][0m testCreatePieceWithMultipleCreatorsInvalidBPS() (gas: 63325)
-[32m[PASS][0m testCreatorArrayLengthConstraint() (gas: 134916)
-[32m[PASS][0m testExcessiveTotalBasisPoints() (gas: 62877)
-[32m[PASS][0m testFirstPieceId() (gas: 357661)
-[32m[PASS][0m testInvalidCreatorAddress() (gas: 62197)
-[32m[PASS][0m testMissingMediaDataAnimation() (gas: 65889)
-[32m[PASS][0m testMissingMediaDataImage() (gas: 65913)
-[32m[PASS][0m testMissingMediaDataText() (gas: 65847)
-[32m[PASS][0m testPieceIDIncrement() (gas: 662688)
-[32m[PASS][0m testTooFewTotalBasisPoints() (gas: 62349)
-[32m[PASS][0m testTopVotedPieceMeetsQuorum() (gas: 1335585)
-Test result: [32mok[0m. [32m14[0m passed; [31m0[0m failed; [33m0[0m skipped; finished in 400.04ms
-
-Running 8 tests for test/revolution-points/Points.t.sol:PointsTestSuite
-[32m[PASS][0m testApprovalRestrictions() (gas: 25739)
-[32m[PASS][0m testEdgeCases() (gas: 70419)
-[32m[PASS][0m testMintingBehavior() (gas: 183272)
-[32m[PASS][0m testOwnershipTransferAndManagerRevert() (gas: 206278)
-[32m[PASS][0m testSupplyInvariants(uint256) (runs: 256, μ: 232675, ~: 249791)
-[32m[PASS][0m testTokenMetadata() (gas: 22162)
-[32m[PASS][0m testTransferRestrictions() (gas: 174152)
-[32m[PASS][0m testVotingAndDelegation() (gas: 245134)
-Test result: [32mok[0m. [32m8[0m passed; [31m0[0m failed; [33m0[0m skipped; finished in 51.00ms
-
-Running 8 tests for test/culture-index/RequiredData.t.sol:CultureIndexRequiredDataTest
-[32m[PASS][0m test__requiredMediaPrefix_IPFS() (gas: 5378322)
-[32m[PASS][0m test__requiredMediaPrefix_MIXED() (gas: 5708747)
-[32m[PASS][0m test__requiredMediaPrefix_SVG() (gas: 5422880)
-[32m[PASS][0m test__requiredMediaType_ANIMATION() (gas: 5395010)
-[32m[PASS][0m test__requiredMediaType_AUDIO() (gas: 5395424)
-[32m[PASS][0m test__requiredMediaType_IMAGE() (gas: 5396077)
-[32m[PASS][0m test__requiredMediaType_NONE() (gas: 6237494)
-[32m[PASS][0m test__requiredMediaType_TEXT() (gas: 5392861)
-Test result: [32mok[0m. [32m8[0m passed; [31m0[0m failed; [33m0[0m skipped; finished in 11.99ms
-
-Running 2 tests for test/rewards/RevolutionRewards.t.sol:RevolutionRewardsTest
-[32m[PASS][0m testDeposit(uint256) (runs: 256, μ: 426659, ~: 562047)
-[32m[PASS][0m testNullReferralRecipient(uint256) (runs: 256, μ: 402428, ~: 459407)
-Test result: [32mok[0m. [32m2[0m passed; [31m0[0m failed; [33m0[0m skipped; finished in 272.63ms
-
-Running 10 tests for test/revolution-token/Security.t.sol:TokenSecurityTest
-[32m[PASS][0m testApprovalChecks() (gas: 738220)
-[32m[PASS][0m testBasisPointsSum() (gas: 60214)
-[32m[PASS][0m testCreatorArrayLimit() (gas: 131296)
-[32m[PASS][0m testEventEmission() (gas: 372156)
-[32m[PASS][0m testFunctionalityUnderMaximumLoad() (gas: 1328329)
-[32m[PASS][0m testMintToDropTopVotedPieceFailure() (gas: 474825)
-[32m[PASS][0m testPrivilegeEscalation() (gas: 60842)
-[32m[PASS][0m testReentrancyOnMint() (gas: 498781)
-[32m[PASS][0m testReentrancyOtherFunctions() (gas: 499743)
-[32m[PASS][0m testZeroAddressInCreatorArray() (gas: 58823)
-Test result: [32mok[0m. [32m10[0m passed; [31m0[0m failed; [33m0[0m skipped; finished in 7.99ms
+[32m[PASS][0m testTransferTokenContractOwnership() (gas: 2516708)
+[32m[PASS][0m test_purchaseBounds(int256) (runs: 256, μ: 141368, ~: 116248)
+Test result: [32mok[0m. [32m9[0m passed; [31m0[0m failed; [33m0[0m skipped; finished in 51.66ms
 
 Running 3 tests for test/auction/GrantsPayments.t.sol:GrantsPaymentsTest
-[32m[PASS][0m test_GrantsBalance(uint256,uint256,uint256,uint256) (runs: 256, μ: 54152638, ~: 54172789)
-[32m[PASS][0m test_InitializationGrantsFounderRateBounds(uint256,uint256) (runs: 256, μ: 51571437, ~: 51156519)
-[32m[PASS][0m test_SetGrantsRate(uint256) (runs: 256, μ: 46521, ~: 46884)
-Test result: [32mok[0m. [32m3[0m passed; [31m0[0m failed; [33m0[0m skipped; finished in 1.73s
-
-Running 1 test for test/splits/Setup.t.sol:SplitsTestSetupTest
-[32m[PASS][0m test__BuyToken() (gas: 558778)
-Test result: [32mok[0m. [32m1[0m passed; [31m0[0m failed; [33m0[0m skipped; finished in 2.01ms
-
-Running 9 tests for test/points-emitter/EmissionRates.t.sol:EmissionRatesTest
-[32m[PASS][0m testBuyTokenTotalVal() (gas: 47686513)
-[32m[PASS][0m testBuyTokenWithDifferentRates(uint256,uint256,uint256) (runs: 256, μ: 47881834, ~: 47914126)
-[32m[PASS][0m testBuyingTwiceAmountIsNotMoreThanTwiceEmittedTokens() (gas: 605203)
-[32m[PASS][0m testGetTokenPrice() (gas: 66350)
-[32m[PASS][0m test_BuyingFunctionBreaksAfterAPeriodOfTime(uint256,uint256,uint256,uint256) (runs: 256, μ: 47846872, ~: 47888951)
-[32m[PASS][0m test_FounderRewardsExpireCorrectly(uint256,uint256,uint256,uint256,uint256) (runs: 256, μ: 48082711, ~: 48092980)
-[32m[PASS][0m test_FounderRewardsExpireForQuoteUtils(uint256,uint256,uint256,uint256,uint256) (runs: 256, μ: 47541416, ~: 47544248)
-[32m[PASS][0m test_correctEmitted(uint256,uint256,uint256) (runs: 256, μ: 47879013, ~: 47915904)
-[32m[PASS][0m test_revertNoPayment() (gas: 27540)
-Test result: [32mok[0m. [32m9[0m passed; [31m0[0m failed; [33m0[0m skipped; finished in 6.03s
-
-Running 13 tests for test/auction/Settling.t.sol:AuctionHouseSettleTest
-[32m[PASS][0m test_CreateAuctionWithoutSettle() (gas: 1348190)
-[32m[PASS][0m test__EntropyPecentCannotLeadToDos(uint256) (runs: 256, μ: 2051948, ~: 2116540)
-[32m[PASS][0m test__OwnerPayment(uint8) (runs: 256, μ: 2371064, ~: 2371064)
-[32m[PASS][0m test__RevertTopVotedPieceMeetsQuorum() (gas: 1426094)
-[32m[PASS][0m test__SettleAuctionZeroEntropyRate() (gas: 2011958)
-[32m[PASS][0m test__SettlingAuctionPrematurely() (gas: 1004115)
-[31m[FAIL. Reason: panic: division or modulo by zero (0x12); counterexample: calldata=0x9884a33f15555555555555555555555555555555555555555555555555555555555555560000000000000000000000000000000000000000000000000000000000000000 args=[9649340769776349618630915417390658987772498722136713669954798667326094136662 [2;49;39m[9.649e75][0m, 0]][0m test__SettlingAuctionWithMultipleCreators(uint256,uint256) (runs: 128, μ: 6501507, ~: 6072066)
-[32m[PASS][0m test__SettlingAuctionWithNoBids(uint8) (runs: 256, μ: 1180767, ~: 1180767)
-[32m[PASS][0m test__SettlingAuctionWithWinningBidAndCreatorPayout(uint256) (runs: 256, μ: 2203845, ~: 2203937)
-[32m[PASS][0m test__TransferFailureAndFallbackToWETH(uint256) (runs: 256, μ: 2178363, ~: 2178472)
-[32m[PASS][0m test__TransferToContractWithoutReceiveOrFallback(uint256) (runs: 256, μ: 2164491, ~: 2164593)
-[32m[PASS][0m test__TransferToEOA() (gas: 2094606)
-[32m[PASS][0m test__VotesCount(uint8) (runs: 256, μ: 2369184, ~: 2369184)
-Test result: [31mFAILED[0m. [32m12[0m passed; [31m1[0m failed; [33m0[0m skipped; finished in 2.79s
+[32m[PASS][0m test_GrantsBalance(uint256,uint256,uint256,uint256) (runs: 256, μ: 54087691, ~: 54108025)
+[32m[PASS][0m test_InitializationGrantsFounderRateBounds(uint256,uint256) (runs: 256, μ: 51525611, ~: 51114057)
+[32m[PASS][0m test_SetGrantsRate(uint256) (runs: 256, μ: 46611, ~: 46884)
+Test result: [32mok[0m. [32m3[0m passed; [31m0[0m failed; [33m0[0m skipped; finished in 2.93s
 
 Running 4 tests for test/points-emitter/AccountPurchaseHistory.t.sol:AccountPurchaseHistoryTest
-[32m[PASS][0m test__BuyingForMultipleAccountsWithCorrectValues(uint256,uint256) (runs: 256, μ: 72946416, ~: 73019175)
-[32m[PASS][0m test__PurchaseHistorySaved() (gas: 541408)
-[32m[PASS][0m test__PurchaseHistorySavedMultiplePurchases(uint256,uint256) (runs: 256, μ: 729298, ~: 729236)
-[32m[PASS][0m test__PurchaseHistoryZeroesGrantsRateHigh() (gas: 401045)
-Test result: [32mok[0m. [32m4[0m passed; [31m0[0m failed; [33m0[0m skipped; finished in 8.30s
+[32m[PASS][0m test__BuyingForMultipleAccountsWithCorrectValues(uint256,uint256) (runs: 256, μ: 64903727, ~: 66235608)
+[32m[PASS][0m test__PurchaseHistorySaved() (gas: 517135)
+[32m[PASS][0m test__PurchaseHistorySavedMultiplePurchases(uint256,uint256) (runs: 256, μ: 704321, ~: 704305)
+[32m[PASS][0m test__PurchaseHistoryZeroesGrantsRateHigh() (gas: 398096)
+Test result: [32mok[0m. [32m4[0m passed; [31m0[0m failed; [33m0[0m skipped; finished in 6.69s
+
+Running 10 tests for test/culture-index/TopArtPiece.t.sol:CultureIndexArtPieceTest
+[32m[PASS][0m testCorrectTopVotedPiece() (gas: 1144085)
+[32m[PASS][0m testFetchTopVotedPiece() (gas: 647243)
+[32m[PASS][0m testGasForCreatingArtPieces() (gas: 2438126417)
+[32m[PASS][0m testGasForLargeVotes() (gas: 11529198257)
+[32m[PASS][0m testGasForPopTopVotedPiece() (gas: 14805572492)
+[32m[PASS][0m testPopTopVotedPiece() (gas: 636374)
+[32m[PASS][0m testVoteAndVerifyTopVotedPiece() (gas: 1677939)
+[32m[PASS][0m test_DropTopVotedPieceSequentialOrder() (gas: 1075940)
+[32m[PASS][0m test_DropTopVotedPieceWithNoMorePieces() (gas: 642737)
+[32m[PASS][0m test_RemovedPieceShouldBeReplaced() (gas: 1117614)
+Test result: [32mok[0m. [32m10[0m passed; [31m0[0m failed; [33m0[0m skipped; finished in 17.49s
+
+Running 1 test for test/culture-index/EdgeCases.t.sol:CultureIndexEdgeCaseTest
+[32m[PASS][0m test__MaxPieces() (gas: 74624034340)
+Test result: [32mok[0m. [32m1[0m passed; [31m0[0m failed; [33m0[0m skipped; finished in 34.17s
+
+Running 1 test for test/auction/OutOfGas.t.sol:AuctionHouseOutOfGasTest
+[32m[PASS][0m test_OutOfGasDOS(uint256) (runs: 256, μ: 126110901, ~: 128603393)
+Test result: [32mok[0m. [32m1[0m passed; [31m0[0m failed; [33m0[0m skipped; finished in 38.75s
+
+Running 9 tests for test/points-emitter/EmissionRates.t.sol:EmissionRatesTest
+[32m[PASS][0m testBuyTokenTotalVal() (gas: 47621409)
+[32m[PASS][0m testBuyTokenWithDifferentRates(uint256,uint256,uint256) (runs: 256, μ: 47826382, ~: 47849080)
+[32m[PASS][0m testBuyingTwiceAmountIsNotMoreThanTwiceEmittedTokens() (gas: 581817)
+[32m[PASS][0m testGetTokenPrice() (gas: 66350)
+[32m[PASS][0m test_BuyingFunctionBreaksAfterAPeriodOfTime(uint256,uint256,uint256,uint256) (runs: 256, μ: 47796439, ~: 47823846)
+[32m[PASS][0m test_FounderRewardsExpireCorrectly(uint256,uint256,uint256,uint256,uint256) (runs: 256, μ: 48015125, ~: 48026309)
+[32m[PASS][0m test_FounderRewardsExpireForQuoteUtils(uint256,uint256,uint256,uint256,uint256) (runs: 256, μ: 47499082, ~: 47501803)
+[32m[PASS][0m test_correctEmitted(uint256,uint256,uint256) (runs: 256, μ: 47823368, ~: 47850858)
+[32m[PASS][0m test_revertNoPayment() (gas: 27540)
+Test result: [32mok[0m. [32m9[0m passed; [31m0[0m failed; [33m0[0m skipped; finished in 40.99s
+
+Running 14 tests for test/voting-power/VotingPower.t.sol:VotingPowerTest
+[32m[PASS][0m testCalculateVotes() (gas: 18564)
+[32m[PASS][0m testCalculateVotesWithWeights() (gas: 11739)
+[32m[PASS][0m testGetPastPointsSupply() (gas: 5022064)
+[32m[PASS][0m testGetPastPointsVotes() (gas: 199811)
+[32m[PASS][0m testGetPastTokenSupply() (gas: 5023314)
+[32m[PASS][0m testGetPastTokenVotes() (gas: 4935071)
+[32m[PASS][0m testGetPointsSupply() (gas: 5018002)
+[32m[PASS][0m testGetPointsVotes() (gas: 197411)
+[32m[PASS][0m testGetTokenSupply() (gas: 5018838)
+[32m[PASS][0m testGetTokenVotes() (gas: 4934452)
+[32m[PASS][0m testTotalSupplyMatches() (gas: 43085)
+[32m[PASS][0m test__DefaultVotingPowerCalculation(uint256,uint256,uint256,uint256) (runs: 256, μ: 238272428, ~: 246110459)
+[32m[PASS][0m test__VotingPowerWithWeight(uint256,uint256,uint256,uint256) (runs: 256, μ: 223315605, ~: 221347631)
+[32m[PASS][0m test_initializeVotingPower() (gas: 361710)
+Test result: [32mok[0m. [32m14[0m passed; [31m0[0m failed; [33m0[0m skipped; finished in 40.73s
+
+Running 18 tests for test/auction/AuctionBasic.t.sol:AuctionHouseBasicTest
+[32m[PASS][0m testAccessControl() (gas: 26647)
+[32m[PASS][0m testAdministrativeFunctions(uint256,uint256,uint8) (runs: 256, μ: 47980, ~: 48746)
+[32m[PASS][0m testEventEmission(uint256,uint256) (runs: 256, μ: 39353, ~: 39353)
+[32m[PASS][0m testInitializationParameters() (gas: 31152)
+[32m[PASS][0m testMinCreatorRateLoweringRestriction(uint256) (runs: 256, μ: 24326, ~: 24326)
+[32m[PASS][0m testOwnerOnlyAccess() (gas: 26651)
+[32m[PASS][0m testSetEntropyRateBps(uint256) (runs: 256, μ: 27074, ~: 27712)
+[32m[PASS][0m testSetEntropyRateBpsInvalidValues(uint256) (runs: 256, μ: 28656, ~: 28656)
+[32m[PASS][0m testSetEntropyRateBpsRestrictToOwner() (gas: 17372)
+[32m[PASS][0m testSetMinCreatorRateBps(uint256,uint256) (runs: 256, μ: 29815, ~: 27465)
+[32m[PASS][0m testSetMinCreatorRateBpsInvalidValues(uint256) (runs: 256, μ: 27778, ~: 27790)
+[32m[PASS][0m testSetMinCreatorRateBpsRestrictToOwner(uint256) (runs: 256, μ: 20089, ~: 20089)
+[32m[PASS][0m testSettlingAuctions() (gas: 1319988)
+[32m[PASS][0m testValueUpdates(uint256,uint256) (runs: 256, μ: 42021, ~: 42040)
+[32m[PASS][0m test_AuctionCreation() (gas: 702476)
+[32m[PASS][0m test_BidEventEmission() (gas: 762978)
+[32m[PASS][0m test_BidForAnotherAccount() (gas: 2072420)
+[32m[PASS][0m test_BiddingProcess(uint256) (runs: 256, μ: 2360010, ~: 2360010)
+Test result: [32mok[0m. [32m18[0m passed; [31m0[0m failed; [33m0[0m skipped; finished in 42.31s
+
+Running 27 tests for test/culture-index/Voting.t.sol:CultureIndexVotingBasicTest
+[32m[PASS][0m testBatchVotingFailsForInvalidPieceIds() (gas: 524171)
+[32m[PASS][0m testBatchVotingFailsForZeroWeight() (gas: 388447)
+[32m[PASS][0m testBatchVotingFailsIfAlreadyVoted() (gas: 632286)
+[32m[PASS][0m testBatchVotingFailsIfPieceDropped() (gas: 640788)
+[32m[PASS][0m testBatchVotingSuccess() (gas: 1045736)
+[32m[PASS][0m testCalculateVoteWeight() (gas: 45820)
+[32m[PASS][0m testCalculateVoteWeights(uint256,uint256) (runs: 256, μ: 291419573, ~: 297233279)
+[32m[PASS][0m testCannotVoteOnDroppedPiece() (gas: 742450)
+[32m[PASS][0m testCannotVoteOnMultiplePiecesTwice() (gas: 1048181)
+[32m[PASS][0m testCannotVoteTwice() (gas: 634290)
+[32m[PASS][0m testCannotVoteWithoutTokens() (gas: 386384)
+[32m[PASS][0m testCannotVoteWithoutTokensMultiplePieces() (gas: 716540)
+[32m[PASS][0m testGasUsage() (gas: 131694845)
+[32m[PASS][0m testInvalidPieceID() (gas: 183084)
+[32m[PASS][0m testNoDoubleVotingAfterERC721Transfer() (gas: 1198605)
+[32m[PASS][0m testQuorumVotesCalculation(uint256,uint256) (runs: 256, μ: 290236006, ~: 282365226)
+[32m[PASS][0m testRejectVoteForInvalidPieceId() (gas: 184202)
+[32m[PASS][0m testVoteAfterTransferringTokens() (gas: 652489)
+[32m[PASS][0m testVoteWeightImpactOnTopVotedPiece() (gas: 1159063)
+[32m[PASS][0m testVoteWeightResetAfterTokenTransfer() (gas: 887619)
+[32m[PASS][0m testVoteWeightWithChangingTokenBalances() (gas: 1245181)
+[32m[PASS][0m testVoteWeight_Points() (gas: 642635)
+[32m[PASS][0m testVoteWeight_Points_Block_before() (gas: 699299)
+[32m[PASS][0m testVoteWeight_Points_No_Snapshot() (gas: 699937)
+[32m[PASS][0m testVoteWeight_Token_Snapshot() (gas: 1732308)
+[32m[PASS][0m testVoteWithRevolutionToken() (gas: 480568)
+[32m[PASS][0m testVoting() (gas: 633678)
+Test result: [32mok[0m. [32m27[0m passed; [31m0[0m failed; [33m0[0m skipped; finished in 48.94s
+
+Running 3 tests for test/points-emitter/GrantsPayments.t.sol:PointsEmitterBasicTest
+[32m[PASS][0m test_GrantsBalance(uint256,uint256,uint256) (runs: 256, μ: 47831308, ~: 47866016)
+[32m[PASS][0m test_InitializationGrantsFounderRateBounds(uint256,uint256) (runs: 256, μ: 51823145, ~: 51974897)
+[32m[PASS][0m test_SetGrantsRate(uint256) (runs: 256, μ: 47810, ~: 48099)
+Test result: [32mok[0m. [32m3[0m passed; [31m0[0m failed; [33m0[0m skipped; finished in 50.28s
+
+Running 13 tests for test/auction/Settling.t.sol:AuctionHouseSettleTest
+[32m[PASS][0m test_CreateAuctionWithoutSettle() (gas: 1348416)
+[32m[PASS][0m test__EntropyPecentCannotLeadToDos(uint256) (runs: 256, μ: 2027479, ~: 2094123)
+[32m[PASS][0m test__OwnerPayment(uint8) (runs: 256, μ: 2348760, ~: 2348760)
+[32m[PASS][0m test__RevertTopVotedPieceMeetsQuorum() (gas: 1426320)
+[32m[PASS][0m test__SettleAuctionZeroEntropyRate() (gas: 1989541)
+[32m[PASS][0m test__SettlingAuctionPrematurely() (gas: 1004341)
+[32m[PASS][0m test__SettlingAuctionWithMultipleCreators(uint256,uint256) (runs: 256, μ: 4672886, ~: 4726077)
+[32m[PASS][0m test__SettlingAuctionWithNoBids(uint8) (runs: 256, μ: 1180993, ~: 1180993)
+[32m[PASS][0m test__SettlingAuctionWithWinningBidAndCreatorPayout(uint256) (runs: 256, μ: 2181414, ~: 2181520)
+[32m[PASS][0m test__TransferFailureAndFallbackToWETH(uint256) (runs: 256, μ: 2155966, ~: 2156055)
+[32m[PASS][0m test__TransferToContractWithoutReceiveOrFallback(uint256) (runs: 256, μ: 2142078, ~: 2142176)
+[32m[PASS][0m test__TransferToEOA() (gas: 2072189)
+[32m[PASS][0m test__VotesCount(uint8) (runs: 256, μ: 2346880, ~: 2346880)
+Test result: [32mok[0m. [32m13[0m passed; [31m0[0m failed; [33m0[0m skipped; finished in 49.97s
+| src/AuctionHouse.sol:AuctionHouse contract |                 |         |         |         |         |
+|--------------------------------------------|-----------------|---------|---------|---------|---------|
+| Deployment Cost                            | Deployment Size |         |         |         |         |
+| 2807318                                    | 14689           |         |         |         |         |
+| Function Name                              | min             | avg     | median  | max     | # calls |
+| WETH                                       | 2918            | 2918    | 2918    | 2918    | 1       |
+| auction                                    | 1408            | 2741    | 1408    | 13408   | 9       |
+| auctions                                   | 994             | 4327    | 3994    | 8994    | 6       |
+| computeTotalReward                         | 752             | 752     | 752     | 752     | 19      |
+| contractVersion                            | 1131            | 1131    | 1131    | 1131    | 1       |
+| createBid                                  | 7050            | 52675   | 54690   | 56690   | 30      |
+| creatorRateBps                             | 262             | 706     | 262     | 2262    | 45      |
+| duration                                   | 284             | 348     | 284     | 2284    | 31      |
+| entropyRateBps                             | 1183            | 1458    | 1183    | 3183    | 29      |
+| getPastAuction                             | 1642            | 1642    | 1642    | 1642    | 1       |
+| grantsAddress                              | 654             | 654     | 654     | 654     | 1       |
+| grantsRateBps                              | 1010            | 1343    | 1010    | 3010    | 18      |
+| initialize                                 | 94449           | 360742  | 361521  | 361521  | 343     |
+| manifestos                                 | 1764            | 9826    | 1764    | 100856  | 13      |
+| minBidIncrementPercentage                  | 928             | 1928    | 1928    | 2928    | 2       |
+| minCreatorRateBps                          | 548             | 1881    | 2548    | 2548    | 9       |
+| owner                                      | 852             | 2547    | 2852    | 2852    | 46      |
+| pause                                      | 2868            | 2868    | 2868    | 2868    | 1       |
+| paused                                     | 604             | 1004    | 604     | 2604    | 5       |
+| reservePrice                               | 1054            | 2872    | 3054    | 3054    | 11      |
+| setCreatorRateBps                          | 1274            | 4760    | 5232    | 7304    | 4       |
+| setEntropyRateBps                          | 712             | 4491    | 6720    | 6720    | 9       |
+| setGrantsRateBps                           | 4115            | 8172    | 8172    | 12229   | 2       |
+| setMinBidIncrementPercentage               | 6504            | 6504    | 6504    | 6504    | 1       |
+| setMinCreatorRateBps                       | 570             | 1615    | 1586    | 2717    | 4       |
+| setReservePrice                            | 4991            | 6366    | 6691    | 7091    | 4       |
+| setTimeBuffer                              | 6739            | 6739    | 6739    | 6739    | 1       |
+| settleAuction                              | 925             | 925     | 925     | 925     | 1       |
+| settleCurrentAndCreateNewAuction           | 102321          | 1215935 | 1092650 | 9562837 | 33      |
+| timeBuffer                                 | 1098            | 2098    | 2098    | 3098    | 2       |
+| transferOwnership                          | 3072            | 3227    | 3072    | 5872    | 54      |
+| unpause                                    | 2472            | 338064  | 372419  | 398060  | 35      |
+| updateManifesto                            | 1694            | 1256338 | 69242   | 8508857 | 7       |
+
+
+| src/Descriptor.sol:Descriptor contract |                 |       |        |       |         |
+|----------------------------------------|-----------------|-------|--------|-------|---------|
+| Deployment Cost                        | Deployment Size |       |        |       |         |
+| 1687569                                | 8777            |       |        |       |         |
+| Function Name                          | min             | avg   | median | max   | # calls |
+| acceptOwnership                        | 5311            | 5311  | 5311   | 5311  | 1       |
+| baseURI                                | 1082            | 2046  | 2046   | 3011  | 2       |
+| contractVersion                        | 789             | 789   | 789    | 789   | 1       |
+| dataURI                                | 43468           | 43468 | 43468  | 43468 | 1       |
+| genericDataURI                         | 44422           | 44422 | 44422  | 44422 | 1       |
+| initialize                             | 95309           | 95309 | 95309  | 95309 | 344     |
+| isDataURIEnabled                       | 567             | 1567  | 1567   | 2567  | 6       |
+| owner                                  | 510             | 1510  | 1510   | 2510  | 2       |
+| setBaseURI                             | 2675            | 20187 | 25692  | 26692 | 4       |
+| toggleDataURIEnabled                   | 2664            | 6690  | 6697   | 8697  | 5       |
+| tokenURI                               | 4377            | 44029 | 38323  | 98862 | 10      |
+| transferOwnership                      | 2793            | 14662 | 14662  | 26532 | 2       |
+
+
+| src/RevolutionPointsEmitter.sol:RevolutionPointsEmitter contract |                 |         |        |          |         |
+|------------------------------------------------------------------|-----------------|---------|--------|----------|---------|
+| Deployment Cost                                                  | Deployment Size |         |        |          |         |
+| 2137157                                                          | 11356           |         |        |          |         |
+| Function Name                                                    | min             | avg     | median | max      | # calls |
+| balanceOf                                                        | 2307            | 2307    | 2307   | 2307     | 9       |
+| buyToken                                                         | 7928            | 1691524 | 395880 | 81411918 | 62      |
+| buyTokenQuote                                                    | 10309           | 16309   | 10309  | 40309    | 5       |
+| computePurchaseRewards                                           | 1649            | 1649    | 1649   | 1649     | 2       |
+| computeTotalReward                                               | 782             | 782     | 782    | 782      | 24      |
+| contractVersion                                                  | 1063            | 1063    | 1063   | 1063     | 1       |
+| founderAddress                                                   | 456             | 722     | 456    | 2456     | 15      |
+| founderEntropyRateBps                                            | 460             | 1460    | 1460   | 2460     | 20      |
+| founderRateBps                                                   | 922             | 1680    | 922    | 2922     | 29      |
+| founderRewardsExpirationDate                                     | 856             | 1141    | 856    | 2856     | 7       |
+| getAccountPurchaseHistory                                        | 1170            | 1182    | 1170   | 5170     | 647     |
+| getTokenQuoteForEther                                            | 6675            | 21706   | 10165  | 40165    | 27      |
+| getTokenQuoteForPayment                                          | 7624            | 16400   | 15548  | 33028    | 6       |
+| grantsAddress                                                    | 632             | 1203    | 632    | 2632     | 7       |
+| grantsRateBps                                                    | 944             | 1633    | 944    | 2944     | 29      |
+| initialize                                                       | 23382           | 279282  | 278062 | 297962   | 349     |
+| owner                                                            | 830             | 1193    | 830    | 2830     | 11      |
+| setGrantsAddress                                                 | 871             | 7857    | 8253   | 14053    | 4       |
+| setGrantsRateBps                                                 | 2537            | 7758    | 8130   | 12237    | 4       |
+| startTime                                                        | 724             | 724     | 724    | 724      | 15      |
+| totalSupply                                                      | 1349            | 1349    | 1349   | 1349     | 2       |
+| vrgda                                                            | 522             | 837     | 522    | 2522     | 19      |
+
+
+| src/RevolutionToken.sol:RevolutionToken contract |                 |        |        |         |         |
+|--------------------------------------------------|-----------------|--------|--------|---------|---------|
+| Deployment Cost                                  | Deployment Size |        |        |         |         |
+| 4504446                                          | 22844           |        |        |         |         |
+| Function Name                                    | min             | avg    | median | max     | # calls |
+| approve                                          | 22824           | 22824  | 22824  | 22824   | 1       |
+| artPieces                                        | 636             | 636    | 636    | 636     | 3       |
+| balanceOf                                        | 1152            | 1152   | 1152   | 1152    | 4       |
+| burn                                             | 713             | 23501  | 18640  | 63300   | 13      |
+| contractURI                                      | 2157            | 2847   | 2157   | 4228    | 3       |
+| contractVersion                                  | 1483            | 1483   | 1483   | 1483    | 1       |
+| cultureIndex                                     | 984             | 2317   | 2984   | 2984    | 3       |
+| delegate                                         | 3473            | 12137  | 7163   | 30750   | 4       |
+| descriptor                                       | 522             | 1522   | 1522   | 2522    | 2       |
+| getArtPieceById                                  | 16090           | 53961  | 16090  | 1035911 | 82      |
+| getPastTotalSupply                               | 1442            | 3143   | 3636   | 4320    | 1562    |
+| getPastVotes                                     | 1044            | 1073   | 1044   | 4503    | 188733  |
+| getVotes                                         | 1420            | 1421   | 1420   | 3420    | 271831  |
+| initialize                                       | 209031          | 239532 | 253361 | 253361  | 343     |
+| isCultureIndexLocked                             | 918             | 918    | 918    | 918     | 1       |
+| isDescriptorLocked                               | 1314            | 1314   | 1314   | 1314    | 1       |
+| isMinterLocked                                   | 456             | 456    | 456    | 456     | 1       |
+| lockCultureIndex                                 | 2431            | 2775   | 2431   | 3465    | 3       |
+| lockDescriptor                                   | 1661            | 3319   | 3578   | 4461    | 4       |
+| lockMinter                                       | 3091            | 6415   | 6857   | 8857    | 4       |
+| mint                                             | 2443            | 216885 | 232045 | 297259  | 1478    |
+| minter                                           | 346             | 402    | 346    | 2346    | 1563    |
+| name                                             | 3012            | 3012   | 3012   | 3012    | 1       |
+| ownerOf                                          | 1034            | 1034   | 1034   | 1034    | 10      |
+| setContractURIHash                               | 1745            | 5903   | 6403   | 9061    | 4       |
+| setCultureIndex                                  | 860             | 6546   | 2740   | 14137   | 5       |
+| setDescriptor                                    | 2410            | 7784   | 4585   | 15772   | 6       |
+| setMinter                                        | 1639            | 9341   | 6814   | 17004   | 8       |
+| symbol                                           | 3870            | 3870   | 3870   | 3870    | 1       |
+| tokenURI                                         | 54838           | 60338  | 60338  | 65838   | 2       |
+| topVotedPieceMeetsQuorum                         | 23844           | 33500  | 28033  | 42308   | 67      |
+| totalSupply                                      | 416             | 844    | 416    | 2416    | 14      |
+| transferFrom                                     | 57625           | 66303  | 57625  | 127411  | 740     |
+
+
+| src/RevolutionVotingPower.sol:RevolutionVotingPower contract |                 |        |        |        |         |
+|--------------------------------------------------------------|-----------------|--------|--------|--------|---------|
+| Deployment Cost                                              | Deployment Size |        |        |        |         |
+| 1447311                                                      | 7577            |        |        |        |         |
+| Function Name                                                | min             | avg    | median | max    | # calls |
+| calculateVotes                                               | 986             | 986    | 986    | 986    | 1       |
+| calculateVotesWithWeights                                    | 994             | 994    | 994    | 994    | 190293  |
+| contractVersion                                              | 963             | 963    | 963    | 963    | 1       |
+| getPastPointsSupply                                          | 2348            | 2771   | 2880   | 6572   | 1561    |
+| getPastPointsVotes                                           | 2666            | 6213   | 7024   | 7356   | 187173  |
+| getPastTokenSupply                                           | 3096            | 4798   | 5290   | 5974   | 1561    |
+| getPastTokenVotes                                            | 1205            | 2582   | 2553   | 6012   | 188733  |
+| getPointsSupply                                              | 1452            | 6952   | 6952   | 12452  | 2       |
+| getPointsVotes                                               | 4398            | 4398   | 4398   | 4398   | 1       |
+| getTokenMinter                                               | 1760            | 1815   | 1760   | 3760   | 1560    |
+| getTokenSupply                                               | 1914            | 7414   | 7414   | 12914  | 2       |
+| getTokenVotes                                                | 2945            | 2945   | 2945   | 2945   | 1       |
+| getTotalVotesSupplyWithWeights                               | 3428            | 3428   | 3428   | 3428   | 1       |
+| getVotes                                                     | 5368            | 5425   | 5368   | 31368  | 271815  |
+| getVotesWithWeights                                          | 1600            | 5282   | 5097   | 6906   | 15      |
+| initialize                                                   | 127247          | 166931 | 167047 | 167047 | 346     |
+| points                                                       | 2312            | 2312   | 2312   | 2312   | 1       |
+| pointsVoteWeight                                             | 2451            | 2451   | 2451   | 2451   | 1       |
+| token                                                        | 3014            | 3014   | 3014   | 3014   | 2       |
+| tokenVoteWeight                                              | 2913            | 2913   | 2913   | 2913   | 1       |
+
+
+| src/builder/RevolutionBuilder.sol:RevolutionBuilder contract |                 |         |         |         |         |
+|--------------------------------------------------------------|-----------------|---------|---------|---------|---------|
+| Deployment Cost                                              | Deployment Size |         |         |         |         |
+| 3504599                                                      | 18960           |         |         |         |         |
+| Function Name                                                | min             | avg     | median  | max     | # calls |
+| deploy                                                       | 3737448         | 4535693 | 4555845 | 4605745 | 343     |
+| getLatestVersions                                            | 53324           | 53324   | 53324   | 53324   | 1       |
+| initialize                                                   | 50658           | 50658   | 50658   | 50658   | 338     |
+| proxiableUUID                                                | 356             | 356     | 356     | 356     | 338     |
+| upgradeTo                                                    | 5136            | 5136    | 5136    | 5136    | 338     |
+
+
+| src/culture-index/CultureIndex.sol:CultureIndex contract |                 |         |        |          |         |
+|----------------------------------------------------------|-----------------|---------|--------|----------|---------|
+| Deployment Cost                                          | Deployment Size |         |        |          |         |
+| 4178034                                                  | 21238           |         |        |          |         |
+| Function Name                                            | min             | avg     | median | max      | # calls |
+| MAX_NUM_CREATORS                                         | 944             | 944     | 944    | 944      | 24      |
+| MAX_QUORUM_VOTES_BPS                                     | 1076            | 1076    | 1076   | 1076     | 4       |
+| VOTE_TYPEHASH                                            | 878             | 878     | 878    | 878      | 11      |
+| _setMinVotingPowerToCreate                               | 2933            | 17849   | 24307  | 26307    | 3       |
+| _setMinVotingPowerToVote                                 | 2449            | 17365   | 23823  | 25823    | 3       |
+| _setQuorumVotesBPS                                       | 2779            | 7783    | 9075   | 9075     | 15      |
+| acceptOwnership                                          | 5711            | 5711    | 5711   | 5711     | 1       |
+| checklist                                                | 3900            | 3900    | 3900   | 3900     | 1       |
+| contractVersion                                          | 1329            | 1329    | 1329   | 1329     | 1       |
+| createPiece                                              | 8439            | 300346  | 299895 | 48172593 | 271814  |
+| dropTopVotedPiece                                        | 5760            | 37536   | 37424  | 96461    | 1490    |
+| getAccountVotingPowerForPiece                            | 10456           | 10580   | 10456  | 10767    | 5       |
+| getPieceById                                             | 7981            | 27833   | 7981   | 620804   | 94      |
+| getTopVotedPiece                                         | 10742           | 10742   | 10742  | 10742    | 5       |
+| getVote                                                  | 1996            | 2335    | 1996   | 5996     | 16      |
+| initialize                                               | 466141          | 504373  | 510506 | 530406   | 343     |
+| maxAnimationUrlLength                                    | 717             | 2217    | 2717   | 2717     | 4       |
+| maxDescriptionLength                                     | 497             | 1830    | 2497   | 2497     | 3       |
+| maxImageLength                                           | 761             | 2094    | 2761   | 2761     | 3       |
+| maxNameLength                                            | 519             | 1852    | 2519   | 2519     | 3       |
+| maxTextLength                                            | 475             | 1808    | 2475   | 2475     | 3       |
+| minVotingPowerToCreate                                   | 1421            | 2421    | 2421   | 3421     | 2       |
+| minVotingPowerToVote                                     | 1289            | 2289    | 2289   | 3289     | 2       |
+| name                                                     | 976             | 2248    | 2976   | 2976     | 11      |
+| nonces                                                   | 1044            | 2680    | 3044   | 3044     | 11      |
+| owner                                                    | 3021            | 3021    | 3021   | 3021     | 1       |
+| pieceCount                                               | 563             | 1563    | 1563   | 2563     | 2       |
+| pieces                                                   | 5637            | 5637    | 5637   | 5637     | 4       |
+| quorumVotes                                              | 4971            | 4971    | 4971   | 4971     | 1       |
+| quorumVotesBPS                                           | 937             | 1794    | 937    | 2937     | 7       |
+| quorumVotesForPiece                                      | 19162           | 21346   | 19739  | 28588    | 5       |
+| template                                                 | 3306            | 3306    | 3306   | 3306     | 1       |
+| tokenVoteWeight                                          | 1443            | 1507    | 1443   | 3443     | 31      |
+| topVotedPieceId                                          | 3800            | 3800    | 3800   | 3800     | 7       |
+| topVotedPieceMeetsQuorum                                 | 13084           | 30247   | 26273  | 38548    | 71      |
+| totalVoteWeights                                         | 387             | 609     | 387    | 2387     | 18      |
+| transferOwnership                                        | 25355           | 25355   | 25355  | 25355    | 1       |
+| vote                                                     | 3635            | 140799  | 156048 | 363705   | 187070  |
+| voteForMany                                              | 4800            | 1755569 | 15574  | 10273353 | 6       |
+| voteForManyWithSig                                       | 6251            | 57841   | 36097  | 146068   | 12      |
+| votingPower                                              | 845             | 1055    | 845    | 2845     | 19      |
+
+
+| test/auction/OutOfGas.t.sol:InfiniteLoop contract |                 |       |        |       |         |
+|---------------------------------------------------|-----------------|-------|--------|-------|---------|
+| Deployment Cost                                   | Deployment Size |       |        |       |         |
+| 13675                                             | 93              |       |        |       |         |
+| Function Name                                     | min             | avg   | median | max   | # calls |
+| receive                                           | 32300           | 32300 | 32300  | 32300 | 21      |
+
+
+| test/auction/Settling.t.sol:ContractThatRejectsEther contract |                 |     |        |     |         |
+|---------------------------------------------------------------|-----------------|-----|--------|-----|---------|
+| Deployment Cost                                               | Deployment Size |     |        |     |         |
+| 27087                                                         | 160             |     |        |     |         |
+| Function Name                                                 | min             | avg | median | max | # calls |
+| receive                                                       | 121             | 121 | 121    | 121 | 1       |
+
+
+| test/auction/Settling.t.sol:ContractWithoutReceiveOrFallback contract |                 |     |        |     |         |
+|-----------------------------------------------------------------------|-----------------|-----|--------|-----|---------|
+| Deployment Cost                                                       | Deployment Size |     |        |     |         |
+| 11669                                                                 | 83              |     |        |     |         |
+| Function Name                                                         | min             | avg | median | max | # calls |
+| fallback                                                              | 6               | 6   | 6      | 6   | 1       |
+
+
+| test/culture-index/CultureIndex.t.sol:CultureIndexVotingTest contract |                 |        |        |        |         |
+|-----------------------------------------------------------------------|-----------------|--------|--------|--------|---------|
+| Deployment Cost                                                       | Deployment Size |        |        |        |         |
+| 1080057                                                               | 5221            |        |        |        |         |
+| Function Name                                                         | min             | avg    | median | max    | # calls |
+| createDefaultArtPiece                                                 | 302056          | 304165 | 304156 | 356304 | 60015   |
+| voteForPiece                                                          | 65123           | 117860 | 109182 | 176977 | 76010   |
+
+
+| test/max-heap/MaxHeap.t.sol:MaxHeapTester contract |                 |       |        |       |         |
+|----------------------------------------------------|-----------------|-------|--------|-------|---------|
+| Deployment Cost                                    | Deployment Size |       |        |       |         |
+| 1102562                                            | 5862            |       |        |       |         |
+| Function Name                                      | min             | avg   | median | max   | # calls |
+| _set                                               | 24801           | 34751 | 34751  | 44701 | 4       |
+| extractMax                                         | 2467            | 2727  | 2467   | 3507  | 4       |
+| getMax                                             | 687             | 687   | 687    | 687   | 6       |
+| heap                                               | 333             | 333   | 333    | 333   | 2       |
+| initialize                                         | 94944           | 94944 | 94944  | 94944 | 31      |
+| insert                                             | 65493           | 74584 | 71593  | 89459 | 35      |
+| items                                              | 820             | 820   | 820    | 820   | 2       |
+| maxHeapifyTest                                     | 2943            | 13071 | 13071  | 23200 | 4       |
+| updateValue                                        | 1346            | 12998 | 12753  | 25142 | 4       |
+
+
+| test/revolution-token/Security.t.sol:ReentrancyAttackContract contract |                 |      |        |      |         |
+|------------------------------------------------------------------------|-----------------|------|--------|------|---------|
+| Deployment Cost                                                        | Deployment Size |      |        |      |         |
+| 99471                                                                  | 561             |      |        |      |         |
+| Function Name                                                          | min             | avg  | median | max  | # calls |
+| attack                                                                 | 3196            | 3196 | 3196   | 3196 | 1       |
+
+
+| test/revolution-token/Security.t.sol:ReentrancyAttackContractGeneral contract |                 |      |        |      |         |
+|-------------------------------------------------------------------------------|-----------------|------|--------|------|---------|
+| Deployment Cost                                                               | Deployment Size |      |        |      |         |
+| 101071                                                                        | 569             |      |        |      |         |
+| Function Name                                                                 | min             | avg  | median | max  | # calls |
+| attackBurn                                                                    | 3176            | 3176 | 3176   | 3176 | 1       |
+
+
+
+ 
+Ran 43 test suites: [32m328[0m tests passed, [31m0[0m failed, [33m0[0m skipped (328 total tests)
