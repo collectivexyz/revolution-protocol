@@ -38,7 +38,7 @@ contract AuctionHouseOutOfGasTest is AuctionHouseTest {
             if (i == nCreators - 1) {
                 creatorBps[i] = 10_000 - totalBps;
             } else {
-                creatorBps[i] = (10_000) / (nCreators - 1);
+                creatorBps[i] = (10_000) / (nCreators);
             }
             totalBps += creatorBps[i];
         }
