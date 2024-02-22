@@ -1,5 +1,11 @@
 # @cobuild/splits
 
+## 0.11.3
+
+### Patch Changes
+
+- abc7062: emit data about the split in CreateSplit, make min accounts 0 instead of 1
+
 ## 0.11.2
 
 ### Patch Changes
