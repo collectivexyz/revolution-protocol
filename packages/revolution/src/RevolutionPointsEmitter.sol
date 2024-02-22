@@ -314,9 +314,8 @@ contract RevolutionPointsEmitter is
         uint256 bpsSum = 0;
         uint256 addressesLength = addresses.length;
 
-        //Mint tokens to buyers
+        // Save cost basis for recipients
         for (uint256 i = 0; i < addressesLength; i++) {
-            // save cost basis for recipient
             _savePurchaseHistory(
                 addresses[i],
                 uint256((totalTokensForBuyers * int(basisPointSplits[i])) / 10_000),
