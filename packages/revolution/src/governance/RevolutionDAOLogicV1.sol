@@ -162,8 +162,7 @@ contract RevolutionDAOLogicV1 is
         address _votingPower,
         IRevolutionBuilder.GovParams calldata _govParams
     ) public virtual initializer {
-        // Not using manager here since this is called by the RevolutionDAOProxyV1
-        if (msg.sender != admin) revert ADMIN_ONLY();
+        if (msg.sender != address(manager)) revert NOT_MANAGER();
 
         if (_executor == address(0)) revert INVALID_EXECUTOR_ADDRESS();
 
@@ -179,6 +178,10 @@ contract RevolutionDAOLogicV1 is
             _govParams.proposalThresholdBPS < MIN_PROPOSAL_THRESHOLD_BPS ||
             _govParams.proposalThresholdBPS > MAX_PROPOSAL_THRESHOLD_BPS
         ) revert INVALID_PROPOSAL_THRESHOLD_BPS();
+
+        // Set msg.sender as temporary admin
+        // IMPORTANT - update to the DAO executor at the end of the initialize function
+        admin = msg.sender;
 
         // Initialize EIP-712 support
         __EIP712_init(_govParams.name, "1");
@@ -205,6 +208,9 @@ contract RevolutionDAOLogicV1 is
             _govParams.dynamicQuorumParams.maxQuorumVotesBPS,
             _govParams.dynamicQuorumParams.quorumCoefficient
         );
+
+        // set Admin to executor
+        admin = _executor;
     }
 
     struct ProposalTemp {

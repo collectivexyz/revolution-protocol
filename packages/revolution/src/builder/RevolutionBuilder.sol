@@ -37,7 +37,6 @@ import { IMaxHeap } from "../interfaces/IMaxHeap.sol";
 import { IRevolutionPointsEmitter } from "../interfaces/IRevolutionPointsEmitter.sol";
 import { IRevolutionPoints } from "../interfaces/IRevolutionPoints.sol";
 import { IVRGDAC } from "../interfaces/IVRGDAC.sol";
-import { RevolutionDAOProxyV1 } from "../governance/RevolutionDAOProxyV1.sol";
 
 import { ERC1967Proxy } from "@cobuild/utility-contracts/src/proxy/ERC1967Proxy.sol";
 import { UUPS } from "@cobuild/utility-contracts/src/proxy/UUPS.sol";
@@ -140,8 +139,7 @@ contract RevolutionBuilder is
     ///                                                          ///
 
     /// @notice Helper function to deploys initial DAO proxy contracts
-    /// @param _govParams The governance settings
-    function _setupInitialProxies(GovParams calldata _govParams) internal returns (InitialProxySetup memory) {
+    function _setupInitialProxies() internal returns (InitialProxySetup memory) {
         // Deploy the DAO's ERC-721 governance token
         address revolutionToken = address(new ERC1967Proxy(revolutionTokenImpl, ""));
         // Use the token address to precompute the DAO's remaining addresses
@@ -150,10 +148,7 @@ contract RevolutionBuilder is
         address executor = address(new ERC1967Proxy{ salt: salt }(executorImpl, ""));
         address revolutionVotingPower = address(new ERC1967Proxy{ salt: salt }(revolutionVotingPowerImpl, ""));
 
-        // Use RevolutionDAOProxyV1 to initialize the DAO
-        address dao = address(
-            new RevolutionDAOProxyV1{ salt: salt }(executor, revolutionVotingPower, _govParams, daoImpl, executor)
-        );
+        address dao = address(new ERC1967Proxy{ salt: salt }(daoImpl, ""));
 
         address revolutionPointsEmitter = address(new ERC1967Proxy{ salt: salt }(revolutionPointsEmitterImpl, ""));
 
@@ -189,7 +184,7 @@ contract RevolutionBuilder is
     ) external returns (DAOAddresses memory) {
         if (_initialOwner == address(0)) revert INVALID_ZERO_ADDRESS();
 
-        InitialProxySetup memory initialSetup = _setupInitialProxies(_govParams);
+        InitialProxySetup memory initialSetup = _setupInitialProxies();
 
         address revolutionToken = initialSetup.revolutionToken;
 
@@ -212,6 +207,12 @@ contract RevolutionBuilder is
         ISplitMain(daoAddressesByToken[revolutionToken].splitsCreator).initialize({
             pointsEmitter: initialSetup.revolutionPointsEmitter,
             initialOwner: initialSetup.executor
+        });
+
+        IRevolutionDAO(daoAddressesByToken[revolutionToken].dao).initialize({
+            executor: initialSetup.executor,
+            votingPower: daoAddressesByToken[revolutionToken].revolutionVotingPower,
+            govParams: _govParams
         });
 
         // Initialize each instance with the provided settings
