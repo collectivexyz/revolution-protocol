@@ -111,8 +111,6 @@ contract Descriptor is IDescriptor, RevolutionVersion, UUPS, Ownable2StepUpgrade
                 quotesCount++;
             } else if (strBytes[i] == "\\") {
                 quotesCount++;
-            } else if (strBytes[i] == "'") {
-                quotesCount++;
             }
         }
         if (quotesCount > 0) {
@@ -122,8 +120,6 @@ contract Descriptor is IDescriptor, RevolutionVersion, UUPS, Ownable2StepUpgrade
                 if (strBytes[i] == '"') {
                     escapedBytes[index++] = "\\";
                 } else if (strBytes[i] == "\\") {
-                    escapedBytes[index++] = "\\";
-                } else if (strBytes[i] == "'") {
                     escapedBytes[index++] = "\\";
                 }
                 escapedBytes[index++] = strBytes[i];
