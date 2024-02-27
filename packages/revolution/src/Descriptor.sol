@@ -116,7 +116,7 @@ contract Descriptor is IDescriptor, RevolutionVersion, UUPS, Ownable2StepUpgrade
         if (quotesCount > 0) {
             bytes memory escapedBytes = new bytes(len + (quotesCount));
             uint256 index;
-            for (uint8 i = 0; i < len; i++) {
+            for (uint256 i = 0; i < len; i++) {
                 if (strBytes[i] == '"') {
                     escapedBytes[index++] = "\\";
                 } else if (strBytes[i] == "\\") {
