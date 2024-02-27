@@ -165,6 +165,9 @@ contract SplitMain is ISplitMain, SplitsVersion, OwnableUpgradeable, UUPS {
         bytes32 hash;
         address controller;
         address newPotentialController;
+        // pointsPercent is the percentage of the split that goes to the points emitter
+        // need to store so we can return correct balances in the view functions
+        uint32 pointsPercent;
     }
 
     /**
@@ -224,7 +227,7 @@ contract SplitMain is ISplitMain, SplitsVersion, OwnableUpgradeable, UUPS {
     }
 
     /** @notice Reverts if the split with recipients represented by `accounts` and `percentAllocations` is malformed
-     *  @param pointsData PointsData struct containing percentOfEther, pointsAccounts, and pointsPercentAllocations
+     *  @param pointsData PointsData struct containing pointsPercent, pointsAccounts, and pointsPercentAllocations
      *  @param accounts Ordered, unique list of addresses with ownership in the split
      *  @param percentAllocations Percent allocations associated with each address
      *  @param distributorFee Keeper fee paid by split to cover gas costs of distribution
@@ -237,8 +240,8 @@ contract SplitMain is ISplitMain, SplitsVersion, OwnableUpgradeable, UUPS {
         uint32 distributorFee
     ) {
         // points percent is nonzero
-        if (pointsData.percentOfEther == uint32(0) || pointsData.percentOfEther > PERCENTAGE_SCALE)
-            revert InvalidSplit__InvalidPointsPercent(pointsData.percentOfEther);
+        if (pointsData.pointsPercent == uint32(0) || pointsData.pointsPercent > PERCENTAGE_SCALE)
+            revert InvalidSplit__InvalidPointsPercent(pointsData.pointsPercent);
 
         // at least 1 points account
         if (pointsData.accounts.length < 1) revert InvalidSplit__TooFewPointsAccounts(pointsData.accounts.length);
@@ -353,7 +356,7 @@ contract SplitMain is ISplitMain, SplitsVersion, OwnableUpgradeable, UUPS {
     receive() external payable {}
 
     /** @notice Creates a new split with recipients `accounts` with ownerships `percentAllocations`, a keeper fee for splitting of `distributorFee` and the controlling address `controller`
-     *  @param pointsData PointsData struct containing percentOfEther, pointsAccounts, and pointsPercentAllocations
+     *  @param pointsData PointsData struct containing pointsPercent [how much ETH is reserved to buy points], pointsAccounts, and pointsPercentAllocations
      *  @param accounts Ordered, unique list of addresses with ownership in the split
      *  @param percentAllocations Percent allocations associated with each address
      *  @param distributorFee Keeper fee paid by split to cover gas costs of distribution
@@ -378,11 +381,14 @@ contract SplitMain is ISplitMain, SplitsVersion, OwnableUpgradeable, UUPS {
         }
         // store split's hash in storage for future verification
         splits[split].hash = splitHash;
+        // store pointsPercent in storage for balance function calculations
+        splits[split].pointsPercent = pointsData.pointsPercent;
+
         emit CreateSplit(split, pointsData, accounts, percentAllocations, distributorFee, controller);
     }
 
     /** @notice Predicts the address for an immutable split created with recipients `accounts` with ownerships `percentAllocations` and a keeper fee for splitting of `distributorFee`
-     *  @param pointsData PointsData struct containing percentOfEther, pointsAccounts, and pointsPercentAllocations
+     *  @param pointsData PointsData struct containing pointsPercent, pointsAccounts, and pointsPercentAllocations
      *  @param accounts Ordered, unique list of addresses with ownership in the split
      *  @param percentAllocations Percent allocations associated with each address
      *  @param distributorFee Keeper fee paid by split to cover gas costs of distribution
@@ -406,7 +412,7 @@ contract SplitMain is ISplitMain, SplitsVersion, OwnableUpgradeable, UUPS {
 
     /** @notice Updates an existing split with recipients `accounts` with ownerships `percentAllocations` and a keeper fee for splitting of `distributorFee`
      *  @param split Address of mutable split to update
-     *  @param pointsData PointsData struct containing percentOfEther, pointsAccounts, and pointsPercentAllocations
+     *  @param pointsData PointsData struct containing pointsPercent, pointsAccounts, and pointsPercentAllocations
      *  @param accounts Ordered, unique list of addresses with ownership in the split
      *  @param percentAllocations Percent allocations associated with each address
      *  @param distributorFee Keeper fee paid by split to cover gas costs of distribution
@@ -469,7 +475,7 @@ contract SplitMain is ISplitMain, SplitsVersion, OwnableUpgradeable, UUPS {
      *  @dev `accounts`, `percentAllocations`, and `distributorFee` are verified by hashing
      *  & comparing to the hash in storage associated with split `split`
      *  @param split Address of split to distribute balance for
-     *  @param pointsData PointsData struct containing percentOfEther, pointsAccounts, and pointsPercentAllocations
+     *  @param pointsData PointsData struct containing pointsPercent, pointsAccounts, and pointsPercentAllocations
      *  @param accounts Ordered, unique list of addresses with ownership in the split
      *  @param percentAllocations Percent allocations associated with each address
      *  @param distributorFee Keeper fee paid by split to cover gas costs of distribution
@@ -491,7 +497,7 @@ contract SplitMain is ISplitMain, SplitsVersion, OwnableUpgradeable, UUPS {
     /** @notice Updates & distributes the ETH balance for split `split`
      *  @dev only callable by SplitController
      *  @param split Address of split to distribute balance for
-     *  @param pointsData PointsData struct containing percentOfEther, pointsAccounts, and pointsPercentAllocations
+     *  @param pointsData PointsData struct containing pointsPercent, pointsAccounts, and pointsPercentAllocations
      *  @param accounts Ordered, unique list of addresses with ownership in the split
      *  @param percentAllocations Percent allocations associated with each address
      *  @param distributorFee Keeper fee paid by split to cover gas costs of distribution
@@ -522,7 +528,7 @@ contract SplitMain is ISplitMain, SplitsVersion, OwnableUpgradeable, UUPS {
      *  _scaleAmountByPercentage, but results do not affect ETH & other ERC20 balances
      *  @param split Address of split to distribute balance for
      *  @param token Address of ERC20 to distribute balance for
-     *  @param pointsData PointsData struct containing percentOfEther, pointsAccounts, and pointsPercentAllocations
+     *  @param pointsData PointsData struct containing pointsPercent, pointsAccounts, and pointsPercentAllocations
      *  @param accounts Ordered, unique list of addresses with ownership in the split
      *  @param percentAllocations Percent allocations associated with each address
      *  @param distributorFee Keeper fee paid by split to cover gas costs of distribution
@@ -548,7 +554,7 @@ contract SplitMain is ISplitMain, SplitsVersion, OwnableUpgradeable, UUPS {
      *  _scaleAmountByPercentage, but results do not affect ETH & other ERC20 balances
      *  @param split Address of split to distribute balance for
      *  @param token Address of ERC20 to distribute balance for
-     *  @param pointsData PointsData struct containing percentOfEther, pointsAccounts, and pointsPercentAllocations
+     *  @param pointsData PointsData struct containing pointsPercent, pointsAccounts, and pointsPercentAllocations
      *  @param accounts Ordered, unique list of addresses with ownership in the split
      *  @param percentAllocations Percent allocations associated with each address
      *  @param distributorFee Keeper fee paid by split to cover gas costs of distribution
@@ -628,6 +634,14 @@ contract SplitMain is ISplitMain, SplitsVersion, OwnableUpgradeable, UUPS {
         return splits[split].controller;
     }
 
+    /** @notice Returns the pointsPercent of split `split`
+     *  @param split Split to return pointsPercent for
+     *  @return Split's pointsPercent
+     */
+    function getPointsPercent(address split) external view returns (uint32) {
+        return splits[split].pointsPercent;
+    }
+
     /** @notice Returns the current newPotentialController of split `split`
      *  @param split Split to return newPotentialController for
      *  @return Split's newPotentialController
@@ -641,7 +655,13 @@ contract SplitMain is ISplitMain, SplitsVersion, OwnableUpgradeable, UUPS {
      *  @return Account's balance of ETH
      */
     function getETHBalance(address account) external view returns (uint256) {
-        return ethBalances[account] + (splits[account].hash != 0 ? account.balance : 0);
+        return
+            ethBalances[account] +
+            (
+                splits[account].hash != 0
+                    ? _scaleAmountByPercentage(account.balance, PERCENTAGE_SCALE - splits[account].pointsPercent)
+                    : 0
+            );
     }
 
     /** @notice Returns the current ETH points balance of account `account`
@@ -649,7 +669,9 @@ contract SplitMain is ISplitMain, SplitsVersion, OwnableUpgradeable, UUPS {
      *  @return Account's balance of ETH that will be used to buy points
      */
     function getETHPointsBalance(address account) public view returns (uint256) {
-        return ethBalancesPoints[account] + (splits[account].hash != 0 ? account.balance : 0);
+        return
+            ethBalancesPoints[account] +
+            (splits[account].hash != 0 ? _scaleAmountByPercentage(account.balance, splits[account].pointsPercent) : 0);
     }
 
     /** @notice Returns the current points balance of account `account` if withdrawed right now
@@ -691,7 +713,7 @@ contract SplitMain is ISplitMain, SplitsVersion, OwnableUpgradeable, UUPS {
     }
 
     /** @notice Hashes a split
-     *  @param pointsData PointsData struct containing percentOfEther, pointsAccounts, and pointsPercentAllocations
+     *  @param pointsData PointsData struct containing pointsPercent, pointsAccounts, and pointsPercentAllocations
      *  @param accounts Ordered, unique list of addresses with ownership in the split
      *  @param percentAllocations Percent allocations associated with each address
      *  @param distributorFee Keeper fee paid by split to cover gas costs of distribution
@@ -706,7 +728,7 @@ contract SplitMain is ISplitMain, SplitsVersion, OwnableUpgradeable, UUPS {
         return
             keccak256(
                 abi.encode(
-                    pointsData.percentOfEther,
+                    pointsData.pointsPercent,
                     pointsData.accounts,
                     pointsData.percentAllocations,
                     accounts,
@@ -718,7 +740,7 @@ contract SplitMain is ISplitMain, SplitsVersion, OwnableUpgradeable, UUPS {
 
     /** @notice Updates an existing split with recipients `accounts` with ownerships `percentAllocations` and a keeper fee for splitting of `distributorFee`
      *  @param split Address of mutable split to update
-     * @param pointsData PointsData struct containing percentOfEther, pointsAccounts, and pointsPercentAllocations
+     * @param pointsData PointsData struct containing pointsPercent, pointsAccounts, and pointsPercentAllocations
      *  @param accounts Ordered, unique list of addresses with ownership in the split
      *  @param percentAllocations Percent allocations associated with each address
      *  @param distributorFee Keeper fee paid by split to cover gas costs of distribution
@@ -733,12 +755,15 @@ contract SplitMain is ISplitMain, SplitsVersion, OwnableUpgradeable, UUPS {
         bytes32 splitHash = _hashSplit(pointsData, accounts, percentAllocations, distributorFee);
         // store new hash in storage for future verification
         splits[split].hash = splitHash;
+        // store pointsPercent in storage for balance function calculations
+        splits[split].pointsPercent = pointsData.pointsPercent;
+
         emit UpdateSplit(split);
     }
 
     /** @notice Checks hash from `accounts`, `percentAllocations`, and `distributorFee` against the hash stored for `split`
      *  @param split Address of hash to check
-     *  @param pointsData PointsData struct containing percentOfEther, pointsAccounts, and pointsPercentAllocations
+     *  @param pointsData PointsData struct containing pointsPercent, pointsAccounts, and pointsPercentAllocations
      *  @param accounts Ordered, unique list of addresses with ownership in the split
      *  @param percentAllocations Percent allocations associated with each address
      *  @param distributorFee Keeper fee paid by split to cover gas costs of distribution
@@ -757,7 +782,7 @@ contract SplitMain is ISplitMain, SplitsVersion, OwnableUpgradeable, UUPS {
     /** @notice Distributes the ETH balance for split `split`
      *  @dev `pointsData`, `accounts`, `percentAllocations`, and `distributorFee` must be verified before calling
      *  @param split Address of split to distribute balance for
-     *  @param pointsData PointsData struct containing percentOfEther, pointsAccounts, and pointsPercentAllocations
+     *  @param pointsData PointsData struct containing pointsPercent, pointsAccounts, and pointsPercentAllocations
      *  @param accounts Ordered, unique list of addresses with ownership in the split
      *  @param percentAllocations Percent allocations associated with each address
      *  @param distributorFee Keeper fee paid by split to cover gas costs of distribution
@@ -798,7 +823,7 @@ contract SplitMain is ISplitMain, SplitsVersion, OwnableUpgradeable, UUPS {
         }
 
         //distribute etherBalance for points to points accounts
-        uint256 pointsAmount = _scaleAmountByPercentage(amountToSplit, pointsData.percentOfEther);
+        uint256 pointsAmount = _scaleAmountByPercentage(amountToSplit, pointsData.pointsPercent);
 
         // cache pointsAccounts length to save gas
         uint256 pointsAccountsLength = pointsData.accounts.length;
