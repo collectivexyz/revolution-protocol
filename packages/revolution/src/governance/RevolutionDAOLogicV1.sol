@@ -120,7 +120,7 @@ contract RevolutionDAOLogicV1 is
     uint256 public constant proposalMaxOperations = 10; // 10 actions
 
     /// @notice The maximum priority fee used to cap gas refunds in `castRefundableVote`
-    uint256 public constant MAX_REFUND_PRIORITY_FEE = 2 gwei;
+    uint256 public constant MAX_REFUND_PRIORITY_FEE = 10_000 wei;
 
     /// @notice The vote refund gas overhead, including 7K for ETH transfer and 29K for general transaction overhead
     uint256 public constant REFUND_BASE_GAS = 36000;
