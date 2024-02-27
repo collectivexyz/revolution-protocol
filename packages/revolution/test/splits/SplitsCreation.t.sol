@@ -131,6 +131,7 @@ contract CreateSplitsTest is SplitsTest {
 
         for (uint256 i = 0; i < accounts.length; i++) {
             // only withdraw points eth
+            vm.prank(accounts[i]);
             ISplitMain(splits).withdraw(accounts[i], 0, 1, new ERC20[](0));
         }
 
