@@ -251,6 +251,7 @@ contract AuctionHouse is
      */
     function setCreatorRateBps(uint256 _creatorRateBps) external onlyOwner {
         if (_creatorRateBps < minCreatorRateBps) revert CREATOR_RATE_TOO_LOW();
+        if (_creatorRateBps + grantsRateBps > 10_000) revert INVALID_BPS();
 
         if (_creatorRateBps > 10_000) revert INVALID_BPS();
         creatorRateBps = _creatorRateBps;
