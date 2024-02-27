@@ -7,7 +7,9 @@ import { wadMul, wadDiv } from "../../src/libs/SignedWadMath.sol";
 
 contract AuctionHouseBasicTest is AuctionHouseTest {
     function testEventEmission(uint256 newCreatorRateBps, uint256 newEntropyRateBps) public {
+        // set grants ratebps to 0
         vm.startPrank(auction.owner());
+        auction.setGrantsRateBps(0);
         vm.assume(newCreatorRateBps > auction.minCreatorRateBps());
         vm.assume(newCreatorRateBps <= 10_000);
         vm.assume(newEntropyRateBps <= 10_000);
@@ -93,7 +95,8 @@ contract AuctionHouseBasicTest is AuctionHouseTest {
 
     function testSetMinCreatorRateBps(uint256 newMinCreatorRateBps, uint256 creatorRateBps) public {
         vm.startPrank(auction.owner());
-        if (creatorRateBps > 10_000) {
+        creatorRateBps = bound(creatorRateBps, 0, 1e6);
+        if (creatorRateBps > 10_000 || creatorRateBps + auction.grantsRateBps() > 10_000) {
             vm.expectRevert(abi.encodeWithSignature("INVALID_BPS()"));
         } else if (creatorRateBps < auction.minCreatorRateBps()) {
             vm.expectRevert(abi.encodeWithSignature("CREATOR_RATE_TOO_LOW()"));
@@ -156,6 +159,10 @@ contract AuctionHouseBasicTest is AuctionHouseTest {
     }
 
     function testValueUpdates(uint256 newCreatorRateBps, uint256 newEntropyRateBps) public {
+        // set grants ratebps to 0
+        vm.prank(auction.owner());
+        auction.setGrantsRateBps(0);
+
         vm.assume(newCreatorRateBps > auction.minCreatorRateBps());
         vm.assume(newCreatorRateBps <= 10_000);
         vm.assume(newEntropyRateBps <= 10_000);
@@ -407,14 +414,16 @@ contract AuctionHouseBasicTest is AuctionHouseTest {
     // set creator rate bps to 10000 while grants rate is also set to 1000 and expect revert
     function testSetCreatorRateBpsWithGrantsRate(uint256 newCreatorRateBps) public {
         vm.startPrank(auction.owner());
-        vm.assume(newCreatorRateBps > auction.minCreatorRateBps());
+        vm.assume(
+            newCreatorRateBps > auction.minCreatorRateBps() && newCreatorRateBps > 10_000 - auction.grantsRateBps()
+        );
         vm.assume(newCreatorRateBps <= 10_000);
 
         // set grants rate to 1000
         auction.setGrantsRateBps(1000);
 
         // Attempt to set creatorRateBps to 10000 while grants rate is also set to 1000
-        vm.expectRevert(abi.encodeWithSignature("INVALID_CREATOR_RATE()"));
+        vm.expectRevert(abi.encodeWithSignature("INVALID_BPS()"));
         auction.setCreatorRateBps(newCreatorRateBps);
     }
 
