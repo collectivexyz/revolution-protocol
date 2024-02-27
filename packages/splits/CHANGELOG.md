@@ -1,5 +1,13 @@
 # @cobuild/splits
 
+## 0.11.4
+
+### Patch Changes
+
+- 61d290d: Fix ERC20 distribution
+- 470ad34: Fix ETH splits balances by account
+- 15a300d: Access control check on `withdraw` to gate point withdrawal to the specific account who owns the balance
+
 ## 0.11.3
 
 ### Patch Changes

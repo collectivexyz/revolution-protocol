@@ -1,5 +1,20 @@
 # @collectivexyz/revolution
 
+## 0.4.4
+
+### Patch Changes
+
+- 61d290d: Fix ERC20 distribution
+- 470ad34: Fix ETH splits balances by account
+- 438bed6: fix creator rate out of range bug in Auction
+- f73da35: fix bug with escape function in Descriptor breaking over 255 len strings
+- da0ce2f: Don't escape single quotes
+- 438bed6: reduce max refund priority fee for DAO
+- Updated dependencies [61d290d]
+- Updated dependencies [470ad34]
+- Updated dependencies [15a300d]
+  - @cobuild/splits@0.11.4
+
 ## 0.4.3
 
 ### Patch Changes
