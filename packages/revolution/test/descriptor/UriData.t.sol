@@ -143,6 +143,58 @@ contract DescriptorURIDataTest is DescriptorTest {
         );
     }
 
+    function testLongDescription() public {
+        uint256 tokenId = 1;
+        //previously the escape function broke on long strings that needed to be escaped
+        ICultureIndex.ArtPieceMetadata memory metadata = ICultureIndex.ArtPieceMetadata({
+            name: "Test Art",
+            description: 'However, based on the provided " compiler error, it seems that inserting the emoji directly might still cause issues. If the direct insertion of an emoji is problematic (e.g., due to tooling, encoding settings, or Solidity version constraints), and if the unicode prefix approach as described does not resolve the issue, consider representing the emoji through its hexadecimal escape sequence within the unicode prefixed string. Heres how you might attempt it:',
+            mediaType: ICultureIndex.MediaType.IMAGE,
+            image: "https://example.com/image.png",
+            text: "",
+            animationUrl: ""
+        });
+
+        string memory uri = descriptor.dataURI(tokenId, metadata);
+        assertTrue(bytes(uri).length > 0, "dataURI should not be empty");
+        // Check if the string contains the base64 identifier which indicates a base64 encoded data URI
+        assertEq(
+            substring(bytes(uri), 0, 29),
+            "data:application/json;base64,",
+            "dataURI should start with 'data:application/json;base64,'"
+        );
+    }
+
+    function testMaliciousDescription() public {
+        string
+            memory description = 'This is a test cases: "Embedded Quotes", \\Double Backslashes\\, \nNewline, \rCarriage Return, \tTab, \\bBackspace, \\fForm Feed, http://example.com/?param=value&another=value, \\u{1F600} Emoji, \u0000Null Byte, \' and Control Characters like \u001F.';
+        ICultureIndex.ArtPieceMetadata memory metadata = ICultureIndex.ArtPieceMetadata({
+            name: "",
+            description: description,
+            mediaType: ICultureIndex.MediaType.IMAGE,
+            image: "https://example.com/image.png",
+            text: "",
+            animationUrl: ""
+        });
+
+        string memory uri = descriptor.dataURI(1, metadata);
+
+        assertTrue(bytes(uri).length > 0, "dataURI should not be empty");
+
+        // Check if the string contains the base64 identifier which indicates a base64 encoded data URI
+        assertEq(
+            substring(bytes(uri), 0, 29),
+            "data:application/json;base64,",
+            "dataURI should start with 'data:application/json;base64,'"
+        );
+
+        // parseJson and ensure the description is escaped
+        string memory metadataJson = decodeMetadata(uri);
+
+        //ensure doesn't revert
+        parseJson(metadataJson);
+    }
+
     /// @notice Test `genericDataURI` returns valid base64 encoded data URI
     function testGenericDataURI() public {
         ICultureIndex.ArtPieceMetadata memory metadata = ICultureIndex.ArtPieceMetadata({
