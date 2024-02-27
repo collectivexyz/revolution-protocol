@@ -404,6 +404,20 @@ contract AuctionHouseBasicTest is AuctionHouseTest {
         );
     }
 
+    // set creator rate bps to 10000 while grants rate is also set to 1000 and expect revert
+    function testSetCreatorRateBpsWithGrantsRate(uint256 newCreatorRateBps) public {
+        vm.startPrank(auction.owner());
+        vm.assume(newCreatorRateBps > auction.minCreatorRateBps());
+        vm.assume(newCreatorRateBps <= 10_000);
+
+        // set grants rate to 1000
+        auction.setGrantsRateBps(1000);
+
+        // Attempt to set creatorRateBps to 10000 while grants rate is also set to 1000
+        vm.expectRevert(abi.encodeWithSignature("INVALID_CREATOR_RATE()"));
+        auction.setCreatorRateBps(newCreatorRateBps);
+    }
+
     function testAccessControl() public {
         vm.stopPrank();
 
