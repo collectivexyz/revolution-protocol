@@ -83,6 +83,40 @@ contract CreateSplitsTest is SplitsTest {
         withdrawEthPointsBalances(accounts);
     }
 
+    function test__CreateBasicSplit__ERC20Payouts() public {
+        (
+            address[] memory accounts,
+            uint32[] memory percentAllocations,
+            uint32 distributorFee,
+            address controller,
+            uint32[] memory pointsAllocations,
+            SplitMain.PointsData memory pointsData
+        ) = setupBasicSplit();
+
+        address split = ISplitMain(splits).createSplit(
+            pointsData,
+            accounts,
+            percentAllocations,
+            distributorFee,
+            controller
+        );
+        assertTrue(split != address(0));
+
+        //ensure split is payable
+        uint256 erc20Value = 1e18;
+
+        // incorrect interface but just need to mint once
+        IRevolutionPoints(erc20).mint(address(split), erc20Value);
+
+        // get hash of split
+        bytes32 splitHash = ISplitMain(splits).getHash(split);
+        assertTrue(splitHash != bytes32(0));
+
+        distributeAndCheckERC20Balance(erc20Value, split, pointsData, accounts, percentAllocations, distributorFee);
+
+        withdrawERC20Balances(accounts);
+    }
+
     function withdrawEthBalances(address[] memory accounts) public {
         //build array of expected balances
         uint256[] memory expectedBalances = new uint256[](accounts.length);
@@ -100,6 +134,30 @@ contract CreateSplitsTest is SplitsTest {
         for (uint256 i = 0; i < accounts.length; i++) {
             assertEq(accounts[i].balance, expectedBalances[i] - 1, "Incorrect ETH balance for account");
             assertEq(ISplitMain(splits).getETHBalance(accounts[i]), 1, "ETH balance should be wiped");
+        }
+    }
+
+    function withdrawERC20Balances(address[] memory accounts) public {
+        //build array of expected balances
+        uint256[] memory expectedBalances = new uint256[](accounts.length);
+
+        for (uint256 i = 0; i < accounts.length; i++) {
+            // subtract 1 for gas efficiency
+            expectedBalances[i] = ISplitMain(splits).getERC20Balance(accounts[i], ERC20(erc20)) - 1;
+        }
+
+        ERC20[] memory erc20Array = new ERC20[](1);
+        erc20Array[0] = ERC20(erc20);
+
+        for (uint256 i = 0; i < accounts.length; i++) {
+            // only Withdraw ERC20 from the split
+            ISplitMain(splits).withdraw(accounts[i], 0, 0, erc20Array);
+        }
+
+        // Check ERC20 balances for each account
+        for (uint256 i = 0; i < accounts.length; i++) {
+            assertEq(ERC20(erc20).balanceOf(accounts[i]), expectedBalances[i], "Incorrect ERC20 balance for account");
+            assertEq(ISplitMain(splits).getERC20Balance(accounts[i], ERC20(erc20)), 1, "ERC20 balance should be wiped");
         }
     }
 

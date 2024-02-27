@@ -16,6 +16,14 @@ import { VRGDAC } from "../../src/libs/VRGDAC.sol";
 import { IVRGDAC } from "../../src/interfaces/IVRGDAC.sol";
 import { ProtocolRewards } from "@cobuild/protocol-rewards/src/ProtocolRewards.sol";
 
+contract ERC20Actual is ERC20 {
+    constructor(string memory name, string memory symbol) ERC20(name, symbol) {}
+
+    function mint(address account, uint256 amount) public {
+        _mint(account, amount);
+    }
+}
+
 contract SplitsTest is Test {
     SplitMain splitsMainImpl;
 
@@ -40,6 +48,8 @@ contract SplitsTest is Test {
     address pointsEmitter;
 
     address revolutionPoints;
+
+    address erc20;
 
     address vrgda;
 
@@ -67,6 +77,8 @@ contract SplitsTest is Test {
         address vrgdaImpl = address(new VRGDAC(manager));
 
         revolutionPoints = address(new ERC1967Proxy(pointsImpl, ""));
+
+        erc20 = address(new ERC20Actual("ERC20", "ERC20"));
 
         pointsEmitter = address(new ERC1967Proxy(pointsEmitterImpl, ""));
 
@@ -154,7 +166,7 @@ contract SplitsTest is Test {
         // Check ETH balances for each account
         for (uint256 i = 0; i < accounts.length; i++) {
             uint256 expectedETHBalance = _scaleAmountByPercentage(
-                _scaleAmountByPercentage(totalETH, PERCENTAGE_SCALE),
+                _scaleAmountByPercentage(totalETH, PERCENTAGE_SCALE - pointsData.percentOfEther - distributorFee),
                 percentAllocations[i]
             );
             uint256 actualETHBalance = ISplitMain(splits).getETHBalance(accounts[i]);
@@ -169,6 +181,50 @@ contract SplitsTest is Test {
             );
             uint256 actualETHPointsBalance = ISplitMain(splits).getETHPointsBalance(pointsData.accounts[i]);
             assertEq(actualETHPointsBalance, expectedETHPointsBalance, "Incorrect ETH points balance for account");
+        }
+    }
+
+    function distributeAndCheckERC20Balance(
+        uint256 totalERC20,
+        address split,
+        SplitMain.PointsData memory pointsData,
+        address[] memory accounts,
+        uint32[] memory percentAllocations,
+        uint32 distributorFee
+    ) internal {
+        uint256 splitMainBalance = IRevolutionPoints(erc20).balanceOf(address(splits));
+
+        uint256 splitBalance = IRevolutionPoints(erc20).balanceOf(split);
+
+        // Distribute ERC20 to the split
+        ISplitMain(splits).distributeERC20(
+            split,
+            ERC20(erc20),
+            pointsData,
+            accounts,
+            percentAllocations,
+            distributorFee,
+            address(this)
+        );
+
+        // assert split balance is 0 after distribution
+        assertEq(IRevolutionPoints(erc20).balanceOf(split), 1, "Split balance should be 0 after distribution");
+
+        // assert splitMain balance gained the split balance
+        assertEq(
+            IRevolutionPoints(erc20).balanceOf(address(splits)),
+            splitMainBalance + splitBalance - 1,
+            "SplitMain balance should gain the split balance"
+        );
+
+        // Check ERC20 balances for each account
+        for (uint256 i = 0; i < accounts.length; i++) {
+            uint256 expectedETHBalance = _scaleAmountByPercentage(
+                _scaleAmountByPercentage(totalERC20, PERCENTAGE_SCALE),
+                percentAllocations[i]
+            ) - 1;
+            uint256 actualETHBalance = ISplitMain(splits).getERC20Balance(accounts[i], ERC20(erc20));
+            assertEq(actualETHBalance, expectedETHBalance, "Incorrect ETH balance for account");
         }
     }
 
@@ -224,7 +280,7 @@ contract SplitsTest is Test {
         accounts[0] = recipient;
 
         percentAllocations = new uint32[](1);
-        percentAllocations[0] = uint32(PERCENTAGE_SCALE) - 10;
+        percentAllocations[0] = uint32(PERCENTAGE_SCALE);
 
         distributorFee = 0;
         controller = address(this);

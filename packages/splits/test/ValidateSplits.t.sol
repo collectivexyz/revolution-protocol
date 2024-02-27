@@ -72,7 +72,7 @@ contract ValidateSplitsTest is SplitsTest {
         address[] memory accounts = new address[](1);
         accounts[0] = address(this);
         uint32[] memory percentAllocations = new uint32[](1);
-        percentAllocations[0] = 1; // 100% allocation
+        percentAllocations[0] = 1e6; // 100% allocation
         uint32 distributorFee = 0;
         address controller = address(this);
 
@@ -82,9 +82,30 @@ contract ValidateSplitsTest is SplitsTest {
             percentAllocations: percentAllocations
         });
 
-        bytes4 selector = bytes4(keccak256("InvalidSplit__InvalidAllocationsSum(uint32)"));
+        bytes4 selector = bytes4(keccak256("InvalidSplit__InvalidPointsPercent(uint32)"));
 
-        vm.expectRevert(abi.encodeWithSelector(selector, 1e6 + 2));
+        vm.expectRevert(abi.encodeWithSelector(selector, 1e6 + 1));
+        ISplitMain(splits).createSplit(pointsData, accounts, percentAllocations, distributorFee, controller);
+    }
+
+    //test that pointsData.percentOfEther can't be 0
+    function test__Revert_SmallTreasurySplit() public {
+        address[] memory accounts = new address[](1);
+        accounts[0] = address(this);
+        uint32[] memory percentAllocations = new uint32[](1);
+        percentAllocations[0] = 1e6; // 100% allocation
+        uint32 distributorFee = 0;
+        address controller = address(this);
+
+        SplitMain.PointsData memory pointsData = ISplitMain.PointsData({
+            percentOfEther: 0,
+            accounts: accounts,
+            percentAllocations: percentAllocations
+        });
+
+        bytes4 selector = bytes4(keccak256("InvalidSplit__InvalidPointsPercent(uint32)"));
+
+        vm.expectRevert(abi.encodeWithSelector(selector, 0));
         ISplitMain(splits).createSplit(pointsData, accounts, percentAllocations, distributorFee, controller);
     }
 
@@ -93,7 +114,7 @@ contract ValidateSplitsTest is SplitsTest {
         address[] memory accounts = new address[](1);
         accounts[0] = address(this);
         uint32[] memory percentAllocations = new uint32[](1);
-        percentAllocations[0] = 1e6 - 1; // 100% allocation
+        percentAllocations[0] = 1e6; // 100% allocation
         uint32 distributorFee = 0;
         address controller = address(this);
 
@@ -117,7 +138,7 @@ contract ValidateSplitsTest is SplitsTest {
         address[] memory accounts = new address[](1);
         accounts[0] = address(this);
         uint32[] memory percentAllocations = new uint32[](1);
-        percentAllocations[0] = 1e6 - 1; // 100% allocation
+        percentAllocations[0] = 1e6; // 100% allocation
         uint32 distributorFee = 0;
         address controller = address(this);
 
@@ -193,7 +214,7 @@ contract ValidateSplitsTest is SplitsTest {
         address[] memory accounts = new address[](1);
         accounts[0] = address(this);
         uint32[] memory percentAllocations = new uint32[](1);
-        percentAllocations[0] = 1e6 - 1;
+        percentAllocations[0] = 1e6;
         uint32 distributorFee = 0;
         address controller = address(this);
 
@@ -222,7 +243,7 @@ contract ValidateSplitsTest is SplitsTest {
         address[] memory accounts = new address[](1);
         accounts[0] = address(this);
         uint32[] memory percentAllocations = new uint32[](1);
-        percentAllocations[0] = 1e6 - 1;
+        percentAllocations[0] = 1e6;
         uint32 distributorFee = 0;
         address controller = address(this);
 
@@ -252,7 +273,7 @@ contract ValidateSplitsTest is SplitsTest {
         accounts[0] = address(0x52);
 
         uint32[] memory percentAllocations = new uint32[](1);
-        percentAllocations[0] = 1e6 - 1e4;
+        percentAllocations[0] = 1e6;
 
         uint32[] memory pointsAllocations = new uint32[](1);
         pointsAllocations[0] = 1e6;
