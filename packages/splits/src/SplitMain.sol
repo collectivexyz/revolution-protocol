@@ -592,6 +592,10 @@ contract SplitMain is ISplitMain, SplitsVersion, OwnableUpgradeable, UUPS {
             ethAmount = _withdraw(account);
         }
         if (withdrawPoints != 0) {
+            // Since _withdrawPoints market buys points from the emitter, we only allow the account to withdraw its own points
+            if (msg.sender != account) {
+                revert Unauthorized(msg.sender);
+            }
             pointsSold = _withdrawPoints(account);
         }
         unchecked {

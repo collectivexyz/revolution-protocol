@@ -245,4 +245,45 @@ contract ValidateSplitsTest is SplitsTest {
         vm.expectRevert(abi.encodeWithSelector(selector, 0));
         ISplitMain(splits).createSplit(pointsData, accounts, percentAllocations, distributorFee, controller);
     }
+
+    //create a split with 0x52 account, but ensure address(this) get's an unauthorized error if trying to withdraw 0x52's points
+    function test__Revert_Unauthorized_Points() public {
+        address[] memory accounts = new address[](1);
+        accounts[0] = address(0x52);
+
+        uint32[] memory percentAllocations = new uint32[](1);
+        percentAllocations[0] = 1e6 - 1e4;
+
+        uint32[] memory pointsAllocations = new uint32[](1);
+        pointsAllocations[0] = 1e6;
+
+        uint32 distributorFee = 0;
+        address controller = address(this);
+
+        SplitMain.PointsData memory pointsData = ISplitMain.PointsData({
+            percentOfEther: 1e4,
+            accounts: accounts,
+            percentAllocations: pointsAllocations
+        });
+
+        address split = ISplitMain(splits).createSplit(
+            pointsData,
+            accounts,
+            percentAllocations,
+            distributorFee,
+            controller
+        );
+
+        // transfer eth to the split
+        vm.deal(address(this), 1e18);
+
+        vm.prank(address(this));
+        // .call to the split to ensure the split is created
+        (bool success, ) = split.call{ value: 1e18 }("");
+
+        // Attempt to withdraw from the split as address(this), expecting an Unauthorized error
+        bytes4 selector = bytes4(keccak256("Unauthorized(address)"));
+        vm.expectRevert(abi.encodeWithSelector(selector, address(this)));
+        ISplitMain(splits).withdraw(split, 0, 1, new ERC20[](0));
+    }
 }
