@@ -661,7 +661,9 @@ contract SplitMain is ISplitMain, SplitsVersion, OwnableUpgradeable, UUPS {
      *  @return Account's balance of ETH that will be used to buy points
      */
     function getETHPointsBalance(address account) public view returns (uint256) {
-        return ethBalancesPoints[account] + (splits[account].hash != 0 ? account.balance : 0);
+        return
+            ethBalancesPoints[account] +
+            (splits[account].hash != 0 ? _scaleAmountByPercentage(account.balance, splits[account].pointsPercent) : 0);
     }
 
     /** @notice Returns the current points balance of account `account` if withdrawed right now
