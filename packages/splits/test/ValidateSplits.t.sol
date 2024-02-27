@@ -19,7 +19,7 @@ contract ValidateSplitsTest is SplitsTest {
         address controller = address(this);
 
         SplitMain.PointsData memory pointsData = ISplitMain.PointsData({
-            percentOfEther: 0,
+            pointsPercent: 0,
             accounts: new address[](0),
             percentAllocations: new uint32[](0)
         });
@@ -40,7 +40,7 @@ contract ValidateSplitsTest is SplitsTest {
         address controller = address(this);
 
         SplitMain.PointsData memory pointsData = ISplitMain.PointsData({
-            percentOfEther: 1e6,
+            pointsPercent: 1e6,
             accounts: accounts,
             percentAllocations: pointsAllocations
         });
@@ -57,7 +57,7 @@ contract ValidateSplitsTest is SplitsTest {
         address controller = address(this);
 
         SplitMain.PointsData memory pointsData = ISplitMain.PointsData({
-            percentOfEther: 1e6 / 2,
+            pointsPercent: 1e6 / 2,
             accounts: new address[](0),
             percentAllocations: new uint32[](0)
         });
@@ -77,7 +77,7 @@ contract ValidateSplitsTest is SplitsTest {
         address controller = address(this);
 
         SplitMain.PointsData memory pointsData = ISplitMain.PointsData({
-            percentOfEther: 1e6 + 1,
+            pointsPercent: 1e6 + 1,
             accounts: accounts,
             percentAllocations: percentAllocations
         });
@@ -88,7 +88,7 @@ contract ValidateSplitsTest is SplitsTest {
         ISplitMain(splits).createSplit(pointsData, accounts, percentAllocations, distributorFee, controller);
     }
 
-    //test that pointsData.percentOfEther can't be 0
+    //test that pointsData.pointsPercent can't be 0
     function test__Revert_SmallTreasurySplit() public {
         address[] memory accounts = new address[](1);
         accounts[0] = address(this);
@@ -98,7 +98,7 @@ contract ValidateSplitsTest is SplitsTest {
         address controller = address(this);
 
         SplitMain.PointsData memory pointsData = ISplitMain.PointsData({
-            percentOfEther: 0,
+            pointsPercent: 0,
             accounts: accounts,
             percentAllocations: percentAllocations
         });
@@ -122,7 +122,7 @@ contract ValidateSplitsTest is SplitsTest {
         pointsAllocations[0] = 1e6 - 1;
 
         SplitMain.PointsData memory pointsData = ISplitMain.PointsData({
-            percentOfEther: 1,
+            pointsPercent: 1,
             accounts: accounts,
             percentAllocations: pointsAllocations
         });
@@ -146,7 +146,7 @@ contract ValidateSplitsTest is SplitsTest {
         pointsAllocations[0] = 1e6 + 1;
 
         SplitMain.PointsData memory pointsData = ISplitMain.PointsData({
-            percentOfEther: 1,
+            pointsPercent: 1,
             accounts: accounts,
             percentAllocations: pointsAllocations
         });
@@ -172,7 +172,7 @@ contract ValidateSplitsTest is SplitsTest {
         pointsAllocations[0] = 1e6;
 
         SplitMain.PointsData memory pointsData = ISplitMain.PointsData({
-            percentOfEther: 1,
+            pointsPercent: 1,
             accounts: accounts,
             percentAllocations: pointsAllocations
         });
@@ -198,7 +198,7 @@ contract ValidateSplitsTest is SplitsTest {
         pointsAllocations[1] = 1e6;
 
         SplitMain.PointsData memory pointsData = ISplitMain.PointsData({
-            percentOfEther: 1,
+            pointsPercent: 1,
             accounts: accounts,
             percentAllocations: pointsAllocations
         });
@@ -227,7 +227,7 @@ contract ValidateSplitsTest is SplitsTest {
         pointsAllocations[1] = 1e6;
 
         SplitMain.PointsData memory pointsData = ISplitMain.PointsData({
-            percentOfEther: 1,
+            pointsPercent: 1,
             accounts: pointsAccounts,
             percentAllocations: pointsAllocations
         });
@@ -256,7 +256,7 @@ contract ValidateSplitsTest is SplitsTest {
         pointsAllocations[1] = 1e6 / 2;
 
         SplitMain.PointsData memory pointsData = ISplitMain.PointsData({
-            percentOfEther: 1,
+            pointsPercent: 1,
             accounts: pointsAccounts,
             percentAllocations: pointsAllocations
         });
@@ -282,7 +282,7 @@ contract ValidateSplitsTest is SplitsTest {
         address controller = address(this);
 
         SplitMain.PointsData memory pointsData = ISplitMain.PointsData({
-            percentOfEther: 1e4,
+            pointsPercent: 1e4,
             accounts: accounts,
             percentAllocations: pointsAllocations
         });

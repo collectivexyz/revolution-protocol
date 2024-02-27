@@ -143,6 +143,13 @@ contract SplitsTest is Test {
 
         uint256 splitBalance = address(split).balance;
 
+        // assert that ETH split balance is equal to getETHBalance(split) scaled down by pointsData.pointsPercent
+        assertEq(
+            _scaleAmountByPercentage(splitBalance, PERCENTAGE_SCALE - pointsData.pointsPercent),
+            ISplitMain(splits).getETHBalance(split),
+            "Split balance should be equal to getETHBalance(split) scaled down by pointsData.pointsPercent"
+        );
+
         // Distribute ETH to the split
         ISplitMain(splits).distributeETH(
             split,
@@ -166,7 +173,7 @@ contract SplitsTest is Test {
         // Check ETH balances for each account
         for (uint256 i = 0; i < accounts.length; i++) {
             uint256 expectedETHBalance = _scaleAmountByPercentage(
-                _scaleAmountByPercentage(totalETH, PERCENTAGE_SCALE - pointsData.percentOfEther - distributorFee),
+                _scaleAmountByPercentage(totalETH, PERCENTAGE_SCALE - pointsData.pointsPercent - distributorFee),
                 percentAllocations[i]
             );
             uint256 actualETHBalance = ISplitMain(splits).getETHBalance(accounts[i]);
@@ -176,7 +183,7 @@ contract SplitsTest is Test {
         // Check ETH points balances for each points account
         for (uint256 i = 0; i < pointsData.accounts.length; i++) {
             uint256 expectedETHPointsBalance = _scaleAmountByPercentage(
-                _scaleAmountByPercentage(totalETH, pointsData.percentOfEther),
+                _scaleAmountByPercentage(totalETH, pointsData.pointsPercent),
                 pointsData.percentAllocations[i]
             );
             uint256 actualETHPointsBalance = ISplitMain(splits).getETHPointsBalance(pointsData.accounts[i]);
@@ -289,7 +296,7 @@ contract SplitsTest is Test {
         pointsAllocations[0] = 1e6;
 
         pointsData = ISplitMain.PointsData({
-            percentOfEther: 10,
+            pointsPercent: 10,
             accounts: accounts,
             percentAllocations: pointsAllocations
         });

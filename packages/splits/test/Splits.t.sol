@@ -80,7 +80,7 @@ contract SplitsTest is Test {
         pointsAllocations[0] = 1e6;
 
         pointsData = ISplitMain.PointsData({
-            percentOfEther: 10,
+            pointsPercent: 10,
             accounts: accounts,
             percentAllocations: pointsAllocations
         });

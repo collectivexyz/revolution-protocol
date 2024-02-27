@@ -13,7 +13,7 @@ interface ISplitMain {
      * STRUCTS
      */
     struct PointsData {
-        uint32 percentOfEther;
+        uint32 pointsPercent;
         address[] accounts;
         uint32[] percentAllocations;
     }

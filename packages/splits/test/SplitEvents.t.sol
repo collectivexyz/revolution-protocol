@@ -20,7 +20,7 @@ contract SplitsEventsTest is SplitsTest {
     //     uint32 distributorFee = 0;
     //     address controller = address(this);
     //     SplitMain.PointsData memory pointsData = ISplitMain.PointsData({
-    //         percentOfEther: 1e6,
+    //         pointsPercent: 1e6,
     //         accounts: pointsAccounts,
     //         percentAllocations: pointsAllocations
     //     });
