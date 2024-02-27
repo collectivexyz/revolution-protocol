@@ -62,6 +62,8 @@ interface ISplitMain {
 
     function getETHBalance(address account) external view returns (uint256);
 
+    function getERC20Balance(address account, ERC20 token) external view returns (uint256);
+
     function getETHPointsBalance(address account) external view returns (uint256);
 
     function getPointsBalance(address account) external view returns (int256);
