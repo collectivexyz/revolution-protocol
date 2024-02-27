@@ -237,7 +237,7 @@ contract SplitMain is ISplitMain, SplitsVersion, OwnableUpgradeable, UUPS {
         uint32 distributorFee
     ) {
         // points percent is nonzero
-        if (pointsData.percentOfEther == uint32(0))
+        if (pointsData.percentOfEther == uint32(0) || pointsData.percentOfEther > PERCENTAGE_SCALE)
             revert InvalidSplit__InvalidPointsPercent(pointsData.percentOfEther);
 
         // at least 1 points account
@@ -254,9 +254,9 @@ contract SplitMain is ISplitMain, SplitsVersion, OwnableUpgradeable, UUPS {
                 pointsData.percentAllocations.length
             );
 
-        // _getSum should overflow if any percentAllocation[i] < 0 and sum + pointsPercent != PERCENTAGE_SCALE
-        if (_getSum(percentAllocations) + pointsData.percentOfEther != PERCENTAGE_SCALE)
-            revert InvalidSplit__InvalidAllocationsSum(_getSum(percentAllocations) + pointsData.percentOfEther);
+        // _getSum should overflow if any percentAllocation[i] < 0 and sum != PERCENTAGE_SCALE
+        if (percentAllocations.length > 0 && _getSum(percentAllocations) != PERCENTAGE_SCALE)
+            revert InvalidSplit__InvalidAllocationsSum(_getSum(percentAllocations));
 
         // _getSum should overflow if any pointsPercentAllocations[i] < 0
         if (_getSum(pointsData.percentAllocations) != PERCENTAGE_SCALE)
@@ -808,9 +808,8 @@ contract SplitMain is ISplitMain, SplitsVersion, OwnableUpgradeable, UUPS {
                 pointsData.percentAllocations[i]
             );
         }
-
-        // don't subtract pointsAmount from amountToSplit, as percentOfEther is included in percentAllocations
-        // and checked against PERCENTAGE_SCALE in validSplit
+        // subtract pointsAmount
+        amountToSplit -= pointsAmount;
 
         unchecked {
             // distribute remaining balance
