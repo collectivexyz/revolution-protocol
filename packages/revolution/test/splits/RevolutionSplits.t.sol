@@ -157,6 +157,15 @@ contract SplitsTest is Test {
             "ETH points balance should be equal to getETHPointsBalance(split) scaled down by pointsData.pointsPercent"
         );
 
+        // assert that getPointsBalance(split) is equal to getTokenQuote(getETHPointsBalance(split))
+        assertEq(
+            IRevolutionPointsEmitter(pointsEmitter).getTokenQuoteForPayment(
+                _scaleAmountByPercentage(splitBalance, pointsData.pointsPercent) - 1
+            ),
+            ISplitMain(splits).getPointsBalance(split),
+            "getPointsBalance(split) should be equal to getTokenQuote(getETHPointsBalance(split))"
+        );
+
         // Distribute ETH to the split
         ISplitMain(splits).distributeETH(
             split,
