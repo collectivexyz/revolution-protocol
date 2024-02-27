@@ -77,15 +77,6 @@ contract RevolutionDAOLogicV1 is
     ///                         IMMUTABLES                       ///
     ///                                                          ///
 
-    /// @notice The name of this revolution
-    string public name;
-
-    /// @notice The purpose of this revolution
-    string public purpose;
-
-    /// @notice The flag of this revolution
-    string public flag;
-
     /// @notice The minimum settable proposal threshold
     uint256 public constant MIN_PROPOSAL_THRESHOLD_BPS = 1; // 1 basis point or 0.01%
 

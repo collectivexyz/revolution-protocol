@@ -260,6 +260,15 @@ contract RevolutionDAOStorageV1 is RevolutionDAOProxyStorage {
     /// @notice The contract upgrade manager
     IUpgradeManager public immutable manager;
 
+    /// @notice The name of this revolution
+    string public name;
+
+    /// @notice The purpose of this revolution
+    string public purpose;
+
+    /// @notice The flag of this revolution
+    string public flag;
+
     /// @notice Vetoer who has the ability to veto any proposal
     address public vetoer;
 
