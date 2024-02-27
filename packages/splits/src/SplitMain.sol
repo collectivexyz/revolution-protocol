@@ -634,6 +634,14 @@ contract SplitMain is ISplitMain, SplitsVersion, OwnableUpgradeable, UUPS {
         return splits[split].controller;
     }
 
+    /** @notice Returns the pointsPercent of split `split`
+     *  @param split Split to return pointsPercent for
+     *  @return Split's pointsPercent
+     */
+    function getPointsPercent(address split) external view returns (uint32) {
+        return splits[split].pointsPercent;
+    }
+
     /** @notice Returns the current newPotentialController of split `split`
      *  @param split Split to return newPotentialController for
      *  @return Split's newPotentialController
@@ -747,6 +755,9 @@ contract SplitMain is ISplitMain, SplitsVersion, OwnableUpgradeable, UUPS {
         bytes32 splitHash = _hashSplit(pointsData, accounts, percentAllocations, distributorFee);
         // store new hash in storage for future verification
         splits[split].hash = splitHash;
+        // store pointsPercent in storage for balance function calculations
+        splits[split].pointsPercent = pointsData.pointsPercent;
+
         emit UpdateSplit(split);
     }
 
