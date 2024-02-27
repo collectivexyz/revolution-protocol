@@ -647,7 +647,13 @@ contract SplitMain is ISplitMain, SplitsVersion, OwnableUpgradeable, UUPS {
      *  @return Account's balance of ETH
      */
     function getETHBalance(address account) external view returns (uint256) {
-        return ethBalances[account] + (splits[account].hash != 0 ? account.balance : 0);
+        return
+            ethBalances[account] +
+            (
+                splits[account].hash != 0
+                    ? _scaleAmountByPercentage(account.balance, PERCENTAGE_SCALE - splits[account].pointsPercent)
+                    : 0
+            );
     }
 
     /** @notice Returns the current ETH points balance of account `account`
