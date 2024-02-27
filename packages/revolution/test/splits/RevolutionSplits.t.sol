@@ -154,7 +154,7 @@ contract SplitsTest is Test {
         // Check ETH balances for each account
         for (uint256 i = 0; i < accounts.length; i++) {
             uint256 expectedETHBalance = _scaleAmountByPercentage(
-                _scaleAmountByPercentage(totalETH, PERCENTAGE_SCALE),
+                _scaleAmountByPercentage(totalETH, PERCENTAGE_SCALE - pointsData.percentOfEther - distributorFee),
                 percentAllocations[i]
             );
             uint256 actualETHBalance = ISplitMain(splits).getETHBalance(accounts[i]);
@@ -224,7 +224,7 @@ contract SplitsTest is Test {
         accounts[0] = recipient;
 
         percentAllocations = new uint32[](1);
-        percentAllocations[0] = uint32(PERCENTAGE_SCALE) - 10;
+        percentAllocations[0] = uint32(PERCENTAGE_SCALE);
 
         distributorFee = 0;
         controller = address(this);
