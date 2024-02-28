@@ -1,5 +1,11 @@
 # @cobuild/splits
 
+## 0.11.5
+
+### Patch Changes
+
+- fe89b36: Require at least 1 account to split to
+
 ## 0.11.4
 
 ### Patch Changes
