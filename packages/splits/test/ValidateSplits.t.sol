@@ -30,7 +30,7 @@ contract ValidateSplitsTest is SplitsTest {
         ISplitMain(splits).createSplit(pointsData, accounts, percentAllocations, distributorFee, controller);
     }
 
-    function test__NO_Revert_TooFewSplitAccounts() public {
+    function test_Revert_TooFewSplitAccounts() public {
         address[] memory accounts = new address[](1);
         accounts[0] = address(this);
 
@@ -45,6 +45,8 @@ contract ValidateSplitsTest is SplitsTest {
             percentAllocations: pointsAllocations
         });
 
+        bytes4 selector = bytes4(keccak256("InvalidSplit__TooFewAccounts(uint256)"));
+        vm.expectRevert(abi.encodeWithSelector(selector, 0));
         ISplitMain(splits).createSplit(pointsData, new address[](0), new uint32[](0), distributorFee, controller);
     }
 

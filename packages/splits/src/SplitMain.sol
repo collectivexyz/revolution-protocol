@@ -231,7 +231,7 @@ contract SplitMain is ISplitMain, SplitsVersion, OwnableUpgradeable, UUPS {
      *  @param accounts Ordered, unique list of addresses with ownership in the split
      *  @param percentAllocations Percent allocations associated with each address
      *  @param distributorFee Keeper fee paid by split to cover gas costs of distribution
-     *  @notice the minimum number of accounts was changed from 2 to 0, to allow for a split with all money going to the revolution treasury
+     *  @notice the minimum number of accounts was changed from 2 to 1, since money is required to go to the treasury
      */
     modifier validSplit(
         PointsData calldata pointsData,
@@ -245,6 +245,9 @@ contract SplitMain is ISplitMain, SplitsVersion, OwnableUpgradeable, UUPS {
 
         // at least 1 points account
         if (pointsData.accounts.length < 1) revert InvalidSplit__TooFewPointsAccounts(pointsData.accounts.length);
+
+        // at least 1 account
+        if (accounts.length < 1) revert InvalidSplit__TooFewAccounts(accounts.length);
 
         // accounts & percentAllocations must be equal length
         if (accounts.length != percentAllocations.length)
@@ -267,20 +270,18 @@ contract SplitMain is ISplitMain, SplitsVersion, OwnableUpgradeable, UUPS {
 
         // accounts are ordered and unique
         // percent allocations are nonzero
-        if (accounts.length > 0) {
-            unchecked {
-                // overflow should be impossible in for-loop index
-                // cache accounts length to save gas
-                uint256 loopLength = accounts.length - 1;
-                for (uint256 i = 0; i < loopLength; ++i) {
-                    // overflow should be impossible in array access math
-                    if (accounts[i] >= accounts[i + 1]) revert InvalidSplit__AccountsOutOfOrder(i);
-                    if (percentAllocations[i] == uint32(0)) revert InvalidSplit__AllocationMustBePositive(i);
-                }
-                // overflow should be impossible in array access math with validated equal array lengths
-                if (percentAllocations[loopLength] == uint32(0))
-                    revert InvalidSplit__AllocationMustBePositive(loopLength);
+
+        unchecked {
+            // overflow should be impossible in for-loop index
+            // cache accounts length to save gas
+            uint256 loopLength = accounts.length - 1;
+            for (uint256 i = 0; i < loopLength; ++i) {
+                // overflow should be impossible in array access math
+                if (accounts[i] >= accounts[i + 1]) revert InvalidSplit__AccountsOutOfOrder(i);
+                if (percentAllocations[i] == uint32(0)) revert InvalidSplit__AllocationMustBePositive(i);
             }
+            // overflow should be impossible in array access math with validated equal array lengths
+            if (percentAllocations[loopLength] == uint32(0)) revert InvalidSplit__AllocationMustBePositive(loopLength);
         }
 
         // pointsAccounts are ordered and unique
