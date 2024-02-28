@@ -1,5 +1,12 @@
 # @collectivexyz/revolution
 
+## 0.4.5
+
+### Patch Changes
+
+- Updated dependencies [fe89b36]
+  - @cobuild/splits@0.11.5
+
 ## 0.4.4
 
 ### Patch Changes
