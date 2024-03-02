@@ -1,6 +1,6 @@
 {
   "name": "@cobuild/revolution",
-  "version": "0.4.5",
+  "version": "0.4.6",
   "repository": "https://github.com/collectivexyz/revolution-protocol.git",
   "license": "MIT",
   "main": "./dist/index.js",
