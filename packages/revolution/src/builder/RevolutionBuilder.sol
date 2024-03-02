@@ -267,10 +267,10 @@ contract RevolutionBuilder is
             weth: _weth
         });
 
-        //make owner of the points the executor
+        //make owner and minter of the points the _initialOwner for founder allocation
         IRevolutionPoints(daoAddressesByToken[revolutionToken].revolutionPoints).initialize({
-            initialOwner: initialSetup.executor,
-            minter: daoAddressesByToken[revolutionToken].revolutionPointsEmitter,
+            initialOwner: _initialOwner,
+            minter: _initialOwner,
             tokenParams: _revolutionPointsParams.tokenParams
         });
 
