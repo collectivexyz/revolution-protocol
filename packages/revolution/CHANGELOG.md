@@ -1,5 +1,12 @@
 # @collectivexyz/revolution
 
+## 0.4.6
+
+### Patch Changes
+
+- df050c7: make points 1 step upgradeable not 2
+- df050c7: make RevolutionPoints owner and minter set to `initialOwner` to start to allow for airdrop
+
 ## 0.4.5
 
 ### Patch Changes
