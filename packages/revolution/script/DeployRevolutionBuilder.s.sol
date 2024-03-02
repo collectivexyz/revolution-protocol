@@ -50,11 +50,9 @@ contract DeployContracts is Script {
 
     function run() public {
         uint256 chainID = vm.envUint("CHAIN_ID");
-        uint256 key = vm.envUint("PRIVATE_KEY");
+        address deployerAddress = vm.envAddress("DEPLOYER_ADDRESS");
         address owner = vm.envAddress("MANAGER_OWNER");
         address rewardsRecipient = vm.envAddress("REWARDS_RECIPIENT");
-
-        address deployerAddress = vm.addr(key);
 
         logDeploymentDetails(chainID, deployerAddress, owner);
 
