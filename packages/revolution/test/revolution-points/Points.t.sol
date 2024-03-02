@@ -5,7 +5,7 @@ import { Test } from "forge-std/Test.sol";
 import { RevolutionPoints } from "../../src/RevolutionPoints.sol";
 import { RevolutionBuilderTest } from "../RevolutionBuilder.t.sol";
 import { IRevolutionBuilder } from "../../src/interfaces/IRevolutionBuilder.sol";
-import { Ownable2StepUpgradeable } from "@openzeppelin/contracts-upgradeable/access/Ownable2StepUpgradeable.sol";
+import { OwnableUpgradeable } from "@openzeppelin/contracts-upgradeable/access/OwnableUpgradeable.sol";
 import { ICultureIndex } from "../../src/interfaces/ICultureIndex.sol";
 
 contract PointsTestSuite is RevolutionBuilderTest {
@@ -163,13 +163,10 @@ contract PointsTestSuite is RevolutionBuilderTest {
         // Transfer ownership and test minting by new owner
         address newOwner = address(0x11);
         vm.startPrank(address(executor));
-        Ownable2StepUpgradeable(address(revolutionPoints)).transferOwnership(newOwner);
+        OwnableUpgradeable(address(revolutionPoints)).transferOwnership(newOwner);
         vm.stopPrank();
 
         vm.startPrank(newOwner);
-
-        //accept ownership
-        Ownable2StepUpgradeable(address(revolutionPoints)).acceptOwnership();
 
         //set new owner as minter
         revolutionPoints.setMinter(newOwner);
@@ -184,6 +181,6 @@ contract PointsTestSuite is RevolutionBuilderTest {
 
         //assert newOwner is minter and owner
         assertEq(revolutionPoints.minter(), newOwner, "New owner should be minter");
-        assertEq(Ownable2StepUpgradeable(address(revolutionPoints)).owner(), newOwner, "New owner should be owner");
+        assertEq(OwnableUpgradeable(address(revolutionPoints)).owner(), newOwner, "New owner should be owner");
     }
 }

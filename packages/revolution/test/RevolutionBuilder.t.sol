@@ -437,6 +437,18 @@ contract RevolutionBuilderTest is Test {
         maxHeap = MaxHeap(_addresses.maxHeap);
         revolutionVotingPower = RevolutionVotingPower(_addresses.revolutionVotingPower);
 
+        // ensure the points is initialized before ops - might fail if another contract fails to initialize
+        if (address(revolutionPoints) != address(0)) {
+            emit log_address(revolutionPoints.owner());
+
+            vm.startPrank(_initialOwner);
+            // make minter of points the pointsEmitter
+            revolutionPoints.setMinter(address(revolutionPointsEmitter));
+            // transfer ownership of the points to the executor
+            revolutionPoints.transferOwnership(address(executor));
+            vm.stopPrank();
+        }
+
         vm.label(address(revolutionToken), "ERC721TOKEN");
         vm.label(address(descriptor), "DESCRIPTOR");
         vm.label(address(auction), "AUCTION");

@@ -137,8 +137,6 @@ contract PointsEmitterBasicTest is PointsEmitterTest {
         RevolutionPoints(governanceToken).transferOwnership(address(emitter2));
 
         vm.startPrank(address(emitter2));
-        //accept ownership transfer
-        RevolutionPoints(governanceToken).acceptOwnership();
 
         //set the minter to the new emitter
         RevolutionPoints(governanceToken).setMinter(address(emitter2));

@@ -15,12 +15,12 @@ pragma solidity ^0.8.22;
  *
  */
 
-import { Ownable2StepUpgradeable } from "@openzeppelin/contracts-upgradeable/access/Ownable2StepUpgradeable.sol";
 import { PausableUpgradeable } from "@openzeppelin/contracts-upgradeable/utils/PausableUpgradeable.sol";
 import { Initializable } from "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
 import { EIP712Upgradeable } from "@openzeppelin/contracts-upgradeable/utils/cryptography/EIP712Upgradeable.sol";
 import { ReentrancyGuardUpgradeable } from "@openzeppelin/contracts-upgradeable/utils/ReentrancyGuardUpgradeable.sol";
 import { IERC20 } from "@openzeppelin/contracts/token/ERC20/IERC20.sol";
+import { OwnableUpgradeable } from "@openzeppelin/contracts-upgradeable/access/OwnableUpgradeable.sol";
 
 import { RevolutionVersion } from "./version/RevolutionVersion.sol";
 import { UUPS } from "@cobuild/utility-contracts/src/proxy/UUPS.sol";
@@ -36,7 +36,7 @@ contract RevolutionPoints is
     IRevolutionPoints,
     RevolutionVersion,
     UUPS,
-    Ownable2StepUpgradeable,
+    OwnableUpgradeable,
     ReentrancyGuardUpgradeable,
     ERC20VotesUpgradeable
 {

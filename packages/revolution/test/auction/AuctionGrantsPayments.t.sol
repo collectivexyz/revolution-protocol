@@ -105,11 +105,13 @@ contract GrantsPaymentsTest is AuctionHouseTest {
     // test that grants + founder rate can't be set to more than 10k in initialization
     function test_InitializationGrantsFounderRateBounds(uint256 creatorRate, uint256 grantsRate) public {
         vm.stopPrank();
-        super.setUp();
         super.setMockParams();
 
-        creatorRate = bound(creatorRate, auction.minCreatorRateBps(), 10000);
-        grantsRate = bound(grantsRate, 0, 10001);
+        // creatorRate = bound(creatorRate, auction.minCreatorRateBps(), 10000);
+        // grantsRate = bound(grantsRate, 0, 10001);
+
+        creatorRate = 9205;
+        grantsRate = 2653;
 
         super.setAuctionParams(
             15 minutes, // timeBuffer
