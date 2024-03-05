@@ -1,5 +1,15 @@
 # @collectivexyz/revolution
 
+## 0.4.7
+
+### Patch Changes
+
+- 08c105f: add airdrop contracts
+- Updated dependencies [08c105f]
+- Updated dependencies [08c105f]
+  - @cobuild/splits@0.11.6
+  - @cobuild/protocol-rewards@0.11.3
+
 ## 0.4.6
 
 ### Patch Changes

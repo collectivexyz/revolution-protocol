@@ -1,5 +1,13 @@
 # @cobuild/splits
 
+## 0.11.6
+
+### Patch Changes
+
+- 08c105f: fix package declaration
+- Updated dependencies [08c105f]
+  - @cobuild/protocol-rewards@0.11.3
+
 ## 0.11.5
 
 ### Patch Changes
