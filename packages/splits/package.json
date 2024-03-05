@@ -11,7 +11,7 @@
   "main": "./dist/index.js",
   "types": "./dist/package/index.d.ts",
   "type": "module",
-  "version": "0.11.5",
+  "version": "0.11.6",
   "publishConfig": {
     "access": "public"
   },

@@ -1,5 +1,11 @@
 # @collectivexyz/protocol-rewards
 
+## 0.11.3
+
+### Patch Changes
+
+- 08c105f: fix module declaration
+
 ## 0.11.2
 
 ### Patch Changes
