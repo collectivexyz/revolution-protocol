@@ -2,7 +2,7 @@
   "name": "@cobuild/revolution",
   "version": "0.4.6",
   "repository": "https://github.com/collectivexyz/revolution-protocol.git",
-  "license": "MIT",
+  "license": "GPL-3.0-only",
   "main": "./dist/index.js",
   "types": "./dist/package/index.d.ts",
   "type": "module",
