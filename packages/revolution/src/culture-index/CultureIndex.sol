@@ -566,17 +566,13 @@ contract CultureIndex is
     function quorumVotesForPiece(uint256 pieceId) public view returns (uint256) {
         uint256 creationBlock = pieces[pieceId].creationBlock;
 
-        /// @notice Points are assumed to be nontransferable and thus we do not need snapshotting for them
-        /// @notice Tokens are assumed to be transferable and thus we need snapshotting for them
         uint256 totalVotesSupply = votingPower.calculateVotesWithWeights(
             IRevolutionVotingPower.BalanceAndWeight({
-                /// @notice Use previous block number to prevent auction
-                /// from minting points and throwing off the quorum in the same block
-                balance: votingPower.getPastPointsSupply(creationBlock),
+                balance: votingPower.getPastPointsSupply(creationBlock - 1),
                 voteWeight: pointsVoteWeight
             }),
             IRevolutionVotingPower.BalanceAndWeight({
-                balance: votingPower.getPastTokenSupply(creationBlock),
+                balance: votingPower.getPastTokenSupply(creationBlock - 1),
                 voteWeight: tokenVoteWeight
             })
         );
