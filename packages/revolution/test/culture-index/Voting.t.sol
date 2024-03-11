@@ -831,8 +831,8 @@ contract CultureIndexVotingBasicTest is CultureIndexTestSuite {
         );
     }
 
-    // test to ensure that the vote weight does not count points votes in the same block
-    function testVoteWeight_Points_No_Snapshot() public {
+    // test to ensure that the vote weight for points is snapshotted
+    function testVoteWeight_Points_Snapshot() public {
         vm.stopPrank();
         address voter = address(this);
 
@@ -844,9 +844,9 @@ contract CultureIndexVotingBasicTest is CultureIndexTestSuite {
         uint256 pieceId = createDefaultArtPiece();
         vm.roll(vm.getBlockNumber() + 1);
 
+        // mint again
         vm.prank(address(revolutionPointsEmitter));
         revolutionPoints.mint(voter, 100);
-
         vm.roll(vm.getBlockNumber() + 1);
 
         // Cast a vote for the art piece
@@ -867,16 +867,12 @@ contract CultureIndexVotingBasicTest is CultureIndexTestSuite {
         );
 
         //expect it to be equal to 200
-        assertEq(
-            cultureIndex.totalVoteWeights(pieceId),
-            200,
-            "Vote weight added does not match expected vote weight from getAccountVotingPowerForPiece"
-        );
+        assertEq(cultureIndex.totalVoteWeights(pieceId), 100, "Vote weight added does not match 100");
 
         assertEq(
             actualVoteWeightAdded,
             cultureIndex.getVote(pieceId, voter).weight,
-            "Vote weight added does not match expected vote weight from getAccountVotingPowerForPiece"
+            "Vote weights in contract are off"
         );
     }
 

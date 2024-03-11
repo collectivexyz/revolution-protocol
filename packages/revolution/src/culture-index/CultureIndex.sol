@@ -309,14 +309,16 @@ contract CultureIndex is
      */
     function getAccountVotingPowerForPiece(uint256 pieceId, address account) public view returns (uint256) {
         if (pieceId >= _currentPieceId) revert INVALID_PIECE_ID();
+        uint256 creationBlock = pieces[pieceId].creationBlock;
+
         return
             votingPower.calculateVotesWithWeights(
                 IRevolutionVotingPower.BalanceAndWeight({
-                    balance: votingPower.getPastPointsVotes(account, block.number - 1),
+                    balance: votingPower.getPastPointsVotes(account, creationBlock - 1),
                     voteWeight: pointsVoteWeight
                 }),
                 IRevolutionVotingPower.BalanceAndWeight({
-                    balance: votingPower.getPastTokenVotes(account, pieces[pieceId].creationBlock - 1),
+                    balance: votingPower.getPastTokenVotes(account, creationBlock - 1),
                     voteWeight: tokenVoteWeight
                 })
             );
@@ -564,17 +566,13 @@ contract CultureIndex is
     function quorumVotesForPiece(uint256 pieceId) public view returns (uint256) {
         uint256 creationBlock = pieces[pieceId].creationBlock;
 
-        /// @notice Points are assumed to be nontransferable and thus we do not need snapshotting for them
-        /// @notice Tokens are assumed to be transferable and thus we need snapshotting for them
         uint256 totalVotesSupply = votingPower.calculateVotesWithWeights(
             IRevolutionVotingPower.BalanceAndWeight({
-                /// @notice Use previous block number to prevent auction
-                /// from minting points and throwing off the quorum in the same block
-                balance: votingPower.getPastPointsSupply(block.number - 1),
+                balance: votingPower.getPastPointsSupply(creationBlock - 1),
                 voteWeight: pointsVoteWeight
             }),
             IRevolutionVotingPower.BalanceAndWeight({
-                balance: votingPower.getPastTokenSupply(creationBlock),
+                balance: votingPower.getPastTokenSupply(creationBlock - 1),
                 voteWeight: tokenVoteWeight
             })
         );
@@ -584,7 +582,7 @@ contract CultureIndex is
             //ignore points for token minter
             IRevolutionVotingPower.BalanceAndWeight({ balance: 0, voteWeight: 0 }),
             IRevolutionVotingPower.BalanceAndWeight({
-                balance: votingPower.getPastTokenVotes(votingPower.getTokenMinter(), creationBlock),
+                balance: votingPower.getPastTokenVotes(votingPower.getTokenMinter(), creationBlock - 1),
                 voteWeight: tokenVoteWeight
             })
         );
