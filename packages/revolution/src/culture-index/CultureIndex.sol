@@ -582,7 +582,7 @@ contract CultureIndex is
             //ignore points for token minter
             IRevolutionVotingPower.BalanceAndWeight({ balance: 0, voteWeight: 0 }),
             IRevolutionVotingPower.BalanceAndWeight({
-                balance: votingPower.getPastTokenVotes(votingPower.getTokenMinter(), creationBlock),
+                balance: votingPower.getPastTokenVotes(votingPower.getTokenMinter(), creationBlock - 1),
                 voteWeight: tokenVoteWeight
             })
         );
