@@ -43,7 +43,7 @@ contract CultureIndexUpgrade is Script {
         console2.logAddress(_getKey("Auction"));
 
         console2.log("~~~~~~~~~~ EXECUTOR ~~~~~~~~~~~");
-        console2.logAddress(_getKey("Executor));
+        console2.logAddress(_getKey("Executor"));
 
         console2.log("~~~~~~~~~~ DAO ~~~~~~~~~~~");
         console2.logAddress(_getKey("DAO"));
