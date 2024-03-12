@@ -1,7 +1,8 @@
 [profile.default]
 fs_permissions = [
   { access = "read", path = "./package.json" },
-  { access = "read-write", path = "./deploys"}
+  { access = "read-write", path = "./deploys"},
+  { access = "read-write", path = "./addresses"}
 ]
 libs = ['node_modules', 'script', '../../node_modules']
 allow_paths = ["node_modules/@cobuild/protocol-rewards", "../../node_modules"]
