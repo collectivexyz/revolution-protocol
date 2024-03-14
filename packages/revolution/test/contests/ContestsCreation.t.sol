@@ -3,6 +3,8 @@ pragma solidity ^0.8.22;
 
 import { ContestBuilderTest } from "./ContestBuilder.t.sol";
 import { ICultureIndex } from "../../src/interfaces/ICultureIndex.sol";
+import { CultureIndex } from "../../src/culture-index/CultureIndex.sol";
+import { BaseContest } from "../../src/culture-index/extensions/contests/BaseContest.sol";
 
 /**
  * @title ContestsCreationTest
@@ -21,6 +23,33 @@ contract ContestsCreationTest is ContestBuilderTest {
         super.setMockContestParams();
 
         super.deployContestMock();
+    }
+
+    /**
+     * @dev Use the builder to create a contest and test the fields
+     */
+    function testContestBuilderFields() public {
+        // Deploy a contest to test the builder fields
+        (address contest, , ) = contestBuilder.deployBaseContest(
+            founder,
+            weth,
+            address(revolutionVotingPower),
+            address(splitMain),
+            founder,
+            contest_CultureIndexParams,
+            baseContestParams
+        );
+
+        // verify contest fields
+        BaseContest baseContest = BaseContest(contest);
+        assertTrue(baseContest.owner() == founder, "Owner mismatch");
+        assertTrue(baseContest.WETH() == weth, "WETH mismatch");
+        assertTrue(address(baseContest.splitMain()) == address(splitMain), "Split main mismatch");
+        // assert the cultureIndex of the baseContest's votingPower field is the same as the one in the contestBuilder
+        assertTrue(
+            address(CultureIndex(address(baseContest.cultureIndex())).votingPower()) == address(revolutionVotingPower),
+            "CultureIndex mismatch"
+        );
     }
 
     /**
