@@ -30,7 +30,7 @@ import { UUPS } from "@cobuild/utility-contracts/src/proxy/UUPS.sol";
 import { IUpgradeManager } from "@cobuild/utility-contracts/src/interfaces/IUpgradeManager.sol";
 import { RevolutionRewards } from "@cobuild/protocol-rewards/src/abstract/RevolutionRewards.sol";
 
-import { ISplitMain } from "@cobuild/splits/src/interfaces";
+import { ISplitMain } from "@cobuild/splits/src/interfaces/ISplitMain.sol";
 
 contract BaseContest is
     IBaseContest,
