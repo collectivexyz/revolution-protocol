@@ -48,6 +48,12 @@ interface IBaseContest is IBaseContestEvents {
     /// @dev Reverts if the top voted piece does not meet quorum.
     error QUORUM_NOT_MET();
 
+    /// @dev Reverts if the contest has already been paid out
+    error CONTEST_ALREADY_PAID_OUT();
+
+    /// @dev Reverts if the contest has not ended
+    error CONTEST_NOT_ENDED();
+
     function setEntropyRate(uint256 _entropyRate) external;
 
     function WETH() external view returns (address);

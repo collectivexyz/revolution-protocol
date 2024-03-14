@@ -56,6 +56,9 @@ contract BaseContest is
     // The end time of the contest
     uint256 public endTime;
 
+    // Whether the contest has been fully paid out
+    bool public paidOut;
+
     // The SplitMain contract
     ISplitMain public splitMain;
 
@@ -143,6 +146,18 @@ contract BaseContest is
 
         entropyRate = _entropyRate;
         emit EntropyRateUpdated(_entropyRate);
+    }
+
+    /**
+     * @notice Pay out the contest winners
+     * @dev Only callable by the owner.
+     * @param _payoutCount The number of winners to pay out. Needs to be adjusted based on gas requirements.
+     */
+    function payOutWinners(uint256 _payoutCount) external onlyOwner {
+        if (paidOut) revert CONTEST_ALREADY_PAID_OUT();
+
+        //slither-disable-next-line timestamp
+        if (block.timestamp < endTime) revert CONTEST_NOT_ENDED();
     }
 
     /// @notice Transfer ETH/WETH from the contract
