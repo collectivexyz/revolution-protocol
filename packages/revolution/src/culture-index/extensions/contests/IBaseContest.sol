@@ -57,6 +57,9 @@ interface IBaseContest is IBaseContestEvents {
     /// @dev Reverts if payout splits do not sum to PERCENTAGE_SCALE
     error INVALID_PAYOUT_SPLITS();
 
+    /// @dev Reverts if payoutSplits are not descending
+    error PAYOUT_SPLITS_NOT_DESCENDING();
+
     function setEntropyRate(uint256 _entropyRate) external;
 
     function WETH() external view returns (address);

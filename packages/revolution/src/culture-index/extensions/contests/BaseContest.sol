@@ -130,10 +130,16 @@ contract BaseContest is
 
         _pause();
 
-        // check payout splits sum to PERCENTAGE_SCALE
+        uint256 numPayoutSplits = _baseContestParams.payoutSplits.length;
+
+        // check payout splits sum to PERCENTAGE_SCALE and ensure descending order
         uint256 sum;
-        for (uint256 i = 0; i < _baseContestParams.payoutSplits.length; i++) {
-            sum += _baseContestParams.payoutSplits[i];
+        uint256 previousSplit = type(uint256).max;
+        for (uint256 i = 0; i < numPayoutSplits; i++) {
+            uint256 currentSplit = _baseContestParams.payoutSplits[i];
+            sum += currentSplit;
+            if (currentSplit > previousSplit) revert PAYOUT_SPLITS_NOT_DESCENDING();
+            previousSplit = currentSplit;
         }
         if (sum != PERCENTAGE_SCALE) revert INVALID_PAYOUT_SPLITS();
 
