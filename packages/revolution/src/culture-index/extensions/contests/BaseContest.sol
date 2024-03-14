@@ -41,11 +41,14 @@ contract BaseContest is
     OwnableUpgradeable,
     RevolutionRewards
 {
+    /// @notice constant to scale uints into percentages (1e6 == 100%)
+    uint256 public constant PERCENTAGE_SCALE = 1e6;
+
     // The address of the WETH contract
     address public WETH;
 
-    // The split of winning proceeds that is sent to winners in basis points
-    uint256 public entropyRateBps;
+    // The split of winning proceeds that is sent to winners
+    uint256 public entropyRate;
 
     // The address of th account to receive builder rewards
     address public builderReward;
@@ -59,7 +62,8 @@ contract BaseContest is
     // The CultureIndex contract holding submissions
     ICultureIndex public cultureIndex;
 
-    ///                                                          ///
+    // The contest payout splits
+    uint256[] public payoutSplits;
     ///                         IMMUTABLES                       ///
     ///                                                          ///
 
@@ -124,20 +128,21 @@ contract BaseContest is
         cultureIndex = ICultureIndex(_cultureIndex);
 
         // set creator payout params
-        entropyRateBps = _baseContestParams.entropyRateBps;
+        entropyRate = _baseContestParams.entropyRate;
         endTime = _baseContestParams.endTime;
+        payoutSplits = _baseContestParams.payoutSplits;
     }
 
     /**
-     * @notice Set the split of that is sent to the creator as ether in basis points.
+     * @notice Set the split of that is sent to the creator as ether
      * @dev Only callable by the owner.
-     * @param _entropyRateBps New entropy rate in basis points.
+     * @param _entropyRate New entropy rate, scaled by PERCENTAGE_SCALE.
      */
-    function setEntropyRateBps(uint256 _entropyRateBps) external onlyOwner {
-        if (_entropyRateBps > 10_000) revert INVALID_BPS();
+    function setEntropyRate(uint256 _entropyRate) external onlyOwner {
+        if (_entropyRate > PERCENTAGE_SCALE) revert INVALID_ENTROPY_RATE();
 
-        entropyRateBps = _entropyRateBps;
-        emit EntropyRateBpsUpdated(_entropyRateBps);
+        entropyRate = _entropyRate;
+        emit EntropyRateUpdated(_entropyRate);
     }
 
     /// @notice Transfer ETH/WETH from the contract

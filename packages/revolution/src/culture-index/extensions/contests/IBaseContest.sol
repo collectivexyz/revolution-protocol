@@ -28,7 +28,7 @@ interface IBaseContestEvents {
         uint256 ethPaidToCreators
     );
 
-    event EntropyRateBpsUpdated(uint256 rateBps);
+    event EntropyRateUpdated(uint256 rate);
 }
 
 interface IBaseContest is IBaseContestEvents {
@@ -42,24 +42,26 @@ interface IBaseContest is IBaseContestEvents {
     /// @dev Reverts if address 0 is passed but not allowed
     error ADDRESS_ZERO();
 
-    /// @dev Reverts if bps is greater than 10,000.
-    error INVALID_BPS();
+    /// @dev Reverts if > PERCENTAGE_SCALE
+    error INVALID_ENTROPY_RATE();
 
     /// @dev Reverts if the top voted piece does not meet quorum.
     error QUORUM_NOT_MET();
 
-    function setEntropyRateBps(uint256 _entropyRateBps) external;
+    function setEntropyRate(uint256 _entropyRate) external;
 
     function WETH() external view returns (address);
 
     function manager() external returns (IUpgradeManager);
 
     /// @notice The contest parameters
-    /// @param entropyRateBps The entropy rate basis points of each contest - the portion of the creator's share that is directly sent to the creator in ETH
+    /// @param entropyRate The entropy rate of each contest - the portion of the creator's share that is directly sent to the creator in ETH
     /// @param endTime The end time of the contest.
+    /// @param payoutSplits How to split the prize pool between the winners
     struct BaseContestParams {
-        uint256 entropyRateBps;
+        uint256 entropyRate;
         uint256 endTime;
+        uint256[] payoutSplits;
     }
 
     /**
