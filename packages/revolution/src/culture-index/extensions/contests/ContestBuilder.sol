@@ -54,15 +54,19 @@ contract ContestBuilder is IContestBuilder, RevolutionVersion, UUPS, Ownable2Ste
     address public immutable maxHeapImpl;
 
     /// @notice The base contest implementation address
-    address public baseContestImpl;
+    address public immutable baseContestImpl;
 
     ///                                                          ///
     ///                          CONSTRUCTOR                     ///
     ///                                                          ///
 
-    constructor(CultureIndexImplementations memory _cultureIndexImplementations) payable initializer {
+    constructor(
+        address _baseContestImpl,
+        CultureIndexImplementations memory _cultureIndexImplementations
+    ) payable initializer {
         cultureIndexImpl = _cultureIndexImplementations.cultureIndex;
         maxHeapImpl = _cultureIndexImplementations.maxHeap;
+        baseContestImpl = _baseContestImpl;
     }
 
     ///                                                          ///
@@ -91,10 +95,10 @@ contract ContestBuilder is IContestBuilder, RevolutionVersion, UUPS, Ownable2Ste
     /// @param builderReward The builder reward address
     /// @param cultureIndexParams The CultureIndex settings
     /// @param baseContestParams The BaseContest settings
-    /// @return basicContest The deployed contest address
+    /// @return baseContest The deployed contest address
     /// @return cultureIndex The deployed culture index address
     /// @return maxHeap The deployed max heap address
-    function deployBasicContest(
+    function deployBaseContest(
         address initialOwner,
         address weth,
         address votingPower,
@@ -102,21 +106,12 @@ contract ContestBuilder is IContestBuilder, RevolutionVersion, UUPS, Ownable2Ste
         address builderReward,
         IRevolutionBuilder.CultureIndexParams calldata cultureIndexParams,
         IBaseContest.BaseContestParams calldata baseContestParams
-    ) external override returns (address basicContest, address cultureIndex, address maxHeap) {
+    ) external override returns (address baseContest, address cultureIndex, address maxHeap) {
         cultureIndex = address(new ERC1967Proxy(cultureIndexImpl, ""));
         maxHeap = address(new ERC1967Proxy(maxHeapImpl, ""));
-        basicContest = address(new ERC1967Proxy(baseContestImpl, ""));
+        baseContest = address(new ERC1967Proxy(baseContestImpl, ""));
 
-        ICultureIndex(cultureIndex).initialize({
-            votingPower: votingPower,
-            initialOwner: initialOwner,
-            // ensure the contest can drop pieces from the culture index
-            dropperAdmin: basicContest,
-            cultureIndexParams: cultureIndexParams,
-            maxHeap: maxHeap
-        });
-
-        IBaseContest(basicContest).initialize({
+        IBaseContest(baseContest).initialize({
             initialOwner: initialOwner,
             splitMain: splitMain,
             cultureIndex: cultureIndex,
@@ -125,11 +120,20 @@ contract ContestBuilder is IContestBuilder, RevolutionVersion, UUPS, Ownable2Ste
             contestParams: baseContestParams
         });
 
-        IMaxHeap(maxHeap).initialize({ initialOwner: initialOwner, admin: cultureIndex });
+        // ICultureIndex(cultureIndex).initialize({
+        //     votingPower: votingPower,
+        //     initialOwner: initialOwner,
+        //     // ensure the contest can drop pieces from the culture index
+        //     dropperAdmin: baseContest,
+        //     cultureIndexParams: cultureIndexParams,
+        //     maxHeap: maxHeap
+        // });
 
-        emit BasicContestDeployed(basicContest, cultureIndex, maxHeap, votingPower);
+        // IMaxHeap(maxHeap).initialize({ initialOwner: initialOwner, admin: cultureIndex });
 
-        return (basicContest, cultureIndex, maxHeap);
+        emit BaseContestDeployed(baseContest, cultureIndex, maxHeap, votingPower);
+
+        return (baseContest, cultureIndex, maxHeap);
     }
 
     ///                                                          ///

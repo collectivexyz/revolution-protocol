@@ -103,7 +103,7 @@ contract BaseContest is
     ///                                                          ///
 
     /**
-     * @notice Initialize the contst and base contracts,
+     * @notice Initialize the contest and base contracts,
      * populate configuration values, and pause the contract.
      * @dev This function can only be called once.
      * @param _initialOwner The address of the owner.

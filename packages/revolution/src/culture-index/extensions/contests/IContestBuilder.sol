@@ -38,7 +38,7 @@ interface IContestBuilder is IUpgradeManager {
     /// @param cultureIndex The culture index address
     /// @param maxHeap The max heap address
     /// @param votingPower The voting power address
-    event BasicContestDeployed(address contest, address cultureIndex, address maxHeap, address votingPower);
+    event BaseContestDeployed(address contest, address cultureIndex, address maxHeap, address votingPower);
 
     ///                                                          ///
     ///                            ERRORS                        ///
@@ -81,7 +81,7 @@ interface IContestBuilder is IUpgradeManager {
     /// @param builderReward The builder reward address
     /// @param cultureIndexParams The CultureIndex settings
     /// @param baseContestParams The BaseContest settings
-    function deployBasicContest(
+    function deployBaseContest(
         address initialOwner,
         address weth,
         address votingPower,
