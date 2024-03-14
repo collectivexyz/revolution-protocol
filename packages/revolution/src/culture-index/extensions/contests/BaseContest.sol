@@ -59,6 +59,12 @@ contract BaseContest is
     // Whether the contest has been fully paid out
     bool public paidOut;
 
+    // The current index of the payout splits. This is used to track which payout split is next to be paid out.
+    uint256 public payoutIndex;
+
+    // The balance of the contract at the time the first winner is paid out
+    uint256 public initialBalance;
+
     // The SplitMain contract
     ISplitMain public splitMain;
 
@@ -124,6 +130,13 @@ contract BaseContest is
 
         _pause();
 
+        // check payout splits sum to PERCENTAGE_SCALE
+        uint256 sum;
+        for (uint256 i = 0; i < _baseContestParams.payoutSplits.length; i++) {
+            sum += _baseContestParams.payoutSplits[i];
+        }
+        if (sum != PERCENTAGE_SCALE) revert INVALID_PAYOUT_SPLITS();
+
         // set contracts
         WETH = _weth;
         builderReward = _builderReward;
@@ -149,15 +162,77 @@ contract BaseContest is
     }
 
     /**
+     * @notice Pays out the next up contest winner, the top voted submission in the CultureIndex
+     * @dev Only callable by the owner.
+     */
+    function payoutNextSubmission() internal {
+        try cultureIndex.dropTopVotedPiece() returns (ICultureIndex.ArtPieceCondensed memory artPiece) {
+            // increment payout index
+            uint256 indexToPayOut = payoutIndex;
+            payoutIndex++;
+
+            // if we have reached the end of the payoutSplits, set paidOut to true
+            if (payoutIndex == payoutSplits.length) {
+                paidOut = true;
+            }
+
+            uint256 numCreators = artPiece.creators.length;
+
+            address[] memory accounts = new address[](numCreators);
+            uint32[] memory percentAllocations = new uint32[](numCreators);
+
+            // iterate over numCreators and populate accounts and percentAllocations
+            for (uint256 i = 0; i < numCreators; i++) {
+                accounts[i] = artPiece.creators[i].creator;
+                // PERCENTAGE_SCALE is 1e6, art piece scale is 1e4, so we multiply by 1e2
+                percentAllocations[i] = uint32(artPiece.creators[i].bps * 1e2);
+            }
+
+            // Create split contract
+            address splitToPay = splitMain.createSplit(
+                ISplitMain.PointsData({
+                    pointsPercent: uint32(PERCENTAGE_SCALE - entropyRate),
+                    accounts: accounts,
+                    percentAllocations: percentAllocations
+                }),
+                accounts,
+                percentAllocations,
+                0,
+                address(0)
+            );
+
+            // transfer ETH to split contract based on indexToPayout
+            uint256 amountToPay = (initialBalance * payoutSplits[indexToPayOut]) / PERCENTAGE_SCALE;
+
+            _safeTransferETHWithFallback(splitToPay, amountToPay);
+        } catch {
+            revert("dropTopVotedPiece failed");
+        }
+    }
+
+    /**
      * @notice Pay out the contest winners
      * @dev Only callable by the owner.
      * @param _payoutCount The number of winners to pay out. Needs to be adjusted based on gas requirements.
      */
-    function payOutWinners(uint256 _payoutCount) external onlyOwner {
+    function payOutWinners(uint256 _payoutCount) external onlyOwner nonReentrant whenNotPaused {
+        // Ensure the contest has not already paid out fully
         if (paidOut) revert CONTEST_ALREADY_PAID_OUT();
 
+        // Ensure the contest has ended
         //slither-disable-next-line timestamp
         if (block.timestamp < endTime) revert CONTEST_NOT_ENDED();
+
+        // Set initial balance if not already set
+        if (initialBalance == 0) {
+            initialBalance = address(this).balance;
+        }
+
+        // pay out _payoutCount winners
+        for (uint256 i = 0; i < _payoutCount; i++) {
+            // while the contract has balance and the contest has not been fully paid out
+            if (!paidOut) payoutNextSubmission();
+        }
     }
 
     /// @notice Transfer ETH/WETH from the contract
