@@ -17,9 +17,6 @@ contract ContestSubmissions is ContestBuilderTest {
     function setUp() public virtual override {
         super.setUp();
 
-        //start prank to be cultureindex's owner
-        vm.startPrank(address(executor));
-
         super.setMockContestParams();
 
         super.deployContestMock();

@@ -18,9 +18,6 @@ contract ContestOwnerControl is ContestBuilderTest {
     function setUp() public virtual override {
         super.setUp();
 
-        //start prank to be cultureindex's owner
-        vm.startPrank(address(executor));
-
         super.setMockContestParams();
 
         super.deployContestMock();
@@ -89,6 +86,13 @@ contract ContestOwnerControl is ContestBuilderTest {
 
         // Assert that contest balance is empty
         assertEq(address(baseContest).balance, 0, "Contest balance should be empty");
+
+        // assert contest paid out and expect revert if trying to pay out again
+        assertEq(baseContest.paidOut(), true, "Contest should be paid out");
+
+        vm.prank(founder);
+        vm.expectRevert(IBaseContest.CONTEST_ALREADY_PAID_OUT.selector);
+        baseContest.payOutWinners(1);
     }
 
     event ReceiveETH(address indexed sender, uint256 amount);

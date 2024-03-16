@@ -17,9 +17,6 @@ contract ContestOwnerControl is ContestBuilderTest {
     function setUp() public virtual override {
         super.setUp();
 
-        //start prank to be cultureindex's owner
-        vm.startPrank(address(executor));
-
         super.setMockContestParams();
 
         super.deployContestMock();
@@ -57,4 +54,23 @@ contract ContestOwnerControl is ContestBuilderTest {
         uint256 actualEntropyRate = baseContest.entropyRate();
         assertEq(actualEntropyRate, newEntropyRate, "Entropy rate was not updated correctly");
     }
+
+    /**
+     * @dev Test to ensure only the owner can call unpause
+     */
+    function test__UnpauseByOwnerOnly() public {
+        // Ensure non-owner cannot unpause
+        address nonOwner = address(0x123);
+        vm.prank(nonOwner);
+        vm.expectRevert();
+        baseContest.unpause();
+
+        // Ensure owner can unpause
+        vm.prank(founder);
+        vm.expectEmit(true, false, false, true);
+        emit Unpaused(founder);
+        baseContest.unpause();
+    }
+
+    event Unpaused(address account);
 }
