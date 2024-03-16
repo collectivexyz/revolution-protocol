@@ -98,6 +98,12 @@ contract ContestOwnerControl is ContestBuilderTest {
         // check that cultureindex maxheap.size is 0 after paying out
         CultureIndex contestIndex = CultureIndex(address(baseContest.cultureIndex()));
         MaxHeap maxHeap = MaxHeap(address(contestIndex.maxHeap()));
+
+        // ensure baseContest initialBalance is 1 ether
+        assertEq(baseContest.initialBalance(), 1 ether, "Initial balance should be 1 ether");
+
+        // ensure payoutIndex is 1
+        assertEq(baseContest.payoutIndex(), 1, "Payout index should be 1");
     }
 
     event ReceiveETH(address indexed sender, uint256 amount);
