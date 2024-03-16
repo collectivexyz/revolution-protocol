@@ -42,13 +42,52 @@ contract ContestsCreationTest is ContestBuilderTest {
 
         // verify contest fields
         BaseContest baseContest = BaseContest(contest);
-        assertTrue(baseContest.owner() == founder, "Owner mismatch");
-        assertTrue(baseContest.WETH() == weth, "WETH mismatch");
-        assertTrue(address(baseContest.splitMain()) == address(splitMain), "Split main mismatch");
+        assertEq(baseContest.owner(), founder, "Owner mismatch");
+        assertEq(baseContest.WETH(), weth, "WETH mismatch");
+        assertEq(address(baseContest.splitMain()), address(splitMain), "Split main mismatch");
+
+        // log the address of the base contest splitMain
+        emit log_named_address("baseContest.splitMain", address(baseContest.splitMain()));
+        emit log_named_address("baseContest.cultureIndex", address(baseContest.cultureIndex()));
+
         // assert the cultureIndex of the baseContest's votingPower field is the same as the one in the contestBuilder
-        assertTrue(
-            address(CultureIndex(address(baseContest.cultureIndex())).votingPower()) == address(revolutionVotingPower),
-            "CultureIndex mismatch"
+        CultureIndex contestIndex = CultureIndex(address(baseContest.cultureIndex()));
+        assertEq(address(contestIndex.votingPower()), address(revolutionVotingPower), "CultureIndex mismatch");
+        // assert other culture index fields
+        assertEq(
+            contestIndex.quorumVotesBPS(),
+            contest_CultureIndexParams.quorumVotesBPS,
+            "CultureIndex quorumVotesBPS mismatch"
+        );
+        assertEq(
+            contestIndex.tokenVoteWeight(),
+            contest_CultureIndexParams.tokenVoteWeight,
+            "CultureIndex tokenVoteWeight mismatch"
+        );
+        assertEq(
+            contestIndex.pointsVoteWeight(),
+            contest_CultureIndexParams.pointsVoteWeight,
+            "CultureIndex pointsVoteWeight mismatch"
+        );
+        assertEq(
+            contestIndex.minVotingPowerToVote(),
+            contest_CultureIndexParams.minVotingPowerToVote,
+            "CultureIndex minVotingPowerToVote mismatch"
+        );
+        assertEq(
+            contestIndex.minVotingPowerToCreate(),
+            contest_CultureIndexParams.minVotingPowerToCreate,
+            "CultureIndex minVotingPowerToCreate mismatch"
+        );
+
+        // test the other cultureIndex fields
+        // assertEq(contestIndex.owner(), founder, "CultureIndex owner mismatch");
+        // assert name and description vs. the contest_CultureIndexParams
+        assertEq(contestIndex.name(), contest_CultureIndexParams.name, "CultureIndex name mismatch");
+        assertEq(
+            contestIndex.description(),
+            contest_CultureIndexParams.description,
+            "CultureIndex description mismatch"
         );
     }
 

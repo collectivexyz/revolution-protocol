@@ -34,6 +34,24 @@ contract ContestBuilderTest is RevolutionBuilderTest {
     function setUp() public virtual override {
         super.setUp();
 
+        super.setMockParams();
+
+        super.setCultureIndexParams(
+            "Vrbs",
+            "Our community Vrbs. Must be 32x32.",
+            "Must be 32x32.",
+            "ipfs://",
+            10,
+            1,
+            200,
+            0,
+            0,
+            ICultureIndex.PieceMaximums({ name: 100, description: 2100, image: 64_000, text: 256, animationUrl: 100 }),
+            ICultureIndex.MediaType.NONE,
+            ICultureIndex.RequiredMediaPrefix.MIXED
+        );
+        super.deployMock();
+
         builderImpl0 = address(
             new ContestBuilder(
                 address(0),
@@ -65,8 +83,8 @@ contract ContestBuilderTest is RevolutionBuilderTest {
     IBaseContest.BaseContestParams internal baseContestParams;
     IRevolutionBuilder.CultureIndexParams internal contest_CultureIndexParams;
 
-    function setMockCultureIndexParams() internal virtual override {
-        setCultureIndexParams(
+    function setMockContestCultureIndexParams() internal virtual {
+        setContestCultureIndexParams(
             "Vrbs",
             "Our community Vrbs.",
             "- [ ] Must be 32x32. - [ ] Must include the noggles.",
@@ -82,7 +100,7 @@ contract ContestBuilderTest is RevolutionBuilderTest {
         );
     }
 
-    function setCultureIndexParams(
+    function setContestCultureIndexParams(
         string memory _name,
         string memory _description,
         string memory _checklist,
@@ -95,7 +113,7 @@ contract ContestBuilderTest is RevolutionBuilderTest {
         ICultureIndex.PieceMaximums memory _pieceMaximums,
         ICultureIndex.MediaType _requiredMediaType,
         ICultureIndex.RequiredMediaPrefix _requiredMediaPrefix
-    ) internal virtual override {
+    ) internal virtual {
         contest_CultureIndexParams = IRevolutionBuilder.CultureIndexParams({
             name: _name,
             description: _description,
@@ -139,9 +157,7 @@ contract ContestBuilderTest is RevolutionBuilderTest {
     CultureIndex internal contest_CultureIndex;
 
     function setMockContestParams() internal virtual {
-        super.setMockParams();
-
-        setMockCultureIndexParams();
+        setMockContestCultureIndexParams();
         setMockBaseContestParams();
     }
 

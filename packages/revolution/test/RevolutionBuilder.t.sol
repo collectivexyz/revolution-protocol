@@ -461,6 +461,7 @@ contract RevolutionBuilderTest is Test {
         vm.label(address(revolutionPointsEmitter), "POINTS_EMITTER");
         vm.label(address(maxHeap), "MAX_HEAP");
         vm.label(address(revolutionVotingPower), "VOTING_POWER");
+        vm.label(address(splitMain), "SPLIT_MAIN");
     }
 
     ///                                                          ///

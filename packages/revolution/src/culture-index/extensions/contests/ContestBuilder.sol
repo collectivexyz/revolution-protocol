@@ -87,6 +87,8 @@ contract ContestBuilder is IContestBuilder, RevolutionVersion, UUPS, Ownable2Ste
     ///                        CONTEST DEPLOY                    ///
     ///                                                          ///
 
+    event NamedLogger(string name, address value);
+
     /// @notice Deploys a culture index for a given token
     /// @param initialOwner The initial owner address
     /// @param weth The WETH address
@@ -111,6 +113,11 @@ contract ContestBuilder is IContestBuilder, RevolutionVersion, UUPS, Ownable2Ste
         maxHeap = address(new ERC1967Proxy(maxHeapImpl, ""));
         baseContest = address(new ERC1967Proxy(baseContestImpl, ""));
 
+        emit NamedLogger("cultureIndex", cultureIndex);
+        emit NamedLogger("maxHeap", maxHeap);
+        emit NamedLogger("baseContest", baseContest);
+        emit NamedLogger("votingPower", votingPower);
+
         IBaseContest(baseContest).initialize({
             initialOwner: initialOwner,
             splitMain: splitMain,
@@ -120,16 +127,16 @@ contract ContestBuilder is IContestBuilder, RevolutionVersion, UUPS, Ownable2Ste
             contestParams: baseContestParams
         });
 
-        // ICultureIndex(cultureIndex).initialize({
-        //     votingPower: votingPower,
-        //     initialOwner: initialOwner,
-        //     // ensure the contest can drop pieces from the culture index
-        //     dropperAdmin: baseContest,
-        //     cultureIndexParams: cultureIndexParams,
-        //     maxHeap: maxHeap
-        // });
+        ICultureIndex(cultureIndex).initialize({
+            votingPower: votingPower,
+            initialOwner: initialOwner,
+            // ensure the contest can drop pieces from the culture index
+            dropperAdmin: baseContest,
+            cultureIndexParams: cultureIndexParams,
+            maxHeap: maxHeap
+        });
 
-        // IMaxHeap(maxHeap).initialize({ initialOwner: initialOwner, admin: cultureIndex });
+        IMaxHeap(maxHeap).initialize({ initialOwner: initialOwner, admin: cultureIndex });
 
         emit BaseContestDeployed(baseContest, cultureIndex, maxHeap, votingPower);
 
