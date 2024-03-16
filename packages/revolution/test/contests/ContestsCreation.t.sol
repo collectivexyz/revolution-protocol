@@ -28,7 +28,7 @@ contract ContestsCreationTest is ContestBuilderTest {
     /**
      * @dev Use the builder to create a contest and test the fields
      */
-    function testContestBuilderFields() public {
+    function test__ContestBuilderFields() public {
         // Deploy a contest to test the builder fields
         (address contest, , ) = contestBuilder.deployBaseContest(
             founder,
@@ -45,10 +45,6 @@ contract ContestsCreationTest is ContestBuilderTest {
         assertEq(baseContest.owner(), founder, "Owner mismatch");
         assertEq(baseContest.WETH(), weth, "WETH mismatch");
         assertEq(address(baseContest.splitMain()), address(splitMain), "Split main mismatch");
-
-        // log the address of the base contest splitMain
-        emit log_named_address("baseContest.splitMain", address(baseContest.splitMain()));
-        emit log_named_address("baseContest.cultureIndex", address(baseContest.cultureIndex()));
 
         // assert the cultureIndex of the baseContest's votingPower field is the same as the one in the contestBuilder
         CultureIndex contestIndex = CultureIndex(address(baseContest.cultureIndex()));
@@ -81,7 +77,7 @@ contract ContestsCreationTest is ContestBuilderTest {
         );
 
         // test the other cultureIndex fields
-        // assertEq(contestIndex.owner(), founder, "CultureIndex owner mismatch");
+        assertEq(contestIndex.owner(), founder, "CultureIndex owner mismatch");
         // assert name and description vs. the contest_CultureIndexParams
         assertEq(contestIndex.name(), contest_CultureIndexParams.name, "CultureIndex name mismatch");
         assertEq(
@@ -94,7 +90,7 @@ contract ContestsCreationTest is ContestBuilderTest {
     /**
      * @dev Test to create a contest by deploying a base contest and verifying its deployment
      */
-    function testCreateContest() public {
+    function test__CreateContest() public {
         // Set mock parameters for the contest creation
         setMockContestParams();
 

@@ -191,7 +191,81 @@ contract ContestBuilderTest is RevolutionBuilderTest {
         );
 
         baseContest = BaseContest(baseContestAddr);
+        contest_CultureIndex = CultureIndex(address(baseContest.cultureIndex()));
 
         vm.label(address(baseContest), "BASE_CONTEST");
+    }
+
+    // Utility function to create a new art piece and return its ID
+    function createContestSubmission(
+        string memory name,
+        string memory description,
+        ICultureIndex.MediaType mediaType,
+        string memory image,
+        string memory text,
+        string memory animationUrl,
+        address creatorAddress,
+        uint256 creatorBps
+    ) internal returns (uint256) {
+        address[] memory creatorAddresses = new address[](1);
+        creatorAddresses[0] = creatorAddress;
+
+        uint256[] memory creatorBpsArray = new uint256[](1);
+        creatorBpsArray[0] = creatorBps;
+
+        return
+            createContestSubmissionMultiCreator(
+                name,
+                description,
+                mediaType,
+                image,
+                text,
+                animationUrl,
+                creatorAddresses,
+                creatorBpsArray
+            );
+    }
+
+    // Utility function to create a new art piece with multiple creators and return its ID
+    function createContestSubmissionMultiCreator(
+        string memory name,
+        string memory description,
+        ICultureIndex.MediaType mediaType,
+        string memory image,
+        string memory text,
+        string memory animationUrl,
+        address[] memory creatorAddresses,
+        uint256[] memory creatorBps
+    ) internal returns (uint256) {
+        ICultureIndex.ArtPieceMetadata memory metadata = ICultureIndex.ArtPieceMetadata({
+            name: name,
+            description: description,
+            mediaType: mediaType,
+            image: image,
+            text: text,
+            animationUrl: animationUrl
+        });
+
+        ICultureIndex.CreatorBps[] memory creators = new ICultureIndex.CreatorBps[](creatorAddresses.length);
+        for (uint256 i = 0; i < creatorAddresses.length; i++) {
+            creators[i] = ICultureIndex.CreatorBps({ creator: creatorAddresses[i], bps: creatorBps[i] });
+        }
+
+        return contest_CultureIndex.createPiece(metadata, creators);
+    }
+
+    //Utility function to create default art piece
+    function createDefaultSubmission() public returns (uint256) {
+        return
+            createContestSubmission(
+                "Vrbs Legend",
+                "A vrbish masterpiece",
+                ICultureIndex.MediaType.IMAGE,
+                "ipfs://vrbs",
+                "",
+                "",
+                address(0x1),
+                10000
+            );
     }
 }

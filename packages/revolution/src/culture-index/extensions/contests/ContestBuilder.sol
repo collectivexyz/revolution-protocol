@@ -87,8 +87,6 @@ contract ContestBuilder is IContestBuilder, RevolutionVersion, UUPS, Ownable2Ste
     ///                        CONTEST DEPLOY                    ///
     ///                                                          ///
 
-    event NamedLogger(string name, address value);
-
     /// @notice Deploys a culture index for a given token
     /// @param initialOwner The initial owner address
     /// @param weth The WETH address
@@ -112,11 +110,6 @@ contract ContestBuilder is IContestBuilder, RevolutionVersion, UUPS, Ownable2Ste
         cultureIndex = address(new ERC1967Proxy(cultureIndexImpl, ""));
         maxHeap = address(new ERC1967Proxy(maxHeapImpl, ""));
         baseContest = address(new ERC1967Proxy(baseContestImpl, ""));
-
-        emit NamedLogger("cultureIndex", cultureIndex);
-        emit NamedLogger("maxHeap", maxHeap);
-        emit NamedLogger("baseContest", baseContest);
-        emit NamedLogger("votingPower", votingPower);
 
         IBaseContest(baseContest).initialize({
             initialOwner: initialOwner,
