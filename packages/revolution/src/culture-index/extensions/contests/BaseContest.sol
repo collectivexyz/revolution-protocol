@@ -277,5 +277,8 @@ contract BaseContest is
     /// @notice Ensures the caller is authorized to upgrade the contract and the new implementation is valid
     /// @dev This function is called in `upgradeTo` & `upgradeToAndCall`
     /// @param _newImpl The new implementation address
-    function _authorizeUpgrade(address _newImpl) internal view override onlyOwner whenPaused {}
+    function _authorizeUpgrade(address _newImpl) internal view override onlyOwner whenPaused {
+        // Ensure the new implementation is registered by the Builder DAO
+        if (!manager.isRegisteredUpgrade(_getImplementation(), _newImpl)) revert INVALID_UPGRADE(_newImpl);
+    }
 }

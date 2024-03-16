@@ -7,10 +7,10 @@ import { CultureIndex } from "../../src/culture-index/CultureIndex.sol";
 import { BaseContest } from "../../src/culture-index/extensions/contests/BaseContest.sol";
 
 /**
- * @title ContestSubmissions
+ * @title ContestOwnerControl
  * @dev Test contract for Contest creation
  */
-contract ContestSubmissions is ContestBuilderTest {
+contract ContestOwnerControl is ContestBuilderTest {
     /**
      * @dev Setup function for each test case
      */
@@ -28,7 +28,8 @@ contract ContestSubmissions is ContestBuilderTest {
     /**
      * @dev Use the builder to create a contest and test the fields
      */
-    function test__ContestSubmission() public {
+    function test__EntropyRateUpdate() public {
+        vm.stopPrank();
         // Deploy a contest to test the builder fields
         (address contest, , ) = contestBuilder.deployBaseContest(
             founder,
@@ -39,18 +40,21 @@ contract ContestSubmissions is ContestBuilderTest {
             contest_CultureIndexParams,
             baseContestParams
         );
-        // assert the cultureIndex of the baseContest's votingPower field is the same as the one in the contestBuilder
-        CultureIndex contestIndex = CultureIndex(address(baseContest.cultureIndex()));
 
-        // ensure piece was added to culture index
-        uint256 pieceId = createDefaultSubmission();
-        CultureIndex.ArtPiece memory createdPiece = contest_CultureIndex.getPieceById(pieceId);
+        // ensure founder can set entropyRateBps and that it is updated
+        BaseContest baseContest = BaseContest(contest);
+        uint256 newEntropyRate = 51000; // Example new entropy rate to test with
 
-        // Assert that the piece was created with the correct data
-        assertEq(createdPiece.metadata.name, "Vrbs Legend", "Piece name should match");
-        assertEq(createdPiece.metadata.description, "A vrbish masterpiece", "Piece description should match");
-        assertEq(createdPiece.metadata.image, "ipfs://vrbs", "Piece image should match");
-        assertEq(createdPiece.creators[0].creator, address(0x1), "Creator address should match");
-        assertEq(createdPiece.creators[0].bps, 10000, "Creator bps should match");
+        // Ensure only the owner can set the entropy rate
+        vm.expectRevert();
+        baseContest.setEntropyRate(newEntropyRate);
+
+        // Change to the owner to set the entropy rate
+        vm.prank(address(founder));
+        baseContest.setEntropyRate(newEntropyRate);
+
+        // Check that the entropy rate was successfully updated
+        uint256 actualEntropyRate = baseContest.entropyRate();
+        assertEq(actualEntropyRate, newEntropyRate, "Entropy rate was not updated correctly");
     }
 }
