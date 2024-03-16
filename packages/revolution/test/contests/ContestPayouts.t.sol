@@ -4,6 +4,7 @@ pragma solidity ^0.8.22;
 import { ContestBuilderTest } from "./ContestBuilder.t.sol";
 import { ICultureIndex } from "../../src/interfaces/ICultureIndex.sol";
 import { CultureIndex } from "../../src/culture-index/CultureIndex.sol";
+import { MaxHeap } from "../../src/culture-index/MaxHeap.sol";
 import { IBaseContest } from "../../src/culture-index/extensions/contests/IBaseContest.sol";
 import { BaseContest } from "../../src/culture-index/extensions/contests/BaseContest.sol";
 
@@ -93,6 +94,10 @@ contract ContestOwnerControl is ContestBuilderTest {
         vm.prank(founder);
         vm.expectRevert(IBaseContest.CONTEST_ALREADY_PAID_OUT.selector);
         baseContest.payOutWinners(1);
+
+        // check that cultureindex maxheap.size is 0 after paying out
+        CultureIndex contestIndex = CultureIndex(address(baseContest.cultureIndex()));
+        MaxHeap maxHeap = MaxHeap(address(contestIndex.maxHeap()));
     }
 
     event ReceiveETH(address indexed sender, uint256 amount);
