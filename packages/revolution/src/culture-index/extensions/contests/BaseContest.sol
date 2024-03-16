@@ -168,6 +168,15 @@ contract BaseContest is
     }
 
     /**
+     * @notice Unpause the BaseContest
+     * @dev This function can only be called by the owner when the
+     * contract is paused.
+     */
+    function unpause() external override onlyOwner {
+        _unpause();
+    }
+
+    /**
      * @notice Pays out the next up contest winner, the top voted submission in the CultureIndex
      * @dev Only callable by the owner.
      */
@@ -221,7 +230,7 @@ contract BaseContest is
      * @dev Only callable by the owner.
      * @param _payoutCount The number of winners to pay out. Needs to be adjusted based on gas requirements.
      */
-    function payOutWinners(uint256 _payoutCount) external onlyOwner nonReentrant whenNotPaused {
+    function payOutWinners(uint256 _payoutCount) external nonReentrant whenNotPaused {
         // Ensure the contest has not already paid out fully
         if (paidOut) revert CONTEST_ALREADY_PAID_OUT();
 
