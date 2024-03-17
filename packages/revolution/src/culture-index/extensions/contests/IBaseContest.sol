@@ -24,8 +24,8 @@ interface IBaseContestEvents {
         uint256 indexed pieceId,
         address[] winners,
         uint256 amount,
-        uint256 pointsPaidToCreators,
-        uint256 ethPaidToCreators
+        uint256 payoutSplit,
+        uint256 payoutIndex
     );
 
     event EntropyRateUpdated(uint256 rate);

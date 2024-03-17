@@ -183,7 +183,7 @@ contract BaseContest is
     function payoutNextSubmission() internal {
         try cultureIndex.dropTopVotedPiece() returns (ICultureIndex.ArtPieceCondensed memory artPiece) {
             // increment payout index
-            uint256 indexToPayOut = payoutIndex;
+            uint256 currentPayoutIndex = payoutIndex;
             payoutIndex++;
 
             // if we have reached the end of the payoutSplits, set paidOut to true
@@ -216,13 +216,32 @@ contract BaseContest is
                 address(0)
             );
 
-            // transfer ETH to split contract based on indexToPayout
-            uint256 amountToPay = (initialBalance * payoutSplits[indexToPayOut]) / PERCENTAGE_SCALE;
+            // transfer ETH to split contract based on currentPayoutIndex
+            uint256 payout = (initialBalance * payoutSplits[currentPayoutIndex]) / PERCENTAGE_SCALE;
 
-            _safeTransferETHWithFallback(splitToPay, amountToPay);
+            emit WinnerPaid(artPiece.pieceId, accounts, payout, payoutSplits[currentPayoutIndex], currentPayoutIndex);
+
+            _safeTransferETHWithFallback(splitToPay, payout);
         } catch {
             revert("dropTopVotedPiece failed");
         }
+    }
+
+    /**
+     * @notice Fetch an art piece by its ID.
+     * @param pieceId The ID of the art piece.
+     * @return The ArtPiece struct associated with the given ID.
+     */
+    function getArtPieceById(uint256 pieceId) external view returns (ICultureIndex.ArtPiece memory) {
+        return cultureIndex.getPieceById(pieceId);
+    }
+
+    /**
+     * @notice Returns true or false depending on whether the top voted piece in the culture index meets quorum
+     * @return True if the top voted piece meets quorum, false otherwise
+     */
+    function topVotedPieceMeetsQuorum() external view returns (bool) {
+        return cultureIndex.topVotedPieceMeetsQuorum();
     }
 
     /**
