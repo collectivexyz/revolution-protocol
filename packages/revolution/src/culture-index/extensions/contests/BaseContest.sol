@@ -128,8 +128,6 @@ contract BaseContest is
         __ReentrancyGuard_init();
         __Ownable_init(_initialOwner);
 
-        _pause();
-
         uint256 numPayoutSplits = _baseContestParams.payoutSplits.length;
 
         // check payout splits sum to PERCENTAGE_SCALE and ensure descending order
