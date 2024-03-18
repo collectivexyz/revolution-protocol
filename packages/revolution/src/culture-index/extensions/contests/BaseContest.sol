@@ -182,11 +182,14 @@ contract BaseContest is
      */
     function payoutNextSubmission() internal {
         try cultureIndex.dropTopVotedPiece() returns (ICultureIndex.ArtPieceCondensed memory artPiece) {
-            // increment payout index
+            // get index to pay out
             uint256 currentPayoutIndex = payoutIndex;
+            // increment payout index for next iteration
             payoutIndex++;
 
             // if we have reached the end of the payoutSplits, set paidOut to true
+            // effectively the same as currentPayoutIndex == payoutSplits.length - 1
+            // (payoutIndex starts at 0)
             if (payoutIndex == payoutSplits.length) {
                 paidOut = true;
             }
@@ -213,14 +216,16 @@ contract BaseContest is
                 accounts,
                 percentAllocations,
                 0,
+                // no controller on the split
                 address(0)
             );
 
-            // transfer ETH to split contract based on currentPayoutIndex
+            // calculate payout based on currentPayoutIndex
             uint256 payout = (initialBalance * payoutSplits[currentPayoutIndex]) / PERCENTAGE_SCALE;
 
             emit WinnerPaid(artPiece.pieceId, accounts, payout, payoutSplits[currentPayoutIndex], currentPayoutIndex);
 
+            // transfer ETH to split contract based on currentPayoutIndex
             _safeTransferETHWithFallback(splitToPay, payout);
         } catch {
             revert("dropTopVotedPiece failed");
@@ -264,8 +269,10 @@ contract BaseContest is
 
         // pay out _payoutCount winners
         for (uint256 i = 0; i < _payoutCount; i++) {
+            // if the contest is paid out - break
+            if (paidOut) break;
             // while the contract has balance and the contest has not been fully paid out
-            if (!paidOut) payoutNextSubmission();
+            payoutNextSubmission();
         }
     }
 
