@@ -56,14 +56,39 @@ contract ContestOwnerControl is ContestBuilderTest {
     }
 
     /**
+     * @dev Test to ensure only the owner can call pause
+     */
+    function test__PauseByOwnerOnly() public {
+        // Ensure non-owner cannot pause
+        address nonOwner = address(0x123);
+        vm.prank(nonOwner);
+        vm.expectRevert();
+        baseContest.pause();
+
+        // Ensure owner can pause
+        vm.prank(founder);
+        vm.expectEmit(true, false, false, true);
+        emit Paused(founder);
+        baseContest.pause();
+    }
+
+    /**
      * @dev Test to ensure only the owner can call unpause
      */
     function test__UnpauseByOwnerOnly() public {
+        //pause first
+        vm.prank(founder);
+        baseContest.pause();
+
         // Ensure non-owner cannot unpause
         address nonOwner = address(0x123);
         vm.prank(nonOwner);
         vm.expectRevert();
         baseContest.unpause();
+
+        // ensure contest cannot be paid out when paused
+        vm.expectRevert();
+        baseContest.payOutWinners(1);
 
         // Ensure owner can unpause
         vm.prank(founder);
@@ -71,6 +96,8 @@ contract ContestOwnerControl is ContestBuilderTest {
         emit Unpaused(founder);
         baseContest.unpause();
     }
+
+    event Paused(address account);
 
     event Unpaused(address account);
 }

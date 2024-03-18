@@ -20,6 +20,30 @@ contract ContestOwnerControl is ContestBuilderTest {
         super.setUp();
     }
 
+    function createThreeSubmissions() public {
+        createDefaultSubmission();
+        createContestSubmission(
+            "Second Submission",
+            "Second masterpiece",
+            ICultureIndex.MediaType.IMAGE,
+            "ipfs://second",
+            "",
+            "",
+            address(0x2),
+            10000
+        );
+        createContestSubmission(
+            "Third Submission",
+            "Third masterpiece",
+            ICultureIndex.MediaType.IMAGE,
+            "ipfs://third",
+            "",
+            "",
+            address(0x3),
+            10000
+        );
+    }
+
     function test__ContestPayoutRevertIfNotOver() public {
         super.setMockContestParams();
 
@@ -37,15 +61,6 @@ contract ContestOwnerControl is ContestBuilderTest {
         // Fast forward time to just before the contest ends
         vm.warp(baseContest.endTime() - 1);
 
-        // expect EnforcedPause() error
-        vm.prank(founder);
-        vm.expectRevert(abi.encodeWithSignature("EnforcedPause()"));
-        baseContest.payOutWinners(1);
-
-        // unpause as owner
-        vm.prank(founder);
-        baseContest.unpause();
-
         // Attempt to pay out winners just before contest ends by the owner
         vm.prank(founder);
         vm.expectRevert(IBaseContest.CONTEST_NOT_ENDED.selector);
@@ -59,7 +74,7 @@ contract ContestOwnerControl is ContestBuilderTest {
         baseContest.payOutWinners(1);
     }
 
-    function test__WinnerSplitReceivesCorrectETHAmount() public {
+    function test__WinnerSplit() public {
         super.setMockContestParams();
 
         super.deployContestMock();
@@ -77,10 +92,6 @@ contract ContestOwnerControl is ContestBuilderTest {
 
         // Fast forward time to after the contest ends
         vm.warp(baseContest.endTime() + 1);
-
-        // unpause
-        vm.prank(founder);
-        baseContest.unpause();
 
         // Pay out winners by the owner after contest ends
         vm.prank(founder);
@@ -113,7 +124,7 @@ contract ContestOwnerControl is ContestBuilderTest {
         assertEq(baseContest.payoutIndex(), 1, "Payout index should be 1");
     }
 
-    function test__MultiWinnerSplitReceivesCorrectETHAmount() public {
+    function test__MultiWinnerSplit() public {
         uint256 prizePoolAmount = 1.2 ether;
         super.setMockContestParams();
 
@@ -129,27 +140,7 @@ contract ContestOwnerControl is ContestBuilderTest {
         vm.stopPrank();
 
         // Create three default submissions and set them as the winners
-        createDefaultSubmission();
-        createContestSubmission(
-            "Second Submission",
-            "Second masterpiece",
-            ICultureIndex.MediaType.IMAGE,
-            "ipfs://second",
-            "",
-            "",
-            address(0x2),
-            10000
-        );
-        createContestSubmission(
-            "Third Submission",
-            "Third masterpiece",
-            ICultureIndex.MediaType.IMAGE,
-            "ipfs://third",
-            "",
-            "",
-            address(0x3),
-            10000
-        );
+        createThreeSubmissions();
 
         // Allocate ETH to the contest contract to simulate prize pool using vm.deal
         vm.deal(address(baseContest), prizePoolAmount);
@@ -158,10 +149,6 @@ contract ContestOwnerControl is ContestBuilderTest {
 
         // Fast forward time to after the contest ends
         vm.warp(baseContest.endTime() + 1);
-
-        // unpause
-        vm.prank(founder);
-        baseContest.unpause();
 
         // Calculate expected balances based on payout splits
         uint256 expectedWinner1Balance = (payoutMinusFee * payoutSplits[0]) / 1e6;
@@ -199,7 +186,7 @@ contract ContestOwnerControl is ContestBuilderTest {
         assertEq(baseContest.payoutIndex(), 3, "Payout index should be 3");
     }
 
-    function test__MultiCreatorSplitReceivesCorrectETHAmount() public {
+    function test__MultiWinnerMultiCreatorSplit() public {
         uint256 prizePoolAmount = 1.2 ether;
 
         super.setMockContestParams();
@@ -266,10 +253,6 @@ contract ContestOwnerControl is ContestBuilderTest {
         // Fast forward time to after the contest ends
         vm.warp(baseContest.endTime() + 1);
 
-        // unpause
-        vm.prank(founder);
-        baseContest.unpause();
-
         // Calculate expected balances based on payout splits
         uint256 expectedWinner1Balance = (payoutMinusFee * payoutSplits[0]) / 1e6;
         uint256 expectedWinner2Balance = (payoutMinusFee * payoutSplits[1]) / 1e6;
@@ -307,6 +290,85 @@ contract ContestOwnerControl is ContestBuilderTest {
 
         // ensure payoutIndex is 3
         assertEq(baseContest.payoutIndex(), 3, "Payout index should be 3");
+    }
+
+    function test__payOutWinners_NoCountSpecified() public {
+        super.setMockContestParams();
+        super.deployContestMock();
+
+        // add submission
+        createDefaultSubmission();
+
+        // Attempt to pay out winners with a count of 0, expecting a revert with NO_COUNT_SPECIFIED error
+        vm.prank(founder);
+        vm.expectRevert(IBaseContest.NO_COUNT_SPECIFIED.selector);
+        baseContest.payOutWinners(0);
+
+        // Further setup to ensure the contest can normally pay out
+        // Allocate ETH to the contest contract to simulate prize pool
+        uint256 prizePoolAmount = 10 ether;
+        vm.deal(address(baseContest), prizePoolAmount);
+
+        // Fast forward time to after the contest ends to meet contest end condition
+        vm.warp(baseContest.endTime() + 1);
+
+        // Attempt to pay out with a valid count after meeting conditions to ensure only the count check is causing revert
+        vm.prank(founder);
+        // Expecting not to revert here, but using try/catch to capture if it incorrectly reverts with NO_COUNT_SPECIFIED
+        baseContest.payOutWinners(1);
+    }
+
+    // test to ensure contest payout reverts if no balance
+    function test__payOutWinners_RevertIfNoBalance() public {
+        super.setMockContestParams();
+        super.deployContestMock();
+
+        // Ensure the contest has no balance
+        assertEq(address(baseContest).balance, 0, "Contest should have no balance");
+
+        // Fast forward time to after the contest ends to meet contest end condition
+        vm.warp(baseContest.endTime() + 1);
+
+        // Attempt to pay out winners when there is no balance, expecting a revert with NO_BALANCE_TO_PAYOUT error
+        vm.prank(founder);
+        vm.expectRevert(IBaseContest.NO_BALANCE_TO_PAYOUT.selector);
+        baseContest.payOutWinners(1);
+    }
+
+    function test__payoutSplitAccounts_SetCorrectly() public {
+        uint256 prizePoolAmount = 1.2 ether;
+
+        super.setMockContestParams();
+
+        uint256[] memory payoutSplits = new uint256[](3);
+        // Scaled by 1e6
+        payoutSplits[0] = 500000; // 50%
+        payoutSplits[1] = 300000; // 30%
+        payoutSplits[2] = 200000; // 20%
+
+        super.setBaseContestParams(500000, block.timestamp + 60 * 60 * 24 * 7, payoutSplits);
+
+        super.deployContestMock();
+        vm.stopPrank();
+
+        createThreeSubmissions();
+
+        // Allocate ETH to the contest contract to simulate prize pool
+        vm.deal(address(baseContest), prizePoolAmount);
+
+        // Fast forward time to after the contest ends
+        vm.warp(baseContest.endTime() + 1);
+
+        // Pay out winners by the owner after contest ends
+        vm.prank(founder);
+        baseContest.payOutWinners(3);
+
+        // Check that payoutSplitAccounts mapping is set correctly for each winner
+        for (uint256 i = 0; i < payoutSplits.length; i++) {
+            address splitAccount = baseContest.payoutSplitAccounts(i);
+            assertTrue(splitAccount != address(0), "Split account should be set");
+            // Further checks can be added here to validate the split configuration if needed
+        }
     }
 
     event ReceiveETH(address indexed sender, uint256 amount);

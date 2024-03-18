@@ -71,8 +71,12 @@ contract BaseContest is
     // The CultureIndex contract holding submissions
     ICultureIndex public cultureIndex;
 
-    // The contest payout splits
+    // The contest payout splits scaled by PERCENTAGE_SCALE in descending order
     uint256[] public payoutSplits;
+
+    // When the contest has been fully paid out, stores the payout split accounts
+    // for each winner
+    mapping(uint256 => address) public payoutSplitAccounts;
     ///                         IMMUTABLES                       ///
     ///                                                          ///
 
@@ -198,6 +202,7 @@ contract BaseContest is
             // effectively the same as currentPayoutIndex == payoutSplits.length - 1
             // (payoutIndex starts at 0)
             if (payoutIndex == payoutSplits.length) {
+                // set true so the payouts stop on the next loop iteration in `payOutWinners`
                 paidOut = true;
             }
 
@@ -226,6 +231,9 @@ contract BaseContest is
                 // no controller on the split
                 address(0)
             );
+
+            // Store the split contract address for the payout
+            payoutSplitAccounts[currentPayoutIndex] = splitToPay;
 
             // calculate payout based on currentPayoutIndex
             uint256 payout = (initialPayoutBalance * payoutSplits[currentPayoutIndex]) / PERCENTAGE_SCALE;
@@ -276,6 +284,9 @@ contract BaseContest is
      * @param _payoutCount The number of winners to pay out. Needs to be adjusted based on gas requirements.
      */
     function payOutWinners(uint256 _payoutCount) external nonReentrant whenNotPaused {
+        // ensure paying out at least one winner
+        if (_payoutCount == 0) revert NO_COUNT_SPECIFIED();
+
         // Ensure the contest has not already paid out fully
         if (paidOut) revert CONTEST_ALREADY_PAID_OUT();
 
