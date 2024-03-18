@@ -266,7 +266,6 @@ contract BaseContest is
 
     /**
      * @notice Pay out the contest winners
-     * @dev Only callable by the owner.
      * @param _payoutCount The number of winners to pay out. Needs to be adjusted based on gas requirements.
      */
     function payOutWinners(uint256 _payoutCount) external nonReentrant whenNotPaused {
