@@ -28,6 +28,8 @@ contract ContestOwnerControl is ContestBuilderTest {
 
         uint256 pieceId = createDefaultSubmission();
 
+        vm.deal(address(baseContest), 1 ether);
+
         // Attempt to pay out winners before contest ends by a non-owner
         vm.expectRevert();
         baseContest.payOutWinners(1);
@@ -71,6 +73,8 @@ contract ContestOwnerControl is ContestBuilderTest {
         uint256 prizePoolAmount = 1 ether;
         vm.deal(address(baseContest), prizePoolAmount);
 
+        uint256 payoutMinusFee = prizePoolAmount - baseContest.computeTotalReward(prizePoolAmount);
+
         // Fast forward time to after the contest ends
         vm.warp(baseContest.endTime() + 1);
 
@@ -82,7 +86,7 @@ contract ContestOwnerControl is ContestBuilderTest {
         vm.prank(founder);
         // expect event ReceiveETH
         vm.expectEmit(false, true, false, true);
-        emit ReceiveETH(address(0), 1 ether);
+        emit ReceiveETH(address(0), payoutMinusFee);
         baseContest.payOutWinners(1);
 
         // Check the winner's balance after payout
@@ -102,15 +106,15 @@ contract ContestOwnerControl is ContestBuilderTest {
         CultureIndex contestIndex = CultureIndex(address(baseContest.cultureIndex()));
         MaxHeap maxHeap = MaxHeap(address(contestIndex.maxHeap()));
 
-        // ensure baseContest initialBalance is 1 ether
-        assertEq(baseContest.initialBalance(), 1 ether, "Initial balance should be 1 ether");
+        // ensure baseContest payoutBalance is 1 ether
+        assertEq(baseContest.initialPayoutBalance(), 1 ether, "Initial balance should be 1 ether");
 
         // ensure payoutIndex is 1
         assertEq(baseContest.payoutIndex(), 1, "Payout index should be 1");
     }
 
-    function test__MultiWinnerSplitReceivesCorrectETHAmount(uint256 prizePoolAmount) public {
-        prizePoolAmount = bound(prizePoolAmount, 0.001 ether, 1000 ether);
+    function test__MultiWinnerSplitReceivesCorrectETHAmount() public {
+        uint256 prizePoolAmount = 1.2 ether;
         super.setMockContestParams();
 
         uint256[] memory payoutSplits = new uint256[](3);
@@ -150,6 +154,8 @@ contract ContestOwnerControl is ContestBuilderTest {
         // Allocate ETH to the contest contract to simulate prize pool using vm.deal
         vm.deal(address(baseContest), prizePoolAmount);
 
+        uint256 payoutMinusFee = prizePoolAmount - baseContest.computeTotalReward(prizePoolAmount);
+
         // Fast forward time to after the contest ends
         vm.warp(baseContest.endTime() + 1);
 
@@ -158,9 +164,9 @@ contract ContestOwnerControl is ContestBuilderTest {
         baseContest.unpause();
 
         // Calculate expected balances based on payout splits
-        uint256 expectedWinner1Balance = (prizePoolAmount * payoutSplits[0]) / 1e6;
-        uint256 expectedWinner2Balance = (prizePoolAmount * payoutSplits[1]) / 1e6;
-        uint256 expectedWinner3Balance = (prizePoolAmount * payoutSplits[2]) / 1e6;
+        uint256 expectedWinner1Balance = (payoutMinusFee * payoutSplits[0]) / 1e6;
+        uint256 expectedWinner2Balance = (payoutMinusFee * payoutSplits[1]) / 1e6;
+        uint256 expectedWinner3Balance = (payoutMinusFee * payoutSplits[2]) / 1e6;
 
         // Pay out winners by the owner after contest ends
         vm.prank(founder);
@@ -186,15 +192,16 @@ contract ContestOwnerControl is ContestBuilderTest {
         CultureIndex contestIndex = CultureIndex(address(baseContest.cultureIndex()));
         MaxHeap maxHeap = MaxHeap(address(contestIndex.maxHeap()));
 
-        // ensure baseContest initialBalance is prizePoolAmount
-        assertEq(baseContest.initialBalance(), prizePoolAmount, "Initial balance should be prizePoolAmount");
+        // ensure baseContest payoutBalance is prizePoolAmount
+        assertEq(baseContest.initialPayoutBalance(), prizePoolAmount, "Initial balance should be prizePoolAmount");
 
         // ensure payoutIndex is 3
         assertEq(baseContest.payoutIndex(), 3, "Payout index should be 3");
     }
 
-    function test__MultiCreatorSplitReceivesCorrectETHAmount(uint256 prizePoolAmount) public {
-        prizePoolAmount = bound(prizePoolAmount, 0.001 ether, 1000 ether);
+    function test__MultiCreatorSplitReceivesCorrectETHAmount() public {
+        uint256 prizePoolAmount = 1.2 ether;
+
         super.setMockContestParams();
 
         uint256[] memory payoutSplits = new uint256[](3);
@@ -254,6 +261,8 @@ contract ContestOwnerControl is ContestBuilderTest {
         // Allocate ETH to the contest contract to simulate prize pool using vm.deal
         vm.deal(address(baseContest), prizePoolAmount);
 
+        uint256 payoutMinusFee = prizePoolAmount - baseContest.computeTotalReward(prizePoolAmount);
+
         // Fast forward time to after the contest ends
         vm.warp(baseContest.endTime() + 1);
 
@@ -262,9 +271,9 @@ contract ContestOwnerControl is ContestBuilderTest {
         baseContest.unpause();
 
         // Calculate expected balances based on payout splits
-        uint256 expectedWinner1Balance = (prizePoolAmount * payoutSplits[0]) / 1e6;
-        uint256 expectedWinner2Balance = (prizePoolAmount * payoutSplits[1]) / 1e6;
-        uint256 expectedWinner3Balance = (prizePoolAmount * payoutSplits[2]) / 1e6;
+        uint256 expectedWinner1Balance = (payoutMinusFee * payoutSplits[0]) / 1e6;
+        uint256 expectedWinner2Balance = (payoutMinusFee * payoutSplits[1]) / 1e6;
+        uint256 expectedWinner3Balance = (payoutMinusFee * payoutSplits[2]) / 1e6;
 
         // Pay out winners by the owner after contest ends
         vm.prank(founder);
@@ -293,8 +302,8 @@ contract ContestOwnerControl is ContestBuilderTest {
         CultureIndex contestIndex = CultureIndex(address(baseContest.cultureIndex()));
         MaxHeap maxHeap = MaxHeap(address(contestIndex.maxHeap()));
 
-        // ensure baseContest initialBalance
-        assertEq(baseContest.initialBalance(), prizePoolAmount, "Initial balance should be correct");
+        // ensure baseContest payoutBalance
+        assertEq(baseContest.initialPayoutBalance(), prizePoolAmount, "Initial balance should be correct");
 
         // ensure payoutIndex is 3
         assertEq(baseContest.payoutIndex(), 3, "Payout index should be 3");

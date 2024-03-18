@@ -63,7 +63,7 @@ contract BaseContest is
     uint256 public payoutIndex;
 
     // The balance of the contract at the time the first winner is paid out
-    uint256 public initialBalance;
+    uint256 public initialPayoutBalance;
 
     // The SplitMain contract
     ISplitMain public splitMain;
@@ -221,12 +221,27 @@ contract BaseContest is
             );
 
             // calculate payout based on currentPayoutIndex
-            uint256 payout = (initialBalance * payoutSplits[currentPayoutIndex]) / PERCENTAGE_SCALE;
+            uint256 payout = (initialPayoutBalance * payoutSplits[currentPayoutIndex]) / PERCENTAGE_SCALE;
 
-            emit WinnerPaid(artPiece.pieceId, accounts, payout, payoutSplits[currentPayoutIndex], currentPayoutIndex);
+            // Send protocol rewards
+            uint256 payoutMinusFee = _handleRewardsAndGetValueToSend(
+                payout,
+                builderReward,
+                address(0),
+                cultureIndex.getPieceById(artPiece.pieceId).sponsor
+            );
+
+            emit WinnerPaid(
+                artPiece.pieceId,
+                accounts,
+                payoutMinusFee,
+                payout - payoutMinusFee,
+                payoutSplits[currentPayoutIndex],
+                currentPayoutIndex
+            );
 
             // transfer ETH to split contract based on currentPayoutIndex
-            _safeTransferETHWithFallback(splitToPay, payout);
+            _safeTransferETHWithFallback(splitToPay, payoutMinusFee);
         } catch {
             revert("dropTopVotedPiece failed");
         }
@@ -263,8 +278,14 @@ contract BaseContest is
         if (block.timestamp < endTime) revert CONTEST_NOT_ENDED();
 
         // Set initial balance if not already set
-        if (initialBalance == 0) {
-            initialBalance = address(this).balance;
+        if (initialPayoutBalance == 0) {
+            uint256 contractBalance = address(this).balance;
+
+            // if there's no balance to pay, don't let contest payout go through
+            if (contractBalance == 0) revert NO_BALANCE_TO_PAYOUT();
+
+            // store balance to pay out
+            initialPayoutBalance = contractBalance;
         }
 
         // pay out _payoutCount winners

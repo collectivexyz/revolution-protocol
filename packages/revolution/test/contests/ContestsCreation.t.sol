@@ -120,8 +120,8 @@ contract ContestsCreationTest is ContestBuilderTest {
         assertTrue(actualPaidOut == expectedPaidOut, "Contest should not be paid out yet");
 
         // Verify the initial balance of the contest is 0
-        uint256 expectedInitialBalance = 0;
-        uint256 actualInitialBalance = baseContest.initialBalance();
-        assertTrue(actualInitialBalance == expectedInitialBalance, "Initial balance should be 0");
+        uint256 expectedPayoutBalance = 0;
+        uint256 actualPayoutBalance = baseContest.initialPayoutBalance();
+        assertTrue(actualPayoutBalance == expectedPayoutBalance, "Payout balance should be 0");
     }
 }

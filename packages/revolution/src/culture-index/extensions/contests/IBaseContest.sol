@@ -24,6 +24,7 @@ interface IBaseContestEvents {
         uint256 indexed pieceId,
         address[] winners,
         uint256 amount,
+        uint256 protocolRewardsAmount,
         uint256 payoutSplit,
         uint256 payoutIndex
     );
@@ -59,6 +60,9 @@ interface IBaseContest is IBaseContestEvents {
 
     /// @dev Reverts if payoutSplits are not descending
     error PAYOUT_SPLITS_NOT_DESCENDING();
+
+    /// @dev Reverts if trying to payout contest with no balance
+    error NO_BALANCE_TO_PAYOUT();
 
     function setEntropyRate(uint256 _entropyRate) external;
 
