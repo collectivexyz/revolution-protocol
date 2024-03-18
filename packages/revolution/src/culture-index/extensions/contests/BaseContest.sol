@@ -175,6 +175,15 @@ contract BaseContest is
     }
 
     /**
+     * @notice Pause the contest to prevent payouts.
+     * @dev This function can only be called by the owner when the
+     * contract is unpaused.
+     */
+    function pause() external override onlyOwner {
+        _pause();
+    }
+
+    /**
      * @notice Pays out the next up contest winner, the top voted submission in the CultureIndex
      * @dev Only callable by the owner.
      */
