@@ -20,11 +20,14 @@ pragma solidity ^0.8.22;
 import { PausableUpgradeable } from "@openzeppelin/contracts-upgradeable/utils/PausableUpgradeable.sol";
 import { ReentrancyGuardUpgradeable } from "@openzeppelin/contracts-upgradeable/utils/ReentrancyGuardUpgradeable.sol";
 import { OwnableUpgradeable } from "@openzeppelin/contracts-upgradeable/access/OwnableUpgradeable.sol";
+import { Ownable2StepUpgradeable } from "@openzeppelin/contracts-upgradeable/access/Ownable2StepUpgradeable.sol";
 
 import { IBaseContest } from "./IBaseContest.sol";
 import { IWETH } from "../../../interfaces/IWETH.sol";
 import { ICultureIndex } from "../../../interfaces/ICultureIndex.sol";
+import { IRevolutionPointsEmitter } from "../../../interfaces/IRevolutionPointsEmitter.sol";
 import { RevolutionVersion } from "../../../version/RevolutionVersion.sol";
+import { ISplitMain } from "@cobuild/splits/src/interfaces/ISplitMain.sol";
 
 import { UUPS } from "@cobuild/utility-contracts/src/proxy/UUPS.sol";
 import { IUpgradeManager } from "@cobuild/utility-contracts/src/interfaces/IUpgradeManager.sol";
@@ -77,6 +80,8 @@ contract BaseContest is
     // When the contest has been fully paid out, stores the payout split accounts
     // for each winner
     mapping(uint256 => address) public payoutSplitAccounts;
+
+    ///                                                          ///
     ///                         IMMUTABLES                       ///
     ///                                                          ///
 
@@ -179,6 +184,44 @@ contract BaseContest is
     }
 
     /**
+     * @notice Emergency withdraw ETH from the contract to the points emitter owner.
+     * @dev This function can only be called by the owner if the contest has not been paid out.
+     */
+    function emergencyWithdraw() external onlyOwner nonReentrant {
+        // Ensure the contract has enough ETH to transfer
+        if (address(this).balance == 0) revert NO_BALANCE_TO_WITHDRAW();
+
+        // Ensure the contest has not been fully paid out
+        if (paidOut) revert CONTEST_ALREADY_PAID_OUT();
+
+        // Transfer the ETH to the points emitter owner
+        _safeTransferETHWithFallback(
+            Ownable2StepUpgradeable(address(ISplitMain(splitMain).pointsEmitter())).owner(),
+            address(this).balance
+        );
+    }
+
+    /**
+     * @notice Withdraw ETH balance to points emitter owner (DAO executor).
+     * @dev This function can be called by anyone if the contest is over.
+     * @dev Useful eg: in case the contest contract is used as the recipient of free mint protocol rewards
+     * for submissions, and members want to withdraw the rewards post-payout to the DAO executor.
+     */
+    function withdrawToPointsEmitterOwner() external nonReentrant {
+        // Ensure the contract has enough ETH to transfer
+        if (address(this).balance == 0) revert NO_BALANCE_TO_WITHDRAW();
+
+        // Ensure the contest has been paid out
+        if (!paidOut) revert CONTEST_NOT_ENDED();
+
+        // Transfer the ETH to the points emitter owner
+        _safeTransferETHWithFallback(
+            Ownable2StepUpgradeable(address(ISplitMain(splitMain).pointsEmitter())).owner(),
+            address(this).balance
+        );
+    }
+
+    /**
      * @notice Pause the contest to prevent payouts.
      * @dev This function can only be called by the owner when the
      * contract is unpaused.
@@ -214,7 +257,7 @@ contract BaseContest is
             // iterate over numCreators and populate accounts and percentAllocations
             for (uint256 i = 0; i < numCreators; i++) {
                 accounts[i] = artPiece.creators[i].creator;
-                // PERCENTAGE_SCALE is 1e6, art piece scale is 1e4, so we multiply by 1e2
+                // PERCENTAGE_SCALE is 1e6, CultureIndex scale is 1e4, so we multiply by 1e2
                 percentAllocations[i] = uint32(artPiece.creators[i].bps * 1e2);
             }
 

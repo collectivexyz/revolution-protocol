@@ -67,6 +67,9 @@ interface IBaseContest is IBaseContestEvents {
     /// @dev Reverts if trying to payout with no winners specified
     error NO_COUNT_SPECIFIED();
 
+    /// @dev Reverts if no balance to withdraw
+    error NO_BALANCE_TO_WITHDRAW();
+
     function setEntropyRate(uint256 _entropyRate) external;
 
     function WETH() external view returns (address);
