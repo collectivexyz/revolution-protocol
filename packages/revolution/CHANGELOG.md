@@ -1,5 +1,12 @@
 # @collectivexyz/revolution
 
+## 0.4.8
+
+### Patch Changes
+
+- 392f7a4: add Contests extension
+- 796cc43: snapshot points
+
 ## 0.4.7
 
 ### Patch Changes
