@@ -169,3 +169,29 @@
 | isDataURIEnabled | bool   | 0    | 0      | 1     | src/Descriptor.sol:Descriptor |
 | baseURI          | string | 1    | 0      | 32    | src/Descriptor.sol:Descriptor |
 | tokenNamePrefix  | string | 2    | 0      | 32    | src/Descriptor.sol:Descriptor |
+
+=======================
+➡ BaseContest
+=======================
+
+| Name                 | Type                        | Slot | Offset | Bytes | Contract                                                          |
+|----------------------|-----------------------------|------|--------|-------|-------------------------------------------------------------------|
+| WETH                 | address                     | 0    | 0      | 20    | src/culture-index/extensions/contests/BaseContest.sol:BaseContest |
+| entropyRate          | uint256                     | 1    | 0      | 32    | src/culture-index/extensions/contests/BaseContest.sol:BaseContest |
+| builderReward        | address                     | 2    | 0      | 20    | src/culture-index/extensions/contests/BaseContest.sol:BaseContest |
+| endTime              | uint256                     | 3    | 0      | 32    | src/culture-index/extensions/contests/BaseContest.sol:BaseContest |
+| paidOut              | bool                        | 4    | 0      | 1     | src/culture-index/extensions/contests/BaseContest.sol:BaseContest |
+| payoutIndex          | uint256                     | 5    | 0      | 32    | src/culture-index/extensions/contests/BaseContest.sol:BaseContest |
+| initialPayoutBalance | uint256                     | 6    | 0      | 32    | src/culture-index/extensions/contests/BaseContest.sol:BaseContest |
+| splitMain            | contract ISplitMain         | 7    | 0      | 20    | src/culture-index/extensions/contests/BaseContest.sol:BaseContest |
+| cultureIndex         | contract ICultureIndex      | 8    | 0      | 20    | src/culture-index/extensions/contests/BaseContest.sol:BaseContest |
+| payoutSplits         | uint256[]                   | 9    | 0      | 32    | src/culture-index/extensions/contests/BaseContest.sol:BaseContest |
+| payoutSplitAccounts  | mapping(uint256 => address) | 10   | 0      | 32    | src/culture-index/extensions/contests/BaseContest.sol:BaseContest |
+
+=======================
+➡ ContestBuilder
+=======================
+
+| Name      | Type                                         | Slot | Offset | Bytes | Contract                                                                |
+|-----------|----------------------------------------------|------|--------|-------|-------------------------------------------------------------------------|
+| isUpgrade | mapping(address => mapping(address => bool)) | 0    | 0      | 32    | src/culture-index/extensions/contests/ContestBuilder.sol:ContestBuilder |

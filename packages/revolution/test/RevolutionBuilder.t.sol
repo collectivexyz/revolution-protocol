@@ -381,6 +381,7 @@ contract RevolutionBuilderTest is Test {
     RevolutionPointsEmitter internal revolutionPointsEmitter;
     MaxHeap internal maxHeap;
     RevolutionVotingPower internal revolutionVotingPower;
+    SplitMain internal splitMain;
 
     function setMockParams() internal virtual {
         setMockRevolutionTokenParams();
@@ -436,6 +437,7 @@ contract RevolutionBuilderTest is Test {
         revolutionPointsEmitter = RevolutionPointsEmitter(_addresses.revolutionPointsEmitter);
         maxHeap = MaxHeap(_addresses.maxHeap);
         revolutionVotingPower = RevolutionVotingPower(_addresses.revolutionVotingPower);
+        splitMain = SplitMain(payable(_addresses.splitsCreator));
 
         // ensure the points is initialized before ops - might fail if another contract fails to initialize
         if (address(revolutionPoints) != address(0)) {
@@ -459,6 +461,7 @@ contract RevolutionBuilderTest is Test {
         vm.label(address(revolutionPointsEmitter), "POINTS_EMITTER");
         vm.label(address(maxHeap), "MAX_HEAP");
         vm.label(address(revolutionVotingPower), "VOTING_POWER");
+        vm.label(address(splitMain), "SPLIT_MAIN");
     }
 
     ///                                                          ///
