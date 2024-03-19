@@ -185,14 +185,11 @@ contract BaseContest is
 
     /**
      * @notice Emergency withdraw ETH from the contract to the points emitter owner.
-     * @dev This function can only be called by the owner if the contest has not been paid out.
+     * @dev This function can only be called by the owner.
      */
     function emergencyWithdraw() external onlyOwner nonReentrant {
         // Ensure the contract has enough ETH to transfer
         if (address(this).balance == 0) revert NO_BALANCE_TO_WITHDRAW();
-
-        // Ensure the contest has not been fully paid out
-        if (paidOut) revert CONTEST_ALREADY_PAID_OUT();
 
         // Transfer the ETH to the points emitter owner
         _safeTransferETHWithFallback(
@@ -211,7 +208,7 @@ contract BaseContest is
         // Ensure the contract has enough ETH to transfer
         if (address(this).balance == 0) revert NO_BALANCE_TO_WITHDRAW();
 
-        // Ensure the contest has been paid out
+        // Ensure the contest has been paid out, since anyone can call this function
         if (!paidOut) revert CONTEST_NOT_ENDED();
 
         // Transfer the ETH to the points emitter owner

@@ -20,30 +20,6 @@ contract ContestOwnerControl is ContestBuilderTest {
         super.setUp();
     }
 
-    function createThreeSubmissions() public {
-        createDefaultSubmission();
-        createContestSubmission(
-            "Second Submission",
-            "Second masterpiece",
-            ICultureIndex.MediaType.IMAGE,
-            "ipfs://second",
-            "",
-            "",
-            address(0x2),
-            10000
-        );
-        createContestSubmission(
-            "Third Submission",
-            "Third masterpiece",
-            ICultureIndex.MediaType.IMAGE,
-            "ipfs://third",
-            "",
-            "",
-            address(0x3),
-            10000
-        );
-    }
-
     function test__ContestPayoutRevertIfNotOver() public {
         super.setMockContestParams();
 
