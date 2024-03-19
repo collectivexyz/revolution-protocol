@@ -20,6 +20,9 @@ export default defineConfig({
         "RevolutionVotingPower",
         "RevolutionToken",
         "RevolutionDAOLogicV1",
+        // extensions
+        "ContestBuilder",
+        "BaseContest",
       ].map((contractName) => `${contractName}.json`),
     }),
   ],
