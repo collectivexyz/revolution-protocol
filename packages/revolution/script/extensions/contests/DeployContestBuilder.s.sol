@@ -5,11 +5,11 @@ import { console2 } from "forge-std/console2.sol";
 import { Script } from "forge-std/Script.sol";
 import { Strings } from "@openzeppelin/contracts/utils/Strings.sol";
 
-import { ContestBuilder } from "../ContestBuilder.sol";
-import { IContestBuilder } from "../IContestBuilder.sol";
-import { BaseContest } from "../BaseContest.sol";
-import { CultureIndex } from "../../../CultureIndex.sol";
-import { MaxHeap } from "../../../MaxHeap.sol";
+import { ContestBuilder } from "../../../src/culture-index/extensions/contests/ContestBuilder.sol";
+import { IContestBuilder } from "../../../src/culture-index/extensions/contests/IContestBuilder.sol";
+import { BaseContest } from "../../../src/culture-index/extensions/contests/BaseContest.sol";
+import { CultureIndex } from "../../../src/culture-index/CultureIndex.sol";
+import { MaxHeap } from "../../../src/culture-index/MaxHeap.sol";
 import { ERC1967Proxy } from "@cobuild/utility-contracts/src/proxy/ERC1967Proxy.sol";
 import { SplitMain } from "@cobuild/splits/src/SplitMain.sol";
 
