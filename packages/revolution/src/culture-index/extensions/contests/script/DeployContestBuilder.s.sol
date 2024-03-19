@@ -92,7 +92,7 @@ contract DeployContestBuilder is Script {
     }
 
     function writeDeploymentDetailsToFile(uint256 chainID) private {
-        string memory filePath = string(abi.encodePacked("deploys/", chainID.toString(), ".txt"));
+        string memory filePath = string(abi.encodePacked("deploys/extensions/contests/", chainID.toString(), ".txt"));
 
         vm.writeFile(filePath, "");
         vm.writeLine(
