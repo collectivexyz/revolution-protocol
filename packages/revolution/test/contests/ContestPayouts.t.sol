@@ -409,5 +409,45 @@ contract ContestOwnerControl is ContestBuilderTest {
         }
     }
 
+    // ensures that if there are eg: 10 payoutSplits but only 3 submissions, the 3 submissions can still be paid out
+    // and the owner can withdraw the remaining funds
+    function test__payOutWinners_WithRemainingFunds() public {
+        uint256 prizePoolAmount = 1 ether;
+        super.setMockContestParams();
+
+        uint256[] memory payoutSplits = new uint256[](10);
+        // Scaled by 1e6
+        for (uint256 i = 0; i < payoutSplits.length; i++) {
+            payoutSplits[i] = 100000; // 10% for each
+        }
+
+        super.setBaseContestParams(500000, block.timestamp + 60 * 60 * 24 * 7, payoutSplits);
+
+        super.deployContestMock();
+
+        // Create three submissions
+        createThreeSubmissions();
+
+        // Allocate ETH to the contest contract to simulate prize pool
+        vm.deal(address(baseContest), prizePoolAmount);
+
+        // Fast forward time to after the contest ends
+        vm.warp(baseContest.endTime() + 1);
+
+        // Pay out winners by the owner after contest ends
+        vm.prank(founder);
+        baseContest.payOutWinners(3);
+
+        // Assert that contest has remaining funds
+        assertTrue(address(baseContest).balance > 0, "Contest should have remaining funds");
+
+        // Withdraw remaining funds to the owner
+        vm.prank(founder);
+        baseContest.emergencyWithdraw();
+
+        // Assert that contest balance is now 0
+        assertEq(address(baseContest).balance, 0, "Contest balance should be 0 after withdrawal");
+    }
+
     event ReceiveETH(address indexed sender, uint256 amount);
 }
