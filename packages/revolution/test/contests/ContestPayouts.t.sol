@@ -7,6 +7,7 @@ import { CultureIndex } from "../../src/culture-index/CultureIndex.sol";
 import { MaxHeap } from "../../src/culture-index/MaxHeap.sol";
 import { IBaseContest } from "../../src/culture-index/extensions/contests/IBaseContest.sol";
 import { BaseContest } from "../../src/culture-index/extensions/contests/BaseContest.sol";
+import { ISplitMain } from "@cobuild/splits/src/interfaces/ISplitMain.sol";
 
 /**
  * @title ContestOwnerControl
@@ -338,6 +339,67 @@ contract ContestOwnerControl is ContestBuilderTest {
         // Pay out winners by the owner after contest ends
         vm.prank(founder);
         baseContest.payOutWinners(3);
+
+        // Check that payoutSplitAccounts mapping is set correctly for each winner
+        for (uint256 i = 0; i < payoutSplits.length; i++) {
+            address splitAccount = baseContest.payoutSplitAccounts(i);
+            assertTrue(splitAccount != address(0), "Split account should be set");
+            // Further checks can be added here to validate the split configuration if needed
+        }
+    }
+
+    // create a split on split main, and then create a submission with the same split, and ensure payout works for the contest
+    function test__payoutSplitAccounts_SetCorrectlyWithSplitMain() public {
+        uint256 prizePoolAmount = 1.2 ether;
+
+        super.setMockContestParams();
+
+        uint256[] memory payoutSplits = new uint256[](1);
+        // Scaled by 1e6
+        payoutSplits[0] = 1e6; // 50%
+
+        super.setBaseContestParams(500000, block.timestamp + 60 * 60 * 24 * 7, payoutSplits);
+
+        super.deployContestMock();
+        vm.stopPrank();
+
+        // set entropy rate to 1e6 / 2
+        vm.prank(founder);
+        baseContest.setEntropyRate(500000);
+
+        (
+            address[] memory accounts,
+            uint32[] memory percentAllocations,
+            uint32 distributorFee,
+            address controller,
+            uint32[] memory pointsAllocations,
+            ISplitMain.PointsData memory pointsData
+        ) = setupBasicSplit();
+
+        // create a split on split main
+        splitMain.createSplit(pointsData, accounts, percentAllocations, distributorFee, controller);
+
+        // create a submission with the split
+        createContestSubmission(
+            "Third Submission",
+            "Third masterpiece",
+            ICultureIndex.MediaType.IMAGE,
+            "ipfs://third",
+            "",
+            "",
+            address(0x3),
+            10000
+        );
+
+        // Allocate ETH to the contest contract to simulate prize pool
+        vm.deal(address(baseContest), prizePoolAmount);
+
+        // Fast forward time to after the contest ends
+        vm.warp(baseContest.endTime() + 1);
+
+        // Pay out winners by the owner after contest ends
+        vm.prank(founder);
+        baseContest.payOutWinners(1);
 
         // Check that payoutSplitAccounts mapping is set correctly for each winner
         for (uint256 i = 0; i < payoutSplits.length; i++) {

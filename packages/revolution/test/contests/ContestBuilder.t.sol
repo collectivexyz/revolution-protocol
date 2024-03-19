@@ -13,6 +13,7 @@ import { ERC1967Proxy } from "@cobuild/utility-contracts/src/proxy/ERC1967Proxy.
 import { RevolutionBuilderTest } from "../RevolutionBuilder.t.sol";
 import { CultureIndex } from "../../src/culture-index/CultureIndex.sol";
 import { MaxHeap } from "../../src/culture-index/MaxHeap.sol";
+import { ISplitMain } from "@cobuild/splits/src/interfaces/ISplitMain.sol";
 
 import { MockERC721 } from "../mock/MockERC721.sol";
 import { MockERC1155 } from "../mock/MockERC1155.sol";
@@ -291,5 +292,38 @@ contract ContestBuilderTest is RevolutionBuilderTest {
             address(0x3),
             10000
         );
+    }
+
+    function setupBasicSplit()
+        internal
+        returns (
+            address[] memory accounts,
+            uint32[] memory percentAllocations,
+            uint32 distributorFee,
+            address controller,
+            uint32[] memory pointsAllocations,
+            ISplitMain.PointsData memory pointsData
+        )
+    {
+        accounts = new address[](1);
+        address recipient = payable(address(0x3));
+        accounts[0] = recipient;
+
+        percentAllocations = new uint32[](1);
+        percentAllocations[0] = uint32(1e6);
+
+        distributorFee = 0;
+        controller = address(0);
+
+        pointsAllocations = new uint32[](1);
+        pointsAllocations[0] = 1e6;
+
+        pointsData = ISplitMain.PointsData({
+            pointsPercent: 1e6 / 2,
+            accounts: accounts,
+            percentAllocations: pointsAllocations
+        });
+
+        return (accounts, percentAllocations, distributorFee, controller, pointsAllocations, pointsData);
     }
 }

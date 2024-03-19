@@ -268,8 +268,8 @@ contract BaseContest is
                 accounts,
                 percentAllocations,
                 0,
-                // no controller on the split
-                address(0)
+                // controller set to owner of SplitMain PointsEmitter - DAO executor
+                Ownable2StepUpgradeable(address(ISplitMain(splitMain).pointsEmitter())).owner()
             );
 
             // Store the split contract address for the payout
