@@ -1,0 +1,16 @@
+{
+  "BuilderProxy": "0x30b54e00d54c844025fa0d73da99056c64ffa7a4",
+  "RevolutionToken": "0xb61393723755a6bc875d0862d7c31662b20e691a",
+  "Descriptor": "0x53c664105cae7b94376fc7a36a326dfe328fb6fd",
+  "Auction": "0x1367c624dbdabc54f64f1c59014745c081da4dfe",
+  "Executor": "0xf871d922d69a3462c3d2328a0501422eec83c5c1",
+  "DAO": "0x67070b533477d2a07a073ec0ab491f19d1d21b49",
+  "Builder": "0x599401b25e6bd021b22561922bc191fbbab8d6a8",
+  "CultureIndex": "0x5bf8a496f96be901a630f6d7e8752ff3402fa17f",
+  "MaxHeap": "0x49a10e8a08e4cbf06c76367f8931c7c17d21d02e",
+  "Points": "0xbf7e0afa290aee0632b6d31d3f8f86eb565f390c",
+  "PointsEmitter": "0x4e61c1f0d9f6202a67645e12be9274703190f85c",
+  "RevolutionVotingPower": "0x88048ca54cad899b975f5dd9ad446fd5cdf53da5",
+  "VRGDAC": "0xc4d4ca5eedd3991f76fb9ec9a36ca2d9b1824879",
+  "SplitMain": "0xed8eba608fcadea7420cd247b7e786cb2d721074"
+}
