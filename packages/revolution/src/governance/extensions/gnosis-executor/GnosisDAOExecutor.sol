@@ -100,7 +100,7 @@ contract GnosisDAOExecutor is Initializable, RevolutionVersion, UUPS, Revolution
     ///                                                          ///
 
     /// @param _manager The contract upgrade manager address
-    constructor(address _manager) payable RevolutionExtension("gnosis.avatar.executor") initializer {
+    constructor(address _manager) payable RevolutionExtension("gnosis.avatar.executor.1") initializer {
         manager = IUpgradeManager(_manager);
     }
 
