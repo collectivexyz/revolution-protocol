@@ -30,12 +30,14 @@
 
 pragma solidity ^0.8.22;
 
+import { UUPS } from "@cobuild/utility-contracts/src/proxy/UUPS.sol";
 import { Initializable } from "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
-import { IRevolutionBuilder } from "../../../interfaces/IRevolutionBuilder.sol";
 import { IAvatar } from "@gnosis.pm/zodiac/contracts/interfaces/IAvatar.sol";
 import { Enum } from "@gnosis.pm/safe-contracts/contracts/common/Enum.sol";
+import { RevolutionVersion } from "../../../version/RevolutionVersion.sol";
+import { IUpgradeManager } from "@cobuild/utility-contracts/src/interfaces/IUpgradeManager.sol";
 
-contract DAOExecutor is Initializable {
+contract GnosisDAOExecutor is Initializable, RevolutionVersion, UUPS {
     event NewAdmin(address indexed newAdmin);
     event NewAvatar(address indexed avatar);
     event NewPendingAdmin(address indexed newPendingAdmin);
@@ -77,7 +79,7 @@ contract DAOExecutor is Initializable {
     ///                                                          ///
 
     /// @notice The contract upgrade manager
-    IRevolutionBuilder private immutable manager;
+    IUpgradeManager private immutable manager;
 
     uint256 public constant GRACE_PERIOD = 14 days;
     uint256 public constant MINIMUM_DELAY = 2 days;
@@ -97,8 +99,8 @@ contract DAOExecutor is Initializable {
     ///                                                          ///
 
     /// @param _manager The contract upgrade manager address
-    constructor(address _manager) initializer {
-        manager = IRevolutionBuilder(_manager);
+    constructor(address _manager) payable initializer {
+        manager = IUpgradeManager(_manager);
     }
 
     ///                                                          ///
@@ -108,6 +110,7 @@ contract DAOExecutor is Initializable {
     /// @notice Initializes an instance of a DAO's treasury
     /// @param _admin The DAO's address
     /// @param _timelockDelay The time delay to execute a queued transaction
+    /// @param _avatar The DAO's safe avatar address
     function initialize(address _admin, uint256 _timelockDelay, address _avatar) external initializer {
         require(_timelockDelay >= MINIMUM_DELAY, "DAOExecutor::constructor: Delay must exceed minimum delay.");
         require(_timelockDelay <= MAXIMUM_DELAY, "DAOExecutor::setDelay: Delay must not exceed maximum delay.");
@@ -227,5 +230,20 @@ contract DAOExecutor is Initializable {
     function getBlockTimestamp() internal view returns (uint256) {
         // solium-disable-next-line security/no-block-members
         return block.timestamp;
+    }
+
+    ///                                                          ///
+    ///                       EXECUTOR UPGRADE                   ///
+    ///                                                          ///
+
+    /// @notice Ensures the caller is authorized to upgrade the contract and that the new implementation is valid
+    /// @dev This function is called in `upgradeTo` & `upgradeToAndCall`
+    /// @param _newImpl The new implementation address
+    function _authorizeUpgrade(address _newImpl) internal view override {
+        // Ensure the caller is the treasury itself
+        require(msg.sender == address(this), "DAOExecutor::_authorizeUpgrade: Caller must be the DAOExecutor");
+
+        // Ensure the new implementation is a registered upgrade
+        if (!manager.isRegisteredUpgrade(_getImplementation(), _newImpl)) revert INVALID_UPGRADE(_newImpl);
     }
 }

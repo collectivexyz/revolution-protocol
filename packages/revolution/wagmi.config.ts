@@ -23,6 +23,7 @@ export default defineConfig({
         // extensions
         "ContestBuilder",
         "BaseContest",
+        "GnosisDAOExecutor",
       ].map((contractName) => `${contractName}.json`),
     }),
   ],
