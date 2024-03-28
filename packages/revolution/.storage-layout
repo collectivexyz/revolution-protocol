@@ -195,3 +195,15 @@
 | Name      | Type                                         | Slot | Offset | Bytes | Contract                                                                |
 |-----------|----------------------------------------------|------|--------|-------|-------------------------------------------------------------------------|
 | isUpgrade | mapping(address => mapping(address => bool)) | 0    | 0      | 32    | src/culture-index/extensions/contests/ContestBuilder.sol:ContestBuilder |
+
+=======================
+➡ GnosisDAOExecutor
+=======================
+
+| Name               | Type                     | Slot | Offset | Bytes | Contract                                                                          |
+|--------------------|--------------------------|------|--------|-------|-----------------------------------------------------------------------------------|
+| admin              | address                  | 0    | 0      | 20    | src/governance/extensions/gnosis-executor/GnosisDAOExecutor.sol:GnosisDAOExecutor |
+| avatar             | address                  | 1    | 0      | 20    | src/governance/extensions/gnosis-executor/GnosisDAOExecutor.sol:GnosisDAOExecutor |
+| pendingAdmin       | address                  | 2    | 0      | 20    | src/governance/extensions/gnosis-executor/GnosisDAOExecutor.sol:GnosisDAOExecutor |
+| delay              | uint256                  | 3    | 0      | 32    | src/governance/extensions/gnosis-executor/GnosisDAOExecutor.sol:GnosisDAOExecutor |
+| queuedTransactions | mapping(bytes32 => bool) | 4    | 0      | 32    | src/governance/extensions/gnosis-executor/GnosisDAOExecutor.sol:GnosisDAOExecutor |
