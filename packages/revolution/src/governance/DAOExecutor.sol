@@ -33,8 +33,9 @@ pragma solidity ^0.8.22;
 import { Initializable } from "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
 import { RevolutionVersion } from "../version/RevolutionVersion.sol";
 import { IUpgradeManager } from "@cobuild/utility-contracts/src/interfaces/IUpgradeManager.sol";
+import { UUPS } from "@cobuild/utility-contracts/src/proxy/UUPS.sol";
 
-contract DAOExecutor is Initializable, RevolutionVersion {
+contract DAOExecutor is Initializable, RevolutionVersion, UUPS {
     event NewAdmin(address indexed newAdmin);
     event NewPendingAdmin(address indexed newPendingAdmin);
     event NewDelay(uint256 indexed newDelay);
@@ -209,4 +210,19 @@ contract DAOExecutor is Initializable, RevolutionVersion {
     receive() external payable {}
 
     fallback() external payable {}
+
+    ///                                                          ///
+    ///                       EXECUTOR UPGRADE                   ///
+    ///                                                          ///
+
+    /// @notice Ensures the caller is authorized to upgrade the contract and that the new implementation is valid
+    /// @dev This function is called in `upgradeTo` & `upgradeToAndCall`
+    /// @param _newImpl The new implementation address
+    function _authorizeUpgrade(address _newImpl) internal view override {
+        // Ensure the caller is the treasury itself
+        require(msg.sender == address(this), "DAOExecutor::_authorizeUpgrade: Caller must be the DAOExecutor");
+
+        // Ensure the new implementation is a registered upgrade
+        if (!manager.isRegisteredUpgrade(_getImplementation(), _newImpl)) revert INVALID_UPGRADE(_newImpl);
+    }
 }

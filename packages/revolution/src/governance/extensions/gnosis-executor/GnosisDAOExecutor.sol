@@ -36,8 +36,9 @@ import { IAvatar } from "@gnosis.pm/zodiac/contracts/interfaces/IAvatar.sol";
 import { Enum } from "@gnosis.pm/safe-contracts/contracts/common/Enum.sol";
 import { RevolutionVersion } from "../../../version/RevolutionVersion.sol";
 import { IUpgradeManager } from "@cobuild/utility-contracts/src/interfaces/IUpgradeManager.sol";
+import { RevolutionExtension } from "../../../version/RevolutionExtension.sol";
 
-contract GnosisDAOExecutor is Initializable, RevolutionVersion, UUPS {
+contract GnosisDAOExecutor is Initializable, RevolutionVersion, UUPS, RevolutionExtension {
     event NewAdmin(address indexed newAdmin);
     event NewAvatar(address indexed avatar);
     event NewPendingAdmin(address indexed newPendingAdmin);
@@ -99,7 +100,7 @@ contract GnosisDAOExecutor is Initializable, RevolutionVersion, UUPS {
     ///                                                          ///
 
     /// @param _manager The contract upgrade manager address
-    constructor(address _manager) payable initializer {
+    constructor(address _manager) payable RevolutionExtension("gnosis.avatar.executor") initializer {
         manager = IUpgradeManager(_manager);
     }
 
