@@ -24,7 +24,7 @@ contract VotingPowerTest is RevolutionBuilderTest {
         cultureIndex.transferOwnership(address(executor));
 
         //start prank to be cultureindex's owner
-        vm.startPrank(address(executor));
+        vm.prank(address(executor));
         // accept ownership
         cultureIndex.acceptOwnership();
     }
