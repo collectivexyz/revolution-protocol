@@ -1,2 +1,2 @@
-DAO Executor Upgrade implementation: 0xeeece1315b35733c1274b82c36217ad380c2b807
-Builder implementation: 0x9994f3402abb2ac64f4d9ea7c92b180cb7480dc7
+DAO Executor Upgrade implementation: 0x36ecc90668b2d35a7918a5065f0ec035247af876
+Builder implementation: 0x679e093697efce68f851e163c24cede2b7d09671
