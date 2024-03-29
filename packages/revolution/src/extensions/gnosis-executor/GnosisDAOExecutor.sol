@@ -138,7 +138,8 @@ contract GnosisDAOExecutor is IDAOExecutor, Initializable, RevolutionVersion, UU
         avatar = initData.avatar;
     }
 
-    function setDelay(uint256 delay_) public onlyAvatar {
+    function setDelay(uint256 delay_) public {
+        require(msg.sender == address(this), "DAOExecutor::setDelay: Call must come from DAOExecutor.");
         require(delay_ >= MINIMUM_DELAY, "DAOExecutor::setDelay: Delay must exceed minimum delay.");
         require(delay_ <= MAXIMUM_DELAY, "DAOExecutor::setDelay: Delay must not exceed maximum delay.");
         delay = delay_;
