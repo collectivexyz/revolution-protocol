@@ -86,7 +86,7 @@ contract GnosisDAOExecutor is IDAOExecutor, Initializable, RevolutionVersion, UU
     ///                                                          ///
 
     /// @notice The contract upgrade manager
-    IUpgradeManager private immutable manager;
+    IUpgradeManager public immutable manager;
 
     uint256 public constant GRACE_PERIOD = 14 days;
     uint256 public constant MINIMUM_DELAY = 2 days;

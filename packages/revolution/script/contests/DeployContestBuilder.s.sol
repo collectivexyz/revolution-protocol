@@ -5,11 +5,11 @@ import { console2 } from "forge-std/console2.sol";
 import { Script } from "forge-std/Script.sol";
 import { Strings } from "@openzeppelin/contracts/utils/Strings.sol";
 
-import { ContestBuilder } from "../../../src/culture-index/contests/ContestBuilder.sol";
-import { IContestBuilder } from "../../../src/culture-index/contests/IContestBuilder.sol";
-import { BaseContest } from "../../../src/culture-index/contests/BaseContest.sol";
-import { CultureIndex } from "../../../src/culture-index/CultureIndex.sol";
-import { MaxHeap } from "../../../src/culture-index/MaxHeap.sol";
+import { ContestBuilder } from "../../src/culture-index/contests/ContestBuilder.sol";
+import { IContestBuilder } from "../../src/culture-index/contests/IContestBuilder.sol";
+import { BaseContest } from "../../src/culture-index/contests/BaseContest.sol";
+import { CultureIndex } from "../../src/culture-index/CultureIndex.sol";
+import { MaxHeap } from "../../src/culture-index/MaxHeap.sol";
 import { ERC1967Proxy } from "@cobuild/utility-contracts/src/proxy/ERC1967Proxy.sol";
 import { SplitMain } from "@cobuild/splits/src/SplitMain.sol";
 
@@ -92,7 +92,7 @@ contract DeployContestBuilder is Script {
     }
 
     function writeDeploymentDetailsToFile(uint256 chainID) private {
-        string memory filePath = string(abi.encodePacked("deploys/extensions/contests/", chainID.toString(), ".txt"));
+        string memory filePath = string(abi.encodePacked("deploys/contests/", chainID.toString(), ".txt"));
 
         vm.writeFile(filePath, "");
         vm.writeLine(
