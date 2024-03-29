@@ -34,11 +34,12 @@ import { UUPS } from "@cobuild/utility-contracts/src/proxy/UUPS.sol";
 import { Initializable } from "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
 import { IAvatar } from "@gnosis.pm/zodiac/contracts/interfaces/IAvatar.sol";
 import { Enum } from "@gnosis.pm/safe-contracts/contracts/common/Enum.sol";
-import { RevolutionVersion } from "../../../version/RevolutionVersion.sol";
+import { RevolutionVersion } from "../../version/RevolutionVersion.sol";
 import { IUpgradeManager } from "@cobuild/utility-contracts/src/interfaces/IUpgradeManager.sol";
-import { RevolutionExtension } from "../../../version/RevolutionExtension.sol";
+import { RevolutionExtension } from "../../version/RevolutionExtension.sol";
+import { IDAOExecutor } from "../../interfaces/IDAOExecutor.sol";
 
-contract GnosisDAOExecutor is Initializable, RevolutionVersion, UUPS, RevolutionExtension {
+contract GnosisDAOExecutor is IDAOExecutor, Initializable, RevolutionVersion, UUPS, RevolutionExtension {
     event NewAdmin(address indexed newAdmin);
     event NewAvatar(address indexed avatar);
     event NewPendingAdmin(address indexed newPendingAdmin);
@@ -75,6 +76,11 @@ contract GnosisDAOExecutor is Initializable, RevolutionVersion, UUPS, Revolution
 
     mapping(bytes32 => bool) public queuedTransactions;
 
+    // @notice Struct to hold the init params for the executor extension
+    struct InitializeData {
+        address avatar;
+    }
+
     ///                                                          ///
     ///                         IMMUTABLES                       ///
     ///                                                          ///
@@ -100,7 +106,7 @@ contract GnosisDAOExecutor is Initializable, RevolutionVersion, UUPS, Revolution
     ///                                                          ///
 
     /// @param _manager The contract upgrade manager address
-    constructor(address _manager) payable RevolutionExtension("gnosis.avatar.executor.1") initializer {
+    constructor(address _manager) payable RevolutionExtension("gnosis.executor.1") initializer {
         manager = IUpgradeManager(_manager);
     }
 
@@ -111,19 +117,25 @@ contract GnosisDAOExecutor is Initializable, RevolutionVersion, UUPS, Revolution
     /// @notice Initializes an instance of a DAO's treasury
     /// @param _admin The DAO's address
     /// @param _timelockDelay The time delay to execute a queued transaction
-    /// @param _avatar The DAO's safe avatar address
-    function initialize(address _admin, uint256 _timelockDelay, address _avatar) external initializer {
+    /// @param _data The data to be decoded
+    /// @custom:data (_avatar address)
+    function initialize(address _admin, uint256 _timelockDelay, bytes memory _data) external initializer {
+        InitializeData memory initData = abi.decode(_data, (InitializeData));
+
         require(_timelockDelay >= MINIMUM_DELAY, "DAOExecutor::constructor: Delay must exceed minimum delay.");
         require(_timelockDelay <= MAXIMUM_DELAY, "DAOExecutor::setDelay: Delay must not exceed maximum delay.");
 
         require(msg.sender == address(manager), "Only manager can initialize");
+
+        // ensure the avatar is not the zero address
+        require(initData.avatar != address(0), "DAOExecutor::initialize: Avatar cannot be zero address");
 
         // Ensure a governor address was provided
         require(_admin != address(0), "DAOExecutor::initialize: Governor cannot be zero address");
 
         admin = _admin;
         delay = _timelockDelay;
-        avatar = _avatar;
+        avatar = initData.avatar;
     }
 
     function setDelay(uint256 delay_) public onlyAvatar {

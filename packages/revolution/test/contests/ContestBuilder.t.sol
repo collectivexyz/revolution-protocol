@@ -4,11 +4,11 @@ pragma solidity 0.8.22;
 import { Test } from "forge-std/Test.sol";
 
 import { IRevolutionBuilder } from "../../src/interfaces/IRevolutionBuilder.sol";
-import { IContestBuilder } from "../../src/culture-index/extensions/contests/IContestBuilder.sol";
-import { IBaseContest } from "../../src/culture-index/extensions/contests/IBaseContest.sol";
+import { IContestBuilder } from "../../src/culture-index/contests/IContestBuilder.sol";
+import { IBaseContest } from "../../src/culture-index/contests/IBaseContest.sol";
 import { ICultureIndex } from "../../src/interfaces/ICultureIndex.sol";
-import { BaseContest } from "../../src/culture-index/extensions/contests/BaseContest.sol";
-import { ContestBuilder } from "../../src/culture-index/extensions/contests/ContestBuilder.sol";
+import { BaseContest } from "../../src/culture-index/contests/BaseContest.sol";
+import { ContestBuilder } from "../../src/culture-index/contests/ContestBuilder.sol";
 import { ERC1967Proxy } from "@cobuild/utility-contracts/src/proxy/ERC1967Proxy.sol";
 import { RevolutionBuilderTest } from "../RevolutionBuilder.t.sol";
 import { CultureIndex } from "../../src/culture-index/CultureIndex.sol";

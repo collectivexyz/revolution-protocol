@@ -34,8 +34,9 @@ import { Initializable } from "@openzeppelin/contracts-upgradeable/proxy/utils/I
 import { RevolutionVersion } from "../version/RevolutionVersion.sol";
 import { IUpgradeManager } from "@cobuild/utility-contracts/src/interfaces/IUpgradeManager.sol";
 import { UUPS } from "@cobuild/utility-contracts/src/proxy/UUPS.sol";
+import { IDAOExecutor } from "../interfaces/IDAOExecutor.sol";
 
-contract DAOExecutor is Initializable, RevolutionVersion, UUPS {
+contract DAOExecutor is IDAOExecutor, Initializable, RevolutionVersion, UUPS {
     event NewAdmin(address indexed newAdmin);
     event NewPendingAdmin(address indexed newPendingAdmin);
     event NewDelay(uint256 indexed newDelay);
@@ -97,7 +98,9 @@ contract DAOExecutor is Initializable, RevolutionVersion, UUPS {
     /// @notice Initializes an instance of a DAO's treasury
     /// @param _admin The DAO's address
     /// @param _timelockDelay The time delay to execute a queued transaction
-    function initialize(address _admin, uint256 _timelockDelay) external initializer {
+    /// @param _data The data to be decoded
+    /// @custom:data ()
+    function initialize(address _admin, uint256 _timelockDelay, bytes memory _data) external initializer {
         require(_timelockDelay >= MINIMUM_DELAY, "DAOExecutor::constructor: Delay must exceed minimum delay.");
         require(_timelockDelay <= MAXIMUM_DELAY, "DAOExecutor::setDelay: Delay must not exceed maximum delay.");
 
@@ -175,7 +178,7 @@ contract DAOExecutor is Initializable, RevolutionVersion, UUPS {
         string memory signature,
         bytes memory data,
         uint256 eta
-    ) public returns (bytes memory) {
+    ) public override returns (bytes memory) {
         require(msg.sender == admin, "DAOExecutor::executeTransaction: Call must come from admin.");
 
         bytes32 txHash = keccak256(abi.encode(target, value, signature, data, eta));

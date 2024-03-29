@@ -24,9 +24,9 @@ pragma solidity 0.8.22;
 
 import { Ownable2StepUpgradeable } from "@openzeppelin/contracts-upgradeable/access/Ownable2StepUpgradeable.sol";
 
-import { ICultureIndex } from "../../../interfaces/ICultureIndex.sol";
-import { IMaxHeap } from "../../../interfaces/IMaxHeap.sol";
-import { IRevolutionBuilder } from "../../../interfaces/IRevolutionBuilder.sol";
+import { ICultureIndex } from "../../interfaces/ICultureIndex.sol";
+import { IMaxHeap } from "../../interfaces/IMaxHeap.sol";
+import { IRevolutionBuilder } from "../../interfaces/IRevolutionBuilder.sol";
 import { IContestBuilder } from "./IContestBuilder.sol";
 import { IBaseContest } from "./IBaseContest.sol";
 
@@ -34,7 +34,7 @@ import { ERC1967Proxy } from "@cobuild/utility-contracts/src/proxy/ERC1967Proxy.
 import { UUPS } from "@cobuild/utility-contracts/src/proxy/UUPS.sol";
 import { IVersionedContract } from "@cobuild/utility-contracts/src/interfaces/IVersionedContract.sol";
 import { ISplitMain } from "@cobuild/splits/src/interfaces/ISplitMain.sol";
-import { RevolutionVersion } from "../../../version/RevolutionVersion.sol";
+import { RevolutionVersion } from "../../version/RevolutionVersion.sol";
 
 /// @title ContestBuilder
 /// @notice The Contest deployer and upgrade manager

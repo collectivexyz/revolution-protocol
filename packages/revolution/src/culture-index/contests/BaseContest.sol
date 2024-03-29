@@ -23,10 +23,10 @@ import { OwnableUpgradeable } from "@openzeppelin/contracts-upgradeable/access/O
 import { Ownable2StepUpgradeable } from "@openzeppelin/contracts-upgradeable/access/Ownable2StepUpgradeable.sol";
 
 import { IBaseContest } from "./IBaseContest.sol";
-import { IWETH } from "../../../interfaces/IWETH.sol";
-import { ICultureIndex } from "../../../interfaces/ICultureIndex.sol";
-import { IRevolutionPointsEmitter } from "../../../interfaces/IRevolutionPointsEmitter.sol";
-import { RevolutionVersion } from "../../../version/RevolutionVersion.sol";
+import { IWETH } from "../../interfaces/IWETH.sol";
+import { ICultureIndex } from "../../interfaces/ICultureIndex.sol";
+import { IRevolutionPointsEmitter } from "../../interfaces/IRevolutionPointsEmitter.sol";
+import { RevolutionVersion } from "../../version/RevolutionVersion.sol";
 import { ISplitMain } from "@cobuild/splits/src/interfaces/ISplitMain.sol";
 
 import { UUPS } from "@cobuild/utility-contracts/src/proxy/UUPS.sol";

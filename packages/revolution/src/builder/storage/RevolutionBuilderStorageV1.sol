@@ -14,4 +14,24 @@ contract RevolutionBuilderStorageV1 is RevolutionBuilderTypesV1 {
     /// @notice Registers deployed addresses
     /// @dev Token deployed address => Struct of all other DAO addresses
     mapping(address => DAOAddresses) internal daoAddressesByToken;
+
+    ///                                                          ///
+    ///                   EXTENSION IMPLEMENTATIONS              ///
+    ///                                                          ///
+
+    /// @notice Registered implementations for extensions
+    /// @dev Extension name => Implementation type => Implementation address
+    mapping(string => mapping(ImplementationType => address)) internal extensionImpls;
+
+    /// @notice Registered builder rewards addresses
+    /// @dev Extension name => Builder rewards address
+    mapping(string => address) internal builderRewards;
+
+    /// @notice Registered extensions by token
+    /// @dev Token address => Extension name
+    mapping(address => string) internal extensionByToken;
+
+    /// @notice Is the extension registered
+    /// @dev Extension name => Validity
+    mapping(string => bool) internal isExtension;
 }
