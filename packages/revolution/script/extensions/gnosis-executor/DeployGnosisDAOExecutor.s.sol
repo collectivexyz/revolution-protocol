@@ -40,10 +40,6 @@ contract DeployGnosisDAOExecutor is Script {
         console2.log("GNOSIS DAO EXECUTOR");
         console2.log(gnosisDAOExecutorImpl);
 
-        // console2.log("OWNER", manager.owner());
-
-        // builder.upgradeTo(builderImpl);
-
         vm.stopBroadcast();
 
         string memory filePath = string(
