@@ -18,6 +18,15 @@ contract VotingPowerTest is RevolutionBuilderTest {
         super.setMockParams();
 
         super.deployMock();
+
+        vm.prank(founder);
+        // transfer ownership to executor
+        cultureIndex.transferOwnership(address(executor));
+
+        //start prank to be cultureindex's owner
+        vm.startPrank(address(executor));
+        // accept ownership
+        cultureIndex.acceptOwnership();
     }
 
     function test_initializeVotingPower() public {
