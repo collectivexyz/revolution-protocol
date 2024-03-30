@@ -571,6 +571,12 @@ contract RevolutionBuilder is
         return builderRewards[_extensionName];
     }
 
+    /// @notice Get extension's name by token
+    /// @param _token The token address
+    function getExtensionByToken(address _token) external view returns (string memory) {
+        return extensionByToken[_token];
+    }
+
     ///                                                          ///
     ///                    DEPLOY EXTENSIONS                     ///
     ///                                                          ///

@@ -386,6 +386,10 @@ interface IRevolutionBuilder is IUpgradeManager {
     /// @param extensionName The name of the extension
     function getExtensionBuilder(string calldata extensionName) external view returns (address);
 
+    /// @notice To get an extension's name by token address
+    /// @param token The token address
+    function getExtensionByToken(address token) external view returns (string memory);
+
     /// @notice Registers an upgrade for a contract
     /// @param baseImpl The base implementation address
     /// @param upgradeImpl The upgrade implementation address

@@ -240,6 +240,13 @@ contract ExtensionAdminTest is BuilderExtensionsTest {
             "RevolutionVotingPower address should not be zero"
         );
         assertTrue(daoAddresses.splitsCreator != address(0), "SplitsCreator address should not be zero");
+
+        // check extensionByToken is extensionName
+        assertEq(
+            manager.getExtensionByToken(daoAddresses.revolutionToken),
+            extensionName,
+            "Extension by token mismatch"
+        );
     }
 
     function test__DeployInvalidExtension() public {
