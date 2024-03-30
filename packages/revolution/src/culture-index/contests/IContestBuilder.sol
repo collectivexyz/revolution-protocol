@@ -2,7 +2,7 @@
 pragma solidity 0.8.22;
 
 import { IUpgradeManager } from "@cobuild/utility-contracts/src/interfaces/IUpgradeManager.sol";
-import { IRevolutionBuilder } from "../../../interfaces/IRevolutionBuilder.sol";
+import { IRevolutionBuilder } from "../../interfaces/IRevolutionBuilder.sol";
 import { IBaseContest } from "./IBaseContest.sol";
 
 /// @title IContestBUilder

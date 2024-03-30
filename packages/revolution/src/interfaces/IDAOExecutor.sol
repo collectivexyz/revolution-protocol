@@ -33,10 +33,11 @@ interface IDAOExecutor {
         string calldata signature,
         bytes calldata data,
         uint256 eta
-    ) external payable returns (bytes memory);
+    ) external returns (bytes memory);
 
     /// @notice Initializes an instance of a DAO's treasury
     /// @param admin The DAO's address
     /// @param timelockDelay The time delay to execute a queued transaction
-    function initialize(address admin, uint256 timelockDelay) external;
+    /// @param data The data to be decoded
+    function initialize(address admin, uint256 timelockDelay, bytes memory data) external;
 }

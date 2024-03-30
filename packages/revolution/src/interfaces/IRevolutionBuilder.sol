@@ -33,6 +33,11 @@ interface IRevolutionBuilder is IUpgradeManager {
         address splitsCreator;
     }
 
+    struct ExtensionData {
+        string name;
+        bytes executorInitializationData;
+    }
+
     ///                                                          ///
     ///                            EVENTS                        ///
     ///                                                          ///
@@ -75,6 +80,16 @@ interface IRevolutionBuilder is IUpgradeManager {
     /// @param upgradeImpl The upgrade implementation address
     event UpgradeRemoved(address baseImpl, address upgradeImpl);
 
+    /// @notice Emitted when an extension is registered by the Revolution DAO
+    /// @param name The name of the extension
+    /// @param builder The builder address to pay rewards to
+    /// @param addresses The implementations of the extension
+    event ExtensionRegistered(string name, address builder, RevolutionBuilderTypesV1.DAOAddresses addresses);
+
+    /// @notice Emitted when an extension is unregistered by the Revolution DAO
+    /// @param name The base implementation address
+    event ExtensionRemoved(string name);
+
     /// @notice Emitted when a culture index is deployed
     /// @param cultureIndex The culture index address
     /// @param maxHeap The max heap address
@@ -87,6 +102,12 @@ interface IRevolutionBuilder is IUpgradeManager {
 
     /// @notice The error message when invalid address zero is passed
     error INVALID_ZERO_ADDRESS();
+
+    /// @notice Reverts when invalid extension is passed
+    error INVALID_EXTENSION();
+
+    /// @notice Reverts when extension already exists
+    error EXTENSION_EXISTS();
 
     ///                                                          ///
     ///                            STRUCTS                       ///
@@ -287,6 +308,12 @@ interface IRevolutionBuilder is IUpgradeManager {
     /// @notice The revolutionVotingPower implementation address
     function revolutionVotingPowerImpl() external view returns (address);
 
+    /// @notice The VRGDA implementation address
+    function vrgdaImpl() external view returns (address);
+
+    /// @notice The splitsCreator implementation address
+    function splitsCreatorImpl() external view returns (address);
+
     /// @notice Deploys a DAO with custom token, auction, and governance settings
     /// @param initialOwner The initial owner address
     /// @param weth The WETH address
@@ -306,6 +333,77 @@ interface IRevolutionBuilder is IUpgradeManager {
         RevolutionPointsParams calldata revolutionPointsParams,
         RevolutionVotingPowerParams calldata revolutionVotingPowerParams
     ) external returns (RevolutionBuilderTypesV1.DAOAddresses memory);
+
+    /// @notice Deploys an extension DAO with custom settings including token, auction, governance, and more
+    /// @param initialOwner The initial owner address
+    /// @param weth The WETH address
+    /// @param revolutionTokenParams The Revolution ERC-721 token settings
+    /// @param auctionParams The auction settings
+    /// @param govParams The governance settings
+    /// @param cultureIndexParams The CultureIndex settings
+    /// @param revolutionPointsParams The RevolutionPoints settings
+    /// @param revolutionVotingPowerParams The RevolutionVotingPower settings
+    /// @param extensionData The data for the extension
+    function deployExtension(
+        address initialOwner,
+        address weth,
+        RevolutionTokenParams calldata revolutionTokenParams,
+        AuctionParams calldata auctionParams,
+        GovParams calldata govParams,
+        CultureIndexParams calldata cultureIndexParams,
+        RevolutionPointsParams calldata revolutionPointsParams,
+        RevolutionVotingPowerParams calldata revolutionVotingPowerParams,
+        ExtensionData calldata extensionData
+    ) external returns (RevolutionBuilderTypesV1.DAOAddresses memory);
+
+    /// @notice Adds an extension to the Revolution DAO
+    /// @param extensionName The user readable name of the extension domain, i.e. the name of the DApp or the protocol.
+    /// @param builder The address of the extension builder to pay rewards to
+    /// @param extensionImpls The extension implementation addresses
+    function registerExtension(
+        string calldata extensionName,
+        address builder,
+        RevolutionBuilderTypesV1.DAOAddresses calldata extensionImpls
+    ) external;
+
+    /// @notice Called by the Revolution DAO to remove an extension
+    /// @param extensionName The name of the extension to remove
+    function removeExtension(string calldata extensionName) external;
+
+    /// @notice To check if a given extension is valid
+    /// @param extensionName The name of the extension
+    function isRegisteredExtension(string calldata extensionName) external view returns (bool);
+
+    /// @notice To get an extension's implementations
+    /// @param extensionName The name of the extension
+    /// @param implementationType The type of the implementation
+    function getExtensionImplementation(
+        string calldata extensionName,
+        RevolutionBuilderTypesV1.ImplementationType implementationType
+    ) external view returns (address);
+
+    /// @notice To get an extension's builder
+    /// @param extensionName The name of the extension
+    function getExtensionBuilder(string calldata extensionName) external view returns (address);
+
+    /// @notice To get an extension's name by token address
+    /// @param token The token address
+    function getExtensionByToken(address token) external view returns (string memory);
+
+    /// @notice Registers an upgrade for a contract
+    /// @param baseImpl The base implementation address
+    /// @param upgradeImpl The upgrade implementation address
+    function registerUpgrade(address baseImpl, address upgradeImpl) external;
+
+    /// @notice Unregisters an upgrade for a contract
+    /// @param baseImpl The base implementation address
+    /// @param upgradeImpl The upgrade implementation address
+    function removeUpgrade(address baseImpl, address upgradeImpl) external;
+
+    /// @notice Check if a contract has been registered as an upgrade
+    /// @param baseImpl The base implementation address
+    /// @param upgradeImpl The upgrade implementation address
+    function isRegisteredUpgrade(address baseImpl, address upgradeImpl) external view returns (bool);
 
     /// @notice Deploys a culture index
     /// @param votingPower The voting power contract

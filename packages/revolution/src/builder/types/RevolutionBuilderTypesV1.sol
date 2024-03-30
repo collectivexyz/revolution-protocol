@@ -41,4 +41,19 @@ interface RevolutionBuilderTypesV1 {
         address dao;
         bytes32 salt;
     }
+
+    enum ImplementationType {
+        DAO,
+        Executor,
+        VRGDAC,
+        Descriptor,
+        Auction,
+        CultureIndex,
+        MaxHeap,
+        RevolutionPoints,
+        RevolutionPointsEmitter,
+        RevolutionToken,
+        RevolutionVotingPower,
+        SplitsCreator
+    }
 }

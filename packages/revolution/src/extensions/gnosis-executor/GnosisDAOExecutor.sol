@@ -26,18 +26,22 @@
 //
 // MODIFICATIONS
 // DAOExecutor.sol modifies Timelock to use Solidity 0.8.x receive(), fallback(), and built-in over/underflow protection
-// This contract acts as executor of Revolution DAO governance and its treasury, so it has been modified to accept ETH.
+// This contract forwards all transactions on to an Avatar contract (like a Safe).
 
 pragma solidity ^0.8.22;
 
-import { Initializable } from "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
-import { RevolutionVersion } from "../version/RevolutionVersion.sol";
-import { IUpgradeManager } from "@cobuild/utility-contracts/src/interfaces/IUpgradeManager.sol";
 import { UUPS } from "@cobuild/utility-contracts/src/proxy/UUPS.sol";
-import { IDAOExecutor } from "../interfaces/IDAOExecutor.sol";
+import { Initializable } from "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
+import { IAvatar } from "@gnosis.pm/zodiac/contracts/interfaces/IAvatar.sol";
+import { Enum } from "@gnosis.pm/safe-contracts/contracts/common/Enum.sol";
+import { RevolutionVersion } from "../../version/RevolutionVersion.sol";
+import { IUpgradeManager } from "@cobuild/utility-contracts/src/interfaces/IUpgradeManager.sol";
+import { RevolutionExtension } from "../../version/RevolutionExtension.sol";
+import { IDAOExecutor } from "../../interfaces/IDAOExecutor.sol";
 
-contract DAOExecutor is IDAOExecutor, Initializable, RevolutionVersion, UUPS {
+contract GnosisDAOExecutor is IDAOExecutor, Initializable, RevolutionVersion, UUPS, RevolutionExtension {
     event NewAdmin(address indexed newAdmin);
+    event NewAvatar(address indexed avatar);
     event NewPendingAdmin(address indexed newPendingAdmin);
     event NewDelay(uint256 indexed newDelay);
     event CancelTransaction(
@@ -66,17 +70,23 @@ contract DAOExecutor is IDAOExecutor, Initializable, RevolutionVersion, UUPS {
     );
 
     address public admin;
+    address public avatar;
     address public pendingAdmin;
     uint256 public delay;
 
     mapping(bytes32 => bool) public queuedTransactions;
+
+    // @notice Struct to hold the init params for the executor extension
+    struct InitializeData {
+        address avatar;
+    }
 
     ///                                                          ///
     ///                         IMMUTABLES                       ///
     ///                                                          ///
 
     /// @notice The contract upgrade manager
-    IUpgradeManager private immutable manager;
+    IUpgradeManager public immutable manager;
 
     uint256 public constant GRACE_PERIOD = 14 days;
     uint256 public constant MINIMUM_DELAY = 2 days;
@@ -87,7 +97,7 @@ contract DAOExecutor is IDAOExecutor, Initializable, RevolutionVersion, UUPS {
     ///                                                          ///
 
     /// @param _manager The contract upgrade manager address
-    constructor(address _manager) payable initializer {
+    constructor(address _manager) payable RevolutionExtension("gnosis.guild.executor.1") initializer {
         manager = IUpgradeManager(_manager);
     }
 
@@ -98,19 +108,25 @@ contract DAOExecutor is IDAOExecutor, Initializable, RevolutionVersion, UUPS {
     /// @notice Initializes an instance of a DAO's treasury
     /// @param _admin The DAO's address
     /// @param _timelockDelay The time delay to execute a queued transaction
-    /// @dev `data` param not passed in to base DAOExecutor contract
-    /// @custom:data ()
-    function initialize(address _admin, uint256 _timelockDelay, bytes memory) external initializer {
+    /// @param _data The data to be decoded
+    /// @custom:data (_avatar address)
+    function initialize(address _admin, uint256 _timelockDelay, bytes memory _data) external initializer {
+        InitializeData memory initData = abi.decode(_data, (InitializeData));
+
         require(_timelockDelay >= MINIMUM_DELAY, "DAOExecutor::constructor: Delay must exceed minimum delay.");
         require(_timelockDelay <= MAXIMUM_DELAY, "DAOExecutor::setDelay: Delay must not exceed maximum delay.");
 
         require(msg.sender == address(manager), "Only manager can initialize");
+
+        // ensure the avatar is not the zero address
+        require(initData.avatar != address(0), "DAOExecutor::initialize: Avatar cannot be zero address");
 
         // Ensure a governor address was provided
         require(_admin != address(0), "DAOExecutor::initialize: Governor cannot be zero address");
 
         admin = _admin;
         delay = _timelockDelay;
+        avatar = initData.avatar;
     }
 
     function setDelay(uint256 delay_) public {
@@ -135,6 +151,13 @@ contract DAOExecutor is IDAOExecutor, Initializable, RevolutionVersion, UUPS {
         pendingAdmin = pendingAdmin_;
 
         emit NewPendingAdmin(pendingAdmin);
+    }
+
+    function setAvatar(address _avatar) public {
+        require(msg.sender == address(this), "DAOExecutor::setAvatar: Call must come from DAOExecutor.");
+        avatar = _avatar;
+
+        emit NewAvatar(_avatar);
     }
 
     function queueTransaction(
@@ -178,7 +201,7 @@ contract DAOExecutor is IDAOExecutor, Initializable, RevolutionVersion, UUPS {
         string memory signature,
         bytes memory data,
         uint256 eta
-    ) public override returns (bytes memory) {
+    ) public returns (bytes memory) {
         require(msg.sender == admin, "DAOExecutor::executeTransaction: Call must come from admin.");
 
         bytes32 txHash = keccak256(abi.encode(target, value, signature, data, eta));
@@ -197,7 +220,12 @@ contract DAOExecutor is IDAOExecutor, Initializable, RevolutionVersion, UUPS {
         }
 
         // solium-disable-next-line security/no-call-value
-        (bool success, bytes memory returnData) = target.call{ value: value }(callData);
+        (bool success, bytes memory returnData) = IAvatar(avatar).execTransactionFromModuleReturnData(
+            target,
+            value,
+            callData,
+            Enum.Operation.Call
+        );
         require(success, "DAOExecutor::executeTransaction: Transaction execution reverted.");
 
         emit ExecuteTransaction(txHash, target, value, signature, data, eta);
@@ -209,10 +237,6 @@ contract DAOExecutor is IDAOExecutor, Initializable, RevolutionVersion, UUPS {
         // solium-disable-next-line security/no-block-members
         return block.timestamp;
     }
-
-    receive() external payable {}
-
-    fallback() external payable {}
 
     ///                                                          ///
     ///                       EXECUTOR UPGRADE                   ///

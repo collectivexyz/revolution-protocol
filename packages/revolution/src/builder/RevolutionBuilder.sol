@@ -251,7 +251,7 @@ contract RevolutionBuilder is
 
         ICultureIndex(daoAddressesByToken[revolutionToken].cultureIndex).initialize({
             votingPower: daoAddressesByToken[revolutionToken].revolutionVotingPower,
-            initialOwner: initialSetup.executor,
+            initialOwner: _initialOwner,
             dropperAdmin: daoAddressesByToken[revolutionToken].revolutionToken,
             cultureIndexParams: _cultureIndexParams,
             maxHeap: daoAddressesByToken[revolutionToken].maxHeap
@@ -285,7 +285,8 @@ contract RevolutionBuilder is
 
         IDAOExecutor(daoAddressesByToken[revolutionToken].executor).initialize({
             admin: initialSetup.dao,
-            timelockDelay: _govParams.timelockDelay
+            timelockDelay: _govParams.timelockDelay,
+            data: bytes("")
         });
 
         emit RevolutionDeployed({
@@ -482,6 +483,326 @@ contract RevolutionBuilder is
                 revolutionVotingPower: _safeGetVersion(revolutionVotingPowerImpl),
                 vrgda: _safeGetVersion(vrgdaImpl)
             });
+    }
+
+    ///                                                          ///
+    ///                           EXTENSIONS                     ///
+    ///                                                          ///
+
+    /// @notice Called by the Revolution DAO to add an extension
+    /// @param _extensionName The user readable name of the extension domain, i.e. the name of the DApp or the protocol.
+    /// @param _builder The address of the extension builder to pay rewards to
+    /// @param _extensionImpls The extension implementation addresses
+    function registerExtension(
+        string calldata _extensionName,
+        address _builder,
+        DAOAddresses calldata _extensionImpls
+    ) external onlyOwner {
+        if (isExtension[_extensionName]) revert EXTENSION_EXISTS();
+
+        // emit the extension added event
+        emit ExtensionRegistered(_extensionName, _builder, _extensionImpls);
+
+        // set the extension as valid
+        isExtension[_extensionName] = true;
+
+        // set the extension implementations for each contract
+        extensionImpls[_extensionName][ImplementationType.DAO] = _extensionImpls.dao;
+        extensionImpls[_extensionName][ImplementationType.Executor] = _extensionImpls.executor;
+        extensionImpls[_extensionName][ImplementationType.VRGDAC] = _extensionImpls.vrgda;
+        extensionImpls[_extensionName][ImplementationType.Descriptor] = _extensionImpls.descriptor;
+        extensionImpls[_extensionName][ImplementationType.Auction] = _extensionImpls.auction;
+        extensionImpls[_extensionName][ImplementationType.CultureIndex] = _extensionImpls.cultureIndex;
+        extensionImpls[_extensionName][ImplementationType.MaxHeap] = _extensionImpls.maxHeap;
+        extensionImpls[_extensionName][ImplementationType.RevolutionPoints] = _extensionImpls.revolutionPoints;
+        extensionImpls[_extensionName][ImplementationType.RevolutionPointsEmitter] = _extensionImpls
+            .revolutionPointsEmitter;
+        extensionImpls[_extensionName][ImplementationType.RevolutionToken] = _extensionImpls.revolutionToken;
+        extensionImpls[_extensionName][ImplementationType.RevolutionVotingPower] = _extensionImpls
+            .revolutionVotingPower;
+        extensionImpls[_extensionName][ImplementationType.SplitsCreator] = _extensionImpls.splitsCreator;
+
+        // Set builder reward address for the extension
+        builderRewards[_extensionName] = _builder;
+    }
+
+    /// @notice Called by the Revolution DAO to remove an extension
+    /// @param _extensionName The name of the extension
+    function removeExtension(string calldata _extensionName) external onlyOwner {
+        delete isExtension[_extensionName];
+
+        delete extensionImpls[_extensionName][ImplementationType.DAO];
+        delete extensionImpls[_extensionName][ImplementationType.Executor];
+        delete extensionImpls[_extensionName][ImplementationType.VRGDAC];
+        delete extensionImpls[_extensionName][ImplementationType.Descriptor];
+        delete extensionImpls[_extensionName][ImplementationType.Auction];
+        delete extensionImpls[_extensionName][ImplementationType.CultureIndex];
+        delete extensionImpls[_extensionName][ImplementationType.MaxHeap];
+        delete extensionImpls[_extensionName][ImplementationType.RevolutionPoints];
+        delete extensionImpls[_extensionName][ImplementationType.RevolutionPointsEmitter];
+        delete extensionImpls[_extensionName][ImplementationType.RevolutionToken];
+        delete extensionImpls[_extensionName][ImplementationType.RevolutionVotingPower];
+        delete extensionImpls[_extensionName][ImplementationType.SplitsCreator];
+
+        delete builderRewards[_extensionName];
+
+        emit ExtensionRemoved(_extensionName);
+    }
+
+    /// @notice If an implementation is registered by the Revolution DAO as an optional upgrade
+    /// @param _extensionName The name of the extension
+    function isRegisteredExtension(string calldata _extensionName) external view returns (bool) {
+        return isExtension[_extensionName];
+    }
+
+    /// @notice Get extension's implementation
+    /// @param _extensionName The name of the extension
+    /// @param _implementationType The type of the implementation
+    function getExtensionImplementation(
+        string calldata _extensionName,
+        ImplementationType _implementationType
+    ) external view returns (address) {
+        return extensionImpls[_extensionName][_implementationType];
+    }
+
+    /// @notice Get extension's builder reward address
+    /// @param _extensionName The name of the extension
+    function getExtensionBuilder(string calldata _extensionName) external view returns (address) {
+        return builderRewards[_extensionName];
+    }
+
+    /// @notice Get extension's name by token
+    /// @param _token The token address
+    function getExtensionByToken(address _token) external view returns (string memory) {
+        return extensionByToken[_token];
+    }
+
+    ///                                                          ///
+    ///                    DEPLOY EXTENSIONS                     ///
+    ///                                                          ///
+
+    /// @notice Helper function to deploys initial DAO proxy contracts
+    function _setupInitialExtensionProxies(string calldata extensionName) internal returns (InitialProxySetup memory) {
+        // Deploy the DAO's ERC-721 governance token
+        address revolutionToken = address(
+            new ERC1967Proxy(extensionImpls[extensionName][ImplementationType.RevolutionToken], "")
+        );
+        // Use the token address to precompute the DAO's remaining addresses
+        bytes32 salt = bytes32(uint256(uint160(revolutionToken)) << 96);
+
+        address executor = address(
+            new ERC1967Proxy{ salt: salt }(extensionImpls[extensionName][ImplementationType.Executor], "")
+        );
+        address revolutionVotingPower = address(
+            new ERC1967Proxy{ salt: salt }(extensionImpls[extensionName][ImplementationType.RevolutionVotingPower], "")
+        );
+
+        address dao = address(
+            new ERC1967Proxy{ salt: salt }(extensionImpls[extensionName][ImplementationType.DAO], "")
+        );
+
+        address revolutionPointsEmitter = address(
+            new ERC1967Proxy{ salt: salt }(
+                extensionImpls[extensionName][ImplementationType.RevolutionPointsEmitter],
+                ""
+            )
+        );
+
+        return
+            InitialProxySetup({
+                revolutionToken: revolutionToken,
+                executor: executor,
+                revolutionVotingPower: revolutionVotingPower,
+                dao: dao,
+                salt: salt,
+                revolutionPointsEmitter: revolutionPointsEmitter
+            });
+    }
+
+    /// @notice Deploys an extended DAO with custom token, auction, emitter, revolution points, and governance settings
+    /// @param _initialOwner The initial owner address
+    /// @param _weth The WETH address
+    /// @param _revolutionTokenParams The ERC-721 token settings
+    /// @param _auctionParams The auction settings
+    /// @param _govParams The governance settings
+    /// @param _cultureIndexParams The culture index settings
+    /// @param _revolutionPointsParams The ERC-20 token settings
+    /// @param _revolutionVotingPowerParams The voting power settings
+    /// @param _extensionData The data for the extension
+    function deployExtension(
+        address _initialOwner,
+        address _weth,
+        RevolutionTokenParams calldata _revolutionTokenParams,
+        AuctionParams calldata _auctionParams,
+        GovParams calldata _govParams,
+        CultureIndexParams calldata _cultureIndexParams,
+        RevolutionPointsParams calldata _revolutionPointsParams,
+        RevolutionVotingPowerParams calldata _revolutionVotingPowerParams,
+        // extension
+        ExtensionData calldata _extensionData
+    ) external returns (DAOAddresses memory) {
+        if (_initialOwner == address(0)) revert INVALID_ZERO_ADDRESS();
+        if (!isExtension[_extensionData.name]) revert INVALID_EXTENSION();
+
+        InitialProxySetup memory initialSetup = _setupInitialExtensionProxies(_extensionData.name);
+
+        address revolutionToken = initialSetup.revolutionToken;
+
+        // register the extension by token
+        extensionByToken[revolutionToken] = _extensionData.name;
+
+        // Deploy the remaining DAO contracts
+        daoAddressesByToken[initialSetup.revolutionToken] = DAOAddresses({
+            revolutionPoints: address(
+                new ERC1967Proxy{ salt: initialSetup.salt }(
+                    extensionImpls[_extensionData.name][ImplementationType.RevolutionPoints],
+                    ""
+                )
+            ),
+            cultureIndex: address(
+                new ERC1967Proxy{ salt: initialSetup.salt }(
+                    extensionImpls[_extensionData.name][ImplementationType.CultureIndex],
+                    ""
+                )
+            ),
+            splitsCreator: address(
+                new ERC1967Proxy{ salt: initialSetup.salt }(
+                    extensionImpls[_extensionData.name][ImplementationType.SplitsCreator],
+                    ""
+                )
+            ),
+            descriptor: address(
+                new ERC1967Proxy{ salt: initialSetup.salt }(
+                    extensionImpls[_extensionData.name][ImplementationType.Descriptor],
+                    ""
+                )
+            ),
+            auction: address(
+                new ERC1967Proxy{ salt: initialSetup.salt }(
+                    extensionImpls[_extensionData.name][ImplementationType.Auction],
+                    ""
+                )
+            ),
+            maxHeap: address(
+                new ERC1967Proxy{ salt: initialSetup.salt }(
+                    extensionImpls[_extensionData.name][ImplementationType.MaxHeap],
+                    ""
+                )
+            ),
+            vrgda: address(
+                new ERC1967Proxy{ salt: initialSetup.salt }(
+                    extensionImpls[_extensionData.name][ImplementationType.VRGDAC],
+                    ""
+                )
+            ),
+            revolutionPointsEmitter: initialSetup.revolutionPointsEmitter,
+            revolutionVotingPower: initialSetup.revolutionVotingPower,
+            revolutionToken: revolutionToken,
+            executor: initialSetup.executor,
+            dao: initialSetup.dao
+        });
+
+        ISplitMain(daoAddressesByToken[revolutionToken].splitsCreator).initialize({
+            pointsEmitter: initialSetup.revolutionPointsEmitter,
+            initialOwner: _initialOwner
+        });
+
+        IRevolutionDAO(daoAddressesByToken[revolutionToken].dao).initialize({
+            executor: initialSetup.executor,
+            votingPower: daoAddressesByToken[revolutionToken].revolutionVotingPower,
+            govParams: _govParams
+        });
+
+        // Initialize each instance with the provided settings
+        IMaxHeap(daoAddressesByToken[revolutionToken].maxHeap).initialize({
+            initialOwner: _initialOwner,
+            admin: daoAddressesByToken[revolutionToken].cultureIndex
+        });
+
+        IVRGDAC(daoAddressesByToken[revolutionToken].vrgda).initialize({
+            initialOwner: _initialOwner,
+            targetPrice: _revolutionPointsParams.emitterParams.vrgdaParams.targetPrice,
+            priceDecayPercent: _revolutionPointsParams.emitterParams.vrgdaParams.priceDecayPercent,
+            perTimeUnit: _revolutionPointsParams.emitterParams.vrgdaParams.tokensPerTimeUnit
+        });
+
+        IRevolutionVotingPower(daoAddressesByToken[revolutionToken].revolutionVotingPower).initialize({
+            initialOwner: _initialOwner,
+            revolutionPoints: daoAddressesByToken[revolutionToken].revolutionPoints,
+            pointsVoteWeight: _revolutionVotingPowerParams.pointsVoteWeight,
+            revolutionToken: daoAddressesByToken[revolutionToken].revolutionToken,
+            tokenVoteWeight: _revolutionVotingPowerParams.tokenVoteWeight
+        });
+
+        IRevolutionToken(revolutionToken).initialize({
+            minter: daoAddressesByToken[revolutionToken].auction,
+            descriptor: daoAddressesByToken[revolutionToken].descriptor,
+            initialOwner: _initialOwner,
+            cultureIndex: daoAddressesByToken[revolutionToken].cultureIndex,
+            revolutionTokenParams: _revolutionTokenParams
+        });
+
+        IDescriptor(daoAddressesByToken[revolutionToken].descriptor).initialize({
+            initialOwner: _initialOwner,
+            tokenNamePrefix: _revolutionTokenParams.tokenNamePrefix
+        });
+
+        ICultureIndex(daoAddressesByToken[revolutionToken].cultureIndex).initialize({
+            votingPower: daoAddressesByToken[revolutionToken].revolutionVotingPower,
+            initialOwner: _initialOwner,
+            dropperAdmin: daoAddressesByToken[revolutionToken].revolutionToken,
+            cultureIndexParams: _cultureIndexParams,
+            maxHeap: daoAddressesByToken[revolutionToken].maxHeap
+        });
+
+        IAuctionHouse(daoAddressesByToken[revolutionToken].auction).initialize({
+            revolutionToken: daoAddressesByToken[revolutionToken].revolutionToken,
+            revolutionPointsEmitter: daoAddressesByToken[revolutionToken].revolutionPointsEmitter,
+            /// @notice So the auction can be unpaused easily
+            /// @dev the _initialOwner should immediately transfer ownership to the DAO after unpausing the auction
+            initialOwner: _initialOwner,
+            auctionParams: _auctionParams,
+            weth: _weth
+        });
+
+        //make owner and minter of the points the _initialOwner for founder allocation
+        IRevolutionPoints(daoAddressesByToken[revolutionToken].revolutionPoints).initialize({
+            initialOwner: _initialOwner,
+            minter: _initialOwner,
+            tokenParams: _revolutionPointsParams.tokenParams
+        });
+
+        IRevolutionPointsEmitter(daoAddressesByToken[revolutionToken].revolutionPointsEmitter).initialize({
+            revolutionPoints: daoAddressesByToken[revolutionToken].revolutionPoints,
+            initialOwner: _initialOwner,
+            weth: _weth,
+            vrgda: daoAddressesByToken[revolutionToken].vrgda,
+            founderParams: _revolutionPointsParams.emitterParams.founderParams,
+            grantsParams: _revolutionPointsParams.emitterParams.grantsParams
+        });
+
+        IDAOExecutor(daoAddressesByToken[revolutionToken].executor).initialize({
+            admin: initialSetup.dao,
+            timelockDelay: _govParams.timelockDelay,
+            data: _extensionData.executorInitializationData
+        });
+
+        emit RevolutionDeployed({
+            revolutionPointsEmitter: daoAddressesByToken[revolutionToken].revolutionPointsEmitter,
+            revolutionPoints: daoAddressesByToken[revolutionToken].revolutionPoints,
+            splitsCreator: daoAddressesByToken[revolutionToken].splitsCreator,
+            cultureIndex: daoAddressesByToken[revolutionToken].cultureIndex,
+            descriptor: daoAddressesByToken[revolutionToken].descriptor,
+            revolutionVotingPower: initialSetup.revolutionVotingPower,
+            auction: daoAddressesByToken[revolutionToken].auction,
+            maxHeap: daoAddressesByToken[revolutionToken].maxHeap,
+            vrgda: daoAddressesByToken[revolutionToken].vrgda,
+            revolutionToken: revolutionToken,
+            executor: initialSetup.executor,
+            dao: initialSetup.dao
+        });
+
+        return daoAddressesByToken[revolutionToken];
     }
 
     ///                                                          ///

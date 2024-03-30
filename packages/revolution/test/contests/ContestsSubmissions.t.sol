@@ -4,7 +4,7 @@ pragma solidity ^0.8.22;
 import { ContestBuilderTest } from "./ContestBuilder.t.sol";
 import { ICultureIndex } from "../../src/interfaces/ICultureIndex.sol";
 import { CultureIndex } from "../../src/culture-index/CultureIndex.sol";
-import { BaseContest } from "../../src/culture-index/extensions/contests/BaseContest.sol";
+import { BaseContest } from "../../src/culture-index/contests/BaseContest.sol";
 
 /**
  * @title ContestSubmissions

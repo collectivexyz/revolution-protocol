@@ -5,8 +5,8 @@ import { ContestBuilderTest } from "./ContestBuilder.t.sol";
 import { ICultureIndex } from "../../src/interfaces/ICultureIndex.sol";
 import { CultureIndex } from "../../src/culture-index/CultureIndex.sol";
 import { MaxHeap } from "../../src/culture-index/MaxHeap.sol";
-import { IBaseContest } from "../../src/culture-index/extensions/contests/IBaseContest.sol";
-import { BaseContest } from "../../src/culture-index/extensions/contests/BaseContest.sol";
+import { IBaseContest } from "../../src/culture-index/contests/IBaseContest.sol";
+import { BaseContest } from "../../src/culture-index/contests/BaseContest.sol";
 import { ISplitMain } from "@cobuild/splits/src/interfaces/ISplitMain.sol";
 
 /**

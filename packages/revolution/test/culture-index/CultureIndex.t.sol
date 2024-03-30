@@ -47,8 +47,14 @@ contract CultureIndexTestSuite is RevolutionBuilderTest {
 
         super.deployMock();
 
+        vm.prank(founder);
+        // transfer ownership to executor
+        cultureIndex.transferOwnership(address(executor));
+
         //start prank to be cultureindex's owner
         vm.startPrank(address(executor));
+        // accept ownership
+        cultureIndex.acceptOwnership();
 
         // // Create new test instances acting as different voters
         voter1Test = new CultureIndexVotingTest(address(cultureIndex), address(revolutionPoints));

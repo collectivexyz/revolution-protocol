@@ -14,7 +14,7 @@
     "dev": "FOUNDRY_PROFILE=dev forge test --watch -vvv",
     "test": "forge test -vvv",
     "test:ci": "FOUNDRY_PROFILE=ci forge test -vvv",
-    "slither:check": "slither src --checklist --filter-paths '@openzeppelin|ERC721|Votes.sol|VotesUpgradeable.sol|ERC20Upgradeable.sol' --config-file='../../slither.config.json'",
+    "slither:check": "slither src --checklist --filter-paths '@openzeppelin|ERC721|@gnosis.pm|Votes.sol|VotesUpgradeable.sol|ERC20Upgradeable.sol' --config-file='../../slither.config.json'",
     "build:contracts": "forge build",
     "prettier": "prettier --write 'src/**/*.sol' 'test/**/*.sol'",
     "lint": "prettier --check 'src/**/*.sol' 'test/**/*.sol'",
@@ -23,8 +23,8 @@
     "wagmi": "FOUNDRY_PROFILE=dev forge build && wagmi generate",
     "write-gas-report": "forge test --gas-report > ../../gas-reports/revolution.ansi",
     "clean": "forge cache clean && if [ -d out ]; then forge clean; fi",
-    "storage-inspect:check": "../../script/storage-check.sh check CultureIndex RevolutionBuilder DAOExecutor RevolutionDAOLogicV1 RevolutionVotingPower RevolutionPoints RevolutionPointsEmitter AuctionHouse MaxHeap RevolutionToken Descriptor BaseContest ContestBuilder",
-    "storage-inspect:generate": "../../script/storage-check.sh generate CultureIndex RevolutionBuilder DAOExecutor RevolutionDAOLogicV1 RevolutionVotingPower RevolutionPoints RevolutionPointsEmitter AuctionHouse MaxHeap RevolutionToken Descriptor BaseContest ContestBuilder",
+    "storage-inspect:check": "../../script/storage-check.sh check CultureIndex RevolutionBuilder DAOExecutor RevolutionDAOLogicV1 RevolutionVotingPower RevolutionPoints RevolutionPointsEmitter AuctionHouse MaxHeap RevolutionToken Descriptor BaseContest ContestBuilder GnosisDAOExecutor",
+    "storage-inspect:generate": "../../script/storage-check.sh generate CultureIndex RevolutionBuilder DAOExecutor RevolutionDAOLogicV1 RevolutionVotingPower RevolutionPoints RevolutionPointsEmitter AuctionHouse MaxHeap RevolutionToken Descriptor BaseContest ContestBuilder GnosisDAOExecutor",
     "update-contract-version": "node script/revolution-versions.mjs"
   },
   "files": [
@@ -43,8 +43,10 @@
   },
   "dependencies": {
     "@cobuild/protocol-rewards": "workspace:*",
-    "@cobuild/utility-contracts": "workspace:*",
     "@cobuild/splits": "workspace:*",
+    "@cobuild/utility-contracts": "workspace:*",
+    "@gnosis.pm/safe-contracts": "^1.3.0",
+    "@gnosis.pm/zodiac": "^4.0.1",
     "@openzeppelin/contracts": "5.0.0",
     "@openzeppelin/contracts-upgradeable": "5.0.0",
     "ds-test": "https://github.com/dapphub/ds-test#cd98eff28324bfac652e63a239a60632a761790b",
