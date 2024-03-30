@@ -1,5 +1,14 @@
 # @collectivexyz/protocol-rewards
 
+## 0.11.4
+
+### Patch Changes
+
+- Updated dependencies [7575f0a]
+- Updated dependencies [7575f0a]
+- Updated dependencies [7575f0a]
+  - @cobuild/utility-contracts@0.12.0
+
 ## 0.11.3
 
 ### Patch Changes
