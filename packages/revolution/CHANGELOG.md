@@ -1,5 +1,23 @@
 # @collectivexyz/revolution
 
+## 0.5.0
+
+### Minor Changes
+
+- 7575f0a: Adds extensions pattern to RevolutionBuilder
+
+### Patch Changes
+
+- 7575f0a: Gnosis DAO executor deployment and deploy script
+- 7575f0a: Makes DAOExecutor upgradeable with new `data` initialization param to support extensions!
+- 7575f0a: Adds GnosisDAOExecutor extension
+- Updated dependencies [7575f0a]
+- Updated dependencies [7575f0a]
+- Updated dependencies [7575f0a]
+  - @cobuild/utility-contracts@0.12.0
+  - @cobuild/protocol-rewards@0.11.4
+  - @cobuild/splits@0.11.7
+
 ## 0.4.8
 
 ### Patch Changes

@@ -1,5 +1,16 @@
 # @cobuild/utility-contracts
 
+## 0.12.0
+
+### Minor Changes
+
+- 7575f0a: Adds extensions pattern to RevolutionBuilder
+
+### Patch Changes
+
+- 7575f0a: Makes DAOExecutor upgradeable with new `data` initialization param to support extensions!
+- 7575f0a: Adds GnosisDAOExecutor extension
+
 ## 0.11.1
 
 ### Patch Changes
