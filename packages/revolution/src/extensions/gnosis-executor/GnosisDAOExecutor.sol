@@ -93,15 +93,6 @@ contract GnosisDAOExecutor is IDAOExecutor, Initializable, RevolutionVersion, UU
     uint256 public constant MAXIMUM_DELAY = 30 days;
 
     ///                                                          ///
-    ///                          MODIFIERS                       ///
-    ///                                                          ///
-
-    modifier onlyAvatar() {
-        require(msg.sender == avatar, "DAOExecutor::onlyAvatar: Only avatar may call this function.");
-        _;
-    }
-
-    ///                                                          ///
     ///                         CONSTRUCTOR                      ///
     ///                                                          ///
 
@@ -162,7 +153,8 @@ contract GnosisDAOExecutor is IDAOExecutor, Initializable, RevolutionVersion, UU
         emit NewPendingAdmin(pendingAdmin);
     }
 
-    function setAvatar(address _avatar) public onlyAvatar {
+    function setAvatar(address _avatar) public {
+        require(msg.sender == address(this), "DAOExecutor::setAvatar: Call must come from DAOExecutor.");
         avatar = _avatar;
 
         emit NewAvatar(_avatar);
