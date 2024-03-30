@@ -13,7 +13,7 @@ contract RevolutionExtension is IRevolutionExtension {
     /**
      * @dev Initializes the extension type.
      *
-     * - `type`: the user readable name of the extension.
+     * - `_extensionType`: the user readable name of the extension.
      *
      */
     constructor(string memory _extensionType) payable {
