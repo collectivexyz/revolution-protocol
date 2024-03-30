@@ -6,9 +6,8 @@ import "forge-std/console2.sol";
 import { Strings } from "@openzeppelin/contracts/utils/Strings.sol";
 
 import { IRevolutionBuilder, RevolutionBuilder } from "../src/builder/RevolutionBuilder.sol";
-import { DAOExecutor } from "../src/governance/DAOExecutor.sol";
 
-contract DAOExecutorUpgrade is Script {
+contract RevolutionBuilderUpgrade is Script {
     using Strings for uint256;
 
     string configFile;
@@ -70,9 +69,6 @@ contract DAOExecutorUpgrade is Script {
 
         vm.startBroadcast(deployerAddress);
 
-        // Deploy dao executor upgrade implementation
-        address daoExecutorUpgradeImpl = address(new DAOExecutor(_getKey("BuilderProxy")));
-
         address builderImpl = address(
             new RevolutionBuilder(
                 IRevolutionBuilder.PointsImplementations({
@@ -88,7 +84,7 @@ contract DAOExecutorUpgrade is Script {
                 }),
                 IRevolutionBuilder.DAOImplementations({
                     revolutionVotingPower: _getKey("RevolutionVotingPower"),
-                    executor: daoExecutorUpgradeImpl,
+                    executor: _getKey("Executor"),
                     dao: _getKey("DAO")
                 }),
                 IRevolutionBuilder.CultureIndexImplementations({
@@ -97,9 +93,6 @@ contract DAOExecutorUpgrade is Script {
                 })
             )
         );
-
-        console2.log("DAO EXECUTOR UPGRADE");
-        console2.log(daoExecutorUpgradeImpl);
 
         console2.log("BUILDER IMPLEMENTATION");
         console2.log(builderImpl);
@@ -110,12 +103,8 @@ contract DAOExecutorUpgrade is Script {
 
         vm.stopBroadcast();
 
-        string memory filePath = string(abi.encodePacked("deploys/", chainID.toString(), ".upgradeExecutor.txt"));
+        string memory filePath = string(abi.encodePacked("deploys/", chainID.toString(), ".upgradeBuilder.txt"));
         vm.writeFile(filePath, "");
-        vm.writeLine(
-            filePath,
-            string(abi.encodePacked("DAO Executor Upgrade implementation: ", addressToString(daoExecutorUpgradeImpl)))
-        );
         vm.writeLine(filePath, string(abi.encodePacked("Builder implementation: ", addressToString(builderImpl))));
     }
 
