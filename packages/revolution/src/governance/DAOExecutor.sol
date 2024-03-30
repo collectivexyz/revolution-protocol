@@ -98,7 +98,7 @@ contract DAOExecutor is IDAOExecutor, Initializable, RevolutionVersion, UUPS {
     /// @notice Initializes an instance of a DAO's treasury
     /// @param _admin The DAO's address
     /// @param _timelockDelay The time delay to execute a queued transaction
-    /// @param _data The data to be decoded
+    /// @dev `data` param not passed in to base DAOExecutor contract
     /// @custom:data ()
     function initialize(address _admin, uint256 _timelockDelay, bytes memory) external initializer {
         require(_timelockDelay >= MINIMUM_DELAY, "DAOExecutor::constructor: Delay must exceed minimum delay.");
