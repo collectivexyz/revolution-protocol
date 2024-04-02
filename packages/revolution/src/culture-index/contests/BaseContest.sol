@@ -320,6 +320,22 @@ contract BaseContest is
     }
 
     /**
+     * @notice Returns the payout splits of the contest
+     * @return The payout splits of the contest
+     */
+    function getPayoutSplits() external view returns (uint256[] memory) {
+        return payoutSplits;
+    }
+
+    /**
+     * @notice Returns the payout splits count
+     * @return The payout splits count
+     */
+    function getPayoutSplitsCount() external view returns (uint256) {
+        return payoutSplits.length;
+    }
+
+    /**
      * @notice Pay out the contest winners
      * @param _payoutCount The number of winners to pay out. Needs to be adjusted based on gas requirements.
      */

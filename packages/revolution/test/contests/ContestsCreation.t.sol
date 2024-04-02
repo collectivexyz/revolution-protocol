@@ -98,6 +98,18 @@ contract ContestsCreationTest is ContestBuilderTest {
             contest_CultureIndexParams.description,
             "CultureIndex description mismatch"
         );
+
+        // ensure getPayoutSplitsCount returns the correct value
+        uint256 expectedPayoutSplitsCount = baseContestParams.payoutSplits.length;
+        uint256 actualPayoutSplitsCount = baseContest.getPayoutSplitsCount();
+        assertEq(actualPayoutSplitsCount, expectedPayoutSplitsCount, "Payout splits count mismatch");
+
+        // ensure getPayoutSplits returns the correct values
+        uint256[] memory expectedPayoutSplits = baseContestParams.payoutSplits;
+        uint256[] memory actualPayoutSplits = baseContest.getPayoutSplits();
+        for (uint256 i = 0; i < expectedPayoutSplits.length; i++) {
+            assertEq(actualPayoutSplits[i], expectedPayoutSplits[i], "Payout splits mismatch at index");
+        }
     }
 
     /**
