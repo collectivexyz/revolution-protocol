@@ -383,6 +383,10 @@ contract BaseContest is
         }
     }
 
+    receive() external payable {}
+
+    fallback() external payable {}
+
     ///                                                          ///
     ///                    BASE CONTEST UPGRADE                  ///
     ///                                                          ///

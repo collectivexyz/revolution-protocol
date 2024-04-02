@@ -191,7 +191,7 @@ contract ContestBuilderTest is RevolutionBuilderTest {
             _baseContestParams
         );
 
-        baseContest = BaseContest(baseContestAddr);
+        baseContest = BaseContest(payable(baseContestAddr));
         contest_CultureIndex = CultureIndex(address(baseContest.cultureIndex()));
 
         vm.label(address(baseContest), "BASE_CONTEST");

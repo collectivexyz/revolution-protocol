@@ -23,6 +23,22 @@ contract ContestsCreationTest is ContestBuilderTest {
     }
 
     /**
+     * @dev Ensure the contest can be sent funds
+     */
+    function test__SendFundsToContest() public {
+        // Send funds to the contest
+        uint256 amount = 1 ether;
+        vm.deal(address(this), amount);
+        vm.prank(address(this));
+        payable(address(baseContest)).call{ value: amount }(new bytes(0));
+
+        // Verify the balance of the contest
+        uint256 expectedBalance = amount;
+        uint256 actualBalance = address(baseContest).balance;
+        assertEq(actualBalance, expectedBalance, "Balance mismatch");
+    }
+
+    /**
      * @dev Use the builder to create a contest and test the fields
      */
     function test__ContestBuilderFields() public {
@@ -38,7 +54,7 @@ contract ContestsCreationTest is ContestBuilderTest {
         );
 
         // verify contest fields
-        BaseContest baseContest = BaseContest(contest);
+        BaseContest baseContest = BaseContest(payable(contest));
         assertEq(baseContest.owner(), founder, "Owner mismatch");
         assertEq(baseContest.WETH(), weth, "WETH mismatch");
         assertEq(address(baseContest.splitMain()), address(splitMain), "Split main mismatch");
