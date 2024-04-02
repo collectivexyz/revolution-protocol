@@ -127,6 +127,11 @@ contract DeployContestBuilder is Script {
                 abi.encodePacked("Base Contest implementation: ", addressToString(deployedContracts.baseContestImpl))
             )
         );
+        // write protocol rewards address
+        vm.writeLine(
+            filePath,
+            string(abi.encodePacked("Protocol Rewards: ", addressToString(vm.envAddress("PROTOCOL_REWARDS"))))
+        );
 
         console2.log("~~~~~~~~~~ MANAGER IMPL 0 ~~~~~~~~~~~");
         console2.logAddress(deployedContracts.contestBuilderImpl0);
