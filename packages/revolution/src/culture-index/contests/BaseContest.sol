@@ -56,6 +56,9 @@ contract BaseContest is
     // The address of th account to receive builder rewards
     address public builderReward;
 
+    // The start time of the contest
+    uint256 public startTime;
+
     // The end time of the contest
     uint256 public endTime;
 
@@ -158,6 +161,7 @@ contract BaseContest is
 
         // set creator payout params
         entropyRate = _baseContestParams.entropyRate;
+        startTime = _baseContestParams.startTime;
         endTime = _baseContestParams.endTime;
         payoutSplits = _baseContestParams.payoutSplits;
     }

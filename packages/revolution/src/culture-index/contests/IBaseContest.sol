@@ -84,12 +84,18 @@ interface IBaseContest is IBaseContestEvents {
 
     function getPayoutSplitsCount() external view returns (uint256);
 
+    function startTime() external view returns (uint256);
+
+    function endTime() external view returns (uint256);
+
     /// @notice The contest parameters
     /// @param entropyRate The entropy rate of each contest - the portion of the creator's share that is directly sent to the creator in ETH
     /// @param endTime The end time of the contest.
+    /// @param startTime The start time of the contest.
     /// @param payoutSplits How to split the prize pool between the winners
     struct BaseContestParams {
         uint256 entropyRate;
+        uint256 startTime;
         uint256 endTime;
         uint256[] payoutSplits;
     }

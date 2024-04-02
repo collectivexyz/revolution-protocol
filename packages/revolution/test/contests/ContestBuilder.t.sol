@@ -136,6 +136,7 @@ contract ContestBuilderTest is RevolutionBuilderTest {
         payoutSplits[0] = 1e6;
         baseContestParams = IBaseContest.BaseContestParams({
             entropyRate: 100,
+            startTime: block.timestamp,
             // 1 week
             endTime: block.timestamp + 60 * 60 * 24 * 7,
             payoutSplits: payoutSplits
@@ -144,11 +145,13 @@ contract ContestBuilderTest is RevolutionBuilderTest {
 
     function setBaseContestParams(
         uint256 _entropyRate,
+        uint256 _startTime,
         uint256 _endTime,
         uint256[] memory _payoutSplits
     ) internal virtual {
         baseContestParams = IBaseContest.BaseContestParams({
             entropyRate: _entropyRate,
+            startTime: _startTime,
             endTime: _endTime,
             payoutSplits: _payoutSplits
         });
