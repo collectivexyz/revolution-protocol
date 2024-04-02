@@ -99,6 +99,11 @@ contract ContestsCreationTest is ContestBuilderTest {
             "CultureIndex description mismatch"
         );
 
+        // ensure start time is set
+        uint256 expectedStartTime = baseContestParams.startTime;
+        uint256 actualStartTime = baseContest.startTime();
+        assertEq(actualStartTime, expectedStartTime, "Start time mismatch");
+
         // ensure getPayoutSplitsCount returns the correct value
         uint256 expectedPayoutSplitsCount = baseContestParams.payoutSplits.length;
         uint256 actualPayoutSplitsCount = baseContest.getPayoutSplitsCount();
@@ -135,6 +140,12 @@ contract ContestsCreationTest is ContestBuilderTest {
         uint256 expectedEndTime = baseContestParams.endTime;
         uint256 actualEndTime = baseContest.endTime();
         assertTrue(actualEndTime == expectedEndTime, "End time mismatch");
+
+        // Verify the startTime of the deployed contest
+        uint256 expectedStartTime = baseContestParams.startTime;
+        uint256 actualStartTime = baseContest.startTime();
+        assertTrue(actualStartTime == expectedStartTime, "Start time mismatch");
+
         // Verify the payoutSplits of the deployed contest
         uint256[] memory expectedPayoutSplits = baseContestParams.payoutSplits;
         for (uint256 i = 0; i < expectedPayoutSplits.length; i++) {
