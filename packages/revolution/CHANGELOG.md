@@ -1,5 +1,11 @@
 # @collectivexyz/revolution
 
+## 0.5.1
+
+### Patch Changes
+
+- 3a13032: Make BaseContest payable and add payout splits helper functions
+
 ## 0.5.0
 
 ### Minor Changes
