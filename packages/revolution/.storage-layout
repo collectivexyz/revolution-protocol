@@ -183,14 +183,15 @@
 | WETH                 | address                     | 0    | 0      | 20    | src/culture-index/contests/BaseContest.sol:BaseContest |
 | entropyRate          | uint256                     | 1    | 0      | 32    | src/culture-index/contests/BaseContest.sol:BaseContest |
 | builderReward        | address                     | 2    | 0      | 20    | src/culture-index/contests/BaseContest.sol:BaseContest |
-| endTime              | uint256                     | 3    | 0      | 32    | src/culture-index/contests/BaseContest.sol:BaseContest |
-| paidOut              | bool                        | 4    | 0      | 1     | src/culture-index/contests/BaseContest.sol:BaseContest |
-| payoutIndex          | uint256                     | 5    | 0      | 32    | src/culture-index/contests/BaseContest.sol:BaseContest |
-| initialPayoutBalance | uint256                     | 6    | 0      | 32    | src/culture-index/contests/BaseContest.sol:BaseContest |
-| splitMain            | contract ISplitMain         | 7    | 0      | 20    | src/culture-index/contests/BaseContest.sol:BaseContest |
-| cultureIndex         | contract ICultureIndex      | 8    | 0      | 20    | src/culture-index/contests/BaseContest.sol:BaseContest |
-| payoutSplits         | uint256[]                   | 9    | 0      | 32    | src/culture-index/contests/BaseContest.sol:BaseContest |
-| payoutSplitAccounts  | mapping(uint256 => address) | 10   | 0      | 32    | src/culture-index/contests/BaseContest.sol:BaseContest |
+| startTime            | uint256                     | 3    | 0      | 32    | src/culture-index/contests/BaseContest.sol:BaseContest |
+| endTime              | uint256                     | 4    | 0      | 32    | src/culture-index/contests/BaseContest.sol:BaseContest |
+| paidOut              | bool                        | 5    | 0      | 1     | src/culture-index/contests/BaseContest.sol:BaseContest |
+| payoutIndex          | uint256                     | 6    | 0      | 32    | src/culture-index/contests/BaseContest.sol:BaseContest |
+| initialPayoutBalance | uint256                     | 7    | 0      | 32    | src/culture-index/contests/BaseContest.sol:BaseContest |
+| splitMain            | contract ISplitMain         | 8    | 0      | 20    | src/culture-index/contests/BaseContest.sol:BaseContest |
+| cultureIndex         | contract ICultureIndex      | 9    | 0      | 20    | src/culture-index/contests/BaseContest.sol:BaseContest |
+| payoutSplits         | uint256[]                   | 10   | 0      | 32    | src/culture-index/contests/BaseContest.sol:BaseContest |
+| payoutSplitAccounts  | mapping(uint256 => address) | 11   | 0      | 32    | src/culture-index/contests/BaseContest.sol:BaseContest |
 
 =======================
 ➡ ContestBuilder
