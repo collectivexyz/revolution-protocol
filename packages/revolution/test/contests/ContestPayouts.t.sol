@@ -111,7 +111,7 @@ contract ContestOwnerControl is ContestBuilderTest {
         payoutSplits[1] = 300000; // 30%
         payoutSplits[2] = 200000; // 20%
 
-        super.setBaseContestParams(500000, block.timestamp + 60 * 60 * 24 * 7, payoutSplits);
+        super.setBaseContestParams(500000, block.timestamp, block.timestamp + 60 * 60 * 24 * 7, payoutSplits);
 
         super.deployContestMock();
         vm.stopPrank();
@@ -174,7 +174,7 @@ contract ContestOwnerControl is ContestBuilderTest {
         payoutSplits[1] = 300000; // 30%
         payoutSplits[2] = 200000; // 20%
 
-        super.setBaseContestParams(500000, block.timestamp + 60 * 60 * 24 * 7, payoutSplits);
+        super.setBaseContestParams(500000, block.timestamp, block.timestamp + 60 * 60 * 24 * 7, payoutSplits);
 
         super.deployContestMock();
         vm.stopPrank();
@@ -323,7 +323,7 @@ contract ContestOwnerControl is ContestBuilderTest {
         payoutSplits[1] = 300000; // 30%
         payoutSplits[2] = 200000; // 20%
 
-        super.setBaseContestParams(500000, block.timestamp + 60 * 60 * 24 * 7, payoutSplits);
+        super.setBaseContestParams(500000, block.timestamp, block.timestamp + 60 * 60 * 24 * 7, payoutSplits);
 
         super.deployContestMock();
         vm.stopPrank();
@@ -358,7 +358,7 @@ contract ContestOwnerControl is ContestBuilderTest {
         // Scaled by 1e6
         payoutSplits[0] = 1e6; // 50%
 
-        super.setBaseContestParams(500000, block.timestamp + 60 * 60 * 24 * 7, payoutSplits);
+        super.setBaseContestParams(500000, block.timestamp, block.timestamp + 60 * 60 * 24 * 7, payoutSplits);
 
         super.deployContestMock();
         vm.stopPrank();
@@ -421,7 +421,7 @@ contract ContestOwnerControl is ContestBuilderTest {
             payoutSplits[i] = 100000; // 10% for each
         }
 
-        super.setBaseContestParams(500000, block.timestamp + 60 * 60 * 24 * 7, payoutSplits);
+        super.setBaseContestParams(500000, block.timestamp, block.timestamp + 60 * 60 * 24 * 7, payoutSplits);
 
         super.deployContestMock();
 

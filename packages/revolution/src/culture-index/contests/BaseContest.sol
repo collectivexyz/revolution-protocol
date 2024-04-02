@@ -56,6 +56,9 @@ contract BaseContest is
     // The address of th account to receive builder rewards
     address public builderReward;
 
+    // The start time of the contest
+    uint256 public startTime;
+
     // The end time of the contest
     uint256 public endTime;
 
@@ -158,6 +161,7 @@ contract BaseContest is
 
         // set creator payout params
         entropyRate = _baseContestParams.entropyRate;
+        startTime = _baseContestParams.startTime;
         endTime = _baseContestParams.endTime;
         payoutSplits = _baseContestParams.payoutSplits;
     }
@@ -320,6 +324,22 @@ contract BaseContest is
     }
 
     /**
+     * @notice Returns the payout splits of the contest
+     * @return The payout splits of the contest
+     */
+    function getPayoutSplits() external view returns (uint256[] memory) {
+        return payoutSplits;
+    }
+
+    /**
+     * @notice Returns the payout splits count
+     * @return The payout splits count
+     */
+    function getPayoutSplitsCount() external view returns (uint256) {
+        return payoutSplits.length;
+    }
+
+    /**
      * @notice Pay out the contest winners
      * @param _payoutCount The number of winners to pay out. Needs to be adjusted based on gas requirements.
      */
@@ -382,6 +402,10 @@ contract BaseContest is
             if (!wethSuccess) revert("WETH transfer failed");
         }
     }
+
+    receive() external payable {}
+
+    fallback() external payable {}
 
     ///                                                          ///
     ///                    BASE CONTEST UPGRADE                  ///

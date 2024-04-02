@@ -23,6 +23,22 @@ contract ContestsCreationTest is ContestBuilderTest {
     }
 
     /**
+     * @dev Ensure the contest can be sent funds
+     */
+    function test__SendFundsToContest() public {
+        // Send funds to the contest
+        uint256 amount = 1 ether;
+        vm.deal(address(this), amount);
+        vm.prank(address(this));
+        payable(address(baseContest)).call{ value: amount }(new bytes(0));
+
+        // Verify the balance of the contest
+        uint256 expectedBalance = amount;
+        uint256 actualBalance = address(baseContest).balance;
+        assertEq(actualBalance, expectedBalance, "Balance mismatch");
+    }
+
+    /**
      * @dev Use the builder to create a contest and test the fields
      */
     function test__ContestBuilderFields() public {
@@ -38,7 +54,7 @@ contract ContestsCreationTest is ContestBuilderTest {
         );
 
         // verify contest fields
-        BaseContest baseContest = BaseContest(contest);
+        BaseContest baseContest = BaseContest(payable(contest));
         assertEq(baseContest.owner(), founder, "Owner mismatch");
         assertEq(baseContest.WETH(), weth, "WETH mismatch");
         assertEq(address(baseContest.splitMain()), address(splitMain), "Split main mismatch");
@@ -82,6 +98,23 @@ contract ContestsCreationTest is ContestBuilderTest {
             contest_CultureIndexParams.description,
             "CultureIndex description mismatch"
         );
+
+        // ensure start time is set
+        uint256 expectedStartTime = baseContestParams.startTime;
+        uint256 actualStartTime = baseContest.startTime();
+        assertEq(actualStartTime, expectedStartTime, "Start time mismatch");
+
+        // ensure getPayoutSplitsCount returns the correct value
+        uint256 expectedPayoutSplitsCount = baseContestParams.payoutSplits.length;
+        uint256 actualPayoutSplitsCount = baseContest.getPayoutSplitsCount();
+        assertEq(actualPayoutSplitsCount, expectedPayoutSplitsCount, "Payout splits count mismatch");
+
+        // ensure getPayoutSplits returns the correct values
+        uint256[] memory expectedPayoutSplits = baseContestParams.payoutSplits;
+        uint256[] memory actualPayoutSplits = baseContest.getPayoutSplits();
+        for (uint256 i = 0; i < expectedPayoutSplits.length; i++) {
+            assertEq(actualPayoutSplits[i], expectedPayoutSplits[i], "Payout splits mismatch at index");
+        }
     }
 
     /**
@@ -107,6 +140,12 @@ contract ContestsCreationTest is ContestBuilderTest {
         uint256 expectedEndTime = baseContestParams.endTime;
         uint256 actualEndTime = baseContest.endTime();
         assertTrue(actualEndTime == expectedEndTime, "End time mismatch");
+
+        // Verify the startTime of the deployed contest
+        uint256 expectedStartTime = baseContestParams.startTime;
+        uint256 actualStartTime = baseContest.startTime();
+        assertTrue(actualStartTime == expectedStartTime, "Start time mismatch");
+
         // Verify the payoutSplits of the deployed contest
         uint256[] memory expectedPayoutSplits = baseContestParams.payoutSplits;
         for (uint256 i = 0; i < expectedPayoutSplits.length; i++) {

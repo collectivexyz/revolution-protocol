@@ -42,7 +42,7 @@ contract ContestOwnerControl is ContestBuilderTest {
         );
 
         // ensure founder can set entropyRateBps and that it is updated
-        BaseContest baseContest = BaseContest(contest);
+        BaseContest baseContest = BaseContest(payable(contest));
         uint256 newEntropyRate = 51000; // Example new entropy rate to test with
 
         // Ensure only the owner can set the entropy rate
