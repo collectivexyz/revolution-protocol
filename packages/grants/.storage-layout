@@ -1,0 +1,32 @@
+👁👁 STORAGE LAYOUT snapshot 👁👁
+=======================
+
+=======================
+➡ SQFSuperFluidStrategy
+=======================
+
+| Name                     | Type                                                       | Slot | Offset | Bytes | Contract                                                          |
+|--------------------------|------------------------------------------------------------|------|--------|-------|-------------------------------------------------------------------|
+| poolActive               | bool                                                       | 0    | 0      | 1     | src/allo-protocol/SQFSuperFluidStrategy.sol:SQFSuperFluidStrategy |
+| poolId                   | uint256                                                    | 1    | 0      | 32    | src/allo-protocol/SQFSuperFluidStrategy.sol:SQFSuperFluidStrategy |
+| poolAmount               | uint256                                                    | 2    | 0      | 32    | src/allo-protocol/SQFSuperFluidStrategy.sol:SQFSuperFluidStrategy |
+| _status                  | uint256                                                    | 3    | 0      | 32    | src/allo-protocol/SQFSuperFluidStrategy.sol:SQFSuperFluidStrategy |
+| initialSuperAppBalance   | uint256                                                    | 4    | 0      | 32    | src/allo-protocol/SQFSuperFluidStrategy.sol:SQFSuperFluidStrategy |
+| superfluidHost           | address                                                    | 5    | 0      | 20    | src/allo-protocol/SQFSuperFluidStrategy.sol:SQFSuperFluidStrategy |
+| allocationSuperToken     | contract ISuperToken                                       | 6    | 0      | 20    | src/allo-protocol/SQFSuperFluidStrategy.sol:SQFSuperFluidStrategy |
+| poolSuperToken           | contract ISuperToken                                       | 7    | 0      | 20    | src/allo-protocol/SQFSuperFluidStrategy.sol:SQFSuperFluidStrategy |
+| recipientSuperAppFactory | contract RecipientSuperAppFactory                          | 8    | 0      | 20    | src/allo-protocol/SQFSuperFluidStrategy.sol:SQFSuperFluidStrategy |
+| gdaPool                  | contract ISuperfluidPool                                   | 9    | 0      | 20    | src/allo-protocol/SQFSuperFluidStrategy.sol:SQFSuperFluidStrategy |
+| passportDecoder          | contract IGitcoinPassportDecoder                           | 10   | 0      | 20    | src/allo-protocol/SQFSuperFluidStrategy.sol:SQFSuperFluidStrategy |
+| minPassportScore         | uint256                                                    | 11   | 0      | 32    | src/allo-protocol/SQFSuperFluidStrategy.sol:SQFSuperFluidStrategy |
+| registrationStartTime    | uint64                                                     | 12   | 0      | 8     | src/allo-protocol/SQFSuperFluidStrategy.sol:SQFSuperFluidStrategy |
+| registrationEndTime      | uint64                                                     | 12   | 8      | 8     | src/allo-protocol/SQFSuperFluidStrategy.sol:SQFSuperFluidStrategy |
+| allocationStartTime      | uint64                                                     | 12   | 16     | 8     | src/allo-protocol/SQFSuperFluidStrategy.sol:SQFSuperFluidStrategy |
+| allocationEndTime        | uint64                                                     | 12   | 24     | 8     | src/allo-protocol/SQFSuperFluidStrategy.sol:SQFSuperFluidStrategy |
+| useRegistryAnchor        | bool                                                       | 13   | 0      | 1     | src/allo-protocol/SQFSuperFluidStrategy.sol:SQFSuperFluidStrategy |
+| metadataRequired         | bool                                                       | 13   | 1      | 1     | src/allo-protocol/SQFSuperFluidStrategy.sol:SQFSuperFluidStrategy |
+| _registry                | contract IRegistry                                         | 13   | 2      | 20    | src/allo-protocol/SQFSuperFluidStrategy.sol:SQFSuperFluidStrategy |
+| recipients               | mapping(address => struct SQFSuperFluidStrategy.Recipient) | 14   | 0      | 32    | src/allo-protocol/SQFSuperFluidStrategy.sol:SQFSuperFluidStrategy |
+| superApps                | mapping(address => address)                                | 15   | 0      | 32    | src/allo-protocol/SQFSuperFluidStrategy.sol:SQFSuperFluidStrategy |
+| totalUnitsByRecipient    | mapping(address => uint256)                                | 16   | 0      | 32    | src/allo-protocol/SQFSuperFluidStrategy.sol:SQFSuperFluidStrategy |
+| recipientFlowRate        | mapping(address => uint256)                                | 17   | 0      | 32    | src/allo-protocol/SQFSuperFluidStrategy.sol:SQFSuperFluidStrategy |
