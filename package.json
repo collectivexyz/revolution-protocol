@@ -29,7 +29,8 @@
       "**/@openzeppelin/**",
       "**/ds-test",
       "**/forge-std",
-      "**/solmate"
+      "**/solmate",
+      "**/solady"
     ]
   },
   "bugs": {

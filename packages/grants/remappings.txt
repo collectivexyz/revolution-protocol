@@ -1,0 +1,6 @@
+ds-test/=node_modules/ds-test/src/
+forge-std/=node_modules/forge-std/src/
+@openzeppelin/contracts/=node_modules/@openzeppelin/contracts/
+solmate=node_modules/solmate/
+solady=node_modules/solady/
+@superfluid-finance/ethereum-contracts/=node_modules/@superfluid-finance/ethereum-contracts/
