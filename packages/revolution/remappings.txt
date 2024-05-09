@@ -6,5 +6,3 @@ solmate=node_modules/solmate
 @cobuild/protocol-rewards/src/=node_modules/@cobuild/protocol-rewards/src/
 @cobuild/splits/src/=node_modules/@cobuild/splits/src/
 @cobuild/utility-contracts/src/=node_modules/@cobuild/utility-contracts/src/
-@superfluid-finance/ethereum-contracts/=node_modules/@superfluid-finance/ethereum-contracts/
-

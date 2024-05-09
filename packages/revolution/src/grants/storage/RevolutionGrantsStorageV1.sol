@@ -2,12 +2,22 @@
 pragma solidity 0.8.22;
 
 import { ICultureIndex } from "../../interfaces/ICultureIndex.sol";
+import { IUpgradeManager } from "@cobuild/utility-contracts/src/interfaces/IUpgradeManager.sol";
 import { IRevolutionVotingPower } from "../../interfaces/IRevolutionVotingPower.sol";
+import { ISuperToken, ISuperfluidPool, PoolConfig } from "../superfluid/SuperTokenV1Library.sol";
 
 /// @notice CultureIndex Storage V1
 /// @author rocketman
 /// @notice The CultureIndex storage contract
 contract RevolutionGrantsStorageV1 {
+    ISuperToken internal immutable superToken;
+    ISuperfluidPool internal immutable pool;
+    PoolConfig internal poolConfig =
+        PoolConfig({ transferabilityForUnitsOwner: false, distributionFromAnyAddress: false });
+
+    /// The upgrade manager
+    IUpgradeManager public manager;
+
     /// @notice An account's nonce for gasless votes
     mapping(address => uint256) public nonces;
 

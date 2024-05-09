@@ -74,6 +74,9 @@ interface IRevolutionGrants is IRevolutionGrantsEvents {
     /// @dev Reverts if bps does not sum to 10000
     error INVALID_BPS_SUM();
 
+    /// @dev Reverts if sender is not manager
+    error SENDER_NOT_MANAGER();
+
     ///                                                          ///
     ///                         STRUCTS                          ///
     ///                                                          ///
@@ -84,80 +87,97 @@ interface IRevolutionGrants is IRevolutionGrantsEvents {
         uint256 weight;
     }
 
-    /**
-     * @notice Checks if a specific voter has already voted for a given art piece.
-     * @param pieceId The ID of the art piece.
-     * @param voter The address of the voter.
-     * @return A boolean indicating if the voter has voted for the art piece.
-     */
-    function hasVoted(uint256 pieceId, address voter) external view returns (bool);
+    // /**
+    //  * @notice Checks if a specific voter has already voted for a given art piece.
+    //  * @param pieceId The ID of the art piece.
+    //  * @param voter The address of the voter.
+    //  * @return A boolean indicating if the voter has voted for the art piece.
+    //  */
+    // function hasVoted(uint256 pieceId, address voter) external view returns (bool);
+
+    // /**
+    //  * @notice Allows a user to vote for a specific art piece.
+    //  * @param pieceId The ID of the art piece.
+    //  */
+    // function vote(uint256 pieceId) external;
+
+    // /**
+    //  * @notice Allows a user to vote for many art pieces.
+    //  * @param pieceIds The ID of the art pieces.
+    //  */
+    // function voteForMany(uint256[] calldata pieceIds) external;
+
+    // /**
+    //  * @notice Allows a user to vote for a specific art piece using a signature.
+    //  * @param from The address of the voter.
+    //  * @param pieceIds The ID of the art piece.
+    //  * @param deadline The deadline for the vote.
+    //  * @param v The v component of the signature.
+    //  * @param r The r component of the signature.
+    //  * @param s The s component of the signature.
+    //  */
+    // function voteForManyWithSig(
+    //     address from,
+    //     uint256[] calldata pieceIds,
+    //     uint256 deadline,
+    //     uint8 v,
+    //     bytes32 r,
+    //     bytes32 s
+    // ) external;
+
+    // /**
+    //  * @notice Allows users to vote for a specific art piece using a signature.
+    //  * @param from The address of the voter.
+    //  * @param pieceIds The ID of the art piece.
+    //  * @param deadline The deadline for the vote.
+    //  * @param v The v component of the signature.
+    //  * @param r The r component of the signature.
+    //  * @param s The s component of the signature.
+    //  */
+    // function batchVoteForManyWithSig(
+    //     address[] memory from,
+    //     uint256[][] memory pieceIds,
+    //     uint256[] memory deadline,
+    //     uint8[] memory v,
+    //     bytes32[] memory r,
+    //     bytes32[] memory s
+    // ) external;
+
+    // /**
+    //  * @notice Fetch the list of voters for a given art piece.
+    //  * @param pieceId The ID of the art piece.
+    //  * @param voter The address of the voter.
+    //  * @return An Voter structs associated with the given art piece ID.
+    //  */
+    // function getVote(uint256 pieceId, address voter) external view returns (Vote memory);
+
+    // /**
+    //  * @notice Returns true or false depending on whether the top voted piece meets quorum
+    //  * @return True if the top voted piece meets quorum, false otherwise
+    //  */
+    // function grantMeetsQuorum() external view returns (bool);
 
     /**
-     * @notice Allows a user to vote for a specific art piece.
-     * @param pieceId The ID of the art piece.
+     * @notice Structure to hold the parameters for initializing grants.
+     * @param tokenVoteWeight The voting weight of the individual Revolution ERC721 tokens.
+     * @param pointsVoteWeight The voting weight of the individual Revolution ERC20 points tokens.
+     * @param quorumVotesBPS The initial quorum votes threshold in basis points.
+     * @param minVotingPowerToVote The minimum vote weight that a voter must have to be able to vote.
+     * @param minVotingPowerToCreate The minimum vote weight that a voter must have to be able to create an art piece.
      */
-    function vote(uint256 pieceId) external;
-
-    /**
-     * @notice Allows a user to vote for many art pieces.
-     * @param pieceIds The ID of the art pieces.
-     */
-    function voteForMany(uint256[] calldata pieceIds) external;
-
-    /**
-     * @notice Allows a user to vote for a specific art piece using a signature.
-     * @param from The address of the voter.
-     * @param pieceIds The ID of the art piece.
-     * @param deadline The deadline for the vote.
-     * @param v The v component of the signature.
-     * @param r The r component of the signature.
-     * @param s The s component of the signature.
-     */
-    function voteForManyWithSig(
-        address from,
-        uint256[] calldata pieceIds,
-        uint256 deadline,
-        uint8 v,
-        bytes32 r,
-        bytes32 s
-    ) external;
-
-    /**
-     * @notice Allows users to vote for a specific art piece using a signature.
-     * @param from The address of the voter.
-     * @param pieceIds The ID of the art piece.
-     * @param deadline The deadline for the vote.
-     * @param v The v component of the signature.
-     * @param r The r component of the signature.
-     * @param s The s component of the signature.
-     */
-    function batchVoteForManyWithSig(
-        address[] memory from,
-        uint256[][] memory pieceIds,
-        uint256[] memory deadline,
-        uint8[] memory v,
-        bytes32[] memory r,
-        bytes32[] memory s
-    ) external;
-
-    /**
-     * @notice Fetch the list of voters for a given art piece.
-     * @param pieceId The ID of the art piece.
-     * @param voter The address of the voter.
-     * @return An Voter structs associated with the given art piece ID.
-     */
-    function getVote(uint256 pieceId, address voter) external view returns (Vote memory);
-
-    /**
-     * @notice Returns true or false depending on whether the top voted piece meets quorum
-     * @return True if the top voted piece meets quorum, false otherwise
-     */
-    function grantMeetsQuorum() external view returns (bool);
+    struct GrantsParams {
+        uint256 tokenVoteWeight;
+        uint256 pointsVoteWeight;
+        uint256 quorumVotesBPS;
+        uint256 minVotingPowerToVote;
+        uint256 minVotingPowerToCreate;
+    }
 
     /**
      * @notice Initializes a token's metadata descriptor
      * @param votingPower The address of the revolution voting power contract
      * @param initialOwner The owner of the contract, allowed to drop pieces. Commonly updated to the AuctionHouse
+     * @param grantsParams The parameters for the grants contract
      */
-    function initialize(address votingPower, address initialOwner) external;
+    function initialize(address votingPower, address initialOwner, GrantsParams memory grantsParams) external;
 }
