@@ -14,11 +14,8 @@ import { IRevolutionVotingPower } from "../interfaces/IRevolutionVotingPower.sol
 import { ICultureIndex } from "../interfaces/ICultureIndex.sol";
 import { RevolutionVersion } from "../version/RevolutionVersion.sol";
 
-import { ERC20VotesUpgradeable } from "../base/erc20/ERC20VotesUpgradeable.sol";
 import { MaxHeap } from "./MaxHeap.sol";
 import { CultureIndexStorageV1 } from "./storage/CultureIndexStorageV1.sol";
-
-import { ERC721CheckpointableUpgradeable } from "../base/ERC721CheckpointableUpgradeable.sol";
 
 contract CultureIndex is
     ICultureIndex,
