@@ -30,7 +30,7 @@ contract RevolutionGrantsStorageV1 {
         PoolConfig({ transferabilityForUnitsOwner: false, distributionFromAnyAddress: false });
 
     /// The upgrade manager
-    IUpgradeManager public manager;
+    IUpgradeManager public immutable manager;
 
     /// @notice An account's nonce for gasless votes
     mapping(address => uint256) public nonces;

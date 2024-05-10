@@ -87,76 +87,6 @@ interface IRevolutionGrants is IRevolutionGrantsEvents {
         uint256 weight;
     }
 
-    // /**
-    //  * @notice Checks if a specific voter has already voted for a given grant application.
-    //  * @param recipient The address of the recipient of the grant.
-    //  * @param voter The address of the voter.
-    //  * @return A boolean indicating if the voter has voted for the grant application.
-    //  */
-    // function hasVoted(uint256 pieceId, address voter) external view returns (bool);
-
-    // /**
-    //  * @notice Allows a user to vote for a specific grant application.
-    //  * @param recipient The address of the recipient of the grant.
-    //  */
-    // function vote(address recipient) external;
-
-    // /**
-    //  * @notice Allows a user to vote for many grant applications.
-    //  * @param recipients The addresses of the recipients of the grants.
-    //  */
-    // function voteForMany(address[] calldata recipients) external;
-
-    // /**
-    //  * @notice Allows a user to vote for a specific grant application using a signature.
-    //  * @param from The address of the voter.
-    //  * @param recipients The addresses of the recipients of the grants.
-    //  * @param deadline The deadline for the vote.
-    //  * @param v The v component of the signature.
-    //  * @param r The r component of the signature.
-    //  * @param s The s component of the signature.
-    //  */
-    // function voteForManyWithSig(
-    //     address from,
-    //     address[] calldata recipients,
-    //     uint256 deadline,
-    //     uint8 v,
-    //     bytes32 r,
-    //     bytes32 s
-    // ) external;
-
-    // /**
-    //  * @notice Allows users to vote for a specific grant application using a signature.
-    //  * @param from The address of the voter.
-    //  * @param recipients The addresses of the recipients of the grants.
-    //  * @param deadline The deadline for the vote.
-    //  * @param v The v component of the signature.
-    //  * @param r The r component of the signature.
-    //  * @param s The s component of the signature.
-    //  */
-    // function batchVoteForManyWithSig(
-    //     address[] memory from,
-    //     address[][] memory recipients,
-    //     uint256[] memory deadline,
-    //     uint8[] memory v,
-    //     bytes32[] memory r,
-    //     bytes32[] memory s
-    // ) external;
-
-    // /**
-    //  * @notice Fetch the list of voters for a given grant application.
-    //  * @param recipient The address of the recipient of the grant.
-    //  * @param voter The address of the voter.
-    //  * @return An Voter structs associated with the given recipient.
-    //  */
-    // function getVote(address recipient, address voter) external view returns (Vote memory);
-
-    // /**
-    //  * @notice Returns true or false depending on whether the grant application meets quorum
-    //  * @return True if the grant application meets quorum, false otherwise
-    //  */
-    // function grantMeetsQuorum(address recipient) external view returns (bool);
-
     /**
      * @notice Structure to hold the parameters for initializing grants.
      * @param tokenVoteWeight The voting weight of the individual Revolution ERC721 tokens.
@@ -177,13 +107,7 @@ interface IRevolutionGrants is IRevolutionGrantsEvents {
      * @notice Initializes a token's metadata descriptor
      * @param votingPower The address of the revolution voting power contract
      * @param initialOwner The owner of the contract.
-     * @param superToken The address of the SuperToken used to pay out the grantees
      * @param grantsParams The parameters for the grants contract
      */
-    function initialize(
-        address votingPower,
-        address initialOwner,
-        address superToken,
-        GrantsParams memory grantsParams
-    ) external;
+    function initialize(address votingPower, address initialOwner, GrantsParams memory grantsParams) external;
 }

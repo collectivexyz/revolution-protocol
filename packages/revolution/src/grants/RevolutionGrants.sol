@@ -12,7 +12,7 @@ import { RevolutionGrantsStorageV1 } from "./storage/RevolutionGrantsStorageV1.s
 import { IRevolutionGrants } from "../interfaces/IRevolutionGrants.sol";
 import { IRevolutionVotingPower } from "../interfaces/IRevolutionVotingPower.sol";
 
-import { SuperTokenV1Library, ISuperToken } from "./superfluid/SuperTokenV1Library.sol";
+import { SuperTokenV1Library, ISuperToken, PoolConfig } from "./superfluid/SuperTokenV1Library.sol";
 
 contract RevolutionGrants is
     IRevolutionGrants,
@@ -38,13 +38,11 @@ contract RevolutionGrants is
      * @notice Initializes the RevolutionGrants contract
      * @param _votingPower The address of the RevolutionVotingPower contract
      * @param _initialOwner The owner of the contract, allowed to drop pieces. Commonly updated to the AuctionHouse
-     * @param _superToken The address of the SuperToken used to pay out the grantees
      * @param _grantsParams The parameters for the grants contract
      */
     function initialize(
         address _votingPower,
         address _initialOwner,
-        address _superToken,
         GrantsParams memory _grantsParams
     ) public initializer {
         if (msg.sender != address(manager)) revert SENDER_NOT_MANAGER();
@@ -62,14 +60,20 @@ contract RevolutionGrants is
         tokenVoteWeight = _grantsParams.tokenVoteWeight;
         pointsVoteWeight = _grantsParams.pointsVoteWeight;
 
-        superToken = ISuperToken(_superToken);
-        pool = superToken.createPool(address(this), poolConfig);
-
         quorumVotesBPS = _grantsParams.quorumVotesBPS;
         minVotingPowerToVote = _grantsParams.minVotingPowerToVote;
         minVotingPowerToCreate = _grantsParams.minVotingPowerToCreate;
 
         snapshotBlock = block.number;
+    }
+
+    /**
+     * @notice Sets the SuperToken and creates a pool from it, can only be called by the owner
+     * @param _superToken The address of the SuperToken to be set and used for the pool
+     */
+    function setSuperTokenAndCreatePool(address _superToken) public onlyOwner {
+        superToken = ISuperToken(_superToken);
+        pool = superToken.createPool(address(this), poolConfig);
     }
 
     /**
