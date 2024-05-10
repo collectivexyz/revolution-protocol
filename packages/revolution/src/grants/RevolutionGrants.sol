@@ -39,7 +39,7 @@ contract RevolutionGrants is
     }
 
     /**
-     * @notice Initializes the maxheap contract
+     * @notice Initializes the RevolutionGrants contract
      * @param _votingPower The address of the RevolutionVotingPower contract
      * @param _initialOwner The owner of the contract, allowed to drop pieces. Commonly updated to the AuctionHouse
      * @param _grantsParams The parameters for the grants contract
@@ -67,6 +67,15 @@ contract RevolutionGrants is
         quorumVotesBPS = _grantsParams.quorumVotesBPS;
         minVotingPowerToVote = _grantsParams.minVotingPowerToVote;
         minVotingPowerToCreate = _grantsParams.minVotingPowerToCreate;
+    }
+
+    /**
+     * @notice Adds an address to the list of approved recipients
+     * @param recipient The address to be added as an approved recipient
+     */
+    function addApprovedRecipient(address recipient) public onlyOwner {
+        if (recipient == address(0)) revert ADDRESS_ZERO();
+        approvedRecipients[recipient] = true;
     }
 
     function updateMemberUnits(address member, uint128 units) public {

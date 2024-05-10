@@ -6,12 +6,20 @@ import { IUpgradeManager } from "@cobuild/utility-contracts/src/interfaces/IUpgr
 import { IRevolutionVotingPower } from "../../interfaces/IRevolutionVotingPower.sol";
 import { ISuperToken, ISuperfluidPool, PoolConfig } from "../superfluid/SuperTokenV1Library.sol";
 
-/// @notice CultureIndex Storage V1
+/// @notice RevolutionGrants Storage V1
 /// @author rocketman
-/// @notice The CultureIndex storage contract
+/// @notice The RevolutionGrants storage contract
 contract RevolutionGrantsStorageV1 {
+    /// The mapping of approved recipients
+    mapping(address => bool) public approvedRecipients;
+
+    /// The SuperToken used to pay out the grantees
     ISuperToken internal immutable superToken;
+
+    /// The Superfluid pool used to distribute the SuperToken
     ISuperfluidPool internal immutable pool;
+
+    /// The Superfluid pool configuration
     PoolConfig internal poolConfig =
         PoolConfig({ transferabilityForUnitsOwner: false, distributionFromAnyAddress: false });
 
