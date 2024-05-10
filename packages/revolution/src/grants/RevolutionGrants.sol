@@ -107,14 +107,23 @@ contract RevolutionGrants is
      * @param account The address of the voter.
      */
     function getAccountVotingPower(address account) public view returns (uint256) {
+        return getVotingPowerForBlock(account, snapshotBlock);
+    }
+
+    /**
+     * @notice Get account voting power for a specific block
+     * @param account The address of the voter.
+     * @param blockNumber The block number to get the voting power for.
+     */
+    function getVotingPowerForBlock(address account, uint256 blockNumber) public view returns (uint256) {
         return
             votingPower.calculateVotesWithWeights(
                 IRevolutionVotingPower.BalanceAndWeight({
-                    balance: votingPower.getPastPointsVotes(account, snapshotBlock),
+                    balance: votingPower.getPastPointsVotes(account, blockNumber),
                     voteWeight: pointsVoteWeight
                 }),
                 IRevolutionVotingPower.BalanceAndWeight({
-                    balance: votingPower.getPastTokenVotes(account, snapshotBlock),
+                    balance: votingPower.getPastTokenVotes(account, blockNumber),
                     voteWeight: tokenVoteWeight
                 })
             );
@@ -200,8 +209,13 @@ contract RevolutionGrants is
      * @notice Adds an address to the list of approved recipients
      * @param recipient The address to be added as an approved recipient
      */
-    function addApprovedRecipient(address recipient) public onlyOwner {
+    function addApprovedRecipient(address recipient) public {
         if (recipient == address(0)) revert ADDRESS_ZERO();
+
+        // check voting power of the caller
+        uint256 weight = getVotingPowerForBlock(msg.sender, block.number - 1);
+        if (weight <= minVotingPowerToCreate) revert WEIGHT_TOO_LOW();
+
         approvedRecipients[recipient] = true;
     }
 
