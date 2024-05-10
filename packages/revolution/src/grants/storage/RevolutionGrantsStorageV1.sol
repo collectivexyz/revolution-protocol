@@ -10,6 +10,9 @@ import { ISuperToken, ISuperfluidPool, PoolConfig } from "../superfluid/SuperTok
 /// @author rocketman
 /// @notice The RevolutionGrants storage contract
 contract RevolutionGrantsStorageV1 {
+    /// The snapshot block number for voting
+    uint256 public snapshotBlock;
+
     /// The mapping of approved recipients
     mapping(address => bool) public approvedRecipients;
 

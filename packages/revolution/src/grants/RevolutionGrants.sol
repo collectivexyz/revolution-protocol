@@ -67,6 +67,8 @@ contract RevolutionGrants is
         quorumVotesBPS = _grantsParams.quorumVotesBPS;
         minVotingPowerToVote = _grantsParams.minVotingPowerToVote;
         minVotingPowerToCreate = _grantsParams.minVotingPowerToCreate;
+
+        snapshotBlock = block.number;
     }
 
     /**
