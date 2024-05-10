@@ -8,13 +8,13 @@ pragma solidity ^0.8.22;
  */
 interface IRevolutionGrantsEvents {
     /**
-     * @dev Emitted when a vote is cast for a piece.
-     * @param pieceId Unique identifier for the piece being voted for.
+     * @dev Emitted when a vote is cast for a grant application.
+     * @param recipient Address of the recipient of the grant.
      * @param voter Address of the voter.
-     * @param weight Weight of the vote.
-     * @param totalWeight Total weight of votes for the piece after the new vote.
+     * @param memberUnits New member units as a result of the vote.
+     * @param bps Basis points of the vote. Proportion of the voters weight that is allocated to the recipient.
      */
-    event VoteCast(uint256 indexed pieceId, address indexed voter, uint256 weight, uint256 totalWeight);
+    event VoteCast(address indexed recipient, address indexed voter, uint256 memberUnits, uint256 bps);
 
     /// @notice Emitted when quorum votes basis points is set
     event QuorumVotesBPSSet(uint256 oldQuorumVotesBPS, uint256 newQuorumVotesBPS);
@@ -38,11 +38,8 @@ interface IRevolutionGrants is IRevolutionGrantsEvents {
     /// @dev Reverts if the lengths of the provided arrays do not match.
     error ARRAY_LENGTH_MISMATCH();
 
-    /// @dev Reverts if the art piece has already been dropped.
-    error ALREADY_DROPPED();
-
-    /// @dev Reverts if the voter has already voted for this piece.
-    error ALREADY_VOTED();
+    /// @dev Reverts if the recipient is not approved.
+    error NOT_APPROVED_RECIPIENT();
 
     /// @dev Reverts if the voter's weight is below the minimum required vote weight.
     error WEIGHT_TOO_LOW();
@@ -56,13 +53,16 @@ interface IRevolutionGrants is IRevolutionGrantsEvents {
     /// @dev Reverts if the quorum votes basis points exceed the maximum allowed value.
     error INVALID_QUORUM_BPS();
 
+    /// @dev Reverts if voting allocation casts will overflow
+    error OVERFLOW();
+
     /// @dev Reverts if the ERC721 voting token weight is invalid (i.e., 0).
     error INVALID_ERC721_VOTING_WEIGHT();
 
     /// @dev Reverts if the ERC20 voting token weight is invalid (i.e., 0).
     error INVALID_ERC20_VOTING_WEIGHT();
 
-    /// @dev Reverts if the total vote weights do not meet the required quorum votes for a piece to be dropped.
+    /// @dev Reverts if the total vote weights do not meet the required quorum votes for a grant to receive funding.
     error DOES_NOT_MEET_QUORUM();
 
     /// @dev Reverts if the voting signature has expired
@@ -81,36 +81,36 @@ interface IRevolutionGrants is IRevolutionGrantsEvents {
     ///                         STRUCTS                          ///
     ///                                                          ///
 
-    // Struct representing a voter and their weight for a specific art piece.
+    // Struct representing a voter and their weight for a specific grant application.
     struct Vote {
         address voterAddress;
         uint256 weight;
     }
 
     // /**
-    //  * @notice Checks if a specific voter has already voted for a given art piece.
-    //  * @param pieceId The ID of the art piece.
+    //  * @notice Checks if a specific voter has already voted for a given grant application.
+    //  * @param recipient The address of the recipient of the grant.
     //  * @param voter The address of the voter.
-    //  * @return A boolean indicating if the voter has voted for the art piece.
+    //  * @return A boolean indicating if the voter has voted for the grant application.
     //  */
     // function hasVoted(uint256 pieceId, address voter) external view returns (bool);
 
     // /**
-    //  * @notice Allows a user to vote for a specific art piece.
-    //  * @param pieceId The ID of the art piece.
+    //  * @notice Allows a user to vote for a specific grant application.
+    //  * @param recipient The address of the recipient of the grant.
     //  */
-    // function vote(uint256 pieceId) external;
+    // function vote(address recipient) external;
 
     // /**
-    //  * @notice Allows a user to vote for many art pieces.
-    //  * @param pieceIds The ID of the art pieces.
+    //  * @notice Allows a user to vote for many grant applications.
+    //  * @param recipients The addresses of the recipients of the grants.
     //  */
-    // function voteForMany(uint256[] calldata pieceIds) external;
+    // function voteForMany(address[] calldata recipients) external;
 
     // /**
-    //  * @notice Allows a user to vote for a specific art piece using a signature.
+    //  * @notice Allows a user to vote for a specific grant application using a signature.
     //  * @param from The address of the voter.
-    //  * @param pieceIds The ID of the art piece.
+    //  * @param recipients The addresses of the recipients of the grants.
     //  * @param deadline The deadline for the vote.
     //  * @param v The v component of the signature.
     //  * @param r The r component of the signature.
@@ -118,7 +118,7 @@ interface IRevolutionGrants is IRevolutionGrantsEvents {
     //  */
     // function voteForManyWithSig(
     //     address from,
-    //     uint256[] calldata pieceIds,
+    //     address[] calldata recipients,
     //     uint256 deadline,
     //     uint8 v,
     //     bytes32 r,
@@ -126,9 +126,9 @@ interface IRevolutionGrants is IRevolutionGrantsEvents {
     // ) external;
 
     // /**
-    //  * @notice Allows users to vote for a specific art piece using a signature.
+    //  * @notice Allows users to vote for a specific grant application using a signature.
     //  * @param from The address of the voter.
-    //  * @param pieceIds The ID of the art piece.
+    //  * @param recipients The addresses of the recipients of the grants.
     //  * @param deadline The deadline for the vote.
     //  * @param v The v component of the signature.
     //  * @param r The r component of the signature.
@@ -136,7 +136,7 @@ interface IRevolutionGrants is IRevolutionGrantsEvents {
     //  */
     // function batchVoteForManyWithSig(
     //     address[] memory from,
-    //     uint256[][] memory pieceIds,
+    //     address[][] memory recipients,
     //     uint256[] memory deadline,
     //     uint8[] memory v,
     //     bytes32[] memory r,
@@ -144,18 +144,18 @@ interface IRevolutionGrants is IRevolutionGrantsEvents {
     // ) external;
 
     // /**
-    //  * @notice Fetch the list of voters for a given art piece.
-    //  * @param pieceId The ID of the art piece.
+    //  * @notice Fetch the list of voters for a given grant application.
+    //  * @param recipient The address of the recipient of the grant.
     //  * @param voter The address of the voter.
-    //  * @return An Voter structs associated with the given art piece ID.
+    //  * @return An Voter structs associated with the given recipient.
     //  */
-    // function getVote(uint256 pieceId, address voter) external view returns (Vote memory);
+    // function getVote(address recipient, address voter) external view returns (Vote memory);
 
     // /**
-    //  * @notice Returns true or false depending on whether the top voted piece meets quorum
-    //  * @return True if the top voted piece meets quorum, false otherwise
+    //  * @notice Returns true or false depending on whether the grant application meets quorum
+    //  * @return True if the grant application meets quorum, false otherwise
     //  */
-    // function grantMeetsQuorum() external view returns (bool);
+    // function grantMeetsQuorum(address recipient) external view returns (bool);
 
     /**
      * @notice Structure to hold the parameters for initializing grants.
@@ -163,7 +163,7 @@ interface IRevolutionGrants is IRevolutionGrantsEvents {
      * @param pointsVoteWeight The voting weight of the individual Revolution ERC20 points tokens.
      * @param quorumVotesBPS The initial quorum votes threshold in basis points.
      * @param minVotingPowerToVote The minimum vote weight that a voter must have to be able to vote.
-     * @param minVotingPowerToCreate The minimum vote weight that a voter must have to be able to create an art piece.
+     * @param minVotingPowerToCreate The minimum vote weight that a voter must have to be able to create a grant.
      */
     struct GrantsParams {
         uint256 tokenVoteWeight;
@@ -176,7 +176,7 @@ interface IRevolutionGrants is IRevolutionGrantsEvents {
     /**
      * @notice Initializes a token's metadata descriptor
      * @param votingPower The address of the revolution voting power contract
-     * @param initialOwner The owner of the contract, allowed to drop pieces. Commonly updated to the AuctionHouse
+     * @param initialOwner The owner of the contract.
      * @param grantsParams The parameters for the grants contract
      */
     function initialize(address votingPower, address initialOwner, GrantsParams memory grantsParams) external;

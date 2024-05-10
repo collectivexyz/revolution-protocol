@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: GPL-3.0-or-later
 pragma solidity 0.8.22;
 
-import { ICultureIndex } from "../../interfaces/ICultureIndex.sol";
+import { IRevolutionGrants } from "../../interfaces/IRevolutionGrants.sol";
 import { IUpgradeManager } from "@cobuild/utility-contracts/src/interfaces/IUpgradeManager.sol";
 import { IRevolutionVotingPower } from "../../interfaces/IRevolutionVotingPower.sol";
 import { ISuperToken, ISuperfluidPool, PoolConfig } from "../superfluid/SuperTokenV1Library.sol";
@@ -10,6 +10,9 @@ import { ISuperToken, ISuperfluidPool, PoolConfig } from "../superfluid/SuperTok
 /// @author rocketman
 /// @notice The RevolutionGrants storage contract
 contract RevolutionGrantsStorageV1 {
+    /// @notice constant to scale uints into percentages (1e6 == 100%)
+    uint256 public constant PERCENTAGE_SCALE = 1e6;
+
     /// The snapshot block number for voting
     uint256 public snapshotBlock;
 
@@ -35,13 +38,13 @@ contract RevolutionGrantsStorageV1 {
     // The RevolutionVotingPower contract used to get the voting power of an account
     IRevolutionVotingPower public votingPower;
 
-    /// @notice The minimum vote power required to vote on an art piece
+    /// @notice The minimum vote power required to vote on a grant
     uint256 public minVotingPowerToVote;
 
-    /// @notice The minimum voting power required to create an art piece
+    /// @notice The minimum voting power required to create a grant
     uint256 public minVotingPowerToCreate;
 
-    /// @notice The basis point number of votes in support of a art piece required in order for a quorum to be reached and for an art piece to be dropped.
+    /// @notice The basis point number of votes in support of a grant required in order for a quorum to be reached and for a grant to be funded.
     uint256 public quorumVotesBPS;
 
     // The weight of the 721 voting token
@@ -50,12 +53,13 @@ contract RevolutionGrantsStorageV1 {
     // The weight of the 20 voting token
     uint256 public pointsVoteWeight;
 
-    // The list of all pieces
-    mapping(uint256 => ICultureIndex.ArtPiece) public pieces;
+    // The mapping of a voter to a list of votes allocations (recipient, BPS)
+    mapping(address => VoteAllocation[]) public votes;
 
-    // The mapping of all votes for a piece
-    mapping(uint256 => mapping(address => ICultureIndex.Vote)) public votes;
-
-    // The total voting weight for a piece
-    mapping(uint256 => uint256) public totalVoteWeights;
+    // Struct to hold the recipient and their corresponding BPS for a vote
+    struct VoteAllocation {
+        address recipient;
+        uint32 bps;
+        uint128 memberUnitsDelta;
+    }
 }
