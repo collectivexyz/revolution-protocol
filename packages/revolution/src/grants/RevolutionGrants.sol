@@ -72,6 +72,24 @@ contract RevolutionGrants is
     }
 
     /**
+     * @notice Get account voting power for a specific piece
+     * @param account The address of the voter.
+     */
+    function getAccountVotingPower(address account) public view returns (uint256) {
+        return
+            votingPower.calculateVotesWithWeights(
+                IRevolutionVotingPower.BalanceAndWeight({
+                    balance: votingPower.getPastPointsVotes(account, snapshotBlock),
+                    voteWeight: pointsVoteWeight
+                }),
+                IRevolutionVotingPower.BalanceAndWeight({
+                    balance: votingPower.getPastTokenVotes(account, snapshotBlock),
+                    voteWeight: tokenVoteWeight
+                })
+            );
+    }
+
+    /**
      * @notice Adds an address to the list of approved recipients
      * @param recipient The address to be added as an approved recipient
      */
