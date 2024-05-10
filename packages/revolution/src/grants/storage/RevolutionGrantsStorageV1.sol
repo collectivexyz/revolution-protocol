@@ -20,10 +20,10 @@ contract RevolutionGrantsStorageV1 {
     mapping(address => bool) public approvedRecipients;
 
     /// The SuperToken used to pay out the grantees
-    ISuperToken internal immutable superToken;
+    ISuperToken internal superToken;
 
     /// The Superfluid pool used to distribute the SuperToken
-    ISuperfluidPool internal immutable pool;
+    ISuperfluidPool internal pool;
 
     /// The Superfluid pool configuration
     PoolConfig internal poolConfig =

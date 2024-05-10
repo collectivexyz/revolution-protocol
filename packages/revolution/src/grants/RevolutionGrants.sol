@@ -28,25 +28,23 @@ contract RevolutionGrants is
     /**
      * @notice Initializes a token's metadata descriptor
      * @param _manager The contract upgrade manager address
-     * @param _superToken The address of the SuperToken used to pay out the grantees
      */
-    constructor(address _manager, ISuperToken _superToken) payable initializer {
+    constructor(address _manager) payable initializer {
         if (_manager == address(0)) revert ADDRESS_ZERO();
         manager = IUpgradeManager(_manager);
-
-        superToken = _superToken;
-        pool = superToken.createPool(address(this), poolConfig);
     }
 
     /**
      * @notice Initializes the RevolutionGrants contract
      * @param _votingPower The address of the RevolutionVotingPower contract
      * @param _initialOwner The owner of the contract, allowed to drop pieces. Commonly updated to the AuctionHouse
+     * @param _superToken The address of the SuperToken used to pay out the grantees
      * @param _grantsParams The parameters for the grants contract
      */
     function initialize(
         address _votingPower,
         address _initialOwner,
+        address _superToken,
         GrantsParams memory _grantsParams
     ) public initializer {
         if (msg.sender != address(manager)) revert SENDER_NOT_MANAGER();
@@ -63,6 +61,9 @@ contract RevolutionGrants is
         votingPower = IRevolutionVotingPower(_votingPower);
         tokenVoteWeight = _grantsParams.tokenVoteWeight;
         pointsVoteWeight = _grantsParams.pointsVoteWeight;
+
+        superToken = ISuperToken(_superToken);
+        pool = superToken.createPool(address(this), poolConfig);
 
         quorumVotesBPS = _grantsParams.quorumVotesBPS;
         minVotingPowerToVote = _grantsParams.minVotingPowerToVote;
