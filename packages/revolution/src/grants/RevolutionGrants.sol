@@ -72,6 +72,26 @@ contract RevolutionGrants is
     }
 
     /**
+     * @notice Sets the minimum voting power required to vote on a grant
+     * @param _minVotingPowerToVote The new minimum voting power to vote
+     */
+    function setMinVotingPowerToVote(uint256 _minVotingPowerToVote) public onlyOwner {
+        emit MinVotingPowerToVoteSet(minVotingPowerToVote, _minVotingPowerToVote);
+
+        minVotingPowerToVote = _minVotingPowerToVote;
+    }
+
+    /**
+     * @notice Sets the minimum voting power required to create a grant
+     * @param _minVotingPowerToCreate The new minimum voting power to create a grant
+     */
+    function setMinVotingPowerToCreate(uint256 _minVotingPowerToCreate) public onlyOwner {
+        emit MinVotingPowerToCreateSet(minVotingPowerToCreate, _minVotingPowerToCreate);
+
+        minVotingPowerToCreate = _minVotingPowerToCreate;
+    }
+
+    /**
      * @notice Retrieves all vote allocations for a given account
      * @param account The address of the account to retrieve votes for
      * @return allocations An array of VoteAllocation structs representing each vote made by the account
