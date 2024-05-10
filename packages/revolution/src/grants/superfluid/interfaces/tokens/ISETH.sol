@@ -1,8 +1,7 @@
 // SPDX-License-Identifier: MIT
-pragma solidity >= 0.8.11;
+pragma solidity >=0.8.11;
 
 import { ISuperToken } from "../superfluid/ISuperToken.sol";
-
 
 /**
  * @title Super ETH (SETH) custom token interface

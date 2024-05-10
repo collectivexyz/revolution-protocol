@@ -16,6 +16,9 @@ interface IUserDefinedMacro {
      * @param  msgSender  The msg.sender of the call to the MacroForwarder.
      * @return operations The batch operations built.
      */
-    function buildBatchOperations(ISuperfluid host, bytes memory params, address msgSender) external view
-        returns (ISuperfluid.Operation[] memory operations);
+    function buildBatchOperations(
+        ISuperfluid host,
+        bytes memory params,
+        address msgSender
+    ) external view returns (ISuperfluid.Operation[] memory operations);
 }

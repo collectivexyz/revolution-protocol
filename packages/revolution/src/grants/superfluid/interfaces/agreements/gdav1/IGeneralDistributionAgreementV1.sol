@@ -19,19 +19,17 @@ struct PoolConfig {
  * @author Superfluid
  */
 abstract contract IGeneralDistributionAgreementV1 is ISuperAgreement {
-
     // Custom Errors
-    error GDA_DISTRIBUTE_FOR_OTHERS_NOT_ALLOWED();          // 0xf67d263e
-    error GDA_DISTRIBUTE_FROM_ANY_ADDRESS_NOT_ALLOWED();    // 0x7761a5e5
-    error GDA_FLOW_DOES_NOT_EXIST();                        // 0x29f4697e
-    error GDA_NON_CRITICAL_SENDER();                        // 0x666f381d
-    error GDA_INSUFFICIENT_BALANCE();                       // 0x33115c3f
-    error GDA_NO_NEGATIVE_FLOW_RATE();                      // 0x15f25663
-    error GDA_ADMIN_CANNOT_BE_POOL();                       // 0x9ab88a26
-    error GDA_NOT_POOL_ADMIN();                             // 0x3a87e565
-    error GDA_NO_ZERO_ADDRESS_ADMIN();                      // 0x82c5d837
-    error GDA_ONLY_SUPER_TOKEN_POOL();                      // 0x90028c37
-
+    error GDA_DISTRIBUTE_FOR_OTHERS_NOT_ALLOWED(); // 0xf67d263e
+    error GDA_DISTRIBUTE_FROM_ANY_ADDRESS_NOT_ALLOWED(); // 0x7761a5e5
+    error GDA_FLOW_DOES_NOT_EXIST(); // 0x29f4697e
+    error GDA_NON_CRITICAL_SENDER(); // 0x666f381d
+    error GDA_INSUFFICIENT_BALANCE(); // 0x33115c3f
+    error GDA_NO_NEGATIVE_FLOW_RATE(); // 0x15f25663
+    error GDA_ADMIN_CANNOT_BE_POOL(); // 0x9ab88a26
+    error GDA_NOT_POOL_ADMIN(); // 0x3a87e565
+    error GDA_NO_ZERO_ADDRESS_ADMIN(); // 0x82c5d837
+    error GDA_ONLY_SUPER_TOKEN_POOL(); // 0x90028c37
 
     // Events
     event InstantDistributionUpdated(
@@ -96,11 +94,11 @@ abstract contract IGeneralDistributionAgreementV1 is ISuperAgreement {
     /// @param from The sender address
     /// @param to The receiver address (the pool)
     /// @return flow rate
-    function getFlowRate(ISuperfluidToken token, address from, ISuperfluidPool to)
-        external
-        view
-        virtual
-        returns (int96);
+    function getFlowRate(
+        ISuperfluidToken token,
+        address from,
+        ISuperfluidPool to
+    ) external view virtual returns (int96);
 
     /// @dev Gets the GDA flow data between `from` and `to` of `token`
     /// @param token The token address
@@ -109,11 +107,11 @@ abstract contract IGeneralDistributionAgreementV1 is ISuperAgreement {
     /// @return lastUpdated The timestamp of when the flow was last updated
     /// @return flowRate The flow rate
     /// @return deposit The amount of deposit the flow
-    function getFlow(ISuperfluidToken token, address from, ISuperfluidPool to)
-        external
-        view
-        virtual
-        returns (uint256 lastUpdated, int96 flowRate, uint256 deposit);
+    function getFlow(
+        ISuperfluidToken token,
+        address from,
+        ISuperfluidPool to
+    ) external view virtual returns (uint256 lastUpdated, int96 flowRate, uint256 deposit);
 
     /// @dev Gets the aggregated GDA flow info of `account` for `token`
     /// @param token The token address
@@ -121,11 +119,10 @@ abstract contract IGeneralDistributionAgreementV1 is ISuperAgreement {
     /// @return timestamp The timestamp of when the flow was last updated for account
     /// @return flowRate The net flow rate of token for account
     /// @return deposit The sum of all deposits for account's flows
-    function getAccountFlowInfo(ISuperfluidToken token, address account)
-        external
-        view
-        virtual
-        returns (uint256 timestamp, int96 flowRate, uint256 deposit);
+    function getAccountFlowInfo(
+        ISuperfluidToken token,
+        address account
+    ) external view virtual returns (uint256 timestamp, int96 flowRate, uint256 deposit);
 
     /// @notice Executes an optimistic estimation of what the actual flow distribution flow rate may be.
     /// The actual flow distribution flow rate is the flow rate that will be sent from `from`.
@@ -173,20 +170,24 @@ abstract contract IGeneralDistributionAgreementV1 is ISuperAgreement {
     /// @param token The token address
     /// @param admin The admin of the pool
     /// @param poolConfig The pool configuration (see PoolConfig struct)
-    function createPool(ISuperfluidToken token, address admin, PoolConfig memory poolConfig)
-        external
-        virtual
-        returns (ISuperfluidPool pool);
+    function createPool(
+        ISuperfluidToken token,
+        address admin,
+        PoolConfig memory poolConfig
+    ) external virtual returns (ISuperfluidPool pool);
 
-    function updateMemberUnits(ISuperfluidPool pool, address memberAddress, uint128 newUnits, bytes calldata ctx)
-        external
-        virtual
-        returns (bytes memory newCtx);
+    function updateMemberUnits(
+        ISuperfluidPool pool,
+        address memberAddress,
+        uint128 newUnits,
+        bytes calldata ctx
+    ) external virtual returns (bytes memory newCtx);
 
-    function claimAll(ISuperfluidPool pool, address memberAddress, bytes calldata ctx)
-        external
-        virtual
-        returns (bytes memory newCtx);
+    function claimAll(
+        ISuperfluidPool pool,
+        address memberAddress,
+        bytes calldata ctx
+    ) external virtual returns (bytes memory newCtx);
 
     /// @notice Connects `msg.sender` to `pool`.
     /// @dev This is used to connect a pool to the GDA.
@@ -260,11 +261,10 @@ abstract contract IGeneralDistributionAgreementV1 is ISuperAgreement {
      * @return isCurrentlyPatricianPeriod Whether it is currently the patrician period dictated by governance
      * @return timestamp The value of host.getNow()
      */
-    function isPatricianPeriodNow(ISuperfluidToken token, address account)
-        external
-        view
-        virtual
-        returns (bool isCurrentlyPatricianPeriod, uint256 timestamp);
+    function isPatricianPeriodNow(
+        ISuperfluidToken token,
+        address account
+    ) external view virtual returns (bool isCurrentlyPatricianPeriod, uint256 timestamp);
 
     /**
      * @dev Returns whether it is the patrician period based on timestamp
@@ -272,9 +272,9 @@ abstract contract IGeneralDistributionAgreementV1 is ISuperAgreement {
      * @param timestamp The timestamp we are interested in observing the result of isPatricianPeriod
      * @return bool Whether it is currently the patrician period dictated by governance
      */
-    function isPatricianPeriod(ISuperfluidToken token, address account, uint256 timestamp)
-        public
-        view
-        virtual
-        returns (bool);
+    function isPatricianPeriod(
+        ISuperfluidToken token,
+        address account,
+        uint256 timestamp
+    ) public view virtual returns (bool);
 }

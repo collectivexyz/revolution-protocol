@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: MIT
-pragma solidity >= 0.8.11;
+pragma solidity >=0.8.11;
 
 import { ISuperfluid } from "./ISuperfluid.sol";
 import { ISuperToken } from "./ISuperToken.sol";
@@ -10,26 +10,21 @@ import { ISuperfluidToken } from "./ISuperfluidToken.sol";
  * @author Superfluid
  */
 interface ISuperfluidGovernance {
-
     /**************************************************************************
      * Errors
      *************************************************************************/
     error SF_GOV_INVALID_LIQUIDATION_OR_PATRICIAN_PERIOD(); // 0xe171980a
-    error SF_GOV_MUST_BE_CONTRACT();                        // 0x80dddd73
+    error SF_GOV_MUST_BE_CONTRACT(); // 0x80dddd73
 
     /**
      * @dev Replace the current governance with a new governance
      */
-    function replaceGovernance(
-        ISuperfluid host,
-        address newGov) external;
+    function replaceGovernance(ISuperfluid host, address newGov) external;
 
     /**
      * @dev Register a new agreement class
      */
-    function registerAgreementClass(
-        ISuperfluid host,
-        address agreementClass) external;
+    function registerAgreementClass(ISuperfluid host, address agreementClass) external;
 
     /**
      * @dev Update logics of the contracts
@@ -48,9 +43,7 @@ interface ISuperfluidGovernance {
     /**
      * @dev Update supertoken logic contract to the latest that is managed by the super token factory
      */
-    function batchUpdateSuperTokenLogic(
-        ISuperfluid host,
-        ISuperToken[] calldata tokens) external;
+    function batchUpdateSuperTokenLogic(ISuperfluid host, ISuperToken[] calldata tokens) external;
 
     /**
      * @dev Update supertoken logic contract to the provided logic contracts.
@@ -59,36 +52,23 @@ interface ISuperfluidGovernance {
     function batchUpdateSuperTokenLogic(
         ISuperfluid host,
         ISuperToken[] calldata tokens,
-        address[] calldata tokenLogics) external;
+        address[] calldata tokenLogics
+    ) external;
 
     /**
      * @dev Set configuration as address value
      */
-    function setConfig(
-        ISuperfluid host,
-        ISuperfluidToken superToken,
-        bytes32 key,
-        address value
-    ) external;
+    function setConfig(ISuperfluid host, ISuperfluidToken superToken, bytes32 key, address value) external;
 
     /**
      * @dev Set configuration as uint256 value
      */
-    function setConfig(
-        ISuperfluid host,
-        ISuperfluidToken superToken,
-        bytes32 key,
-        uint256 value
-    ) external;
+    function setConfig(ISuperfluid host, ISuperfluidToken superToken, bytes32 key, uint256 value) external;
 
     /**
      * @dev Clear configuration
      */
-    function clearConfig(
-        ISuperfluid host,
-        ISuperfluidToken superToken,
-        bytes32 key
-    ) external;
+    function clearConfig(ISuperfluid host, ISuperfluidToken superToken, bytes32 key) external;
 
     /**
      * @dev Get configuration as address value
@@ -96,7 +76,8 @@ interface ISuperfluidGovernance {
     function getConfigAsAddress(
         ISuperfluid host,
         ISuperfluidToken superToken,
-        bytes32 key) external view returns (address value);
+        bytes32 key
+    ) external view returns (address value);
 
     /**
      * @dev Get configuration as uint256 value
@@ -104,6 +85,6 @@ interface ISuperfluidGovernance {
     function getConfigAsUint256(
         ISuperfluid host,
         ISuperfluidToken superToken,
-        bytes32 key) external view returns (uint256 value);
-
+        bytes32 key
+    ) external view returns (uint256 value);
 }

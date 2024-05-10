@@ -4,7 +4,7 @@ pragma solidity >=0.8.11;
 // minimal interface for interacting with Safe contracts
 interface ISafe {
     function nonce() external view returns (uint256);
-    
+
     // solhint-disable-next-line func-name-mixedcase
     function VERSION() external view returns (string memory);
 
