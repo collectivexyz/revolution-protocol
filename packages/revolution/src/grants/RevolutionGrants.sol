@@ -167,8 +167,7 @@ contract RevolutionGrants is
         votes[voter].push(VoteAllocation({ recipient: recipient, bps: bps, memberUnitsDelta: newUnits }));
 
         // update member units
-        bool success = updateMemberUnits(recipient, memberUnits);
-        if (!success) revert UNITS_UPDATE_FAILED();
+        updateMemberUnits(recipient, memberUnits);
 
         emit VoteCast(recipient, voter, memberUnits, bps);
     }
@@ -234,7 +233,8 @@ contract RevolutionGrants is
     }
 
     function updateMemberUnits(address member, uint128 units) internal {
-        superToken.updateMemberUnits(pool, member, units);
+        bool success = superToken.updateMemberUnits(pool, member, units);
+        if (!success) revert UNITS_UPDATE_FAILED();
     }
 
     function distributeFlow(int96 flowRate) public onlyOwner {
@@ -273,6 +273,66 @@ contract RevolutionGrants is
             /* eg (100 * 2*1e4) / (1e6) */
             scaledAmount := div(mul(amount, scaledPercent), PERCENTAGE_SCALE)
         }
+    }
+
+    /**
+     * @notice Helper function to get the total units of a member in the pool
+     * @param member The address of the member
+     * @return units The total units of the member
+     */
+    function getPoolMemberUnits(address member) public view returns (uint128 units) {
+        return pool.getUnits(member);
+    }
+
+    /**
+     * @notice Helper function to claim all tokens for a member from the pool
+     * @param member The address of the member
+     */
+    function claimAllFromPool(address member) public {
+        pool.claimAll(member);
+    }
+
+    /**
+     * @notice Helper function to get the claimable balance for a member at the current time
+     * @param member The address of the member
+     * @return claimableBalance The claimable balance for the member
+     */
+    function getClaimableBalanceNow(address member) public view returns (int256 claimableBalance) {
+        (claimableBalance, ) = pool.getClaimableNow(member);
+    }
+
+    /**
+     * @notice Retrieves the flow rate for a specific member in the pool
+     * @param memberAddr The address of the member
+     * @return flowRate The flow rate for the member
+     */
+    function getMemberFlowRate(address memberAddr) public view returns (int96 flowRate) {
+        flowRate = pool.getMemberFlowRate(memberAddr);
+    }
+
+    /**
+     * @notice Retrieves the total amount received by a specific member in the pool
+     * @param memberAddr The address of the member
+     * @return totalAmountReceived The total amount received by the member
+     */
+    function getTotalAmountReceivedByMember(address memberAddr) public view returns (uint256 totalAmountReceived) {
+        totalAmountReceived = pool.getTotalAmountReceivedByMember(memberAddr);
+    }
+
+    /**
+     * @notice Retrieves the total units of the pool
+     * @return totalUnits The total units of the pool
+     */
+    function getTotalUnits() public view returns (uint128 totalUnits) {
+        totalUnits = pool.getTotalUnits();
+    }
+
+    /**
+     * @notice Retrieves the total flow rate of the pool
+     * @return totalFlowRate The total flow rate of the pool
+     */
+    function getTotalFlowRate() public view returns (int96 totalFlowRate) {
+        totalFlowRate = pool.getTotalFlowRate();
     }
 
     /**
