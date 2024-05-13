@@ -79,7 +79,7 @@ contract RevolutionGrants is
     function setSuperTokenAndCreatePool(address _superToken) public onlyOwner {
         superToken = ISuperToken(_superToken);
         pool = superToken.createPool(address(this), poolConfig);
-        // superToken.connectPool(pool);
+        superToken.connectPool(pool);
     }
 
     /**
