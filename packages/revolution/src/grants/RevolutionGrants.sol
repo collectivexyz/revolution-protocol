@@ -237,9 +237,13 @@ contract RevolutionGrants is
     function updateMemberUnits(address member, uint128 units) internal {
         bool success = superToken.updateMemberUnits(pool, member, units);
         if (!success) revert UNITS_UPDATE_FAILED();
+
+        // distribute new flow rate
+        superToken.distributeFlow(address(this), pool, flowRate);
     }
 
-    function distributeFlow(int96 flowRate) public onlyOwner {
+    function setFlowRate(int96 _flowRate) public onlyOwner {
+        flowRate = _flowRate;
         superToken.distributeFlow(address(this), pool, flowRate);
     }
 

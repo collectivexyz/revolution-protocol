@@ -16,6 +16,9 @@ contract RevolutionGrantsStorageV1 {
     /// The snapshot block number for voting
     uint256 public snapshotBlock;
 
+    /// The flow rate going from the pool to the grant recipients
+    int96 public flowRate;
+
     /// The mapping of approved recipients
     mapping(address => bool) public approvedRecipients;
 
