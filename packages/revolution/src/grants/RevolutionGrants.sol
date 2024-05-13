@@ -189,6 +189,9 @@ contract RevolutionGrants is
             // Update the member units in the pool
             updateMemberUnits(recipient, currentUnits - unitsDelta);
         }
+
+        // Clear out the votes for the voter
+        delete votes[voter];
     }
 
     /**
