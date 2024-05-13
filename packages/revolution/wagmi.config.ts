@@ -21,6 +21,7 @@ export default defineConfig({
         "RevolutionToken",
         "RevolutionDAOLogicV1",
         "DAOExecutor",
+        "RevolutionGrants",
         // extensions
         "ContestBuilder",
         "BaseContest",

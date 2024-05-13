@@ -14,9 +14,11 @@ import { RevolutionDAOLogicV1 } from "../src/governance/RevolutionDAOLogicV1.sol
 import { DAOExecutor } from "../src/governance/DAOExecutor.sol";
 import { CultureIndex } from "../src/culture-index/CultureIndex.sol";
 import { ICultureIndex } from "../src/interfaces/ICultureIndex.sol";
+import { IRevolutionGrants } from "../src/interfaces/IRevolutionGrants.sol";
 import { RevolutionPoints } from "../src/RevolutionPoints.sol";
 import { RevolutionVotingPower } from "../src/RevolutionVotingPower.sol";
 import { RevolutionPointsEmitter } from "../src/RevolutionPointsEmitter.sol";
+import { RevolutionGrants } from "../src/grants/RevolutionGrants.sol";
 import { MaxHeap } from "../src/culture-index/MaxHeap.sol";
 import { RevolutionDAOStorageV1 } from "../src/governance/RevolutionDAOInterfaces.sol";
 import { ProtocolRewards } from "@cobuild/protocol-rewards/src/ProtocolRewards.sol";
@@ -49,6 +51,7 @@ contract RevolutionBuilderTest is Test {
     address internal revolutionVotingPowerImpl;
     address internal vrgdaImpl;
     address internal splitsCreatorImpl;
+    address internal grantsImpl;
 
     address internal nounsDAO;
     address internal revolutionDAO;
@@ -124,6 +127,7 @@ contract RevolutionBuilderTest is Test {
         revolutionVotingPowerImpl = address(new RevolutionVotingPower(address(manager)));
         vrgdaImpl = address(new VRGDAC(address(manager)));
         splitsCreatorImpl = address(new SplitMain(address(manager)));
+        grantsImpl = address(new RevolutionGrants(address(manager)));
 
         managerImpl = address(
             new RevolutionBuilder(
@@ -161,6 +165,7 @@ contract RevolutionBuilderTest is Test {
     IRevolutionBuilder.CultureIndexParams internal cultureIndexParams;
     IRevolutionBuilder.RevolutionPointsParams internal revolutionPointsParams;
     IRevolutionBuilder.RevolutionVotingPowerParams internal revolutionVotingPowerParams;
+    IRevolutionGrants.GrantsParams internal grantsParams;
 
     function setMockRevolutionTokenParams() internal virtual {
         setRevolutionTokenParams("Mock Token", "MOCK", "Qmew7TdyGnj6YRUjQR68sUJN3239MYXRD8uxowxF6rGK8j", "Mock");
@@ -269,6 +274,26 @@ contract RevolutionBuilderTest is Test {
             name: _daoName,
             purpose: _daoPurpose,
             flag: _daoFlag
+        });
+    }
+
+    function setMockGrantsParams() internal virtual {
+        setGrantsParams(100 * 1e18, 1, 1000, 0, 0);
+    }
+
+    function setGrantsParams(
+        uint256 _tokenVoteWeight,
+        uint256 _pointsVoteWeight,
+        uint256 _quorumVotesBPS,
+        uint256 _minVotingPowerToVote,
+        uint256 _minVotingPowerToCreate
+    ) internal virtual {
+        grantsParams = IRevolutionGrants.GrantsParams({
+            tokenVoteWeight: _tokenVoteWeight,
+            pointsVoteWeight: _pointsVoteWeight,
+            quorumVotesBPS: _quorumVotesBPS,
+            minVotingPowerToVote: _minVotingPowerToVote,
+            minVotingPowerToCreate: _minVotingPowerToCreate
         });
     }
 
@@ -391,6 +416,7 @@ contract RevolutionBuilderTest is Test {
         setMockPointsParams();
         setMockPointsEmitterParams();
         setMockRevolutionVotingPowerParams();
+        setMockGrantsParams();
     }
 
     function deployMock() internal virtual {
