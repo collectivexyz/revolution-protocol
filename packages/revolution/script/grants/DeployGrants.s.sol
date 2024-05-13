@@ -26,7 +26,7 @@ contract DeployGrants is Script {
         vm.startBroadcast(deployerAddress);
 
         IRevolutionGrants.GrantsParams memory params = IRevolutionGrants.GrantsParams({
-            tokenVoteWeight: 1e18, // Example token vote weight
+            tokenVoteWeight: 1000 * 1e18,
             pointsVoteWeight: 1, // Example points vote weight
             quorumVotesBPS: 0, // Example quorum votes in basis points (50%)
             minVotingPowerToVote: 1e18, // Minimum voting power required to vote
