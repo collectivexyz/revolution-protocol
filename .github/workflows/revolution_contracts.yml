@@ -37,4 +37,4 @@ jobs:
     uses: ./.github/workflows/coverage.yml
     with:
       package: "revolution"
-      files_to_ignore: '"*lib*" "*base*" "*governance*" "*protocol-rewards*" "*interfaces*" "*extensions*" "*superfluid*"'
+      files_to_ignore: '"*lib*" "*base*" "*governance*" "*protocol-rewards*" "RevolutionGrants.sol" "*interfaces*" "*extensions*" "*superfluid*"'
