@@ -38,6 +38,9 @@ interface IRevolutionGrants is IRevolutionGrantsEvents {
     /// @dev Reverts if the lengths of the provided arrays do not match.
     error ARRAY_LENGTH_MISMATCH();
 
+    /// @dev Reverts if unit updates fail
+    error UNITS_UPDATE_FAILED();
+
     /// @dev Reverts if the recipient is not approved.
     error NOT_APPROVED_RECIPIENT();
 

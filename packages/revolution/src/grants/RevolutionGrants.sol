@@ -167,7 +167,8 @@ contract RevolutionGrants is
         votes[voter].push(VoteAllocation({ recipient: recipient, bps: bps, memberUnitsDelta: newUnits }));
 
         // update member units
-        updateMemberUnits(recipient, memberUnits);
+        bool success = updateMemberUnits(recipient, memberUnits);
+        if (!success) revert UNITS_UPDATE_FAILED();
 
         emit VoteCast(recipient, voter, memberUnits, bps);
     }
