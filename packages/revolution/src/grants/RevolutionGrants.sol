@@ -79,6 +79,7 @@ contract RevolutionGrants is
     function setSuperTokenAndCreatePool(address _superToken) public onlyOwner {
         superToken = ISuperToken(_superToken);
         pool = superToken.createPool(address(this), poolConfig);
+        // superToken.connectPool(pool);
     }
 
     /**
@@ -157,7 +158,8 @@ contract RevolutionGrants is
         uint128 currentUnits = pool.getUnits(recipient);
 
         // double check for overflow before casting
-        uint256 scaledUnits = _scaleAmountByPercentage(totalWeight, bps);
+        // and scale back by 1e18 per https://docs.superfluid.finance/docs/protocol/distributions/guides/pools#about-member-units
+        uint256 scaledUnits = _scaleAmountByPercentage(totalWeight, bps) / 1e18;
         if (scaledUnits > type(uint128).max) revert OVERFLOW();
         uint128 newUnits = uint128(scaledUnits);
 

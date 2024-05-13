@@ -29,7 +29,7 @@ contract DeployGrants is Script {
             tokenVoteWeight: 1e18, // Example token vote weight
             pointsVoteWeight: 1, // Example points vote weight
             quorumVotesBPS: 0, // Example quorum votes in basis points (50%)
-            minVotingPowerToVote: 1, // Minimum voting power required to vote
+            minVotingPowerToVote: 1e18, // Minimum voting power required to vote
             minVotingPowerToCreate: 100 * 1e18 // Minimum voting power required to create a grant
         });
 
