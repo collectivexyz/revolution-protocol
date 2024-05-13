@@ -1,5 +1,15 @@
 # @collectivexyz/revolution
 
+## 0.6.0
+
+### Minor Changes
+
+- c517edf: Add basic Grants program using Superfluid streaming
+
+### Patch Changes
+
+- 2f43e3d: Deploy Gnosis Executor on Base
+
 ## 0.5.1
 
 ### Patch Changes
