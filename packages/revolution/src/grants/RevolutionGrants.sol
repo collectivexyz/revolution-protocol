@@ -37,11 +37,13 @@ contract RevolutionGrants is
     /**
      * @notice Initializes the RevolutionGrants contract
      * @param _votingPower The address of the RevolutionVotingPower contract
+     * @param _superToken The address of the SuperToken to be used for the pool
      * @param _initialOwner The owner of the contract, allowed to drop pieces. Commonly updated to the AuctionHouse
      * @param _grantsParams The parameters for the grants contract
      */
     function initialize(
         address _votingPower,
+        address _superToken,
         address _initialOwner,
         GrantsParams memory _grantsParams
     ) public initializer {
@@ -65,6 +67,9 @@ contract RevolutionGrants is
         minVotingPowerToCreate = _grantsParams.minVotingPowerToCreate;
 
         snapshotBlock = block.number;
+
+        // Set the pool config
+        setSuperTokenAndCreatePool(_superToken);
     }
 
     /**

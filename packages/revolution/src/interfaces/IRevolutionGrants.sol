@@ -106,8 +106,14 @@ interface IRevolutionGrants is IRevolutionGrantsEvents {
     /**
      * @notice Initializes a token's metadata descriptor
      * @param votingPower The address of the revolution voting power contract
+     * @param superToken The address of the SuperToken to be used for the pool
      * @param initialOwner The owner of the contract.
      * @param grantsParams The parameters for the grants contract
      */
-    function initialize(address votingPower, address initialOwner, GrantsParams memory grantsParams) external;
+    function initialize(
+        address votingPower,
+        address superToken,
+        address initialOwner,
+        GrantsParams memory grantsParams
+    ) external;
 }
