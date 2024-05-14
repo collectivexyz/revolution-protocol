@@ -79,7 +79,35 @@ contract RevolutionGrants is
     function setSuperTokenAndCreatePool(address _superToken) public onlyOwner {
         superToken = ISuperToken(_superToken);
         pool = superToken.createPool(address(this), poolConfig);
+    }
+
+    /**
+     * @notice Allows a user to connect to the Superfluid pool
+     * @dev This function should be called by a user who wishes to participate in the pool
+     */
+    function connectToPool() public {
+        // Connect the sender to the pool
         superToken.connectPool(pool);
+    }
+
+    /**
+     * @notice Allows a user to connect to downgrade their Supertokens to ERC20
+     * @dev This function should be called by a recipient who wishes to downgrade their Supertokens to ERC20
+     */
+    function downgradeToERC20(uint256 amount) public {
+        // Connect the sender to the pool
+        superToken.downgrade(amount);
+    }
+
+    /**
+     * @notice Sets the quorum votes basis points required for a grant to be funded
+     * @param _quorumVotesBPS The new quorum votes basis points
+     */
+    function setQuorumVotesBPS(uint256 _quorumVotesBPS) public onlyOwner {
+        require(_quorumVotesBPS <= PERCENTAGE_SCALE, "Invalid BPS value");
+        emit QuorumVotesBPSSet(quorumVotesBPS, _quorumVotesBPS);
+
+        quorumVotesBPS = _quorumVotesBPS;
     }
 
     /**
@@ -119,6 +147,15 @@ contract RevolutionGrants is
      */
     function getAccountVotingPower(address account) public view returns (uint256) {
         return getVotingPowerForBlock(account, snapshotBlock);
+    }
+
+    /**
+     * @notice Retrieves all votes made by a specific account
+     * @param voter The address of the voter to retrieve votes for
+     * @return votesArray An array of VoteAllocation structs representing each vote made by the voter
+     */
+    function getAllVotes(address voter) public view returns (VoteAllocation[] memory votesArray) {
+        return votes[voter];
     }
 
     /**
@@ -237,14 +274,10 @@ contract RevolutionGrants is
     function updateMemberUnits(address member, uint128 units) internal {
         bool success = superToken.updateMemberUnits(pool, member, units);
         if (!success) revert UNITS_UPDATE_FAILED();
-
-        // distribute new flow rate
-        superToken.distributeFlow(address(this), pool, flowRate);
     }
 
     function setFlowRate(int96 _flowRate) public onlyOwner {
-        flowRate = _flowRate;
-        superToken.distributeFlow(address(this), pool, flowRate);
+        superToken.distributeFlow(address(this), pool, _flowRate);
     }
 
     /** @notice Sums array of uint32s

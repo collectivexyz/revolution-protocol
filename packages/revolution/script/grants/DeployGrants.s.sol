@@ -30,7 +30,7 @@ contract DeployGrants is Script {
             pointsVoteWeight: 1, // Example points vote weight
             quorumVotesBPS: 0, // Example quorum votes in basis points (50%)
             minVotingPowerToVote: 1e18, // Minimum voting power required to vote
-            minVotingPowerToCreate: 100 * 1e18 // Minimum voting power required to create a grant
+            minVotingPowerToCreate: 1000 * 1e18 // Minimum voting power required to create a grant
         });
 
         grantsImpl = address(new RevolutionGrants(manager));
