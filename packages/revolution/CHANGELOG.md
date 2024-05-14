@@ -1,5 +1,11 @@
 # @collectivexyz/revolution
 
+## 0.6.1
+
+### Patch Changes
+
+- 552b0ce: Add new utility functions to grants contract
+
 ## 0.6.0
 
 ### Minor Changes
