@@ -186,8 +186,9 @@ contract RevolutionGrants is
         uint128 currentUnits = pool.getUnits(recipient);
 
         // double check for overflow before casting
-        // and scale back by 1e18 per https://docs.superfluid.finance/docs/protocol/distributions/guides/pools#about-member-units
-        uint256 scaledUnits = _scaleAmountByPercentage(totalWeight, bps) / 1e18;
+        // and scale back by 1e15 per https://docs.superfluid.finance/docs/protocol/distributions/guides/pools#about-member-units
+        // gives someone with 1 vote at least 1e3 units to work with
+        uint256 scaledUnits = _scaleAmountByPercentage(totalWeight, bps) / 1e15;
         if (scaledUnits > type(uint128).max) revert OVERFLOW();
         uint128 newUnits = uint128(scaledUnits);
 
