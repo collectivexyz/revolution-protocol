@@ -82,15 +82,6 @@ contract RevolutionGrants is
     }
 
     /**
-     * @notice Allows a user to connect to the Superfluid pool
-     * @dev This function should be called by a user who wishes to participate in the pool
-     */
-    function connectToPool() public {
-        // Connect the sender to the pool
-        superToken.connectPool(pool);
-    }
-
-    /**
      * @notice Allows a user to connect to downgrade their Supertokens to ERC20
      * @dev This function should be called by a recipient who wishes to downgrade their Supertokens to ERC20
      */
@@ -255,6 +246,9 @@ contract RevolutionGrants is
         for (uint256 i = 0; i < recipients.length; i++) {
             _vote(recipients[i], percentAllocations[i], voter, weight);
         }
+
+        // Distribute flow to the pool
+        superToken.distributeFlow(address(this), pool, pool.getTotalFlowRate());
     }
 
     /**
