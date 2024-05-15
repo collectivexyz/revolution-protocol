@@ -247,8 +247,13 @@ contract RevolutionGrants is
             _vote(recipients[i], percentAllocations[i], voter, weight);
         }
 
-        // Distribute flow to the pool
-        superToken.distributeFlow(address(this), pool, pool.getTotalFlowRate());
+        // if flow rate is 0, restart it
+        // could happen at beginning when few users are voting
+        // where the member units briefly become 0
+        int96 flowRate = pool.getTotalFlowRate();
+        if (flowRate == 0) {
+            superToken.distributeFlow(address(this), pool, flowRate);
+        }
     }
 
     /**
