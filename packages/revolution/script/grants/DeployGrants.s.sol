@@ -17,7 +17,7 @@ contract DeployGrants is Script {
     function run() public {
         uint256 chainID = vm.envUint("CHAIN_ID");
         uint256 key = vm.envUint("PRIVATE_KEY");
-        address manager = vm.envAddress("MANAGER_OWNER");
+        address initialOwner = vm.envAddress("INITIAL_OWNER");
         address votingPower = vm.envAddress("VOTING_POWER");
         address superToken = vm.envAddress("SUPER_TOKEN");
 
@@ -33,13 +33,14 @@ contract DeployGrants is Script {
             minVotingPowerToCreate: 1000 * 1e18 // Minimum voting power required to create a grant
         });
 
-        grantsImpl = address(new RevolutionGrants(manager));
+        grantsImpl = address(new RevolutionGrants());
         grants = address(new ERC1967Proxy(grantsImpl, ""));
 
         IRevolutionGrants(grants).initialize({
             votingPower: votingPower,
             superToken: superToken,
-            initialOwner: manager,
+            grantsImpl: grantsImpl,
+            initialOwner: initialOwner,
             grantsParams: params
         });
 

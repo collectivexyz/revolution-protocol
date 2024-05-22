@@ -19,11 +19,23 @@ interface IRevolutionGrantsEvents {
     /// @notice Emitted when quorum votes basis points is set
     event QuorumVotesBPSSet(uint256 oldQuorumVotesBPS, uint256 newQuorumVotesBPS);
 
+    /// @notice Emitted when a new grants recipient is set
+    event GrantRecipientApproved(address indexed recipient, address indexed approvedBy);
+
+    /// @notice Emitted when the flow rate is updated
+    event FlowRateUpdated(int96 oldFlowRate, int96 newFlowRate);
+
     /// @notice Emitted when min voting power to vote is set
     event MinVotingPowerToVoteSet(uint256 oldMinVotingPowerToVote, uint256 newMinVotingPowerToVote);
 
     /// @notice Emitted when min voting power to create is set
     event MinVotingPowerToCreateSet(uint256 oldMinVotingPowerToCreate, uint256 newMinVotingPowerToCreate);
+
+    /// @notice Emitted when a new child revolution grants contract is created
+    event GrantPoolCreated(address indexed parent, address indexed revolutionGrants);
+
+    /// @notice Emitted when a new grants implementation is set
+    event GrantsImplementationSet(address indexed grantsImpl);
 }
 
 /**
@@ -111,12 +123,14 @@ interface IRevolutionGrants is IRevolutionGrantsEvents {
      * @param votingPower The address of the revolution voting power contract
      * @param superToken The address of the SuperToken to be used for the pool
      * @param initialOwner The owner of the contract.
+     * @param grantsImpl The address of the grants implementation contract
      * @param grantsParams The parameters for the grants contract
      */
     function initialize(
         address votingPower,
         address superToken,
         address initialOwner,
+        address grantsImpl,
         GrantsParams memory grantsParams
     ) external;
 }

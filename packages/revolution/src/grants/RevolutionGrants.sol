@@ -6,11 +6,11 @@ import { ReentrancyGuardUpgradeable } from "@openzeppelin/contracts-upgradeable/
 import { EIP712Upgradeable } from "@openzeppelin/contracts-upgradeable/utils/cryptography/EIP712Upgradeable.sol";
 
 import { UUPS } from "@cobuild/utility-contracts/src/proxy/UUPS.sol";
-import { IUpgradeManager } from "@cobuild/utility-contracts/src/interfaces/IUpgradeManager.sol";
 import { RevolutionVersion } from "../version/RevolutionVersion.sol";
 import { RevolutionGrantsStorageV1 } from "./storage/RevolutionGrantsStorageV1.sol";
 import { IRevolutionGrants } from "../interfaces/IRevolutionGrants.sol";
 import { IRevolutionVotingPower } from "../interfaces/IRevolutionVotingPower.sol";
+import { ERC1967Proxy } from "@cobuild/utility-contracts/src/proxy/ERC1967Proxy.sol";
 
 import { SuperTokenV1Library, ISuperToken, PoolConfig } from "./superfluid/SuperTokenV1Library.sol";
 
@@ -27,29 +27,27 @@ contract RevolutionGrants is
 
     /**
      * @notice Initializes a token's metadata descriptor
-     * @param _manager The contract upgrade manager address
      */
-    constructor(address _manager) payable initializer {
-        if (_manager == address(0)) revert ADDRESS_ZERO();
-        manager = IUpgradeManager(_manager);
-    }
+    constructor() payable initializer {}
 
     /**
      * @notice Initializes the RevolutionGrants contract
      * @param _votingPower The address of the RevolutionVotingPower contract
      * @param _superToken The address of the SuperToken to be used for the pool
-     * @param _initialOwner The owner of the contract, allowed to drop pieces. Commonly updated to the AuctionHouse
+     * @param _initialOwner The owner of the contract
+     * @param _grantsImpl The address of the grants implementation contract
      * @param _grantsParams The parameters for the grants contract
      */
     function initialize(
         address _votingPower,
         address _superToken,
         address _initialOwner,
+        address _grantsImpl,
         GrantsParams memory _grantsParams
     ) public initializer {
-        if (msg.sender != address(manager)) revert SENDER_NOT_MANAGER();
         if (_initialOwner == address(0)) revert ADDRESS_ZERO();
         if (_votingPower == address(0)) revert ADDRESS_ZERO();
+        if (_grantsImpl == address(0)) revert ADDRESS_ZERO();
 
         // Initialize EIP-712 support
         __EIP712_init("RevolutionGrants", "1");
@@ -61,6 +59,7 @@ contract RevolutionGrants is
         votingPower = IRevolutionVotingPower(_votingPower);
         tokenVoteWeight = _grantsParams.tokenVoteWeight;
         pointsVoteWeight = _grantsParams.pointsVoteWeight;
+        grantsImpl = _grantsImpl;
 
         quorumVotesBPS = _grantsParams.quorumVotesBPS;
         minVotingPowerToVote = _grantsParams.minVotingPowerToVote;
@@ -70,6 +69,12 @@ contract RevolutionGrants is
 
         // Set the pool config
         setSuperTokenAndCreatePool(_superToken);
+
+        // if total member units is 0, set 1 member unit to address(this)
+        // do this to prevent distribution pool from resetting flow rate to 0
+        if (getTotalUnits() == 0) {
+            updateMemberUnits(address(this), 1);
+        }
     }
 
     /**
@@ -79,15 +84,6 @@ contract RevolutionGrants is
     function setSuperTokenAndCreatePool(address _superToken) public onlyOwner {
         superToken = ISuperToken(_superToken);
         pool = superToken.createPool(address(this), poolConfig);
-    }
-
-    /**
-     * @notice Allows a user to connect to downgrade their Supertokens to ERC20
-     * @dev This function should be called by a recipient who wishes to downgrade their Supertokens to ERC20
-     */
-    function downgradeToERC20(uint256 amount) public {
-        // Connect the sender to the pool
-        superToken.downgrade(amount);
     }
 
     /**
@@ -119,6 +115,47 @@ contract RevolutionGrants is
         emit MinVotingPowerToCreateSet(minVotingPowerToCreate, _minVotingPowerToCreate);
 
         minVotingPowerToCreate = _minVotingPowerToCreate;
+    }
+
+    /**
+     * @notice Sets the address of the grants implementation contract
+     * @param _grantsImpl The new address of the grants implementation contract
+     */
+    function setGrantsImpl(address _grantsImpl) public onlyOwner {
+        require(_grantsImpl != address(0), "Invalid address");
+        grantsImpl = _grantsImpl;
+        emit GrantsImplementationSet(_grantsImpl);
+    }
+
+    /**
+     * @notice Creates a new RevolutionGrants object, adds it as a recipient, and updates the subGrantPools mapping
+     */
+    function createAndAddSubGrantPool() public onlyOwner nonReentrant {
+        // Create a new RevolutionGrants contract
+        address newGrants = address(new ERC1967Proxy(grantsImpl, ""));
+
+        // Initialize the new RevolutionGrants contract
+        IRevolutionGrants(newGrants).initialize({
+            votingPower: address(votingPower),
+            superToken: address(superToken),
+            initialOwner: owner(),
+            grantsImpl: grantsImpl,
+            grantsParams: GrantsParams({
+                tokenVoteWeight: tokenVoteWeight,
+                pointsVoteWeight: pointsVoteWeight,
+                quorumVotesBPS: quorumVotesBPS,
+                minVotingPowerToVote: minVotingPowerToVote,
+                minVotingPowerToCreate: minVotingPowerToCreate
+            })
+        });
+
+        // Add the new RevolutionGrants contract as an approved recipient
+        approvedRecipients[newGrants] = true;
+
+        // Update the isGrantPool mapping
+        isGrantPool[newGrants] = true;
+
+        emit GrantPoolCreated(address(this), newGrants);
     }
 
     /**
@@ -195,10 +232,13 @@ contract RevolutionGrants is
         uint128 memberUnits = currentUnits + newUnits;
 
         // update votes, track recipient, bps, and total member units assigned
-        votes[voter].push(VoteAllocation({ recipient: recipient, bps: bps, memberUnitsDelta: newUnits }));
+        votes[voter].push(VoteAllocation({ recipient: recipient, bps: bps, memberUnits: newUnits }));
 
         // update member units
         updateMemberUnits(recipient, memberUnits);
+
+        // update voterToRecipientMemberUnits
+        voterToRecipientMemberUnits[voter][recipient] = newUnits;
 
         emit VoteCast(recipient, voter, memberUnits, bps);
     }
@@ -214,11 +254,14 @@ contract RevolutionGrants is
         for (uint256 i = 0; i < allocations.length; i++) {
             address recipient = allocations[i].recipient;
             uint128 currentUnits = pool.getUnits(recipient);
-            uint128 unitsDelta = allocations[i].memberUnitsDelta;
+            uint128 unitsDelta = allocations[i].memberUnits;
 
             // Calculate the new units by subtracting the delta from the current units
             // Update the member units in the pool
             updateMemberUnits(recipient, currentUnits - unitsDelta);
+
+            // update voterToRecipientMemberUnits
+            voterToRecipientMemberUnits[voter][recipient] = 0;
         }
 
         // Clear out the votes for the voter
@@ -226,12 +269,51 @@ contract RevolutionGrants is
     }
 
     /**
+     * @notice Admin function to set votes allocations for multiple voters.
+     * @param voters The addresses of the voters.
+     * @param recipientsList The list of addresses of the grant recipients for each voter.
+     * @param percentAllocationsList The list of basis points of the vote to be split with the recipients for each voter.
+     * @dev This function can only be called by the owner. Only doing this because of upgradeable issue in first contract.
+     */
+    function adminSetVotesAllocations(
+        address[] memory voters,
+        address[][] memory recipientsList,
+        uint32[][] memory percentAllocationsList
+    ) external onlyOwner nonReentrant {
+        require(voters.length == recipientsList.length, "Mismatched voters and recipients list length");
+        require(
+            voters.length == percentAllocationsList.length,
+            "Mismatched voters and percent allocations list length"
+        );
+
+        for (uint256 i = 0; i < voters.length; i++) {
+            _setVotesAllocations(voters[i], recipientsList[i], percentAllocationsList[i]);
+        }
+    }
+
+    /**
      * @notice Cast a vote for a set of grant addresses.
      * @param recipients The addresses of the grant recipients.
      * @param percentAllocations The basis points of the vote to be split with the recipients.
      */
-    function setVotesAllocations(address[] memory recipients, uint32[] memory percentAllocations) public nonReentrant {
-        address voter = msg.sender;
+    function setVotesAllocations(
+        address[] memory recipients,
+        uint32[] memory percentAllocations
+    ) external nonReentrant {
+        _setVotesAllocations(msg.sender, recipients, percentAllocations);
+    }
+
+    /**
+     * @notice Cast a vote for a set of grant addresses.
+     * @param voter The address of the voter.
+     * @param recipients The addresses of the grant recipients.
+     * @param percentAllocations The basis points of the vote to be split with the recipients.
+     */
+    function _setVotesAllocations(
+        address voter,
+        address[] memory recipients,
+        uint32[] memory percentAllocations
+    ) internal {
         uint256 weight = getAccountVotingPower(voter);
 
         // Ensure the voter has enough voting power to vote
@@ -269,14 +351,31 @@ contract RevolutionGrants is
         if (weight <= minVotingPowerToCreate) revert WEIGHT_TOO_LOW();
 
         approvedRecipients[recipient] = true;
+
+        emit GrantRecipientApproved(recipient, msg.sender);
     }
 
+    /**
+     * @notice Updates the member units in the Superfluid pool
+     * @param member The address of the member whose units are being updated
+     * @param units The new number of units to be assigned to the member
+     * @dev Reverts with UNITS_UPDATE_FAILED if the update fails
+     */
     function updateMemberUnits(address member, uint128 units) internal {
         bool success = superToken.updateMemberUnits(pool, member, units);
+
         if (!success) revert UNITS_UPDATE_FAILED();
     }
 
+    /**
+     * @notice Sets the flow rate for the Superfluid pool
+     * @param _flowRate The new flow rate to be set
+     * @dev Only callable by the owner of the contract
+     * @dev Emits a FlowRateUpdated event with the old and new flow rates
+     */
     function setFlowRate(int96 _flowRate) public onlyOwner {
+        emit FlowRateUpdated(pool.getTotalFlowRate(), _flowRate);
+
         superToken.distributeFlow(address(this), pool, _flowRate);
     }
 
@@ -381,6 +480,7 @@ contract RevolutionGrants is
      */
     function _authorizeUpgrade(address _newImpl) internal view override onlyOwner {
         // Ensure the new implementation is a registered upgrade
-        if (!manager.isRegisteredUpgrade(_getImplementation(), _newImpl)) revert INVALID_UPGRADE(_newImpl);
+        // just using my EOA for now
+        // if (!manager.isRegisteredUpgrade(_getImplementation(), _newImpl)) revert INVALID_UPGRADE(_newImpl);
     }
 }
