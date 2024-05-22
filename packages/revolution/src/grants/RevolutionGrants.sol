@@ -69,6 +69,12 @@ contract RevolutionGrants is
 
         // Set the pool config
         setSuperTokenAndCreatePool(_superToken);
+
+        // if total member units is 0, set 1 member unit to address(this)
+        // do this to prevent distribution pool from resetting flow rate to 0
+        if (getTotalUnits() == 0) {
+            updateMemberUnits(address(this), 1);
+        }
     }
 
     /**
@@ -124,7 +130,7 @@ contract RevolutionGrants is
     /**
      * @notice Creates a new RevolutionGrants object, adds it as a recipient, and updates the subGrantPools mapping
      */
-    function createAndAddSubGrantPool() public onlyOwner {
+    function createAndAddSubGrantPool() public onlyOwner nonReentrant {
         // Create a new RevolutionGrants contract
         address newGrants = address(new ERC1967Proxy(grantsImpl, ""));
 
@@ -273,7 +279,7 @@ contract RevolutionGrants is
         address[] memory voters,
         address[][] memory recipientsList,
         uint32[][] memory percentAllocationsList
-    ) external onlyOwner {
+    ) external onlyOwner nonReentrant {
         require(voters.length == recipientsList.length, "Mismatched voters and recipients list length");
         require(
             voters.length == percentAllocationsList.length,
@@ -307,7 +313,7 @@ contract RevolutionGrants is
         address voter,
         address[] memory recipients,
         uint32[] memory percentAllocations
-    ) internal nonReentrant {
+    ) internal {
         uint256 weight = getAccountVotingPower(voter);
 
         // Ensure the voter has enough voting power to vote
