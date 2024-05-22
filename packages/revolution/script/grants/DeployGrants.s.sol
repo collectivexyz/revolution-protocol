@@ -17,7 +17,7 @@ contract DeployGrants is Script {
     function run() public {
         uint256 chainID = vm.envUint("CHAIN_ID");
         uint256 key = vm.envUint("PRIVATE_KEY");
-        address manager = vm.envAddress("MANAGER_OWNER");
+        address initialOwner = vm.envAddress("INITIAL_OWNER");
         address votingPower = vm.envAddress("VOTING_POWER");
         address superToken = vm.envAddress("SUPER_TOKEN");
 
@@ -40,7 +40,7 @@ contract DeployGrants is Script {
             votingPower: votingPower,
             superToken: superToken,
             grantsImpl: grantsImpl,
-            initialOwner: manager,
+            initialOwner: initialOwner,
             grantsParams: params
         });
 
