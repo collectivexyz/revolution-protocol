@@ -155,8 +155,8 @@ contract RevolutionGrants is
         // Add the new RevolutionGrants contract as an approved recipient
         approvedRecipients[newGrants] = true;
 
-        // Update the subGrantPools mapping
-        subGrantPools[newGrants] = address(this);
+        // Update the isGrantPool mapping
+        isGrantPool[newGrants] = true;
 
         emit GrantPoolCreated(address(this), newGrants);
     }
