@@ -156,7 +156,7 @@ contract RevolutionGrants is
         approvedRecipients[newGrants] = true;
 
         // Update the subGrantPools mapping
-        subGrantPools[address(this)] = newGrants;
+        subGrantPools[newGrants] = address(this);
 
         emit GrantPoolCreated(address(this), newGrants);
     }

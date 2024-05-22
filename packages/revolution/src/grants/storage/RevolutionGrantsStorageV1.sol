@@ -28,7 +28,7 @@ contract RevolutionGrantsStorageV1 {
     /// The Superfluid pool used to distribute the SuperToken
     ISuperfluidPool public pool;
 
-    /// The sub-grant pools, mapping of parent to child RevolutionGrants contract address
+    /// The sub-grant pools, mapping of child to parent RevolutionGrants contract address
     mapping(address => address) public subGrantPools;
 
     /// The Superfluid pool configuration
