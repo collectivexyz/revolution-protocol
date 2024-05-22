@@ -81,15 +81,6 @@ contract RevolutionGrants is
     }
 
     /**
-     * @notice Allows a user to connect to downgrade their Supertokens to ERC20
-     * @dev This function should be called by a recipient who wishes to downgrade their Supertokens to ERC20
-     */
-    function downgradeToERC20(uint256 amount) public {
-        // Connect the sender to the pool
-        superToken.downgrade(amount);
-    }
-
-    /**
      * @notice Sets the quorum votes basis points required for a grant to be funded
      * @param _quorumVotesBPS The new quorum votes basis points
      */
@@ -357,8 +348,13 @@ contract RevolutionGrants is
     }
 
     function updateMemberUnits(address member, uint128 units) internal {
-        bool success = superToken.updateMemberUnits(pool, member, units);
-        if (!success) revert UNITS_UPDATE_FAILED();
+        try superToken.updateMemberUnits(pool, member, units) returns (bool success) {
+            if (!success) {
+                revert UNITS_UPDATE_FAILED();
+            }
+        } catch {
+            revert UNITS_UPDATE_FAILED();
+        }
     }
 
     function setFlowRate(int96 _flowRate) public onlyOwner {
