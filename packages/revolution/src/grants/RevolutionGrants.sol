@@ -235,10 +235,13 @@ contract RevolutionGrants is
         uint128 memberUnits = currentUnits + newUnits;
 
         // update votes, track recipient, bps, and total member units assigned
-        votes[voter].push(VoteAllocation({ recipient: recipient, bps: bps, memberUnitsDelta: newUnits }));
+        votes[voter].push(VoteAllocation({ recipient: recipient, bps: bps, memberUnits: newUnits }));
 
         // update member units
         updateMemberUnits(recipient, memberUnits);
+
+        // update voterToRecipientMemberUnits
+        voterToRecipientMemberUnits[voter][recipient] = newUnits;
 
         emit VoteCast(recipient, voter, memberUnits, bps);
     }
@@ -254,11 +257,14 @@ contract RevolutionGrants is
         for (uint256 i = 0; i < allocations.length; i++) {
             address recipient = allocations[i].recipient;
             uint128 currentUnits = pool.getUnits(recipient);
-            uint128 unitsDelta = allocations[i].memberUnitsDelta;
+            uint128 unitsDelta = allocations[i].memberUnits;
 
             // Calculate the new units by subtracting the delta from the current units
             // Update the member units in the pool
             updateMemberUnits(recipient, currentUnits - unitsDelta);
+
+            // update voterToRecipientMemberUnits
+            voterToRecipientMemberUnits[voter][recipient] = 0;
         }
 
         // Clear out the votes for the voter

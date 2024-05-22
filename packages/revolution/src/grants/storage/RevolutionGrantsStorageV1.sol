@@ -31,6 +31,9 @@ contract RevolutionGrantsStorageV1 {
     /// The sub-grant pools, mapping of recipients to whether or not they are a grant pool
     mapping(address => bool) public isGrantPool;
 
+    /// The mapping of a voter to the member units assigned to each recipient they voted for
+    mapping(address => mapping(address => uint256)) public voterToRecipientMemberUnits;
+
     /// The Superfluid pool configuration
     PoolConfig public poolConfig =
         PoolConfig({ transferabilityForUnitsOwner: false, distributionFromAnyAddress: false });
@@ -63,6 +66,6 @@ contract RevolutionGrantsStorageV1 {
     struct VoteAllocation {
         address recipient;
         uint32 bps;
-        uint128 memberUnitsDelta;
+        uint128 memberUnits;
     }
 }
