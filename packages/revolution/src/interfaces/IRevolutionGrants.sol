@@ -23,7 +23,7 @@ interface IRevolutionGrantsEvents {
     event GrantRecipientApproved(address indexed recipient, address indexed approvedBy);
 
     /// @notice Emitted when the flow rate is updated
-    event FlowRateUpdated(uint256 oldFlowRate, uint256 newFlowRate);
+    event FlowRateUpdated(int96 oldFlowRate, int96 newFlowRate);
 
     /// @notice Emitted when min voting power to vote is set
     event MinVotingPowerToVoteSet(uint256 oldMinVotingPowerToVote, uint256 newMinVotingPowerToVote);

@@ -356,13 +356,9 @@ contract RevolutionGrants is
      * @dev Reverts with UNITS_UPDATE_FAILED if the update fails
      */
     function updateMemberUnits(address member, uint128 units) internal {
-        try superToken.updateMemberUnits(pool, member, units) returns (bool success) {
-            if (!success) {
-                revert UNITS_UPDATE_FAILED();
-            }
-        } catch {
-            revert UNITS_UPDATE_FAILED();
-        }
+        bool success = superToken.updateMemberUnits(pool, member, units);
+
+        if (!success) revert UNITS_UPDATE_FAILED();
     }
 
     /**
@@ -372,7 +368,7 @@ contract RevolutionGrants is
      * @dev Emits a FlowRateUpdated event with the old and new flow rates
      */
     function setFlowRate(int96 _flowRate) public onlyOwner {
-        emit FlowRateUpdated(superToken.getTotalFlowRate(), _flowRate);
+        emit FlowRateUpdated(pool.getTotalFlowRate(), _flowRate);
 
         superToken.distributeFlow(address(this), pool, _flowRate);
     }
