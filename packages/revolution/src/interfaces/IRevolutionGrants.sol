@@ -24,6 +24,12 @@ interface IRevolutionGrantsEvents {
 
     /// @notice Emitted when min voting power to create is set
     event MinVotingPowerToCreateSet(uint256 oldMinVotingPowerToCreate, uint256 newMinVotingPowerToCreate);
+
+    /// @notice Emitted when a new child revolution grants contract is created
+    event GrantPoolCreated(address indexed parent, address indexed revolutionGrants);
+
+    /// @notice Emitted when a new grants implementation is set
+    event GrantsImplementationSet(address indexed grantsImpl);
 }
 
 /**

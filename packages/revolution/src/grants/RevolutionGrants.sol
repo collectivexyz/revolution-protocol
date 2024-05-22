@@ -11,6 +11,7 @@ import { RevolutionVersion } from "../version/RevolutionVersion.sol";
 import { RevolutionGrantsStorageV1 } from "./storage/RevolutionGrantsStorageV1.sol";
 import { IRevolutionGrants } from "../interfaces/IRevolutionGrants.sol";
 import { IRevolutionVotingPower } from "../interfaces/IRevolutionVotingPower.sol";
+import { ERC1967Proxy } from "@cobuild/utility-contracts/src/proxy/ERC1967Proxy.sol";
 
 import { SuperTokenV1Library, ISuperToken, PoolConfig } from "./superfluid/SuperTokenV1Library.sol";
 
@@ -119,6 +120,46 @@ contract RevolutionGrants is
         emit MinVotingPowerToCreateSet(minVotingPowerToCreate, _minVotingPowerToCreate);
 
         minVotingPowerToCreate = _minVotingPowerToCreate;
+    }
+
+    /**
+     * @notice Sets the address of the grants implementation contract
+     * @param _grantsImpl The new address of the grants implementation contract
+     */
+    function setGrantsImpl(address _grantsImpl) public onlyOwner {
+        require(_grantsImpl != address(0), "Invalid address");
+        grantsImpl = _grantsImpl;
+        emit GrantsImplementationSet(_grantsImpl);
+    }
+
+    /**
+     * @notice Creates a new RevolutionGrants object, adds it as a recipient, and updates the subGrantPools mapping
+     */
+    function createAndAddSubGrantPool() public onlyOwner {
+        // Create a new RevolutionGrants contract
+        address newGrants = address(new ERC1967Proxy(grantsImpl, ""));
+
+        // Initialize the new RevolutionGrants contract
+        IRevolutionGrants(newGrants).initialize({
+            votingPower: address(votingPower),
+            superToken: address(superToken),
+            initialOwner: owner(),
+            grantsParams: GrantsParams({
+                tokenVoteWeight: tokenVoteWeight,
+                pointsVoteWeight: pointsVoteWeight,
+                quorumVotesBPS: quorumVotesBPS,
+                minVotingPowerToVote: minVotingPowerToVote,
+                minVotingPowerToCreate: minVotingPowerToCreate
+            })
+        });
+
+        // Add the new RevolutionGrants contract as an approved recipient
+        approvedRecipients[newGrants] = true;
+
+        // Update the subGrantPools mapping
+        subGrantPools[address(this)] = newGrants;
+
+        emit GrantPoolCreated(address(this), newGrants);
     }
 
     /**

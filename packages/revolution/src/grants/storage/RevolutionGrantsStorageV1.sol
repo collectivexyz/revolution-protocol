@@ -16,6 +16,9 @@ contract RevolutionGrantsStorageV1 {
     /// The snapshot block number for voting
     uint256 public snapshotBlock;
 
+    /// The grants implementation
+    address public grantsImpl;
+
     /// The mapping of approved recipients
     mapping(address => bool) public approvedRecipients;
 
@@ -24,6 +27,9 @@ contract RevolutionGrantsStorageV1 {
 
     /// The Superfluid pool used to distribute the SuperToken
     ISuperfluidPool public pool;
+
+    /// The sub-grant pools, mapping of parent to child RevolutionGrants contract address
+    mapping(address => address) public subGrantPools;
 
     /// The Superfluid pool configuration
     PoolConfig public poolConfig =
