@@ -345,8 +345,16 @@ contract RevolutionGrants is
         if (weight <= minVotingPowerToCreate) revert WEIGHT_TOO_LOW();
 
         approvedRecipients[recipient] = true;
+
+        emit GrantRecipientApproved(recipient, msg.sender);
     }
 
+    /**
+     * @notice Updates the member units in the Superfluid pool
+     * @param member The address of the member whose units are being updated
+     * @param units The new number of units to be assigned to the member
+     * @dev Reverts with UNITS_UPDATE_FAILED if the update fails
+     */
     function updateMemberUnits(address member, uint128 units) internal {
         try superToken.updateMemberUnits(pool, member, units) returns (bool success) {
             if (!success) {
@@ -357,7 +365,15 @@ contract RevolutionGrants is
         }
     }
 
+    /**
+     * @notice Sets the flow rate for the Superfluid pool
+     * @param _flowRate The new flow rate to be set
+     * @dev Only callable by the owner of the contract
+     * @dev Emits a FlowRateUpdated event with the old and new flow rates
+     */
     function setFlowRate(int96 _flowRate) public onlyOwner {
+        emit FlowRateUpdated(superToken.getTotalFlowRate(), _flowRate);
+
         superToken.distributeFlow(address(this), pool, _flowRate);
     }
 

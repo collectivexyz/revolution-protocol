@@ -19,6 +19,12 @@ interface IRevolutionGrantsEvents {
     /// @notice Emitted when quorum votes basis points is set
     event QuorumVotesBPSSet(uint256 oldQuorumVotesBPS, uint256 newQuorumVotesBPS);
 
+    /// @notice Emitted when a new grants recipient is set
+    event GrantRecipientApproved(address indexed recipient, address indexed approvedBy);
+
+    /// @notice Emitted when the flow rate is updated
+    event FlowRateUpdated(uint256 oldFlowRate, uint256 newFlowRate);
+
     /// @notice Emitted when min voting power to vote is set
     event MinVotingPowerToVoteSet(uint256 oldMinVotingPowerToVote, uint256 newMinVotingPowerToVote);
 
