@@ -1,5 +1,15 @@
 # @collectivexyz/revolution
 
+## 0.7.0
+
+### Minor Changes
+
+- 9ae9ba3: Recursive grants
+
+### Patch Changes
+
+- 914d981: More gas efficient flow rate fix in Grants
+
 ## 0.6.1
 
 ### Patch Changes
