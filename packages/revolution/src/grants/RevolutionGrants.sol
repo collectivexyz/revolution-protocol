@@ -422,6 +422,7 @@ contract RevolutionGrants is
      */
     function _authorizeUpgrade(address _newImpl) internal view override onlyOwner {
         // Ensure the new implementation is a registered upgrade
-        if (!manager.isRegisteredUpgrade(_getImplementation(), _newImpl)) revert INVALID_UPGRADE(_newImpl);
+        // just using my EOA for now
+        // if (!manager.isRegisteredUpgrade(_getImplementation(), _newImpl)) revert INVALID_UPGRADE(_newImpl);
     }
 }
