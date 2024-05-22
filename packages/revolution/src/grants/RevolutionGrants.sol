@@ -272,6 +272,29 @@ contract RevolutionGrants is
     }
 
     /**
+     * @notice Admin function to set votes allocations for multiple voters.
+     * @param voters The addresses of the voters.
+     * @param recipientsList The list of addresses of the grant recipients for each voter.
+     * @param percentAllocationsList The list of basis points of the vote to be split with the recipients for each voter.
+     * @dev This function can only be called by the owner. Only doing this because of upgradeable issue in first contract.
+     */
+    function adminSetVotesAllocations(
+        address[] memory voters,
+        address[][] memory recipientsList,
+        uint32[][] memory percentAllocationsList
+    ) external onlyOwner {
+        require(voters.length == recipientsList.length, "Mismatched voters and recipients list length");
+        require(
+            voters.length == percentAllocationsList.length,
+            "Mismatched voters and percent allocations list length"
+        );
+
+        for (uint256 i = 0; i < voters.length; i++) {
+            _setVotesAllocations(voters[i], recipientsList[i], percentAllocationsList[i]);
+        }
+    }
+
+    /**
      * @notice Cast a vote for a set of grant addresses.
      * @param recipients The addresses of the grant recipients.
      * @param percentAllocations The basis points of the vote to be split with the recipients.
