@@ -276,8 +276,24 @@ contract RevolutionGrants is
      * @param recipients The addresses of the grant recipients.
      * @param percentAllocations The basis points of the vote to be split with the recipients.
      */
-    function setVotesAllocations(address[] memory recipients, uint32[] memory percentAllocations) public nonReentrant {
-        address voter = msg.sender;
+    function setVotesAllocations(
+        address[] memory recipients,
+        uint32[] memory percentAllocations
+    ) external nonReentrant {
+        _setVotesAllocations(msg.sender, recipients, percentAllocations);
+    }
+
+    /**
+     * @notice Cast a vote for a set of grant addresses.
+     * @param voter The address of the voter.
+     * @param recipients The addresses of the grant recipients.
+     * @param percentAllocations The basis points of the vote to be split with the recipients.
+     */
+    function _setVotesAllocations(
+        address voter,
+        address[] memory recipients,
+        uint32[] memory percentAllocations
+    ) internal nonReentrant {
         uint256 weight = getAccountVotingPower(voter);
 
         // Ensure the voter has enough voting power to vote
