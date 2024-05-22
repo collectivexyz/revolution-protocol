@@ -127,7 +127,7 @@ contract RevolutionBuilderTest is Test {
         revolutionVotingPowerImpl = address(new RevolutionVotingPower(address(manager)));
         vrgdaImpl = address(new VRGDAC(address(manager)));
         splitsCreatorImpl = address(new SplitMain(address(manager)));
-        grantsImpl = address(new RevolutionGrants(address(manager)));
+        grantsImpl = address(new RevolutionGrants());
 
         managerImpl = address(
             new RevolutionBuilder(

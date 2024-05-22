@@ -6,7 +6,6 @@ import { ReentrancyGuardUpgradeable } from "@openzeppelin/contracts-upgradeable/
 import { EIP712Upgradeable } from "@openzeppelin/contracts-upgradeable/utils/cryptography/EIP712Upgradeable.sol";
 
 import { UUPS } from "@cobuild/utility-contracts/src/proxy/UUPS.sol";
-import { IUpgradeManager } from "@cobuild/utility-contracts/src/interfaces/IUpgradeManager.sol";
 import { RevolutionVersion } from "../version/RevolutionVersion.sol";
 import { RevolutionGrantsStorageV1 } from "./storage/RevolutionGrantsStorageV1.sol";
 import { IRevolutionGrants } from "../interfaces/IRevolutionGrants.sol";
@@ -28,29 +27,27 @@ contract RevolutionGrants is
 
     /**
      * @notice Initializes a token's metadata descriptor
-     * @param _manager The contract upgrade manager address
      */
-    constructor(address _manager) payable initializer {
-        if (_manager == address(0)) revert ADDRESS_ZERO();
-        manager = IUpgradeManager(_manager);
-    }
+    constructor() payable initializer {}
 
     /**
      * @notice Initializes the RevolutionGrants contract
      * @param _votingPower The address of the RevolutionVotingPower contract
      * @param _superToken The address of the SuperToken to be used for the pool
-     * @param _initialOwner The owner of the contract, allowed to drop pieces. Commonly updated to the AuctionHouse
+     * @param _initialOwner The owner of the contract
+     * @param _grantsImpl The address of the grants implementation contract
      * @param _grantsParams The parameters for the grants contract
      */
     function initialize(
         address _votingPower,
         address _superToken,
         address _initialOwner,
+        address _grantsImpl,
         GrantsParams memory _grantsParams
     ) public initializer {
-        if (msg.sender != address(manager)) revert SENDER_NOT_MANAGER();
         if (_initialOwner == address(0)) revert ADDRESS_ZERO();
         if (_votingPower == address(0)) revert ADDRESS_ZERO();
+        if (_grantsImpl == address(0)) revert ADDRESS_ZERO();
 
         // Initialize EIP-712 support
         __EIP712_init("RevolutionGrants", "1");
@@ -62,6 +59,7 @@ contract RevolutionGrants is
         votingPower = IRevolutionVotingPower(_votingPower);
         tokenVoteWeight = _grantsParams.tokenVoteWeight;
         pointsVoteWeight = _grantsParams.pointsVoteWeight;
+        grantsImpl = _grantsImpl;
 
         quorumVotesBPS = _grantsParams.quorumVotesBPS;
         minVotingPowerToVote = _grantsParams.minVotingPowerToVote;
@@ -144,6 +142,7 @@ contract RevolutionGrants is
             votingPower: address(votingPower),
             superToken: address(superToken),
             initialOwner: owner(),
+            grantsImpl: grantsImpl,
             grantsParams: GrantsParams({
                 tokenVoteWeight: tokenVoteWeight,
                 pointsVoteWeight: pointsVoteWeight,

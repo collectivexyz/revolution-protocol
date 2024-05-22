@@ -33,12 +33,13 @@ contract DeployGrants is Script {
             minVotingPowerToCreate: 1000 * 1e18 // Minimum voting power required to create a grant
         });
 
-        grantsImpl = address(new RevolutionGrants(manager));
+        grantsImpl = address(new RevolutionGrants());
         grants = address(new ERC1967Proxy(grantsImpl, ""));
 
         IRevolutionGrants(grants).initialize({
             votingPower: votingPower,
             superToken: superToken,
+            grantsImpl: grantsImpl,
             initialOwner: manager,
             grantsParams: params
         });
