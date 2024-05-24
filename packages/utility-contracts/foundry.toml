@@ -14,7 +14,7 @@ via_ir = true
 out = 'out'
 script = 'script'
 src = 'src'
-solc_version = '0.8.22'
+solc_version = '0.8.23'
 
 [profile.dev]
 optimizer = false 
