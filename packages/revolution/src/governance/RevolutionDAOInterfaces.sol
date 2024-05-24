@@ -33,7 +33,7 @@ import { IRevolutionBuilder } from "../interfaces/IRevolutionBuilder.sol";
 import { IUpgradeManager } from "@cobuild/utility-contracts/src/interfaces/IUpgradeManager.sol";
 import { IRevolutionVotingPower } from "../interfaces/IRevolutionVotingPower.sol";
 
-pragma solidity 0.8.22;
+pragma solidity ^0.8.23;
 
 contract RevolutionDAOEvents {
     /// @notice An event emitted when a new proposal is created
