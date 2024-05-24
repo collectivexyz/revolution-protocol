@@ -4,7 +4,9 @@ pragma solidity 0.8.22;
 import { IRevolutionGrants } from "../../interfaces/IRevolutionGrants.sol";
 import { IUpgradeManager } from "@cobuild/utility-contracts/src/interfaces/IUpgradeManager.sol";
 import { IRevolutionVotingPower } from "../../interfaces/IRevolutionVotingPower.sol";
-import { ISuperToken, ISuperfluidPool, PoolConfig } from "../superfluid/SuperTokenV1Library.sol";
+import { ISuperToken } from "@superfluid-finance/ethereum-contracts/contracts/interfaces/superfluid/ISuperToken.sol";
+import { ISuperfluidPool } from "@superfluid-finance/ethereum-contracts/contracts/interfaces/agreements/gdav1/ISuperfluidPool.sol";
+import { PoolConfig } from "@superfluid-finance/ethereum-contracts/contracts/apps/SuperTokenV1Library.sol";
 
 /// @notice RevolutionGrants Storage V1
 /// @author rocketman

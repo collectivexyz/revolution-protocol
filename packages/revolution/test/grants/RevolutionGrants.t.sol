@@ -11,6 +11,7 @@ import { PoolConfig } from "../../src/grants/superfluid/SuperTokenV1Library.sol"
 import { MintableSuperToken } from "../../src/grants/superfluid/MintableSuperToken.sol";
 import { ISuperToken } from "../../src/grants/superfluid/interfaces/superfluid/ISuperToken.sol";
 import { SuperTokenV1Library } from "../../src/grants/superfluid/SuperTokenV1Library.sol";
+import { PoolConfig } from "@superfluid-finance/ethereum-contracts/contracts/apps/SuperTokenV1Library.sol";
 
 contract RevolutionGrantsTest is RevolutionBuilderTest {
     using SuperTokenV1Library for ISuperToken;
