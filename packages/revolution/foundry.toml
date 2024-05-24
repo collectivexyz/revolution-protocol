@@ -4,8 +4,8 @@ fs_permissions = [
   { access = "read-write", path = "./deploys"},
   { access = "read-write", path = "./addresses"}
 ]
-libs = ['node_modules', 'script', '../../node_modules']
-allow_paths = ["node_modules/@cobuild/protocol-rewards", "../../node_modules"]
+libs = ['node_modules', 'script', '../../node_modules', '../../lib']
+allow_paths = ["node_modules/@cobuild/protocol-rewards", "../../node_modules", "../../lib"]
 optimizer = true
 optimizer_runs = 750
 via_ir = true

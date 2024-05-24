@@ -11,8 +11,8 @@ import { RevolutionGrantsStorageV1 } from "./storage/RevolutionGrantsStorageV1.s
 import { IRevolutionGrants } from "../interfaces/IRevolutionGrants.sol";
 import { IRevolutionVotingPower } from "../interfaces/IRevolutionVotingPower.sol";
 import { ERC1967Proxy } from "@cobuild/utility-contracts/src/proxy/ERC1967Proxy.sol";
-
-import { SuperTokenV1Library, ISuperToken, PoolConfig } from "./superfluid/SuperTokenV1Library.sol";
+import { ISuperToken } from "@superfluid-finance/ethereum-contracts/contracts/interfaces/superfluid/ISuperToken.sol";
+import { SuperTokenV1Library } from "@superfluid-finance/ethereum-contracts/contracts/apps/SuperTokenV1Library.sol";
 
 contract RevolutionGrants is
     IRevolutionGrants,

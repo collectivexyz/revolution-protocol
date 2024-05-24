@@ -7,7 +7,7 @@ import { ERC1967Proxy } from "@cobuild/utility-contracts/src/proxy/ERC1967Proxy.
 import { RevolutionBuilderTest } from "../RevolutionBuilder.t.sol";
 import { IRevolutionGrants } from "../../src/interfaces/IRevolutionGrants.sol";
 import { RevolutionGrants } from "../../src/grants/RevolutionGrants.sol";
-import { PoolConfig } from "../../src/grants/superfluid/SuperTokenV1Library.sol";
+import { PoolConfig } from "@superfluid-finance/ethereum-contracts/contracts/apps/SuperTokenV1Library.sol";
 
 contract RevolutionGrantsTest is RevolutionBuilderTest {
     address grants;
