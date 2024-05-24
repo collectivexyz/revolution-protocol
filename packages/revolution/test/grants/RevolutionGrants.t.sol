@@ -7,18 +7,14 @@ import { ERC1967Proxy } from "@cobuild/utility-contracts/src/proxy/ERC1967Proxy.
 import { RevolutionBuilderTest } from "../RevolutionBuilder.t.sol";
 import { IRevolutionGrants } from "../../src/interfaces/IRevolutionGrants.sol";
 import { RevolutionGrants } from "../../src/grants/RevolutionGrants.sol";
-import { PoolConfig } from "../../src/grants/superfluid/SuperTokenV1Library.sol";
-import { MintableSuperToken } from "../../src/grants/superfluid/MintableSuperToken.sol";
-import { ISuperToken } from "../../src/grants/superfluid/interfaces/superfluid/ISuperToken.sol";
-import { SuperTokenV1Library } from "../../src/grants/superfluid/SuperTokenV1Library.sol";
+import { ISuperToken } from "@superfluid-finance/ethereum-contracts/contracts/interfaces/superfluid/ISuperToken.sol";
+import { SuperTokenV1Library } from "@superfluid-finance/ethereum-contracts/contracts/apps/SuperTokenV1Library.sol";
 import { PoolConfig } from "@superfluid-finance/ethereum-contracts/contracts/apps/SuperTokenV1Library.sol";
 
 contract RevolutionGrantsTest is RevolutionBuilderTest {
     using SuperTokenV1Library for ISuperToken;
 
     address grants;
-
-    ISuperToken public usdc;
 
     function setUp() public virtual override {
         super.setUp();
@@ -38,8 +34,6 @@ contract RevolutionGrantsTest is RevolutionBuilderTest {
             minVotingPowerToVote: 1e18, // Minimum voting power required to vote
             minVotingPowerToCreate: 100 * 1e18 // Minimum voting power required to create a grant
         });
-
-        usdc = ISuperToken(address(new MintableSuperToken(address(manager))));
 
         vm.prank(address(manager));
         IRevolutionGrants(grants).initialize({
