@@ -10,9 +10,15 @@ import { RevolutionGrants } from "../../src/grants/RevolutionGrants.sol";
 import { ISuperToken } from "@superfluid-finance/ethereum-contracts/contracts/interfaces/superfluid/ISuperToken.sol";
 import { SuperTokenV1Library } from "@superfluid-finance/ethereum-contracts/contracts/apps/SuperTokenV1Library.sol";
 import { PoolConfig } from "@superfluid-finance/ethereum-contracts/contracts/apps/SuperTokenV1Library.sol";
+import { ERC1820RegistryCompiled } from "@superfluid-finance/ethereum-contracts/contracts/libs/ERC1820RegistryCompiled.sol";
+import { SuperfluidFrameworkDeployer } from "@superfluid-finance/ethereum-contracts/contracts/utils/SuperfluidFrameworkDeployer.sol";
+import { TestToken } from "@superfluid-finance/ethereum-contracts/contracts/utils/TestToken.sol";
+import { SuperToken } from "@superfluid-finance/ethereum-contracts/contracts/superfluid/SuperToken.sol";
 
 contract RevolutionGrantsTest is RevolutionBuilderTest {
-    using SuperTokenV1Library for ISuperToken;
+    SuperfluidFrameworkDeployer.Framework internal sf;
+    SuperfluidFrameworkDeployer internal deployer;
+    SuperToken internal superToken;
 
     address grants;
 
@@ -35,10 +41,22 @@ contract RevolutionGrantsTest is RevolutionBuilderTest {
             minVotingPowerToCreate: 100 * 1e18 // Minimum voting power required to create a grant
         });
 
+        vm.etch(ERC1820RegistryCompiled.at, ERC1820RegistryCompiled.bin);
+
+        deployer = new SuperfluidFrameworkDeployer();
+        deployer.deployTestFramework();
+        sf = deployer.getFramework();
+        (TestToken underlyingToken, SuperToken superToken) = deployer.deployWrapperSuperToken(
+            "MR Token",
+            "MRx",
+            18,
+            10000000
+        );
+
         vm.prank(address(manager));
         IRevolutionGrants(grants).initialize({
             votingPower: votingPowerAddress,
-            superToken: address(usdc),
+            superToken: address(superToken),
             initialOwner: initialOwner,
             grantsImpl: grantsImpl,
             grantsParams: params
