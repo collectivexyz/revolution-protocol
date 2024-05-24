@@ -50,7 +50,7 @@
 // RevolutionDAOLogicV1 removes:
 // - `quorumVotes()` has been replaced by `quorumVotes(uint256 proposalId)`.
 
-pragma solidity ^0.8.22;
+pragma solidity ^0.8.23;
 
 import { Ownable2StepUpgradeable } from "@openzeppelin/contracts-upgradeable/access/Ownable2StepUpgradeable.sol";
 

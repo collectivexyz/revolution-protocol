@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: GPL-3.0-or-later
 // OpenZeppelin Contracts (last updated v5.0.0) (token/ERC20/extensions/ERC20Votes.sol)
 
-pragma solidity ^0.8.22;
+pragma solidity ^0.8.23;
 
 import { ERC20Upgradeable } from "./ERC20Upgradeable.sol";
 import { VotesUpgradeable } from "../VotesUpgradeable.sol";

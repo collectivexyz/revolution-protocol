@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: GPL-3.0-or-later
-pragma solidity ^0.8.22;
+pragma solidity ^0.8.23;
 
 import { Test } from "forge-std/Test.sol";
 import { MaxHeapTestSuite } from "./MaxHeap.t.sol"; // Assuming MaxHeap is in a separate file

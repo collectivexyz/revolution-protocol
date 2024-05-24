@@ -15,7 +15,7 @@
  * ░░░░░░░░░░░░░░░░░░░░░░░░░░░░░ *
  *********************************/
 
-pragma solidity ^0.8.22;
+pragma solidity ^0.8.23;
 
 import { IRevolutionBuilder } from "./IRevolutionBuilder.sol";
 import { IGrantsRevenueStream } from "./IGrantsRevenueStream.sol";

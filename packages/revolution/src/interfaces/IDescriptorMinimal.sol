@@ -15,7 +15,7 @@
  * ░░░░░░░░░░░░░░░░░░░░░░░░░░░░░ *
  *********************************/
 
-pragma solidity ^0.8.22;
+pragma solidity ^0.8.23;
 
 import { ICultureIndex } from "./ICultureIndex.sol";
 

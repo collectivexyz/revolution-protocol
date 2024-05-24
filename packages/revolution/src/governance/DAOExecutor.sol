@@ -28,7 +28,7 @@
 // DAOExecutor.sol modifies Timelock to use Solidity 0.8.x receive(), fallback(), and built-in over/underflow protection
 // This contract acts as executor of Revolution DAO governance and its treasury, so it has been modified to accept ETH.
 
-pragma solidity ^0.8.22;
+pragma solidity ^0.8.23;
 
 import { Initializable } from "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
 import { RevolutionVersion } from "../version/RevolutionVersion.sol";
