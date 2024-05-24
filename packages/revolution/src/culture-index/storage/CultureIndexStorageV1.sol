@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: GPL-3.0-or-later
-pragma solidity 0.8.22;
+pragma solidity ^0.8.23;
 
 import { ICultureIndex } from "../../interfaces/ICultureIndex.sol";
 import { IRevolutionVotingPower } from "../../interfaces/IRevolutionVotingPower.sol";

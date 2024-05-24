@@ -7,3 +7,4 @@ solmate=node_modules/solmate
 @cobuild/splits/src/=node_modules/@cobuild/splits/src/
 @cobuild/utility-contracts/src/=node_modules/@cobuild/utility-contracts/src/
 @superfluid-finance/ethereum-contracts=../../lib/superfluid-protocol-monorepo/packages/ethereum-contracts
+@superfluid-finance/solidity-semantic-money=../../lib/superfluid-protocol-monorepo/packages/solidity-semantic-money
