@@ -51,7 +51,6 @@ contract RevolutionGrants is
 
         // Initialize EIP-712 support
         __EIP712_init("RevolutionGrants", "1");
-
         __Ownable_init(_initialOwner);
         __ReentrancyGuard_init();
 
@@ -68,22 +67,22 @@ contract RevolutionGrants is
         snapshotBlock = block.number;
 
         // Set the pool config
-        setSuperTokenAndCreatePool(_superToken);
+        _setSuperTokenAndCreatePool(_superToken);
 
-        // if total member units is 0, set 1 member unit to address(this)
-        // do this to prevent distribution pool from resetting flow rate to 0
-        if (getTotalUnits() == 0) {
-            updateMemberUnits(address(this), 1);
-        }
+        // // if total member units is 0, set 1 member unit to address(this)
+        // // do this to prevent distribution pool from resetting flow rate to 0
+        // if (getTotalUnits() == 0) {
+        //     updateMemberUnits(address(this), 1);
+        // }
     }
 
     /**
      * @notice Sets the SuperToken and creates a pool from it, can only be called by the owner
      * @param _superToken The address of the SuperToken to be set and used for the pool
      */
-    function setSuperTokenAndCreatePool(address _superToken) public onlyOwner {
+    function _setSuperTokenAndCreatePool(address _superToken) internal {
         superToken = ISuperToken(_superToken);
-        pool = superToken.createPool(address(this), poolConfig);
+        // pool = superToken.createPool(address(this), poolConfig);
     }
 
     /**
