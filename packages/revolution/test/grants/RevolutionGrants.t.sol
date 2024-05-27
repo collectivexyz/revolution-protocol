@@ -46,12 +46,14 @@ contract RevolutionGrantsTest is RevolutionBuilderTest {
         deployer = new SuperfluidFrameworkDeployer();
         deployer.deployTestFramework();
         sf = deployer.getFramework();
-        (TestToken underlyingToken, SuperToken superToken) = deployer.deployWrapperSuperToken(
+        (TestToken underlyingToken, SuperToken token) = deployer.deployWrapperSuperToken(
             "MR Token",
             "MRx",
             18,
             10000000
         );
+
+        superToken = token;
 
         vm.prank(address(manager));
         IRevolutionGrants(grants).initialize({
@@ -71,7 +73,7 @@ contract RevolutionGrantsTest is RevolutionBuilderTest {
         assertEq(RevolutionGrants(grants).tokenVoteWeight(), 1e18);
         assertEq(RevolutionGrants(grants).pointsVoteWeight(), 1);
 
-        usdc.createPool(
+        superToken.createPool(
             address(this),
             PoolConfig({ transferabilityForUnitsOwner: false, distributionFromAnyAddress: false })
         );
