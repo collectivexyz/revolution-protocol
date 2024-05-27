@@ -4,3 +4,4 @@ forge-std/=node_modules/forge-std/src/
 @openzeppelin/contracts-upgradeable/=node_modules/@openzeppelin/contracts-upgradeable/
 solmate=node_modules/solmate/
 @cobuild/utility-contracts/src/=node_modules/@cobuild/utility-contracts/src/
+@superfluid-finance/ethereum-contracts/=script/superfluid-protocol-monorepo/packages/ethereum-contracts/contracts
