@@ -4,11 +4,10 @@ pragma solidity ^0.8.23;
 import { console2 } from "forge-std/console2.sol";
 import { Script } from "forge-std/Script.sol";
 import { Strings } from "@openzeppelin/contracts/utils/Strings.sol";
-import { RevolutionGrants } from "../../src/grants/RevolutionGrants.sol";
+import { RevolutionGrants } from "../../src/RevolutionGrants.sol";
 import { ERC1967Proxy } from "@cobuild/utility-contracts/src/proxy/ERC1967Proxy.sol";
-import { IRevolutionGrants } from "../../src/interfaces/IRevolutionGrants.sol";
 
-contract DeployGrants is Script {
+contract UpgradeGrants is Script {
     using Strings for uint256;
 
     address grants;
@@ -17,32 +16,12 @@ contract DeployGrants is Script {
     function run() public {
         uint256 chainID = vm.envUint("CHAIN_ID");
         uint256 key = vm.envUint("PRIVATE_KEY");
-        address initialOwner = vm.envAddress("INITIAL_OWNER");
-        address votingPower = vm.envAddress("VOTING_POWER");
-        address superToken = vm.envAddress("SUPER_TOKEN");
 
         address deployerAddress = vm.addr(key);
 
         vm.startBroadcast(deployerAddress);
 
-        IRevolutionGrants.GrantsParams memory params = IRevolutionGrants.GrantsParams({
-            tokenVoteWeight: 1000 * 1e18,
-            pointsVoteWeight: 1, // Example points vote weight
-            quorumVotesBPS: 0, // Example quorum votes in basis points (50%)
-            minVotingPowerToVote: 1e18, // Minimum voting power required to vote
-            minVotingPowerToCreate: 1000 * 1e18 // Minimum voting power required to create a grant
-        });
-
         grantsImpl = address(new RevolutionGrants());
-        grants = address(new ERC1967Proxy(grantsImpl, ""));
-
-        IRevolutionGrants(grants).initialize({
-            votingPower: votingPower,
-            superToken: superToken,
-            grantsImpl: grantsImpl,
-            initialOwner: initialOwner,
-            grantsParams: params
-        });
 
         vm.stopBroadcast();
 
@@ -50,10 +29,9 @@ contract DeployGrants is Script {
     }
 
     function writeDeploymentDetailsToFile(uint256 chainID) private {
-        string memory filePath = string(abi.encodePacked("deploys/grants/", chainID.toString(), ".txt"));
+        string memory filePath = string(abi.encodePacked("deploys/grants/", chainID.toString(), ".upgradeGrants.txt"));
 
         vm.writeFile(filePath, "");
-        vm.writeLine(filePath, string(abi.encodePacked("Grants: ", addressToString(grants))));
         vm.writeLine(filePath, string(abi.encodePacked("GrantsImpl: ", addressToString(grantsImpl))));
     }
 

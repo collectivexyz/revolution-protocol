@@ -4,9 +4,8 @@ pragma solidity ^0.8.23;
 import { Test } from "forge-std/Test.sol";
 
 import { ERC1967Proxy } from "@cobuild/utility-contracts/src/proxy/ERC1967Proxy.sol";
-import { RevolutionBuilderTest } from "../RevolutionBuilder.t.sol";
 import { IRevolutionGrants } from "../../src/interfaces/IRevolutionGrants.sol";
-import { RevolutionGrants } from "../../src/grants/RevolutionGrants.sol";
+import { RevolutionGrants } from "../../src/RevolutionGrants.sol";
 import { ISuperToken } from "@superfluid-finance/ethereum-contracts/contracts/interfaces/superfluid/ISuperToken.sol";
 import { SuperTokenV1Library } from "@superfluid-finance/ethereum-contracts/contracts/apps/SuperTokenV1Library.sol";
 import { PoolConfig } from "@superfluid-finance/ethereum-contracts/contracts/apps/SuperTokenV1Library.sol";
@@ -15,7 +14,7 @@ import { SuperfluidFrameworkDeployer } from "@superfluid-finance/ethereum-contra
 import { TestToken } from "@superfluid-finance/ethereum-contracts/contracts/utils/TestToken.sol";
 import { SuperToken } from "@superfluid-finance/ethereum-contracts/contracts/superfluid/SuperToken.sol";
 
-contract RevolutionGrantsTest is RevolutionBuilderTest {
+contract RevolutionGrantsTest is Test {
     SuperfluidFrameworkDeployer.Framework internal sf;
     SuperfluidFrameworkDeployer internal deployer;
     SuperToken internal superToken;

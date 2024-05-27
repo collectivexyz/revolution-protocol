@@ -2,21 +2,21 @@
 pragma solidity ^0.8.23;
 
 import { Ownable2StepUpgradeable } from "@openzeppelin/contracts-upgradeable/access/Ownable2StepUpgradeable.sol";
-import { ReentrancyGuardUpgradeable } from "@openzeppelin/contracts-upgradeable/utils/ReentrancyGuardUpgradeable.sol";
+import { ReentrancyGuardUpgradeable } from "@openzeppelin/contracts-upgradeable/security/ReentrancyGuardUpgradeable.sol";
 import { EIP712Upgradeable } from "@openzeppelin/contracts-upgradeable/utils/cryptography/EIP712Upgradeable.sol";
 
 import { UUPS } from "@cobuild/utility-contracts/src/proxy/UUPS.sol";
-import { RevolutionVersion } from "../version/RevolutionVersion.sol";
+import { RevolutionGrantsVersion } from "./version/GrantsVersion.sol";
 import { RevolutionGrantsStorageV1 } from "./storage/RevolutionGrantsStorageV1.sol";
-import { IRevolutionGrants } from "../interfaces/IRevolutionGrants.sol";
-import { IRevolutionVotingPower } from "../interfaces/IRevolutionVotingPower.sol";
+import { IRevolutionGrants } from "./interfaces/IRevolutionGrants.sol";
+import { IRevolutionVotingPowerMinimal } from "./interfaces/IRevolutionVotingPowerMinimal.sol";
 import { ERC1967Proxy } from "@cobuild/utility-contracts/src/proxy/ERC1967Proxy.sol";
 import { ISuperToken } from "@superfluid-finance/ethereum-contracts/contracts/interfaces/superfluid/ISuperToken.sol";
 import { SuperTokenV1Library } from "@superfluid-finance/ethereum-contracts/contracts/apps/SuperTokenV1Library.sol";
 
 contract RevolutionGrants is
     IRevolutionGrants,
-    RevolutionVersion,
+    RevolutionGrantsVersion,
     UUPS,
     Ownable2StepUpgradeable,
     ReentrancyGuardUpgradeable,
@@ -55,7 +55,7 @@ contract RevolutionGrants is
         __ReentrancyGuard_init();
 
         // Set the voting power info
-        votingPower = IRevolutionVotingPower(_votingPower);
+        votingPower = IRevolutionVotingPowerMinimal(_votingPower);
         tokenVoteWeight = _grantsParams.tokenVoteWeight;
         pointsVoteWeight = _grantsParams.pointsVoteWeight;
         grantsImpl = _grantsImpl;

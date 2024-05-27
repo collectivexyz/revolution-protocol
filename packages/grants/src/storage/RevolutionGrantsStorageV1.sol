@@ -1,9 +1,9 @@
 // SPDX-License-Identifier: GPL-3.0-or-later
 pragma solidity ^0.8.23;
 
-import { IRevolutionGrants } from "../../interfaces/IRevolutionGrants.sol";
+import { IRevolutionGrants } from "../interfaces/IRevolutionGrants.sol";
 import { IUpgradeManager } from "@cobuild/utility-contracts/src/interfaces/IUpgradeManager.sol";
-import { IRevolutionVotingPower } from "../../interfaces/IRevolutionVotingPower.sol";
+import { IRevolutionVotingPowerMinimal } from "../interfaces/IRevolutionVotingPowerMinimal.sol";
 import { ISuperToken } from "@superfluid-finance/ethereum-contracts/contracts/interfaces/superfluid/ISuperToken.sol";
 import { ISuperfluidPool } from "@superfluid-finance/ethereum-contracts/contracts/interfaces/agreements/gdav1/ISuperfluidPool.sol";
 import { PoolConfig } from "@superfluid-finance/ethereum-contracts/contracts/apps/SuperTokenV1Library.sol";
@@ -44,7 +44,7 @@ contract RevolutionGrantsStorageV1 {
     mapping(address => uint256) public nonces;
 
     // The RevolutionVotingPower contract used to get the voting power of an account
-    IRevolutionVotingPower public votingPower;
+    IRevolutionVotingPowerMinimal public votingPower;
 
     /// @notice The minimum vote power required to vote on a grant
     uint256 public minVotingPowerToVote;
