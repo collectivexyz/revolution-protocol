@@ -391,7 +391,6 @@ contract RevolutionBuilderTest is Test {
         setMockPointsParams();
         setMockPointsEmitterParams();
         setMockRevolutionVotingPowerParams();
-        setMockGrantsParams();
     }
 
     function deployMock() internal virtual {
