@@ -49,7 +49,7 @@ contract DeployGrants is Script {
     }
 
     function writeDeploymentDetailsToFile(uint256 chainID) private {
-        string memory filePath = string(abi.encodePacked("deploys/grants/", chainID.toString(), ".txt"));
+        string memory filePath = string(abi.encodePacked("deploys/", chainID.toString(), ".txt"));
 
         vm.writeFile(filePath, "");
         vm.writeLine(filePath, string(abi.encodePacked("Grants: ", addressToString(grants))));
