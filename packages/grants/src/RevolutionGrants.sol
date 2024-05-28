@@ -150,6 +150,8 @@ contract RevolutionGrants is
         // Update the isGrantPool mapping
         isGrantPool[newGrants] = true;
 
+        Ownable2StepUpgradeable(newGrants).transferOwnership(owner());
+
         emit GrantPoolCreated(address(this), newGrants);
     }
 
