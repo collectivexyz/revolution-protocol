@@ -4,7 +4,7 @@ pragma solidity ^0.8.23;
 import { console2 } from "forge-std/console2.sol";
 import { Script } from "forge-std/Script.sol";
 import { Strings } from "@openzeppelin/contracts/utils/Strings.sol";
-import { RevolutionGrants } from "../../src/RevolutionGrants.sol";
+import { RevolutionGrants } from "../src/RevolutionGrants.sol";
 import { ERC1967Proxy } from "@cobuild/utility-contracts/src/proxy/ERC1967Proxy.sol";
 
 contract UpgradeGrants is Script {

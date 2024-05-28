@@ -34,24 +34,21 @@ contract RevolutionGrants is
      * @notice Initializes the RevolutionGrants contract
      * @param _votingPower The address of the RevolutionVotingPower contract
      * @param _superToken The address of the SuperToken to be used for the pool
-     * @param _initialOwner The owner of the contract
      * @param _grantsImpl The address of the grants implementation contract
      * @param _grantsParams The parameters for the grants contract
      */
     function initialize(
         address _votingPower,
         address _superToken,
-        address _initialOwner,
         address _grantsImpl,
         GrantsParams memory _grantsParams
     ) public initializer {
-        if (_initialOwner == address(0)) revert ADDRESS_ZERO();
         if (_votingPower == address(0)) revert ADDRESS_ZERO();
         if (_grantsImpl == address(0)) revert ADDRESS_ZERO();
 
         // Initialize EIP-712 support
         __EIP712_init("RevolutionGrants", "1");
-        __Ownable_init(_initialOwner);
+        __Ownable_init();
         __ReentrancyGuard_init();
 
         // Set the voting power info
@@ -137,7 +134,6 @@ contract RevolutionGrants is
         IRevolutionGrants(newGrants).initialize({
             votingPower: address(votingPower),
             superToken: address(superToken),
-            initialOwner: owner(),
             grantsImpl: grantsImpl,
             grantsParams: GrantsParams({
                 tokenVoteWeight: tokenVoteWeight,
@@ -193,11 +189,11 @@ contract RevolutionGrants is
     function getVotingPowerForBlock(address account, uint256 blockNumber) public view returns (uint256) {
         return
             votingPower.calculateVotesWithWeights(
-                IRevolutionVotingPower.BalanceAndWeight({
+                IRevolutionVotingPowerMinimal.BalanceAndWeight({
                     balance: votingPower.getPastPointsVotes(account, blockNumber),
                     voteWeight: pointsVoteWeight
                 }),
-                IRevolutionVotingPower.BalanceAndWeight({
+                IRevolutionVotingPowerMinimal.BalanceAndWeight({
                     balance: votingPower.getPastTokenVotes(account, blockNumber),
                     voteWeight: tokenVoteWeight
                 })

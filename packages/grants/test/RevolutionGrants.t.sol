@@ -4,8 +4,8 @@ pragma solidity ^0.8.23;
 import { Test } from "forge-std/Test.sol";
 
 import { ERC1967Proxy } from "@cobuild/utility-contracts/src/proxy/ERC1967Proxy.sol";
-import { IRevolutionGrants } from "../../src/interfaces/IRevolutionGrants.sol";
-import { RevolutionGrants } from "../../src/RevolutionGrants.sol";
+import { IRevolutionGrants } from "../src/interfaces/IRevolutionGrants.sol";
+import { RevolutionGrants } from "../src/RevolutionGrants.sol";
 import { ISuperToken } from "@superfluid-finance/ethereum-contracts/contracts/interfaces/superfluid/ISuperToken.sol";
 import { SuperTokenV1Library } from "@superfluid-finance/ethereum-contracts/contracts/apps/SuperTokenV1Library.sol";
 import { PoolConfig } from "@superfluid-finance/ethereum-contracts/contracts/apps/SuperTokenV1Library.sol";
@@ -20,13 +20,15 @@ contract RevolutionGrantsTest is Test {
     SuperToken internal superToken;
 
     address grants;
+    address grantsImpl;
 
-    function setUp() public virtual override {
-        super.setUp();
+    address revolutionVotingPower;
 
-        super.setMockParams();
+    address manager = address(0x198);
 
-        super.deployMock();
+    function setUp() public virtual {
+        grantsImpl = address(new RevolutionGrants());
+        revolutionVotingPower = address(0x01);
 
         grants = address(new ERC1967Proxy(grantsImpl, ""));
         address votingPowerAddress = address(revolutionVotingPower);
@@ -49,7 +51,8 @@ contract RevolutionGrantsTest is Test {
             "MR Token",
             "MRx",
             18,
-            10000000
+            10000000,
+            manager
         );
 
         superToken = token;
@@ -58,7 +61,6 @@ contract RevolutionGrantsTest is Test {
         IRevolutionGrants(grants).initialize({
             votingPower: votingPowerAddress,
             superToken: address(superToken),
-            initialOwner: initialOwner,
             grantsImpl: grantsImpl,
             grantsParams: params
         });
@@ -71,10 +73,10 @@ contract RevolutionGrantsTest is Test {
         assertEq(RevolutionGrants(grants).quorumVotesBPS(), 5000);
         assertEq(RevolutionGrants(grants).tokenVoteWeight(), 1e18);
         assertEq(RevolutionGrants(grants).pointsVoteWeight(), 1);
+    }
 
-        superToken.createPool(
-            address(this),
-            PoolConfig({ transferabilityForUnitsOwner: false, distributionFromAnyAddress: false })
-        );
+    function test_createSubPool() public {
+        vm.prank(address(manager));
+        RevolutionGrants(grants).createAndAddSubGrantPool();
     }
 }
