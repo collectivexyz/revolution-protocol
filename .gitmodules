@@ -1,3 +1,0 @@
-[submodule "packages/grants/script/superfluid-protocol-monorepo"]
-	path = packages/grants/script/superfluid-protocol-monorepo
-	url = https://github.com/superfluid-finance/protocol-monorepo
