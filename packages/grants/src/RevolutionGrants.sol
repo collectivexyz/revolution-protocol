@@ -66,11 +66,11 @@ contract RevolutionGrants is
         // Set the pool config
         _setSuperTokenAndCreatePool(_superToken);
 
-        // // if total member units is 0, set 1 member unit to address(this)
-        // // do this to prevent distribution pool from resetting flow rate to 0
-        // if (getTotalUnits() == 0) {
-        //     updateMemberUnits(address(this), 1);
-        // }
+        // if total member units is 0, set 1 member unit to address(this)
+        // do this to prevent distribution pool from resetting flow rate to 0
+        if (getTotalUnits() == 0) {
+            updateMemberUnits(address(this), 1);
+        }
     }
 
     /**
@@ -79,7 +79,7 @@ contract RevolutionGrants is
      */
     function _setSuperTokenAndCreatePool(address _superToken) internal {
         superToken = ISuperToken(_superToken);
-        // pool = superToken.createPool(address(this), poolConfig);
+        pool = superToken.createPool(address(this), poolConfig);
     }
 
     /**
