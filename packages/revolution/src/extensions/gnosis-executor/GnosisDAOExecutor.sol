@@ -28,7 +28,7 @@
 // DAOExecutor.sol modifies Timelock to use Solidity 0.8.x receive(), fallback(), and built-in over/underflow protection
 // This contract forwards all transactions on to an Avatar contract (like a Safe).
 
-pragma solidity ^0.8.22;
+pragma solidity ^0.8.23;
 
 import { UUPS } from "@cobuild/utility-contracts/src/proxy/UUPS.sol";
 import { Initializable } from "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";

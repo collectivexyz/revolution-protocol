@@ -1,12 +1,12 @@
 // SPDX-License-Identifier: GPL-3.0-or-later
-pragma solidity 0.8.22;
+pragma solidity ^0.8.23;
 
 import { console2 } from "forge-std/console2.sol";
 import { Script } from "forge-std/Script.sol";
 import { Strings } from "@openzeppelin/contracts/utils/Strings.sol";
-import { RevolutionGrants } from "../../src/grants/RevolutionGrants.sol";
+import { RevolutionGrants } from "../src/RevolutionGrants.sol";
 import { ERC1967Proxy } from "@cobuild/utility-contracts/src/proxy/ERC1967Proxy.sol";
-import { IRevolutionGrants } from "../../src/interfaces/IRevolutionGrants.sol";
+import { IRevolutionGrants } from "../src/interfaces/IRevolutionGrants.sol";
 
 contract DeployGrants is Script {
     using Strings for uint256;
@@ -40,7 +40,6 @@ contract DeployGrants is Script {
             votingPower: votingPower,
             superToken: superToken,
             grantsImpl: grantsImpl,
-            initialOwner: initialOwner,
             grantsParams: params
         });
 
@@ -50,7 +49,7 @@ contract DeployGrants is Script {
     }
 
     function writeDeploymentDetailsToFile(uint256 chainID) private {
-        string memory filePath = string(abi.encodePacked("deploys/grants/", chainID.toString(), ".txt"));
+        string memory filePath = string(abi.encodePacked("deploys/", chainID.toString(), ".txt"));
 
         vm.writeFile(filePath, "");
         vm.writeLine(filePath, string(abi.encodePacked("Grants: ", addressToString(grants))));

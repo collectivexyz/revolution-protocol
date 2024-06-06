@@ -1,22 +1,22 @@
 // SPDX-License-Identifier: GPL-3.0
-pragma solidity ^0.8.22;
+pragma solidity ^0.8.23;
 
 import { Ownable2StepUpgradeable } from "@openzeppelin/contracts-upgradeable/access/Ownable2StepUpgradeable.sol";
-import { ReentrancyGuardUpgradeable } from "@openzeppelin/contracts-upgradeable/utils/ReentrancyGuardUpgradeable.sol";
+import { ReentrancyGuardUpgradeable } from "@openzeppelin/contracts-upgradeable/security/ReentrancyGuardUpgradeable.sol";
 import { EIP712Upgradeable } from "@openzeppelin/contracts-upgradeable/utils/cryptography/EIP712Upgradeable.sol";
 
 import { UUPS } from "@cobuild/utility-contracts/src/proxy/UUPS.sol";
-import { RevolutionVersion } from "../version/RevolutionVersion.sol";
+import { RevolutionGrantsVersion } from "./version/GrantsVersion.sol";
 import { RevolutionGrantsStorageV1 } from "./storage/RevolutionGrantsStorageV1.sol";
-import { IRevolutionGrants } from "../interfaces/IRevolutionGrants.sol";
-import { IRevolutionVotingPower } from "../interfaces/IRevolutionVotingPower.sol";
+import { IRevolutionGrants } from "./interfaces/IRevolutionGrants.sol";
+import { IRevolutionVotingPowerMinimal } from "./interfaces/IRevolutionVotingPowerMinimal.sol";
 import { ERC1967Proxy } from "@cobuild/utility-contracts/src/proxy/ERC1967Proxy.sol";
 import { ISuperToken } from "@superfluid-finance/ethereum-contracts/contracts/interfaces/superfluid/ISuperToken.sol";
 import { SuperTokenV1Library } from "@superfluid-finance/ethereum-contracts/contracts/apps/SuperTokenV1Library.sol";
 
 contract RevolutionGrants is
     IRevolutionGrants,
-    RevolutionVersion,
+    RevolutionGrantsVersion,
     UUPS,
     Ownable2StepUpgradeable,
     ReentrancyGuardUpgradeable,
@@ -34,29 +34,25 @@ contract RevolutionGrants is
      * @notice Initializes the RevolutionGrants contract
      * @param _votingPower The address of the RevolutionVotingPower contract
      * @param _superToken The address of the SuperToken to be used for the pool
-     * @param _initialOwner The owner of the contract
      * @param _grantsImpl The address of the grants implementation contract
      * @param _grantsParams The parameters for the grants contract
      */
     function initialize(
         address _votingPower,
         address _superToken,
-        address _initialOwner,
         address _grantsImpl,
         GrantsParams memory _grantsParams
     ) public initializer {
-        if (_initialOwner == address(0)) revert ADDRESS_ZERO();
         if (_votingPower == address(0)) revert ADDRESS_ZERO();
         if (_grantsImpl == address(0)) revert ADDRESS_ZERO();
 
         // Initialize EIP-712 support
         __EIP712_init("RevolutionGrants", "1");
-
-        __Ownable_init(_initialOwner);
+        __Ownable_init();
         __ReentrancyGuard_init();
 
         // Set the voting power info
-        votingPower = IRevolutionVotingPower(_votingPower);
+        votingPower = IRevolutionVotingPowerMinimal(_votingPower);
         tokenVoteWeight = _grantsParams.tokenVoteWeight;
         pointsVoteWeight = _grantsParams.pointsVoteWeight;
         grantsImpl = _grantsImpl;
@@ -68,7 +64,7 @@ contract RevolutionGrants is
         snapshotBlock = block.number;
 
         // Set the pool config
-        setSuperTokenAndCreatePool(_superToken);
+        _setSuperTokenAndCreatePool(_superToken);
 
         // if total member units is 0, set 1 member unit to address(this)
         // do this to prevent distribution pool from resetting flow rate to 0
@@ -81,7 +77,7 @@ contract RevolutionGrants is
      * @notice Sets the SuperToken and creates a pool from it, can only be called by the owner
      * @param _superToken The address of the SuperToken to be set and used for the pool
      */
-    function setSuperTokenAndCreatePool(address _superToken) public onlyOwner {
+    function _setSuperTokenAndCreatePool(address _superToken) internal {
         superToken = ISuperToken(_superToken);
         pool = superToken.createPool(address(this), poolConfig);
     }
@@ -138,7 +134,6 @@ contract RevolutionGrants is
         IRevolutionGrants(newGrants).initialize({
             votingPower: address(votingPower),
             superToken: address(superToken),
-            initialOwner: owner(),
             grantsImpl: grantsImpl,
             grantsParams: GrantsParams({
                 tokenVoteWeight: tokenVoteWeight,
@@ -154,6 +149,8 @@ contract RevolutionGrants is
 
         // Update the isGrantPool mapping
         isGrantPool[newGrants] = true;
+
+        Ownable2StepUpgradeable(newGrants).transferOwnership(owner());
 
         emit GrantPoolCreated(address(this), newGrants);
     }
@@ -194,11 +191,11 @@ contract RevolutionGrants is
     function getVotingPowerForBlock(address account, uint256 blockNumber) public view returns (uint256) {
         return
             votingPower.calculateVotesWithWeights(
-                IRevolutionVotingPower.BalanceAndWeight({
+                IRevolutionVotingPowerMinimal.BalanceAndWeight({
                     balance: votingPower.getPastPointsVotes(account, blockNumber),
                     voteWeight: pointsVoteWeight
                 }),
-                IRevolutionVotingPower.BalanceAndWeight({
+                IRevolutionVotingPowerMinimal.BalanceAndWeight({
                     balance: votingPower.getPastTokenVotes(account, blockNumber),
                     voteWeight: tokenVoteWeight
                 })
@@ -266,29 +263,6 @@ contract RevolutionGrants is
 
         // Clear out the votes for the voter
         delete votes[voter];
-    }
-
-    /**
-     * @notice Admin function to set votes allocations for multiple voters.
-     * @param voters The addresses of the voters.
-     * @param recipientsList The list of addresses of the grant recipients for each voter.
-     * @param percentAllocationsList The list of basis points of the vote to be split with the recipients for each voter.
-     * @dev This function can only be called by the owner. Only doing this because of upgradeable issue in first contract.
-     */
-    function adminSetVotesAllocations(
-        address[] memory voters,
-        address[][] memory recipientsList,
-        uint32[][] memory percentAllocationsList
-    ) external onlyOwner nonReentrant {
-        require(voters.length == recipientsList.length, "Mismatched voters and recipients list length");
-        require(
-            voters.length == percentAllocationsList.length,
-            "Mismatched voters and percent allocations list length"
-        );
-
-        for (uint256 i = 0; i < voters.length; i++) {
-            _setVotesAllocations(voters[i], recipientsList[i], percentAllocationsList[i]);
-        }
     }
 
     /**

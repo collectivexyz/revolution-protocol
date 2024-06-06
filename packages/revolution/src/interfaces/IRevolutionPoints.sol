@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: GPL-3.0-or-later
-pragma solidity ^0.8.22;
+pragma solidity ^0.8.23;
 
 import { IRevolutionBuilder } from "./IRevolutionBuilder.sol";
 import { IVotes } from "@openzeppelin/contracts/governance/utils/IVotes.sol";
