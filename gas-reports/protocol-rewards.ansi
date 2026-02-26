@@ -1,0 +1,102 @@
+Compiling 42 files with 0.8.22
+Solc 0.8.22 finished in 20.33s
+Compiler run [33msuccessful with warnings:[0m
+[1;33mWarning (5667)[0m[1;37m: Unused function parameter. Remove or comment out the variable name to silence this warning.[0m
+  [34m-->[0m test/ProtocolRewardsTest.sol:52:31:
+[34m   |[0m
+[34m52 |[0m     ) public payable returns ([33muint256 tokensSoldWad[0m) {
+[34m   |[0m                               [1;33m^^^^^^^^^^^^^^^^^^^^^[0m
+
+[1;33mWarning (2072)[0m[1;37m: Unused local variable.[0m
+  [34m-->[0m test/ProtocolRewardsTest.sol:54:9:
+[34m   |[0m
+[34m54 |[0m         [33muint256 msgValueRemaining[0m = _handleRewardsAndGetValueToSend(msg.value, builder, purchaseReferral, deployer);
+[34m   |[0m         [1;33m^^^^^^^^^^^^^^^^^^^^^^^^^[0m
+
+
+Running 2 tests for test/unit/BasicRevolutionRewards.t.sol:RevolutionRewardsTest
+[32m[PASS][0m testDeposit(uint256) (runs: 256, μ: 130713, ~: 144012)
+[32m[PASS][0m testNullReferralRecipient(uint256) (runs: 256, μ: 109706, ~: 119535)
+Test result: [32mok[0m. [32m2[0m passed; [31m0[0m failed; [33m0[0m skipped; finished in 29.97ms
+
+Running 16 tests for test/unit/Withdraw.t.sol:WithdrawTest
+[32m[PASS][0m testRevert_InvalidNonce() (gas: 45978)
+[32m[PASS][0m testRevert_InvalidReplay() (gas: 86536)
+[32m[PASS][0m testRevert_InvalidSigner() (gas: 46014)
+[32m[PASS][0m testRevert_InvalidWithdrawAmount() (gas: 46551)
+[32m[PASS][0m testRevert_InvalidWithdrawToAddress() (gas: 14810)
+[32m[PASS][0m testRevert_InvalidWithdrawWithSigToAddress() (gas: 45892)
+[32m[PASS][0m testRevert_SigExpired() (gas: 22739)
+[32m[PASS][0m testRevert_WithdrawForInvalidAmount() (gas: 14710)
+[32m[PASS][0m testRevert_WithdrawForInvalidToAddress() (gas: 14343)
+[32m[PASS][0m testRevert_WithdrawInvalidAmount() (gas: 15085)
+[32m[PASS][0m testWithdraw() (gas: 51231)
+[32m[PASS][0m testWithdrawFor() (gas: 47894)
+[32m[PASS][0m testWithdrawForFullBalance() (gas: 48129)
+[32m[PASS][0m testWithdrawFullBalance() (gas: 51410)
+[32m[PASS][0m testWithdrawWithSig() (gas: 82017)
+[32m[PASS][0m testWithdrawWithSigFullBalance() (gas: 81904)
+Test result: [32mok[0m. [32m16[0m passed; [31m0[0m failed; [33m0[0m skipped; finished in 1.64s
+
+Running 6 tests for test/unit/Deposit.t.sol:DepositTest
+[32m[PASS][0m testDeposit(uint256,address) (runs: 256, μ: 44636, ~: 45987)
+[32m[PASS][0m testDepositBatch(uint8) (runs: 256, μ: 2971303, ~: 1936089)
+[32m[PASS][0m testRevert_CannotDepositToAddressZero(uint256) (runs: 256, μ: 19359, ~: 19804)
+[32m[PASS][0m testRevert_InvalidDepositMsgValue(uint8) (runs: 256, μ: 405862, ~: 377622)
+[32m[PASS][0m testRevert_RecipientCannotBeAddressZero(uint8) (runs: 256, μ: 377513, ~: 286414)
+[32m[PASS][0m testRevert_RecipientsAndAmountsLengthMismatch(uint8,uint8) (runs: 256, μ: 348858, ~: 253163)
+Test result: [32mok[0m. [32m6[0m passed; [31m0[0m failed; [33m0[0m skipped; finished in 1.82s
+
+Running 2 tests for test/invariant/ProtocolRewards.invariant.t.sol:ProtocolRewardsInvariantTest
+[32m[PASS][0m invariant_TotalSupplyMatchesTotalDeposits() (runs: 1000, calls: 20000, reverts: 0)
+[32m[PASS][0m invariant_UserBalanceCannotExceedTotalSupply() (runs: 1000, calls: 20000, reverts: 0)
+Test result: [32mok[0m. [32m2[0m passed; [31m0[0m failed; [33m0[0m skipped; finished in 4.71s
+| src/ProtocolRewards.sol:ProtocolRewards contract |                 |       |        |       |         |
+|--------------------------------------------------|-----------------|-------|--------|-------|---------|
+| Deployment Cost                                  | Deployment Size |       |        |       |         |
+| 776358                                           | 5131            |       |        |       |         |
+| Function Name                                    | min             | avg   | median | max   | # calls |
+| WITHDRAW_TYPEHASH                                | 220             | 220   | 220    | 220   | 8       |
+| balanceOf                                        | 455             | 2160  | 2455   | 2455  | 170     |
+| deposit                                          | 750             | 23505 | 25789  | 26051 | 37      |
+| depositBatch                                     | 1015            | 15243 | 14967  | 30023 | 4       |
+| depositRewards                                   | 13425           | 42275 | 42275  | 71125 | 2       |
+| nonces                                           | 2499            | 2499  | 2499   | 2499  | 8       |
+| totalRewardsSupply                               | 288             | 288   | 288    | 288   | 142     |
+| withdraw                                         | 504             | 13926 | 12532  | 37714 | 19      |
+| withdrawFor                                      | 460             | 19066 | 19066  | 37671 | 4       |
+| withdrawWithSig                                  | 542             | 32384 | 24615  | 64143 | 9       |
+
+
+| test/ProtocolRewardsTest.sol:RewardsTest contract |                 |       |        |       |         |
+|---------------------------------------------------|-----------------|-------|--------|-------|---------|
+| Deployment Cost                                   | Deployment Size |       |        |       |         |
+| 236199                                            | 1542            |       |        |       |         |
+| Function Name                                     | min             | avg   | median | max   | # calls |
+| buyAndIssueRewards                                | 17950           | 50160 | 50160  | 82370 | 2       |
+| computePurchaseRewards                            | 1366            | 1366  | 1366   | 1366  | 2       |
+
+
+| test/invariant/Handler.sol:Handler contract |                 |       |        |        |         |
+|---------------------------------------------|-----------------|-------|--------|--------|---------|
+| Deployment Cost                             | Deployment Size |       |        |        |         |
+| 465719                                      | 2614            |       |        |        |         |
+| Function Name                               | min             | avg   | median | max    | # calls |
+| deposit                                     | 50766           | 86475 | 86805  | 138196 | 19      |
+| forEachActor                                | 2507            | 43555 | 48116  | 75516  | 20      |
+| ghost_depositSum                            | 2329            | 2329  | 2329   | 2329   | 20      |
+| ghost_withdrawSum                           | 2274            | 2274  | 2274   | 2274   | 20      |
+| withdraw                                    | 12509           | 33555 | 40561  | 54861  | 21      |
+
+
+| test/invariant/ProtocolRewards.invariant.t.sol:ProtocolRewardsInvariantTest contract |                 |      |        |      |         |
+|--------------------------------------------------------------------------------------|-----------------|------|--------|------|---------|
+| Deployment Cost                                                                      | Deployment Size |      |        |      |         |
+| 3708776                                                                              | 18353           |      |        |      |         |
+| Function Name                                                                        | min             | avg  | median | max  | # calls |
+| ensureActorBalanceDoesNotExceedTotalSupply                                           | 4106            | 4856 | 4106   | 8606 | 108     |
+
+
+
+ 
+Ran 4 test suites: [32m26[0m tests passed, [31m0[0m failed, [33m0[0m skipped (26 total tests)

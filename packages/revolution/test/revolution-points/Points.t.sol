@@ -1,0 +1,184 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
+pragma solidity ^0.8.22;
+
+import { Test } from "forge-std/Test.sol";
+import { RevolutionPoints } from "../../src/RevolutionPoints.sol";
+import { RevolutionBuilderTest } from "../RevolutionBuilder.t.sol";
+import { IRevolutionBuilder } from "../../src/interfaces/IRevolutionBuilder.sol";
+import { OwnableUpgradeable } from "@openzeppelin/contracts-upgradeable/access/OwnableUpgradeable.sol";
+import { ICultureIndex } from "../../src/interfaces/ICultureIndex.sol";
+
+contract PointsTestSuite is RevolutionBuilderTest {
+    function setUp() public override {
+        super.setUp();
+        super.setMockParams();
+
+        super.setPointsParams("Revolution Governance", "GOV");
+
+        super.setCultureIndexParams(
+            "Vrbs",
+            "Our community Vrbs. Must be 32x32.",
+            "Must be 32x32.",
+            "ipfs://",
+            10,
+            1,
+            200,
+            0,
+            0,
+            ICultureIndex.PieceMaximums({ name: 100, description: 2100, image: 64_000, text: 256, animationUrl: 100 }),
+            ICultureIndex.MediaType.NONE,
+            ICultureIndex.RequiredMediaPrefix.MIXED
+        );
+
+        super.deployMock();
+    }
+
+    function testTransferBehavior() public {
+        // Setup: Mint some tokens to an account
+        address account1 = address(0x1);
+        uint256 mintAmount = 1000 * 1e18;
+        vm.startPrank(address(revolutionPointsEmitter));
+        revolutionPoints.mint(account1, mintAmount);
+        assertEq(revolutionPoints.balanceOf(account1), mintAmount, "Minting failed");
+
+        // Transfer tokens from account1 to account2
+        address account2 = address(0x2);
+        uint256 transferAmount = 500 * 1e18;
+        vm.startPrank(account1);
+        revolutionPoints.transfer(account2, transferAmount);
+        vm.stopPrank();
+
+        // Verify that the balances are updated correctly
+        assertEq(revolutionPoints.balanceOf(account1), mintAmount - transferAmount, "account1 should decrease");
+        assertEq(revolutionPoints.balanceOf(account2), transferAmount, "account2 should increase");
+    }
+
+    function testApprovalRestrictions() public {
+        // Setup: Use two accounts
+        address owner = address(revolutionPointsEmitter);
+        address spender = address(0x2);
+
+        // Attempt to approve spender by the owner
+        uint256 approvalAmount = 500 * 1e18;
+        vm.startPrank(owner);
+        revolutionPoints.approve(spender, approvalAmount);
+        vm.stopPrank();
+
+        // Verify that the allowance changed
+        assertEq(revolutionPoints.allowance(owner, spender), approvalAmount, "Allowance should be set");
+    }
+
+    function testMintingBehavior() public {
+        address account = address(0x3);
+        uint256 mintAmount = 500 * 1e18;
+
+        // Attempt minting by a non-owner
+        address nonOwner = address(0x4);
+        vm.startPrank(nonOwner);
+        vm.expectRevert();
+        revolutionPoints.mint(account, mintAmount);
+        vm.stopPrank();
+
+        // Verify that the balance remains unchanged
+        assertEq(revolutionPoints.balanceOf(account), 0, "Non-owner should not be able to mint");
+
+        // Minting by the owner
+        vm.startPrank(address(revolutionPointsEmitter));
+        revolutionPoints.mint(account, mintAmount);
+        vm.stopPrank();
+
+        // Verify balance and total supply
+        assertEq(revolutionPoints.balanceOf(account), mintAmount, "Minting failed to update balance");
+        assertEq(revolutionPoints.totalSupply(), mintAmount, "Total supply not updated correctly");
+    }
+
+    function testVotingAndDelegation() public {
+        address delegate = address(0x6);
+        uint256 mintAmount = 1000 * 1e18;
+
+        // Mint tokens to the owner
+        vm.startPrank(address(revolutionPointsEmitter));
+        revolutionPoints.mint(address(this), mintAmount);
+        vm.stopPrank();
+
+        // Delegate voting power
+        revolutionPoints.delegate(delegate);
+
+        // Check the voting power of the delegate
+        assertEq(revolutionPoints.getVotes(delegate), mintAmount, "Delegation failed to assign voting power");
+
+        // Ensure that no tokens were transferred in the process of delegation
+        assertEq(revolutionPoints.balanceOf(delegate), 0, "Delegation should not transfer tokens");
+    }
+
+    function testTokenMetadata() public {
+        assertEq(revolutionPoints.name(), "Revolution Governance", "Incorrect token name");
+        assertEq(revolutionPoints.symbol(), "GOV", "Incorrect token symbol");
+        assertEq(revolutionPoints.decimals(), 18, "Incorrect number of decimals");
+    }
+
+    function testSupplyInvariants(uint256 mintAmount1) public {
+        mintAmount1 = bound(mintAmount1, 0, type(uint208).max / 20);
+
+        address account1 = address(0x7);
+        address account2 = address(0x8);
+
+        // Mint tokens to different accounts
+        vm.startPrank(address(revolutionPointsEmitter));
+        revolutionPoints.mint(account1, mintAmount1);
+        revolutionPoints.mint(account2, mintAmount1 / 10);
+        vm.stopPrank();
+
+        // Check total supply
+        uint256 totalSupply = revolutionPoints.totalSupply();
+
+        assertEq(totalSupply, mintAmount1 + mintAmount1 / 10, "Total supply should equal sum of balances");
+
+        // Check individual balances
+        assertEq(revolutionPoints.balanceOf(account1), mintAmount1, "Incorrect balance for account1");
+        assertEq(revolutionPoints.balanceOf(account2), mintAmount1 / 10, "Incorrect balance for account2");
+    }
+
+    function testEdgeCases() public {
+        // Minting an excessive amount of tokens (overflow check)
+        uint256 excessiveAmount = type(uint256).max;
+        vm.startPrank(address(revolutionPointsEmitter));
+        vm.expectRevert();
+        revolutionPoints.mint(address(1), excessiveAmount);
+        vm.stopPrank();
+    }
+
+    function testOwnershipTransferAndManagerRevert() public {
+        // Attempt to initialize contract by a non-manager account
+        address minter = address(0x10);
+        address nonManager = address(0x10);
+        IRevolutionBuilder.PointsTokenParams memory params = IRevolutionBuilder.PointsTokenParams("Test Token", "TST");
+        vm.startPrank(nonManager);
+        vm.expectRevert(abi.encodeWithSignature("InvalidInitialization()"));
+        revolutionPoints.initialize(nonManager, minter, params);
+        vm.stopPrank();
+
+        // Transfer ownership and test minting by new owner
+        address newOwner = address(0x11);
+        vm.startPrank(address(executor));
+        OwnableUpgradeable(address(revolutionPoints)).transferOwnership(newOwner);
+        vm.stopPrank();
+
+        vm.startPrank(newOwner);
+
+        //set new owner as minter
+        revolutionPoints.setMinter(newOwner);
+
+        revolutionPoints.mint(address(1), 100 * 1e18);
+        assertEq(revolutionPoints.balanceOf(address(1)), 100 * 1e18, "New owner should be able to mint");
+
+        //ensure minting to address(0) is not allowed
+        vm.expectRevert();
+        revolutionPoints.mint(address(0), 100 * 1e18);
+        vm.stopPrank();
+
+        //assert newOwner is minter and owner
+        assertEq(revolutionPoints.minter(), newOwner, "New owner should be minter");
+        assertEq(OwnableUpgradeable(address(revolutionPoints)).owner(), newOwner, "New owner should be owner");
+    }
+}

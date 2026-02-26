@@ -1,0 +1,1304 @@
+Compiling 188 files with 0.8.22
+Solc 0.8.22 finished in 1644.36s
+Compiler run [33msuccessful with warnings:[0m
+[1;33mWarning (5740)[0m[1;37m: Unreachable code.[0m
+   [34m-->[0m src/base/erc20/ERC20Upgradeable.sol:139:9:
+[34m    |[0m
+[34m139 |[0m         [33mreturn true[0m;
+[34m    |[0m         [1;33m^^^^^^^^^^^[0m
+
+[1;33mWarning (5740)[0m[1;37m: Unreachable code.[0m
+   [34m-->[0m src/base/erc20/ERC20Upgradeable.sol:163:9:
+[34m    |[0m
+[34m163 |[0m         [33mreturn true[0m;
+[34m    |[0m         [1;33m^^^^^^^^^^^[0m
+
+[1;33mWarning (5740)[0m[1;37m: Unreachable code.[0m
+   [34m-->[0m src/base/erc20/ERC20Upgradeable.sol:185:9:
+[34m    |[0m
+[34m185 |[0m         [33m_transfer(from, to, value)[0m;
+[34m    |[0m         [1;33m^^^^^^^^^^^^^^^^^^^^^^^^^^[0m
+
+[1;33mWarning (5740)[0m[1;37m: Unreachable code.[0m
+   [34m-->[0m src/base/erc20/ERC20Upgradeable.sol:186:9:
+[34m    |[0m
+[34m186 |[0m         [33mreturn true[0m;
+[34m    |[0m         [1;33m^^^^^^^^^^^[0m
+
+[1;33mWarning (2072)[0m[1;37m: Unused local variable.[0m
+   [34m-->[0m test/auction/AuctionBasic.t.sol:345:9:
+[34m    |[0m
+[34m345 |[0m         [33muint256 creatorGovernancePayment[0m = creatorPayment - creatorDirectPayment;
+[34m    |[0m         [1;33m^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^[0m
+
+[1;33mWarning (2072)[0m[1;37m: Unused local variable.[0m
+  [34m-->[0m test/auction/AuctionMinting.t.sol:31:13:
+[34m   |[0m
+[34m31 |[0m             [33maddress payable referral[0m,
+[34m   |[0m             [1;33m^^^^^^^^^^^^^^^^^^^^^^^^[0m
+
+[1;33mWarning (2072)[0m[1;37m: Unused local variable.[0m
+  [34m-->[0m test/auction/GrantsPayments.t.sol:62:10:
+[34m   |[0m
+[34m62 |[0m         ([33muint256 tokenId[0m, uint256 amount, , uint256 endTime, address payable bidder, , ) = auction.auction();
+[34m   |[0m          [1;33m^^^^^^^^^^^^^^^[0m
+
+[1;33mWarning (2072)[0m[1;37m: Unused local variable.[0m
+   [34m-->[0m test/auction/Settling.t.sol:246:9:
+[34m    |[0m
+[34m246 |[0m         [33muint256 grantsRate[0m = auction.grantsRateBps();
+[34m    |[0m         [1;33m^^^^^^^^^^^^^^^^^^[0m
+
+[1;33mWarning (2072)[0m[1;37m: Unused local variable.[0m
+   [34m-->[0m test/auction/Settling.t.sol:382:9:
+[34m    |[0m
+[34m382 |[0m         [33muint256 auctioneerPayment[0m = msgValueRemainingAuction - creatorsShare - grantsShare;
+[34m    |[0m         [1;33m^^^^^^^^^^^^^^^^^^^^^^^^^[0m
+
+[1;33mWarning (2072)[0m[1;37m: Unused local variable.[0m
+   [34m-->[0m test/auction/Settling.t.sol:557:9:
+[34m    |[0m
+[34m557 |[0m         [33muint256 auctioneerPayment[0m = msgValueRemaining - creatorsShare - grantsShare;
+[34m    |[0m         [1;33m^^^^^^^^^^^^^^^^^^^^^^^^^[0m
+
+[1;33mWarning (2072)[0m[1;37m: Unused local variable.[0m
+   [34m-->[0m test/auction/Settling.t.sol:561:9:
+[34m    |[0m
+[34m561 |[0m         [33muint256 creatorsGovernancePayment[0m = creatorsShare - creatorsDirectPayment;
+[34m    |[0m         [1;33m^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^[0m
+
+[1;33mWarning (2072)[0m[1;37m: Unused local variable.[0m
+   [34m-->[0m test/auction/Settling.t.sol:624:9:
+[34m    |[0m
+[34m624 |[0m         [33muint256 auctioneerPayment[0m = msgValueRemaining -
+[34m    |[0m         [1;33m^^^^^^^^^^^^^^^^^^^^^^^^^[0m
+
+[1;33mWarning (2072)[0m[1;37m: Unused local variable.[0m
+   [34m-->[0m test/auction/Settling.t.sol:698:9:
+[34m    |[0m
+[34m698 |[0m         [33maddress recipient[0m = address(0x123); // Some EOA address
+[34m    |[0m         [1;33m^^^^^^^^^^^^^^^^^[0m
+
+[1;33mWarning (2072)[0m[1;37m: Unused local variable.[0m
+   [34m-->[0m test/culture-index/ArtPiece.t.sol:461:9:
+[34m    |[0m
+[34m461 |[0m         [33muint256 pieceId[0m = createArtPieceMultiCreator(
+[34m    |[0m         [1;33m^^^^^^^^^^^^^^^[0m
+
+[1;33mWarning (2072)[0m[1;37m: Unused local variable.[0m
+  [34m-->[0m test/culture-index/EdgeCases.t.sol:46:9:
+[34m   |[0m
+[34m46 |[0m         [33maddress voter[0m = address(89);
+[34m   |[0m         [1;33m^^^^^^^^^^^^^[0m
+
+[1;33mWarning (2072)[0m[1;37m: Unused local variable.[0m
+   [34m-->[0m test/culture-index/Voting.t.sol:206:9:
+[34m    |[0m
+[34m206 |[0m         [33muint256 pieceId[0m = createDefaultArtPiece();
+[34m    |[0m         [1;33m^^^^^^^^^^^^^^^[0m
+
+[1;33mWarning (2072)[0m[1;37m: Unused local variable.[0m
+   [34m-->[0m test/points-emitter/AccountPurchaseHistory.t.sol:117:9:
+[34m    |[0m
+[34m117 |[0m         [33mint256 expectedBuyerAmount[0m = getTokenQuoteForEtherHelper(amountPaidToOwner, expectedFounderPoints);
+[34m    |[0m         [1;33m^^^^^^^^^^^^^^^^^^^^^^^^^^[0m
+
+[1;33mWarning (2072)[0m[1;37m: Unused local variable.[0m
+  [34m-->[0m test/points-emitter/BPS.t.sol:48:9:
+[34m   |[0m
+[34m48 |[0m         [33mint256 expectedAmount[0m = expectedFounderPoints + expectedBuyerAmount;
+[34m   |[0m         [1;33m^^^^^^^^^^^^^^^^^^^^^[0m
+
+[1;33mWarning (2072)[0m[1;37m: Unused local variable.[0m
+   [34m-->[0m test/points-emitter/BPS.t.sol:207:9:
+[34m    |[0m
+[34m207 |[0m         [33mProtocolRewards protocolRewards[0m = new ProtocolRewards();
+[34m    |[0m         [1;33m^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^[0m
+
+[1;33mWarning (2072)[0m[1;37m: Unused local variable.[0m
+  [34m-->[0m test/points-emitter/EmissionRates.t.sol:47:9:
+[34m   |[0m
+[34m47 |[0m         [33maddress creatorsAddress[0m = revolutionPointsEmitter.founderAddress();
+[34m   |[0m         [1;33m^^^^^^^^^^^^^^^^^^^^^^^[0m
+
+[1;33mWarning (2072)[0m[1;37m: Unused local variable.[0m
+  [34m-->[0m test/points-emitter/EmissionRates.t.sol:97:9:
+[34m   |[0m
+[34m97 |[0m         [33mint256 priceAfterManyPurchases[0m = revolutionPointsEmitter.buyTokenQuote(1e18);
+[34m   |[0m         [1;33m^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^[0m
+
+[1;33mWarning (2072)[0m[1;37m: Unused local variable.[0m
+   [34m-->[0m test/points-emitter/EmissionRates.t.sol:319:9:
+[34m    |[0m
+[34m319 |[0m         [33muint256 tokensSold[0m = revolutionPointsEmitter.buyToken{ value: valueToSend }(
+[34m    |[0m         [1;33m^^^^^^^^^^^^^^^^^^[0m
+
+[1;33mWarning (2072)[0m[1;37m: Unused local variable.[0m
+  [34m-->[0m test/points-emitter/EmitterBasic.t.sol:73:9:
+[34m   |[0m
+[34m73 |[0m         [33mProtocolRewards protocolRewards[0m = new ProtocolRewards();
+[34m   |[0m         [1;33m^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^[0m
+
+[1;33mWarning (2072)[0m[1;37m: Unused local variable.[0m
+  [34m-->[0m test/revolution-builder/Versions.t.sol:20:9:
+[34m   |[0m
+[34m20 |[0m         [33mIRevolutionBuilder.DAOVersionInfo memory versions[0m = manager.getLatestVersions();
+[34m   |[0m         [1;33m^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^[0m
+
+[1;33mWarning (2072)[0m[1;37m: Unused local variable.[0m
+   [34m-->[0m test/revolution-token/TokenMinting.t.sol:200:10:
+[34m    |[0m
+[34m200 |[0m         ([33muint256 pieceId[0m, ICultureIndex.ArtPieceMetadata memory metadata, , , ) = cultureIndex.pieces(0);
+[34m    |[0m          [1;33m^^^^^^^^^^^^^^^[0m
+
+[1;33mWarning (2072)[0m[1;37m: Unused local variable.[0m
+   [34m-->[0m test/revolution-token/TokenMinting.t.sol:200:27:
+[34m    |[0m
+[34m200 |[0m         (uint256 pieceId, [33mICultureIndex.ArtPieceMetadata memory metadata[0m, , , ) = cultureIndex.pieces(0);
+[34m    |[0m                           [1;33m^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^[0m
+
+[1;33mWarning (2072)[0m[1;37m: Unused local variable.[0m
+  [34m-->[0m test/splits/SplitsCreation.t.sol:22:13:
+[34m   |[0m
+[34m22 |[0m             [33muint32[] memory pointsAllocations[0m,
+[34m   |[0m             [1;33m^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^[0m
+
+[1;33mWarning (2072)[0m[1;37m: Unused local variable.[0m
+  [34m-->[0m test/splits/SplitsCreation.t.sol:57:13:
+[34m   |[0m
+[34m57 |[0m             [33muint32[] memory pointsAllocations[0m,
+[34m   |[0m             [1;33m^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^[0m
+
+[1;33mWarning (2072)[0m[1;37m: Unused local variable.[0m
+  [34m-->[0m test/splits/SplitsCreation.t.sol:92:13:
+[34m   |[0m
+[34m92 |[0m             [33muint32[] memory pointsAllocations[0m,
+[34m   |[0m             [1;33m^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^[0m
+
+[1;33mWarning (2072)[0m[1;37m: Unused local variable.[0m
+   [34m-->[0m test/voting-power/VotingPower.t.sol:176:13:
+[34m    |[0m
+[34m176 |[0m             [33muint256 pieceId[0m = createDefaultArtPiece();
+[34m    |[0m             [1;33m^^^^^^^^^^^^^^^[0m
+
+[1;33mWarning (2018)[0m[1;37m: Function state mutability can be restricted to view[0m
+   [34m-->[0m test/auction/Settling.t.sol:277:5:
+[34m    |[0m
+[34m277 |[0m     [33mfunction getCreatorGovernancePayoutHelper(uint bidAmount) public returns (uint) {[0m
+[34m    |[0m     [1;33m^ (Relevant source part starts here and spans across multiple lines).[0m
+
+[1;33mWarning (2018)[0m[1;37m: Function state mutability can be restricted to pure[0m
+   [34m-->[0m test/auction/Settling.t.sol:336:5:
+[34m    |[0m
+[34m336 |[0m     [33mfunction _getTotalPointsEmitterPayment([0m
+[34m    |[0m     [1;33m^ (Relevant source part starts here and spans across multiple lines).[0m
+
+[1;33mWarning (2018)[0m[1;37m: Function state mutability can be restricted to view[0m
+   [34m-->[0m test/auction/Settling.t.sol:350:5:
+[34m    |[0m
+[34m350 |[0m     [33mfunction getDAOPayout(uint bidAmount) public returns (uint) {[0m
+[34m    |[0m     [1;33m^ (Relevant source part starts here and spans across multiple lines).[0m
+
+[1;33mWarning (2018)[0m[1;37m: Function state mutability can be restricted to view[0m
+   [34m-->[0m test/auction/Settling.t.sol:375:5:
+[34m    |[0m
+[34m375 |[0m     [33mfunction getFounderDirectPayment(uint bidAmount) public returns (uint) {[0m
+[34m    |[0m     [1;33m^ (Relevant source part starts here and spans across multiple lines).[0m
+
+[1;33mWarning (2018)[0m[1;37m: Function state mutability can be restricted to pure[0m
+  [34m-->[0m test/descriptor/Descriptor.t.sol:57:5:
+[34m   |[0m
+[34m57 |[0m     [33mfunction parseJson([0m
+[34m   |[0m     [1;33m^ (Relevant source part starts here and spans across multiple lines).[0m
+
+[1;33mWarning (2018)[0m[1;37m: Function state mutability can be restricted to view[0m
+  [34m-->[0m test/points-emitter/PointsEmitter.t.sol:53:5:
+[34m   |[0m
+[34m53 |[0m     [33mfunction getTokenQuoteForEtherHelper(uint256 etherAmount, int256 supply) public returns (int gainedX) {[0m
+[34m   |[0m     [1;33m^ (Relevant source part starts here and spans across multiple lines).[0m
+
+[1;33mWarning (2018)[0m[1;37m: Function state mutability can be restricted to view[0m
+  [34m-->[0m test/revolution-builder/Versions.t.sol:18:5:
+[34m   |[0m
+[34m18 |[0m     [33mfunction test_getDAOVersions() public {[0m
+[34m   |[0m     [1;33m^ (Relevant source part starts here and spans across multiple lines).[0m
+
+[1;33mWarning (2018)[0m[1;37m: Function state mutability can be restricted to pure[0m
+   [34m-->[0m test/revolution-token/Basic.t.sol:469:5:
+[34m    |[0m
+[34m469 |[0m     [33mfunction parseJson([0m
+[34m    |[0m     [1;33m^ (Relevant source part starts here and spans across multiple lines).[0m
+
+[1;33mWarning (2018)[0m[1;37m: Function state mutability can be restricted to view[0m
+   [34m-->[0m test/splits/RevolutionSplits.t.sol:290:5:
+[34m    |[0m
+[34m290 |[0m     [33mfunction setupBasicSplit()[0m
+[34m    |[0m     [1;33m^ (Relevant source part starts here and spans across multiple lines).[0m
+
+
+Running 2 tests for test/auction/AuctionMinting.t.sol:AuctionHouseMintTest
+[32m[PASS][0m test__BehaviorOnMintFailureDuringAuctionCreation() (gas: 74981)
+[32m[PASS][0m test__MintFailureDueToEmptyNFTList() (gas: 63916)
+Test result: [32mok[0m. [32m2[0m passed; [31m0[0m failed; [33m0[0m skipped; finished in 4.93ms
+
+Running 2 tests for test/dao/DAO.t.sol:DAOTestSuite
+[32m[PASS][0m testDAOPurpose() (gas: 20247)
+[32m[PASS][0m testDAOSymbol() (gas: 15594)
+Test result: [32mok[0m. [32m2[0m passed; [31m0[0m failed; [33m0[0m skipped; finished in 5.84ms
+
+Running 3 tests for test/revolution-points/AccessControl.t.sol:PointsTestSuite
+[32m[PASS][0m test__MinterAccessControl() (gas: 204988)
+[32m[PASS][0m test__MinterLocking() (gas: 210230)
+[32m[PASS][0m test__basicAccessControl() (gas: 187640)
+Test result: [32mok[0m. [32m3[0m passed; [31m0[0m failed; [33m0[0m skipped; finished in 6.47ms
+
+Running 14 tests for test/revolution-token/AccessControl.t.sol:TokenAccessControlTest
+[32m[PASS][0m testBurningPermission() (gas: 559828)
+[32m[PASS][0m testCultureIndexUpdateAndLock() (gas: 34240)
+[32m[PASS][0m testDescriptorLocking() (gas: 227780)
+[32m[PASS][0m testDescriptorUpdateAndLock() (gas: 40572)
+[32m[PASS][0m testLockAdminFunctions() (gas: 40927)
+[32m[PASS][0m testLockMinter() (gas: 31831)
+[32m[PASS][0m testMinterAssignment() (gas: 32155)
+[32m[PASS][0m testMinterAssignmentAndLocking() (gas: 622942)
+[32m[PASS][0m testNonOwnerCannotCallDropTopVotedPiece() (gas: 375763)
+[32m[PASS][0m testOwnerPrivileges() (gas: 29777)
+[32m[PASS][0m testRevertOnNonMinterMint() (gas: 17168)
+[32m[PASS][0m testRevertOnNonOwnerSettingContractURI() (gas: 18229)
+[32m[PASS][0m testSetContractURIByOwner() (gas: 23688)
+[32m[PASS][0m testSetMinter() (gas: 29772)
+Test result: [32mok[0m. [32m14[0m passed; [31m0[0m failed; [33m0[0m skipped; finished in 8.20ms
+
+Running 13 tests for test/max-heap/MaxHeap.t.sol:MaxHeapTestSuite
+[32m[PASS][0m testCannotRemoveMaxWhenEmpty() (gas: 18157)
+[32m[PASS][0m testExtractMaxOnlyOwner() (gas: 69174)
+[32m[PASS][0m testHeapEmptyAfterAllRemoved() (gas: 140129)
+[32m[PASS][0m testHeapProperty() (gas: 506192)
+[32m[PASS][0m testHeapify() (gas: 323764)
+[32m[PASS][0m testHeapifyOnNonRoot() (gas: 345370)
+[32m[PASS][0m testInsert() (gas: 223680)
+[32m[PASS][0m testInsertDuplicateValues() (gas: 223974)
+[32m[PASS][0m testInsertOnlyOwner() (gas: 95497)
+[32m[PASS][0m testOldHeapEntriesNotRemove2() (gas: 267330)
+[32m[PASS][0m testOldHeapEntriesNotRemoved() (gas: 218360)
+[32m[PASS][0m testRemoveMax() (gas: 211061)
+[32m[PASS][0m testUpdateValueOnlyOwner() (gas: 90724)
+Test result: [32mok[0m. [32m13[0m passed; [31m0[0m failed; [33m0[0m skipped; finished in 10.10ms
+
+Running 21 tests for test/revolution-token/Basic.t.sol:TokenBasicTest
+[32m[PASS][0m testContractURI() (gas: 18948)
+[32m[PASS][0m testCorrectArtAssociation() (gas: 603542)
+[32m[PASS][0m testCreatePieceWithExcessCreators() (gas: 145642)
+[32m[PASS][0m testCreatePieceWithInvalidBasisPoints() (gas: 63241)
+[32m[PASS][0m testCreatePieceWithValidParameters() (gas: 383085)
+[32m[PASS][0m testCreatePieceWithZeroAddress() (gas: 63130)
+[32m[PASS][0m testCultureIndexInteraction() (gas: 606033)
+[32m[PASS][0m testDoubleVotingRestriction() (gas: 635399)
+[32m[PASS][0m testDropTopVotedPieceOnEmptyHeap() (gas: 54172)
+[32m[PASS][0m testInitialVariablesState() (gas: 27625)
+[32m[PASS][0m testName() (gas: 17619)
+[32m[PASS][0m testPieceCountIncrement() (gas: 665789)
+[32m[PASS][0m testRetrievingVotesForNonExistentArtPiece() (gas: 17816)
+[32m[PASS][0m testSymbol() (gas: 18213)
+[32m[PASS][0m testTokenMetadataIntegrity() (gas: 832150)
+[32m[PASS][0m testVotingOnDroppedPiece() (gas: 761100)
+[32m[PASS][0m testVotingOnNonExistentArtPiece() (gas: 184086)
+[32m[PASS][0m testVotingWithZeroBalance() (gas: 391759)
+[32m[PASS][0m test_DropTopVotedPiece() (gas: 854665)
+[32m[PASS][0m test_GetTopVotedPiece() (gas: 1112209)
+[32m[PASS][0m test_VotingOnArtPiece() (gas: 632405)
+Test result: [32mok[0m. [32m21[0m passed; [31m0[0m failed; [33m0[0m skipped; finished in 10.39ms
+
+Running 1 test for test/culture-index/CultureIndexDeploy.t.sol:CultureIndexDeployTest
+[32m[PASS][0m test__DeployCultureIndex() (gas: 1309798)
+Test result: [32mok[0m. [32m1[0m passed; [31m0[0m failed; [33m0[0m skipped; finished in 5.16ms
+
+Running 21 tests for test/culture-index/Metadata.t.sol:CultureIndexArtMetadataTest
+[32m[PASS][0m test__ExceedingAnimationLength() (gas: 90200)
+[32m[PASS][0m test__ExceedingAudioLength() (gas: 90265)
+[32m[PASS][0m test__ExceedingDescriptionLength() (gas: 396635)
+[32m[PASS][0m test__ExceedingImageLength() (gas: 10064813)
+[32m[PASS][0m test__ExceedingNameLength() (gas: 94190)
+[32m[PASS][0m test__ExceedingTextLength() (gas: 116283)
+[32m[PASS][0m test__InvalidAnimationPrefix() (gas: 79515)
+[32m[PASS][0m test__InvalidAnimationPrefixFullHash() (gas: 79129)
+[32m[PASS][0m test__InvalidBothHashesAnimation() (gas: 79595)
+[32m[PASS][0m test__InvalidBothHashesImage() (gas: 79726)
+[32m[PASS][0m test__InvalidImagePrefix() (gas: 86417)
+[32m[PASS][0m test__InvalidImagePrefixFullHash() (gas: 65889)
+[32m[PASS][0m test__InvalidOneHashAnimation_1() (gas: 89325)
+[32m[PASS][0m test__InvalidOneHashAnimation_2() (gas: 79903)
+[32m[PASS][0m test__InvalidOneHashImage_1() (gas: 88994)
+[32m[PASS][0m test__InvalidOneHashImage_2() (gas: 80315)
+[32m[PASS][0m test__MissingMediaDataAudio() (gas: 65864)
+[32m[PASS][0m test__MissingMediaDataText() (gas: 66373)
+[32m[PASS][0m test__ValidHashesAnimation_SVG() (gas: 453882)
+[32m[PASS][0m test__ValidImagePrefixIpfs() (gas: 357137)
+[32m[PASS][0m test__ValidImagePrefixSvg() (gas: 363341)
+Test result: [32mok[0m. [32m21[0m passed; [31m0[0m failed; [33m0[0m skipped; finished in 46.88ms
+
+Running 2 tests for test/culture-index/MultiVoting.t.sol:CultureIndexVotingTestManager
+[32m[PASS][0m testVoteOnMultiplePieces() (gas: 1058477)
+[32m[PASS][0m testVotingWithDifferentWeights() (gas: 788148)
+Test result: [32mok[0m. [32m2[0m passed; [31m0[0m failed; [33m0[0m skipped; finished in 5.55ms
+
+Running 1 test for test/culture-index/OnchainSvg.t.sol:CultureIndexRequiredDataTest
+[32m[PASS][0m test__largeSVG() (gas: 29604961)
+Test result: [32mok[0m. [32m1[0m passed; [31m0[0m failed; [33m0[0m skipped; finished in 6.52ms
+
+Running 4 tests for test/points-emitter/BPS.t.sol:PointsEmitterBasicTest
+[32m[PASS][0m testPercentagePayouts(uint256) (runs: 256, μ: 653728, ~: 653812)
+[32m[PASS][0m testTotalBasisPoints() (gas: 682368)
+[32m[PASS][0m test_bpsInitialization() (gas: 1053645)
+[32m[PASS][0m test_revertMismatchedLengthArrays() (gas: 34196)
+Test result: [32mok[0m. [32m4[0m passed; [31m0[0m failed; [33m0[0m skipped; finished in 133.01ms
+
+Running 10 tests for test/culture-index/AccessControl.t.sol:CultureIndexAccessControlTest
+[32m[PASS][0m testDropTopVotedPieceOnlyIfQuorumIsMet(uint256) (runs: 256, μ: 840141, ~: 840255)
+[32m[PASS][0m testRevertCreatingWithWeightTooLow() (gas: 243100)
+[32m[PASS][0m testRevertNonOwnerSetMinVotingPowerToCreate() (gas: 17387)
+[32m[PASS][0m testRevertNonOwnerSetMinVotingPowerToVote() (gas: 16727)
+[32m[PASS][0m testRevertNonOwnerSetQuorumVotesBPS() (gas: 16947)
+[32m[PASS][0m testRevertVotingWithWeightTooLow() (gas: 570498)
+[32m[PASS][0m testSetMinVotingPowerToCreateOnlyOwnerCanCall() (gas: 48751)
+[32m[PASS][0m testSetMinVotingPowerToVoteOnlyOwnerCanCall() (gas: 48223)
+[32m[PASS][0m testSetQuorumVotesBPSOutsideRange(uint256) (runs: 256, μ: 28071, ~: 27979)
+[32m[PASS][0m testSetQuorumVotesBPSWithinRange(uint256) (runs: 256, μ: 29425, ~: 29820)
+Test result: [32mok[0m. [32m10[0m passed; [31m0[0m failed; [33m0[0m skipped; finished in 233.00ms
+
+Running 7 tests for test/culture-index/SignatureVoting.t.sol:CultureIndexVotingSignaturesTest
+[32m[PASS][0m testRevert_InvalidNonce() (gas: 413924)
+[32m[PASS][0m testRevert_InvalidReplay() (gas: 688912)
+[32m[PASS][0m testRevert_InvalidSigner() (gas: 414091)
+[32m[PASS][0m testRevert_InvalidVoteForManyWithSigToAddress() (gas: 416472)
+[32m[PASS][0m testRevert_InvalidVotes() (gas: 868967)
+[32m[PASS][0m testRevert_SigExpired() (gas: 385547)
+[32m[PASS][0m test_VoteForManyWithSig() (gas: 688756)
+Test result: [32mok[0m. [32m7[0m passed; [31m0[0m failed; [33m0[0m skipped; finished in 15.76ms
+
+Running 3 tests for test/splits/SplitsCreation.t.sol:CreateSplitsTest
+[32m[PASS][0m test__CreateBasicSplit__ERC20Payouts() (gas: 320131)
+[32m[PASS][0m test__CreateBasicSplit__EthPayouts() (gas: 377595)
+[32m[PASS][0m test__CreateBasicSplit__PointsPayouts() (gas: 858107)
+Test result: [32mok[0m. [32m3[0m passed; [31m0[0m failed; [33m0[0m skipped; finished in 3.22ms
+
+Running 18 tests for test/descriptor/UriData.t.sol:DescriptorURIDataTest
+[32m[PASS][0m testBaselineTokenURIWithDataURIEnabled() (gas: 73100)
+[32m[PASS][0m testDataURI() (gas: 65541)
+[32m[PASS][0m testGenericDataURI() (gas: 65194)
+[32m[PASS][0m testLongDescription() (gas: 464076)
+[32m[PASS][0m testMaliciousDescription() (gas: 660729)
+[32m[PASS][0m testSetBaseURI() (gas: 40602)
+[32m[PASS][0m testSetBaseURIEvent() (gas: 42744)
+[32m[PASS][0m testSetBaseURI_AccessControl() (gas: 27152)
+[32m[PASS][0m testToggleDataURIEnabled() (gas: 17251)
+[32m[PASS][0m testToggleDataURIEnabledAccessControl() (gas: 17393)
+[32m[PASS][0m testToggleDataURIEnabledEvent() (gas: 19618)
+[32m[PASS][0m testTokenURIWithDataURIEnabled() (gas: 27377)
+[32m[PASS][0m testTokenURIWithFullMetadata() (gas: 279137)
+[32m[PASS][0m testTokenURIWithHTTPURL() (gas: 51647)
+[32m[PASS][0m testTokenURIWithMixedMediaMetadata() (gas: 328419)
+[32m[PASS][0m testTokenURIWithOnlyImageMetadata() (gas: 201219)
+[32m[PASS][0m testTransferOwnership() (gas: 34068)
+[32m[PASS][0m testTransferOwnershipAccessControl() (gas: 27877)
+Test result: [32mok[0m. [32m18[0m passed; [31m0[0m failed; [33m0[0m skipped; finished in 28.63ms
+
+Running 15 tests for test/culture-index/ArtPiece.t.sol:CultureIndexArtPieceTest
+[32m[PASS][0m testArtPieceCreationAndVoting(uint256,uint256) (runs: 256, μ: 1778769, ~: 1779072)
+[32m[PASS][0m testCreatePiece() (gas: 373937)
+[32m[PASS][0m testCreatePieceWithMultipleCreators() (gas: 418392)
+[32m[PASS][0m testCreatePieceWithMultipleCreatorsInvalidBPS() (gas: 63573)
+[32m[PASS][0m testCreatorArrayLengthConstraint() (gas: 134916)
+[32m[PASS][0m testExcessiveTotalBasisPoints() (gas: 63012)
+[32m[PASS][0m testFirstPieceId() (gas: 357807)
+[32m[PASS][0m testInvalidCreatorAddress() (gas: 62197)
+[32m[PASS][0m testMissingMediaDataAnimation() (gas: 66024)
+[32m[PASS][0m testMissingMediaDataImage() (gas: 66048)
+[32m[PASS][0m testMissingMediaDataText() (gas: 65960)
+[32m[PASS][0m testPieceIDIncrement() (gas: 663002)
+[32m[PASS][0m testTooFewTotalBasisPoints() (gas: 62462)
+[32m[PASS][0m testTopVotedPieceMeetsQuorum() (gas: 1335877)
+[32m[PASS][0m test__NonZeroCreators(uint256) (runs: 256, μ: 241947, ~: 243585)
+Test result: [32mok[0m. [32m15[0m passed; [31m0[0m failed; [33m0[0m skipped; finished in 434.28ms
+
+Running 3 tests for test/vrgdac/VRGDAC.t.sol:PointsTestSuite
+[32m[PASS][0m test_noNegatives(int256,int256,int256,int256) (runs: 256, μ: 276336, ~: 276291)
+[32m[PASS][0m test_yToX_ManyPurchasesAfterLongTime(int256,int256,int256,int256,int256,int256) (runs: 256, μ: 281618, ~: 281949)
+[32m[PASS][0m test_yToX_NoPurchasesAfterLongTime(int256,int256,int256,int256,int256,int256) (runs: 256, μ: 281524, ~: 281145)
+Test result: [32mok[0m. [32m3[0m passed; [31m0[0m failed; [33m0[0m skipped; finished in 194.59ms
+
+Running 1 test for test/revolution-builder/Versions.t.sol:RevolutionBuilderBasicTest
+[32m[PASS][0m test_getDAOVersions() (gas: 69592)
+Test result: [32mok[0m. [32m1[0m passed; [31m0[0m failed; [33m0[0m skipped; finished in 5.29ms
+
+Running 10 tests for test/revolution-token/TokenMinting.t.sol:TokenMintingTest
+[32m[PASS][0m testBurn() (gas: 561346)
+[32m[PASS][0m testBurnFunction() (gas: 561828)
+[32m[PASS][0m testMint() (gas: 603413)
+[32m[PASS][0m testMintToItself() (gas: 606558)
+[32m[PASS][0m testMintWithNoPieces() (gas: 54145)
+[32m[PASS][0m testMintingEvent() (gas: 618024)
+[32m[PASS][0m testTokenURI() (gas: 707682)
+[32m[PASS][0m test_DroppedArtPieceMatchesTopVoted() (gas: 879678)
+[32m[PASS][0m test_MintingIncrement(uint256) (runs: 256, μ: 1413025, ~: 1454214)
+[32m[PASS][0m test_TopVotedPieceMinting() (gas: 841739)
+Test result: [32mok[0m. [32m10[0m passed; [31m0[0m failed; [33m0[0m skipped; finished in 291.95ms
+
+Running 18 tests for test/max-heap/Updates.t.sol:MaxHeapUpdateTestSuite
+[32m[PASS][0m testCannotRemoveMaxWhenEmpty() (gas: 18201)
+[32m[PASS][0m testExtractMaxOnlyOwner() (gas: 69192)
+[32m[PASS][0m testExtractUpdateError() (gas: 309247)
+[32m[PASS][0m testHeapEmptyAfterAllRemoved() (gas: 140164)
+[32m[PASS][0m testHeapProperty() (gas: 506227)
+[32m[PASS][0m testHeapify() (gas: 323808)
+[32m[PASS][0m testHeapifyOnNonRoot() (gas: 345509)
+[32m[PASS][0m testInitialInsertAndMax() (gas: 224827)
+[32m[PASS][0m testInsert() (gas: 223768)
+[32m[PASS][0m testInsertDuplicateValues() (gas: 224108)
+[32m[PASS][0m testInsertOnlyOwner() (gas: 95541)
+[32m[PASS][0m testOldHeapEntriesNotRemove2() (gas: 267418)
+[32m[PASS][0m testOldHeapEntriesNotRemoved() (gas: 218395)
+[32m[PASS][0m testRemoveMax() (gas: 211149)
+[32m[PASS][0m testUpdateValueDecrease() (gas: 227021)
+[32m[PASS][0m testUpdateValueIncrease() (gas: 224623)
+[32m[PASS][0m testUpdateValueOnlyOwner() (gas: 90724)
+[32m[PASS][0m testUpdateValueWithHeapify() (gas: 366471)
+Test result: [32mok[0m. [32m18[0m passed; [31m0[0m failed; [33m0[0m skipped; finished in 6.83ms
+
+Running 8 tests for test/revolution-points/Points.t.sol:PointsTestSuite
+[32m[PASS][0m testApprovalRestrictions() (gas: 25739)
+[32m[PASS][0m testEdgeCases() (gas: 70419)
+[32m[PASS][0m testMintingBehavior() (gas: 183272)
+[32m[PASS][0m testOwnershipTransferAndManagerRevert() (gas: 206278)
+[32m[PASS][0m testSupplyInvariants(uint256) (runs: 256, μ: 236621, ~: 249791)
+[32m[PASS][0m testTokenMetadata() (gas: 22162)
+[32m[PASS][0m testTransferRestrictions() (gas: 174152)
+[32m[PASS][0m testVotingAndDelegation() (gas: 245134)
+Test result: [32mok[0m. [32m8[0m passed; [31m0[0m failed; [33m0[0m skipped; finished in 47.96ms
+
+Running 8 tests for test/culture-index/RequiredData.t.sol:CultureIndexRequiredDataTest
+[32m[PASS][0m test__requiredMediaPrefix_IPFS() (gas: 5099490)
+[32m[PASS][0m test__requiredMediaPrefix_MIXED() (gas: 5429915)
+[32m[PASS][0m test__requiredMediaPrefix_SVG() (gas: 5144048)
+[32m[PASS][0m test__requiredMediaType_ANIMATION() (gas: 5116404)
+[32m[PASS][0m test__requiredMediaType_AUDIO() (gas: 5116818)
+[32m[PASS][0m test__requiredMediaType_IMAGE() (gas: 5117471)
+[32m[PASS][0m test__requiredMediaType_NONE() (gas: 5959001)
+[32m[PASS][0m test__requiredMediaType_TEXT() (gas: 5114255)
+Test result: [32mok[0m. [32m8[0m passed; [31m0[0m failed; [33m0[0m skipped; finished in 11.53ms
+
+Running 2 tests for test/rewards/RevolutionRewards.t.sol:RevolutionRewardsTest
+[32m[PASS][0m testDeposit(uint256) (runs: 256, μ: 431637, ~: 540176)
+[32m[PASS][0m testNullReferralRecipient(uint256) (runs: 256, μ: 407081, ~: 515238)
+Test result: [32mok[0m. [32m2[0m passed; [31m0[0m failed; [33m0[0m skipped; finished in 153.29ms
+
+Running 10 tests for test/revolution-token/Security.t.sol:TokenSecurityTest
+[32m[PASS][0m testApprovalChecks() (gas: 738333)
+[32m[PASS][0m testBasisPointsSum() (gas: 60440)
+[32m[PASS][0m testCreatorArrayLimit() (gas: 131296)
+[32m[PASS][0m testEventEmission() (gas: 372269)
+[32m[PASS][0m testFunctionalityUnderMaximumLoad() (gas: 1330702)
+[32m[PASS][0m testMintToDropTopVotedPieceFailure() (gas: 474938)
+[32m[PASS][0m testPrivilegeEscalation() (gas: 60842)
+[32m[PASS][0m testReentrancyOnMint() (gas: 498894)
+[32m[PASS][0m testReentrancyOtherFunctions() (gas: 499856)
+[32m[PASS][0m testZeroAddressInCreatorArray() (gas: 58823)
+Test result: [32mok[0m. [32m10[0m passed; [31m0[0m failed; [33m0[0m skipped; finished in 6.95ms
+
+Running 1 test for test/revolution-token/Voting.t.sol:TokenSecurityTest
+[32m[PASS][0m testBlockingOfTransferAndRedelegating() (gas: 1825878)
+Test result: [32mok[0m. [32m1[0m passed; [31m0[0m failed; [33m0[0m skipped; finished in 5.70ms
+
+Running 1 test for test/splits/Setup.t.sol:SplitsTestSetupTest
+[32m[PASS][0m test__BuyToken() (gas: 536907)
+Test result: [32mok[0m. [32m1[0m passed; [31m0[0m failed; [33m0[0m skipped; finished in 4.58ms
+
+Running 3 tests for test/points-emitter/GrantsPayments.t.sol:PointsEmitterBasicTest
+[32m[PASS][0m test_GrantsBalance(uint256,uint256,uint256) (runs: 256, μ: 46827390, ~: 46858280)
+[32m[PASS][0m test_InitializationGrantsFounderRateBounds(uint256,uint256) (runs: 256, μ: 50542687, ~: 50687254)
+[32m[PASS][0m test_SetGrantsRate(uint256) (runs: 256, μ: 47826, ~: 48041)
+Test result: [32mok[0m. [32m3[0m passed; [31m0[0m failed; [33m0[0m skipped; finished in 2.14s
+
+Running 4 tests for test/auction/HistoricPrices.t.sol:HistoricPriceTest
+[32m[PASS][0m test__HistoricPriceBurned() (gas: 1196871)
+[32m[PASS][0m test__HistoricPriceBurnedBelowReserve() (gas: 1262951)
+[32m[PASS][0m test__HistoricPriceSaved() (gas: 2040866)
+[32m[PASS][0m test__MultipleHistoricPricesSaved() (gas: 3224404)
+Test result: [32mok[0m. [32m4[0m passed; [31m0[0m failed; [33m0[0m skipped; finished in 17.24ms
+
+Running 2 tests for test/culture-index/Initialization.t.sol:CultureIndexInitializationTest
+[32m[PASS][0m testChecklistInitialization() (gas: 15810)
+[32m[PASS][0m testTemplateInitialization() (gas: 15260)
+Test result: [32mok[0m. [32m2[0m passed; [31m0[0m failed; [33m0[0m skipped; finished in 14.49ms
+
+Running 2 tests for test/points-emitter/Initialization.t.sol:PointsEmitterInitializationTest
+[32m[PASS][0m test__FounderFieldsInitialization() (gas: 26324)
+[32m[PASS][0m test__GrantsFieldsInitialization() (gas: 19035)
+Test result: [32mok[0m. [32m2[0m passed; [31m0[0m failed; [33m0[0m skipped; finished in 4.74ms
+
+Running 1 test for test/descriptor/JsonInjection.t.sol:JsonInjectionAttackTest
+[32m[PASS][0m testTokenURIWithMixedMediaMetadata() (gas: 341849)
+Test result: [32mok[0m. [32m1[0m passed; [31m0[0m failed; [33m0[0m skipped; finished in 6.01ms
+
+Running 8 tests for test/auction/Manifestos.t.sol:ManifestosTest
+[32m[PASS][0m test_MultipleAuctions_ManifestosEmpty_CorrectWinner_SetAndVerifyLast() (gas: 6567956)
+[32m[PASS][0m test__Bids_SettlingAuctionAndSettingManifesto() (gas: 2151478)
+[32m[PASS][0m test__Bids_SettlingAuctionEmptyManifesto() (gas: 2028831)
+[32m[PASS][0m test__Bids_UpdateManifesto_NotInitialOwner() (gas: 2032776)
+[32m[PASS][0m test__NoBids_SettlingAuctionEmptyManifesto() (gas: 1188780)
+[32m[PASS][0m test__TransferToken_UpdateManifesto_NotInitialOwner() (gas: 2096534)
+[32m[PASS][0m test__UpdateManifesto() (gas: 2100950)
+[32m[PASS][0m test__UpdateManifesto_TooLong() (gas: 10904798)
+Test result: [32mok[0m. [32m8[0m passed; [31m0[0m failed; [33m0[0m skipped; finished in 22.02ms
+
+Running 13 tests for test/auction/Settling.t.sol:AuctionHouseSettleTest
+[32m[PASS][0m test_CreateAuctionWithoutSettle() (gas: 1348416)
+[32m[PASS][0m test__EntropyPecentCannotLeadToDos(uint256) (runs: 256, μ: 2026773, ~: 2094895)
+[32m[PASS][0m test__OwnerPayment(uint8) (runs: 256, μ: 2349532, ~: 2349532)
+[32m[PASS][0m test__RevertTopVotedPieceMeetsQuorum() (gas: 1426320)
+[32m[PASS][0m test__SettleAuctionZeroEntropyRate() (gas: 1990313)
+[32m[PASS][0m test__SettlingAuctionPrematurely() (gas: 1004341)
+[32m[PASS][0m test__SettlingAuctionWithMultipleCreators(uint256,uint256) (runs: 256, μ: 4898626, ~: 5062452)
+[32m[PASS][0m test__SettlingAuctionWithNoBids(uint8) (runs: 256, μ: 1180993, ~: 1180993)
+[32m[PASS][0m test__SettlingAuctionWithWinningBidAndCreatorPayout(uint256) (runs: 256, μ: 2182228, ~: 2182325)
+[32m[PASS][0m test__TransferFailureAndFallbackToWETH(uint256) (runs: 256, μ: 2156738, ~: 2156827)
+[32m[PASS][0m test__TransferToContractWithoutReceiveOrFallback(uint256) (runs: 256, μ: 2142857, ~: 2142948)
+[32m[PASS][0m test__TransferToEOA() (gas: 2072961)
+[32m[PASS][0m test__VotesCount(uint8) (runs: 256, μ: 2347652, ~: 2347652)
+Test result: [32mok[0m. [32m13[0m passed; [31m0[0m failed; [33m0[0m skipped; finished in 3.90s
+
+Running 9 tests for test/points-emitter/EmitterBasic.t.sol:PointsEmitterBasicTest
+[32m[PASS][0m testBuyToken() (gas: 486573)
+[32m[PASS][0m testBuyTokenPriceIncreases() (gas: 692533)
+[32m[PASS][0m testBuyTokenReentrancy() (gas: 914506)
+[32m[PASS][0m testBuyingLaterIsBetter() (gas: 85427)
+[32m[PASS][0m testCannotBuyAsCreators() (gas: 37011)
+[32m[PASS][0m testCannotBuyAsOwner() (gas: 35747)
+[32m[PASS][0m testSetGrantsAddress() (gas: 30777)
+[32m[PASS][0m testTransferTokenContractOwnership() (gas: 2518252)
+[32m[PASS][0m test_purchaseBounds(int256) (runs: 256, μ: 64163, ~: 93602)
+Test result: [32mok[0m. [32m9[0m passed; [31m0[0m failed; [33m0[0m skipped; finished in 45.49ms
+
+Running 9 tests for test/points-emitter/EmissionRates.t.sol:EmissionRatesTest
+[32m[PASS][0m testBuyTokenTotalVal() (gas: 46613808)
+[32m[PASS][0m testBuyTokenWithDifferentRates(uint256,uint256,uint256) (runs: 256, μ: 46806763, ~: 46841300)
+[32m[PASS][0m testBuyingTwiceAmountIsNotMoreThanTwiceEmittedTokens() (gas: 583360)
+[32m[PASS][0m testGetTokenPrice() (gas: 66350)
+[32m[PASS][0m test_BuyingFunctionBreaksAfterAPeriodOfTime(uint256,uint256,uint256,uint256) (runs: 256, μ: 46781988, ~: 46816104)
+[32m[PASS][0m test_FounderRewardsExpireCorrectly(uint256,uint256,uint256,uint256,uint256) (runs: 256, μ: 47008269, ~: 47020600)
+[32m[PASS][0m test_FounderRewardsExpireForQuoteUtils(uint256,uint256,uint256,uint256,uint256) (runs: 256, μ: 46490405, ~: 46493351)
+[32m[PASS][0m test_correctEmitted(uint256,uint256,uint256) (runs: 256, μ: 46811368, ~: 46843001)
+[32m[PASS][0m test_revertNoPayment() (gas: 27536)
+Test result: [32mok[0m. [32m9[0m passed; [31m0[0m failed; [33m0[0m skipped; finished in 5.04s
+
+Running 4 tests for test/points-emitter/AccountPurchaseHistory.t.sol:AccountPurchaseHistoryTest
+[32m[PASS][0m test__BuyingForMultipleAccountsWithCorrectValues(uint256,uint256) (runs: 256, μ: 64534745, ~: 68076782)
+[32m[PASS][0m test__PurchaseHistorySaved() (gas: 517940)
+[32m[PASS][0m test__PurchaseHistorySavedMultiplePurchases(uint256,uint256) (runs: 256, μ: 705946, ~: 705949)
+[32m[PASS][0m test__PurchaseHistoryZeroesGrantsRateHigh() (gas: 400410)
+Test result: [32mok[0m. [32m4[0m passed; [31m0[0m failed; [33m0[0m skipped; finished in 7.02s
+
+Running 3 tests for test/auction/GrantsPayments.t.sol:GrantsPaymentsTest
+[32m[PASS][0m test_GrantsBalance(uint256,uint256,uint256,uint256) (runs: 256, μ: 52785995, ~: 52821151)
+[32m[PASS][0m test_InitializationGrantsFounderRateBounds(uint256,uint256) (runs: 256, μ: 50240568, ~: 49826411)
+[32m[PASS][0m test_SetGrantsRate(uint256) (runs: 256, μ: 46677, ~: 46884)
+Test result: [32mok[0m. [32m3[0m passed; [31m0[0m failed; [33m0[0m skipped; finished in 12.52s
+
+Running 1 test for test/culture-index/EdgeCases.t.sol:CultureIndexEdgeCaseTest
+[32m[PASS][0m test__MaxPieces() (gas: 74624034340)
+Test result: [32mok[0m. [32m1[0m passed; [31m0[0m failed; [33m0[0m skipped; finished in 37.07s
+
+Running 1 test for test/auction/OutOfGas.t.sol:AuctionHouseOutOfGasTest
+[32m[PASS][0m test_OutOfGasDOS(uint256) (runs: 256, μ: 125792318, ~: 128603345)
+Test result: [32mok[0m. [32m1[0m passed; [31m0[0m failed; [33m0[0m skipped; finished in 41.50s
+
+Running 10 tests for test/culture-index/TopArtPiece.t.sol:CultureIndexArtPieceTest
+[32m[PASS][0m testCorrectTopVotedPiece() (gas: 1144085)
+[32m[PASS][0m testFetchTopVotedPiece() (gas: 647243)
+[32m[PASS][0m testGasForCreatingArtPieces() (gas: 2438126417)
+[32m[PASS][0m testGasForLargeVotes() (gas: 11529198257)
+[32m[PASS][0m testGasForPopTopVotedPiece() (gas: 14805572492)
+[32m[PASS][0m testPopTopVotedPiece() (gas: 636374)
+[32m[PASS][0m testVoteAndVerifyTopVotedPiece() (gas: 1677939)
+[32m[PASS][0m test_DropTopVotedPieceSequentialOrder() (gas: 1075940)
+[32m[PASS][0m test_DropTopVotedPieceWithNoMorePieces() (gas: 642737)
+[32m[PASS][0m test_RemovedPieceShouldBeReplaced() (gas: 1117614)
+Test result: [32mok[0m. [32m10[0m passed; [31m0[0m failed; [33m0[0m skipped; finished in 43.60s
+
+Running 14 tests for test/voting-power/VotingPower.t.sol:VotingPowerTest
+[32m[PASS][0m testCalculateVotes() (gas: 18564)
+[32m[PASS][0m testCalculateVotesWithWeights() (gas: 11739)
+[32m[PASS][0m testGetPastPointsSupply() (gas: 5022064)
+[32m[PASS][0m testGetPastPointsVotes() (gas: 199811)
+[32m[PASS][0m testGetPastTokenSupply() (gas: 5023314)
+[32m[PASS][0m testGetPastTokenVotes() (gas: 4935071)
+[32m[PASS][0m testGetPointsSupply() (gas: 5018002)
+[32m[PASS][0m testGetPointsVotes() (gas: 197411)
+[32m[PASS][0m testGetTokenSupply() (gas: 5018838)
+[32m[PASS][0m testGetTokenVotes() (gas: 4934452)
+[32m[PASS][0m testTotalSupplyMatches() (gas: 43085)
+[32m[PASS][0m test__DefaultVotingPowerCalculation(uint256,uint256,uint256,uint256) (runs: 256, μ: 233286020, ~: 244710713)
+[32m[PASS][0m test__VotingPowerWithWeight(uint256,uint256,uint256,uint256) (runs: 256, μ: 227676057, ~: 211787623)
+[32m[PASS][0m test_initializeVotingPower() (gas: 361710)
+Test result: [32mok[0m. [32m14[0m passed; [31m0[0m failed; [33m0[0m skipped; finished in 43.09s
+
+Running 4 tests for test/points-emitter/Balances.t.sol:PointsEmitterBasicTest
+[32m[PASS][0m test_GetTokenAmountForMultiPurchaseEdgeCases() (gas: 86873)
+[32m[PASS][0m test_GetTokenAmountForMultiPurchaseGeneral(uint256) (runs: 256, μ: 602212, ~: 598574)
+[32m[PASS][0m test_OwnerBalance(uint256,uint256,uint256) (runs: 256, μ: 46809008, ~: 46843384)
+[32m[PASS][0m test_PointsEmitterBalance(uint256,uint256,uint256) (runs: 256, μ: 46778913, ~: 46810463)
+Test result: [32mok[0m. [32m4[0m passed; [31m0[0m failed; [33m0[0m skipped; finished in 44.34s
+
+Running 27 tests for test/culture-index/Voting.t.sol:CultureIndexVotingBasicTest
+[32m[PASS][0m testBatchVotingFailsForInvalidPieceIds() (gas: 524171)
+[32m[PASS][0m testBatchVotingFailsForZeroWeight() (gas: 388447)
+[32m[PASS][0m testBatchVotingFailsIfAlreadyVoted() (gas: 632286)
+[32m[PASS][0m testBatchVotingFailsIfPieceDropped() (gas: 640788)
+[32m[PASS][0m testBatchVotingSuccess() (gas: 1045736)
+[32m[PASS][0m testCalculateVoteWeight() (gas: 45820)
+[32m[PASS][0m testCalculateVoteWeights(uint256,uint256) (runs: 256, μ: 257170328, ~: 245797689)
+[32m[PASS][0m testCannotVoteOnDroppedPiece() (gas: 742450)
+[32m[PASS][0m testCannotVoteOnMultiplePiecesTwice() (gas: 1048181)
+[32m[PASS][0m testCannotVoteTwice() (gas: 634290)
+[32m[PASS][0m testCannotVoteWithoutTokens() (gas: 386384)
+[32m[PASS][0m testCannotVoteWithoutTokensMultiplePieces() (gas: 716540)
+[32m[PASS][0m testGasUsage() (gas: 130686236)
+[32m[PASS][0m testInvalidPieceID() (gas: 183084)
+[32m[PASS][0m testNoDoubleVotingAfterERC721Transfer() (gas: 1198605)
+[32m[PASS][0m testQuorumVotesCalculation(uint256,uint256) (runs: 256, μ: 320758121, ~: 316188992)
+[32m[PASS][0m testRejectVoteForInvalidPieceId() (gas: 184202)
+[32m[PASS][0m testVoteAfterTransferringTokens() (gas: 652489)
+[32m[PASS][0m testVoteWeightImpactOnTopVotedPiece() (gas: 1159063)
+[32m[PASS][0m testVoteWeightResetAfterTokenTransfer() (gas: 887619)
+[32m[PASS][0m testVoteWeightWithChangingTokenBalances() (gas: 1245181)
+[32m[PASS][0m testVoteWeight_Points() (gas: 642635)
+[32m[PASS][0m testVoteWeight_Points_Block_before() (gas: 699299)
+[32m[PASS][0m testVoteWeight_Points_No_Snapshot() (gas: 699937)
+[32m[PASS][0m testVoteWeight_Token_Snapshot() (gas: 1732308)
+[32m[PASS][0m testVoteWithRevolutionToken() (gas: 480568)
+[32m[PASS][0m testVoting() (gas: 633678)
+Test result: [32mok[0m. [32m27[0m passed; [31m0[0m failed; [33m0[0m skipped; finished in 58.36s
+
+Running 19 tests for test/auction/AuctionBasic.t.sol:AuctionHouseBasicTest
+[32m[PASS][0m testAccessControl() (gas: 26669)
+[32m[PASS][0m testAdministrativeFunctions(uint256,uint256,uint8) (runs: 256, μ: 48040, ~: 48746)
+[32m[PASS][0m testEventEmission(uint256,uint256) (runs: 256, μ: 44925, ~: 44944)
+[32m[PASS][0m testInitializationParameters() (gas: 31152)
+[32m[PASS][0m testMinCreatorRateLoweringRestriction(uint256) (runs: 256, μ: 24326, ~: 24326)
+[32m[PASS][0m testOwnerOnlyAccess() (gas: 26651)
+[32m[PASS][0m testSetCreatorRateBpsWithGrantsRate(uint256) (runs: 256, μ: 34697, ~: 34697)
+[32m[PASS][0m testSetEntropyRateBps(uint256) (runs: 256, μ: 27262, ~: 27712)
+[32m[PASS][0m testSetEntropyRateBpsInvalidValues(uint256) (runs: 256, μ: 28656, ~: 28656)
+[32m[PASS][0m testSetEntropyRateBpsRestrictToOwner() (gas: 17372)
+[32m[PASS][0m testSetMinCreatorRateBps(uint256,uint256) (runs: 256, μ: 36259, ~: 36024)
+[32m[PASS][0m testSetMinCreatorRateBpsInvalidValues(uint256) (runs: 256, μ: 27813, ~: 27790)
+[32m[PASS][0m testSetMinCreatorRateBpsRestrictToOwner(uint256) (runs: 256, μ: 20089, ~: 20089)
+[32m[PASS][0m testSettlingAuctions() (gas: 1320010)
+[32m[PASS][0m testValueUpdates(uint256,uint256) (runs: 256, μ: 49733, ~: 49752)
+[32m[PASS][0m test_AuctionCreation() (gas: 702476)
+[32m[PASS][0m test_BidEventEmission() (gas: 763000)
+[32m[PASS][0m test_BidForAnotherAccount() (gas: 2073214)
+[32m[PASS][0m test_BiddingProcess(uint256) (runs: 256, μ: 2360782, ~: 2360782)
+Test result: [32mok[0m. [32m19[0m passed; [31m0[0m failed; [33m0[0m skipped; finished in 58.99s
+| node_modules/@cobuild/protocol-rewards/src/ProtocolRewards.sol:ProtocolRewards contract |                 |       |        |       |         |
+|-----------------------------------------------------------------------------------------|-----------------|-------|--------|-------|---------|
+| Deployment Cost                                                                         | Deployment Size |       |        |       |         |
+| 793778                                                                                  | 5218            |       |        |       |         |
+| Function Name                                                                           | min             | avg   | median | max   | # calls |
+| balanceOf                                                                               | 452             | 452   | 452    | 452   | 7       |
+| depositRewards                                                                          | 5425            | 24717 | 27325  | 93025 | 84      |
+| totalRewardsSupply                                                                      | 288             | 288   | 288    | 288   | 2       |
+
+
+| node_modules/@cobuild/splits/src/SplitMain.sol:SplitMain contract |                 |        |        |        |         |
+|-------------------------------------------------------------------|-----------------|--------|--------|--------|---------|
+| Deployment Cost                                                   | Deployment Size |        |        |        |         |
+| 4173595                                                           | 21192           |        |        |        |         |
+| Function Name                                                     | min             | avg    | median | max    | # calls |
+| PERCENTAGE_SCALE                                                  | 313             | 313    | 313    | 313    | 4       |
+| createSplit                                                       | 134166          | 134166 | 134166 | 134166 | 3       |
+| distributeERC20                                                   | 64416           | 64416  | 64416  | 64416  | 1       |
+| distributeETH                                                     | 67942           | 67942  | 67942  | 67942  | 2       |
+| getERC20Balance                                                   | 1417            | 2083   | 1417   | 3417   | 3       |
+| getETHBalance                                                     | 838             | 2275   | 2838   | 3149   | 6       |
+| getETHPointsBalance                                               | 1050            | 1789   | 1050   | 3268   | 6       |
+| getHash                                                           | 476             | 476    | 476    | 476    | 3       |
+| getPointsBalance                                                  | 19206           | 20684  | 21424  | 21424  | 3       |
+| initialize                                                        | 328212          | 328212 | 328212 | 328212 | 351     |
+| receive                                                           | 62              | 62     | 62     | 62     | 2       |
+| withdraw                                                          | 31486           | 178550 | 36964  | 467200 | 3       |
+
+
+| node_modules/@cobuild/splits/src/SplitWallet.sol:SplitWallet contract |                 |       |        |       |         |
+|-----------------------------------------------------------------------|-----------------|-------|--------|-------|---------|
+| Deployment Cost                                                       | Deployment Size |       |        |       |         |
+| 203110                                                                | 1068            |       |        |       |         |
+| Function Name                                                         | min             | avg   | median | max   | # calls |
+| sendERC20ToMain                                                       | 23804           | 23804 | 23804  | 23804 | 1       |
+| sendETHToMain                                                         | 7438            | 7438  | 7438   | 7438  | 2       |
+
+
+| node_modules/@cobuild/utility-contracts/src/proxy/ERC1967Proxy.sol:ERC1967Proxy contract                                                                                |                 |         |         |          |         |
+|-------------------------------------------------------------------------------------------------------------------------------------------------------------------------|-----------------|---------|---------|----------|---------|
+| Deployment Cost                                                                                                                                                         | Deployment Size |         |         |          |         |
+| 52860                                                                                                                                                                   | 825             |         |         |          |         |
+| Function Name                                                                                                                                                           | min             | avg     | median  | max      | # calls |
+| MAX_NUM_CREATORS                                                                                                                                                        | 1242            | 1804    | 1242    | 5742     | 24      |
+| MAX_QUORUM_VOTES_BPS                                                                                                                                                    | 1374            | 4749    | 5874    | 5874     | 4       |
+| PERCENTAGE_SCALE                                                                                                                                                        | 611             | 611     | 611     | 611      | 4       |
+| VOTE_TYPEHASH                                                                                                                                                           | 1176            | 1176    | 1176    | 1176     | 11      |
+| WETH                                                                                                                                                                    | 7716            | 7716    | 7716    | 7716     | 1       |
+| _set                                                                                                                                                                    | 25108           | 35058   | 35058   | 45008    | 4       |
+| _setMinVotingPowerToCreate                                                                                                                                              | 7738            | 21149   | 24605   | 31105    | 3       |
+| _setMinVotingPowerToVote                                                                                                                                                | 7254            | 20665   | 24121   | 30621    | 3       |
+| _setQuorumVotesBPS                                                                                                                                                      | 3095            | 10781   | 13873   | 13873    | 15      |
+| acceptOwnership                                                                                                                                                         | 3034            | 5120    | 5720    | 6006     | 4       |
+| allowance                                                                                                                                                               | 8069            | 8069    | 8069    | 8069     | 1       |
+| approve                                                                                                                                                                 | 5126            | 14125   | 14125   | 23125    | 2       |
+| artPieces                                                                                                                                                               | 937             | 937     | 937     | 937      | 3       |
+| auction                                                                                                                                                                 | 1736            | 3069    | 1736    | 13736    | 9       |
+| auctions                                                                                                                                                                | 1307            | 4640    | 4307    | 9307     | 6       |
+| balanceOf                                                                                                                                                               | 1103            | 1910    | 1103    | 7603     | 81      |
+| baseURI                                                                                                                                                                 | 1386            | 4599    | 4599    | 7812     | 2       |
+| burn                                                                                                                                                                    | 1015            | 23799   | 18938   | 63598    | 13      |
+| buyToken                                                                                                                                                                | 0               | 1212202 | 401498  | 53609091 | 64      |
+| buyTokenQuote                                                                                                                                                           | 10610           | 17510   | 10610   | 45110    | 5       |
+| calculateVotes                                                                                                                                                          | 1290            | 1290    | 1290    | 1290     | 1       |
+| calculateVotesWithWeights                                                                                                                                               | 1310            | 1310    | 1310    | 5810     | 188845  |
+| checklist                                                                                                                                                               | 8704            | 8704    | 8704    | 8704     | 1       |
+| computePurchaseRewards                                                                                                                                                  | 1968            | 1968    | 1968    | 1968     | 2       |
+| computeTotalReward                                                                                                                                                      | 1053            | 1697    | 1083    | 5583     | 43      |
+| contractURI                                                                                                                                                             | 2461            | 4653    | 2461    | 9038     | 3       |
+| createBid                                                                                                                                                               | 7361            | 52982   | 54997   | 56997    | 30      |
+| createPiece                                                                                                                                                             | 8840            | 300759  | 300301  | 48194649 | 271218  |
+| createSplit                                                                                                                                                             | 139054          | 139054  | 139054  | 139054   | 3       |
+| creatorRateBps                                                                                                                                                          | 560             | 1081    | 560     | 7060     | 47      |
+| cultureIndex                                                                                                                                                            | 1282            | 2615    | 3282    | 3282     | 3       |
+| dataURI                                                                                                                                                                 | 41400           | 237997  | 235208  | 437383   | 3       |
+| decimals                                                                                                                                                                | 611             | 611     | 611     | 611      | 1       |
+| delegate                                                                                                                                                                | 3793            | 24824   | 11152   | 74335    | 5       |
+| deploy                                                                                                                                                                  | 4233278         | 4260785 | 4277661 | 4332061  | 347     |
+| deployCultureIndex                                                                                                                                                      | 791316          | 791316  | 791316  | 791316   | 1       |
+| description                                                                                                                                                             | 1720            | 1720    | 1720    | 1720     | 1       |
+| descriptor                                                                                                                                                              | 820             | 1820    | 1820    | 2820     | 2       |
+| distributeERC20                                                                                                                                                         | 64813           | 64813   | 64813   | 64813    | 1       |
+| distributeETH                                                                                                                                                           | 68333           | 68333   | 68333   | 68333    | 2       |
+| dropTopVotedPiece                                                                                                                                                       | 6059            | 38512   | 37780   | 96789    | 893     |
+| duration                                                                                                                                                                | 582             | 646     | 582     | 2582     | 31      |
+| entropyRateBps                                                                                                                                                          | 1481            | 1739    | 1481    | 3481     | 31      |
+| extractMax                                                                                                                                                              | 840             | 4294    | 2746    | 63246    | 926     |
+| fallback                                                                                                                                                                | 354             | 2270    | 367     | 4867     | 78      |
+| flag                                                                                                                                                                    | 8702            | 8702    | 8702    | 8702     | 1       |
+| founderAddress                                                                                                                                                          | 754             | 1320    | 754     | 7254     | 15      |
+| founderEntropyRateBps                                                                                                                                                   | 758             | 1658    | 758     | 2758     | 20      |
+| founderRateBps                                                                                                                                                          | 1220            | 2375    | 1220    | 7720     | 29      |
+| founderRewardsExpirationDate                                                                                                                                            | 1154            | 1439    | 1154    | 3154     | 7       |
+| genericDataURI                                                                                                                                                          | 41406           | 41406   | 41406   | 41406    | 1       |
+| getAccountPurchaseHistory                                                                                                                                               | 1474            | 1513    | 1474    | 9974     | 427     |
+| getAccountVotingPowerForPiece                                                                                                                                           | 10760           | 10884   | 10760   | 11071    | 5       |
+| getArtPieceById                                                                                                                                                         | 16524           | 55273   | 16524   | 1058027  | 82      |
+| getERC20Balance                                                                                                                                                         | 1721            | 2387    | 1721    | 3721     | 3       |
+| getETHBalance                                                                                                                                                           | 1139            | 2576    | 3139    | 3450     | 6       |
+| getETHPointsBalance                                                                                                                                                     | 1351            | 2090    | 1351    | 3569     | 6       |
+| getHash                                                                                                                                                                 | 777             | 777     | 777     | 777      | 3       |
+| getLatestVersions                                                                                                                                                       | 58338           | 58338   | 58338   | 58338    | 1       |
+| getMax                                                                                                                                                                  | 988             | 988     | 988     | 988      | 982     |
+| getPastAuction                                                                                                                                                          | 1955            | 1955    | 1955    | 1955     | 1       |
+| getPastPointsSupply                                                                                                                                                     | 2649            | 3194    | 3181    | 6873     | 964     |
+| getPastPointsVotes                                                                                                                                                      | 2970            | 6521    | 7328    | 10089    | 186919  |
+| getPastTokenSupply                                                                                                                                                      | 3397            | 5331    | 5942    | 6271     | 964     |
+| getPastTokenVotes                                                                                                                                                       | 1509            | 2877    | 2857    | 6001     | 187882  |
+| getPastTotalSupply                                                                                                                                                      | 1413            | 2817    | 2006    | 5637     | 1930    |
+| getPastVotes                                                                                                                                                            | 0               | 3087    | 1882    | 5953     | 374803  |
+| getPieceById                                                                                                                                                            | 8415            | 29005   | 8415    | 642920   | 94      |
+| getPointsBalance                                                                                                                                                        | 19507           | 20985   | 21725   | 21725    | 3       |
+| getPointsSupply                                                                                                                                                         | 1750            | 9500    | 9500    | 17250    | 2       |
+| getPointsVotes                                                                                                                                                          | 9199            | 9199    | 9199    | 9199     | 1       |
+| getTokenMinter                                                                                                                                                          | 2058            | 2147    | 2058    | 4058     | 963     |
+| getTokenQuoteForEther                                                                                                                                                   | 7009            | 21355   | 9019    | 44999    | 27      |
+| getTokenQuoteForPayment                                                                                                                                                 | 7925            | 26102   | 17329   | 61829    | 10      |
+| getTokenSupply                                                                                                                                                          | 2212            | 7712    | 7712    | 13212    | 2       |
+| getTokenVotes                                                                                                                                                           | 3246            | 3246    | 3246    | 3246     | 1       |
+| getTopVotedPiece                                                                                                                                                        | 11173           | 11173   | 11173   | 11173    | 5       |
+| getTotalVotesSupplyWithWeights                                                                                                                                          | 3732            | 3732    | 3732    | 3732     | 1       |
+| getVote                                                                                                                                                                 | 2303            | 2923    | 2303    | 8229     | 16      |
+| getVotes                                                                                                                                                                | 0               | 2964    | 1721    | 36169    | 813692  |
+| getVotesWithWeights                                                                                                                                                     | 1910            | 5592    | 5407    | 7216     | 15      |
+| grantsAddress                                                                                                                                                           | 930             | 1432    | 930     | 2930     | 8       |
+| grantsRateBps                                                                                                                                                           | 1242            | 1903    | 1308    | 7742     | 48      |
+| heap                                                                                                                                                                    | 634             | 634     | 634     | 634      | 2       |
+| initialize(address,address)                                                                                                                                             | 95223           | 207394  | 95245   | 328513   | 730     |
+| initialize(address,address,(string,string))                                                                                                                             | 7602            | 192735  | 193260  | 193260   | 354     |
+| initialize(address,address,(uint256,uint256,uint256,uint256,address,string,string,string,(uint16,uint16,uint32)))                                                       | 447381          | 447381  | 447381  | 447381   | 347     |
+| initialize(address,address,address,address,(string,string,string,string))                                                                                               | 209422          | 239831  | 253758  | 253758   | 347     |
+| initialize(address,address,address,address,(string,string,string,string,uint256,uint256,uint256,uint256,uint256,(uint256,uint256,uint256,uint256,uint256),uint8,uint8)) | 466605          | 504803  | 510976  | 530876   | 348     |
+| initialize(address,address,address,address,(uint256,uint256,address,uint256),(uint256,address))                                                                         | 23735           | 280440  | 278411  | 298311   | 355     |
+| initialize(address,address,address,address,(uint256,uint256,uint256,uint8,uint256,uint256,uint256,(uint256,address)))                                                   | 341988          | 361830  | 361888  | 361888   | 347     |
+| initialize(address,address,uint256,address,uint256)                                                                                                                     | 127566          | 167252  | 167366  | 167366   | 350     |
+| initialize(address,int256,int256,int256)                                                                                                                                | 160364          | 160364  | 160364  | 160364   | 354     |
+| initialize(address,string)                                                                                                                                              | 95622           | 95622   | 95622   | 95622    | 348     |
+| initialize(address,uint256)                                                                                                                                             | 68835           | 68835   | 68835   | 68835    | 347     |
+| insert                                                                                                                                                                  | 7199            | 48750   | 48755   | 109660   | 271257  |
+| isCultureIndexLocked                                                                                                                                                    | 1216            | 1216    | 1216    | 1216     | 1       |
+| isDataURIEnabled                                                                                                                                                        | 865             | 4115    | 4115    | 7365     | 6       |
+| isDescriptorLocked                                                                                                                                                      | 1612            | 1612    | 1612    | 1612     | 1       |
+| isMinterLocked                                                                                                                                                          | 688             | 721     | 721     | 754      | 2       |
+| items                                                                                                                                                                   | 1124            | 1124    | 1124    | 1124     | 2       |
+| lockCultureIndex                                                                                                                                                        | 2726            | 4573    | 2726    | 8267     | 3       |
+| lockDescriptor                                                                                                                                                          | 1956            | 4741    | 4756    | 7497     | 4       |
+| lockMinter                                                                                                                                                              | 5152            | 9434    | 7893    | 13652    | 5       |
+| manifestos                                                                                                                                                              | 2071            | 10332   | 2071    | 103714   | 13      |
+| maxAnimationUrlLength                                                                                                                                                   | 1015            | 4765    | 5265    | 7515     | 4       |
+| maxDescriptionLength                                                                                                                                                    | 795             | 3628    | 2795    | 7295     | 3       |
+| maxHeapifyTest                                                                                                                                                          | 3241            | 13369   | 13369   | 23498    | 4       |
+| maxImageLength                                                                                                                                                          | 1059            | 3892    | 3059    | 7559     | 3       |
+| maxNameLength                                                                                                                                                           | 817             | 3650    | 2817    | 7317     | 3       |
+| maxTextLength                                                                                                                                                           | 773             | 3606    | 2773    | 7273     | 3       |
+| minBidIncrementPercentage                                                                                                                                               | 1226            | 2226    | 2226    | 3226     | 2       |
+| minCreatorRateBps                                                                                                                                                       | 846             | 3203    | 2846    | 7346     | 7       |
+| minVotingPowerToCreate                                                                                                                                                  | 1719            | 4969    | 4969    | 8219     | 2       |
+| minVotingPowerToVote                                                                                                                                                    | 1587            | 4837    | 4837    | 8087     | 2       |
+| mint()                                                                                                                                                                  | 2742            | 223589  | 232343  | 297557   | 881     |
+| mint(address,uint256)                                                                                                                                                   | 3970            | 47596   | 57130   | 155790   | 185666  |
+| minter                                                                                                                                                                  | 622             | 754     | 644     | 7144     | 973     |
+| name                                                                                                                                                                    | 1280            | 3211    | 3280    | 7816     | 14      |
+| nonces                                                                                                                                                                  | 1345            | 2981    | 3345    | 3345     | 11      |
+| owner                                                                                                                                                                   | 808             | 5323    | 7650    | 7819     | 64      |
+| ownerOf                                                                                                                                                                 | 1335            | 1335    | 1335    | 1335     | 10      |
+| pause                                                                                                                                                                   | 7670            | 7670    | 7670    | 7670     | 1       |
+| paused                                                                                                                                                                  | 902             | 1302    | 902     | 2902     | 5       |
+| pieceCount                                                                                                                                                              | 861             | 4111    | 4111    | 7361     | 2       |
+| pieces                                                                                                                                                                  | 6040            | 6040    | 6040    | 6040     | 4       |
+| points                                                                                                                                                                  | 7110            | 7110    | 7110    | 7110     | 1       |
+| pointsVoteWeight                                                                                                                                                        | 7249            | 7249    | 7249    | 7249     | 1       |
+| purpose                                                                                                                                                                 | 12922           | 12922   | 12922   | 12922    | 1       |
+| quorumVotes                                                                                                                                                             | 5269            | 5269    | 5269    | 5269     | 1       |
+| quorumVotesBPS                                                                                                                                                          | 1235            | 3377    | 1235    | 7735     | 7       |
+| quorumVotesForPiece                                                                                                                                                     | 19463           | 21647   | 20040   | 28889    | 5       |
+| reservePrice                                                                                                                                                            | 1352            | 5215    | 3352    | 7852     | 11      |
+| setBaseURI                                                                                                                                                              | 7489            | 23871   | 28249   | 31499    | 4       |
+| setContractURIHash                                                                                                                                                      | 2059            | 9588    | 11213   | 13868    | 4       |
+| setCreatorRateBps                                                                                                                                                       | 1762            | 5391    | 5733    | 7965     | 5       |
+| setCultureIndex                                                                                                                                                         | 1162            | 8647    | 7545    | 18935    | 5       |
+| setDescriptor                                                                                                                                                           | 3887            | 10336   | 6551    | 20570    | 6       |
+| setEntropyRateBps                                                                                                                                                       | 1014            | 5791    | 7018    | 7503     | 9       |
+| setGrantsAddress                                                                                                                                                        | 1176            | 10407   | 10801   | 18851    | 4       |
+| setGrantsRateBps                                                                                                                                                        | 2835            | 9761    | 12435   | 14527    | 9       |
+| setMinBidIncrementPercentage                                                                                                                                            | 6802            | 6802    | 6802    | 6802     | 1       |
+| setMinCreatorRateBps                                                                                                                                                    | 872             | 2905    | 2890    | 4971     | 4       |
+| setMinter                                                                                                                                                               | 1944            | 10879   | 7780    | 21802    | 12      |
+| setReservePrice                                                                                                                                                         | 5289            | 7789    | 7389    | 11089    | 4       |
+| setTimeBuffer                                                                                                                                                           | 7037            | 7037    | 7037    | 7037     | 1       |
+| settleAuction                                                                                                                                                           | 1224            | 1224    | 1224    | 1224     | 1       |
+| settleCurrentAndCreateNewAuction                                                                                                                                        | 102620          | 1228075 | 1093717 | 9563084  | 33      |
+| size                                                                                                                                                                    | 842             | 866     | 842     | 7342     | 1063    |
+| startTime                                                                                                                                                               | 1022            | 1022    | 1022    | 1022     | 15      |
+| symbol                                                                                                                                                                  | 3829            | 6251    | 6251    | 8674     | 2       |
+| template                                                                                                                                                                | 8110            | 8110    | 8110    | 8110     | 1       |
+| timeBuffer                                                                                                                                                              | 1396            | 2396    | 2396    | 3396     | 2       |
+| toggleDataURIEnabled                                                                                                                                                    | 6992            | 9686    | 7466    | 13492    | 5       |
+| token                                                                                                                                                                   | 3312            | 5562    | 5562    | 7812     | 2       |
+| tokenURI(uint256)                                                                                                                                                       | 49995           | 55495   | 55495   | 60995    | 2       |
+| tokenURI(uint256,(string,string,uint8,string,string,string))                                                                                                            | 4771            | 39829   | 38052   | 83963    | 10      |
+| tokenVoteWeight                                                                                                                                                         | 1741            | 1849    | 1741    | 3741     | 32      |
+| topVotedPieceId                                                                                                                                                         | 4098            | 4098    | 4098    | 4098     | 7       |
+| topVotedPieceMeetsQuorum                                                                                                                                                | 17882           | 32255   | 28331   | 42606    | 138     |
+| totalSupply                                                                                                                                                             | 648             | 1689    | 648     | 7214     | 187     |
+| totalVoteWeights                                                                                                                                                        | 688             | 910     | 688     | 2688     | 18      |
+| transfer                                                                                                                                                                | 1198            | 1198    | 1198    | 1198     | 2       |
+| transferFrom                                                                                                                                                            | 57932           | 76751   | 80262   | 127718   | 696     |
+| transferOwnership                                                                                                                                                       | 3370            | 5221    | 3370    | 31717    | 60      |
+| unpause                                                                                                                                                                 | 7274            | 338706  | 372714  | 398355   | 35      |
+| updateManifesto                                                                                                                                                         | 2011            | 1257389 | 69561   | 8511717  | 7       |
+| updateValue                                                                                                                                                             | 829             | 56677   | 68697   | 270093   | 186916  |
+| upgradeTo                                                                                                                                                               | 5434            | 5434    | 5434    | 5434     | 342     |
+| vote                                                                                                                                                                    | 3937            | 141141  | 156346  | 364003   | 186816  |
+| voteForMany                                                                                                                                                             | 5111            | 1755983 | 15888   | 10274274 | 6       |
+| voteForManyWithSig                                                                                                                                                      | 6592            | 58181   | 36438   | 146405   | 12      |
+| votingPower                                                                                                                                                             | 1143            | 1827    | 1143    | 7643     | 19      |
+| vrgda                                                                                                                                                                   | 820             | 1451    | 820     | 4820     | 19      |
+| withdraw                                                                                                                                                                | 31811           | 178871  | 37283   | 467519   | 3       |
+| xToY                                                                                                                                                                    | 7892            | 10392   | 7892    | 20392    | 5       |
+| yToX                                                                                                                                                                    | 3719            | 8318    | 5209    | 19709    | 177     |
+
+
+| src/AuctionHouse.sol:AuctionHouse contract |                 |         |         |         |         |
+|--------------------------------------------|-----------------|---------|---------|---------|---------|
+| Deployment Cost                            | Deployment Size |         |         |         |         |
+| 2810318                                    | 14704           |         |         |         |         |
+| Function Name                              | min             | avg     | median  | max     | # calls |
+| WETH                                       | 2918            | 2918    | 2918    | 2918    | 1       |
+| auction                                    | 1408            | 2741    | 1408    | 13408   | 9       |
+| auctions                                   | 994             | 4327    | 3994    | 8994    | 6       |
+| computeTotalReward                         | 752             | 752     | 752     | 752     | 19      |
+| contractVersion                            | 1131            | 1131    | 1131    | 1131    | 1       |
+| createBid                                  | 7050            | 52675   | 54690   | 56690   | 30      |
+| creatorRateBps                             | 262             | 687     | 262     | 2262    | 47      |
+| duration                                   | 284             | 348     | 284     | 2284    | 31      |
+| entropyRateBps                             | 1183            | 1441    | 1183    | 3183    | 31      |
+| getPastAuction                             | 1642            | 1642    | 1642    | 1642    | 1       |
+| grantsAddress                              | 654             | 654     | 654     | 654     | 1       |
+| grantsRateBps                              | 1010            | 1431    | 1010    | 3010    | 19      |
+| initialize                                 | 341621          | 361463  | 361521  | 361521  | 347     |
+| manifestos                                 | 1764            | 9826    | 1764    | 100856  | 13      |
+| minBidIncrementPercentage                  | 928             | 1928    | 1928    | 2928    | 2       |
+| minCreatorRateBps                          | 548             | 2262    | 2548    | 2548    | 7       |
+| owner                                      | 852             | 2518    | 2852    | 2852    | 48      |
+| pause                                      | 2868            | 2868    | 2868    | 2868    | 1       |
+| paused                                     | 604             | 1004    | 604     | 2604    | 5       |
+| reservePrice                               | 1054            | 2872    | 3054    | 3054    | 11      |
+| setCreatorRateBps                          | 1460            | 4190    | 5435    | 5460    | 5       |
+| setEntropyRateBps                          | 712             | 4491    | 6720    | 6720    | 9       |
+| setGrantsRateBps                           | 4115            | 10826   | 12229   | 14229   | 5       |
+| setMinBidIncrementPercentage               | 6504            | 6504    | 6504    | 6504    | 1       |
+| setMinCreatorRateBps                       | 570             | 2604    | 2586    | 4673    | 4       |
+| setReservePrice                            | 4991            | 6366    | 6691    | 7091    | 4       |
+| setTimeBuffer                              | 6739            | 6739    | 6739    | 6739    | 1       |
+| settleAuction                              | 925             | 925     | 925     | 925     | 1       |
+| settleCurrentAndCreateNewAuction           | 102321          | 1227780 | 1093422 | 9562789 | 33      |
+| timeBuffer                                 | 1098            | 2098    | 2098    | 3098    | 2       |
+| transferOwnership                          | 3072            | 3224    | 3072    | 5872    | 55      |
+| unpause                                    | 2472            | 338153  | 372419  | 398060  | 35      |
+| updateManifesto                            | 1694            | 1256338 | 69242   | 8508857 | 7       |
+
+
+| src/Descriptor.sol:Descriptor contract |                 |        |        |        |         |
+|----------------------------------------|-----------------|--------|--------|--------|---------|
+| Deployment Cost                        | Deployment Size |        |        |        |         |
+| 1667348                                | 8676            |        |        |        |         |
+| Function Name                          | min             | avg    | median | max    | # calls |
+| acceptOwnership                        | 5311            | 5311   | 5311   | 5311   | 1       |
+| baseURI                                | 1082            | 2046   | 2046   | 3011   | 2       |
+| contractVersion                        | 789             | 789    | 789    | 789    | 1       |
+| dataURI                                | 36488           | 233017 | 230232 | 432332 | 3       |
+| genericDataURI                         | 36482           | 36482  | 36482  | 36482  | 1       |
+| initialize                             | 95309           | 95309  | 95309  | 95309  | 348     |
+| isDataURIEnabled                       | 567             | 1567   | 1567   | 2567   | 6       |
+| owner                                  | 510             | 1510   | 1510   | 2510   | 2       |
+| setBaseURI                             | 2675            | 20187  | 25692  | 26692  | 4       |
+| toggleDataURIEnabled                   | 2664            | 6690   | 6697   | 8697   | 5       |
+| tokenURI                               | 4377            | 36716  | 33143  | 79027  | 10      |
+| transferOwnership                      | 2793            | 14662  | 14662  | 26532  | 2       |
+
+
+| src/RevolutionPoints.sol:RevolutionPoints contract |                 |        |        |        |         |
+|----------------------------------------------------|-----------------|--------|--------|--------|---------|
+| Deployment Cost                                    | Deployment Size |        |        |        |         |
+| 2936834                                            | 15023           |        |        |        |         |
+| Function Name                                      | min             | avg    | median | max    | # calls |
+| acceptOwnership                                    | 2739            | 4139   | 4139   | 5539   | 2       |
+| allowance                                          | 3265            | 3265   | 3265   | 3265   | 1       |
+| approve                                            | 321             | 321    | 321    | 321    | 1       |
+| balanceOf                                          | 802             | 1478   | 802    | 2802   | 68      |
+| contractVersion                                    | 1138            | 1138   | 1138   | 1138   | 1       |
+| decimals                                           | 313             | 313    | 313    | 313    | 1       |
+| delegate                                           | 74037           | 74037  | 74037  | 74037  | 1       |
+| getPastTotalSupply                                 | 1112            | 1657   | 1644   | 5336   | 965     |
+| getPastVotes                                       | 959             | 4510   | 5317   | 5649   | 186920  |
+| getVotes                                           | 1093            | 1136   | 1093   | 3093   | 271236  |
+| initialize                                         | 2755            | 192379 | 192917 | 192917 | 354     |
+| isMinterLocked                                     | 390             | 390    | 390    | 390    | 1       |
+| lockMinter                                         | 6527            | 6527   | 6527   | 6527   | 1       |
+| mint                                               | 3665            | 47293  | 56829  | 150989 | 185666  |
+| minter                                             | 324             | 1181   | 324    | 2324   | 7       |
+| name                                               | 2975            | 2975   | 2975   | 2975   | 1       |
+| owner                                              | 786             | 786    | 786    | 786    | 2       |
+| setMinter                                          | 2876            | 8552   | 8429   | 14476  | 4       |
+| symbol                                             | 3525            | 3525   | 3525   | 3525   | 1       |
+| totalSupply                                        | 350             | 904    | 350    | 2350   | 173     |
+| transfer                                           | 893             | 893    | 893    | 893    | 2       |
+| transferOwnership                                  | 22919           | 24919  | 24919  | 26919  | 2       |
+
+
+| src/RevolutionPointsEmitter.sol:RevolutionPointsEmitter contract |                 |         |        |          |         |
+|------------------------------------------------------------------|-----------------|---------|--------|----------|---------|
+| Deployment Cost                                                  | Deployment Size |         |        |          |         |
+| 2215445                                                          | 11747           |         |        |          |         |
+| Function Name                                                    | min             | avg     | median | max      | # calls |
+| balanceOf                                                        | 2307            | 2307    | 2307   | 2307     | 9       |
+| buyToken                                                         | 7924            | 1229059 | 396652 | 53602276 | 63      |
+| buyTokenQuote                                                    | 10309           | 16309   | 10309  | 40309    | 5       |
+| computePurchaseRewards                                           | 1649            | 1649    | 1649   | 1649     | 2       |
+| computeTotalReward                                               | 782             | 782     | 782    | 782      | 24      |
+| contractVersion                                                  | 1063            | 1063    | 1063   | 1063     | 1       |
+| founderAddress                                                   | 456             | 722     | 456    | 2456     | 15      |
+| founderEntropyRateBps                                            | 460             | 1360    | 460    | 2460     | 20      |
+| founderRateBps                                                   | 922             | 1611    | 922    | 2922     | 29      |
+| founderRewardsExpirationDate                                     | 856             | 1141    | 856    | 2856     | 7       |
+| getAccountPurchaseHistory                                        | 1170            | 1188    | 1170   | 5170     | 427     |
+| getTokenQuoteForEther                                            | 6708            | 20554   | 8718   | 40198    | 27      |
+| getTokenQuoteForPayment                                          | 7624            | 24451   | 17028  | 57028    | 10      |
+| grantsAddress                                                    | 632             | 1203    | 632    | 2632     | 7       |
+| grantsRateBps                                                    | 944             | 1564    | 944    | 2944     | 29      |
+| initialize                                                       | 23382           | 280091  | 278062 | 297962   | 355     |
+| owner                                                            | 830             | 1193    | 830    | 2830     | 11      |
+| setGrantsAddress                                                 | 871             | 7857    | 8253   | 14053    | 4       |
+| setGrantsRateBps                                                 | 2537            | 7758    | 8130   | 12237    | 4       |
+| startTime                                                        | 724             | 724     | 724    | 724      | 15      |
+| totalSupply                                                      | 1348            | 1348    | 1348   | 1348     | 2       |
+| vrgda                                                            | 522             | 837     | 522    | 2522     | 19      |
+
+
+| src/RevolutionToken.sol:RevolutionToken contract |                 |        |        |         |         |
+|--------------------------------------------------|-----------------|--------|--------|---------|---------|
+| Deployment Cost                                  | Deployment Size |        |        |         |         |
+| 4504446                                          | 22844           |        |        |         |         |
+| Function Name                                    | min             | avg    | median | max     | # calls |
+| approve                                          | 22824           | 22824  | 22824  | 22824   | 1       |
+| artPieces                                        | 636             | 636    | 636    | 636     | 3       |
+| balanceOf                                        | 1152            | 1152   | 1152   | 1152    | 4       |
+| burn                                             | 713             | 23501  | 18640  | 63300   | 13      |
+| contractURI                                      | 2157            | 2847   | 2157   | 4228    | 3       |
+| contractVersion                                  | 1483            | 1483   | 1483   | 1483    | 1       |
+| cultureIndex                                     | 984             | 2317   | 2984   | 2984    | 3       |
+| delegate                                         | 3473            | 12137  | 7163   | 30750   | 4       |
+| descriptor                                       | 522             | 1522   | 1522   | 2522    | 2       |
+| getArtPieceById                                  | 16090           | 54038  | 16090  | 1035911 | 82      |
+| getPastTotalSupply                               | 1442            | 3374   | 3987   | 4316    | 965     |
+| getPastVotes                                     | 1044            | 1064   | 1044   | 4188    | 187882  |
+| getVotes                                         | 1420            | 1421   | 1420   | 3420    | 271235  |
+| initialize                                       | 209031          | 239436 | 253361 | 253361  | 347     |
+| isCultureIndexLocked                             | 918             | 918    | 918    | 918     | 1       |
+| isDescriptorLocked                               | 1314            | 1314   | 1314   | 1314    | 1       |
+| isMinterLocked                                   | 456             | 456    | 456    | 456     | 1       |
+| lockCultureIndex                                 | 2431            | 2775   | 2431   | 3465    | 3       |
+| lockDescriptor                                   | 1661            | 3319   | 3578   | 4461    | 4       |
+| lockMinter                                       | 3091            | 6415   | 6857   | 8857    | 4       |
+| mint                                             | 2443            | 223276 | 232045 | 297259  | 881     |
+| minter                                           | 346             | 437    | 346    | 2346    | 966     |
+| name                                             | 3012            | 3012   | 3012   | 3012    | 1       |
+| ownerOf                                          | 1034            | 1034   | 1034   | 1034    | 10      |
+| setContractURIHash                               | 1745            | 5903   | 6403   | 9061    | 4       |
+| setCultureIndex                                  | 860             | 6546   | 2740   | 14137   | 5       |
+| setDescriptor                                    | 2410            | 7784   | 4585   | 15772   | 6       |
+| setMinter                                        | 1639            | 9341   | 6814   | 17004   | 8       |
+| symbol                                           | 3870            | 3870   | 3870   | 3870    | 1       |
+| tokenURI                                         | 49658           | 55158  | 55158  | 60658   | 2       |
+| topVotedPieceMeetsQuorum                         | 23844           | 33500  | 28033  | 42308   | 67      |
+| totalSupply                                      | 416             | 916    | 416    | 2416    | 12      |
+| transferFrom                                     | 57625           | 76444  | 79955  | 127411  | 696     |
+
+
+| src/RevolutionVotingPower.sol:RevolutionVotingPower contract |                 |        |        |        |         |
+|--------------------------------------------------------------|-----------------|--------|--------|--------|---------|
+| Deployment Cost                                              | Deployment Size |        |        |        |         |
+| 1447311                                                      | 7577            |        |        |        |         |
+| Function Name                                                | min             | avg    | median | max    | # calls |
+| calculateVotes                                               | 986             | 986    | 986    | 986    | 1       |
+| calculateVotesWithWeights                                    | 994             | 994    | 994    | 994    | 188845  |
+| contractVersion                                              | 963             | 963    | 963    | 963    | 1       |
+| getPastPointsSupply                                          | 2348            | 2893   | 2880   | 6572   | 964     |
+| getPastPointsVotes                                           | 2666            | 6217   | 7024   | 7356   | 186919  |
+| getPastTokenSupply                                           | 3096            | 5030   | 5641   | 5970   | 964     |
+| getPastTokenVotes                                            | 1205            | 2573   | 2553   | 5697   | 187882  |
+| getPointsSupply                                              | 1452            | 6952   | 6952   | 12452  | 2       |
+| getPointsVotes                                               | 4398            | 4398   | 4398   | 4398   | 1       |
+| getTokenMinter                                               | 1760            | 1849   | 1760   | 3760   | 963     |
+| getTokenSupply                                               | 1914            | 7414   | 7414   | 12914  | 2       |
+| getTokenVotes                                                | 2945            | 2945   | 2945   | 2945   | 1       |
+| getTotalVotesSupplyWithWeights                               | 3428            | 3428   | 3428   | 3428   | 1       |
+| getVotes                                                     | 5368            | 5424   | 5368   | 31368  | 271219  |
+| getVotesWithWeights                                          | 1600            | 5282   | 5097   | 6906   | 15      |
+| initialize                                                   | 127247          | 166933 | 167047 | 167047 | 350     |
+| points                                                       | 2312            | 2312   | 2312   | 2312   | 1       |
+| pointsVoteWeight                                             | 2451            | 2451   | 2451   | 2451   | 1       |
+| token                                                        | 3014            | 3014   | 3014   | 3014   | 2       |
+| tokenVoteWeight                                              | 2913            | 2913   | 2913   | 2913   | 1       |
+
+
+| src/builder/RevolutionBuilder.sol:RevolutionBuilder contract |                 |         |         |         |         |
+|--------------------------------------------------------------|-----------------|---------|---------|---------|---------|
+| Deployment Cost                                              | Deployment Size |         |         |         |         |
+| 3032235                                                      | 16615           |         |         |         |         |
+| Function Name                                                | min             | avg     | median  | max     | # calls |
+| deploy                                                       | 4232410         | 4259797 | 4276787 | 4326687 | 347     |
+| deployCultureIndex                                           | 786346          | 786346  | 786346  | 786346  | 1       |
+| getLatestVersions                                            | 53346           | 53346   | 53346   | 53346   | 1       |
+| initialize                                                   | 50680           | 50680   | 50680   | 50680   | 342     |
+| proxiableUUID                                                | 356             | 356     | 356     | 356     | 342     |
+| upgradeTo                                                    | 5136            | 5136    | 5136    | 5136    | 342     |
+
+
+| src/culture-index/CultureIndex.sol:CultureIndex contract |                 |         |        |          |         |
+|----------------------------------------------------------|-----------------|---------|--------|----------|---------|
+| Deployment Cost                                          | Deployment Size |         |        |          |         |
+| 4178034                                                  | 21238           |         |        |          |         |
+| Function Name                                            | min             | avg     | median | max      | # calls |
+| MAX_NUM_CREATORS                                         | 944             | 944     | 944    | 944      | 24      |
+| MAX_QUORUM_VOTES_BPS                                     | 1076            | 1076    | 1076   | 1076     | 4       |
+| VOTE_TYPEHASH                                            | 878             | 878     | 878    | 878      | 11      |
+| _setMinVotingPowerToCreate                               | 2933            | 17849   | 24307  | 26307    | 3       |
+| _setMinVotingPowerToVote                                 | 2449            | 17365   | 23823  | 25823    | 3       |
+| _setQuorumVotesBPS                                       | 2779            | 7783    | 9075   | 9075     | 15      |
+| acceptOwnership                                          | 5711            | 5711    | 5711   | 5711     | 1       |
+| checklist                                                | 3900            | 3900    | 3900   | 3900     | 1       |
+| contractVersion                                          | 1329            | 1329    | 1329   | 1329     | 1       |
+| createPiece                                              | 8439            | 300350  | 299895 | 48172593 | 271218  |
+| description                                              | 1416            | 1416    | 1416   | 1416     | 1       |
+| dropTopVotedPiece                                        | 5760            | 38174   | 37452  | 96461    | 893     |
+| getAccountVotingPowerForPiece                            | 10456           | 10580   | 10456  | 10767    | 5       |
+| getPieceById                                             | 7981            | 27872   | 7981   | 620804   | 94      |
+| getTopVotedPiece                                         | 10742           | 10742   | 10742  | 10742    | 5       |
+| getVote                                                  | 1996            | 2335    | 1996   | 5996     | 16      |
+| initialize                                               | 466141          | 504334  | 510506 | 530406   | 348     |
+| maxAnimationUrlLength                                    | 717             | 2217    | 2717   | 2717     | 4       |
+| maxDescriptionLength                                     | 497             | 1830    | 2497   | 2497     | 3       |
+| maxImageLength                                           | 761             | 2094    | 2761   | 2761     | 3       |
+| maxNameLength                                            | 519             | 1852    | 2519   | 2519     | 3       |
+| maxTextLength                                            | 475             | 1808    | 2475   | 2475     | 3       |
+| minVotingPowerToCreate                                   | 1421            | 2421    | 2421   | 3421     | 2       |
+| minVotingPowerToVote                                     | 1289            | 2289    | 2289   | 3289     | 2       |
+| name                                                     | 976             | 2142    | 2976   | 2976     | 12      |
+| nonces                                                   | 1044            | 2680    | 3044   | 3044     | 11      |
+| owner                                                    | 3021            | 3021    | 3021   | 3021     | 1       |
+| pieceCount                                               | 563             | 1563    | 1563   | 2563     | 2       |
+| pieces                                                   | 5637            | 5637    | 5637   | 5637     | 4       |
+| quorumVotes                                              | 4971            | 4971    | 4971   | 4971     | 1       |
+| quorumVotesBPS                                           | 937             | 1794    | 937    | 2937     | 7       |
+| quorumVotesForPiece                                      | 19162           | 21346   | 19739  | 28588    | 5       |
+| template                                                 | 3306            | 3306    | 3306   | 3306     | 1       |
+| tokenVoteWeight                                          | 1443            | 1507    | 1443   | 3443     | 31      |
+| topVotedPieceId                                          | 3800            | 3800    | 3800   | 3800     | 7       |
+| topVotedPieceMeetsQuorum                                 | 13084           | 30247   | 26273  | 38548    | 71      |
+| totalVoteWeights                                         | 387             | 609     | 387    | 2387     | 18      |
+| transferOwnership                                        | 25355           | 25355   | 25355  | 25355    | 1       |
+| vote                                                     | 3635            | 140843  | 156048 | 363705   | 186816  |
+| voteForMany                                              | 4800            | 1755569 | 15574  | 10273353 | 6       |
+| voteForManyWithSig                                       | 6251            | 57841   | 36097  | 146068   | 12      |
+| votingPower                                              | 845             | 1055    | 845    | 2845     | 19      |
+
+
+| src/culture-index/MaxHeap.sol:MaxHeap contract |                 |       |        |        |         |
+|------------------------------------------------|-----------------|-------|--------|--------|---------|
+| Deployment Cost                                | Deployment Size |       |        |        |         |
+| 1080717                                        | 5746            |       |        |        |         |
+| Function Name                                  | min             | avg   | median | max    | # calls |
+| contractVersion                                | 770             | 770   | 770    | 770    | 1       |
+| extractMax                                     | 541             | 3989  | 2445   | 62945  | 922     |
+| getMax                                         | 687             | 687   | 687    | 687    | 976     |
+| initialize                                     | 94922           | 94922 | 94922  | 94922  | 348     |
+| insert                                         | 2394            | 48443 | 48454  | 109359 | 271222  |
+| size                                           | 544             | 551   | 544    | 2544   | 1063    |
+| updateValue                                    | 524             | 56377 | 68396  | 269792 | 186912  |
+
+
+| src/governance/DAOExecutor.sol:DAOExecutor contract |                 |       |        |       |         |
+|-----------------------------------------------------|-----------------|-------|--------|-------|---------|
+| Deployment Cost                                     | Deployment Size |       |        |       |         |
+| 884829                                              | 4713            |       |        |       |         |
+| Function Name                                       | min             | avg   | median | max   | # calls |
+| contractVersion                                     | 708             | 708   | 708    | 708   | 1       |
+| initialize                                          | 68534           | 68534 | 68534  | 68534 | 347     |
+| receive                                             | 75              | 75    | 75     | 75    | 76      |
+
+
+| src/governance/RevolutionDAOLogicV1.sol:RevolutionDAOLogicV1 contract |                 |        |        |        |         |
+|-----------------------------------------------------------------------|-----------------|--------|--------|--------|---------|
+| Deployment Cost                                                       | Deployment Size |        |        |        |         |
+| 4862221                                                               | 24758           |        |        |        |         |
+| Function Name                                                         | min             | avg    | median | max    | # calls |
+| contractVersion                                                       | 1625            | 1625   | 1625   | 1625   | 1       |
+| flag                                                                  | 3898            | 3898   | 3898   | 3898   | 1       |
+| initialize                                                            | 446966          | 446966 | 446966 | 446966 | 347     |
+| purpose                                                               | 8112            | 8112   | 8112   | 8112   | 1       |
+
+
+| src/libs/VRGDAC.sol:VRGDAC contract |                 |        |        |        |         |
+|-------------------------------------|-----------------|--------|--------|--------|---------|
+| Deployment Cost                     | Deployment Size |        |        |        |         |
+| 1098137                             | 5833            |        |        |        |         |
+| Function Name                       | min             | avg    | median | max    | # calls |
+| contractVersion                     | 660             | 660    | 660    | 660    | 1       |
+| initialize                          | 160051          | 160051 | 160051 | 160051 | 354     |
+| xToY                                | 7582            | 9182   | 7582   | 15582  | 5       |
+| yToX                                | 3409            | 6991   | 4899   | 14899  | 177     |
+
+
+| test/auction/OutOfGas.t.sol:InfiniteLoop contract |                 |       |        |       |         |
+|---------------------------------------------------|-----------------|-------|--------|-------|---------|
+| Deployment Cost                                   | Deployment Size |       |        |       |         |
+| 13675                                             | 93              |       |        |       |         |
+| Function Name                                     | min             | avg   | median | max   | # calls |
+| receive                                           | 32300           | 32300 | 32300  | 32300 | 21      |
+
+
+| test/auction/Settling.t.sol:ContractThatRejectsEther contract |                 |     |        |     |         |
+|---------------------------------------------------------------|-----------------|-----|--------|-----|---------|
+| Deployment Cost                                               | Deployment Size |     |        |     |         |
+| 27087                                                         | 160             |     |        |     |         |
+| Function Name                                                 | min             | avg | median | max | # calls |
+| receive                                                       | 121             | 121 | 121    | 121 | 1       |
+
+
+| test/auction/Settling.t.sol:ContractWithoutReceiveOrFallback contract |                 |     |        |     |         |
+|-----------------------------------------------------------------------|-----------------|-----|--------|-----|---------|
+| Deployment Cost                                                       | Deployment Size |     |        |     |         |
+| 11669                                                                 | 83              |     |        |     |         |
+| Function Name                                                         | min             | avg | median | max | # calls |
+| fallback                                                              | 6               | 6   | 6      | 6   | 1       |
+
+
+| test/culture-index/CultureIndex.t.sol:CultureIndexVotingTest contract |                 |        |        |        |         |
+|-----------------------------------------------------------------------|-----------------|--------|--------|--------|---------|
+| Deployment Cost                                                       | Deployment Size |        |        |        |         |
+| 1080057                                                               | 5221            |        |        |        |         |
+| Function Name                                                         | min             | avg    | median | max    | # calls |
+| createDefaultArtPiece                                                 | 302056          | 304165 | 304156 | 356304 | 60015   |
+| voteForPiece                                                          | 65123           | 117860 | 109182 | 176977 | 76010   |
+
+
+| test/max-heap/MaxHeap.t.sol:MaxHeapTester contract |                 |       |        |       |         |
+|----------------------------------------------------|-----------------|-------|--------|-------|---------|
+| Deployment Cost                                    | Deployment Size |       |        |       |         |
+| 1102562                                            | 5862            |       |        |       |         |
+| Function Name                                      | min             | avg   | median | max   | # calls |
+| _set                                               | 24801           | 34751 | 34751  | 44701 | 4       |
+| extractMax                                         | 2467            | 2727  | 2467   | 3507  | 4       |
+| getMax                                             | 687             | 687   | 687    | 687   | 6       |
+| heap                                               | 333             | 333   | 333    | 333   | 2       |
+| initialize                                         | 94944           | 94944 | 94944  | 94944 | 31      |
+| insert                                             | 65493           | 74584 | 71593  | 89459 | 35      |
+| items                                              | 820             | 820   | 820    | 820   | 2       |
+| maxHeapifyTest                                     | 2943            | 13071 | 13071  | 23200 | 4       |
+| updateValue                                        | 1346            | 12998 | 12753  | 25142 | 4       |
+
+
+| test/mock/MockWETH.sol:MockWETH contract |                 |       |        |       |         |
+|------------------------------------------|-----------------|-------|--------|-------|---------|
+| Deployment Cost                          | Deployment Size |       |        |       |         |
+| 445082                                   | 2157            |       |        |       |         |
+| Function Name                            | min             | avg   | median | max   | # calls |
+| balanceOf                                | 557             | 2209  | 2557   | 2557  | 23      |
+| deposit                                  | 21999           | 22319 | 21999  | 23999 | 25      |
+| transfer                                 | 23106           | 24786 | 25106  | 25106 | 25      |
+
+
+| test/revolution-token/Security.t.sol:ReentrancyAttackContract contract |                 |      |        |      |         |
+|------------------------------------------------------------------------|-----------------|------|--------|------|---------|
+| Deployment Cost                                                        | Deployment Size |      |        |      |         |
+| 99471                                                                  | 561             |      |        |      |         |
+| Function Name                                                          | min             | avg  | median | max  | # calls |
+| attack                                                                 | 3196            | 3196 | 3196   | 3196 | 1       |
+
+
+| test/revolution-token/Security.t.sol:ReentrancyAttackContractGeneral contract |                 |      |        |      |         |
+|-------------------------------------------------------------------------------|-----------------|------|--------|------|---------|
+| Deployment Cost                                                               | Deployment Size |      |        |      |         |
+| 101071                                                                        | 569             |      |        |      |         |
+| Function Name                                                                 | min             | avg  | median | max  | # calls |
+| attackBurn                                                                    | 3176            | 3176 | 3176   | 3176 | 1       |
+
+
+| test/splits/RevolutionSplits.t.sol:ERC20Actual contract |                 |       |        |       |         |
+|---------------------------------------------------------|-----------------|-------|--------|-------|---------|
+| Deployment Cost                                         | Deployment Size |       |        |       |         |
+| 421967                                                  | 3025            |       |        |       |         |
+| Function Name                                           | min             | avg   | median | max   | # calls |
+| balanceOf                                               | 560             | 893   | 560    | 2560  | 6       |
+| mint                                                    | 46504           | 46504 | 46504  | 46504 | 1       |
+| transfer                                                | 22855           | 23855 | 23855  | 24855 | 2       |
+
+
+
+ 
+Ran 44 test suites: [32m333[0m tests passed, [31m0[0m failed, [33m0[0m skipped (333 total tests)
