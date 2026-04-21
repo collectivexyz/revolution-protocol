@@ -45,6 +45,9 @@ contract CultureIndex is
     /// @notice The maximum settable quorum votes basis points
     uint256 public constant MAX_QUORUM_VOTES_BPS = 6_000; // 6,000 basis points or 60%
 
+    /// @notice Maximum number of pieces that can be selected from the heap for buy-now minting.
+    uint256 public constant MAX_SELECTABLE_TOP_N = 10;
+
     ///                                                          ///
     ///                         CONSTRUCTOR                      ///
     ///                                                          ///
@@ -516,6 +519,126 @@ contract CultureIndex is
     }
 
     /**
+     * @notice Returns the highest-ranked piece IDs using a bounded frontier traversal over the max heap.
+     * @dev The heap backing array is not sorted; do not read heap[0..count) directly.
+     * @param count The maximum number of piece IDs to return.
+     */
+    function getTopPieceIds(uint256 count) public view returns (uint256[] memory pieceIds) {
+        if (count > MAX_SELECTABLE_TOP_N) revert INVALID_TOP_N();
+
+        uint256 heapSize = maxHeap.size();
+        uint256 n = count < heapSize ? count : heapSize;
+        pieceIds = new uint256[](n);
+
+        if (n == 0) return pieceIds;
+
+        // Candidate heap indices. For n results, a binary heap frontier never needs more than 2n + 1 slots.
+        uint256[] memory candidates = new uint256[](2 * n + 1);
+        uint256 candidateCount = 1;
+        candidates[0] = 0;
+
+        for (uint256 out; out < n; ++out) {
+            uint256 bestCandidateSlot;
+            uint256 bestHeapIndex = candidates[0];
+            uint256 bestPieceId = maxHeap.heap(bestHeapIndex);
+            uint256 bestValue = totalVoteWeights[bestPieceId];
+
+            for (uint256 i = 1; i < candidateCount; ++i) {
+                uint256 heapIndex = candidates[i];
+                uint256 candidatePieceId = maxHeap.heap(heapIndex);
+                uint256 candidateValue = totalVoteWeights[candidatePieceId];
+
+                if (_isBetterHeapCandidate(candidateValue, heapIndex, bestValue, bestHeapIndex)) {
+                    bestCandidateSlot = i;
+                    bestHeapIndex = heapIndex;
+                    bestPieceId = candidatePieceId;
+                    bestValue = candidateValue;
+                }
+            }
+
+            pieceIds[out] = bestPieceId;
+
+            candidates[bestCandidateSlot] = candidates[candidateCount - 1];
+            --candidateCount;
+
+            uint256 left = bestHeapIndex * 2 + 1;
+            uint256 right = left + 1;
+
+            if (left < heapSize) candidates[candidateCount++] = left;
+            if (right < heapSize) candidates[candidateCount++] = right;
+        }
+    }
+
+    /**
+     * @notice Returns whether a piece is ranked within the top-N selectable heap entries.
+     * @dev This performs rank-pruning instead of materializing the full top-N list. It never scans the full heap.
+     * @param pieceId The piece to test.
+     * @param topN The maximum selectable rank.
+     */
+    function isPieceInTopN(uint256 pieceId, uint256 topN) public view returns (bool) {
+        if (topN == 0 || topN > MAX_SELECTABLE_TOP_N) revert INVALID_TOP_N();
+        if (pieceId >= _currentPieceId) revert INVALID_PIECE_ID();
+        if (pieces[pieceId].isDropped) return false;
+
+        uint256 heapSize = maxHeap.size();
+        if (heapSize == 0) return false;
+
+        (, uint256 selectedIndex) = maxHeap.items(pieceId);
+
+        // itemId 0 is valid, so the default heapIndex of 0 is not sufficient to prove membership.
+        if (selectedIndex >= heapSize || maxHeap.heap(selectedIndex) != pieceId) return false;
+
+        uint256 selectedValue = totalVoteWeights[pieceId];
+
+        uint256[] memory stack = new uint256[](2 * topN + 1);
+        uint256 stackLen = 1;
+        stack[0] = 0;
+
+        uint256 betterCount;
+
+        while (stackLen != 0) {
+            uint256 heapIndex = stack[--stackLen];
+            uint256 candidatePieceId = maxHeap.heap(heapIndex);
+            uint256 candidateValue = totalVoteWeights[candidatePieceId];
+
+            if (!_isBetterHeapCandidate(candidateValue, heapIndex, selectedValue, selectedIndex)) continue;
+
+            ++betterCount;
+            if (betterCount >= topN) return false;
+
+            uint256 left = heapIndex * 2 + 1;
+            uint256 right = left + 1;
+
+            if (left < heapSize) stack[stackLen++] = left;
+            if (right < heapSize) stack[stackLen++] = right;
+        }
+
+        return true;
+    }
+
+    function _isBetterHeapCandidate(
+        uint256 candidateValue,
+        uint256 candidateHeapIndex,
+        uint256 referenceValue,
+        uint256 referenceHeapIndex
+    ) internal pure returns (bool) {
+        return
+            candidateValue > referenceValue ||
+            (candidateValue == referenceValue && candidateHeapIndex < referenceHeapIndex);
+    }
+
+    /**
+     * @notice Sets the legacy token holder whose votes are excluded from quorum for pre-migration pieces.
+     * @dev Used when migrating an unlocked live community from AuctionHouse to a new sale/minter.
+     */
+    function setLegacyQuorumExcludedTokenHolder(address holder, uint256 cutoffBlock) external onlyOwner {
+        legacyQuorumExcludedTokenHolder = holder;
+        legacyQuorumCutoffBlock = cutoffBlock;
+
+        emit LegacyQuorumExcludedTokenHolderSet(holder, cutoffBlock);
+    }
+
+    /**
      * @notice Admin function for setting the quorum votes basis points
      * @dev newQuorumVotesBPS must be greater than the hardcoded min
      * @param newQuorumVotesBPS new art piece drop threshold
@@ -574,12 +697,22 @@ contract CultureIndex is
             })
         );
 
-        /// @notice We want to subtract the balance of tokens held by the auction since no one can vote with those tokens
+        /// @notice We want to subtract the balance of tokens held by the token minter since no one can vote with those tokens.
+        /// @dev For pieces created before a live migration cutoff, use the legacy holder to avoid quorum drift.
+        address quorumExcludedTokenHolder = votingPower.getTokenMinter();
+        if (
+            legacyQuorumExcludedTokenHolder != address(0) &&
+            legacyQuorumCutoffBlock != 0 &&
+            creationBlock < legacyQuorumCutoffBlock
+        ) {
+            quorumExcludedTokenHolder = legacyQuorumExcludedTokenHolder;
+        }
+
         uint256 tokenMinterVotes = votingPower.calculateVotesWithWeights(
             //ignore points for token minter
             IRevolutionVotingPower.BalanceAndWeight({ balance: 0, voteWeight: 0 }),
             IRevolutionVotingPower.BalanceAndWeight({
-                balance: votingPower.getPastTokenVotes(votingPower.getTokenMinter(), creationBlock - 1),
+                balance: votingPower.getPastTokenVotes(quorumExcludedTokenHolder, creationBlock - 1),
                 voteWeight: tokenVoteWeight
             })
         );
@@ -601,6 +734,41 @@ contract CultureIndex is
 
         uint256 pieceId = topVotedPieceId();
         return totalVoteWeights[pieceId] >= quorumVotesForPiece(pieceId);
+    }
+
+    /**
+     * @notice Pulls and drops a selected piece if it is currently within the top-N pieces.
+     * @param pieceId The selected piece ID.
+     * @param topN The maximum selectable rank.
+     * @return The selected dropped piece.
+     */
+    function dropPieceInTopN(uint256 pieceId, uint256 topN) public nonReentrant returns (ArtPieceCondensed memory) {
+        if (msg.sender != dropperAdmin) revert NOT_DROPPER_ADMIN();
+        if (topN == 0 || topN > MAX_SELECTABLE_TOP_N) revert INVALID_TOP_N();
+        if (pieceId >= _currentPieceId) revert INVALID_PIECE_ID();
+        if (pieces[pieceId].isDropped) revert ALREADY_DROPPED();
+        if (!isPieceInTopN(pieceId, topN)) revert PIECE_NOT_IN_TOP_N();
+        if (totalVoteWeights[pieceId] < quorumVotesForPiece(pieceId)) revert DOES_NOT_MEET_QUORUM();
+
+        // Promote the selected piece to the root and remove it using the existing heap API.
+        // This avoids a MaxHeap upgrade while keeping removal logarithmic in heap size.
+        maxHeap.updateValue(pieceId, type(uint256).max);
+
+        //slither-disable-next-line unused-return
+        (uint256 removedPieceId, ) = maxHeap.extractMax();
+        if (removedPieceId != pieceId) revert HEAP_REMOVE_FAILED();
+
+        //set the piece as dropped
+        pieces[pieceId].isDropped = true;
+
+        emit PieceDropped(pieceId, msg.sender);
+
+        return
+            ICultureIndex.ArtPieceCondensed({
+                pieceId: pieceId,
+                creators: pieces[pieceId].creators,
+                sponsor: pieces[pieceId].sponsor
+            });
     }
 
     /**

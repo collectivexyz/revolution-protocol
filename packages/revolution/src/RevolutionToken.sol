@@ -182,6 +182,24 @@ contract RevolutionToken is
     }
 
     /**
+     * @notice Mint a token directly to a recipient from a selected top-N CultureIndex piece.
+     * @param recipient The address that will receive the minted token.
+     * @param pieceId The selected CultureIndex piece ID.
+     * @param topN The maximum selectable rank for the piece.
+     */
+    function mintFromPiece(
+        address recipient,
+        uint256 pieceId,
+        uint256 topN
+    ) public override onlyMinter nonReentrant returns (uint256) {
+        if (recipient == address(0)) revert ADDRESS_ZERO();
+
+        ICultureIndex.ArtPieceCondensed memory artPiece = cultureIndex.dropPieceInTopN(pieceId, topN);
+
+        return _mintWithArtPiece(recipient, artPiece);
+    }
+
+    /**
      * @notice Burn a token.
      */
     function burn(uint256 tokenId) public override onlyMinter nonReentrant {
@@ -294,18 +312,25 @@ contract RevolutionToken is
     function _mintTo(address to) internal returns (uint256) {
         // Use try/catch to handle potential failure
         try cultureIndex.dropTopVotedPiece() returns (ICultureIndex.ArtPieceCondensed memory artPiece) {
-            uint256 tokenId = _currentTokenId++;
-
-            artPieces[tokenId] = artPiece.pieceId;
-
-            _mint(to, tokenId);
-
-            emit RevolutionTokenCreated(tokenId, artPiece);
-
-            return tokenId;
+            return _mintWithArtPiece(to, artPiece);
         } catch {
             revert("dropTopVotedPiece failed");
         }
+    }
+
+    /**
+     * @notice Mint a token with `tokenId` to the provided `to` address using an already dropped art piece.
+     */
+    function _mintWithArtPiece(address to, ICultureIndex.ArtPieceCondensed memory artPiece) internal returns (uint256) {
+        uint256 tokenId = _currentTokenId++;
+
+        artPieces[tokenId] = artPiece.pieceId;
+
+        _mint(to, tokenId);
+
+        emit RevolutionTokenCreated(tokenId, artPiece);
+
+        return tokenId;
     }
 
     ///                                                          ///

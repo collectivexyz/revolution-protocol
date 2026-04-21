@@ -78,6 +78,8 @@ interface IRevolutionToken is IERC721Enumerable, IVotes {
 
     function mint() external returns (uint256);
 
+    function mintFromPiece(address recipient, uint256 pieceId, uint256 topN) external returns (uint256);
+
     function burn(uint256 tokenId) external;
 
     function dataURI(uint256 tokenId) external returns (string memory);
@@ -87,6 +89,8 @@ interface IRevolutionToken is IERC721Enumerable, IVotes {
     function lockMinter() external;
 
     function minter() external view returns (address);
+
+    function cultureIndex() external view returns (ICultureIndex);
 
     function setDescriptor(IDescriptorMinimal descriptor) external;
 
