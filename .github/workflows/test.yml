@@ -40,5 +40,5 @@ jobs:
 
       - name: Run Geiger Check
         run: |
-          forge geiger --check ${{ inputs.package_folder }}/src*
+          cd ${{ inputs.package_folder }} && forge lint --only-lint unsafe-cheatcode --ignored-error-codes 6321 src*
         id: geiger
