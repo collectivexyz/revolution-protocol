@@ -39,15 +39,19 @@ new_filename=.storage-layout.temp
 
 if [[ $func == "check" ]]; then
   generate $new_filename
-  if ! cmp -s .storage-layout $new_filename ; then
+  normalized_filename=.storage-layout.normalized
+  normalized_new_filename=.storage-layout.temp.normalized
+  perl -0pe 's/\n+\z/\n/' "$filename" > "$normalized_filename"
+  perl -0pe 's/\n+\z/\n/' "$new_filename" > "$normalized_new_filename"
+  if ! cmp -s "$normalized_filename" "$normalized_new_filename" ; then
     echo "storage-layout test: fails ❌"
     echo "The following lines are different:"
-    diff -a --suppress-common-lines "$filename" "$new_filename"
-    rm $new_filename
+    diff -a --suppress-common-lines "$normalized_filename" "$normalized_new_filename"
+    rm "$new_filename" "$normalized_filename" "$normalized_new_filename"
     exit 1
   else
     echo "storage-layout test: passes ✅"
-    rm $new_filename
+    rm "$new_filename" "$normalized_filename" "$normalized_new_filename"
     exit 0
   fi
 elif [[ $func == "generate" ]]; then

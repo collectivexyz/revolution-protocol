@@ -61,6 +61,7 @@ jobs:
       - name: Filter files to ignore
         run: |
           cd ./${{ env.package_folder }} && lcov --rc lcov_branch_coverage=1 \
+          --ignore-errors unused --ignore-errors inconsistent \
           --remove lcov.info \
           --output-file lcov.info "*node_modules*" "*test*" "*script*" ${{ inputs.files_to_ignore }}
 
