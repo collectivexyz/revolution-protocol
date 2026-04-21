@@ -78,6 +78,5 @@ jobs:
         with:
           coverage-files: ./${{ env.package_folder }}/lcov.info
           minimum-coverage: 85 # TODO update this once first audit pass goes through
-          artifact-name: code-coverage-report
           github-token: ${{ secrets.GITHUB_TOKEN }}
           working-directory: ./${{ env.package_folder }}
