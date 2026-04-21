@@ -124,7 +124,7 @@ contract PointsEmitterBasicTest is PointsEmitterTest {
             initialOwner: owner,
             weth: address(weth),
             revolutionPoints: address(governanceToken),
-        minPriceWei: 1,
+            minPriceWei: 1,
             vrgda: address(revolutionPointsEmitter.vrgda()),
             founderParams: IRevolutionBuilder.FounderParams({
                 totalRateBps: 1_000,

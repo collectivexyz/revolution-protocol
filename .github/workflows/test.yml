@@ -4,6 +4,10 @@ on:
       package_folder:
         required: true
         type: string
+      test_args:
+        required: false
+        type: string
+        default: ""
 
 jobs:
   forge_test:
@@ -27,12 +31,12 @@ jobs:
 
       - name: Test Light
         run: |
-          cd ${{ inputs.package_folder}} && pnpm clean && pnpm test:ci
+          cd ${{ inputs.package_folder}} && pnpm clean && pnpm test:ci ${{ inputs.test_args }}
 
       - name: Test
         if: github.ref == 'refs/heads/main'
         run: |
-          cd ${{ inputs.package_folder}} && pnpm clean && pnpm test
+          cd ${{ inputs.package_folder}} && pnpm clean && pnpm test ${{ inputs.test_args }}
 
       - name: Run Geiger Check
         run: |

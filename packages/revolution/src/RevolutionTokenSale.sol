@@ -388,6 +388,7 @@ contract RevolutionTokenSale is
     function _timeSinceStartWad() internal view returns (int256) {
         uint256 elapsed = block.timestamp > saleStartTime ? block.timestamp - saleStartTime : 0;
         uint256 interval = priceUpdateInterval;
+        // slither-disable-next-line weak-prng
         if (interval != 0) elapsed -= elapsed % interval;
         return toDaysWadUnsafe(elapsed);
     }
@@ -468,6 +469,7 @@ contract RevolutionTokenSale is
             }
 
             if (paymentShares.creatorGovernance > 0) {
+                // slither-disable-next-line arbitrary-send-eth
                 paidToCreators.points = revolutionPointsEmitter.buyToken{ value: paymentShares.creatorGovernance }(
                     vrgdaReceivers,
                     vrgdaSplits,

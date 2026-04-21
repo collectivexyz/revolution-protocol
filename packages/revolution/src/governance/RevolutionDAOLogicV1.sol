@@ -636,7 +636,7 @@ contract RevolutionDAOLogicV1 is
         Receipt storage receipt = proposal.receipts[voter];
         if (receipt.hasVoted) revert VOTER_ALREADY_VOTED();
 
-        /// @notice: Unlike GovernerBravo, votes are considered from the block the proposal was created in order to normalize quorumVotes and proposalThreshold metrics
+        /// @notice Unlike GovernerBravo, votes are considered from the block the proposal was created in order to normalize quorumVotes and proposalThreshold metrics
         uint256 votes = votingPower.getPastVotes(voter, proposalCreationBlock(proposal));
 
         if (support == 0) {

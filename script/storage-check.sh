@@ -16,7 +16,8 @@ generate() {
   for contract in ${contracts[@]}
   do
     { echo -e "\n======================="; echo "➡ $contract" ; echo -e "=======================\n"; } >> "$file"
-    FOUNDRY_PROFILE=dev forge inspect --pretty "$contract" storage-layout >> "$file"
+    FOUNDRY_PROFILE=dev forge inspect "$contract" storageLayout >> "$file" || \
+      FOUNDRY_PROFILE=dev forge inspect --pretty "$contract" storage-layout >> "$file"
   done
   if [[ $func == "generate" ]]; then
     echo "Storage layout snapshot stored at $file"

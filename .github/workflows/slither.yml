@@ -14,9 +14,22 @@ jobs:
       - name: Install node deps and foundry
         uses: ./.github/actions/setup_deps
 
-      - uses: crytic/slither-action@v0.3.0
-        with:
-          fail-on: "medium"
-          target: "${{ inputs.package_folder }}/src"
-          slither-config: "../../slither.config.json"
-          slither-args: --solc-remaps "ds-test=${{ inputs.package_folder }}/node_modules/ds-test/src forge-std=${{ inputs.package_folder }}/node_modules/forge-std/src @openzeppelin/contracts=${{ inputs.package_folder }}/node_modules/@openzeppelin/contracts @openzeppelin/contracts-upgradeable=${{ inputs.package_folder }}/node_modules/@openzeppelin/contracts-upgradeable solmate=${{ inputs.package_folder }}/node_modules/solmate @cobuild/utility-contracts=packages/utility-contracts @cobuild/protocol-rewards=packages/protocol-rewards" --checklist --filter-paths "@openzeppelin|ERC721|Votes|VotesUpgradeable|ERC1967Upgrade|SafeTransferLib.sol|ERC20Upgradeable.sol"
+      - name: Install Slither
+        run: python3 -m pip install slither-analyzer==0.11.5
+
+      - name: Prepare Revolution Slither remappings
+        if: ${{ inputs.package_folder == 'packages/revolution' }}
+        run: |
+          mkdir -p "${{ inputs.package_folder }}/node_modules/@superfluid-finance"
+          rm -rf "${{ inputs.package_folder }}/node_modules/@superfluid-finance/ethereum-contracts"
+          ln -s "$GITHUB_WORKSPACE/lib/superfluid-protocol-monorepo/packages/ethereum-contracts" "${{ inputs.package_folder }}/node_modules/@superfluid-finance/ethereum-contracts"
+          awk '{ if ($0 ~ /^@superfluid-finance\/ethereum-contracts=/) print "@superfluid-finance/ethereum-contracts/=node_modules/@superfluid-finance/ethereum-contracts/"; else print }' "${{ inputs.package_folder }}/remappings.txt" > "${{ inputs.package_folder }}/remappings.txt.tmp"
+          mv "${{ inputs.package_folder }}/remappings.txt.tmp" "${{ inputs.package_folder }}/remappings.txt"
+
+      - name: Run Slither
+        run: |
+          slither "${{ inputs.package_folder }}/src" \
+            --checklist \
+            --fail-high \
+            --filter-paths "node_modules|@openzeppelin|@gnosis.pm|governance|grants|extensions|builder|culture-index/contests|ERC721|Votes|VotesUpgradeable|ERC1967Upgrade|SafeTransferLib.sol|ERC20Upgradeable.sol" \
+            --config-file slither.config.json
