@@ -148,8 +148,73 @@ contract RevolutionTokenSaleTest is RevolutionBuilderTest {
         assertTrue(cultureIndex.isPieceInTopN(selectedPieceId, 10));
     }
 
+    function testGetAvailablePiecesIsCappedBySalePoolSize() public {
+        _createRankedPieces(12);
+
+        vm.prank(founder);
+        tokenSale.setPoolSize(5);
+
+        (uint256[] memory pieceIds, uint256 price) = tokenSale.getAvailablePieces(10);
+
+        assertEq(pieceIds.length, 5);
+        assertEq(price, tokenSale.getCurrentPrice());
+    }
+
+    function testGrantsConfigCannotRoutePositiveRateToZeroAddress() public {
+        IRevolutionTokenSale.TokenSaleParams memory params = _defaultSaleParams();
+        params.grantsParams.grantsAddress = address(0);
+        params.grantsParams.totalRateBps = 1;
+
+        _expectTokenSaleDeployRevert(IRevolutionTokenSale.INVALID_GRANTS_CONFIG.selector, params);
+
+        vm.prank(founder);
+        vm.expectRevert(IRevolutionTokenSale.INVALID_GRANTS_CONFIG.selector);
+        tokenSale.setGrantsAddress(address(0));
+
+        vm.prank(founder);
+        tokenSale.setGrantsRateBps(0);
+
+        vm.prank(founder);
+        tokenSale.setGrantsAddress(address(0));
+
+        vm.prank(founder);
+        vm.expectRevert(IRevolutionTokenSale.INVALID_GRANTS_CONFIG.selector);
+        tokenSale.setGrantsRateBps(1);
+    }
+
+    function testBuyNowRejectsWhenSoldCountCannotPriceAnotherSale() public {
+        uint256[] memory pieceIds = _createRankedPieces(12);
+        uint256 selectedPieceId = pieceIds[11];
+        address buyer = address(0xB0B0);
+        address recipient = address(0xCAFE);
+        uint256 maxSoldByVRGDA = tokenSale.MAX_SOLD_BY_VRGDA();
+
+        vm.prank(founder);
+        tokenSale.setSoldByVRGDA(maxSoldByVRGDA);
+
+        _switchMinterAndUnpauseSale();
+
+        vm.prank(buyer);
+        vm.expectRevert(IRevolutionTokenSale.INVALID_SOLD_COUNT.selector);
+        tokenSale.buyNow{ value: 0 }(selectedPieceId, recipient, type(uint256).max, address(0));
+    }
+
+    function testVRGDAPricingRejectsUnsafeTargetPrice() public {
+        IRevolutionTokenSale.TokenSaleParams memory params = _defaultSaleParams();
+        params.vrgdaParams.targetPrice = tokenSale.MAX_TARGET_PRICE() + 1;
+
+        _expectTokenSaleDeployRevert(IRevolutionTokenSale.INVALID_VRGDA_PARAMS.selector, params);
+
+        vm.prank(founder);
+        vm.expectRevert(IRevolutionTokenSale.INVALID_VRGDA_PARAMS.selector);
+        tokenSale.setVRGDAParams(params.vrgdaParams);
+    }
+
     function testVRGDAPricingRejectsUnsafeWadOverflowSoldCount() public {
-        uint256 unsafeSoldCount = tokenSale.MAX_SOLD_BY_VRGDA() + 1;
+        uint256 safeMaxSoldCount = tokenSale.MAX_SOLD_BY_VRGDA();
+        uint256 unsafeSoldCount = safeMaxSoldCount + 1;
+
+        assertEq(tokenSale.getPrice(safeMaxSoldCount), type(uint256).max);
 
         vm.expectRevert(IRevolutionTokenSale.INVALID_SOLD_COUNT.selector);
         tokenSale.getPrice(unsafeSoldCount);
@@ -240,6 +305,24 @@ contract RevolutionTokenSaleTest is RevolutionBuilderTest {
 
         tokenSale = RevolutionTokenSale(address(new ERC1967Proxy(saleImpl, init)));
         vm.label(address(tokenSale), "TOKEN_SALE");
+    }
+
+    function _expectTokenSaleDeployRevert(
+        bytes4 expectedRevert,
+        IRevolutionTokenSale.TokenSaleParams memory params
+    ) internal {
+        address saleImpl = address(new RevolutionTokenSale(address(manager), address(protocolRewards), revolutionDAO));
+        bytes memory init = abi.encodeWithSelector(
+            RevolutionTokenSale.initialize.selector,
+            address(revolutionToken),
+            address(revolutionPointsEmitter),
+            founder,
+            weth,
+            params
+        );
+
+        vm.expectRevert(expectedRevert);
+        new ERC1967Proxy(saleImpl, init);
     }
 
     function _switchMinterAndUnpauseSale() internal {

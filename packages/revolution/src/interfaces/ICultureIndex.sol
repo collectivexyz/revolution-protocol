@@ -118,6 +118,9 @@ interface ICultureIndex is ICultureIndexEvents {
     /// @dev Reverts if selected heap removal did not remove the requested piece.
     error HEAP_REMOVE_FAILED();
 
+    /// @dev Reverts if a legacy quorum migration cutoff is invalid.
+    error INVALID_QUORUM_CUTOFF();
+
     /// @dev Reverts if address 0 is passed but not allowed
     error ADDRESS_ZERO();
 

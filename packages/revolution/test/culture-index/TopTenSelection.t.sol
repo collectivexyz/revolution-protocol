@@ -87,6 +87,25 @@ contract CultureIndexTopTenSelectionTest is CultureIndexTestSuite {
         assertTrue(cultureIndex.getPieceById(2).isDropped);
     }
 
+    function testSetLegacyQuorumExcludedTokenHolderRejectsInvalidCutoffConfig() public {
+        vm.expectRevert(ICultureIndex.INVALID_QUORUM_CUTOFF.selector);
+        cultureIndex.setLegacyQuorumExcludedTokenHolder(address(0xA11CE), block.number + 1);
+
+        vm.expectRevert(ICultureIndex.INVALID_QUORUM_CUTOFF.selector);
+        cultureIndex.setLegacyQuorumExcludedTokenHolder(address(0xA11CE), 0);
+
+        vm.expectRevert(ICultureIndex.INVALID_QUORUM_CUTOFF.selector);
+        cultureIndex.setLegacyQuorumExcludedTokenHolder(address(0), block.number);
+
+        cultureIndex.setLegacyQuorumExcludedTokenHolder(address(0xA11CE), block.number);
+        assertEq(cultureIndex.legacyQuorumExcludedTokenHolder(), address(0xA11CE));
+        assertEq(cultureIndex.legacyQuorumCutoffBlock(), block.number);
+
+        cultureIndex.setLegacyQuorumExcludedTokenHolder(address(0), 0);
+        assertEq(cultureIndex.legacyQuorumExcludedTokenHolder(), address(0));
+        assertEq(cultureIndex.legacyQuorumCutoffBlock(), 0);
+    }
+
     function testGasIsPieceInTop10WithThousandPiecesDoesNotScanFullHeap() public {
         _seedRankedPieces(1_000);
 

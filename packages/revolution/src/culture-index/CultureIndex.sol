@@ -632,6 +632,9 @@ contract CultureIndex is
      * @dev Used when migrating an unlocked live community from AuctionHouse to a new sale/minter.
      */
     function setLegacyQuorumExcludedTokenHolder(address holder, uint256 cutoffBlock) external onlyOwner {
+        if ((holder == address(0)) != (cutoffBlock == 0)) revert INVALID_QUORUM_CUTOFF();
+        if (cutoffBlock > block.number) revert INVALID_QUORUM_CUTOFF();
+
         legacyQuorumExcludedTokenHolder = holder;
         legacyQuorumCutoffBlock = cutoffBlock;
 

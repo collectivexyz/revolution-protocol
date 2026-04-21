@@ -17,6 +17,7 @@ interface IRevolutionTokenSale is IGrantsRevenueStream {
     error INVALID_VRGDA_PARAMS();
     error INVALID_POOL_SIZE();
     error INVALID_SOLD_COUNT();
+    error INVALID_GRANTS_CONFIG();
     error INSUFFICIENT_PAYMENT();
     error MAX_PRICE_EXCEEDED();
     error CREATOR_RATE_TOO_LOW();

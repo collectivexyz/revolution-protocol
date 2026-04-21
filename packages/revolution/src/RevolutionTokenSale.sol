@@ -38,8 +38,11 @@ contract RevolutionTokenSale is
     /// @dev wadExp lower bound from SignedWadMath; values below this return ~0.
     int256 private constant MIN_EXP_INPUT = -41_446_531_673_892_822_313;
 
-    /// @notice Maximum sold count that can be safely converted to a signed wad for VRGDA pricing.
-    uint256 public constant MAX_SOLD_BY_VRGDA = uint256(type(int256).max) / WAD - 1;
+    /// @notice Maximum target price that can be safely multiplied by wadExp(0).
+    int256 public constant MAX_TARGET_PRICE = type(int256).max / int256(WAD) - 1;
+
+    /// @notice Maximum sold count that can be safely converted through unsafeWadDiv for VRGDA pricing.
+    uint256 public constant MAX_SOLD_BY_VRGDA = uint256(type(int256).max) / WAD / WAD - 1;
 
     /// @notice The Revolution ERC721 token contract.
     IRevolutionToken public revolutionToken;
@@ -145,6 +148,8 @@ contract RevolutionTokenSale is
         if (_tokenSaleParams.entropyRateBps > 10_000) revert INVALID_BPS();
         if (_tokenSaleParams.grantsParams.totalRateBps > 10_000) revert INVALID_BPS();
         if (_tokenSaleParams.grantsParams.totalRateBps + _tokenSaleParams.creatorRateBps > 10_000) revert INVALID_BPS();
+        if (_tokenSaleParams.grantsParams.totalRateBps > 0 && _tokenSaleParams.grantsParams.grantsAddress == address(0))
+            revert INVALID_GRANTS_CONFIG();
         if (_tokenSaleParams.minPriceWei == 0) revert INVALID_PRICE();
 
         minPriceWei = _tokenSaleParams.minPriceWei;
@@ -176,6 +181,7 @@ contract RevolutionTokenSale is
         address referral
     ) external payable nonReentrant whenNotPaused returns (uint256 tokenId, uint256 price) {
         if (recipient == address(0)) revert ADDRESS_ZERO();
+        if (soldByVRGDA >= MAX_SOLD_BY_VRGDA) revert INVALID_SOLD_COUNT();
 
         price = getCurrentPrice();
         if (price > maxPrice) revert MAX_PRICE_EXCEEDED();
@@ -240,7 +246,8 @@ contract RevolutionTokenSale is
      * @notice Returns top selectable pieces and the current buy-now price.
      */
     function getAvailablePieces(uint256 count) external view returns (uint256[] memory pieceIds, uint256 price) {
-        pieceIds = revolutionToken.cultureIndex().getTopPieceIds(count);
+        uint256 availableCount = count > poolSize ? poolSize : count;
+        pieceIds = revolutionToken.cultureIndex().getTopPieceIds(availableCount);
         price = getCurrentPrice();
     }
 
@@ -331,12 +338,15 @@ contract RevolutionTokenSale is
     function setGrantsRateBps(uint256 _grantsRateBps) external override onlyOwner nonReentrant {
         if (_grantsRateBps > 10_000) revert INVALID_BPS();
         if (_grantsRateBps + creatorRateBps > 10_000) revert INVALID_BPS();
+        if (_grantsRateBps > 0 && grantsAddress == address(0)) revert INVALID_GRANTS_CONFIG();
 
         grantsRateBps = _grantsRateBps;
         emit GrantsRateBpsUpdated(_grantsRateBps);
     }
 
     function setGrantsAddress(address _grantsAddress) external override onlyOwner nonReentrant {
+        if (_grantsAddress == address(0) && grantsRateBps > 0) revert INVALID_GRANTS_CONFIG();
+
         grantsAddress = _grantsAddress;
         emit GrantsAddressUpdated(_grantsAddress);
     }
@@ -350,6 +360,7 @@ contract RevolutionTokenSale is
     function _setVRGDAParams(VRGDAParams calldata _vrgdaParams) internal {
         if (
             _vrgdaParams.targetPrice <= 0 ||
+            _vrgdaParams.targetPrice > MAX_TARGET_PRICE ||
             _vrgdaParams.priceDecayPercent <= 0 ||
             _vrgdaParams.priceDecayPercent >= 1e18 ||
             _vrgdaParams.tokensPerTimeUnit <= 0
@@ -388,7 +399,18 @@ contract RevolutionTokenSale is
             // sold is the number sold so far; VRGDA prices the next token, sold + 1.
             int256 soldWad = int256((sold + 1) * WAD);
             int256 targetSaleTime = unsafeWadDiv(soldWad, tokensPerTimeUnit);
-            int256 exponent = wadMul(decayConstant, timeSinceStart - targetSaleTime);
+            int256 timeDelta = timeSinceStart - targetSaleTime;
+            int256 absDecayConstant = -decayConstant;
+
+            if (timeDelta < 0) {
+                int256 maxAheadTimeDelta = unsafeWadDiv(maxXBound, absDecayConstant);
+                if (-timeDelta >= maxAheadTimeDelta) return type(uint256).max;
+            } else {
+                int256 maxBehindTimeDelta = unsafeWadDiv(-MIN_EXP_INPUT, absDecayConstant);
+                if (timeDelta >= maxBehindTimeDelta) return 0;
+            }
+
+            int256 exponent = wadMul(decayConstant, timeDelta);
 
             if (exponent <= MIN_EXP_INPUT) return 0;
             if (exponent >= maxXBound) return type(uint256).max;
