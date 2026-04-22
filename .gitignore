@@ -40,3 +40,6 @@ package/chainConfigs.ts
 # package files
 dist/
 soljson-v0.8.22+commit.4fc1097e.js
+.DS_Store
+audit-packages/
+output-packages/
