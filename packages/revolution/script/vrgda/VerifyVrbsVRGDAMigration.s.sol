@@ -46,11 +46,16 @@ contract VerifyVrbsVRGDAMigration is VrbsMigrationHelpers {
         require(!_auctionHasUnsettledToken(), "auction still has unsettled token");
         require(IRevolutionTokenRead(VrbsAddresses.TOKEN).minter() == tokenSale, "token minter is not token sale");
         require(!IRevolutionTokenRead(VrbsAddresses.TOKEN).isMinterLocked(), "token minter locked unexpectedly");
+        require(IRevolutionTokenRead(VrbsAddresses.TOKEN).pendingOwner() == address(0), "token pending owner not zero");
         require(!IRevolutionTokenSaleRead(tokenSale).paused(), "token sale is paused");
         require(IRevolutionTokenSaleRead(tokenSale).owner() == VrbsAddresses.EXECUTOR, "token sale owner not executor");
         require(
             ICultureIndexRead(VrbsAddresses.CULTURE_INDEX).owner() == VrbsAddresses.EXECUTOR,
             "culture owner not executor"
+        );
+        require(
+            ICultureIndexRead(VrbsAddresses.CULTURE_INDEX).pendingOwner() == address(0),
+            "culture pending owner not zero"
         );
         require(
             address(IRevolutionTokenSaleRead(tokenSale).revolutionToken()) == VrbsAddresses.TOKEN, "sale token mismatch"
@@ -64,6 +69,10 @@ contract VerifyVrbsVRGDAMigration is VrbsMigrationHelpers {
             "sale WETH mismatch"
         );
         require(IRevolutionTokenSaleRead(tokenSale).WETH().code.length != 0, "sale WETH has no code");
+        require(
+            IRevolutionTokenSaleRead(tokenSale).protocolRewards() == VrbsAddresses.PROTOCOL_REWARDS,
+            "sale protocol rewards mismatch"
+        );
         require(
             IRevolutionTokenSaleRead(tokenSale).protocolFeeRecipient() == expectedProtocolFeeRecipient,
             "sale protocol fee recipient mismatch"

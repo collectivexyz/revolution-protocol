@@ -13,12 +13,12 @@ abstract contract RewardSplits is IRewardSplits {
     uint256 internal constant PURCHASE_REFERRAL_BPS = 50;
 
     address internal immutable revolutionRewardRecipient;
-    IProtocolRewards internal immutable protocolRewards;
+    IProtocolRewards internal immutable _protocolRewards;
 
-    constructor(address _protocolRewards, address _revolutionRewardRecipient) payable {
-        if (_protocolRewards == address(0) || _revolutionRewardRecipient == address(0)) revert("Invalid Address Zero");
+    constructor(address protocolRewards_, address _revolutionRewardRecipient) payable {
+        if (protocolRewards_ == address(0) || _revolutionRewardRecipient == address(0)) revert("Invalid Address Zero");
 
-        protocolRewards = IProtocolRewards(_protocolRewards);
+        _protocolRewards = IProtocolRewards(protocolRewards_);
         revolutionRewardRecipient = _revolutionRewardRecipient;
     }
 
@@ -61,7 +61,7 @@ abstract contract RewardSplits is IRewardSplits {
 
         if (purchaseReferral == address(0)) purchaseReferral = revolutionRewardRecipient;
 
-        protocolRewards.depositRewards{ value: totalReward }(
+        _protocolRewards.depositRewards{ value: totalReward }(
             builderReferral,
             settings.builderReferralReward,
             purchaseReferral,

@@ -87,6 +87,7 @@ contract BuildVrbsVRGDAProposal is VrbsMigrationHelpers {
         _writeAddressLine(filePath, "Auction", VrbsAddresses.AUCTION);
         _writeAddressLine(filePath, "TokenSale", ctx.tokenSale);
         _writeAddressLine(filePath, "TokenSaleImpl", ctx.expectedTokenSaleImpl);
+        _writeAddressLine(filePath, "ProtocolRewards", VrbsAddresses.PROTOCOL_REWARDS);
         _writeAddressLine(filePath, "ProtocolFeeRecipient", ctx.expectedProtocolFeeRecipient);
         _writeAddressLine(filePath, "NewTokenImpl", ctx.newTokenImpl);
         _writeAddressLine(filePath, "NewCultureIndexImpl", ctx.newCultureIndexImpl);

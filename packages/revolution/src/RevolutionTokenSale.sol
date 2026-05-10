@@ -266,6 +266,13 @@ contract RevolutionTokenSale is
     }
 
     /**
+     * @notice Immutable protocol rewards contract used for purchase reward deposits.
+     */
+    function protocolRewards() external view returns (address) {
+        return address(_protocolRewards);
+    }
+
+    /**
      * @notice Allows a member to update their manifesto.
      */
     function updateManifesto(uint256 tokenId, string calldata newSpeech) external {

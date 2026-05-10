@@ -69,7 +69,7 @@ interface IAuctionHouseRead is IOwnableRead, IPausableRead {
         );
 }
 
-interface IRevolutionTokenRead is IRevolutionToken, IOwnableRead {
+interface IRevolutionTokenRead is IRevolutionToken, IOwnable2StepRead {
     function isMinterLocked() external view returns (bool);
 }
 
@@ -196,10 +196,12 @@ abstract contract VrbsMigrationHelpers is Script {
     }
 
     function _requireOwnersForAtomicCutover(address tokenSale) internal view returns (bool acceptCultureOwnership) {
-        address tokenOwner = IRevolutionTokenRead(VrbsAddresses.TOKEN).owner();
+        IRevolutionTokenRead token = IRevolutionTokenRead(VrbsAddresses.TOKEN);
+        address tokenOwner = token.owner();
         address saleOwner = IOwnableRead(tokenSale).owner();
 
         require(tokenOwner == VrbsAddresses.EXECUTOR, "token owner is not Vrbs Executor");
+        require(token.pendingOwner() == address(0), "token pending owner is not zero");
         acceptCultureOwnership = _cultureIndexNeedsOwnershipAcceptance();
         require(saleOwner == VrbsAddresses.EXECUTOR, "token sale owner is not Vrbs Executor");
     }
@@ -207,11 +209,15 @@ abstract contract VrbsMigrationHelpers is Script {
     function _cultureIndexNeedsOwnershipAcceptance() internal view returns (bool) {
         ICultureIndexRead cultureIndex = ICultureIndexRead(VrbsAddresses.CULTURE_INDEX);
         address cultureOwner = cultureIndex.owner();
+        address culturePendingOwner = cultureIndex.pendingOwner();
 
-        if (cultureOwner == VrbsAddresses.EXECUTOR) return false;
+        if (cultureOwner == VrbsAddresses.EXECUTOR) {
+            require(culturePendingOwner == address(0), "culture index pending owner is not zero");
+            return false;
+        }
 
         require(
-            cultureIndex.pendingOwner() == VrbsAddresses.EXECUTOR,
+            culturePendingOwner == VrbsAddresses.EXECUTOR,
             "culture index owner/pending owner is not Vrbs Executor"
         );
         return true;
@@ -461,6 +467,7 @@ abstract contract VrbsMigrationHelpers is Script {
         require(address(sale.revolutionToken()) == VrbsAddresses.TOKEN, "token sale token mismatch");
         require(sale.revolutionPointsEmitter() == VrbsAddresses.POINTS_EMITTER, "token sale points emitter mismatch");
         require(sale.WETH() == weth, "token sale WETH mismatch");
+        require(sale.protocolRewards() == VrbsAddresses.PROTOCOL_REWARDS, "token sale protocol rewards mismatch");
         require(
             sale.protocolFeeRecipient() == expectedProtocolFeeRecipient, "token sale protocol fee recipient mismatch"
         );

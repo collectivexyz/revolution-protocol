@@ -164,6 +164,10 @@ contract RevolutionTokenSaleTest is RevolutionBuilderTest {
         assertEq(tokenSale.protocolFeeRecipient(), revolutionDAO);
     }
 
+    function testProtocolRewardsGetterReturnsConstructorRewards() public {
+        assertEq(tokenSale.protocolRewards(), address(protocolRewards));
+    }
+
     function testGrantsConfigCannotRoutePositiveRateToZeroAddress() public {
         IRevolutionTokenSale.TokenSaleParams memory params = _defaultSaleParams();
         params.grantsParams.grantsAddress = address(0);

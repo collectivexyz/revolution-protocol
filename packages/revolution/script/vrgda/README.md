@@ -82,7 +82,8 @@ calldata. Do not deploy a TokenSale proxy without init calldata.
 
 Export the generated values at the bottom of the deployment output. The proposal
 scripts use these values to assert the deployed `TOKEN_SALE_PROXY` still matches
-the reviewed economics, protocol fee recipient, and launch-price bound:
+the reviewed economics, protocol rewards contract, protocol fee recipient, and
+launch-price bound:
 
 ```bash
 export PROTOCOL_FEE_RECIPIENT=0x...
@@ -267,5 +268,5 @@ forge script script/vrgda/VerifyVrbsVRGDAMigration.s.sol:VerifyVrbsVRGDAMigratio
 
 The verifier checks final implementations, auction paused/settled state, token
 minter, CultureIndex owner, TokenSale implementation/owner/unpause state,
-WETH/emitter/protocol fee recipient wiring, sale start binding, launch-price
-bound, and legacy quorum cutoff state.
+WETH/emitter/protocol rewards/protocol fee recipient wiring, sale start binding,
+launch-price bound, and legacy quorum cutoff state.

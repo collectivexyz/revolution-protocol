@@ -146,6 +146,8 @@ interface IRevolutionTokenSale is IGrantsRevenueStream {
 
     function protocolFeeRecipient() external view returns (address);
 
+    function protocolRewards() external view returns (address);
+
     function updateManifesto(uint256 tokenId, string calldata newSpeech) external;
 
     function pause() external;

@@ -144,14 +144,20 @@ contract DryRunVrbsVRGDAMigration is VrbsMigrationHelpers {
         require(_implementationOf(VrbsAddresses.CULTURE_INDEX) == artifacts.cultureIndexImpl, "culture impl mismatch");
         require(_implementationOf(artifacts.tokenSaleProxy) == artifacts.tokenSaleImpl, "token sale impl mismatch");
         require(IRevolutionTokenRead(VrbsAddresses.TOKEN).minter() == artifacts.tokenSaleProxy, "minter mismatch");
+        require(IRevolutionTokenRead(VrbsAddresses.TOKEN).pendingOwner() == address(0), "token pending owner mismatch");
         require(
             ICultureIndexRead(VrbsAddresses.CULTURE_INDEX).owner() == VrbsAddresses.EXECUTOR, "culture owner mismatch"
+        );
+        require(
+            ICultureIndexRead(VrbsAddresses.CULTURE_INDEX).pendingOwner() == address(0),
+            "culture pending owner mismatch"
         );
         require(!sale.paused(), "sale is paused");
         require(sale.owner() == VrbsAddresses.EXECUTOR, "sale owner mismatch");
         require(address(sale.revolutionToken()) == VrbsAddresses.TOKEN, "sale token mismatch");
         require(sale.revolutionPointsEmitter() == VrbsAddresses.POINTS_EMITTER, "sale emitter mismatch");
         require(sale.WETH() == IAuctionHouseRead(VrbsAddresses.AUCTION).WETH(), "sale WETH mismatch");
+        require(sale.protocolRewards() == VrbsAddresses.PROTOCOL_REWARDS, "sale protocol rewards mismatch");
         require(sale.protocolFeeRecipient() == expectedProtocolFeeRecipient, "sale protocol fee recipient mismatch");
         _assertSaleParams(artifacts.tokenSaleProxy, params, false);
         _assertLaunchPrice(artifacts.tokenSaleProxy, maxLaunchPriceWei);
