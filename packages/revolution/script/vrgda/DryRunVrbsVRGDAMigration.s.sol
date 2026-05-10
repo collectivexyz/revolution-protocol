@@ -1,23 +1,15 @@
 // SPDX-License-Identifier: GPL-3.0-or-later
 pragma solidity 0.8.22;
 
-import { console2 } from "forge-std/console2.sol";
+import {console2} from "forge-std/console2.sol";
 
-import { IUpgradeManager } from "@cobuild/utility-contracts/src/interfaces/IUpgradeManager.sol";
-import { ERC1967Proxy } from "@cobuild/utility-contracts/src/proxy/ERC1967Proxy.sol";
-
-import { CultureIndex } from "../../src/culture-index/CultureIndex.sol";
-import { RevolutionToken } from "../../src/RevolutionToken.sol";
-import { RevolutionTokenSale } from "../../src/RevolutionTokenSale.sol";
-import { ICultureIndex } from "../../src/interfaces/ICultureIndex.sol";
-import { IRevolutionTokenSale } from "../../src/interfaces/IRevolutionTokenSale.sol";
+import {ICultureIndex} from "../../src/interfaces/ICultureIndex.sol";
+import {IRevolutionTokenSale} from "../../src/interfaces/IRevolutionTokenSale.sol";
 
 import {
     VrbsAddresses,
     VrbsMigrationHelpers,
     IAuctionHouseRead,
-    IOwnableRead,
-    IOwnable2StepRead,
     ICultureIndexRead,
     IRevolutionPointsEmitterRead,
     IRevolutionTokenRead,
@@ -46,11 +38,7 @@ contract RejectETHReceiver {
 /// @notice Base fork rehearsal for the full Vrbs VRGDA cutover plus first buy-now purchase.
 /// @dev Run against a fork RPC. This script intentionally does not broadcast.
 contract DryRunVrbsVRGDAMigration is VrbsMigrationHelpers {
-    struct DryRunArtifacts {
-        address manager;
-        address oldTokenImpl;
-        address oldCultureIndexImpl;
-        address oldAuctionImpl;
+    struct ProposalArtifacts {
         address tokenImpl;
         address cultureIndexImpl;
         address tokenSaleImpl;
@@ -63,12 +51,14 @@ contract DryRunVrbsVRGDAMigration is VrbsMigrationHelpers {
         address firstCreator;
         address referral;
         address refundReceiver;
+        address protocolFeeRecipient;
         uint256 ownerLiquidBefore;
         uint256 grantsLiquidBefore;
         uint256 creatorLiquidBefore;
         uint256 firstCreatorPointsBefore;
         uint256 protocolSupplyBefore;
         uint256 referralRewardsBefore;
+        uint256 protocolFeeRecipientRewardsBefore;
         uint256 refundReceiverWethBefore;
         uint256 soldBefore;
     }
@@ -84,22 +74,21 @@ contract DryRunVrbsVRGDAMigration is VrbsMigrationHelpers {
 
         IRevolutionTokenSale.TokenSaleParams memory params = _readSaleParams();
         _validateSaleParams(params);
+        _requireSaleStartSentinel(params);
 
-        DryRunArtifacts memory artifacts = _deployArtifacts(protocolFeeRecipient, params);
-        _registerUpgradesOnFork(artifacts);
-        _prepareCultureOwnershipOnFork();
+        ProposalArtifacts memory artifacts = _readProposalArtifacts();
 
-        bool acceptCultureOwnership =
-            _preflightVrbsVRGDAProposal(artifacts.tokenImpl, artifacts.cultureIndexImpl, artifacts.tokenSaleProxy);
+        bool acceptCultureOwnership = _preflightVrbsVRGDAProposal(
+            artifacts.tokenImpl, artifacts.cultureIndexImpl, artifacts.tokenSaleProxy, artifacts.tokenSaleImpl, params
+        );
 
         (address[] memory targets, uint256[] memory values, string[] memory signatures, bytes[] memory calldatas) = _buildCommunityActions(
             artifacts.tokenImpl, artifacts.cultureIndexImpl, artifacts.tokenSaleProxy, acceptCultureOwnership
         );
-        signatures;
 
-        _executeAsExecutor(targets, values, calldatas);
-        _assertPostCutover(artifacts);
-        _buyFirstToken(artifacts.tokenSaleProxy);
+        _executeAsExecutor(targets, values, signatures, calldatas);
+        _assertPostCutover(artifacts, params);
+        _buyFirstToken(artifacts.tokenSaleProxy, protocolFeeRecipient);
 
         console2.log("Vrbs VRGDA fork dry-run passed");
         console2.log("TokenSale proxy");
@@ -107,73 +96,21 @@ contract DryRunVrbsVRGDAMigration is VrbsMigrationHelpers {
         console2.log("Current price", IRevolutionTokenSaleRead(artifacts.tokenSaleProxy).getCurrentPrice());
     }
 
-    function _deployArtifacts(address protocolFeeRecipient, IRevolutionTokenSale.TokenSaleParams memory params)
-        internal
-        returns (DryRunArtifacts memory artifacts)
-    {
-        IUpgradeManager manager = _manager();
-        address weth = IAuctionHouseRead(VrbsAddresses.AUCTION).WETH();
-        _requireCode(weth, "auction WETH");
-
-        artifacts.manager = address(manager);
-        artifacts.oldTokenImpl = _implementationOf(VrbsAddresses.TOKEN);
-        artifacts.oldCultureIndexImpl = _implementationOf(VrbsAddresses.CULTURE_INDEX);
-        artifacts.oldAuctionImpl = _implementationOf(VrbsAddresses.AUCTION);
-        artifacts.tokenImpl = address(new RevolutionToken(address(manager)));
-        artifacts.cultureIndexImpl = address(new CultureIndex(address(manager)));
-        artifacts.tokenSaleImpl =
-            address(new RevolutionTokenSale(address(manager), VrbsAddresses.PROTOCOL_REWARDS, protocolFeeRecipient));
-
-        bytes memory init = abi.encodeWithSelector(
-            RevolutionTokenSale.initialize.selector,
-            VrbsAddresses.TOKEN,
-            VrbsAddresses.POINTS_EMITTER,
-            VrbsAddresses.EXECUTOR,
-            weth,
-            params
-        );
-        artifacts.tokenSaleProxy = address(new ERC1967Proxy(artifacts.tokenSaleImpl, init));
-
-        _assertSaleConfig(artifacts.tokenSaleProxy, VrbsAddresses.EXECUTOR, weth, params);
-        _requirePointsEmitterSafe(artifacts.tokenSaleProxy);
+    function _readProposalArtifacts() internal view returns (ProposalArtifacts memory artifacts) {
+        artifacts.tokenImpl = vm.envAddress("VRGDA_NEW_TOKEN_IMPL");
+        artifacts.cultureIndexImpl = vm.envAddress("VRGDA_NEW_CULTURE_INDEX_IMPL");
+        artifacts.tokenSaleImpl = vm.envAddress("TOKEN_SALE_IMPL");
+        artifacts.tokenSaleProxy = vm.envAddress("TOKEN_SALE_PROXY");
     }
 
-    function _registerUpgradesOnFork(DryRunArtifacts memory artifacts) internal {
-        IUpgradeManager manager = IUpgradeManager(artifacts.manager);
-        address managerOwner = IOwnableRead(artifacts.manager).owner();
-        require(managerOwner != address(0), "manager owner is zero");
-
-        vm.startPrank(managerOwner);
-        if (!manager.isRegisteredUpgrade(artifacts.oldTokenImpl, artifacts.tokenImpl)) {
-            manager.registerUpgrade(artifacts.oldTokenImpl, artifacts.tokenImpl);
-        }
-        if (!manager.isRegisteredUpgrade(artifacts.oldCultureIndexImpl, artifacts.cultureIndexImpl)) {
-            manager.registerUpgrade(artifacts.oldCultureIndexImpl, artifacts.cultureIndexImpl);
-        }
-        vm.stopPrank();
-
-        require(
-            !manager.isRegisteredUpgrade(artifacts.oldAuctionImpl, artifacts.tokenSaleImpl),
-            "auction => token sale registered"
-        );
-    }
-
-    function _prepareCultureOwnershipOnFork() internal {
-        ICultureIndexRead cultureIndex = ICultureIndexRead(VrbsAddresses.CULTURE_INDEX);
-        if (cultureIndex.owner() == VrbsAddresses.EXECUTOR) return;
-
-        if (cultureIndex.pendingOwner() != VrbsAddresses.EXECUTOR) {
-            address currentOwner = cultureIndex.owner();
-            require(currentOwner != address(0), "culture owner is zero");
-            vm.prank(currentOwner);
-            IOwnable2StepRead(VrbsAddresses.CULTURE_INDEX).transferOwnership(VrbsAddresses.EXECUTOR);
-        }
-
-        require(cultureIndex.pendingOwner() == VrbsAddresses.EXECUTOR, "culture ownership not pending executor");
-    }
-
-    function _executeAsExecutor(address[] memory targets, uint256[] memory values, bytes[] memory calldatas) internal {
+    function _executeAsExecutor(
+        address[] memory targets,
+        uint256[] memory values,
+        string[] memory signatures,
+        bytes[] memory calldatas
+    ) internal {
         for (uint256 i; i < targets.length; ++i) {
+            require(bytes(signatures[i]).length == 0, "dry-run only supports raw calldata");
             vm.prank(VrbsAddresses.EXECUTOR);
             (bool ok, bytes memory result) = targets[i].call{value: values[i]}(calldatas[i]);
             if (!ok) {
@@ -187,11 +124,15 @@ contract DryRunVrbsVRGDAMigration is VrbsMigrationHelpers {
         }
     }
 
-    function _assertPostCutover(DryRunArtifacts memory artifacts) internal view {
+    function _assertPostCutover(ProposalArtifacts memory artifacts, IRevolutionTokenSale.TokenSaleParams memory params)
+        internal
+        view
+    {
         IRevolutionTokenSaleRead sale = IRevolutionTokenSaleRead(artifacts.tokenSaleProxy);
 
         require(_implementationOf(VrbsAddresses.TOKEN) == artifacts.tokenImpl, "token impl mismatch");
         require(_implementationOf(VrbsAddresses.CULTURE_INDEX) == artifacts.cultureIndexImpl, "culture impl mismatch");
+        require(_implementationOf(artifacts.tokenSaleProxy) == artifacts.tokenSaleImpl, "token sale impl mismatch");
         require(IRevolutionTokenRead(VrbsAddresses.TOKEN).minter() == artifacts.tokenSaleProxy, "minter mismatch");
         require(
             ICultureIndexRead(VrbsAddresses.CULTURE_INDEX).owner() == VrbsAddresses.EXECUTOR, "culture owner mismatch"
@@ -201,6 +142,7 @@ contract DryRunVrbsVRGDAMigration is VrbsMigrationHelpers {
         require(address(sale.revolutionToken()) == VrbsAddresses.TOKEN, "sale token mismatch");
         require(sale.revolutionPointsEmitter() == VrbsAddresses.POINTS_EMITTER, "sale emitter mismatch");
         require(sale.WETH() == IAuctionHouseRead(VrbsAddresses.AUCTION).WETH(), "sale WETH mismatch");
+        _assertSaleParams(artifacts.tokenSaleProxy, params, false);
         require(sale.saleStartTime() != type(uint256).max, "sale start sentinel not bound");
         require(sale.saleStartTime() == block.timestamp, "sale start not bound to execution block");
         require(
@@ -213,7 +155,7 @@ contract DryRunVrbsVRGDAMigration is VrbsMigrationHelpers {
         );
     }
 
-    function _buyFirstToken(address tokenSale) internal {
+    function _buyFirstToken(address tokenSale, address protocolFeeRecipient) internal {
         IRevolutionTokenSaleRead saleRead = IRevolutionTokenSaleRead(tokenSale);
         IRevolutionTokenSale sale = IRevolutionTokenSale(tokenSale);
 
@@ -225,7 +167,8 @@ contract DryRunVrbsVRGDAMigration is VrbsMigrationHelpers {
         ICultureIndex.ArtPiece memory artPiece = ICultureIndex(VrbsAddresses.CULTURE_INDEX).getPieceById(pieceIds[0]);
         require(artPiece.creators.length > 0, "piece has no creators");
 
-        PurchaseSnapshot memory beforePurchase = _snapshotBeforePurchase(tokenSale, artPiece.creators[0].creator);
+        PurchaseSnapshot memory beforePurchase =
+            _snapshotBeforePurchase(tokenSale, artPiece.creators[0].creator, protocolFeeRecipient);
 
         uint256 protocolReward = IRewardSplitsRead(tokenSale).computeTotalReward(price);
         require(protocolReward > 0, "price too low for protocol reward dry-run");
@@ -264,6 +207,11 @@ contract DryRunVrbsVRGDAMigration is VrbsMigrationHelpers {
                 > beforePurchase.referralRewardsBefore,
             "referral protocol rewards did not increase"
         );
+        require(
+            IProtocolRewardsRead(VrbsAddresses.PROTOCOL_REWARDS).balanceOf(beforePurchase.protocolFeeRecipient)
+                > beforePurchase.protocolFeeRecipientRewardsBefore,
+            "protocol fee recipient rewards did not increase"
+        );
         if (ownerShare > 0) {
             require(
                 _liquidBalance(VrbsAddresses.EXECUTOR, beforePurchase.weth) > beforePurchase.ownerLiquidBefore,
@@ -289,7 +237,7 @@ contract DryRunVrbsVRGDAMigration is VrbsMigrationHelpers {
         );
     }
 
-    function _snapshotBeforePurchase(address tokenSale, address firstCreator)
+    function _snapshotBeforePurchase(address tokenSale, address firstCreator, address protocolFeeRecipient)
         internal
         returns (PurchaseSnapshot memory snapshot)
     {
@@ -300,6 +248,7 @@ contract DryRunVrbsVRGDAMigration is VrbsMigrationHelpers {
         snapshot.firstCreator = firstCreator;
         snapshot.referral = address(0xBEEF);
         snapshot.refundReceiver = address(new RejectETHReceiver());
+        snapshot.protocolFeeRecipient = protocolFeeRecipient;
         snapshot.ownerLiquidBefore = _liquidBalance(VrbsAddresses.EXECUTOR, snapshot.weth);
         snapshot.grantsLiquidBefore = _liquidBalance(snapshot.grantsAddress, snapshot.weth);
         snapshot.creatorLiquidBefore = _liquidBalance(firstCreator, snapshot.weth);
@@ -308,6 +257,8 @@ contract DryRunVrbsVRGDAMigration is VrbsMigrationHelpers {
         snapshot.protocolSupplyBefore = IProtocolRewardsRead(VrbsAddresses.PROTOCOL_REWARDS).totalRewardsSupply();
         snapshot.referralRewardsBefore =
             IProtocolRewardsRead(VrbsAddresses.PROTOCOL_REWARDS).balanceOf(snapshot.referral);
+        snapshot.protocolFeeRecipientRewardsBefore =
+            IProtocolRewardsRead(VrbsAddresses.PROTOCOL_REWARDS).balanceOf(protocolFeeRecipient);
         snapshot.refundReceiverWethBefore = IERC20BalanceRead(snapshot.weth).balanceOf(snapshot.refundReceiver);
         snapshot.soldBefore = sale.soldByVRGDA();
     }

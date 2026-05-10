@@ -1,9 +1,11 @@
 // SPDX-License-Identifier: GPL-3.0-or-later
 pragma solidity 0.8.22;
 
-import { console2 } from "forge-std/console2.sol";
+import {console2} from "forge-std/console2.sol";
 
-import { VrbsAddresses, VrbsMigrationHelpers, IVrbsDAO } from "./VrbsMigrationHelpers.sol";
+import {IRevolutionTokenSale} from "../../src/interfaces/IRevolutionTokenSale.sol";
+
+import {VrbsAddresses, VrbsMigrationHelpers, IVrbsDAO} from "./VrbsMigrationHelpers.sol";
 
 /// @notice Broadcast helper to submit the already-built Vrbs DAO migration proposal.
 /// @dev The signer must meet the DAO proposal threshold. Use BuildVrbsVRGDAProposal first for a dry-run/output file.
@@ -16,17 +18,18 @@ contract SubmitVrbsVRGDAProposal is VrbsMigrationHelpers {
         address proposer = vm.addr(key);
         address newTokenImpl = vm.envAddress("VRGDA_NEW_TOKEN_IMPL");
         address newCultureIndexImpl = vm.envAddress("VRGDA_NEW_CULTURE_INDEX_IMPL");
+        address expectedTokenSaleImpl = vm.envAddress("TOKEN_SALE_IMPL");
         address tokenSale = vm.envAddress("TOKEN_SALE_PROXY");
         string memory description = _proposalDescription();
+        IRevolutionTokenSale.TokenSaleParams memory expectedParams = _readSaleParams();
+        _validateSaleParams(expectedParams);
 
-        bool acceptCultureOwnership = _preflightVrbsVRGDAProposal(newTokenImpl, newCultureIndexImpl, tokenSale);
+        bool acceptCultureOwnership = _preflightVrbsVRGDAProposal(
+            newTokenImpl, newCultureIndexImpl, tokenSale, expectedTokenSaleImpl, expectedParams
+        );
 
-        (
-            address[] memory targets,
-            uint256[] memory values,
-            string[] memory signatures,
-            bytes[] memory calldatas
-        ) = _buildCommunityActions(newTokenImpl, newCultureIndexImpl, tokenSale, acceptCultureOwnership);
+        (address[] memory targets, uint256[] memory values, string[] memory signatures, bytes[] memory calldatas) =
+            _buildCommunityActions(newTokenImpl, newCultureIndexImpl, tokenSale, acceptCultureOwnership);
 
         console2.log("Submitting Vrbs DAO proposal from proposer");
         console2.logAddress(proposer);

@@ -43,7 +43,6 @@ Run all commands from `packages/revolution` on Base (`CHAIN_ID=8453`).
 Required env:
 
 - `PRIVATE_KEY`: deployer key
-- `PROTOCOL_REWARDS`: must be `0x9f7f714a3CD6B6eADbC9629838B0f6ddEAbE1710`
 - `PROTOCOL_FEE_RECIPIENT`: revolution/protocol fallback reward recipient for the new TokenSale constructor
 - `VRGDA_MIN_PRICE_WEI`
 - `VRGDA_TARGET_PRICE_WAD`
@@ -58,14 +57,13 @@ Optional env:
 - `VRGDA_MIN_CREATOR_RATE_BPS`, defaults to current AuctionHouse value
 - `VRGDA_GRANTS_RATE_BPS`, defaults to current AuctionHouse value
 - `VRGDA_GRANTS_ADDRESS`, defaults to current AuctionHouse value
-- `VRGDA_SALE_START_TIME`, defaults to `type(uint256).max`; the proposal binds this to the execution timestamp immediately before unpause
+- `VRGDA_SALE_START_TIME`, defaults to `type(uint256).max`; do not override for the Vrbs migration
 - `VRGDA_SOLD_BY_VRGDA`, defaults to `0`
 - `VRGDA_PRICE_UPDATE_INTERVAL`, defaults to `900`
 - `VRGDA_POOL_SIZE`, defaults to `10`
 
 ```bash
 PRIVATE_KEY=$DEPLOYER_PRIVATE_KEY \
-PROTOCOL_REWARDS=0x9f7f714a3CD6B6eADbC9629838B0f6ddEAbE1710 \
 PROTOCOL_FEE_RECIPIENT=0x... \
 VRGDA_MIN_PRICE_WEI=10000000000000000 \
 VRGDA_TARGET_PRICE_WAD=1000000000000000000 \
@@ -77,13 +75,16 @@ forge script script/vrgda/DeployVrbsVRGDASale.s.sol:DeployVrbsVRGDASale \
 
 Output: `deploys/8453.vrbs-vrgda-deploy.txt`.
 
-Export the generated values:
+Export the generated values at the bottom of the deployment output. The proposal
+scripts use these values to assert the deployed `TOKEN_SALE_PROXY` still matches
+the reviewed economics:
 
 ```bash
 export VRGDA_NEW_TOKEN_IMPL=0x...
 export VRGDA_NEW_CULTURE_INDEX_IMPL=0x...
 export TOKEN_SALE_IMPL=0x...
 export TOKEN_SALE_PROXY=0x...
+# Also export every generated VRGDA_* economics line from the deployment output.
 ```
 
 ### 2. Register exact upgrades with the Revolution upgrade manager
@@ -145,7 +146,12 @@ proposal scripts revert.
 ```bash
 VRGDA_NEW_TOKEN_IMPL=$VRGDA_NEW_TOKEN_IMPL \
 VRGDA_NEW_CULTURE_INDEX_IMPL=$VRGDA_NEW_CULTURE_INDEX_IMPL \
+TOKEN_SALE_IMPL=$TOKEN_SALE_IMPL \
 TOKEN_SALE_PROXY=$TOKEN_SALE_PROXY \
+VRGDA_MIN_PRICE_WEI=$VRGDA_MIN_PRICE_WEI \
+VRGDA_TARGET_PRICE_WAD=$VRGDA_TARGET_PRICE_WAD \
+VRGDA_PRICE_DECAY_PERCENT_WAD=$VRGDA_PRICE_DECAY_PERCENT_WAD \
+VRGDA_TOKENS_PER_TIME_UNIT_WAD=$VRGDA_TOKENS_PER_TIME_UNIT_WAD \
 forge script script/vrgda/BuildVrbsVRGDAProposal.s.sol:BuildVrbsVRGDAProposal \
   --rpc-url $BASE_RPC_URL
 ```
@@ -176,14 +182,18 @@ cutover, sale start binding, and TokenSale unpause across separate blocks.
 
 ### 5. Dry-run the full migration and first purchase on a Base fork
 
-Run this before submitting or executing the DAO proposal. It deploys fresh local
-artifacts on the fork, registers the exact upgrades, prepares CultureIndex
-ownership if needed, executes the generated DAO actions as the Vrbs Executor,
-and performs one `buyNow()` through owner, grants, creator, PointsEmitter,
-protocol rewards, refund, and WETH fallback paths.
+Run this before submitting or executing the DAO proposal. It uses the exact
+deployed artifacts and sale parameters from env, requires the same live-ready
+preconditions as build/submit, executes the generated DAO actions as the Vrbs
+Executor, and performs one `buyNow()` through owner, grants, creator,
+PointsEmitter, protocol rewards, refund, and WETH fallback paths.
 
 ```bash
 PROTOCOL_FEE_RECIPIENT=0x... \
+VRGDA_NEW_TOKEN_IMPL=$VRGDA_NEW_TOKEN_IMPL \
+VRGDA_NEW_CULTURE_INDEX_IMPL=$VRGDA_NEW_CULTURE_INDEX_IMPL \
+TOKEN_SALE_IMPL=$TOKEN_SALE_IMPL \
+TOKEN_SALE_PROXY=$TOKEN_SALE_PROXY \
 VRGDA_MIN_PRICE_WEI=10000000000000000 \
 VRGDA_TARGET_PRICE_WAD=1000000000000000000 \
 VRGDA_PRICE_DECAY_PERCENT_WAD=310000000000000000 \
@@ -203,7 +213,12 @@ To submit from a proposer key instead of BaseScan:
 PRIVATE_KEY=$PROPOSER_PRIVATE_KEY \
 VRGDA_NEW_TOKEN_IMPL=$VRGDA_NEW_TOKEN_IMPL \
 VRGDA_NEW_CULTURE_INDEX_IMPL=$VRGDA_NEW_CULTURE_INDEX_IMPL \
+TOKEN_SALE_IMPL=$TOKEN_SALE_IMPL \
 TOKEN_SALE_PROXY=$TOKEN_SALE_PROXY \
+VRGDA_MIN_PRICE_WEI=$VRGDA_MIN_PRICE_WEI \
+VRGDA_TARGET_PRICE_WAD=$VRGDA_TARGET_PRICE_WAD \
+VRGDA_PRICE_DECAY_PERCENT_WAD=$VRGDA_PRICE_DECAY_PERCENT_WAD \
+VRGDA_TOKENS_PER_TIME_UNIT_WAD=$VRGDA_TOKENS_PER_TIME_UNIT_WAD \
 forge script script/vrgda/SubmitVrbsVRGDAProposal.s.sol:SubmitVrbsVRGDAProposal \
   --rpc-url $BASE_RPC_URL --broadcast
 ```
@@ -213,11 +228,16 @@ forge script script/vrgda/SubmitVrbsVRGDAProposal.s.sol:SubmitVrbsVRGDAProposal 
 ```bash
 VRGDA_NEW_TOKEN_IMPL=$VRGDA_NEW_TOKEN_IMPL \
 VRGDA_NEW_CULTURE_INDEX_IMPL=$VRGDA_NEW_CULTURE_INDEX_IMPL \
+TOKEN_SALE_IMPL=$TOKEN_SALE_IMPL \
 TOKEN_SALE_PROXY=$TOKEN_SALE_PROXY \
+VRGDA_MIN_PRICE_WEI=$VRGDA_MIN_PRICE_WEI \
+VRGDA_TARGET_PRICE_WAD=$VRGDA_TARGET_PRICE_WAD \
+VRGDA_PRICE_DECAY_PERCENT_WAD=$VRGDA_PRICE_DECAY_PERCENT_WAD \
+VRGDA_TOKENS_PER_TIME_UNIT_WAD=$VRGDA_TOKENS_PER_TIME_UNIT_WAD \
 forge script script/vrgda/VerifyVrbsVRGDAMigration.s.sol:VerifyVrbsVRGDAMigration \
   --rpc-url $BASE_RPC_URL
 ```
 
 The verifier checks final implementations, auction paused/settled state, token
-minter, CultureIndex owner, TokenSale owner/unpause state, WETH/emitter wiring,
-sale start binding, and legacy quorum cutoff state.
+minter, CultureIndex owner, TokenSale implementation/owner/unpause state,
+WETH/emitter wiring, sale start binding, and legacy quorum cutoff state.

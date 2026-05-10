@@ -1,7 +1,9 @@
 // SPDX-License-Identifier: GPL-3.0-or-later
 pragma solidity 0.8.22;
 
-import { console2 } from "forge-std/console2.sol";
+import {console2} from "forge-std/console2.sol";
+
+import {IRevolutionTokenSale} from "../../src/interfaces/IRevolutionTokenSale.sol";
 
 import {
     VrbsAddresses,
@@ -20,10 +22,15 @@ contract VerifyVrbsVRGDAMigration is VrbsMigrationHelpers {
 
         address expectedTokenImpl = vm.envAddress("VRGDA_NEW_TOKEN_IMPL");
         address expectedCultureIndexImpl = vm.envAddress("VRGDA_NEW_CULTURE_INDEX_IMPL");
+        address expectedTokenSaleImpl = vm.envAddress("TOKEN_SALE_IMPL");
         address tokenSale = vm.envAddress("TOKEN_SALE_PROXY");
+        IRevolutionTokenSale.TokenSaleParams memory expectedParams = _readSaleParams();
+        _validateSaleParams(expectedParams);
+        _requireSaleStartSentinel(expectedParams);
 
         _requireCode(expectedTokenImpl, "VRGDA_NEW_TOKEN_IMPL");
         _requireCode(expectedCultureIndexImpl, "VRGDA_NEW_CULTURE_INDEX_IMPL");
+        _requireCode(expectedTokenSaleImpl, "TOKEN_SALE_IMPL");
         _requireCode(tokenSale, "TOKEN_SALE_PROXY");
 
         _requireDaoExecutionWiring();
@@ -32,6 +39,7 @@ contract VerifyVrbsVRGDAMigration is VrbsMigrationHelpers {
             _implementationOf(VrbsAddresses.CULTURE_INDEX) == expectedCultureIndexImpl,
             "culture index implementation mismatch"
         );
+        require(_implementationOf(tokenSale) == expectedTokenSaleImpl, "token sale implementation mismatch");
         require(IAuctionHouseRead(VrbsAddresses.AUCTION).paused(), "auction is not paused");
         require(!_auctionHasUnsettledToken(), "auction still has unsettled token");
         require(IRevolutionTokenRead(VrbsAddresses.TOKEN).minter() == tokenSale, "token minter is not token sale");
@@ -54,6 +62,7 @@ contract VerifyVrbsVRGDAMigration is VrbsMigrationHelpers {
             "sale WETH mismatch"
         );
         require(IRevolutionTokenSaleRead(tokenSale).WETH().code.length != 0, "sale WETH has no code");
+        _assertSaleParams(tokenSale, expectedParams, false);
         require(IRevolutionTokenSaleRead(tokenSale).getCurrentPrice() > 0, "sale price is zero");
         require(IRevolutionTokenSaleRead(tokenSale).saleStartTime() != type(uint256).max, "sale start was not bound");
         require(IRevolutionTokenSaleRead(tokenSale).saleStartTime() <= block.timestamp, "sale start is in future");

@@ -1,14 +1,14 @@
 // SPDX-License-Identifier: GPL-3.0-or-later
 pragma solidity 0.8.22;
 
-import { console2 } from "forge-std/console2.sol";
+import {console2} from "forge-std/console2.sol";
 
-import { ERC1967Proxy } from "@cobuild/utility-contracts/src/proxy/ERC1967Proxy.sol";
+import {ERC1967Proxy} from "@cobuild/utility-contracts/src/proxy/ERC1967Proxy.sol";
 
-import { CultureIndex } from "../../src/culture-index/CultureIndex.sol";
-import { RevolutionToken } from "../../src/RevolutionToken.sol";
-import { RevolutionTokenSale } from "../../src/RevolutionTokenSale.sol";
-import { IRevolutionTokenSale } from "../../src/interfaces/IRevolutionTokenSale.sol";
+import {CultureIndex} from "../../src/culture-index/CultureIndex.sol";
+import {RevolutionToken} from "../../src/RevolutionToken.sol";
+import {RevolutionTokenSale} from "../../src/RevolutionTokenSale.sol";
+import {IRevolutionTokenSale} from "../../src/interfaces/IRevolutionTokenSale.sol";
 
 import {
     VrbsAddresses,
@@ -46,7 +46,7 @@ contract DeployVrbsVRGDASale is VrbsMigrationHelpers {
         uint256 key = vm.envUint("PRIVATE_KEY");
         address deployer = vm.addr(key);
 
-        address protocolRewards = vm.envAddress("PROTOCOL_REWARDS");
+        address protocolRewards = VrbsAddresses.PROTOCOL_REWARDS;
         address protocolFeeRecipient = vm.envAddress("PROTOCOL_FEE_RECIPIENT");
         address tokenSaleOwner = vm.envOr("TOKEN_SALE_OWNER", VrbsAddresses.EXECUTOR);
         address weth = IAuctionHouseRead(VrbsAddresses.AUCTION).WETH();
@@ -59,6 +59,7 @@ contract DeployVrbsVRGDASale is VrbsMigrationHelpers {
 
         IRevolutionTokenSale.TokenSaleParams memory params = _readSaleParams();
         _validateSaleParams(params);
+        _requireSaleStartSentinel(params);
 
         DeploymentResult memory result;
         result.manager = address(_manager());
@@ -167,11 +168,44 @@ contract DeployVrbsVRGDASale is VrbsMigrationHelpers {
         vm.writeLine(filePath, "");
         vm.writeLine(filePath, string.concat("export VRGDA_NEW_TOKEN_IMPL=", _addressToString(result.tokenImpl)));
         vm.writeLine(
-            filePath,
-            string.concat("export VRGDA_NEW_CULTURE_INDEX_IMPL=", _addressToString(result.cultureIndexImpl))
+            filePath, string.concat("export VRGDA_NEW_CULTURE_INDEX_IMPL=", _addressToString(result.cultureIndexImpl))
         );
         vm.writeLine(filePath, string.concat("export TOKEN_SALE_IMPL=", _addressToString(result.tokenSaleImpl)));
         vm.writeLine(filePath, string.concat("export TOKEN_SALE_PROXY=", _addressToString(result.tokenSaleProxy)));
+        vm.writeLine(filePath, string.concat("export VRGDA_MIN_PRICE_WEI=", _uintToString(params.minPriceWei)));
+        vm.writeLine(filePath, string.concat("export VRGDA_CREATOR_RATE_BPS=", _uintToString(params.creatorRateBps)));
+        vm.writeLine(filePath, string.concat("export VRGDA_ENTROPY_RATE_BPS=", _uintToString(params.entropyRateBps)));
+        vm.writeLine(
+            filePath, string.concat("export VRGDA_MIN_CREATOR_RATE_BPS=", _uintToString(params.minCreatorRateBps))
+        );
+        vm.writeLine(
+            filePath, string.concat("export VRGDA_GRANTS_RATE_BPS=", _uintToString(params.grantsParams.totalRateBps))
+        );
+        vm.writeLine(
+            filePath, string.concat("export VRGDA_GRANTS_ADDRESS=", _addressToString(params.grantsParams.grantsAddress))
+        );
+        vm.writeLine(
+            filePath,
+            string.concat("export VRGDA_TARGET_PRICE_WAD=", _uintToString(uint256(params.vrgdaParams.targetPrice)))
+        );
+        vm.writeLine(
+            filePath,
+            string.concat(
+                "export VRGDA_PRICE_DECAY_PERCENT_WAD=", _uintToString(uint256(params.vrgdaParams.priceDecayPercent))
+            )
+        );
+        vm.writeLine(
+            filePath,
+            string.concat(
+                "export VRGDA_TOKENS_PER_TIME_UNIT_WAD=", _uintToString(uint256(params.vrgdaParams.tokensPerTimeUnit))
+            )
+        );
+        vm.writeLine(filePath, string.concat("export VRGDA_SALE_START_TIME=", _uintToString(params.saleStartTime)));
+        vm.writeLine(filePath, string.concat("export VRGDA_SOLD_BY_VRGDA=", _uintToString(params.soldByVRGDA)));
+        vm.writeLine(
+            filePath, string.concat("export VRGDA_PRICE_UPDATE_INTERVAL=", _uintToString(params.priceUpdateInterval))
+        );
+        vm.writeLine(filePath, string.concat("export VRGDA_POOL_SIZE=", _uintToString(params.poolSize)));
 
         console2.log("Deployment output written to");
         console2.log(filePath);

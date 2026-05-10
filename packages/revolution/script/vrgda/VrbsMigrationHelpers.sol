@@ -1,14 +1,14 @@
 // SPDX-License-Identifier: GPL-3.0-or-later
 pragma solidity 0.8.22;
 
-import { Script } from "forge-std/Script.sol";
-import { Strings } from "@openzeppelin/contracts/utils/Strings.sol";
+import {Script} from "forge-std/Script.sol";
+import {Strings} from "@openzeppelin/contracts/utils/Strings.sol";
 
-import { IUpgradeManager } from "@cobuild/utility-contracts/src/interfaces/IUpgradeManager.sol";
-import { ICultureIndex } from "../../src/interfaces/ICultureIndex.sol";
-import { IRevolutionBuilder } from "../../src/interfaces/IRevolutionBuilder.sol";
-import { IRevolutionToken } from "../../src/interfaces/IRevolutionToken.sol";
-import { IRevolutionTokenSale } from "../../src/interfaces/IRevolutionTokenSale.sol";
+import {IUpgradeManager} from "@cobuild/utility-contracts/src/interfaces/IUpgradeManager.sol";
+import {ICultureIndex} from "../../src/interfaces/ICultureIndex.sol";
+import {IRevolutionBuilder} from "../../src/interfaces/IRevolutionBuilder.sol";
+import {IRevolutionToken} from "../../src/interfaces/IRevolutionToken.sol";
+import {IRevolutionTokenSale} from "../../src/interfaces/IRevolutionTokenSale.sol";
 
 /// @notice Live Vrbs community addresses on Base.
 library VrbsAddresses {
@@ -91,6 +91,9 @@ interface IRevolutionTokenSaleRead is IRevolutionTokenSale, IPausableRead, IOwna
     function soldByVRGDA() external view returns (uint256);
     function priceUpdateInterval() external view returns (uint256);
     function poolSize() external view returns (uint256);
+    function targetPrice() external view returns (int256);
+    function priceDecayPercent() external view returns (int256);
+    function tokensPerTimeUnit() external view returns (int256);
 }
 
 interface IRevolutionPointsEmitterRead is IPausableRead, IOwnableRead {
@@ -150,13 +153,13 @@ abstract contract VrbsMigrationHelpers is Script {
         returns (uint256 tokenId, uint256 amount, uint256 startTime, uint256 endTime, address bidder, bool settled)
     {
         address referral;
-        (tokenId, amount, startTime, endTime, bidder, referral, settled) = IAuctionHouseRead(VrbsAddresses.AUCTION)
-            .auction();
+        (tokenId, amount, startTime, endTime, bidder, referral, settled) =
+            IAuctionHouseRead(VrbsAddresses.AUCTION).auction();
         referral;
     }
 
     function _auctionHasUnsettledToken() internal view returns (bool) {
-        (, , uint256 startTime, , , bool settled) = _auctionState();
+        (,, uint256 startTime,,, bool settled) = _auctionState();
         return startTime != 0 && !settled;
     }
 
@@ -221,16 +224,20 @@ abstract contract VrbsMigrationHelpers is Script {
         require(tokenSale != emitter.founderAddress(), "token sale is points emitter founder");
     }
 
-    function _requireRegisteredUpgrades(address newTokenImpl, address newCultureIndexImpl, address tokenSale)
-        internal
-        view
-    {
+    function _requireRegisteredUpgrades(
+        address newTokenImpl,
+        address newCultureIndexImpl,
+        address tokenSale,
+        address expectedTokenSaleImpl
+    ) internal view {
         IUpgradeManager manager = _manager();
         address oldTokenImpl = _implementationOf(VrbsAddresses.TOKEN);
         address oldCultureIndexImpl = _implementationOf(VrbsAddresses.CULTURE_INDEX);
         address oldAuctionImpl = _implementationOf(VrbsAddresses.AUCTION);
         address tokenSaleImpl = _implementationOf(tokenSale);
 
+        _requireCode(expectedTokenSaleImpl, "TOKEN_SALE_IMPL");
+        require(tokenSaleImpl == expectedTokenSaleImpl, "token sale implementation mismatch");
         require(manager.isRegisteredUpgrade(oldTokenImpl, newTokenImpl), "token upgrade not registered");
         require(manager.isRegisteredUpgrade(oldCultureIndexImpl, newCultureIndexImpl), "culture upgrade not registered");
         require(!manager.isRegisteredUpgrade(oldAuctionImpl, tokenSaleImpl), "auction => token sale is registered");
@@ -241,22 +248,23 @@ abstract contract VrbsMigrationHelpers is Script {
         _requireCode(protocolRewards, "PROTOCOL_REWARDS");
     }
 
-    function _requireTokenSaleReadyForProposal(address tokenSale) internal view {
-        IRevolutionTokenSaleRead sale = IRevolutionTokenSaleRead(tokenSale);
-
-        require(sale.paused(), "token sale must still be paused before proposal execution");
-        require(sale.owner() == VrbsAddresses.EXECUTOR, "token sale owner is not executor");
-        require(address(sale.revolutionToken()) == VrbsAddresses.TOKEN, "sale token mismatch");
-        require(sale.revolutionPointsEmitter() == VrbsAddresses.POINTS_EMITTER, "sale points emitter mismatch");
-        require(sale.WETH() == IAuctionHouseRead(VrbsAddresses.AUCTION).WETH(), "sale WETH mismatch");
-        require(sale.getCurrentPrice() > 0, "sale current price is zero");
+    function _requireTokenSaleReadyForProposal(
+        address tokenSale,
+        IRevolutionTokenSale.TokenSaleParams memory expectedParams
+    ) internal view {
+        _requireSaleStartSentinel(expectedParams);
+        _assertSaleConfig(
+            tokenSale, VrbsAddresses.EXECUTOR, IAuctionHouseRead(VrbsAddresses.AUCTION).WETH(), expectedParams
+        );
     }
 
-    function _preflightVrbsVRGDAProposal(address newTokenImpl, address newCultureIndexImpl, address tokenSale)
-        internal
-        view
-        returns (bool acceptCultureOwnership)
-    {
+    function _preflightVrbsVRGDAProposal(
+        address newTokenImpl,
+        address newCultureIndexImpl,
+        address tokenSale,
+        address expectedTokenSaleImpl,
+        IRevolutionTokenSale.TokenSaleParams memory expectedParams
+    ) internal view returns (bool acceptCultureOwnership) {
         _requireCode(newTokenImpl, "VRGDA_NEW_TOKEN_IMPL");
         _requireCode(newCultureIndexImpl, "VRGDA_NEW_CULTURE_INDEX_IMPL");
         _requireCode(tokenSale, "TOKEN_SALE_PROXY");
@@ -266,10 +274,10 @@ abstract contract VrbsMigrationHelpers is Script {
         _requireTokenCanCutOver();
         acceptCultureOwnership = _requireOwnersForAtomicCutover(tokenSale);
         _requirePointsEmitterSafe(tokenSale);
-        _requireRegisteredUpgrades(newTokenImpl, newCultureIndexImpl, tokenSale);
-        _requireTokenSaleReadyForProposal(tokenSale);
+        _requireRegisteredUpgrades(newTokenImpl, newCultureIndexImpl, tokenSale, expectedTokenSaleImpl);
+        _requireTokenSaleReadyForProposal(tokenSale, expectedParams);
 
-        (, , , , , bool settled) = _auctionState();
+        (,,,,, bool settled) = _auctionState();
         require(settled, "auction state is not settled");
     }
 
@@ -318,6 +326,10 @@ abstract contract VrbsMigrationHelpers is Script {
         require(params.vrgdaParams.priceDecayPercent < 1e18, "price decay must be below 1e18");
     }
 
+    function _requireSaleStartSentinel(IRevolutionTokenSale.TokenSaleParams memory params) internal pure {
+        require(params.saleStartTime == type(uint256).max, "sale start must use execution sentinel");
+    }
+
     function _buildCommunityActions(
         address newTokenImpl,
         address newCultureIndexImpl,
@@ -354,16 +366,15 @@ abstract contract VrbsMigrationHelpers is Script {
 
         targets[offset + 2] = VrbsAddresses.CULTURE_INDEX;
         calldatas[offset + 2] = abi.encodeWithSelector(
-            ICultureIndex.setLegacyQuorumExcludedTokenHolder.selector,
-            VrbsAddresses.AUCTION,
-            type(uint256).max
+            ICultureIndex.setLegacyQuorumExcludedTokenHolder.selector, VrbsAddresses.AUCTION, type(uint256).max
         );
 
         targets[offset + 3] = VrbsAddresses.TOKEN;
         calldatas[offset + 3] = abi.encodeWithSelector(IRevolutionToken.setMinter.selector, tokenSale);
 
         targets[offset + 4] = tokenSale;
-        calldatas[offset + 4] = abi.encodeWithSelector(IRevolutionTokenSale.setSaleStartTime.selector, type(uint256).max);
+        calldatas[offset + 4] =
+            abi.encodeWithSelector(IRevolutionTokenSale.setSaleStartTime.selector, type(uint256).max);
 
         targets[offset + 5] = tokenSale;
         calldatas[offset + 5] = abi.encodeWithSelector(IRevolutionTokenSale.unpause.selector);
@@ -391,6 +402,10 @@ abstract contract VrbsMigrationHelpers is Script {
 
     function _addressToString(address addr) internal pure returns (string memory) {
         return Strings.toHexString(uint160(addr), 20);
+    }
+
+    function _uintToString(uint256 value) internal pure returns (string memory) {
+        return value.toString();
     }
 
     function _bytesToHexString(bytes memory data) internal pure returns (string memory) {
@@ -423,16 +438,29 @@ abstract contract VrbsMigrationHelpers is Script {
         require(address(sale.revolutionToken()) == VrbsAddresses.TOKEN, "token sale token mismatch");
         require(sale.revolutionPointsEmitter() == VrbsAddresses.POINTS_EMITTER, "token sale points emitter mismatch");
         require(sale.WETH() == weth, "token sale WETH mismatch");
+        _assertSaleParams(tokenSale, params, true);
+        require(sale.getCurrentPrice() > 0, "token sale current price is zero");
+    }
+
+    function _assertSaleParams(
+        address tokenSale,
+        IRevolutionTokenSale.TokenSaleParams memory params,
+        bool checkSaleStartTime
+    ) internal view {
+        IRevolutionTokenSaleRead sale = IRevolutionTokenSaleRead(tokenSale);
+
         require(sale.minPriceWei() == params.minPriceWei, "token sale min price mismatch");
         require(sale.creatorRateBps() == params.creatorRateBps, "token sale creator rate mismatch");
         require(sale.minCreatorRateBps() == params.minCreatorRateBps, "token sale min creator rate mismatch");
         require(sale.entropyRateBps() == params.entropyRateBps, "token sale entropy rate mismatch");
         require(sale.grantsAddress() == params.grantsParams.grantsAddress, "token sale grants address mismatch");
         require(sale.grantsRateBps() == params.grantsParams.totalRateBps, "token sale grants rate mismatch");
-        require(sale.saleStartTime() == params.saleStartTime, "token sale start mismatch");
+        if (checkSaleStartTime) require(sale.saleStartTime() == params.saleStartTime, "token sale start mismatch");
         require(sale.soldByVRGDA() == params.soldByVRGDA, "token sale sold count mismatch");
         require(sale.priceUpdateInterval() == params.priceUpdateInterval, "token sale price interval mismatch");
         require(sale.poolSize() == params.poolSize, "token sale pool size mismatch");
-        require(sale.getCurrentPrice() > 0, "token sale current price is zero");
+        require(sale.targetPrice() == params.vrgdaParams.targetPrice, "token sale target price mismatch");
+        require(sale.priceDecayPercent() == params.vrgdaParams.priceDecayPercent, "token sale decay mismatch");
+        require(sale.tokensPerTimeUnit() == params.vrgdaParams.tokensPerTimeUnit, "token sale tokens/time mismatch");
     }
 }

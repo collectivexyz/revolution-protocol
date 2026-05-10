@@ -1,10 +1,12 @@
 // SPDX-License-Identifier: GPL-3.0-or-later
 pragma solidity 0.8.22;
 
-import { console2 } from "forge-std/console2.sol";
-import { Strings } from "@openzeppelin/contracts/utils/Strings.sol";
+import {console2} from "forge-std/console2.sol";
+import {Strings} from "@openzeppelin/contracts/utils/Strings.sol";
 
-import { VrbsAddresses, VrbsMigrationHelpers, IVrbsDAO } from "./VrbsMigrationHelpers.sol";
+import {IRevolutionTokenSale} from "../../src/interfaces/IRevolutionTokenSale.sol";
+
+import {VrbsAddresses, VrbsMigrationHelpers, IVrbsDAO} from "./VrbsMigrationHelpers.sol";
 
 /// @notice Read-only helper that writes the exact Vrbs DAO proposal inputs and full propose calldata.
 /// @dev Use the generated file in the BaseScan DAO write-contract UI or submit through SubmitVrbsVRGDAProposal.
@@ -17,31 +19,28 @@ contract BuildVrbsVRGDAProposal is VrbsMigrationHelpers {
 
         address newTokenImpl = vm.envAddress("VRGDA_NEW_TOKEN_IMPL");
         address newCultureIndexImpl = vm.envAddress("VRGDA_NEW_CULTURE_INDEX_IMPL");
+        address expectedTokenSaleImpl = vm.envAddress("TOKEN_SALE_IMPL");
         address tokenSale = vm.envAddress("TOKEN_SALE_PROXY");
         string memory description = _proposalDescription();
+        IRevolutionTokenSale.TokenSaleParams memory expectedParams = _readSaleParams();
+        _validateSaleParams(expectedParams);
 
-        bool acceptCultureOwnership = _preflightVrbsVRGDAProposal(newTokenImpl, newCultureIndexImpl, tokenSale);
-
-        (
-            address[] memory targets,
-            uint256[] memory values,
-            string[] memory signatures,
-            bytes[] memory calldatas
-        ) = _buildCommunityActions(newTokenImpl, newCultureIndexImpl, tokenSale, acceptCultureOwnership);
-
-        bytes memory proposeCalldata = abi.encodeWithSelector(
-            IVrbsDAO.propose.selector,
-            targets,
-            values,
-            signatures,
-            calldatas,
-            description
+        bool acceptCultureOwnership = _preflightVrbsVRGDAProposal(
+            newTokenImpl, newCultureIndexImpl, tokenSale, expectedTokenSaleImpl, expectedParams
         );
+
+        (address[] memory targets, uint256[] memory values, string[] memory signatures, bytes[] memory calldatas) =
+            _buildCommunityActions(newTokenImpl, newCultureIndexImpl, tokenSale, acceptCultureOwnership);
+
+        bytes memory proposeCalldata =
+            abi.encodeWithSelector(IVrbsDAO.propose.selector, targets, values, signatures, calldatas, description);
 
         string memory filePath = _outputFile("dao-proposal");
         vm.writeFile(filePath, "");
         vm.writeLine(filePath, "# Vrbs DAO VRGDA migration proposal");
-        vm.writeLine(filePath, "# DAO: https://basescan.org/address/0x613B7dDCA4B05355B3541F8c018B374987549E79#writeContract");
+        vm.writeLine(
+            filePath, "# DAO: https://basescan.org/address/0x613B7dDCA4B05355B3541F8c018B374987549E79#writeContract"
+        );
         vm.writeLine(filePath, "# Use the propose(...) fields below, or submit the full proposeCalldata.");
         vm.writeLine(filePath, "# Action order must not be changed.");
         vm.writeLine(filePath, "");
@@ -51,6 +50,7 @@ contract BuildVrbsVRGDAProposal is VrbsMigrationHelpers {
         _writeAddressLine(filePath, "CultureIndex", VrbsAddresses.CULTURE_INDEX);
         _writeAddressLine(filePath, "Auction", VrbsAddresses.AUCTION);
         _writeAddressLine(filePath, "TokenSale", tokenSale);
+        _writeAddressLine(filePath, "TokenSaleImpl", expectedTokenSaleImpl);
         _writeAddressLine(filePath, "NewTokenImpl", newTokenImpl);
         _writeAddressLine(filePath, "NewCultureIndexImpl", newCultureIndexImpl);
         _writeStringLine(filePath, "acceptCultureOwnership", acceptCultureOwnership ? "true" : "false");
