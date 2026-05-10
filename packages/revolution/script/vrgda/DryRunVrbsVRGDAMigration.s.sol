@@ -69,8 +69,8 @@ contract DryRunVrbsVRGDAMigration is VrbsMigrationHelpers {
         _requireAuctionPausedAndSettled();
         _requireTokenCanCutOver();
 
-        address protocolFeeRecipient = vm.envAddress("PROTOCOL_FEE_RECIPIENT");
-        require(protocolFeeRecipient != address(0), "PROTOCOL_FEE_RECIPIENT is zero");
+        address protocolFeeRecipient = _readProtocolFeeRecipient();
+        uint256 maxLaunchPriceWei = _readMaxLaunchPriceWei();
 
         IRevolutionTokenSale.TokenSaleParams memory params = _readSaleParams();
         _validateSaleParams(params);
@@ -78,8 +78,14 @@ contract DryRunVrbsVRGDAMigration is VrbsMigrationHelpers {
 
         ProposalArtifacts memory artifacts = _readProposalArtifacts();
 
-        bool acceptCultureOwnership = _preflightVrbsVRGDAProposal(
-            artifacts.tokenImpl, artifacts.cultureIndexImpl, artifacts.tokenSaleProxy, artifacts.tokenSaleImpl, params
+        (bool acceptCultureOwnership, uint256 launchPriceWei) = _preflightVrbsVRGDAProposal(
+            artifacts.tokenImpl,
+            artifacts.cultureIndexImpl,
+            artifacts.tokenSaleProxy,
+            artifacts.tokenSaleImpl,
+            params,
+            protocolFeeRecipient,
+            maxLaunchPriceWei
         );
 
         (address[] memory targets, uint256[] memory values, string[] memory signatures, bytes[] memory calldatas) = _buildCommunityActions(
@@ -87,12 +93,14 @@ contract DryRunVrbsVRGDAMigration is VrbsMigrationHelpers {
         );
 
         _executeAsExecutor(targets, values, signatures, calldatas);
-        _assertPostCutover(artifacts, params);
+        _assertPostCutover(artifacts, params, protocolFeeRecipient, maxLaunchPriceWei);
         _buyFirstToken(artifacts.tokenSaleProxy, protocolFeeRecipient);
 
         console2.log("Vrbs VRGDA fork dry-run passed");
         console2.log("TokenSale proxy");
         console2.logAddress(artifacts.tokenSaleProxy);
+        console2.log("Launch price", launchPriceWei);
+        console2.log("Max launch price", maxLaunchPriceWei);
         console2.log("Current price", IRevolutionTokenSaleRead(artifacts.tokenSaleProxy).getCurrentPrice());
     }
 
@@ -124,10 +132,12 @@ contract DryRunVrbsVRGDAMigration is VrbsMigrationHelpers {
         }
     }
 
-    function _assertPostCutover(ProposalArtifacts memory artifacts, IRevolutionTokenSale.TokenSaleParams memory params)
-        internal
-        view
-    {
+    function _assertPostCutover(
+        ProposalArtifacts memory artifacts,
+        IRevolutionTokenSale.TokenSaleParams memory params,
+        address expectedProtocolFeeRecipient,
+        uint256 maxLaunchPriceWei
+    ) internal view {
         IRevolutionTokenSaleRead sale = IRevolutionTokenSaleRead(artifacts.tokenSaleProxy);
 
         require(_implementationOf(VrbsAddresses.TOKEN) == artifacts.tokenImpl, "token impl mismatch");
@@ -142,7 +152,9 @@ contract DryRunVrbsVRGDAMigration is VrbsMigrationHelpers {
         require(address(sale.revolutionToken()) == VrbsAddresses.TOKEN, "sale token mismatch");
         require(sale.revolutionPointsEmitter() == VrbsAddresses.POINTS_EMITTER, "sale emitter mismatch");
         require(sale.WETH() == IAuctionHouseRead(VrbsAddresses.AUCTION).WETH(), "sale WETH mismatch");
+        require(sale.protocolFeeRecipient() == expectedProtocolFeeRecipient, "sale protocol fee recipient mismatch");
         _assertSaleParams(artifacts.tokenSaleProxy, params, false);
+        _assertLaunchPrice(artifacts.tokenSaleProxy, maxLaunchPriceWei);
         require(sale.saleStartTime() != type(uint256).max, "sale start sentinel not bound");
         require(sale.saleStartTime() == block.timestamp, "sale start not bound to execution block");
         require(

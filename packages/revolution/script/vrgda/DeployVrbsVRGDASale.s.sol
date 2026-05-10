@@ -14,8 +14,7 @@ import {
     VrbsAddresses,
     VrbsMigrationHelpers,
     IAuctionHouseRead,
-    IRevolutionPointsEmitterRead,
-    IRevolutionTokenSaleRead
+    IRevolutionPointsEmitterRead
 } from "./VrbsMigrationHelpers.sol";
 
 /// @notice Deploys the one-community Vrbs VRGDA migration artifacts on Base:
@@ -47,13 +46,13 @@ contract DeployVrbsVRGDASale is VrbsMigrationHelpers {
         address deployer = vm.addr(key);
 
         address protocolRewards = VrbsAddresses.PROTOCOL_REWARDS;
-        address protocolFeeRecipient = vm.envAddress("PROTOCOL_FEE_RECIPIENT");
+        address protocolFeeRecipient = _readProtocolFeeRecipient();
+        uint256 maxLaunchPriceWei = _readMaxLaunchPriceWei();
         address tokenSaleOwner = vm.envOr("TOKEN_SALE_OWNER", VrbsAddresses.EXECUTOR);
         address weth = IAuctionHouseRead(VrbsAddresses.AUCTION).WETH();
 
         _requireProtocolRewards(protocolRewards);
         _requireCode(weth, "auction WETH");
-        require(protocolFeeRecipient != address(0), "PROTOCOL_FEE_RECIPIENT is zero");
         require(tokenSaleOwner == VrbsAddresses.EXECUTOR, "TOKEN_SALE_OWNER must be Vrbs Executor for DAO cutover");
         require(!IRevolutionPointsEmitterRead(VrbsAddresses.POINTS_EMITTER).paused(), "points emitter is paused");
 
@@ -85,6 +84,7 @@ contract DeployVrbsVRGDASale is VrbsMigrationHelpers {
         console2.logAddress(protocolRewards);
         console2.log("PROTOCOL FEE RECIPIENT");
         console2.logAddress(protocolFeeRecipient);
+        console2.log("MAX LAUNCH PRICE WEI", maxLaunchPriceWei);
 
         vm.startBroadcast(key);
 
@@ -104,7 +104,9 @@ contract DeployVrbsVRGDASale is VrbsMigrationHelpers {
 
         vm.stopBroadcast();
 
-        _assertSaleConfig(result.tokenSaleProxy, tokenSaleOwner, weth, params);
+        uint256 launchPriceWei = _assertSaleConfig(
+            result.tokenSaleProxy, tokenSaleOwner, weth, params, protocolFeeRecipient, maxLaunchPriceWei
+        );
         _requirePointsEmitterSafe(result.tokenSaleProxy);
 
         console2.log("NEW TOKEN IMPL");
@@ -115,9 +117,18 @@ contract DeployVrbsVRGDASale is VrbsMigrationHelpers {
         console2.logAddress(result.tokenSaleImpl);
         console2.log("TOKEN SALE PROXY");
         console2.logAddress(result.tokenSaleProxy);
-        console2.log("TOKEN SALE CURRENT PRICE", IRevolutionTokenSaleRead(result.tokenSaleProxy).getCurrentPrice());
+        console2.log("TOKEN SALE LAUNCH PRICE WEI", launchPriceWei);
 
-        _writeDeploymentFile(protocolRewards, protocolFeeRecipient, tokenSaleOwner, weth, params, result);
+        _writeDeploymentFile(
+            protocolRewards,
+            protocolFeeRecipient,
+            tokenSaleOwner,
+            weth,
+            params,
+            result,
+            maxLaunchPriceWei,
+            launchPriceWei
+        );
     }
 
     function _writeDeploymentFile(
@@ -126,7 +137,9 @@ contract DeployVrbsVRGDASale is VrbsMigrationHelpers {
         address tokenSaleOwner,
         address weth,
         IRevolutionTokenSale.TokenSaleParams memory params,
-        DeploymentResult memory result
+        DeploymentResult memory result,
+        uint256 maxLaunchPriceWei,
+        uint256 launchPriceWei
     ) internal {
         string memory filePath = _outputFile("deploy");
         vm.writeFile(filePath, "");
@@ -164,8 +177,12 @@ contract DeployVrbsVRGDASale is VrbsMigrationHelpers {
         _writeUintLine(filePath, "SoldByVRGDA", params.soldByVRGDA);
         _writeUintLine(filePath, "PriceUpdateInterval", params.priceUpdateInterval);
         _writeUintLine(filePath, "PoolSize", params.poolSize);
+        _writeUintLine(filePath, "LaunchPriceWei", launchPriceWei);
+        _writeUintLine(filePath, "MaxLaunchPriceWei", maxLaunchPriceWei);
 
         vm.writeLine(filePath, "");
+        vm.writeLine(filePath, string.concat("export PROTOCOL_FEE_RECIPIENT=", _addressToString(protocolFeeRecipient)));
+        vm.writeLine(filePath, string.concat("export VRGDA_MAX_LAUNCH_PRICE_WEI=", _uintToString(maxLaunchPriceWei)));
         vm.writeLine(filePath, string.concat("export VRGDA_NEW_TOKEN_IMPL=", _addressToString(result.tokenImpl)));
         vm.writeLine(
             filePath, string.concat("export VRGDA_NEW_CULTURE_INDEX_IMPL=", _addressToString(result.cultureIndexImpl))

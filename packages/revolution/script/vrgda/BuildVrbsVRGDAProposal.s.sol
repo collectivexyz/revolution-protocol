@@ -13,29 +13,65 @@ import {VrbsAddresses, VrbsMigrationHelpers, IVrbsDAO} from "./VrbsMigrationHelp
 contract BuildVrbsVRGDAProposal is VrbsMigrationHelpers {
     using Strings for uint256;
 
+    struct ProposalContext {
+        address newTokenImpl;
+        address newCultureIndexImpl;
+        address expectedTokenSaleImpl;
+        address tokenSale;
+        address expectedProtocolFeeRecipient;
+        uint256 maxLaunchPriceWei;
+        string description;
+        IRevolutionTokenSale.TokenSaleParams expectedParams;
+        bool acceptCultureOwnership;
+        uint256 launchPriceWei;
+    }
+
     function run() external {
+        ProposalContext memory ctx = _loadProposalContext();
+
+        _writeProposal(ctx);
+        _logProposal(ctx);
+    }
+
+    function _loadProposalContext() internal returns (ProposalContext memory ctx) {
         _requireBase();
         _requireVrbsContractsHaveCode();
 
-        address newTokenImpl = vm.envAddress("VRGDA_NEW_TOKEN_IMPL");
-        address newCultureIndexImpl = vm.envAddress("VRGDA_NEW_CULTURE_INDEX_IMPL");
-        address expectedTokenSaleImpl = vm.envAddress("TOKEN_SALE_IMPL");
-        address tokenSale = vm.envAddress("TOKEN_SALE_PROXY");
-        string memory description = _proposalDescription();
-        IRevolutionTokenSale.TokenSaleParams memory expectedParams = _readSaleParams();
-        _validateSaleParams(expectedParams);
+        ctx.newTokenImpl = vm.envAddress("VRGDA_NEW_TOKEN_IMPL");
+        ctx.newCultureIndexImpl = vm.envAddress("VRGDA_NEW_CULTURE_INDEX_IMPL");
+        ctx.expectedTokenSaleImpl = vm.envAddress("TOKEN_SALE_IMPL");
+        ctx.tokenSale = vm.envAddress("TOKEN_SALE_PROXY");
+        ctx.expectedProtocolFeeRecipient = _readProtocolFeeRecipient();
+        ctx.maxLaunchPriceWei = _readMaxLaunchPriceWei();
+        ctx.description = _proposalDescription();
+        ctx.expectedParams = _readSaleParams();
+        _validateSaleParams(ctx.expectedParams);
 
-        bool acceptCultureOwnership = _preflightVrbsVRGDAProposal(
-            newTokenImpl, newCultureIndexImpl, tokenSale, expectedTokenSaleImpl, expectedParams
+        (ctx.acceptCultureOwnership, ctx.launchPriceWei) = _preflightVrbsVRGDAProposal(
+            ctx.newTokenImpl,
+            ctx.newCultureIndexImpl,
+            ctx.tokenSale,
+            ctx.expectedTokenSaleImpl,
+            ctx.expectedParams,
+            ctx.expectedProtocolFeeRecipient,
+            ctx.maxLaunchPriceWei
         );
+    }
 
+    function _writeProposal(ProposalContext memory ctx) internal {
         (address[] memory targets, uint256[] memory values, string[] memory signatures, bytes[] memory calldatas) =
-            _buildCommunityActions(newTokenImpl, newCultureIndexImpl, tokenSale, acceptCultureOwnership);
+            _buildCommunityActions(ctx.newTokenImpl, ctx.newCultureIndexImpl, ctx.tokenSale, ctx.acceptCultureOwnership);
 
         bytes memory proposeCalldata =
-            abi.encodeWithSelector(IVrbsDAO.propose.selector, targets, values, signatures, calldatas, description);
+            abi.encodeWithSelector(IVrbsDAO.propose.selector, targets, values, signatures, calldatas, ctx.description);
 
         string memory filePath = _outputFile("dao-proposal");
+        _writeProposalHeader(filePath, ctx);
+        _writeProposalActions(filePath, targets, values, signatures, calldatas);
+        _writeProposalArrays(filePath, targets, values, signatures, calldatas, proposeCalldata);
+    }
+
+    function _writeProposalHeader(string memory filePath, ProposalContext memory ctx) internal {
         vm.writeFile(filePath, "");
         vm.writeLine(filePath, "# Vrbs DAO VRGDA migration proposal");
         vm.writeLine(
@@ -49,14 +85,25 @@ contract BuildVrbsVRGDAProposal is VrbsMigrationHelpers {
         _writeAddressLine(filePath, "RevolutionToken", VrbsAddresses.TOKEN);
         _writeAddressLine(filePath, "CultureIndex", VrbsAddresses.CULTURE_INDEX);
         _writeAddressLine(filePath, "Auction", VrbsAddresses.AUCTION);
-        _writeAddressLine(filePath, "TokenSale", tokenSale);
-        _writeAddressLine(filePath, "TokenSaleImpl", expectedTokenSaleImpl);
-        _writeAddressLine(filePath, "NewTokenImpl", newTokenImpl);
-        _writeAddressLine(filePath, "NewCultureIndexImpl", newCultureIndexImpl);
-        _writeStringLine(filePath, "acceptCultureOwnership", acceptCultureOwnership ? "true" : "false");
-        _writeStringLine(filePath, "description", description);
+        _writeAddressLine(filePath, "TokenSale", ctx.tokenSale);
+        _writeAddressLine(filePath, "TokenSaleImpl", ctx.expectedTokenSaleImpl);
+        _writeAddressLine(filePath, "ProtocolFeeRecipient", ctx.expectedProtocolFeeRecipient);
+        _writeAddressLine(filePath, "NewTokenImpl", ctx.newTokenImpl);
+        _writeAddressLine(filePath, "NewCultureIndexImpl", ctx.newCultureIndexImpl);
+        _writeUintLine(filePath, "LaunchPriceWei", ctx.launchPriceWei);
+        _writeUintLine(filePath, "MaxLaunchPriceWei", ctx.maxLaunchPriceWei);
+        _writeStringLine(filePath, "acceptCultureOwnership", ctx.acceptCultureOwnership ? "true" : "false");
+        _writeStringLine(filePath, "description", ctx.description);
         vm.writeLine(filePath, "");
+    }
 
+    function _writeProposalActions(
+        string memory filePath,
+        address[] memory targets,
+        uint256[] memory values,
+        string[] memory signatures,
+        bytes[] memory calldatas
+    ) internal {
         for (uint256 i; i < targets.length; ++i) {
             vm.writeLine(filePath, string.concat("action[", i.toString(), "]"));
             _writeAddressLine(filePath, "target", targets[i]);
@@ -65,7 +112,16 @@ contract BuildVrbsVRGDAProposal is VrbsMigrationHelpers {
             _writeBytesLine(filePath, "calldata", calldatas[i]);
             vm.writeLine(filePath, "");
         }
+    }
 
+    function _writeProposalArrays(
+        string memory filePath,
+        address[] memory targets,
+        uint256[] memory values,
+        string[] memory signatures,
+        bytes[] memory calldatas,
+        bytes memory proposeCalldata
+    ) internal {
         vm.writeLine(filePath, "# Copy/paste arrays");
         vm.writeLine(filePath, string.concat("targets: [", _addressesCsv(targets), "]"));
         vm.writeLine(filePath, string.concat("values: [", _uintsCsv(values), "]"));
@@ -73,11 +129,15 @@ contract BuildVrbsVRGDAProposal is VrbsMigrationHelpers {
         vm.writeLine(filePath, string.concat("calldatas: [", _bytesCsv(calldatas), "]"));
         vm.writeLine(filePath, "");
         _writeBytesLine(filePath, "proposeCalldata", proposeCalldata);
+    }
 
+    function _logProposal(ProposalContext memory ctx) internal pure {
         console2.log("DAO proposal output written to");
-        console2.log(filePath);
+        console2.log(_outputFile("dao-proposal"));
         console2.log("DAO");
         console2.logAddress(VrbsAddresses.DAO);
+        console2.log("TOKEN SALE LAUNCH PRICE WEI", ctx.launchPriceWei);
+        console2.log("MAX LAUNCH PRICE WEI", ctx.maxLaunchPriceWei);
     }
 
     function _addressesCsv(address[] memory values) internal pure returns (string memory out) {
@@ -94,7 +154,7 @@ contract BuildVrbsVRGDAProposal is VrbsMigrationHelpers {
 
     function _stringsCsv(string[] memory values) internal pure returns (string memory out) {
         for (uint256 i; i < values.length; ++i) {
-            out = string.concat(out, i == 0 ? "" : ",", "\"", values[i], "\"");
+            out = string.concat(out, i == 0 ? "" : ",", '"', values[i], '"');
         }
     }
 

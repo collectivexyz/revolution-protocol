@@ -24,6 +24,8 @@ contract VerifyVrbsVRGDAMigration is VrbsMigrationHelpers {
         address expectedCultureIndexImpl = vm.envAddress("VRGDA_NEW_CULTURE_INDEX_IMPL");
         address expectedTokenSaleImpl = vm.envAddress("TOKEN_SALE_IMPL");
         address tokenSale = vm.envAddress("TOKEN_SALE_PROXY");
+        address expectedProtocolFeeRecipient = _readProtocolFeeRecipient();
+        uint256 maxLaunchPriceWei = _readMaxLaunchPriceWei();
         IRevolutionTokenSale.TokenSaleParams memory expectedParams = _readSaleParams();
         _validateSaleParams(expectedParams);
         _requireSaleStartSentinel(expectedParams);
@@ -62,8 +64,12 @@ contract VerifyVrbsVRGDAMigration is VrbsMigrationHelpers {
             "sale WETH mismatch"
         );
         require(IRevolutionTokenSaleRead(tokenSale).WETH().code.length != 0, "sale WETH has no code");
+        require(
+            IRevolutionTokenSaleRead(tokenSale).protocolFeeRecipient() == expectedProtocolFeeRecipient,
+            "sale protocol fee recipient mismatch"
+        );
         _assertSaleParams(tokenSale, expectedParams, false);
-        require(IRevolutionTokenSaleRead(tokenSale).getCurrentPrice() > 0, "sale price is zero");
+        uint256 boundedPrice = _assertLaunchPrice(tokenSale, maxLaunchPriceWei);
         require(IRevolutionTokenSaleRead(tokenSale).saleStartTime() != type(uint256).max, "sale start was not bound");
         require(IRevolutionTokenSaleRead(tokenSale).saleStartTime() <= block.timestamp, "sale start is in future");
 
@@ -89,7 +95,8 @@ contract VerifyVrbsVRGDAMigration is VrbsMigrationHelpers {
         console2.log("Vrbs VRGDA migration verified");
         console2.log("TokenSale");
         console2.logAddress(tokenSale);
-        console2.log("Current price", IRevolutionTokenSaleRead(tokenSale).getCurrentPrice());
+        console2.log("Current price", boundedPrice);
+        console2.log("Max launch price", maxLaunchPriceWei);
         console2.log("Legacy quorum cutoff", ICultureIndexRead(VrbsAddresses.CULTURE_INDEX).legacyQuorumCutoffBlock());
     }
 }

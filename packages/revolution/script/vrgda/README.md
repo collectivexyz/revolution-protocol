@@ -44,6 +44,7 @@ Required env:
 
 - `PRIVATE_KEY`: deployer key
 - `PROTOCOL_FEE_RECIPIENT`: revolution/protocol fallback reward recipient for the new TokenSale constructor
+- `VRGDA_MAX_LAUNCH_PRICE_WEI`: maximum acceptable computed launch price for the deployed TokenSale
 - `VRGDA_MIN_PRICE_WEI`
 - `VRGDA_TARGET_PRICE_WAD`
 - `VRGDA_PRICE_DECAY_PERCENT_WAD`
@@ -65,6 +66,7 @@ Optional env:
 ```bash
 PRIVATE_KEY=$DEPLOYER_PRIVATE_KEY \
 PROTOCOL_FEE_RECIPIENT=0x... \
+VRGDA_MAX_LAUNCH_PRICE_WEI=2000000000000000000 \
 VRGDA_MIN_PRICE_WEI=10000000000000000 \
 VRGDA_TARGET_PRICE_WAD=1000000000000000000 \
 VRGDA_PRICE_DECAY_PERCENT_WAD=310000000000000000 \
@@ -75,11 +77,16 @@ forge script script/vrgda/DeployVrbsVRGDASale.s.sol:DeployVrbsVRGDASale \
 
 Output: `deploys/8453.vrbs-vrgda-deploy.txt`.
 
+The deploy script atomically initializes the TokenSale proxy with constructor
+calldata. Do not deploy a TokenSale proxy without init calldata.
+
 Export the generated values at the bottom of the deployment output. The proposal
 scripts use these values to assert the deployed `TOKEN_SALE_PROXY` still matches
-the reviewed economics:
+the reviewed economics, protocol fee recipient, and launch-price bound:
 
 ```bash
+export PROTOCOL_FEE_RECIPIENT=0x...
+export VRGDA_MAX_LAUNCH_PRICE_WEI=2000000000000000000
 export VRGDA_NEW_TOKEN_IMPL=0x...
 export VRGDA_NEW_CULTURE_INDEX_IMPL=0x...
 export TOKEN_SALE_IMPL=0x...
@@ -148,6 +155,8 @@ VRGDA_NEW_TOKEN_IMPL=$VRGDA_NEW_TOKEN_IMPL \
 VRGDA_NEW_CULTURE_INDEX_IMPL=$VRGDA_NEW_CULTURE_INDEX_IMPL \
 TOKEN_SALE_IMPL=$TOKEN_SALE_IMPL \
 TOKEN_SALE_PROXY=$TOKEN_SALE_PROXY \
+PROTOCOL_FEE_RECIPIENT=$PROTOCOL_FEE_RECIPIENT \
+VRGDA_MAX_LAUNCH_PRICE_WEI=$VRGDA_MAX_LAUNCH_PRICE_WEI \
 VRGDA_MIN_PRICE_WEI=$VRGDA_MIN_PRICE_WEI \
 VRGDA_TARGET_PRICE_WAD=$VRGDA_TARGET_PRICE_WAD \
 VRGDA_PRICE_DECAY_PERCENT_WAD=$VRGDA_PRICE_DECAY_PERCENT_WAD \
@@ -157,6 +166,10 @@ forge script script/vrgda/BuildVrbsVRGDAProposal.s.sol:BuildVrbsVRGDAProposal \
 ```
 
 Output: `deploys/8453.vrbs-vrgda-dao-proposal.txt`.
+
+The proposal output includes `LaunchPriceWei` and `MaxLaunchPriceWei`. Do not
+submit the proposal if the launch price is unexpected, even if it is below the
+configured maximum.
 
 Use BaseScan Write Contract on the DAO:
 
@@ -180,9 +193,11 @@ If CultureIndex ownership is pending to the Vrbs Executor, the proposal prepends
 Do not split ownership acceptance, CultureIndex upgrade, quorum cutoff, minter
 cutover, sale start binding, and TokenSale unpause across separate blocks.
 
-### 5. Dry-run the full migration and first purchase on a Base fork
+### 5. Required gate: dry-run the full migration and first purchase on a Base fork
 
-Run this before submitting or executing the DAO proposal. It uses the exact
+This is a production gate. Run it after deployment, manager registration, and
+any required CultureIndex ownership transfer, and before submitting or executing
+the DAO proposal. It uses the exact
 deployed artifacts and sale parameters from env, requires the same live-ready
 preconditions as build/submit, executes the generated DAO actions as the Vrbs
 Executor, and performs one `buyNow()` through owner, grants, creator,
@@ -190,6 +205,7 @@ PointsEmitter, protocol rewards, refund, and WETH fallback paths.
 
 ```bash
 PROTOCOL_FEE_RECIPIENT=0x... \
+VRGDA_MAX_LAUNCH_PRICE_WEI=2000000000000000000 \
 VRGDA_NEW_TOKEN_IMPL=$VRGDA_NEW_TOKEN_IMPL \
 VRGDA_NEW_CULTURE_INDEX_IMPL=$VRGDA_NEW_CULTURE_INDEX_IMPL \
 TOKEN_SALE_IMPL=$TOKEN_SALE_IMPL \
@@ -203,7 +219,13 @@ forge script script/vrgda/DryRunVrbsVRGDAMigration.s.sol:DryRunVrbsVRGDAMigratio
 ```
 
 The dry-run is intentionally non-broadcast. A failure means the proposal should
-not be submitted with those parameters.
+not be submitted with those parameters. If it passes, set
+`VRBS_VRGDA_DRY_RUN_PASSED=1` only for the submit command below.
+
+The same gate is available as the `Vrbs VRGDA Dry Run` GitHub Actions workflow.
+Configure the selected GitHub environment with `BASE_RPC_URL` as a secret and
+the generated deployment output values as environment variables, then run the
+workflow before proposal submission.
 
 ### 6. Submit the Vrbs DAO proposal
 
@@ -211,10 +233,13 @@ To submit from a proposer key instead of BaseScan:
 
 ```bash
 PRIVATE_KEY=$PROPOSER_PRIVATE_KEY \
+VRBS_VRGDA_DRY_RUN_PASSED=1 \
 VRGDA_NEW_TOKEN_IMPL=$VRGDA_NEW_TOKEN_IMPL \
 VRGDA_NEW_CULTURE_INDEX_IMPL=$VRGDA_NEW_CULTURE_INDEX_IMPL \
 TOKEN_SALE_IMPL=$TOKEN_SALE_IMPL \
 TOKEN_SALE_PROXY=$TOKEN_SALE_PROXY \
+PROTOCOL_FEE_RECIPIENT=$PROTOCOL_FEE_RECIPIENT \
+VRGDA_MAX_LAUNCH_PRICE_WEI=$VRGDA_MAX_LAUNCH_PRICE_WEI \
 VRGDA_MIN_PRICE_WEI=$VRGDA_MIN_PRICE_WEI \
 VRGDA_TARGET_PRICE_WAD=$VRGDA_TARGET_PRICE_WAD \
 VRGDA_PRICE_DECAY_PERCENT_WAD=$VRGDA_PRICE_DECAY_PERCENT_WAD \
@@ -230,6 +255,8 @@ VRGDA_NEW_TOKEN_IMPL=$VRGDA_NEW_TOKEN_IMPL \
 VRGDA_NEW_CULTURE_INDEX_IMPL=$VRGDA_NEW_CULTURE_INDEX_IMPL \
 TOKEN_SALE_IMPL=$TOKEN_SALE_IMPL \
 TOKEN_SALE_PROXY=$TOKEN_SALE_PROXY \
+PROTOCOL_FEE_RECIPIENT=$PROTOCOL_FEE_RECIPIENT \
+VRGDA_MAX_LAUNCH_PRICE_WEI=$VRGDA_MAX_LAUNCH_PRICE_WEI \
 VRGDA_MIN_PRICE_WEI=$VRGDA_MIN_PRICE_WEI \
 VRGDA_TARGET_PRICE_WAD=$VRGDA_TARGET_PRICE_WAD \
 VRGDA_PRICE_DECAY_PERCENT_WAD=$VRGDA_PRICE_DECAY_PERCENT_WAD \
@@ -240,4 +267,5 @@ forge script script/vrgda/VerifyVrbsVRGDAMigration.s.sol:VerifyVrbsVRGDAMigratio
 
 The verifier checks final implementations, auction paused/settled state, token
 minter, CultureIndex owner, TokenSale implementation/owner/unpause state,
-WETH/emitter wiring, sale start binding, and legacy quorum cutoff state.
+WETH/emitter/protocol fee recipient wiring, sale start binding, launch-price
+bound, and legacy quorum cutoff state.

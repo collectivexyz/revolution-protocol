@@ -1,0 +1,84 @@
+name: "Vrbs VRGDA Dry Run"
+
+on:
+  workflow_dispatch:
+    inputs:
+      environment:
+        description: "GitHub environment containing Vrbs VRGDA deployment variables"
+        required: true
+        type: environment
+
+jobs:
+  dry_run:
+    name: "Fork dry-run"
+    runs-on: ubuntu-latest
+    environment: ${{ inputs.environment }}
+    env:
+      BASE_RPC_URL: ${{ secrets.BASE_RPC_URL }}
+      PROTOCOL_FEE_RECIPIENT: ${{ vars.PROTOCOL_FEE_RECIPIENT }}
+      VRGDA_MAX_LAUNCH_PRICE_WEI: ${{ vars.VRGDA_MAX_LAUNCH_PRICE_WEI }}
+      VRGDA_NEW_TOKEN_IMPL: ${{ vars.VRGDA_NEW_TOKEN_IMPL }}
+      VRGDA_NEW_CULTURE_INDEX_IMPL: ${{ vars.VRGDA_NEW_CULTURE_INDEX_IMPL }}
+      TOKEN_SALE_IMPL: ${{ vars.TOKEN_SALE_IMPL }}
+      TOKEN_SALE_PROXY: ${{ vars.TOKEN_SALE_PROXY }}
+      VRGDA_MIN_PRICE_WEI: ${{ vars.VRGDA_MIN_PRICE_WEI }}
+      VRGDA_CREATOR_RATE_BPS: ${{ vars.VRGDA_CREATOR_RATE_BPS }}
+      VRGDA_ENTROPY_RATE_BPS: ${{ vars.VRGDA_ENTROPY_RATE_BPS }}
+      VRGDA_MIN_CREATOR_RATE_BPS: ${{ vars.VRGDA_MIN_CREATOR_RATE_BPS }}
+      VRGDA_GRANTS_RATE_BPS: ${{ vars.VRGDA_GRANTS_RATE_BPS }}
+      VRGDA_GRANTS_ADDRESS: ${{ vars.VRGDA_GRANTS_ADDRESS }}
+      VRGDA_TARGET_PRICE_WAD: ${{ vars.VRGDA_TARGET_PRICE_WAD }}
+      VRGDA_PRICE_DECAY_PERCENT_WAD: ${{ vars.VRGDA_PRICE_DECAY_PERCENT_WAD }}
+      VRGDA_TOKENS_PER_TIME_UNIT_WAD: ${{ vars.VRGDA_TOKENS_PER_TIME_UNIT_WAD }}
+      VRGDA_SALE_START_TIME: ${{ vars.VRGDA_SALE_START_TIME }}
+      VRGDA_SOLD_BY_VRGDA: ${{ vars.VRGDA_SOLD_BY_VRGDA }}
+      VRGDA_PRICE_UPDATE_INTERVAL: ${{ vars.VRGDA_PRICE_UPDATE_INTERVAL }}
+      VRGDA_POOL_SIZE: ${{ vars.VRGDA_POOL_SIZE }}
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup dependencies
+        uses: ./.github/actions/setup_deps
+
+      - name: Check required variables
+        shell: bash
+        run: |
+          required_vars=(
+            BASE_RPC_URL
+            PROTOCOL_FEE_RECIPIENT
+            VRGDA_MAX_LAUNCH_PRICE_WEI
+            VRGDA_NEW_TOKEN_IMPL
+            VRGDA_NEW_CULTURE_INDEX_IMPL
+            TOKEN_SALE_IMPL
+            TOKEN_SALE_PROXY
+            VRGDA_MIN_PRICE_WEI
+            VRGDA_CREATOR_RATE_BPS
+            VRGDA_ENTROPY_RATE_BPS
+            VRGDA_MIN_CREATOR_RATE_BPS
+            VRGDA_GRANTS_RATE_BPS
+            VRGDA_GRANTS_ADDRESS
+            VRGDA_TARGET_PRICE_WAD
+            VRGDA_PRICE_DECAY_PERCENT_WAD
+            VRGDA_TOKENS_PER_TIME_UNIT_WAD
+            VRGDA_SALE_START_TIME
+            VRGDA_SOLD_BY_VRGDA
+            VRGDA_PRICE_UPDATE_INTERVAL
+            VRGDA_POOL_SIZE
+          )
+
+          missing=0
+          for name in "${required_vars[@]}"; do
+            if [ -z "${!name}" ]; then
+              echo "::error::$name is required"
+              missing=1
+            fi
+          done
+          exit "$missing"
+
+      - name: Run fork dry-run
+        working-directory: packages/revolution
+        run: |
+          forge script script/vrgda/DryRunVrbsVRGDAMigration.s.sol:DryRunVrbsVRGDAMigration \
+            --rpc-url "$BASE_RPC_URL"

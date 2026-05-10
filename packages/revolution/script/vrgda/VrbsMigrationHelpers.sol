@@ -250,11 +250,18 @@ abstract contract VrbsMigrationHelpers is Script {
 
     function _requireTokenSaleReadyForProposal(
         address tokenSale,
-        IRevolutionTokenSale.TokenSaleParams memory expectedParams
-    ) internal view {
+        IRevolutionTokenSale.TokenSaleParams memory expectedParams,
+        address expectedProtocolFeeRecipient,
+        uint256 maxLaunchPriceWei
+    ) internal view returns (uint256 launchPriceWei) {
         _requireSaleStartSentinel(expectedParams);
-        _assertSaleConfig(
-            tokenSale, VrbsAddresses.EXECUTOR, IAuctionHouseRead(VrbsAddresses.AUCTION).WETH(), expectedParams
+        launchPriceWei = _assertSaleConfig(
+            tokenSale,
+            VrbsAddresses.EXECUTOR,
+            IAuctionHouseRead(VrbsAddresses.AUCTION).WETH(),
+            expectedParams,
+            expectedProtocolFeeRecipient,
+            maxLaunchPriceWei
         );
     }
 
@@ -263,8 +270,10 @@ abstract contract VrbsMigrationHelpers is Script {
         address newCultureIndexImpl,
         address tokenSale,
         address expectedTokenSaleImpl,
-        IRevolutionTokenSale.TokenSaleParams memory expectedParams
-    ) internal view returns (bool acceptCultureOwnership) {
+        IRevolutionTokenSale.TokenSaleParams memory expectedParams,
+        address expectedProtocolFeeRecipient,
+        uint256 maxLaunchPriceWei
+    ) internal view returns (bool acceptCultureOwnership, uint256 launchPriceWei) {
         _requireCode(newTokenImpl, "VRGDA_NEW_TOKEN_IMPL");
         _requireCode(newCultureIndexImpl, "VRGDA_NEW_CULTURE_INDEX_IMPL");
         _requireCode(tokenSale, "TOKEN_SALE_PROXY");
@@ -275,7 +284,9 @@ abstract contract VrbsMigrationHelpers is Script {
         acceptCultureOwnership = _requireOwnersForAtomicCutover(tokenSale);
         _requirePointsEmitterSafe(tokenSale);
         _requireRegisteredUpgrades(newTokenImpl, newCultureIndexImpl, tokenSale, expectedTokenSaleImpl);
-        _requireTokenSaleReadyForProposal(tokenSale, expectedParams);
+        launchPriceWei = _requireTokenSaleReadyForProposal(
+            tokenSale, expectedParams, expectedProtocolFeeRecipient, maxLaunchPriceWei
+        );
 
         (,,,,, bool settled) = _auctionState();
         require(settled, "auction state is not settled");
@@ -303,6 +314,16 @@ abstract contract VrbsMigrationHelpers is Script {
             priceUpdateInterval: vm.envOr("VRGDA_PRICE_UPDATE_INTERVAL", uint256(900)),
             poolSize: vm.envOr("VRGDA_POOL_SIZE", uint256(10))
         });
+    }
+
+    function _readProtocolFeeRecipient() internal view returns (address protocolFeeRecipient) {
+        protocolFeeRecipient = vm.envAddress("PROTOCOL_FEE_RECIPIENT");
+        require(protocolFeeRecipient != address(0), "PROTOCOL_FEE_RECIPIENT is zero");
+    }
+
+    function _readMaxLaunchPriceWei() internal view returns (uint256 maxLaunchPriceWei) {
+        maxLaunchPriceWei = vm.envUint("VRGDA_MAX_LAUNCH_PRICE_WEI");
+        require(maxLaunchPriceWei != 0, "VRGDA_MAX_LAUNCH_PRICE_WEI is zero");
     }
 
     function _toPositiveInt(uint256 value) internal pure returns (int256) {
@@ -429,8 +450,10 @@ abstract contract VrbsMigrationHelpers is Script {
         address tokenSale,
         address owner,
         address weth,
-        IRevolutionTokenSale.TokenSaleParams memory params
-    ) internal view {
+        IRevolutionTokenSale.TokenSaleParams memory params,
+        address expectedProtocolFeeRecipient,
+        uint256 maxLaunchPriceWei
+    ) internal view returns (uint256 launchPriceWei) {
         IRevolutionTokenSaleRead sale = IRevolutionTokenSaleRead(tokenSale);
 
         require(sale.paused(), "token sale must start paused");
@@ -438,8 +461,22 @@ abstract contract VrbsMigrationHelpers is Script {
         require(address(sale.revolutionToken()) == VrbsAddresses.TOKEN, "token sale token mismatch");
         require(sale.revolutionPointsEmitter() == VrbsAddresses.POINTS_EMITTER, "token sale points emitter mismatch");
         require(sale.WETH() == weth, "token sale WETH mismatch");
+        require(
+            sale.protocolFeeRecipient() == expectedProtocolFeeRecipient, "token sale protocol fee recipient mismatch"
+        );
         _assertSaleParams(tokenSale, params, true);
-        require(sale.getCurrentPrice() > 0, "token sale current price is zero");
+        launchPriceWei = _assertLaunchPrice(tokenSale, maxLaunchPriceWei);
+    }
+
+    function _assertLaunchPrice(address tokenSale, uint256 maxLaunchPriceWei)
+        internal
+        view
+        returns (uint256 launchPriceWei)
+    {
+        launchPriceWei = IRevolutionTokenSaleRead(tokenSale).getCurrentPrice();
+        require(launchPriceWei > 0, "token sale launch price is zero");
+        require(launchPriceWei != type(uint256).max, "token sale launch price is max");
+        require(launchPriceWei <= maxLaunchPriceWei, "token sale launch price exceeds max");
     }
 
     function _assertSaleParams(

@@ -259,6 +259,13 @@ contract RevolutionTokenSale is
     }
 
     /**
+     * @notice Immutable fallback recipient for protocol reward splits.
+     */
+    function protocolFeeRecipient() external view returns (address) {
+        return revolutionRewardRecipient;
+    }
+
+    /**
      * @notice Allows a member to update their manifesto.
      */
     function updateManifesto(uint256 tokenId, string calldata newSpeech) external {
