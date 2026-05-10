@@ -106,6 +106,15 @@ contract CultureIndexTopTenSelectionTest is CultureIndexTestSuite {
         assertEq(cultureIndex.legacyQuorumCutoffBlock(), 0);
     }
 
+    function testSetLegacyQuorumExcludedTokenHolderCanBindCutoffToCurrentBlock() public {
+        uint256 currentBlock = block.number;
+
+        cultureIndex.setLegacyQuorumExcludedTokenHolder(address(0xA11CE), type(uint256).max);
+
+        assertEq(cultureIndex.legacyQuorumExcludedTokenHolder(), address(0xA11CE));
+        assertEq(cultureIndex.legacyQuorumCutoffBlock(), currentBlock);
+    }
+
     function testGasIsPieceInTop10WithThousandPiecesDoesNotScanFullHeap() public {
         _seedRankedPieces(1_000);
 

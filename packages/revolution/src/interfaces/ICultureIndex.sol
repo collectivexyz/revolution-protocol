@@ -364,7 +364,7 @@ interface ICultureIndex is ICultureIndexEvents {
     /**
      * @notice Sets the legacy token holder whose votes should be excluded for pre-migration pieces.
      * @param holder The legacy holder, usually the old AuctionHouse.
-     * @param cutoffBlock Pieces created before this block use the legacy holder.
+     * @param cutoffBlock Pieces created at or before this block use the legacy holder. Use type(uint256).max to bind to the current execution block.
      */
     function setLegacyQuorumExcludedTokenHolder(address holder, uint256 cutoffBlock) external;
 

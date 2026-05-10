@@ -632,8 +632,12 @@ contract CultureIndex is
      * @dev Used when migrating an unlocked live community from AuctionHouse to a new sale/minter.
      */
     function setLegacyQuorumExcludedTokenHolder(address holder, uint256 cutoffBlock) external onlyOwner {
-        if ((holder == address(0)) != (cutoffBlock == 0)) revert INVALID_QUORUM_CUTOFF();
-        if (cutoffBlock > block.number) revert INVALID_QUORUM_CUTOFF();
+        if (holder == address(0)) {
+            if (cutoffBlock != 0) revert INVALID_QUORUM_CUTOFF();
+        } else {
+            if (cutoffBlock == type(uint256).max) cutoffBlock = block.number;
+            if (cutoffBlock == 0 || cutoffBlock > block.number) revert INVALID_QUORUM_CUTOFF();
+        }
 
         legacyQuorumExcludedTokenHolder = holder;
         legacyQuorumCutoffBlock = cutoffBlock;
@@ -701,12 +705,12 @@ contract CultureIndex is
         );
 
         /// @notice We want to subtract the balance of tokens held by the token minter since no one can vote with those tokens.
-        /// @dev For pieces created before a live migration cutoff, use the legacy holder to avoid quorum drift.
+        /// @dev For pieces created at or before a live migration cutoff, use the legacy holder to avoid quorum drift.
         address quorumExcludedTokenHolder = votingPower.getTokenMinter();
         if (
             legacyQuorumExcludedTokenHolder != address(0) &&
             legacyQuorumCutoffBlock != 0 &&
-            creationBlock < legacyQuorumCutoffBlock
+            creationBlock <= legacyQuorumCutoffBlock
         ) {
             quorumExcludedTokenHolder = legacyQuorumExcludedTokenHolder;
         }
