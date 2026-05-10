@@ -10,6 +10,7 @@ Live Vrbs addresses used by these scripts:
 - Auction: `0x4153b0310354B189E18797D5d7Dfda2C924bdC3D`
 - Culture Index: `0x5DA551c18109B58831abE8A5b9eDc5f9a8e4887c`
 - Vrb Votes Emitter: `0xEA0aF4b42Cb72C58A11E63a2175B99b2c809Fc28`
+- Protocol Rewards: `0x9f7f714a3CD6B6eADbC9629838B0f6ddEAbE1710`
 
 The scripts assume AuctionHouse is already paused and settled. They will revert if the auction has an unsettled token.
 
@@ -23,6 +24,16 @@ setLegacyQuorumExcludedTokenHolder(auction, type(uint256).max)
 
 During execution this binds the cutoff to the current block. The quorum check then uses the legacy holder for pieces created at or before that cutoff block. This avoids same-block quorum drift during the DAO cutover.
 
+The proposal also calls:
+
+```solidity
+TokenSale.setSaleStartTime(type(uint256).max)
+```
+
+immediately before `TokenSale.unpause()`. During execution this binds the VRGDA
+sale start to the current block timestamp, so governance delay does not decay
+the opening buy-now price.
+
 ## Run order
 
 Run all commands from `packages/revolution` on Base (`CHAIN_ID=8453`).
@@ -32,7 +43,7 @@ Run all commands from `packages/revolution` on Base (`CHAIN_ID=8453`).
 Required env:
 
 - `PRIVATE_KEY`: deployer key
-- `PROTOCOL_REWARDS`: protocol rewards contract address to use in the new TokenSale constructor
+- `PROTOCOL_REWARDS`: must be `0x9f7f714a3CD6B6eADbC9629838B0f6ddEAbE1710`
 - `PROTOCOL_FEE_RECIPIENT`: revolution/protocol fallback reward recipient for the new TokenSale constructor
 - `VRGDA_MIN_PRICE_WEI`
 - `VRGDA_TARGET_PRICE_WAD`
@@ -47,14 +58,14 @@ Optional env:
 - `VRGDA_MIN_CREATOR_RATE_BPS`, defaults to current AuctionHouse value
 - `VRGDA_GRANTS_RATE_BPS`, defaults to current AuctionHouse value
 - `VRGDA_GRANTS_ADDRESS`, defaults to current AuctionHouse value
-- `VRGDA_SALE_START_TIME`, defaults to current block timestamp
+- `VRGDA_SALE_START_TIME`, defaults to `type(uint256).max`; the proposal binds this to the execution timestamp immediately before unpause
 - `VRGDA_SOLD_BY_VRGDA`, defaults to `0`
 - `VRGDA_PRICE_UPDATE_INTERVAL`, defaults to `900`
 - `VRGDA_POOL_SIZE`, defaults to `10`
 
 ```bash
 PRIVATE_KEY=$DEPLOYER_PRIVATE_KEY \
-PROTOCOL_REWARDS=0x... \
+PROTOCOL_REWARDS=0x9f7f714a3CD6B6eADbC9629838B0f6ddEAbE1710 \
 PROTOCOL_FEE_RECIPIENT=0x... \
 VRGDA_MIN_PRICE_WEI=10000000000000000 \
 VRGDA_TARGET_PRICE_WAD=1000000000000000000 \
@@ -125,8 +136,9 @@ CultureIndex.transferOwnership(0x9bcb4E5978FFAFfDAbE72C2962957479F0E3b598)
 Do not accept ownership manually. The proposal builder will detect
 `pendingOwner == Vrbs Executor` and prepend `CultureIndex.acceptOwnership()` to
 the DAO proposal so ownership acceptance, CultureIndex upgrade, quorum cutoff,
-Token minter cutover, and TokenSale unpause all execute atomically. If neither
-`owner` nor `pendingOwner` is the Vrbs Executor, the proposal scripts revert.
+Token minter cutover, sale start binding, and TokenSale unpause all execute
+atomically. If neither `owner` nor `pendingOwner` is the Vrbs Executor, the
+proposal scripts revert.
 
 ### 4. Build the Vrbs DAO proposal
 
@@ -152,14 +164,38 @@ If CultureIndex is already owned by the Vrbs Executor, the action order is:
 2. `CultureIndex.upgradeTo(newCultureIndexImpl)`
 3. `CultureIndex.setLegacyQuorumExcludedTokenHolder(auction, type(uint256).max)`
 4. `Vrbs Token.setMinter(tokenSaleProxy)`
-5. `TokenSale.unpause()`
+5. `TokenSale.setSaleStartTime(type(uint256).max)`
+6. `TokenSale.unpause()`
 
 If CultureIndex ownership is pending to the Vrbs Executor, the proposal prepends:
 
 1. `CultureIndex.acceptOwnership()`
 
 Do not split ownership acceptance, CultureIndex upgrade, quorum cutoff, minter
-cutover, and TokenSale unpause across separate blocks.
+cutover, sale start binding, and TokenSale unpause across separate blocks.
+
+### 5. Dry-run the full migration and first purchase on a Base fork
+
+Run this before submitting or executing the DAO proposal. It deploys fresh local
+artifacts on the fork, registers the exact upgrades, prepares CultureIndex
+ownership if needed, executes the generated DAO actions as the Vrbs Executor,
+and performs one `buyNow()` through owner, grants, creator, PointsEmitter,
+protocol rewards, refund, and WETH fallback paths.
+
+```bash
+PROTOCOL_FEE_RECIPIENT=0x... \
+VRGDA_MIN_PRICE_WEI=10000000000000000 \
+VRGDA_TARGET_PRICE_WAD=1000000000000000000 \
+VRGDA_PRICE_DECAY_PERCENT_WAD=310000000000000000 \
+VRGDA_TOKENS_PER_TIME_UNIT_WAD=1000000000000000000 \
+forge script script/vrgda/DryRunVrbsVRGDAMigration.s.sol:DryRunVrbsVRGDAMigration \
+  --rpc-url $BASE_RPC_URL
+```
+
+The dry-run is intentionally non-broadcast. A failure means the proposal should
+not be submitted with those parameters.
+
+### 6. Submit the Vrbs DAO proposal
 
 To submit from a proposer key instead of BaseScan:
 
@@ -172,7 +208,7 @@ forge script script/vrgda/SubmitVrbsVRGDAProposal.s.sol:SubmitVrbsVRGDAProposal 
   --rpc-url $BASE_RPC_URL --broadcast
 ```
 
-### 5. Verify after proposal execution
+### 7. Verify after proposal execution
 
 ```bash
 VRGDA_NEW_TOKEN_IMPL=$VRGDA_NEW_TOKEN_IMPL \
@@ -184,4 +220,4 @@ forge script script/vrgda/VerifyVrbsVRGDAMigration.s.sol:VerifyVrbsVRGDAMigratio
 
 The verifier checks final implementations, auction paused/settled state, token
 minter, CultureIndex owner, TokenSale owner/unpause state, WETH/emitter wiring,
-and legacy quorum cutoff state.
+sale start binding, and legacy quorum cutoff state.

@@ -19,15 +19,7 @@ contract SubmitVrbsVRGDAProposal is VrbsMigrationHelpers {
         address tokenSale = vm.envAddress("TOKEN_SALE_PROXY");
         string memory description = _proposalDescription();
 
-        _requireCode(newTokenImpl, "VRGDA_NEW_TOKEN_IMPL");
-        _requireCode(newCultureIndexImpl, "VRGDA_NEW_CULTURE_INDEX_IMPL");
-        _requireCode(tokenSale, "TOKEN_SALE_PROXY");
-        _requireDaoExecutionWiring();
-        _requireAuctionPausedAndSettled();
-        _requireTokenCanCutOver();
-        bool acceptCultureOwnership = _requireOwnersForAtomicCutover(tokenSale);
-        _requirePointsEmitterSafe(tokenSale);
-        _requireRegisteredUpgrades(newTokenImpl, newCultureIndexImpl, tokenSale);
+        bool acceptCultureOwnership = _preflightVrbsVRGDAProposal(newTokenImpl, newCultureIndexImpl, tokenSale);
 
         (
             address[] memory targets,

@@ -38,8 +38,13 @@ contract VerifyVrbsVRGDAMigration is VrbsMigrationHelpers {
         require(!IRevolutionTokenRead(VrbsAddresses.TOKEN).isMinterLocked(), "token minter locked unexpectedly");
         require(!IRevolutionTokenSaleRead(tokenSale).paused(), "token sale is paused");
         require(IRevolutionTokenSaleRead(tokenSale).owner() == VrbsAddresses.EXECUTOR, "token sale owner not executor");
-        require(ICultureIndexRead(VrbsAddresses.CULTURE_INDEX).owner() == VrbsAddresses.EXECUTOR, "culture owner not executor");
-        require(address(IRevolutionTokenSaleRead(tokenSale).revolutionToken()) == VrbsAddresses.TOKEN, "sale token mismatch");
+        require(
+            ICultureIndexRead(VrbsAddresses.CULTURE_INDEX).owner() == VrbsAddresses.EXECUTOR,
+            "culture owner not executor"
+        );
+        require(
+            address(IRevolutionTokenSaleRead(tokenSale).revolutionToken()) == VrbsAddresses.TOKEN, "sale token mismatch"
+        );
         require(
             IRevolutionTokenSaleRead(tokenSale).revolutionPointsEmitter() == VrbsAddresses.POINTS_EMITTER,
             "sale emitter mismatch"
@@ -50,6 +55,8 @@ contract VerifyVrbsVRGDAMigration is VrbsMigrationHelpers {
         );
         require(IRevolutionTokenSaleRead(tokenSale).WETH().code.length != 0, "sale WETH has no code");
         require(IRevolutionTokenSaleRead(tokenSale).getCurrentPrice() > 0, "sale price is zero");
+        require(IRevolutionTokenSaleRead(tokenSale).saleStartTime() != type(uint256).max, "sale start was not bound");
+        require(IRevolutionTokenSaleRead(tokenSale).saleStartTime() <= block.timestamp, "sale start is in future");
 
         uint256[] memory pieceIds;
         uint256 price;

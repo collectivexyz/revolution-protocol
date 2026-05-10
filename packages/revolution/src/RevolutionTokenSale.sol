@@ -300,6 +300,7 @@ contract RevolutionTokenSale is
     }
 
     function setSaleStartTime(uint256 _saleStartTime) external onlyOwner whenPaused {
+        if (_saleStartTime == type(uint256).max) _saleStartTime = block.timestamp;
         saleStartTime = _saleStartTime;
         emit SaleStartTimeUpdated(_saleStartTime);
     }

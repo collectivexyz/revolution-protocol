@@ -6,6 +6,7 @@ import { Strings } from "@openzeppelin/contracts/utils/Strings.sol";
 
 import { IUpgradeManager } from "@cobuild/utility-contracts/src/interfaces/IUpgradeManager.sol";
 import { ICultureIndex } from "../../src/interfaces/ICultureIndex.sol";
+import { IRevolutionBuilder } from "../../src/interfaces/IRevolutionBuilder.sol";
 import { IRevolutionToken } from "../../src/interfaces/IRevolutionToken.sol";
 import { IRevolutionTokenSale } from "../../src/interfaces/IRevolutionTokenSale.sol";
 
@@ -21,6 +22,7 @@ library VrbsAddresses {
     address internal constant CULTURE_INDEX = 0x5DA551c18109B58831abE8A5b9eDc5f9a8e4887c;
     address internal constant POINTS = 0xDFb1cd29c4aB6985F1614e0d65782cd136115b6A;
     address internal constant POINTS_EMITTER = 0xEA0aF4b42Cb72C58A11E63a2175B99b2c809Fc28;
+    address internal constant PROTOCOL_REWARDS = 0x9f7f714a3CD6B6eADbC9629838B0f6ddEAbE1710;
     address internal constant MAX_HEAP = 0x867076c5b2B2A6f265283D436faD77565B264C20;
     address internal constant VOTING_POWER = 0x059C233acFCAFd845ae84B84245aE3f6e332306b;
     address internal constant VRGDA = 0xD3079014C14322Cd868a74Cfb8d11F81E90CAC40;
@@ -32,6 +34,7 @@ interface IOwnableRead {
 
 interface IOwnable2StepRead is IOwnableRead {
     function pendingOwner() external view returns (address);
+    function transferOwnership(address newOwner) external;
     function acceptOwnership() external;
 }
 
@@ -91,6 +94,7 @@ interface IRevolutionTokenSaleRead is IRevolutionTokenSale, IPausableRead, IOwna
 }
 
 interface IRevolutionPointsEmitterRead is IPausableRead, IOwnableRead {
+    function balanceOf(address owner) external view returns (uint256);
     function founderAddress() external view returns (address);
 }
 
@@ -165,6 +169,7 @@ abstract contract VrbsMigrationHelpers is Script {
         _requireCode(VrbsAddresses.CULTURE_INDEX, "CultureIndex");
         _requireCode(VrbsAddresses.POINTS, "Vrb Votes");
         _requireCode(VrbsAddresses.POINTS_EMITTER, "Vrb Votes Emitter");
+        _requireCode(VrbsAddresses.PROTOCOL_REWARDS, "ProtocolRewards");
         _requireCode(VrbsAddresses.MAX_HEAP, "MaxHeap");
         _requireCode(VrbsAddresses.VOTING_POWER, "VotingPower");
         _requireCode(VrbsAddresses.VRGDA, "VRGDA");
@@ -176,7 +181,9 @@ abstract contract VrbsMigrationHelpers is Script {
     }
 
     function _requireTokenCanCutOver() internal view {
-        require(IRevolutionTokenRead(VrbsAddresses.TOKEN).minter() == VrbsAddresses.AUCTION, "auction is not token minter");
+        require(
+            IRevolutionTokenRead(VrbsAddresses.TOKEN).minter() == VrbsAddresses.AUCTION, "auction is not token minter"
+        );
         require(!IRevolutionTokenRead(VrbsAddresses.TOKEN).isMinterLocked(), "token minter is locked");
     }
 
@@ -214,7 +221,10 @@ abstract contract VrbsMigrationHelpers is Script {
         require(tokenSale != emitter.founderAddress(), "token sale is points emitter founder");
     }
 
-    function _requireRegisteredUpgrades(address newTokenImpl, address newCultureIndexImpl, address tokenSale) internal view {
+    function _requireRegisteredUpgrades(address newTokenImpl, address newCultureIndexImpl, address tokenSale)
+        internal
+        view
+    {
         IUpgradeManager manager = _manager();
         address oldTokenImpl = _implementationOf(VrbsAddresses.TOKEN);
         address oldCultureIndexImpl = _implementationOf(VrbsAddresses.CULTURE_INDEX);
@@ -226,6 +236,88 @@ abstract contract VrbsMigrationHelpers is Script {
         require(!manager.isRegisteredUpgrade(oldAuctionImpl, tokenSaleImpl), "auction => token sale is registered");
     }
 
+    function _requireProtocolRewards(address protocolRewards) internal view {
+        require(protocolRewards == VrbsAddresses.PROTOCOL_REWARDS, "unexpected protocol rewards");
+        _requireCode(protocolRewards, "PROTOCOL_REWARDS");
+    }
+
+    function _requireTokenSaleReadyForProposal(address tokenSale) internal view {
+        IRevolutionTokenSaleRead sale = IRevolutionTokenSaleRead(tokenSale);
+
+        require(sale.paused(), "token sale must still be paused before proposal execution");
+        require(sale.owner() == VrbsAddresses.EXECUTOR, "token sale owner is not executor");
+        require(address(sale.revolutionToken()) == VrbsAddresses.TOKEN, "sale token mismatch");
+        require(sale.revolutionPointsEmitter() == VrbsAddresses.POINTS_EMITTER, "sale points emitter mismatch");
+        require(sale.WETH() == IAuctionHouseRead(VrbsAddresses.AUCTION).WETH(), "sale WETH mismatch");
+        require(sale.getCurrentPrice() > 0, "sale current price is zero");
+    }
+
+    function _preflightVrbsVRGDAProposal(address newTokenImpl, address newCultureIndexImpl, address tokenSale)
+        internal
+        view
+        returns (bool acceptCultureOwnership)
+    {
+        _requireCode(newTokenImpl, "VRGDA_NEW_TOKEN_IMPL");
+        _requireCode(newCultureIndexImpl, "VRGDA_NEW_CULTURE_INDEX_IMPL");
+        _requireCode(tokenSale, "TOKEN_SALE_PROXY");
+
+        _requireDaoExecutionWiring();
+        _requireAuctionPausedAndSettled();
+        _requireTokenCanCutOver();
+        acceptCultureOwnership = _requireOwnersForAtomicCutover(tokenSale);
+        _requirePointsEmitterSafe(tokenSale);
+        _requireRegisteredUpgrades(newTokenImpl, newCultureIndexImpl, tokenSale);
+        _requireTokenSaleReadyForProposal(tokenSale);
+
+        (, , , , , bool settled) = _auctionState();
+        require(settled, "auction state is not settled");
+    }
+
+    function _readSaleParams() internal returns (IRevolutionTokenSale.TokenSaleParams memory params) {
+        IAuctionHouseRead auction = IAuctionHouseRead(VrbsAddresses.AUCTION);
+
+        params = IRevolutionTokenSale.TokenSaleParams({
+            minPriceWei: vm.envUint("VRGDA_MIN_PRICE_WEI"),
+            creatorRateBps: vm.envOr("VRGDA_CREATOR_RATE_BPS", auction.creatorRateBps()),
+            entropyRateBps: vm.envOr("VRGDA_ENTROPY_RATE_BPS", auction.entropyRateBps()),
+            minCreatorRateBps: vm.envOr("VRGDA_MIN_CREATOR_RATE_BPS", auction.minCreatorRateBps()),
+            grantsParams: IRevolutionBuilder.GrantsParams({
+                totalRateBps: vm.envOr("VRGDA_GRANTS_RATE_BPS", auction.grantsRateBps()),
+                grantsAddress: vm.envOr("VRGDA_GRANTS_ADDRESS", auction.grantsAddress())
+            }),
+            vrgdaParams: IRevolutionTokenSale.VRGDAParams({
+                targetPrice: _toPositiveInt(vm.envUint("VRGDA_TARGET_PRICE_WAD")),
+                priceDecayPercent: _toPositiveInt(vm.envUint("VRGDA_PRICE_DECAY_PERCENT_WAD")),
+                tokensPerTimeUnit: _toPositiveInt(vm.envUint("VRGDA_TOKENS_PER_TIME_UNIT_WAD"))
+            }),
+            saleStartTime: vm.envOr("VRGDA_SALE_START_TIME", type(uint256).max),
+            soldByVRGDA: vm.envOr("VRGDA_SOLD_BY_VRGDA", uint256(0)),
+            priceUpdateInterval: vm.envOr("VRGDA_PRICE_UPDATE_INTERVAL", uint256(900)),
+            poolSize: vm.envOr("VRGDA_POOL_SIZE", uint256(10))
+        });
+    }
+
+    function _toPositiveInt(uint256 value) internal pure returns (int256) {
+        require(value != 0, "VRGDA int param is zero");
+        require(value <= uint256(type(int256).max), "value too large for int256");
+        return int256(value);
+    }
+
+    function _validateSaleParams(IRevolutionTokenSale.TokenSaleParams memory params) internal pure {
+        require(params.minPriceWei != 0, "min price is zero");
+        require(params.poolSize > 0 && params.poolSize <= 10, "invalid pool size");
+        require(params.creatorRateBps >= params.minCreatorRateBps, "creator rate below min");
+        require(params.creatorRateBps <= 10_000, "creator rate too high");
+        require(params.entropyRateBps <= 10_000, "entropy rate too high");
+        require(params.grantsParams.totalRateBps <= 10_000, "grants rate too high");
+        require(params.creatorRateBps + params.grantsParams.totalRateBps <= 10_000, "creator+grants too high");
+        require(
+            params.grantsParams.totalRateBps == 0 || params.grantsParams.grantsAddress != address(0),
+            "positive grants rate with zero address"
+        );
+        require(params.vrgdaParams.priceDecayPercent < 1e18, "price decay must be below 1e18");
+    }
+
     function _buildCommunityActions(
         address newTokenImpl,
         address newCultureIndexImpl,
@@ -234,9 +326,14 @@ abstract contract VrbsMigrationHelpers is Script {
     )
         internal
         pure
-        returns (address[] memory targets, uint256[] memory values, string[] memory signatures, bytes[] memory calldatas)
+        returns (
+            address[] memory targets,
+            uint256[] memory values,
+            string[] memory signatures,
+            bytes[] memory calldatas
+        )
     {
-        uint256 actionCount = acceptCultureOwnership ? 6 : 5;
+        uint256 actionCount = acceptCultureOwnership ? 7 : 6;
         uint256 offset = acceptCultureOwnership ? 1 : 0;
 
         targets = new address[](actionCount);
@@ -266,7 +363,10 @@ abstract contract VrbsMigrationHelpers is Script {
         calldatas[offset + 3] = abi.encodeWithSelector(IRevolutionToken.setMinter.selector, tokenSale);
 
         targets[offset + 4] = tokenSale;
-        calldatas[offset + 4] = abi.encodeWithSelector(IRevolutionTokenSale.unpause.selector);
+        calldatas[offset + 4] = abi.encodeWithSelector(IRevolutionTokenSale.setSaleStartTime.selector, type(uint256).max);
+
+        targets[offset + 5] = tokenSale;
+        calldatas[offset + 5] = abi.encodeWithSelector(IRevolutionTokenSale.unpause.selector);
     }
 
     function _proposalDescription() internal returns (string memory) {

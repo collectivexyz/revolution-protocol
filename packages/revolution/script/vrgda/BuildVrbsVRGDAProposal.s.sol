@@ -4,16 +4,7 @@ pragma solidity 0.8.22;
 import { console2 } from "forge-std/console2.sol";
 import { Strings } from "@openzeppelin/contracts/utils/Strings.sol";
 
-import { IUpgradeManager } from "@cobuild/utility-contracts/src/interfaces/IUpgradeManager.sol";
-
-import {
-    VrbsAddresses,
-    VrbsMigrationHelpers,
-    IAuctionHouseRead,
-    IRevolutionTokenRead,
-    IRevolutionTokenSaleRead,
-    IVrbsDAO
-} from "./VrbsMigrationHelpers.sol";
+import { VrbsAddresses, VrbsMigrationHelpers, IVrbsDAO } from "./VrbsMigrationHelpers.sol";
 
 /// @notice Read-only helper that writes the exact Vrbs DAO proposal inputs and full propose calldata.
 /// @dev Use the generated file in the BaseScan DAO write-contract UI or submit through SubmitVrbsVRGDAProposal.
@@ -29,7 +20,7 @@ contract BuildVrbsVRGDAProposal is VrbsMigrationHelpers {
         address tokenSale = vm.envAddress("TOKEN_SALE_PROXY");
         string memory description = _proposalDescription();
 
-        bool acceptCultureOwnership = _preflight(newTokenImpl, newCultureIndexImpl, tokenSale);
+        bool acceptCultureOwnership = _preflightVrbsVRGDAProposal(newTokenImpl, newCultureIndexImpl, tokenSale);
 
         (
             address[] memory targets,
@@ -87,55 +78,6 @@ contract BuildVrbsVRGDAProposal is VrbsMigrationHelpers {
         console2.log(filePath);
         console2.log("DAO");
         console2.logAddress(VrbsAddresses.DAO);
-    }
-
-    function _preflight(
-        address newTokenImpl,
-        address newCultureIndexImpl,
-        address tokenSale
-    ) internal view returns (bool acceptCultureOwnership) {
-        _requireCode(newTokenImpl, "VRGDA_NEW_TOKEN_IMPL");
-        _requireCode(newCultureIndexImpl, "VRGDA_NEW_CULTURE_INDEX_IMPL");
-        _requireCode(tokenSale, "TOKEN_SALE_PROXY");
-
-        _requireDaoExecutionWiring();
-        _requireAuctionPausedAndSettled();
-        _requireTokenCanCutOver();
-        acceptCultureOwnership = _requireOwnersForAtomicCutover(tokenSale);
-        _requirePointsEmitterSafe(tokenSale);
-
-        IUpgradeManager manager = _manager();
-        address oldTokenImpl = _implementationOf(VrbsAddresses.TOKEN);
-        address oldCultureIndexImpl = _implementationOf(VrbsAddresses.CULTURE_INDEX);
-        address oldAuctionImpl = _implementationOf(VrbsAddresses.AUCTION);
-        address tokenSaleImpl = _implementationOf(tokenSale);
-
-        require(manager.isRegisteredUpgrade(oldTokenImpl, newTokenImpl), "token upgrade not registered");
-        require(manager.isRegisteredUpgrade(oldCultureIndexImpl, newCultureIndexImpl), "culture upgrade not registered");
-        require(!manager.isRegisteredUpgrade(oldAuctionImpl, tokenSaleImpl), "auction => token sale is registered");
-
-        IRevolutionTokenSaleRead sale = IRevolutionTokenSaleRead(tokenSale);
-        require(sale.paused(), "token sale must still be paused before proposal execution");
-        require(address(sale.revolutionToken()) == VrbsAddresses.TOKEN, "sale token mismatch");
-        require(sale.revolutionPointsEmitter() == VrbsAddresses.POINTS_EMITTER, "sale points emitter mismatch");
-        require(sale.WETH() == IAuctionHouseRead(VrbsAddresses.AUCTION).WETH(), "sale WETH mismatch");
-        require(sale.getCurrentPrice() > 0, "sale current price is zero");
-
-        uint256 tokenId;
-        uint256 amount;
-        uint256 startTime;
-        uint256 endTime;
-        address bidder;
-        bool settled;
-        (tokenId, amount, startTime, endTime, bidder, settled) = _auctionState();
-        tokenId;
-        amount;
-        startTime;
-        endTime;
-        bidder;
-        require(settled, "auction state is not settled");
-
-        require(IRevolutionTokenRead(VrbsAddresses.TOKEN).owner() == VrbsAddresses.EXECUTOR, "token owner is not executor");
     }
 
     function _addressesCsv(address[] memory values) internal pure returns (string memory out) {

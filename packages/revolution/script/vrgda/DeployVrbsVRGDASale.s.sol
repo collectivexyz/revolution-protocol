@@ -8,7 +8,6 @@ import { ERC1967Proxy } from "@cobuild/utility-contracts/src/proxy/ERC1967Proxy.
 import { CultureIndex } from "../../src/culture-index/CultureIndex.sol";
 import { RevolutionToken } from "../../src/RevolutionToken.sol";
 import { RevolutionTokenSale } from "../../src/RevolutionTokenSale.sol";
-import { IRevolutionBuilder } from "../../src/interfaces/IRevolutionBuilder.sol";
 import { IRevolutionTokenSale } from "../../src/interfaces/IRevolutionTokenSale.sol";
 
 import {
@@ -52,7 +51,7 @@ contract DeployVrbsVRGDASale is VrbsMigrationHelpers {
         address tokenSaleOwner = vm.envOr("TOKEN_SALE_OWNER", VrbsAddresses.EXECUTOR);
         address weth = IAuctionHouseRead(VrbsAddresses.AUCTION).WETH();
 
-        _requireCode(protocolRewards, "PROTOCOL_REWARDS");
+        _requireProtocolRewards(protocolRewards);
         _requireCode(weth, "auction WETH");
         require(protocolFeeRecipient != address(0), "PROTOCOL_FEE_RECIPIENT is zero");
         require(tokenSaleOwner == VrbsAddresses.EXECUTOR, "TOKEN_SALE_OWNER must be Vrbs Executor for DAO cutover");
@@ -118,51 +117,6 @@ contract DeployVrbsVRGDASale is VrbsMigrationHelpers {
         console2.log("TOKEN SALE CURRENT PRICE", IRevolutionTokenSaleRead(result.tokenSaleProxy).getCurrentPrice());
 
         _writeDeploymentFile(protocolRewards, protocolFeeRecipient, tokenSaleOwner, weth, params, result);
-    }
-
-    function _readSaleParams() internal returns (IRevolutionTokenSale.TokenSaleParams memory params) {
-        IAuctionHouseRead auction = IAuctionHouseRead(VrbsAddresses.AUCTION);
-
-        params = IRevolutionTokenSale.TokenSaleParams({
-            minPriceWei: vm.envUint("VRGDA_MIN_PRICE_WEI"),
-            creatorRateBps: vm.envOr("VRGDA_CREATOR_RATE_BPS", auction.creatorRateBps()),
-            entropyRateBps: vm.envOr("VRGDA_ENTROPY_RATE_BPS", auction.entropyRateBps()),
-            minCreatorRateBps: vm.envOr("VRGDA_MIN_CREATOR_RATE_BPS", auction.minCreatorRateBps()),
-            grantsParams: IRevolutionBuilder.GrantsParams({
-                totalRateBps: vm.envOr("VRGDA_GRANTS_RATE_BPS", auction.grantsRateBps()),
-                grantsAddress: vm.envOr("VRGDA_GRANTS_ADDRESS", auction.grantsAddress())
-            }),
-            vrgdaParams: IRevolutionTokenSale.VRGDAParams({
-                targetPrice: _toPositiveInt(vm.envUint("VRGDA_TARGET_PRICE_WAD")),
-                priceDecayPercent: _toPositiveInt(vm.envUint("VRGDA_PRICE_DECAY_PERCENT_WAD")),
-                tokensPerTimeUnit: _toPositiveInt(vm.envUint("VRGDA_TOKENS_PER_TIME_UNIT_WAD"))
-            }),
-            saleStartTime: vm.envOr("VRGDA_SALE_START_TIME", block.timestamp),
-            soldByVRGDA: vm.envOr("VRGDA_SOLD_BY_VRGDA", uint256(0)),
-            priceUpdateInterval: vm.envOr("VRGDA_PRICE_UPDATE_INTERVAL", uint256(900)),
-            poolSize: vm.envOr("VRGDA_POOL_SIZE", uint256(10))
-        });
-    }
-
-    function _toPositiveInt(uint256 value) internal pure returns (int256) {
-        require(value != 0, "VRGDA int param is zero");
-        require(value <= uint256(type(int256).max), "value too large for int256");
-        return int256(value);
-    }
-
-    function _validateSaleParams(IRevolutionTokenSale.TokenSaleParams memory params) internal pure {
-        require(params.minPriceWei != 0, "min price is zero");
-        require(params.poolSize > 0 && params.poolSize <= 10, "invalid pool size");
-        require(params.creatorRateBps >= params.minCreatorRateBps, "creator rate below min");
-        require(params.creatorRateBps <= 10_000, "creator rate too high");
-        require(params.entropyRateBps <= 10_000, "entropy rate too high");
-        require(params.grantsParams.totalRateBps <= 10_000, "grants rate too high");
-        require(params.creatorRateBps + params.grantsParams.totalRateBps <= 10_000, "creator+grants too high");
-        require(
-            params.grantsParams.totalRateBps == 0 || params.grantsParams.grantsAddress != address(0),
-            "positive grants rate with zero address"
-        );
-        require(params.vrgdaParams.priceDecayPercent < 1e18, "price decay must be below 1e18");
     }
 
     function _writeDeploymentFile(

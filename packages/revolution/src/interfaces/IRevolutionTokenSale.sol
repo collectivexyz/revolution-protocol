@@ -158,6 +158,7 @@ interface IRevolutionTokenSale is IGrantsRevenueStream {
 
     function setVRGDAParams(VRGDAParams calldata vrgdaParams) external;
 
+    /// @notice Set the VRGDA time anchor. Passing type(uint256).max binds it to the current block timestamp.
     function setSaleStartTime(uint256 saleStartTime) external;
 
     function setSoldByVRGDA(uint256 soldByVRGDA) external;
