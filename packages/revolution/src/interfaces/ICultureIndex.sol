@@ -53,6 +53,9 @@ interface ICultureIndexEvents {
 
     /// @notice Emitted when min voting power to create is set
     event MinVotingPowerToCreateSet(uint256 oldMinVotingPowerToCreate, uint256 newMinVotingPowerToCreate);
+
+    /// @notice Emitted when the legacy quorum-excluded token holder is updated for migration safety
+    event LegacyQuorumExcludedTokenHolderSet(address holder, uint256 cutoffBlock);
 }
 
 /**
@@ -105,6 +108,18 @@ interface ICultureIndex is ICultureIndexEvents {
 
     /// @dev Reverts if the culture index heap is empty.
     error CULTURE_INDEX_EMPTY();
+
+    /// @dev Reverts if top-N selection count is invalid.
+    error INVALID_TOP_N();
+
+    /// @dev Reverts if a piece is not selectable in the requested top-N set.
+    error PIECE_NOT_IN_TOP_N();
+
+    /// @dev Reverts if selected heap removal did not remove the requested piece.
+    error HEAP_REMOVE_FAILED();
+
+    /// @dev Reverts if a legacy quorum migration cutoff is invalid.
+    error INVALID_QUORUM_CUTOFF();
 
     /// @dev Reverts if address 0 is passed but not allowed
     error ADDRESS_ZERO();
@@ -325,6 +340,33 @@ interface ICultureIndex is ICultureIndexEvents {
      * @return True if the top voted piece meets quorum, false otherwise
      */
     function topVotedPieceMeetsQuorum() external view returns (bool);
+
+    /**
+     * @notice Returns the highest-ranked undropped piece IDs using a bounded heap frontier traversal.
+     * @param count The maximum number of piece IDs to return.
+     */
+    function getTopPieceIds(uint256 count) external view returns (uint256[] memory);
+
+    /**
+     * @notice Returns whether a piece is currently selectable within the top-N heap ranking.
+     * @param pieceId The ID of the art piece.
+     * @param topN The maximum selectable rank.
+     */
+    function isPieceInTopN(uint256 pieceId, uint256 topN) external view returns (bool);
+
+    /**
+     * @notice Officially release or "drop" a selected art piece if it is in the current top-N set.
+     * @param pieceId The ID of the art piece to drop.
+     * @param topN The maximum selectable rank.
+     */
+    function dropPieceInTopN(uint256 pieceId, uint256 topN) external returns (ArtPieceCondensed memory);
+
+    /**
+     * @notice Sets the legacy token holder whose votes should be excluded for pre-migration pieces.
+     * @param holder The legacy holder, usually the old AuctionHouse.
+     * @param cutoffBlock Pieces created at or before this block use the legacy holder. Use type(uint256).max to bind to the current execution block.
+     */
+    function setLegacyQuorumExcludedTokenHolder(address holder, uint256 cutoffBlock) external;
 
     /**
      * @notice Officially release or "drop" the art piece with the most votes.

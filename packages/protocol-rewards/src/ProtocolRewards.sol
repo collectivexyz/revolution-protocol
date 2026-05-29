@@ -57,7 +57,7 @@ contract ProtocolRewards is IProtocolRewards, EIP712 {
 
         if (numRecipients != amounts.length || numRecipients != reasons.length) revert ARRAY_LENGTH_MISMATCH();
 
-        uint256 expectedTotalValue;
+        uint256 expectedTotalValue = 0;
 
         for (uint256 i; i < numRecipients; ) {
             expectedTotalValue += amounts[i];

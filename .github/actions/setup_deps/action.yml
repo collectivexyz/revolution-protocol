@@ -17,7 +17,7 @@ runs:
     - name: Install turbo
       shell: bash
       run: |
-        pnpm add -g turbo
+        pnpm add -g turbo@1.11.3
 
     - name: Update Dependencies
       shell: bash

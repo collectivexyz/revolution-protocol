@@ -21,6 +21,9 @@ optimizer = false
 optimizer_runs = 0  
 via_ir = false
 
+[profile.ci]
+via_ir = false
+
 [fmt]
 bracket_spacing = true
 func_attrs_with_params_multiline = true

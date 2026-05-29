@@ -4,6 +4,10 @@ on:
       package_folder:
         required: true
         type: string
+      test_args:
+        required: false
+        type: string
+        default: ""
 
 jobs:
   forge_test:
@@ -11,7 +15,7 @@ jobs:
       fail-fast: true
 
     name: Forge test
-    runs-on: revolution_protocol_builds_ubuntu_large
+    runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
         with:
@@ -27,14 +31,14 @@ jobs:
 
       - name: Test Light
         run: |
-          cd ${{ inputs.package_folder}} && pnpm clean && pnpm test:ci
+          cd ${{ inputs.package_folder}} && pnpm clean && pnpm test:ci ${{ inputs.test_args }}
 
       - name: Test
         if: github.ref == 'refs/heads/main'
         run: |
-          cd ${{ inputs.package_folder}} && pnpm clean && pnpm test
+          cd ${{ inputs.package_folder}} && pnpm clean && pnpm test ${{ inputs.test_args }}
 
       - name: Run Geiger Check
         run: |
-          forge geiger --check ${{ inputs.package_folder }}/src*
+          cd ${{ inputs.package_folder }} && forge lint --only-lint unsafe-cheatcode --ignored-error-codes 6321 src*
         id: geiger

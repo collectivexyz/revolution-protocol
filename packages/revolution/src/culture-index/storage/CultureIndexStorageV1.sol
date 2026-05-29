@@ -68,4 +68,11 @@ contract CultureIndexStorageV1 {
 
     // The required file prefixes for art pieces
     ICultureIndex.RequiredMediaPrefix public requiredMediaPrefix;
+
+    // Pieces created before this block use legacyQuorumExcludedTokenHolder for quorum vote exclusion.
+    uint256 public legacyQuorumCutoffBlock;
+
+    // Legacy holder whose token votes are excluded from quorum calculations for pre-migration pieces.
+    // This prevents quorum drift when an unlocked live token changes minter from AuctionHouse to TokenSale.
+    address public legacyQuorumExcludedTokenHolder;
 }

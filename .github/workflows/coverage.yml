@@ -8,6 +8,10 @@ on:
         required: false
         type: string
         default: ""
+      coverage_args:
+        required: false
+        type: string
+        default: ""
 
 env:
   # Setting an environment variable with the value of a configuration variable
@@ -35,12 +39,21 @@ jobs:
           package_folder: packages/${{ inputs.package }}
           foundry_profile: coverage
 
+      - name: Prepare Revolution coverage remappings
+        if: ${{ inputs.package == 'revolution' }}
+        run: |
+          mkdir -p "$package_folder/node_modules/@superfluid-finance"
+          rm -rf "$package_folder/node_modules/@superfluid-finance/ethereum-contracts"
+          ln -s "$GITHUB_WORKSPACE/lib/superfluid-protocol-monorepo/packages/ethereum-contracts" "$package_folder/node_modules/@superfluid-finance/ethereum-contracts"
+          awk '{ if ($0 ~ /^@superfluid-finance\/ethereum-contracts=/) print "@superfluid-finance/ethereum-contracts/=node_modules/@superfluid-finance/ethereum-contracts/"; else print }' "$package_folder/remappings.txt" > "$package_folder/remappings.txt.tmp"
+          mv "$package_folder/remappings.txt.tmp" "$package_folder/remappings.txt"
+
       - name: Run Forge coverage
         if: github.ref == 'refs/heads/main'
-        run: cd $package_folder && forge coverage --report lcov
+        run: cd $package_folder && forge coverage --report lcov ${{ inputs.coverage_args }}
 
       - name: Run Forge coverage with CI profile
-        run: cd $package_folder && FOUNDRY_PROFILE=ci forge coverage --report lcov
+        run: cd $package_folder && FOUNDRY_PROFILE=ci forge coverage --report lcov ${{ inputs.coverage_args }}
 
       - name: Setup LCOV
         uses: hrishikesh-kadam/setup-lcov@v1
@@ -48,6 +61,7 @@ jobs:
       - name: Filter files to ignore
         run: |
           cd ./${{ env.package_folder }} && lcov --rc lcov_branch_coverage=1 \
+          --ignore-errors unused --ignore-errors inconsistent \
           --remove lcov.info \
           --output-file lcov.info "*node_modules*" "*test*" "*script*" ${{ inputs.files_to_ignore }}
 
@@ -64,6 +78,5 @@ jobs:
         with:
           coverage-files: ./${{ env.package_folder }}/lcov.info
           minimum-coverage: 85 # TODO update this once first audit pass goes through
-          artifact-name: code-coverage-report
           github-token: ${{ secrets.GITHUB_TOKEN }}
           working-directory: ./${{ env.package_folder }}

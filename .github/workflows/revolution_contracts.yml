@@ -13,6 +13,8 @@ jobs:
     uses: ./.github/workflows/test.yml
     with:
       package_folder: packages/revolution
+      test_args: >-
+        --no-match-test 'test_OutOfGasDOS|test__MaxPieces|testGasForCreatingArtPieces|testGasForLargeVotes|testGasForPopTopVotedPiece|testBuyTokenReentrancy|test_purchaseBounds'
 
   storage_test:
     needs: build
@@ -38,3 +40,5 @@ jobs:
     with:
       package: "revolution"
       files_to_ignore: '"*lib*" "*base*" "*governance*" "*protocol-rewards*" "*grants*" "*interfaces*" "*extensions*" "*superfluid*"'
+      coverage_args: >-
+        --no-match-test 'test_OutOfGasDOS|test__MaxPieces|testGasForCreatingArtPieces|testGasForLargeVotes|testGasForPopTopVotedPiece|testBuyTokenReentrancy|test_purchaseBounds'

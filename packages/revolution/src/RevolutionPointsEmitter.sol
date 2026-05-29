@@ -281,11 +281,11 @@ contract RevolutionPointsEmitter is
     function _applyPriceFloorAndGetDistribution(
         int256 timeSinceStart,
         BuyTokenPaymentShares memory buyTokenPaymentShares
-    ) internal view returns (
-        uint256 totalTokensForFounder,
-        uint256 totalTokensForBuyers,
-        PaymentDistribution memory distribution
-    ) {
+    )
+        internal
+        view
+        returns (uint256 totalTokensForFounder, uint256 totalTokensForBuyers, PaymentDistribution memory distribution)
+    {
         // ------- Founder governance tokens (pre-clamp) -------
         int256 rawFounder = buyTokenPaymentShares.founderGovernancePayment > 0
             ? vrgda.yToX({
@@ -352,16 +352,17 @@ contract RevolutionPointsEmitter is
         );
 
         // -----------------------------------------------------
-        //  PRICE FLOOR CALCULATION                            
+        //  PRICE FLOOR CALCULATION
         // -----------------------------------------------------
 
         int256 timeSinceStart = toDaysWadUnsafe(block.timestamp - startTime);
 
         // Calculate the amount of ether to pay the founder and owner
-        (uint256 totalTokensForFounder, uint256 totalTokensForBuyers, PaymentDistribution memory paymentDistribution) = _applyPriceFloorAndGetDistribution(
-            timeSinceStart,
-            buyTokenPaymentShares
-        );
+        (
+            uint256 totalTokensForFounder,
+            uint256 totalTokensForBuyers,
+            PaymentDistribution memory paymentDistribution
+        ) = _applyPriceFloorAndGetDistribution(timeSinceStart, buyTokenPaymentShares);
 
         // Stores total bps, ensure it is 10_000 later
         uint256 bpsSum = 0;
@@ -371,7 +372,7 @@ contract RevolutionPointsEmitter is
         for (uint256 i = 0; i < addressesLength; i++) {
             _savePurchaseHistory(
                 addresses[i],
-                totalTokensForBuyers * basisPointSplits[i] / 10_000,
+                (totalTokensForBuyers * basisPointSplits[i]) / 10_000,
                 (buyTokenPaymentShares.buyersGovernancePayment * basisPointSplits[i]) / 10_000
             );
 
@@ -411,7 +412,7 @@ contract RevolutionPointsEmitter is
         // Mint tokens to buyers
         if (totalTokensForBuyers > 0) {
             for (uint256 i = 0; i < addressesLength; i++) {
-                _mint(addresses[i], totalTokensForBuyers * basisPointSplits[i] / 10_000);
+                _mint(addresses[i], (totalTokensForBuyers * basisPointSplits[i]) / 10_000);
             }
         }
 
